@@ -271,7 +271,6 @@ filegroup {
 
         // etc.
         ":framework-javastream-protos",
-        ":framework-statslog-gen", // StatsLogInternal.java
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
 
         // telephony annotations
@@ -613,13 +612,6 @@ java_library {
     srcs: [
         "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
-}
-
-genrule {
-    name: "framework-statslog-gen",
-    tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out) --worksource",
-    out: ["android/util/StatsLogInternal.java"],
 }
 
 genrule {
@@ -966,6 +958,10 @@ filegroup {
         "core/java/android/content/pm/DataLoaderParamsParcel.aidl",
         "core/java/android/content/pm/DataLoaderType.aidl",
         "core/java/android/content/pm/FileSystemControlParcel.aidl",
+        "core/java/android/content/pm/IDataLoader.aidl",
+        "core/java/android/content/pm/IDataLoaderManager.aidl",
+        "core/java/android/content/pm/InstallationFileParcel.aidl",
+        "core/java/android/content/pm/InstallationFileLocation.aidl",
         "core/java/android/content/pm/IDataLoaderStatusListener.aidl",
         "core/java/android/content/pm/IPackageInstallerSessionFileSystemConnector.aidl",
         "core/java/android/content/pm/NamedParcelFileDescriptor.aidl",
@@ -976,7 +972,6 @@ filegroup {
 filegroup {
     name: "incremental_manager_aidl",
     srcs: [
-        "core/java/android/os/incremental/IIncrementalManager.aidl",
         "core/java/android/os/incremental/IIncrementalService.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IncrementalSignature.aidl",

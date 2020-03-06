@@ -44,6 +44,8 @@ class BlobStoreManagerShellCommand extends ShellCommand {
                 return runClearAllBlobs(pw);
             case "delete-blob":
                 return runDeleteBlob(pw);
+            case "idle-maintenance":
+                return runIdleMaintenance(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -84,6 +86,11 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runIdleMaintenance(PrintWriter pw) {
+        mService.runIdleMaintenance();
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -112,6 +119,8 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         pw.println("      --expiry: Expiry time of the blob to delete, in milliseconds.");
         pw.println("      --label: Label of the blob to delete.");
         pw.println("      --tag: Tag of the blob to delete.");
+        pw.println("idle-maintenance");
+        pw.println("    Run idle maintenance which takes care of removing stale data.");
         pw.println();
     }
 

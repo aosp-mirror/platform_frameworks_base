@@ -105,7 +105,6 @@ import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.gpu.GpuService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.incident.IncidentCompanionService;
-import com.android.server.incremental.IncrementalManagerService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
 import com.android.server.inputmethod.InputMethodSystemProperty;
@@ -189,12 +188,6 @@ public final class SystemServer {
 
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
-
-    private static final long SNAPSHOT_INTERVAL = 60 * 60 * 1000; // 1hr
-
-    // The earliest supported time.  We pick one day into 1970, to
-    // give any timezone code room without going into negative time.
-    private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
 
     private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;
     private static final long SLOW_DELIVERY_THRESHOLD_MS = 200;
@@ -335,7 +328,7 @@ public final class SystemServer {
     private ContentResolver mContentResolver;
     private EntropyMixer mEntropyMixer;
     private DataLoaderManagerService mDataLoaderManagerService;
-    private IncrementalManagerService mIncrementalManagerService;
+    private long mIncrementalServiceHandle = 0;
 
     private boolean mOnlyCore;
     private boolean mFirstBoot;
@@ -376,6 +369,16 @@ public final class SystemServer {
      * Spawn a thread that monitors for fd leaks.
      */
     private static native void spawnFdLeakCheckThread();
+
+    /**
+     * Start native Incremental Service and get its handle.
+     */
+    private static native long startIncrementalService();
+
+    /**
+     * Inform Incremental Service that system is ready.
+     */
+    private static native void setIncrementalServiceSystemReady(long incrementalServiceHandle);
 
     /**
      * The main entry point from zygote.
@@ -745,8 +748,8 @@ public final class SystemServer {
         t.traceEnd();
 
         // Incremental service needs to be started before package manager
-        t.traceBegin("StartIncrementalManagerService");
-        mIncrementalManagerService = IncrementalManagerService.start(mSystemContext);
+        t.traceBegin("StartIncrementalService");
+        mIncrementalServiceHandle = startIncrementalService();
         t.traceEnd();
 
         // Power manager needs to be started early because other services need it.
@@ -2133,9 +2136,9 @@ public final class SystemServer {
         mPackageManagerService.systemReady();
         t.traceEnd();
 
-        if (mIncrementalManagerService != null) {
-            t.traceBegin("MakeIncrementalManagerServiceReady");
-            mIncrementalManagerService.systemReady();
+        if (mIncrementalServiceHandle != 0) {
+            t.traceBegin("MakeIncrementalServiceReady");
+            setIncrementalServiceSystemReady(mIncrementalServiceHandle);
             t.traceEnd();
         }
 

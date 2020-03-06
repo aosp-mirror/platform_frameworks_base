@@ -31,6 +31,7 @@ import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -109,10 +110,17 @@ public abstract class ExternalStorageService extends Service {
      *
      * <p> Additional calls to start a session for the same {@code sessionId} while the session
      * is still starting or already started should have no effect.
+     *
+     * @param sessionId uniquely identifies a running session and used in {@link #onEndSession}
+     * @param flag specifies the type or additional attributes of a session
+     * @param deviceFd for intercepting IO from other apps
+     * @param upperFileSystemPath is the root path on which we are intercepting IO from other apps
+     * @param lowerFileSystemPath is the root path matching {@code upperFileSystemPath} containing
+     * the actual data apps are trying to access
      */
     public abstract void onStartSession(@NonNull String sessionId, @SessionFlag int flag,
-            @NonNull ParcelFileDescriptor deviceFd, @NonNull String upperFileSystemPath,
-            @NonNull String lowerFileSystemPath) throws IOException;
+            @NonNull ParcelFileDescriptor deviceFd, @NonNull File upperFileSystemPath,
+            @NonNull File lowerFileSystemPath) throws IOException;
 
     /**
      * Called when the system ends the session identified by {@code sessionId}. Implementors should
@@ -136,7 +144,8 @@ public abstract class ExternalStorageService extends Service {
                 RemoteCallback callback) throws RemoteException {
             mHandler.post(() -> {
                 try {
-                    onStartSession(sessionId, flag, deviceFd, upperPath, lowerPath);
+                    onStartSession(sessionId, flag, deviceFd, new File(upperPath),
+                            new File(lowerPath));
                     sendResult(sessionId, null /* throwable */, callback);
                 } catch (Throwable t) {
                     sendResult(sessionId, t, callback);

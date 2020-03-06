@@ -21,7 +21,6 @@
 #include <SkImageInfo.h>
 #include <SkRect.h>
 #include <cutils/compiler.h>
-#include <ui/GraphicBuffer.h>
 #include <utils/StrongPointer.h>
 
 #include "IRenderPipeline.h"

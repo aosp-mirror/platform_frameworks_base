@@ -3079,6 +3079,12 @@
       <public name="config_sms_enabled_locking_shift_tables" />
     </public-group>
 
+    <public-group type="string" first-id="0x0104002c">
+      <!-- @hide -->
+      <public name="config_customMediaKeyDispatcher" />
+      <!-- @hide -->
+      <public name="config_customSessionPolicyProvider" />
+    </public-group>
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 

@@ -134,6 +134,7 @@ public class AppSearchDocumentTest {
                 .setCreationTimestampMillis(5L)
                 .setScore(1)
                 .setTtlMillis(1L)
+                .setScore(1)
                 .setProperty("longKey1", 1L)
                 .setProperty("doubleKey1", 1.0)
                 .setProperty("booleanKey1", true)
@@ -192,7 +193,7 @@ public class AppSearchDocumentTest {
                 .build();
 
         // Get a value for a key that doesn't exist
-        assertThat(document.getPropertyDouble("doubleKey1")).isNull();
+        assertThat(document.getPropertyDouble("doubleKey1")).isEqualTo(0.0);
         assertThat(document.getPropertyDoubleArray("doubleKey1")).isNull();
 
         // Get a value with a single element as an array and as a single value
@@ -205,7 +206,7 @@ public class AppSearchDocumentTest {
                 .containsExactly("test-value1", "test-value2", "test-value3");
 
         // Get a value of the wrong type
-        assertThat(document.getPropertyDouble("longKey1")).isNull();
+        assertThat(document.getPropertyDouble("longKey1")).isEqualTo(0.0);
         assertThat(document.getPropertyDoubleArray("longKey1")).isNull();
     }
 
@@ -254,8 +255,8 @@ public class AppSearchDocumentTest {
                         .addDocumentValues(sDocumentProperties1.getProto()));
         List<String> sortedKey = new ArrayList<>(propertyProtoMap.keySet());
         Collections.sort(sortedKey);
-        for (String key : sortedKey) {
-            documentProtoBuilder.addProperties(propertyProtoMap.get(key));
+        for (int i = 0; i < sortedKey.size(); i++) {
+            documentProtoBuilder.addProperties(propertyProtoMap.get(sortedKey.get(i)));
         }
         assertThat(document.getProto()).isEqualTo(documentProtoBuilder.build());
     }

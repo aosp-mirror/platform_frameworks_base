@@ -2018,16 +2018,13 @@ package android.content.pm {
     method @NonNull public final int getType();
   }
 
-  public final class InstallationFile implements android.os.Parcelable {
+  public final class InstallationFile {
     ctor public InstallationFile(int, @NonNull String, long, @Nullable byte[], @Nullable byte[]);
-    method public int describeContents();
     method public long getLengthBytes();
     method public int getLocation();
     method @Nullable public byte[] getMetadata();
     method @NonNull public String getName();
     method @Nullable public byte[] getSignature();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.InstallationFile> CREATOR;
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {
@@ -4734,7 +4731,7 @@ package android.media.tv {
 
   public final class TvInputManager {
     method @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, @NonNull android.media.tv.TvInputInfo, @NonNull android.media.tv.TvInputManager.HardwareCallback);
-    method @Nullable @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, @NonNull android.media.tv.TvInputInfo, @NonNull android.media.tv.TvInputManager.HardwareCallback, @Nullable String, int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.TV_INPUT_HARDWARE) public android.media.tv.TvInputManager.Hardware acquireTvInputHardware(int, @NonNull android.media.tv.TvInputInfo, @Nullable String, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.TvInputManager.HardwareCallback);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PARENTAL_CONTROLS) public void addBlockedRating(@NonNull android.media.tv.TvContentRating);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public boolean captureFrame(String, android.view.Surface, android.media.tv.TvStreamConfig);
     method @RequiresPermission(android.Manifest.permission.CAPTURE_TV_INPUT) public java.util.List<android.media.tv.TvStreamConfig> getAvailableTvStreamConfigList(String);
@@ -8144,8 +8141,8 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportFullWifiLockReleasedFromSource(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiBatchedScanStartedFromSource(@NonNull android.os.WorkSource, @IntRange(from=0) int);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiBatchedScanStoppedFromSource(@NonNull android.os.WorkSource);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastDisabled(int);
-    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastDisabled(@NonNull android.os.WorkSource);
+    method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiMulticastEnabled(@NonNull android.os.WorkSource);
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiOff();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiOn();
     method @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public void reportWifiRssiChanged(@IntRange(from=0xffffff81, to=0) int);
@@ -8224,13 +8221,15 @@ package android.os {
     field public static final String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
     field public static final String ACTION_UPDATE_CONVERSATION_ACTIONS = "android.intent.action.UPDATE_CONVERSATION_ACTIONS";
     field public static final String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
-    field public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
+    field @RequiresPermission("android.permission.UPDATE_CONFIG") public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
     field public static final String ACTION_UPDATE_INTENT_FIREWALL = "android.intent.action.UPDATE_INTENT_FIREWALL";
     field public static final String ACTION_UPDATE_LANG_ID = "android.intent.action.UPDATE_LANG_ID";
     field public static final String ACTION_UPDATE_NETWORK_WATCHLIST = "android.intent.action.UPDATE_NETWORK_WATCHLIST";
     field public static final String ACTION_UPDATE_PINS = "android.intent.action.UPDATE_PINS";
     field public static final String ACTION_UPDATE_SMART_SELECTION = "android.intent.action.UPDATE_SMART_SELECTION";
     field public static final String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
+    field public static final String EXTRA_REQUIRED_HASH = "android.os.extra.REQUIRED_HASH";
+    field public static final String EXTRA_VERSION = "android.os.extra.VERSION";
   }
 
   public class Environment {
@@ -10341,7 +10340,7 @@ package android.service.storage {
     ctor public ExternalStorageService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method public abstract void onEndSession(@NonNull String) throws java.io.IOException;
-    method public abstract void onStartSession(@NonNull String, int, @NonNull android.os.ParcelFileDescriptor, @NonNull String, @NonNull String) throws java.io.IOException;
+    method public abstract void onStartSession(@NonNull String, int, @NonNull android.os.ParcelFileDescriptor, @NonNull java.io.File, @NonNull java.io.File) throws java.io.IOException;
     field public static final int FLAG_SESSION_ATTRIBUTE_INDEXABLE = 2; // 0x2
     field public static final int FLAG_SESSION_TYPE_FUSE = 1; // 0x1
     field public static final String SERVICE_INTERFACE = "android.service.storage.ExternalStorageService";
@@ -11642,7 +11641,7 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
-    method public int getEmergencyNumberDbVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getIsimImpu();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
@@ -11673,7 +11672,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
     method public boolean isCurrentSimOperator(@NonNull String, int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataAllowedInVoiceCall();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionEnabled();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionAllowed();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();

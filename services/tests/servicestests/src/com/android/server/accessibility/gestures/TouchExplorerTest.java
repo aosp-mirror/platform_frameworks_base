@@ -16,6 +16,15 @@
 
 package com.android.server.accessibility.gestures;
 
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_HOVER_ENTER;
+import static android.view.MotionEvent.ACTION_HOVER_EXIT;
+import static android.view.MotionEvent.ACTION_HOVER_MOVE;
+import static android.view.MotionEvent.ACTION_MOVE;
+import static android.view.MotionEvent.ACTION_POINTER_DOWN;
+import static android.view.MotionEvent.ACTION_POINTER_UP;
+import static android.view.MotionEvent.ACTION_UP;
+
 import static com.android.server.accessibility.gestures.TouchState.STATE_CLEAR;
 import static com.android.server.accessibility.gestures.TouchState.STATE_DELEGATING;
 import static com.android.server.accessibility.gestures.TouchState.STATE_DRAGGING;
@@ -23,6 +32,7 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_E
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
 import android.content.Context;
@@ -31,6 +41,7 @@ import android.os.SystemClock;
 import android.testing.DexmakerShareClassLoaderRule;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
@@ -98,8 +109,7 @@ public class TouchExplorerTest {
         }
 
         @Override
-        public void setNext(EventStreamTransformation next) {
-        }
+        public void setNext(EventStreamTransformation next) {}
 
         @Override
         public EventStreamTransformation getNext() {
@@ -118,13 +128,26 @@ public class TouchExplorerTest {
     }
 
     @Test
+    public void testOneFingerMove_shouldInjectHoverEvents() {
+        goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
+        try {
+            Thread.sleep(2 * ViewConfiguration.getDoubleTapTimeout());
+        } catch (InterruptedException e) {
+            fail("Interrupted while waiting for transition to touch exploring state.");
+        }
+        moveEachPointers(mLastEvent, p(10, 10));
+        send(mLastEvent);
+        goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
+        assertCapturedEvents(ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT);
+    }
+
+    @Test
     public void testTwoFingersMove_shouldDelegatingAndInjectActionDownPointerDown() {
         goFromStateClearTo(STATE_MOVING_2FINGERS);
-
         assertState(STATE_DELEGATING);
-        assertCapturedEvents(
-                MotionEvent.ACTION_DOWN,
-                MotionEvent.ACTION_POINTER_DOWN);
+        goToStateClearFrom(STATE_MOVING_2FINGERS);
+        assertState(STATE_CLEAR);
+        assertCapturedEvents(ACTION_DOWN, ACTION_POINTER_DOWN, ACTION_POINTER_UP, ACTION_UP);
         assertCapturedEventsNoHistory();
     }
 
@@ -146,11 +169,7 @@ public class TouchExplorerTest {
         mTouchExplorer.clearEvents(InputDevice.SOURCE_TOUCHSCREEN);
         assertState(STATE_CLEAR);
         List<MotionEvent> events = getCapturedEvents();
-        assertCapturedEvents(
-                MotionEvent.ACTION_DOWN,
-                MotionEvent.ACTION_POINTER_DOWN,
-                MotionEvent.ACTION_POINTER_UP,
-                MotionEvent.ACTION_UP);
+        assertCapturedEvents(ACTION_DOWN, ACTION_POINTER_DOWN, ACTION_POINTER_UP, ACTION_UP);
     }
 
     @Test
@@ -158,7 +177,9 @@ public class TouchExplorerTest {
         goFromStateClearTo(STATE_DRAGGING_2FINGERS);
 
         assertState(STATE_DRAGGING);
-        assertCapturedEvents(MotionEvent.ACTION_DOWN);
+        goToStateClearFrom(STATE_DRAGGING_2FINGERS);
+        assertState(STATE_CLEAR);
+        assertCapturedEvents(ACTION_DOWN, ACTION_UP);
         assertCapturedEventsNoHistory();
     }
 
@@ -166,25 +187,32 @@ public class TouchExplorerTest {
     public void testTwoFingersNotDrag_shouldDelegatingAndActionUpDownPointerDown() {
         // only from dragging state, and withMoveHistory no dragging
         goFromStateClearTo(STATE_PINCH_2FINGERS);
-
         assertState(STATE_DELEGATING);
+        goToStateClearFrom(STATE_PINCH_2FINGERS);
+        assertState(STATE_CLEAR);
         assertCapturedEvents(
-                /* goto dragging state */ MotionEvent.ACTION_DOWN,
-                /* leave dragging state */ MotionEvent.ACTION_UP,
-                MotionEvent.ACTION_DOWN,
-                MotionEvent.ACTION_POINTER_DOWN);
+                /* goto dragging state */ ACTION_DOWN,
+                /* leave dragging state */ ACTION_UP,
+                ACTION_DOWN,
+                ACTION_POINTER_DOWN,
+                ACTION_POINTER_UP,
+                ACTION_UP);
         assertCapturedEventsNoHistory();
     }
 
     @Test
     public void testThreeFingersMove_shouldDelegatingAnd3ActionPointerDown() {
         goFromStateClearTo(STATE_MOVING_3FINGERS);
-
         assertState(STATE_DELEGATING);
+        goToStateClearFrom(STATE_MOVING_3FINGERS);
+        assertState(STATE_CLEAR);
         assertCapturedEvents(
-                MotionEvent.ACTION_DOWN,
-                MotionEvent.ACTION_POINTER_DOWN,
-                MotionEvent.ACTION_POINTER_DOWN);
+                ACTION_DOWN,
+                ACTION_POINTER_DOWN,
+                ACTION_POINTER_DOWN,
+                ACTION_POINTER_UP,
+                ACTION_POINTER_UP,
+                ACTION_UP);
         assertCapturedEventsNoHistory();
     }
 
@@ -200,54 +228,76 @@ public class TouchExplorerTest {
     private void goFromStateClearTo(int state) {
         try {
             switch (state) {
-                case STATE_CLEAR: {
+                case STATE_CLEAR:
                     mTouchExplorer.onDestroy();
-                }
-                break;
-                case STATE_TOUCH_EXPLORING_1FINGER: {
+                    break;
+                case STATE_TOUCH_EXPLORING_1FINGER:
                     send(downEvent());
-                }
-                break;
-                case STATE_TOUCH_EXPLORING_2FINGER: {
+                    break;
+                case STATE_TOUCH_EXPLORING_2FINGER:
                     goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
                     send(pointerDownEvent());
-                }
-                break;
-                case STATE_TOUCH_EXPLORING_3FINGER: {
+                    break;
+                case STATE_TOUCH_EXPLORING_3FINGER:
                     goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
                     send(thirdPointerDownEvent());
-                }
-                break;
-                case STATE_MOVING_2FINGERS: {
+                    break;
+                case STATE_MOVING_2FINGERS:
                     goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
                     moveEachPointers(mLastEvent, p(10, 0), p(5, 10));
                     send(mLastEvent);
-                }
-                break;
-                case STATE_DRAGGING_2FINGERS: {
+                    break;
+                case STATE_DRAGGING_2FINGERS:
                     goFromStateClearTo(STATE_TOUCH_EXPLORING_2FINGER);
                     moveEachPointers(mLastEvent, p(10, 0), p(10, 0));
                     send(mLastEvent);
-                }
-                break;
-                case STATE_PINCH_2FINGERS: {
+                    break;
+                case STATE_PINCH_2FINGERS:
                     goFromStateClearTo(STATE_DRAGGING_2FINGERS);
                     moveEachPointers(mLastEvent, p(10, 0), p(-10, 1));
                     send(mLastEvent);
-                }
-                break;
-                case STATE_MOVING_3FINGERS: {
+                    break;
+                case STATE_MOVING_3FINGERS:
                     goFromStateClearTo(STATE_TOUCH_EXPLORING_3FINGER);
                     moveEachPointers(mLastEvent, p(1, 0), p(1, 0), p(1, 0));
                     send(mLastEvent);
-                }
-                break;
+                    break;
                 default:
                     throw new IllegalArgumentException("Illegal state: " + state);
             }
         } catch (Throwable t) {
-            throw new RuntimeException("Failed to go to state "
-            + TouchState.getStateSymbolicName(state), t);
+            throw new RuntimeException(
+                    "Failed to go to state " + TouchState.getStateSymbolicName(state), t);
+        }
+    }
+
+    private void goToStateClearFrom(int state) {
+        try {
+            switch (state) {
+                case STATE_CLEAR:
+                    mTouchExplorer.onDestroy();
+                    break;
+                case STATE_TOUCH_EXPLORING_1FINGER:
+                    send(upEvent());
+                    break;
+                case STATE_TOUCH_EXPLORING_2FINGER:
+                case STATE_MOVING_2FINGERS:
+                case STATE_DRAGGING_2FINGERS:
+                case STATE_PINCH_2FINGERS:
+                    send(pointerUpEvent());
+                    goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
+                    break;
+                case STATE_TOUCH_EXPLORING_3FINGER:
+                case STATE_MOVING_3FINGERS:
+                    send(thirdPointerUpEvent());
+                    goToStateClearFrom(STATE_TOUCH_EXPLORING_2FINGER);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Illegal state: " + state);
+            }
+        } catch (Throwable t) {
+            throw new RuntimeException(
+                    "Failed to go to state " + TouchState.getStateSymbolicName(state), t);
         }
     }
 
@@ -292,30 +342,46 @@ public class TouchExplorerTest {
     private MotionEvent downEvent() {
         mLastDownTime = SystemClock.uptimeMillis();
         return fromTouchscreen(
-                MotionEvent.obtain(mLastDownTime, mLastDownTime, MotionEvent.ACTION_DOWN, DEFAULT_X,
-                        DEFAULT_Y, 0));
+                MotionEvent.obtain(
+                        mLastDownTime, mLastDownTime, ACTION_DOWN, DEFAULT_X, DEFAULT_Y, 0));
     }
 
     private MotionEvent upEvent() {
-        MotionEvent event = downEvent();
-        event.setAction(MotionEvent.ACTION_UP);
+        MotionEvent event = MotionEvent.obtainNoHistory(mLastEvent);
+        event.setAction(ACTION_UP);
         return event;
     }
 
     private MotionEvent pointerDownEvent() {
         final int secondPointerId = 0x0100;
-        final int action = MotionEvent.ACTION_POINTER_DOWN | secondPointerId;
-        final float[] x = new float[]{DEFAULT_X, DEFAULT_X + 29};
-        final float[] y = new float[]{DEFAULT_Y, DEFAULT_Y + 28};
+        final int action = ACTION_POINTER_DOWN | secondPointerId;
+        final float[] x = new float[] {DEFAULT_X, DEFAULT_X + 29};
+        final float[] y = new float[] {DEFAULT_Y, DEFAULT_Y + 28};
         return manyPointerEvent(action, x, y);
+    }
+
+    private MotionEvent pointerUpEvent() {
+        final int secondPointerId = 0x0100;
+        final int action = ACTION_POINTER_UP | secondPointerId;
+        final MotionEvent event = MotionEvent.obtainNoHistory(mLastEvent);
+        event.setAction(action);
+        return event;
     }
 
     private MotionEvent thirdPointerDownEvent() {
         final int thirdPointerId = 0x0200;
-        final int action = MotionEvent.ACTION_POINTER_DOWN | thirdPointerId;
-        final float[] x = new float[]{DEFAULT_X, DEFAULT_X + 29, DEFAULT_X + 59};
-        final float[] y = new float[]{DEFAULT_Y, DEFAULT_Y + 28, DEFAULT_Y + 58};
+        final int action = ACTION_POINTER_DOWN | thirdPointerId;
+        final float[] x = new float[] {DEFAULT_X, DEFAULT_X + 29, DEFAULT_X + 59};
+        final float[] y = new float[] {DEFAULT_Y, DEFAULT_Y + 28, DEFAULT_Y + 58};
         return manyPointerEvent(action, x, y);
+    }
+
+    private MotionEvent thirdPointerUpEvent() {
+        final int thirdPointerId = 0x0200;
+        final int action = ACTION_POINTER_UP | thirdPointerId;
+        final MotionEvent event = MotionEvent.obtainNoHistory(mLastEvent);
+        event.setAction(action);
+        return event;
     }
 
     private void moveEachPointers(MotionEvent event, PointF... points) {
@@ -325,8 +391,8 @@ public class TouchExplorerTest {
             x[i] = event.getX(i) + points[i].x;
             y[i] = event.getY(i) + points[i].y;
         }
-        MotionEvent newEvent = manyPointerEvent(MotionEvent.ACTION_MOVE, x, y);
-        event.setAction(MotionEvent.ACTION_MOVE);
+        MotionEvent newEvent = manyPointerEvent(ACTION_MOVE, x, y);
+        event.setAction(ACTION_MOVE);
         // add history count
         event.addBatch(newEvent);
     }

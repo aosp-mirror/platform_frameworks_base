@@ -42,6 +42,8 @@ import android.view.WindowManagerGlobal;
 
 import java.io.PrintWriter;
 
+import javax.inject.Inject;
+
 /**
  * Handles bounds calculation for PIP on Phone and other form factors, it keeps tracking variant
  * state changes originated from Window Manager and is the source of truth for PiP window bounds.
@@ -81,9 +83,10 @@ public class PipBoundsHandler {
     private boolean mIsShelfShowing;
     private int mShelfHeight;
 
-    public PipBoundsHandler(Context context) {
+    @Inject
+    public PipBoundsHandler(Context context, PipSnapAlgorithm pipSnapAlgorithm) {
         mContext = context;
-        mSnapAlgorithm = new PipSnapAlgorithm(context);
+        mSnapAlgorithm = pipSnapAlgorithm;
         mWindowManager = WindowManagerGlobal.getWindowManagerService();
         reloadResources();
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
@@ -225,8 +228,8 @@ public class PipBoundsHandler {
      */
     Rect getDestinationBounds(float aspectRatio, Rect bounds) {
         final Rect destinationBounds;
+        final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
         if (bounds == null) {
-            final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
             destinationBounds = new Rect(defaultBounds);
         } else {
             destinationBounds = new Rect(bounds);

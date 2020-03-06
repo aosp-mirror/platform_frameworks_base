@@ -18,13 +18,12 @@
 #define LOG_TAG "asset"
 
 #include <inttypes.h>
+#include <linux/capability.h>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-#include <private/android_filesystem_config.h> // for AID_SYSTEM
 
 #include <sstream>
 #include <string>

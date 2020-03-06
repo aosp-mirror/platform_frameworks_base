@@ -2833,6 +2833,17 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * @hide
+     * @deprecated Use {@link #getNetworkCountryIso(int)} instead.
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link #getNetworkCountryIso(int)} instead.")
+    public String getNetworkCountryIsoForPhone(int phoneId) {
+        return getNetworkCountryIso(phoneId);
+    }
+
     /*
      * When adding a network type to the list below, make sure to add the correct icon to
      * MobileSignalController.mapIconSets() as well as NETWORK_TYPES
@@ -8929,7 +8940,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Shut down all the live radios over all the slot index.
+     * Shut down all the live radios over all the slot indexes.
+     *
+     * <p>To know when the radio has completed powering off, use
+     * {@link PhoneStateListener#LISTEN_SERVICE_STATE LISTEN_SERVICE_STATE}.
      *
      * @hide
      */
@@ -8942,7 +8956,8 @@ public class TelephonyManager {
                 telephony.shutdownMobileRadios();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#shutdownMobileRadios", e);
+            Log.e(TAG, "Error calling ITelephony#shutdownAllRadios", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -8961,7 +8976,8 @@ public class TelephonyManager {
                 return telephony.needMobileRadioShutdown();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#needMobileRadioShutdown", e);
+            Log.e(TAG, "Error calling ITelephony#isAnyRadioPoweredOn", e);
+            e.rethrowAsRuntimeException();
         }
         return false;
     }
@@ -11132,21 +11148,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Checks whether cellular data connection is enabled in the device.
+     * Checks whether cellular data connection is allowed in the device.
      *
-     * Whether cellular data connection is enabled, meaning upon request whether will try to setup
-     * metered data connection considering all factors below:
-     * 1) User turned on data setting {@link #isDataEnabled}.
-     * 2) Carrier allows data to be on.
-     * 3) Network policy.
-     * And possibly others.
-     *
-     * @return {@code true} if the overall data connection is capable; {@code false} if not.
+     * <p>Whether cellular data connection is allowed considers all factors below:
+     * <UL>
+     *   <LI>User turned on data setting {@link #isDataEnabled}.</LI>
+     *   <LI>Carrier allows data to be on.</LI>
+     *   <LI>Network policy.</LI>
+     *   <LI>And possibly others.</LI>
+     * </UL>
+     * @return {@code true} if the overall data connection is allowed; {@code false} if not.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isDataConnectionEnabled() {
+    public boolean isDataConnectionAllowed() {
         boolean retVal = false;
         try {
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
@@ -11154,8 +11170,9 @@ public class TelephonyManager {
             if (telephony != null)
                 retVal = telephony.isDataEnabled(subId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error isDataConnectionEnabled", e);
+            Log.e(TAG, "Error isDataConnectionAllowed", e);
         } catch (NullPointerException e) {
+            return false;
         }
         return retVal;
     }
@@ -11862,7 +11879,7 @@ public class TelephonyManager {
     }
 
     /**
-     * A test API to return the emergency number db version.
+     * Returns the emergency number database version.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
@@ -11871,6 +11888,7 @@ public class TelephonyManager {
      */
     @TestApi
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getEmergencyNumberDbVersion() {
         try {
             ITelephony telephony = getITelephony();

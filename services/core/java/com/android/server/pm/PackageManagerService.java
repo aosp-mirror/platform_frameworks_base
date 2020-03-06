@@ -3364,6 +3364,10 @@ public class PackageManagerService extends IPackageManager.Stub
             // critical part of the core system.
             mRequiredPermissionControllerPackage = getRequiredPermissionControllerLPr();
 
+            mSettings.setPermissionControllerVersion(
+                    getPackageInfo(mRequiredPermissionControllerPackage, 0,
+                            UserHandle.USER_SYSTEM).getLongVersionCode());
+
             // Initialize InstantAppRegistry's Instant App list for all users.
             final int[] userIds = UserManagerService.getInstance().getUserIds();
             for (AndroidPackage pkg : mPackages.values()) {
@@ -6838,7 +6842,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                 || (matchVisibleToInstantAppOnly && isCallerInstantApp
                                         && isTargetHiddenFromInstantApp));
                 final boolean blockNormalResolution = !isTargetInstantApp && !isCallerInstantApp
-                        && !resolveForStart && shouldFilterApplicationLocked(
+                        && shouldFilterApplicationLocked(
                                 getPackageSettingInternal(ai.applicationInfo.packageName,
                                         Process.SYSTEM_UID), filterCallingUid, userId);
                 if (!blockInstantResolution && !blockNormalResolution) {
@@ -19985,6 +19989,11 @@ public class PackageManagerService extends IPackageManager.Stub
         long token = Binder.clearCallingIdentity();
         try {
             if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
+                PackageInfo packageInfo = getPackageInfo(packageName, 0, UserHandle.USER_SYSTEM);
+                if (packageInfo != null) {
+                    EventLog.writeEvent(0x534e4554, "145981139", packageInfo.applicationInfo.uid,
+                            "");
+                }
                 return null;
             }
         } finally {
@@ -22668,7 +22677,7 @@ public class PackageManagerService extends IPackageManager.Stub
     boolean readPermissionStateForUser(@UserIdInt int userId) {
         synchronized (mPackages) {
             mSettings.readPermissionStateForUserSyncLPr(userId);
-            return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+            return mPmInternal.isPermissionUpgradeNeeded(userId);
         }
     }
 
@@ -24067,10 +24076,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public void setRuntimePermissionsFingerPrint(@NonNull String fingerPrint,
-                @UserIdInt int userId) {
+        public void updateRuntimePermissionsFingerprint(@UserIdInt int userId) {
             synchronized (mLock) {
-                mSettings.setRuntimePermissionsFingerPrintLPr(fingerPrint, userId);
+                mSettings.updateRuntimePermissionsFingerprintLPr(userId);
             }
         }
 
@@ -24122,9 +24130,9 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public boolean areDefaultRuntimePermissionsGranted(int userId) {
+        public boolean isPermissionUpgradeNeeded(int userId) {
             synchronized (mLock) {
-                return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
+                return mSettings.isPermissionUpgradeNeededLPr(userId);
             }
         }
 
@@ -24151,6 +24159,18 @@ public class PackageManagerService extends IPackageManager.Stub
         @Override
         public List<String> getMimeGroup(String packageName, String mimeGroup) {
             return PackageManagerService.this.getMimeGroup(packageName, mimeGroup);
+        }
+
+        @Override
+        public void setVisibilityLogging(String packageName, boolean enable) {
+            final PackageSetting pkg;
+            synchronized (mLock) {
+                pkg = mSettings.getPackageLPr(packageName);
+            }
+            if (pkg == null) {
+                throw new IllegalStateException("No package found for " + packageName);
+            }
+            mAppsFilter.getFeatureConfig().enableLogging(pkg.appId, enable);
         }
     }
 

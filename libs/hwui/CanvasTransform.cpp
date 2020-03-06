@@ -22,7 +22,6 @@
 #include <SkGradientShader.h>
 #include <SkPaint.h>
 #include <SkShader.h>
-#include <ui/ColorSpace.h>
 
 #include <algorithm>
 #include <cmath>

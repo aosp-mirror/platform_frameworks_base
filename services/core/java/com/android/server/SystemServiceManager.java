@@ -203,7 +203,7 @@ public class SystemServiceManager {
             for (int i = 0; i < serviceLen; i++) {
                 final SystemService service = mServices.get(i);
                 long time = SystemClock.elapsedRealtime();
-                t.traceBegin(service.getClass().getName());
+                t.traceBegin("OnBootPhase " + service.getClass().getName());
                 try {
                     service.onBootPhase(mCurrentPhase);
                 } catch (Exception ex) {

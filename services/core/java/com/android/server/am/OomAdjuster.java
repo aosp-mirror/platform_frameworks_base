@@ -33,6 +33,8 @@ import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT;
+import static android.app.ActivityManager.PROCESS_STATE_PERSISTENT_UI;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
@@ -1698,13 +1700,13 @@ public final class OomAdjuster {
                                 if (enabled) {
                                     if (cr.hasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
                                         // TOP process passes all capabilities to the service.
-                                        capability = PROCESS_CAPABILITY_ALL;
+                                        capability |= PROCESS_CAPABILITY_ALL;
                                     } else {
                                         // TOP process passes no capability to the service.
                                     }
                                 } else {
                                     // TOP process passes all capabilities to the service.
-                                    capability = PROCESS_CAPABILITY_ALL;
+                                    capability |= PROCESS_CAPABILITY_ALL;
                                 }
                             } else if (clientProcState
                                     <= PROCESS_STATE_FOREGROUND_SERVICE) {
@@ -2005,17 +2007,9 @@ public final class OomAdjuster {
         // apply capability from FGS.
         if (app.hasForegroundServices()) {
             capability |= capabilityFromFGS;
-        } else if (!ActivityManager.isProcStateBackground(procState)) {
-            // procState higher than PROCESS_STATE_BOUND_FOREGROUND_SERVICE implicitly has
-            // camera/microphone capability
-            //TODO: remove this line when enforcing the feature.
-            capability |= PROCESS_CAPABILITY_ALL_IMPLICIT;
         }
 
-        // TOP process has all capabilities.
-        if (procState <= PROCESS_STATE_TOP) {
-            capability = PROCESS_CAPABILITY_ALL;
-        }
+        capability |= getDefaultCapability(app, procState);
 
         // Do final modification to adj.  Everything we do between here and applying
         // the final setAdj must be done in this function, because we will also use
@@ -2033,6 +2027,30 @@ public final class OomAdjuster {
         // if curAdj or curProcState improved, then this process was promoted
         return app.curAdj < prevAppAdj || app.getCurProcState() < prevProcState
                 || app.curCapability != prevCapability ;
+    }
+
+    private int getDefaultCapability(ProcessRecord app, int procState) {
+        switch (procState) {
+            case PROCESS_STATE_PERSISTENT:
+            case PROCESS_STATE_PERSISTENT_UI:
+            case PROCESS_STATE_TOP:
+                return PROCESS_CAPABILITY_ALL;
+            case PROCESS_STATE_BOUND_TOP:
+                return PROCESS_CAPABILITY_ALL_IMPLICIT;
+            case PROCESS_STATE_FOREGROUND_SERVICE:
+                if (app.hasForegroundServices()) {
+                    // Capability from FGS are conditional depending on foreground service type in
+                    // manifest file and the mAllowWhileInUsePermissionInFgs flag.
+                    return PROCESS_CAPABILITY_NONE;
+                } else {
+                    // process has no FGS, the PROCESS_STATE_FOREGROUND_SERVICE is from client.
+                    return PROCESS_CAPABILITY_ALL_IMPLICIT;
+                }
+            case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                return PROCESS_CAPABILITY_ALL_IMPLICIT;
+            default:
+                return PROCESS_CAPABILITY_NONE;
+        }
     }
 
     /**

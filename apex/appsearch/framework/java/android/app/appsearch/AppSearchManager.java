@@ -44,6 +44,7 @@ import java.util.function.BiConsumer;
  *
  * @hide
  */
+// TODO(b/148046169): This class header needs a detailed example/tutorial.
 @SystemService(Context.APP_SEARCH_SERVICE)
 public class AppSearchManager {
     private final IAppSearchManager mService;

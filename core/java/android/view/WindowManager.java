@@ -1587,7 +1587,7 @@ public interface WindowManager extends ViewManager {
          *
          * {@sample development/samples/ApiDemos/res/layout/overscan_activity.xml complete}
          *
-         * @deprecated Overscan areas aren't set by any Android product anymore.
+         * @deprecated Overscan areas aren't set by any Android product anymore as of Android 11.
          */
         @Deprecated
         public static final int FLAG_LAYOUT_IN_OVERSCAN = 0x02000000;
@@ -2777,7 +2777,7 @@ public interface WindowManager extends ViewManager {
          * setting in the system settings menu. In that case, this field is ignored and the display
          * will remain in its current mode.
          *
-         * @see android.content.pm.ActivityInfo#preferMinimalPostProcessing
+         * @see android.content.pm.ActivityInfo#FLAG_PREFER_MINIMAL_POST_PROCESSING
          * @see android.view.Display#isMinimalPostProcessingSupported
          * @see android.view.Window#setPreferMinimalPostProcessing
          */

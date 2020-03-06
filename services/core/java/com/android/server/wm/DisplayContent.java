@@ -1657,6 +1657,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mIgnoreRotationForApps = isNonDecorDisplayCloseToSquare(Surface.ROTATION_0, width, height);
     }
 
+    /** @return {@code true} if the orientation requested from application will be ignored. */
+    boolean ignoreRotationForApps() {
+        return mIgnoreRotationForApps;
+    }
+
     private boolean isNonDecorDisplayCloseToSquare(int rotation, int width, int height) {
         final DisplayCutout displayCutout =
                 calculateDisplayCutoutForRotation(rotation).getDisplayCutout();

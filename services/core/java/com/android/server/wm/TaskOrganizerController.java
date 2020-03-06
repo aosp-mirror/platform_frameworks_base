@@ -253,8 +253,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
                 final int nextId = display.getNextStackId();
                 TaskTile tile = new TaskTile(mService, nextId, windowingMode);
                 display.addTile(tile);
-                RunningTaskInfo out = new RunningTaskInfo();
-                tile.fillTaskInfo(out);
+                RunningTaskInfo out = tile.getTaskInfo();
                 mLastSentTaskInfos.put(tile, out);
                 return out;
             }
@@ -412,9 +411,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
                                 && !ArrayUtils.contains(activityTypes, as.getActivityType())) {
                             continue;
                         }
-                        final RunningTaskInfo info = new RunningTaskInfo();
-                        as.fillTaskInfo(info);
-                        out.add(info);
+                        out.add(as.getTaskInfo());
                     }
                 }
                 return out;
@@ -447,9 +444,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
                             && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
                         continue;
                     }
-                    final RunningTaskInfo info = new RunningTaskInfo();
-                    task.fillTaskInfo(info);
-                    out.add(info);
+                    out.add(task.getTaskInfo());
                 }
                 return out;
             }

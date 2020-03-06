@@ -347,12 +347,12 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
 
     @Override
     public void close() {
-        closeSession(STATE_CLOSED);
+        closeSession(STATE_CLOSED, false /* sendCallback */);
     }
 
     @Override
     public void abandon() {
-        closeSession(STATE_ABANDONED);
+        closeSession(STATE_ABANDONED, true /* sendCallback */);
     }
 
     @Override
@@ -360,11 +360,11 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         synchronized (mSessionLock) {
             mBlobCommitCallback = callback;
 
-            closeSession(STATE_COMMITTED);
+            closeSession(STATE_COMMITTED, true /* sendCallback */);
         }
     }
 
-    private void closeSession(int state) {
+    private void closeSession(int state, boolean sendCallback) {
         assertCallerIsOwner();
         synchronized (mSessionLock) {
             if (mState != STATE_OPENED) {
@@ -381,7 +381,9 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             mState = state;
             revokeAllFdsLocked();
 
-            mListener.onStateChanged(this);
+            if (sendCallback) {
+                mListener.onStateChanged(this);
+            }
         }
     }
 
@@ -457,6 +459,10 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 return "<abandoned>";
             case STATE_COMMITTED:
                 return "<committed>";
+            case STATE_VERIFIED_VALID:
+                return "<verified_valid>";
+            case STATE_VERIFIED_INVALID:
+                return "<verified_invalid>";
             default:
                 Slog.wtf(TAG, "Unknown state: " + state);
                 return "<unknown>";

@@ -55,6 +55,7 @@ public class RankingBuilder {
     private boolean mIsVisuallyInterruptive = false;
     private boolean mIsConversation = false;
     private ShortcutInfo mShortcutInfo = null;
+    private int mRankingAdjustment = 0;
 
     public RankingBuilder() {
     }
@@ -82,6 +83,7 @@ public class RankingBuilder {
         mIsVisuallyInterruptive = ranking.visuallyInterruptive();
         mIsConversation = ranking.isConversation();
         mShortcutInfo = ranking.getShortcutInfo();
+        mRankingAdjustment = ranking.getRankingAdjustment();
     }
 
     public Ranking build() {
@@ -108,7 +110,8 @@ public class RankingBuilder {
                 mCanBubble,
                 mIsVisuallyInterruptive,
                 mIsConversation,
-                mShortcutInfo);
+                mShortcutInfo,
+                mRankingAdjustment);
         return ranking;
     }
 
@@ -195,6 +198,11 @@ public class RankingBuilder {
 
     public RankingBuilder setShortcutInfo(ShortcutInfo shortcutInfo) {
         mShortcutInfo = shortcutInfo;
+        return this;
+    }
+
+    public RankingBuilder setRankingAdjustment(int rankingAdjustment) {
+        mRankingAdjustment = rankingAdjustment;
         return this;
     }
 

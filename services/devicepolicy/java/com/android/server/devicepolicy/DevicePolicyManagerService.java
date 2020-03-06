@@ -3297,22 +3297,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
 
-    public DeviceAdminInfo findAdmin(ComponentName adminName, int userHandle,
+    public DeviceAdminInfo findAdmin(final ComponentName adminName, final int userHandle,
             boolean throwForMissingPermission) {
         if (!mHasFeature) {
             return null;
         }
         enforceFullCrossUsersPermission(userHandle);
-        ActivityInfo ai = null;
-        try {
-            ai = mIPackageManager.getReceiverInfo(adminName,
-                    PackageManager.GET_META_DATA |
-                    PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS |
-                    PackageManager.MATCH_DIRECT_BOOT_AWARE |
-                    PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
-        } catch (RemoteException e) {
-            // shouldn't happen.
-        }
+        final ActivityInfo ai = mInjector.binderWithCleanCallingIdentity(() -> {
+            try {
+                return mIPackageManager.getReceiverInfo(adminName,
+                        PackageManager.GET_META_DATA
+                        | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                        | PackageManager.MATCH_DIRECT_BOOT_AWARE
+                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userHandle);
+            } catch (RemoteException e) {
+                // shouldn't happen.
+                return null;
+            }
+        });
         if (ai == null) {
             throw new IllegalArgumentException("Unknown admin: " + adminName);
         }
@@ -10910,9 +10912,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void enforcePackageIsSystemPackage(String packageName, int userId)
             throws RemoteException {
-        if (!isSystemApp(mIPackageManager, packageName, userId)) {
-            throw new IllegalArgumentException(
-                    "The provided package is not a system package");
+        boolean isSystem;
+        try {
+            isSystem = isSystemApp(mIPackageManager, packageName, userId);
+        } catch (IllegalArgumentException e) {
+            isSystem = false;
+        }
+        if (!isSystem) {
+            throw new IllegalArgumentException("The provided package is not a system package");
         }
     }
 

@@ -16,14 +16,15 @@
 
 package android.content.pm;
 
-import android.os.Bundle;
+import android.content.pm.DataLoaderParamsParcel;
+import android.content.pm.FileSystemControlParcel;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderStatusListener;
-import java.util.List;
 
 /** @hide */
 interface IDataLoaderManager {
-    boolean initializeDataLoader(int id, in Bundle params, IDataLoaderStatusListener listener);
+    boolean initializeDataLoader(int id, in DataLoaderParamsParcel params,
+            in FileSystemControlParcel control, IDataLoaderStatusListener listener);
     IDataLoader getDataLoader(int dataLoaderId);
     void destroyDataLoader(int dataLoaderId);
 }
