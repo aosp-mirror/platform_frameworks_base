@@ -282,15 +282,32 @@ filegroup {
     name: "framework-updatable-sources",
     srcs: [
         ":framework-appsearch-sources",
-        ":framework-sdkextensions-sources",
-        ":framework-statsd-sources",
-        ":framework-tethering-srcs",
-        ":updatable-media-srcs",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
-        ":framework-wifi-updatable-sources",
+        ":framework-sdkextensions-sources",
+        ":framework-statsd-sources",
         ":framework-telephony-sources",
+        ":framework-tethering-srcs",
+        ":framework-wifi-updatable-sources",
+        ":updatable-media-srcs",
     ]
+}
+
+java_library {
+    name: "framework-updatable-stubs-module_libs_api",
+    static_libs: [
+        "framework-appsearch-stubs", // TODO: Update to module_libs_api when there is one.
+        "framework-media-stubs-module_libs_api",
+        "framework-mediaprovider-stubs-module_libs_api",
+        "framework-permission-stubs-module_libs_api",
+        "framework-sdkextensions-stubs-module_libs_api",
+        "framework-statsd-stubs-module_libs_api",
+        "framework-telephony-stubs", // TODO: Update to module_libs_api when there is one.
+        "framework-tethering-stubs-module_libs_api",
+        "framework-wifi-stubs-module_libs_api",
+    ],
+    sdk_version: "module_current",
+    visibility: [":__pkg__"],
 }
 
 filegroup {
@@ -308,7 +325,6 @@ java_defaults {
     name: "framework-aidl-export-defaults",
     aidl: {
         export_include_dirs: [
-            "apex/media/framework/java",
             "core/java",
             "drm/java",
             "graphics/java",
@@ -325,6 +341,12 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
+
+            // TODO(b/148660295): remove this
+            "apex/media/framework/java",
+
+            // TODO(b/147699819): remove this
+            "telephony/java",
         ],
     },
 }
@@ -398,9 +420,7 @@ java_defaults {
         "app-compat-annotations",
         "ext",
         "unsupportedappusage",
-        "framework-media-stubs-systemapi",
-        "framework-mediaprovider-stubs-systemapi",
-        "framework-telephony-stubs",
+        "framework-updatable-stubs-module_libs_api",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -466,14 +486,6 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
-    libs: [
-        "framework-appsearch-stubs",
-        "framework-sdkextensions-stubs-systemapi",
-        "framework-statsd-stubs-module_libs_api",
-        "framework-permission-stubs-systemapi",
-        "framework-wifi-stubs-systemapi",
-        "framework-tethering-stubs-module_libs_api",
-    ],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -515,17 +527,11 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "framework-appsearch", // TODO(b/146218515): should be framework-appsearch-stubs
-        "framework-media-stubs-systemapi",
-        "framework-mediaprovider-stubs-systemapi",
-        "framework-permission-stubs-systemapi",
-        "framework-sdkextensions-stubs-systemapi",
-        "framework-statsd-stubs-module_libs_api",
-        "framework-wifi-stubs-systemapi",
-        "framework-tethering-stubs-module_libs_api",
-        // TODO (b/147688669) should be framework-telephony-stubs
+        // TODO(b/146218515): should be removed
+        "framework-appsearch",
+        // TODO (b/147688669) should be removed
         "framework-telephony",
-        // TODO(jiyong): add stubs for APEXes here
+        "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
