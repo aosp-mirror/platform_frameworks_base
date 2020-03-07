@@ -49,7 +49,6 @@ import com.android.systemui.statusbar.NavigationBarController;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.phone.AutoHideController;
 import com.android.systemui.statusbar.phone.BarTransitions;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.io.FileDescriptor;
@@ -105,7 +104,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     public CarNavigationBar(Context context,
             CarNavigationBarController carNavigationBarController,
             WindowManager windowManager,
-            DeviceProvisionedController deviceProvisionedController,
+            CarDeviceProvisionedController deviceProvisionedController,
             CommandQueue commandQueue,
             AutoHideController autoHideController,
             ButtonSelectionStateListener buttonSelectionStateListener,
@@ -117,8 +116,7 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         super(context);
         mCarNavigationBarController = carNavigationBarController;
         mWindowManager = windowManager;
-        mCarDeviceProvisionedController = (CarDeviceProvisionedController)
-                deviceProvisionedController;
+        mCarDeviceProvisionedController = deviceProvisionedController;
         mCommandQueue = commandQueue;
         mAutoHideController = autoHideController;
         mButtonSelectionStateListener = buttonSelectionStateListener;
