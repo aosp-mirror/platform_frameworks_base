@@ -164,8 +164,8 @@ class PeopleHubSettingChangeDataSourceImpl @Inject constructor(
         // Immediately report current value of setting
         updateListener(listener)
         val observer = object : ContentObserver(handler) {
-            override fun onChange(selfChange: Boolean, uri: Uri?, userId: Int) {
-                super.onChange(selfChange, uri, userId)
+            override fun onChange(selfChange: Boolean, uri: Uri?, flags: Int) {
+                super.onChange(selfChange, uri, flags)
                 updateListener(listener)
             }
         }
