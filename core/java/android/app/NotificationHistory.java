@@ -22,6 +22,7 @@ import android.graphics.drawable.Icon;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,9 +108,11 @@ public final class NotificationHistory implements Parcelable {
                     ", mChannelName='" + mChannelName + '\'' +
                     ", mChannelId='" + mChannelId + '\'' +
                     ", mUserId=" + mUserId +
+                    ", mUid=" + mUid +
                     ", mTitle='" + mTitle + '\'' +
                     ", mText='" + mText + '\'' +
                     ", mIcon=" + mIcon +
+                    ", mPostedTimeMs=" + mPostedTimeMs +
                     ", mConversationId=" + mConversationId +
                     '}';
         }
@@ -285,9 +288,7 @@ public final class NotificationHistory implements Parcelable {
         if (!hasNextNotification()) {
             return null;
         }
-
         HistoricalNotification n = readNotificationFromParcel(mParcel);
-
         mIndex++;
         if (!hasNextNotification()) {
             mParcel.recycle();
