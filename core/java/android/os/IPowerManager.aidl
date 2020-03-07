@@ -38,6 +38,8 @@ interface IPowerManager
     void releaseWakeLock(IBinder lock, int flags);
     void updateWakeLockUids(IBinder lock, in int[] uids);
     oneway void powerHint(int hintId, int data);
+    oneway void setPowerBoost(int boost, int durationMs);
+    oneway void setPowerMode(int mode, boolean enabled);
 
     void updateWakeLockWorkSource(IBinder lock, in WorkSource ws, String historyTag);
     boolean isWakeLockLevelSupported(int level);
