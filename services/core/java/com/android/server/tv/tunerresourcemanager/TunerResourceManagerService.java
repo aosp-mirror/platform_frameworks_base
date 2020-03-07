@@ -29,11 +29,12 @@ import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
@@ -61,7 +62,8 @@ public class TunerResourceManagerService extends SystemService {
     // Map of the current available frontend resources
     private Map<Integer, FrontendResource> mFrontendResources = new HashMap<>();
 
-    private SparseArray<IResourcesReclaimListener> mListeners = new SparseArray<>();
+    @GuardedBy("mLock")
+    private Map<Integer, ResourcesReclaimListenerRecord> mListeners = new HashMap<>();
 
     private TvInputManager mManager;
     private UseCasePriorityHints mPriorityCongfig = new UseCasePriorityHints();
@@ -99,6 +101,10 @@ public class TunerResourceManagerService extends SystemService {
 
             if (clientId == null) {
                 throw new RemoteException("clientId can't be null!");
+            }
+
+            if (listener == null) {
+                throw new RemoteException("IResourcesReclaimListener can't be null!");
             }
 
             if (!mPriorityCongfig.isDefinedUseCase(profile.getUseCase())) {
@@ -259,8 +265,7 @@ public class TunerResourceManagerService extends SystemService {
                                               .build();
         clientProfile.setPriority(getClientPriority(profile.getUseCase(), pid));
 
-        addClientProfile(clientId[0], clientProfile);
-        mListeners.append(clientId[0], listener);
+        addClientProfile(clientId[0], clientProfile, listener);
     }
 
     @VisibleForTesting
@@ -269,7 +274,6 @@ public class TunerResourceManagerService extends SystemService {
             Slog.d(TAG, "unregisterClientProfile(clientId=" + clientId + ")");
         }
         removeClientProfile(clientId);
-        mListeners.remove(clientId);
     }
 
     @VisibleForTesting
@@ -393,6 +397,62 @@ public class TunerResourceManagerService extends SystemService {
     }
 
     @VisibleForTesting
+    protected class ResourcesReclaimListenerRecord implements IBinder.DeathRecipient {
+        private final IResourcesReclaimListener mListener;
+        private final int mClientId;
+
+        public ResourcesReclaimListenerRecord(IResourcesReclaimListener listener, int clientId) {
+            mListener = listener;
+            mClientId = clientId;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mLock) {
+                removeClientProfile(mClientId);
+            }
+        }
+
+        public int getId() {
+            return mClientId;
+        }
+
+        public IResourcesReclaimListener getListener() {
+            return mListener;
+        }
+    }
+
+    private void addResourcesReclaimListener(int clientId, IResourcesReclaimListener listener) {
+        if (listener == null) {
+            if (DEBUG) {
+                Slog.w(TAG, "Listener is null when client " + clientId + " registered!");
+            }
+            return;
+        }
+
+        ResourcesReclaimListenerRecord record =
+                new ResourcesReclaimListenerRecord(listener, clientId);
+
+        try {
+            listener.asBinder().linkToDeath(record, 0);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Listener already died.");
+            return;
+        }
+
+        mListeners.put(clientId, record);
+    }
+
+    @VisibleForTesting
+    protected void reclaimFrontendResource(int reclaimingId) {
+        try {
+            mListeners.get(reclaimingId).getListener().onReclaimResources();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to reclaim resources on client " + reclaimingId, e);
+        }
+    }
+
+    @VisibleForTesting
     protected int getClientPriority(int useCase, int pid) {
         if (DEBUG) {
             Slog.d(TAG, "getClientPriority useCase=" + useCase
@@ -409,17 +469,6 @@ public class TunerResourceManagerService extends SystemService {
     protected boolean isForeground(int pid) {
         // TODO: how to get fg/bg information from pid
         return true;
-    }
-
-    @VisibleForTesting
-    protected void reclaimFrontendResource(int reclaimingId) throws RemoteException {
-        if (mListeners.get(reclaimingId) != null) {
-            try {
-                mListeners.get(reclaimingId).onReclaimResources();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
     }
 
     private void updateFrontendClientMappingOnNewGrant(int grantingId, int ownerClientId) {
@@ -487,8 +536,10 @@ public class TunerResourceManagerService extends SystemService {
         return mClientProfiles.get(clientId);
     }
 
-    private void addClientProfile(int clientId, ClientProfile profile) {
+    private void addClientProfile(int clientId, ClientProfile profile,
+            IResourcesReclaimListener listener) {
         mClientProfiles.put(clientId, profile);
+        addResourcesReclaimListener(clientId, listener);
     }
 
     private void removeClientProfile(int clientId) {
@@ -499,9 +550,11 @@ public class TunerResourceManagerService extends SystemService {
             }
         }
         mClientProfiles.remove(clientId);
+        mListeners.remove(clientId);
     }
 
-    private boolean checkClientExists(int clientId) {
+    @VisibleForTesting
+    protected boolean checkClientExists(int clientId) {
         return mClientProfiles.keySet().contains(clientId);
     }
 
