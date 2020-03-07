@@ -27,14 +27,50 @@ import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+
+import com.android.server.SystemConfig;
 
 import java.util.List;
 
 /**
  * Updates OverlayManager state; gets information about installed overlay packages.
+ *
+ * <p>Users of this API must be actors of any overlays they desire to change the state of.</p>
+ *
+ * <p>An actor is a package responsible for managing the state of overlays targeting overlayables
+ * that specify the actor. For example, an actor may enable or disable an overlay or otherwise
+ * change its state.</p>
+ *
+ * <p>Actors are specified as part of the overlayable definition.
+ *
+ * <pre>{@code
+ * <overlayable name="OverlayableResourcesName" actor="overlay://namespace/actorName">
+ * }</pre></p>
+ *
+ * <p>Actors are defined through {@link SystemConfig}. Only system packages can be used.
+ * The namespace "android" is reserved for use by AOSP and any "android" definitions must
+ * have an implementation on device that fulfill their intended functionality.</p>
+ *
+ * <pre>{@code
+ * <named-actor
+ *     namespace="namespace"
+ *     name="actorName"
+ *     package="com.example.pkg"
+ *     />
+ * }</pre></p>
+ *
+ * <p>An actor can manipulate a particular overlay if any of the following is true:
+ * <ul>
+ * <li>its UID is {@link Process#ROOT_UID}, {@link Process#SYSTEM_UID}</li>
+ * <li>it is the target of the overlay package</li>
+ * <li>it has the CHANGE_OVERLAY_PACKAGES permission and the target does not specify an actor</li>
+ * <li>it is the actor specified by the overlayable</li>
+ * </ul></p>
+ *
  * @hide
  */
 @SystemApi
@@ -84,6 +120,8 @@ public class OverlayManager {
      * If a set of overlay packages share the same category, single call to this method is
      * equivalent to multiple calls to {@link #setEnabled(String, boolean, UserHandle)}.
      *
+     * The caller must pass the actor requirements specified in the class comment.
+     *
      * @param packageName the name of the overlay package to enable.
      * @param user The user for which to change the overlay.
      *
@@ -115,6 +153,8 @@ public class OverlayManager {
      *
      * While {@link #setEnabledExclusiveInCategory(String, UserHandle)} doesn't support disabling
      * every overlay in a category, this method allows you to disable everything.
+     *
+     * The caller must pass the actor requirements specified in the class comment.
      *
      * @param packageName the name of the overlay package to enable.
      * @param enable {@code false} if the overlay should be turned off.
