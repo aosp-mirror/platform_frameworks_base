@@ -242,7 +242,7 @@ class BlobMetadata {
         return hasOtherLeasees(null, uid);
     }
 
-    private boolean isALeasee(@Nullable String packageName, int uid) {
+    boolean isALeasee(@Nullable String packageName, int uid) {
         synchronized (mMetadataLock) {
             // Check if the package is a leasee of the data blob.
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {
