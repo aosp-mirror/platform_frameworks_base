@@ -15,12 +15,12 @@
  */
 package android.hardware.fingerprint;
 
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.Fingerprint;
+import android.view.Surface;
 import java.util.List;
 
 /**
@@ -33,7 +33,7 @@ interface IFingerprintService {
     // through FingerprintManager now.
     void authenticate(IBinder token, long sessionId, int userId,
             IFingerprintServiceReceiver receiver, int flags, String opPackageName,
-            in IBiometricNativeHandle windowId);
+            in Surface surface);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signatuer permission. This method should only be
@@ -42,7 +42,7 @@ interface IFingerprintService {
     // startPreparedClient().
     void prepareForAuthentication(IBinder token, long sessionId, int userId,
             IBiometricServiceReceiverInternal wrapperReceiver, String opPackageName, int cookie,
-            int callingUid, int callingPid, int callingUserId, in IBiometricNativeHandle windowId);
+            int callingUid, int callingPid, int callingUserId, in Surface surface);
 
     // Starts authentication with the previously prepared client.
     void startPreparedClient(int cookie);
@@ -57,7 +57,7 @@ interface IFingerprintService {
 
     // Start fingerprint enrollment
     void enroll(IBinder token, in byte [] cryptoToken, int groupId, IFingerprintServiceReceiver receiver,
-            int flags, String opPackageName, in IBiometricNativeHandle windowId);
+            int flags, String opPackageName, in Surface surface);
 
     // Cancel enrollment in progress
     void cancelEnrollment(IBinder token);
