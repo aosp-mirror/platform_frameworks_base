@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static java.lang.Float.isNaN;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
@@ -289,6 +291,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         mInFrontAlpha = state.getFrontAlpha();
         mBehindAlpha = state.getBehindAlpha();
         mBubbleAlpha = state.getBubbleAlpha();
+        if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha)) {
+            throw new IllegalStateException("Scrim opacity is NaN for state: " + state + ", front: "
+                    + mInFrontAlpha + ", back: " + mBehindAlpha);
+        }
         applyExpansionToAlpha();
 
         // Scrim might acquire focus when user is navigating with a D-pad or a keyboard.
@@ -416,6 +422,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * @param fraction From 0 to 1 where 0 means collapsed and 1 expanded.
      */
     public void setPanelExpansion(float fraction) {
+        if (isNaN(fraction)) {
+            throw new IllegalArgumentException("Fraction should not be NaN");
+        }
         if (mExpansionFraction != fraction) {
             mExpansionFraction = fraction;
 
@@ -493,6 +502,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
                     mState.getBehindTint(), interpolatedFract);
         }
+        if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha)) {
+            throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
+                    + ", front: " + mInFrontAlpha + ", back: " + mBehindAlpha);
+        }
     }
 
     /**
@@ -548,6 +561,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             float newBehindAlpha = mState.getBehindAlpha();
             if (mBehindAlpha != newBehindAlpha) {
                 mBehindAlpha = newBehindAlpha;
+                if (isNaN(mBehindAlpha)) {
+                    throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
+                            + ", back: " + mBehindAlpha);
+                }
                 updateScrims();
             }
         }
@@ -948,8 +965,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         pw.print(" tint=0x");
         pw.println(Integer.toHexString(mScrimForBubble.getTint()));
 
-        pw.print("   mTracking=");
+        pw.print("  mTracking=");
         pw.println(mTracking);
+
+        pw.print("  mExpansionFraction=");
+        pw.println(mExpansionFraction);
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
@@ -996,6 +1016,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
         // in this case, back-scrim needs to be re-evaluated
         if (mState == ScrimState.AOD || mState == ScrimState.PULSING) {
             float newBehindAlpha = mState.getBehindAlpha();
+            if (isNaN(newBehindAlpha)) {
+                throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
+                        + ", back: " + mBehindAlpha);
+            }
             if (mBehindAlpha != newBehindAlpha) {
                 mBehindAlpha = newBehindAlpha;
                 updateScrims();
