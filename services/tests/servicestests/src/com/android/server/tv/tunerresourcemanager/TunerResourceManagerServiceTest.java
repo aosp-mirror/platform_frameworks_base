@@ -48,6 +48,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for {@link TunerResourceManagerService} class.
@@ -118,7 +119,7 @@ public class TunerResourceManagerServiceTest {
                 new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
-        SparseArray<FrontendResource> resources =
+        Map<Integer, FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
         for (int id = 0; id < infos.length; id++) {
             assertThat(resources.get(infos[id].getId())
@@ -128,7 +129,7 @@ public class TunerResourceManagerServiceTest {
             assertThat(resources.get(infos[id].getId())
                     .getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
         }
-        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+        assertThat(resources.values()).comparingElementsUsing(FR_TFI_COMPARE)
                 .containsExactlyElementsIn(Arrays.asList(infos));
     }
 
@@ -146,19 +147,15 @@ public class TunerResourceManagerServiceTest {
                 new TunerFrontendInfo(3 /*id*/, FrontendSettings.TYPE_ATSC, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
-        SparseArray<FrontendResource> resources =
+        Map<Integer, FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
-        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+        assertThat(resources.values()).comparingElementsUsing(FR_TFI_COMPARE)
                 .containsExactlyElementsIn(Arrays.asList(infos));
 
-        assertThat(resources.get(0).getExclusiveGroupMemberFeIds())
-                .isEqualTo(new ArrayList<Integer>());
-        assertThat(resources.get(1).getExclusiveGroupMemberFeIds())
-                .isEqualTo(new ArrayList<Integer>(Arrays.asList(2, 3)));
-        assertThat(resources.get(2).getExclusiveGroupMemberFeIds())
-                .isEqualTo(new ArrayList<Integer>(Arrays.asList(1, 3)));
-        assertThat(resources.get(3).getExclusiveGroupMemberFeIds())
-                .isEqualTo(new ArrayList<Integer>(Arrays.asList(1, 2)));
+        assertThat(resources.get(0).getExclusiveGroupMemberFeIds()).isEmpty();
+        assertThat(resources.get(1).getExclusiveGroupMemberFeIds()).containsExactly(2, 3);
+        assertThat(resources.get(2).getExclusiveGroupMemberFeIds()).containsExactly(1, 3);
+        assertThat(resources.get(3).getExclusiveGroupMemberFeIds()).containsExactly(1, 2);
     }
 
     @Test
@@ -171,11 +168,11 @@ public class TunerResourceManagerServiceTest {
                 new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
 
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
-        SparseArray<FrontendResource> resources0 =
+        Map<Integer, FrontendResource> resources0 =
                 mTunerResourceManagerService.getFrontendResources();
 
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
-        SparseArray<FrontendResource> resources1 =
+        Map<Integer, FrontendResource> resources1 =
                 mTunerResourceManagerService.getFrontendResources();
 
         assertThat(resources0).isEqualTo(resources1);
@@ -198,13 +195,13 @@ public class TunerResourceManagerServiceTest {
                 new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos1);
 
-        SparseArray<FrontendResource> resources =
+        Map<Integer, FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
         for (int id = 0; id < infos1.length; id++) {
             assertThat(resources.get(infos1[id].getId())
                     .getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
         }
-        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+        assertThat(resources.values()).comparingElementsUsing(FR_TFI_COMPARE)
                 .containsExactlyElementsIn(Arrays.asList(infos1));
     }
 
@@ -225,13 +222,13 @@ public class TunerResourceManagerServiceTest {
                 new TunerFrontendInfo(1 /*id*/, FrontendSettings.TYPE_DVBT, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos1);
 
-        SparseArray<FrontendResource> resources =
+        Map<Integer, FrontendResource> resources =
                 mTunerResourceManagerService.getFrontendResources();
         for (int id = 0; id < infos1.length; id++) {
             assertThat(resources.get(infos1[id].getId())
                     .getExclusiveGroupMemberFeIds().size()).isEqualTo(0);
         }
-        assertThat(sparseArrayToList(resources)).comparingElementsUsing(FR_TFI_COMPARE)
+        assertThat(resources.values()).comparingElementsUsing(FR_TFI_COMPARE)
                 .containsExactlyElementsIn(Arrays.asList(infos1));
     }
 
@@ -352,9 +349,9 @@ public class TunerResourceManagerServiceTest {
             throw e.rethrowFromSystemServer();
         }
         assertThat(frontendId[0]).isEqualTo(infos[1].getId());
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[1].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[2].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[2].getId())
                 .isInUse()).isTrue();
     }
 
@@ -372,12 +369,12 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[0], null /*listener*/, clientId0);
         assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfiles().get(clientId0[0])
+        mTunerResourceManagerService.getClientProfile(clientId0[0])
                 .setPriority(clientPriorities[0]);
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[1], null /*listener*/, clientId1);
         assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfiles().get(clientId1[0])
+        mTunerResourceManagerService.getClientProfile(clientId1[0])
                 .setPriority(clientPriorities[1]);
 
         // Init frontend resources.
@@ -433,12 +430,12 @@ public class TunerResourceManagerServiceTest {
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[0], null /*listener*/, clientId0);
         assertThat(clientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfiles().get(clientId0[0])
+        mTunerResourceManagerService.getClientProfile(clientId0[0])
                 .setPriority(clientPriorities[0]);
         mTunerResourceManagerService.registerClientProfileInternal(
                 profiles[1], null /*listener*/, clientId1);
         assertThat(clientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
-        mTunerResourceManagerService.getClientProfiles().get(clientId1[0])
+        mTunerResourceManagerService.getClientProfile(clientId1[0])
                 .setPriority(clientPriorities[1]);
 
         // Init frontend resources.
@@ -469,14 +466,14 @@ public class TunerResourceManagerServiceTest {
             throw e.rethrowFromSystemServer();
         }
         assertThat(frontendId[0]).isEqualTo(infos[1].getId());
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[0].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[1].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResources()
-                .get(infos[0].getId()).getOwnerClientId()).isEqualTo(clientId1[0]);
-        assertThat(mTunerResourceManagerService.getFrontendResources()
-                .get(infos[1].getId()).getOwnerClientId()).isEqualTo(clientId1[0]);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
+                .getOwnerClientId()).isEqualTo(clientId1[0]);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
+                .getOwnerClientId()).isEqualTo(clientId1[0]);
         assertThat(mReclaimingId).isEqualTo(clientId0[0]);
     }
 
@@ -508,16 +505,16 @@ public class TunerResourceManagerServiceTest {
             throw e.rethrowFromSystemServer();
         }
         assertThat(frontendId[0]).isEqualTo(infos[0].getId());
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[0].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
                 .isInUse()).isTrue();
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[1].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
                 .isInUse()).isTrue();
 
         // Unregister client when using frontend
         mTunerResourceManagerService.unregisterClientProfileInternal(clientId[0]);
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[0].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
                 .isInUse()).isFalse();
-        assertThat(mTunerResourceManagerService.getFrontendResources().get(infos[1].getId())
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
                 .isInUse()).isFalse();
 
     }
