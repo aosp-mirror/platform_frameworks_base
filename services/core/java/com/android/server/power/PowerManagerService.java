@@ -42,6 +42,8 @@ import android.hardware.SystemSensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.hardware.power.Boost;
+import android.hardware.power.Mode;
 import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -732,6 +734,16 @@ public final class PowerManagerService extends SystemService
             PowerManagerService.nativeSendPowerHint(hintId, data);
         }
 
+        /** Wrapper for PowerManager.nativeSetPowerBoost */
+        public void nativeSetPowerBoost(int boost, int durationMs) {
+            PowerManagerService.nativeSetPowerBoost(boost, durationMs);
+        }
+
+        /** Wrapper for PowerManager.nativeSetPowerMode */
+        public void nativeSetPowerMode(int mode, boolean enabled) {
+            PowerManagerService.nativeSetPowerMode(mode, enabled);
+        }
+
         /** Wrapper for PowerManager.nativeSetFeature */
         public void nativeSetFeature(int featureId, int data) {
             PowerManagerService.nativeSetFeature(featureId, data);
@@ -817,6 +829,8 @@ public final class PowerManagerService extends SystemService
     private static native void nativeSetInteractive(boolean enable);
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeSendPowerHint(int hintId, int data);
+    private static native void nativeSetPowerBoost(int boost, int durationMs);
+    private static native void nativeSetPowerMode(int mode, boolean enabled);
     private static native void nativeSetFeature(int featureId, int data);
     private static native boolean nativeForceSuspend();
 
@@ -3608,6 +3622,16 @@ public final class PowerManagerService extends SystemService
         mNativeWrapper.nativeSendPowerHint(hintId, data);
     }
 
+    private void setPowerBoostInternal(int boost, int durationMs) {
+        // Maybe filter the event.
+        mNativeWrapper.nativeSetPowerBoost(boost, durationMs);
+    }
+
+    private void setPowerModeInternal(int mode, boolean enabled) {
+        // Maybe filter the event.
+        mNativeWrapper.nativeSetPowerMode(mode, enabled);
+    }
+
     @VisibleForTesting
     boolean wasDeviceIdleForInternal(long ms) {
         synchronized (mLock) {
@@ -4664,6 +4688,26 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        public void setPowerBoost(int boost, int durationMs) {
+            if (!mSystemReady) {
+                // Service not ready yet, so who the heck cares about power hints, bah.
+                return;
+            }
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+            setPowerBoostInternal(boost, durationMs);
+        }
+
+        @Override // Binder call
+        public void setPowerMode(int mode, boolean enabled) {
+            if (!mSystemReady) {
+                // Service not ready yet, so who the heck cares about power hints, bah.
+                return;
+            }
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+            setPowerModeInternal(mode, enabled);
+        }
+
+        @Override // Binder call
         public void acquireWakeLock(IBinder lock, int flags, String tag, String packageName,
                 WorkSource ws, String historyTag) {
             if (lock == null) {
@@ -5457,6 +5501,15 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override
+        public void setPowerBoost(int boost, int durationMs) {
+            setPowerBoostInternal(boost, durationMs);
+        }
+
+        @Override
+        public void setPowerMode(int mode, boolean enabled) {
+            setPowerModeInternal(mode, enabled);
+        }
+       @Override
         public boolean wasDeviceIdleFor(long ms) {
             return wasDeviceIdleForInternal(ms);
         }
