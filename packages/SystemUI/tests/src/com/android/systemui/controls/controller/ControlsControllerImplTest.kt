@@ -408,7 +408,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
     fun testDisableFeature_notAvailable() {
         Settings.Secure.putIntForUser(mContext.contentResolver,
                 ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
-        controller.settingObserver.onChange(false, ControlsControllerImpl.URI, 0)
+        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, 0)
         assertFalse(controller.available)
     }
 
@@ -421,7 +421,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         Settings.Secure.putIntForUser(mContext.contentResolver,
                 ControlsControllerImpl.CONTROLS_AVAILABLE, 0, user)
-        controller.settingObserver.onChange(false, ControlsControllerImpl.URI, user)
+        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, user)
         assertTrue(controller.getFavorites().isEmpty())
     }
 
@@ -432,7 +432,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         Settings.Secure.putIntForUser(mContext.contentResolver,
                 ControlsControllerImpl.CONTROLS_AVAILABLE, 0, otherUser)
-        controller.settingObserver.onChange(false, ControlsControllerImpl.URI, otherUser)
+        controller.settingObserver.onChange(false, listOf(ControlsControllerImpl.URI), 0, otherUser)
 
         assertTrue(controller.available)
         assertFalse(controller.getFavorites().isEmpty())

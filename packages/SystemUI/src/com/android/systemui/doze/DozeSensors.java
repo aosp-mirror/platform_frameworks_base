@@ -261,7 +261,7 @@ public class DozeSensors {
 
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
+        public void onChange(boolean selfChange, Iterable<Uri> uris, int flags, int userId) {
             if (userId != ActivityManager.getCurrentUser()) {
                 return;
             }
