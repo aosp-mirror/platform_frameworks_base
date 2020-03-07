@@ -3522,6 +3522,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void setInputMethodTarget(WindowState target, boolean targetWaitingAnim) {
+        // Always update control target. This is needed to handle rotation.
+        updateImeControlTarget(target);
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
@@ -3529,7 +3531,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(false /* setLayoutNeeded */);
-        updateImeControlTarget(mInputMethodTarget);
         updateImeParent();
     }
 
