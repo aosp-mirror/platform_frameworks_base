@@ -16,23 +16,49 @@
 package com.android.internal.util.custom;
 
 import android.content.Context;
+import android.content.om.IOverlayManager;
+import android.content.om.OverlayInfo;
 
-import android.os.SystemProperties;
 import android.provider.Settings;
 import android.os.UserHandle;
 
 import static com.android.internal.util.custom.hwkeys.DeviceKeysConstants.*;
 
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON_OVERLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON_OVERLAY;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
+
 public class NavbarUtils {
-    public static boolean hasNavbarByDefault(Context context) {
-        boolean needsNav = context.getResources().getBoolean(com.android.internal.R.bool.config_showNavigationBar);
-        String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-        if ("1".equals(navBarOverride)) {
-            needsNav = false;
-        } else if ("0".equals(navBarOverride)) {
-            needsNav = true;
+    private static final String NAV_BAR_MODE_GESTURAL_OVERLAY_NARROW_BACK
+            = "com.android.internal.systemui.navbar.gestural_narrow_back";
+    private static final String NAV_BAR_MODE_GESTURAL_OVERLAY_WIDE_BACK
+            = "com.android.internal.systemui.navbar.gestural_wide_back";
+    private static final String NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK
+            = "com.android.internal.systemui.navbar.gestural_extra_wide_back";
+    private static final String[] NAVBAR_MODES_OVERLAYS = {
+            NAV_BAR_MODE_2BUTTON_OVERLAY,
+            NAV_BAR_MODE_3BUTTON_OVERLAY,
+            NAV_BAR_MODE_GESTURAL_OVERLAY,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_NARROW_BACK,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_WIDE_BACK,
+            NAV_BAR_MODE_GESTURAL_OVERLAY_EXTRA_WIDE_BACK
+    };
+
+    public static String getNavigationBarModeOverlay(Context context, IOverlayManager overlayManager) {
+        for (int i = 0; i < NAVBAR_MODES_OVERLAYS.length; i++) {
+            OverlayInfo info = null;
+            try {
+                info = overlayManager.getOverlayInfo(NAVBAR_MODES_OVERLAYS[i], UserHandle.USER_CURRENT);
+            } catch (Exception e) { /* Do nothing */ }
+            if (info != null && info.isEnabled()) {
+                return info.getPackageName();
+            }
         }
-        return needsNav;
+        return "";
+    }
+
+    public static boolean hasNavbarByDefault(Context context) {
+        return true;
     }
     public static boolean isEnabled(Context context) {
         return Settings.System.getIntForUser(context.getContentResolver(),

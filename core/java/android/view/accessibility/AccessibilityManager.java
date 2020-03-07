@@ -1368,8 +1368,7 @@ public final class AccessibilityManager {
      * {@code false} otherwise
      */
     public static boolean isAccessibilityButtonSupported() {
-        final Resources res = Resources.getSystem();
-        return res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
+        return true;
     }
 
     private final class MyCallback implements Handler.Callback {
