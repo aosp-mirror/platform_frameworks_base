@@ -216,12 +216,17 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     private void registerReceivers() {
-        final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
-        intentFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
-        intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+        final IntentFilter packageChangedFilter = new IntentFilter();
+        packageChangedFilter.addAction(Intent.ACTION_PACKAGE_FULLY_REMOVED);
+        packageChangedFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        packageChangedFilter.addDataScheme("package");
         mContext.registerReceiverAsUser(new PackageChangedReceiver(), UserHandle.ALL,
-                intentFilter, null, mHandler);
+                packageChangedFilter, null, mHandler);
+
+        final IntentFilter userActionFilter = new IntentFilter();
+        userActionFilter.addAction(Intent.ACTION_USER_REMOVED);
+        mContext.registerReceiverAsUser(new UserActionReceiver(), UserHandle.ALL,
+                userActionFilter, null, mHandler);
     }
 
     @GuardedBy("mBlobsLock")
@@ -769,40 +774,34 @@ public class BlobStoreManagerService extends SystemService {
             // Clean up any pending sessions
             final LongSparseArray<BlobStoreSession> userSessions =
                     getUserSessionsLocked(UserHandle.getUserId(uid));
-            final ArrayList<Integer> indicesToRemove = new ArrayList<>();
-            for (int i = 0, count = userSessions.size(); i < count; ++i) {
-                final BlobStoreSession session = userSessions.valueAt(i);
-                if (session.getOwnerUid() == uid
-                        && session.getOwnerPackageName().equals(packageName)) {
-                    session.getSessionFile().delete();
-                    mActiveBlobIds.remove(session.getSessionId());
-                    indicesToRemove.add(i);
+            userSessions.removeIf((sessionId, blobStoreSession) -> {
+                if (blobStoreSession.getOwnerUid() == uid
+                        && blobStoreSession.getOwnerPackageName().equals(packageName)) {
+                    blobStoreSession.getSessionFile().delete();
+                    mActiveBlobIds.remove(blobStoreSession.getSessionId());
+                    return true;
                 }
-            }
-            for (int i = 0, count = indicesToRemove.size(); i < count; ++i) {
-                userSessions.removeAt(indicesToRemove.get(i));
-            }
+                return false;
+            });
             writeBlobSessionsAsync();
 
             // Remove the package from the committer and leasee list
             final ArrayMap<BlobHandle, BlobMetadata> userBlobs =
                     getUserBlobsLocked(UserHandle.getUserId(uid));
-            indicesToRemove.clear();
-            for (int i = 0, count = userBlobs.size(); i < count; ++i) {
-                final BlobMetadata blobMetadata = userBlobs.valueAt(i);
+            userBlobs.entrySet().removeIf(entry -> {
+                final BlobMetadata blobMetadata = entry.getValue();
                 blobMetadata.removeCommitter(packageName, uid);
                 blobMetadata.removeLeasee(packageName, uid);
                 // Delete the blob if it doesn't have any active leases.
                 if (!blobMetadata.hasLeases()) {
                     blobMetadata.getBlobFile().delete();
                     mActiveBlobIds.remove(blobMetadata.getBlobId());
-                    indicesToRemove.add(i);
+                    return true;
                 }
-            }
-            for (int i = 0, count = indicesToRemove.size(); i < count; ++i) {
-                userBlobs.removeAt(indicesToRemove.get(i));
-            }
+                return false;
+            });
             writeBlobsInfoAsync();
+
             if (LOGV) {
                 Slog.v(TAG, "Removed blobs data associated with pkg="
                         + packageName + ", uid=" + uid);
@@ -1103,6 +1102,19 @@ public class BlobStoreManagerService extends SystemService {
                     }
                     handlePackageRemoved(packageName, uid);
                     break;
+                default:
+                    Slog.wtf(TAG, "Received unknown intent: " + intent);
+            }
+        }
+    }
+
+    private class UserActionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (LOGV) {
+                Slog.v(TAG, "Received: " + intent);
+            }
+            switch (intent.getAction()) {
                 case Intent.ACTION_USER_REMOVED:
                     final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE,
                             USER_NULL);
