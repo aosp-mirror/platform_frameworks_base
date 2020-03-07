@@ -165,10 +165,16 @@ public final class ImeFocusController {
         if (!getImmDelegate().isCurrentRootView(view.getViewRootImpl())) {
             return;
         }
-        if (mServedView == view || !view.hasImeFocus() || !view.hasWindowFocus()) {
+        if (!view.hasImeFocus() || !view.hasWindowFocus()) {
             return;
         }
-        mNextServedView = hasFocus ? view : null;
+        if (DEBUG) Log.d(TAG, "onViewFocusChanged, view=" + view + ", mServedView=" + mServedView);
+
+        if (hasFocus) {
+            mNextServedView = view;
+        } else if (view == mServedView) {
+            mNextServedView = null;
+        }
         mViewRootImpl.dispatchCheckFocus();
     }
 
