@@ -43,10 +43,6 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
             R.attr.state_encrypted
     };
 
-    private static final int[] STATE_METERED = {
-            R.attr.state_metered
-    };
-
     private static final int[] FRICTION_ATTRS = {
             R.attr.wifi_friction
     };
@@ -201,8 +197,6 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
         if ((mWifiEntry.getSecurity() != WifiEntry.SECURITY_NONE)
                 && (mWifiEntry.getSecurity() != WifiEntry.SECURITY_OWE)) {
             mFrictionSld.setState(STATE_SECURED);
-        } else if (mWifiEntry.isMetered()) {
-            mFrictionSld.setState(STATE_METERED);
         }
         frictionImageView.setImageDrawable(mFrictionSld.getCurrent());
     }
