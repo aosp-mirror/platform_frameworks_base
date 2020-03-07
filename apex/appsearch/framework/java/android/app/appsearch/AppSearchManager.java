@@ -33,6 +33,7 @@ import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -193,44 +194,62 @@ public class AppSearchManager {
      * {@code AppSearch#getDocuments()} API provided by JetPack.
      *
      * @param uris URIs of the documents to look up.
-     * @param executor Executor on which to invoke the callback.
-     * @param callback Callback to receive the documents or error.
+     * @return An {@link AppSearchBatchResult} mapping the document URIs to
+     *     {@link AppSearchDocument} values if they were successfully retrieved, a {@code null}
+     *     failure if they were not found, or a {@link Throwable} failure describing the problem if
+     *     an error occurred.
      */
-    public void getDocuments(
-            @NonNull List<String> uris,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull BiConsumer<List<AppSearchDocument>, ? super Throwable> callback) {
-        AndroidFuture<List<byte[]>> future = new AndroidFuture<>();
-        future.whenCompleteAsync((documentProtos, err) -> {
-            if (err != null) {
-                callback.accept(null, err);
-                return;
-            }
-            if (documentProtos != null) {
-                List<AppSearchDocument> results = new ArrayList<>(documentProtos.size());
-                for (int i = 0; i < documentProtos.size(); i++) {
-                    DocumentProto documentProto;
-                    try {
-                        documentProto = DocumentProto.parseFrom(documentProtos.get(i));
-                    } catch (InvalidProtocolBufferException e) {
-                        callback.accept(null, e);
-                        return;
-                    }
-                    results.add(new AppSearchDocument(documentProto));
-                }
-                callback.accept(results, null);
-                return;
-            }
-            // Nothing was supplied in the future at all
-            callback.accept(null, new IllegalStateException(
-                    "Unknown failure occurred while retrieving documents"));
-        }, executor);
-        // TODO(b/146386470) stream uris?
+    public AppSearchBatchResult<String, AppSearchDocument> getDocuments(
+            @NonNull List<String> uris) {
+        // TODO(b/146386470): Transmit the result documents as a RemoteStream instead of sending
+        //     them in one big list.
+        AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.getDocuments(uris.toArray(new String[uris.size()]), future);
+            mService.getDocuments(uris, future);
         } catch (RemoteException e) {
             future.completeExceptionally(e);
         }
+
+        // Deserialize the protos into Document objects
+        AppSearchBatchResult<String, byte[]> protoResults = getFutureOrThrow(future);
+        AppSearchBatchResult.Builder<String, AppSearchDocument> documentResultBuilder =
+                new AppSearchBatchResult.Builder<>();
+
+        // Translate successful results
+        for (Map.Entry<String, byte[]> protoResult : protoResults.getSuccesses().entrySet()) {
+            DocumentProto documentProto;
+            try {
+                documentProto = DocumentProto.parseFrom(protoResult.getValue());
+            } catch (InvalidProtocolBufferException e) {
+                documentResultBuilder.setFailure(
+                        protoResult.getKey(), AppSearchResult.RESULT_IO_ERROR, e.getMessage());
+                continue;
+            }
+            AppSearchDocument document;
+            try {
+                document = new AppSearchDocument(documentProto);
+            } catch (Throwable t) {
+                // These documents went through validation, so how could this fail? We must have
+                // done something wrong.
+                documentResultBuilder.setFailure(
+                        protoResult.getKey(),
+                        AppSearchResult.RESULT_INTERNAL_ERROR,
+                        t.getMessage());
+                continue;
+            }
+            documentResultBuilder.setSuccess(protoResult.getKey(), document);
+        }
+
+        // Translate failed results
+        for (Map.Entry<String, AppSearchResult<byte[]>> protoResult :
+                protoResults.getFailures().entrySet()) {
+            documentResultBuilder.setFailure(
+                    protoResult.getKey(),
+                    protoResult.getValue().getResultCode(),
+                    protoResult.getValue().getErrorMessage());
+        }
+
+        return documentResultBuilder.build();
     }
 
     /**

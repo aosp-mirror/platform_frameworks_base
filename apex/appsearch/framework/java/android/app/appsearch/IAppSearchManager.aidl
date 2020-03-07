@@ -51,11 +51,14 @@ interface IAppSearchManager {
      * Retrieves documents from the index.
      *
      * @param uris The URIs of the documents to retrieve
-     * @param callback {@link AndroidFuture}&lt;{@link List}&lt;byte[]&gt;&gt;. Will be completed
-     *     with a {@link List} containing serialized DocumentProtos, or completed exceptionally if
-     *     get fails.
+     * @param callback
+     *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link byte[]}&gt;&gt;.
+     *     If the call fails to start, {@code callback} will be completed exceptionally. Otherwise,
+     *     {@code callback} will be completed with an
+     *     {@link AppSearchBatchResult}&lt;{@link String}, {@link byte[]}&gt;
+     *     where the keys are document URIs, and the values are serialized Document protos.
      */
-    void getDocuments(in String[] uris, in AndroidFuture callback);
+    void getDocuments(in List<String> uris, in AndroidFuture<AppSearchBatchResult> callback);
 
     /**
      * Searches a document based on a given specifications.
