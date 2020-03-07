@@ -300,6 +300,19 @@ class ControlsControllerImpl @Inject constructor (
         bindingController.unsubscribe()
     }
 
+    override fun addFavorite(
+        componentName: ComponentName,
+        structureName: CharSequence,
+        controlInfo: ControlInfo
+    ) {
+        if (!confirmAvailability()) return
+        executor.execute {
+            if (Favorites.addFavorite(componentName, structureName, controlInfo)) {
+                persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+            }
+        }
+    }
+
     override fun replaceFavoritesForStructure(structureInfo: StructureInfo) {
         if (!confirmAvailability()) return
         executor.execute {
@@ -437,6 +450,24 @@ private object Favorites {
         favMap = newFavMap
     }
 
+    fun addFavorite(
+        componentName: ComponentName,
+        structureName: CharSequence,
+        controlInfo: ControlInfo
+    ): Boolean {
+        // Check if control is in favorites
+        if (getControlsForComponent(componentName)
+                        .any { it.controlId == controlInfo.controlId }) {
+            return false
+        }
+        val structureInfo = favMap.get(componentName)
+                ?.firstOrNull { it.structure == structureName }
+                ?: StructureInfo(componentName, structureName, emptyList())
+        val newStructureInfo = structureInfo.copy(controls = structureInfo.controls + controlInfo)
+        replaceControls(newStructureInfo)
+        return true
+    }
+
     fun replaceControls(updatedStructure: StructureInfo) {
         val newFavMap = favMap.toMutableMap()
         val structures = mutableListOf<StructureInfo>()
@@ -456,8 +487,8 @@ private object Favorites {
             structures.add(updatedStructure)
         }
 
-        newFavMap.put(componentName, structures.toList())
-        favMap = newFavMap.toMap()
+        newFavMap.put(componentName, structures)
+        favMap = newFavMap
     }
 
     fun clear() {
