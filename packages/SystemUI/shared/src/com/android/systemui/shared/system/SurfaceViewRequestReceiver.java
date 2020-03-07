@@ -62,7 +62,7 @@ public class SurfaceViewRequestReceiver {
                             surfaceControl.getWidth(),
                             surfaceControl.getHeight(),
                             WindowManager.LayoutParams.TYPE_APPLICATION,
-                            0,
+                            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                             mOpacity);
 
             mSurfaceControlViewHost.addView(view, layoutParams);
