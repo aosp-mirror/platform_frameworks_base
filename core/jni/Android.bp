@@ -140,6 +140,7 @@ cc_library_shared {
                 "android_media_AudioEffectDescriptor.cpp",
                 "android_media_AudioRecord.cpp",
                 "android_media_AudioSystem.cpp",
+                "android_media_AudioTrackCallback.cpp",
                 "android_media_AudioTrack.cpp",
                 "android_media_AudioAttributes.cpp",
                 "android_media_AudioProductStrategies.cpp",

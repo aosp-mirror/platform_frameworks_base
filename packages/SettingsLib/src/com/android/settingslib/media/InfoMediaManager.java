@@ -311,6 +311,21 @@ public class InfoMediaManager extends MediaManager {
         return -1;
     }
 
+    CharSequence getSessionName() {
+        if (TextUtils.isEmpty(mPackageName)) {
+            Log.w(TAG, "Unable to get session name. The package name is null or empty!");
+            return null;
+        }
+
+        final RoutingSessionInfo info = getRoutingSessionInfo();
+        if (info != null) {
+            return info.getName();
+        }
+
+        Log.w(TAG, "Unable to get session name for package: " + mPackageName);
+        return null;
+    }
+
     private void refreshDevices() {
         mMediaDevices.clear();
         mCurrentConnectedDevice = null;

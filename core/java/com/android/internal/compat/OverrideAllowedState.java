@@ -33,7 +33,8 @@ public final class OverrideAllowedState implements Parcelable {
             DISABLED_NOT_DEBUGGABLE,
             DISABLED_NON_TARGET_SDK,
             DISABLED_TARGET_SDK_TOO_HIGH,
-            PACKAGE_DOES_NOT_EXIST
+            PACKAGE_DOES_NOT_EXIST,
+            LOGGING_ONLY_CHANGE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {
@@ -60,6 +61,10 @@ public final class OverrideAllowedState implements Parcelable {
      * Package does not exist.
      */
     public static final int PACKAGE_DOES_NOT_EXIST = 4;
+    /**
+     * Change is marked as logging only, and cannot be toggled.
+     */
+    public static final int LOGGING_ONLY_CHANGE = 5;
 
     @State
     public final int state;
@@ -118,6 +123,10 @@ public final class OverrideAllowedState implements Parcelable {
                         "Cannot override %1$d for %2$s because the package does not exist, and "
                                 + "the change is targetSdk gated.",
                         changeId, packageName));
+            case LOGGING_ONLY_CHANGE:
+                throw new SecurityException(String.format(
+                        "Cannot override %1$d because it is marked as a logging-only change.",
+                        changeId));
         }
     }
 

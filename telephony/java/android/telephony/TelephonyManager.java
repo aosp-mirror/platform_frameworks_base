@@ -333,21 +333,6 @@ public class TelephonyManager {
     };
 
     /** @hide */
-    @IntDef(prefix = {"MODEM_COUNT_"},
-            value = {
-                    MODEM_COUNT_NO_MODEM,
-                    MODEM_COUNT_SINGLE_MODEM,
-                    MODEM_COUNT_DUAL_MODEM,
-                    MODEM_COUNT_TRI_MODEM
-            })
-    public @interface ModemCount {}
-
-    public static final int MODEM_COUNT_NO_MODEM     = 0;
-    public static final int MODEM_COUNT_SINGLE_MODEM = 1;
-    public static final int MODEM_COUNT_DUAL_MODEM   = 2;
-    public static final int MODEM_COUNT_TRI_MODEM    = 3;
-
-    /** @hide */
     @UnsupportedAppUsage
     public TelephonyManager(Context context) {
       this(context, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
@@ -465,22 +450,22 @@ public class TelephonyManager {
      * Returns 2 for Dual standby mode (Dual SIM functionality).
      * Returns 3 for Tri standby mode (Tri SIM functionality).
      */
-    public @ModemCount int getActiveModemCount() {
+    public int getActiveModemCount() {
         int modemCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
-                modemCount = MODEM_COUNT_SINGLE_MODEM;
+                modemCount = 1;
                 // check for voice and data support, 0 if not supported
                 if (!isVoiceCapable() && !isSmsCapable() && !isDataCapable()) {
-                    modemCount = MODEM_COUNT_NO_MODEM;
+                    modemCount = 0;
                 }
                 break;
             case DSDS:
             case DSDA:
-                modemCount = MODEM_COUNT_DUAL_MODEM;
+                modemCount = 2;
                 break;
             case TSTS:
-                modemCount = MODEM_COUNT_TRI_MODEM;
+                modemCount = 3;
                 break;
         }
         return modemCount;
@@ -493,7 +478,7 @@ public class TelephonyManager {
      * dual-SIM capable device operating in single SIM mode (only one logical modem is turned on),
      * {@link #getActiveModemCount} returns 1 while this API returns 2.
      */
-    public @ModemCount int getSupportedModemCount() {
+    public int getSupportedModemCount() {
         return TelephonyProperties.max_active_modems().orElse(getActiveModemCount());
     }
 
@@ -12669,7 +12654,8 @@ public class TelephonyManager {
      * {@hide}
      */
     @SystemApi
-    public boolean isCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean matchesCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
             @Nullable String mvnoMatchData) {
         try {
             if (!mccmnc.equals(getSimOperator())) {

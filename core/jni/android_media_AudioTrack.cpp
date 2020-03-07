@@ -31,13 +31,14 @@
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
 
-#include "android_media_AudioFormat.h"
+#include "android_media_AudioAttributes.h"
 #include "android_media_AudioErrors.h"
+#include "android_media_AudioFormat.h"
+#include "android_media_AudioTrackCallback.h"
+#include "android_media_DeviceCallback.h"
 #include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
-#include "android_media_DeviceCallback.h"
 #include "android_media_VolumeShaper.h"
-#include "android_media_AudioAttributes.h"
 
 #include <cinttypes>
 
@@ -75,22 +76,12 @@ struct audiotrack_callback_cookie {
 
 // ----------------------------------------------------------------------------
 class AudioTrackJniStorage {
-    public:
-        sp<MemoryHeapBase>         mMemHeap;
-        sp<MemoryBase>             mMemBase;
-        audiotrack_callback_cookie mCallbackData;
-        sp<JNIDeviceCallback>      mDeviceCallback;
-
-    AudioTrackJniStorage() {
-        mCallbackData.audioTrack_class = 0;
-        mCallbackData.audioTrack_ref = 0;
-        mCallbackData.isOffload = false;
-    }
-
-    ~AudioTrackJniStorage() {
-        mMemBase.clear();
-        mMemHeap.clear();
-    }
+public:
+    sp<MemoryHeapBase> mMemHeap;
+    sp<MemoryBase> mMemBase;
+    audiotrack_callback_cookie mCallbackData{};
+    sp<JNIDeviceCallback> mDeviceCallback;
+    sp<JNIAudioTrackCallback> mAudioTrackCallback;
 
     bool allocSharedMem(int sizeInBytes) {
         mMemHeap = new MemoryHeapBase(sizeInBytes, 0, "AudioTrack Heap Base");
@@ -459,6 +450,10 @@ static jint android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject we
         lpJniStorage->mCallbackData.audioTrack_ref = env->NewGlobalRef(weak_this);
         lpJniStorage->mCallbackData.busy = false;
     }
+    lpJniStorage->mAudioTrackCallback =
+            new JNIAudioTrackCallback(env, thiz, lpJniStorage->mCallbackData.audioTrack_ref,
+                                      javaAudioTrackFields.postNativeEventInJava);
+    lpTrack->setAudioTrackCallback(lpJniStorage->mAudioTrackCallback);
 
     nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
     if (nSession == NULL) {

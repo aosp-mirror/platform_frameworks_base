@@ -304,13 +304,9 @@ public class MediaRouter2Manager {
      * @see Callback#onTransferFailed(RoutingSessionInfo, MediaRoute2Info)
      */
     public void transfer(@NonNull RoutingSessionInfo sessionInfo,
-            @Nullable MediaRoute2Info route) {
+            @NonNull MediaRoute2Info route) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
-
-        if (route == null) {
-            releaseSession(sessionInfo);
-            return;
-        }
+        Objects.requireNonNull(route, "route must not be null");
 
         //TODO: Ignore unknown route.
         if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
@@ -334,10 +330,10 @@ public class MediaRouter2Manager {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.requestCreateSessionWithManager(
                         client, sessionInfo.getClientPackageName(), route, requestId);
-                releaseSession(sessionInfo);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
+            releaseSession(sessionInfo);
         }
     }
 

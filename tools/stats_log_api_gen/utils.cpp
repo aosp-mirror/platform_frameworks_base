@@ -102,7 +102,7 @@ bool atom_needed_for_module(const AtomDecl& atomDecl, const string& moduleName) 
     if (moduleName == DEFAULT_MODULE_NAME) {
         return true;
     }
-    return atomDecl.hasModule && (moduleName == atomDecl.moduleName);
+    return atomDecl.moduleNames.find(moduleName) != atomDecl.moduleNames.end();
 }
 
 bool signature_needed_for_module(const set<string>& modules, const string& moduleName) {

@@ -35,10 +35,10 @@ import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_AES128_XCBC
 import static android.net.ipsec.ike.SaProposal.PSEUDORANDOM_FUNCTION_HMAC_SHA1;
 
 import android.annotation.NonNull;
+import android.content.Context;
 import android.net.Ikev2VpnProfile;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
-import android.net.IpSecManager.UdpEncapsulationSocket;
 import android.net.IpSecTransform;
 import android.net.Network;
 import android.net.RouteInfo;
@@ -84,18 +84,14 @@ import java.util.List;
  */
 public class VpnIkev2Utils {
     static IkeSessionParams buildIkeSessionParams(
-            @NonNull Ikev2VpnProfile profile, @NonNull UdpEncapsulationSocket socket) {
-        // TODO(b/149356682): Update this based on new IKE API. Only numeric addresses supported
-        //                    until then. All others throw IAE (caught by caller).
-        final InetAddress serverAddr = InetAddresses.parseNumericAddress(profile.getServerAddr());
+            @NonNull Context context, @NonNull Ikev2VpnProfile profile, @NonNull Network network) {
         final IkeIdentification localId = parseIkeIdentification(profile.getUserIdentity());
         final IkeIdentification remoteId = parseIkeIdentification(profile.getServerAddr());
 
-        // TODO(b/149356682): Update this based on new IKE API.
         final IkeSessionParams.Builder ikeOptionsBuilder =
-                new IkeSessionParams.Builder()
-                        .setServerAddress(serverAddr)
-                        .setUdpEncapsulationSocket(socket)
+                new IkeSessionParams.Builder(context)
+                        .setServerHostname(profile.getServerAddr())
+                        .setNetwork(network)
                         .setLocalIdentification(localId)
                         .setRemoteIdentification(remoteId);
         setIkeAuth(profile, ikeOptionsBuilder);

@@ -703,13 +703,18 @@ public final class Settings {
      * Weak or above, as defined by the CDD. Only biometrics that meet or exceed Strong, as defined
      * in the CDD are allowed to participate in Keystore operations.
      * <p>
-     * Input: extras {@link #EXTRA_BIOMETRIC_MINIMUM_STRENGTH_REQUIRED} as an integer, with
+     * Input: extras {@link #EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED} as an integer, with
      * constants defined in {@link android.hardware.biometrics.BiometricManager.Authenticators},
      * e.g. {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_STRONG}.
      * If not specified, the default behavior is
      * {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_WEAK}.
      * <p>
-     * Output: Nothing.
+     * Output: Returns {@link android.app.Activity#RESULT_CANCELED} if the user already has an
+     * authenticator that meets the requirements, or if the device cannot fulfill the request
+     * (e.g. does not have biometric hardware). Returns {@link android.app.Activity#RESULT_OK}
+     * otherwise. Note that callers should still check
+     * {@link android.hardware.biometrics.BiometricManager#canAuthenticate(int)}
+     * afterwards to ensure that the user actually completed enrollment.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_BIOMETRIC_ENROLL =
@@ -719,12 +724,12 @@ public final class Settings {
      * Activity Extra: The minimum strength to request enrollment for.
      * <p>
      * This can be passed as an extra field to the {@link #ACTION_BIOMETRIC_ENROLL} intent to
-     * indicate that only enrollment for sensors that meet this strength should be shown. The
-     * value should be one of the biometric strength constants defined in
+     * indicate that only enrollment for sensors that meet these requirements should be shown. The
+     * value should be a combination of the constants defined in
      * {@link android.hardware.biometrics.BiometricManager.Authenticators}.
      */
-    public static final String EXTRA_BIOMETRIC_MINIMUM_STRENGTH_REQUIRED =
-            "android.provider.extra.BIOMETRIC_MINIMUM_STRENGTH_REQUIRED";
+    public static final String EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED =
+            "android.provider.extra.BIOMETRIC_AUTHENTICATORS_ALLOWED";
 
     /**
      * Activity Action: Show settings to allow configuration of cast endpoints.
@@ -6606,6 +6611,18 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_BUTTON_TARGET_COMPONENT =
                 "accessibility_button_target_component";
+
+        /**
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via the long press accessibility button in the navigation bar.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_BUTTON_LONG_PRESS_TARGETS =
+                "accessibility_button_long_press_targets";
 
         /**
          * The system class name of magnification controller which is a target to be toggled via

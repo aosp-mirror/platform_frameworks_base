@@ -467,9 +467,9 @@ final class UiModeManagerService extends SystemService {
             mNightMode = Secure.getIntForUser(context.getContentResolver(),
                     Secure.UI_NIGHT_MODE, defaultNightMode, userId);
             mOverrideNightModeOn = Secure.getIntForUser(context.getContentResolver(),
-                    Secure.UI_NIGHT_MODE_OVERRIDE_ON, defaultNightMode, userId) != 0;
+                    Secure.UI_NIGHT_MODE_OVERRIDE_ON, 0, userId) != 0;
             mOverrideNightModeOff = Secure.getIntForUser(context.getContentResolver(),
-                    Secure.UI_NIGHT_MODE_OVERRIDE_OFF, defaultNightMode, userId) != 0;
+                    Secure.UI_NIGHT_MODE_OVERRIDE_OFF, 0, userId) != 0;
             mCustomAutoNightModeStartMilliseconds = LocalTime.ofNanoOfDay(
                     Secure.getLongForUser(context.getContentResolver(),
                     Secure.DARK_THEME_CUSTOM_START_TIME,
@@ -1045,7 +1045,6 @@ final class UiModeManagerService extends SystemService {
                 final TwilightState lastState = mTwilightManager.getLastTwilightState();
                 activateNightMode = lastState == null ? mComputedNightMode : lastState.isNight();
             }
-            
             updateComputedNightModeLocked(activateNightMode);
         } else {
             if (mTwilightManager != null) {
@@ -1375,6 +1374,9 @@ final class UiModeManagerService extends SystemService {
 
     private void updateComputedNightModeLocked(boolean activate) {
         mComputedNightMode = activate;
+        if (mNightMode == MODE_NIGHT_YES || mNightMode == UiModeManager.MODE_NIGHT_NO) {
+            return;
+        }
         if (mOverrideNightModeOn && !mComputedNightMode) {
             mComputedNightMode = true;
             return;

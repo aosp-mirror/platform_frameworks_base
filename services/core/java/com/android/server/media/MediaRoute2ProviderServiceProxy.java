@@ -328,19 +328,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         mCallback.onSessionCreated(this, sessionInfo, requestId);
     }
 
-    private void onSessionCreationFailed(Connection connection, long requestId) {
-        if (mActiveConnection != connection) {
-            return;
-        }
-
-        if (requestId == MediaRoute2ProviderService.REQUEST_ID_NONE) {
-            Slog.w(TAG, "onSessionCreationFailed: Ignoring requestId REQUEST_ID_NONE");
-            return;
-        }
-
-        mCallback.onSessionCreationFailed(this, requestId);
-    }
-
     private void onSessionUpdated(Connection connection, RoutingSessionInfo sessionInfo) {
         if (mActiveConnection != connection) {
             return;
@@ -543,10 +530,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             mHandler.post(() -> onSessionCreated(Connection.this, sessionInfo, requestId));
         }
 
-        void postSessionCreationFailed(long requestId) {
-            mHandler.post(() -> onSessionCreationFailed(Connection.this, requestId));
-        }
-
         void postSessionUpdated(RoutingSessionInfo sessionInfo) {
             mHandler.post(() -> onSessionUpdated(Connection.this, sessionInfo));
         }
@@ -555,7 +538,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
             mHandler.post(() -> onSessionReleased(Connection.this, sessionInfo));
         }
 
-        void postSessionReleased(long requestId, int reason) {
+        void postRequestFailed(long requestId, int reason) {
             mHandler.post(() -> onRequestFailed(Connection.this, requestId, reason));
         }
     }
@@ -589,14 +572,6 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         }
 
         @Override
-        public void notifySessionCreationFailed(long requestId) {
-            Connection connection = mConnectionRef.get();
-            if (connection != null) {
-                connection.postSessionCreationFailed(requestId);
-            }
-        }
-
-        @Override
         public void notifySessionUpdated(RoutingSessionInfo sessionInfo) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
@@ -616,7 +591,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
         public void notifyRequestFailed(long requestId, int reason) {
             Connection connection = mConnectionRef.get();
             if (connection != null) {
-                connection.postSessionReleased(requestId, reason);
+                connection.postRequestFailed(requestId, reason);
             }
         }
     }

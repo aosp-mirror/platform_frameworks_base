@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
@@ -159,6 +160,32 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     String getMetricsCategory() {
         return ResolverActivity.METRICS_CATEGORY_RESOLVER;
+    }
+
+    @Override
+    protected void showWorkProfileOffEmptyState(ResolverListAdapter activeListAdapter,
+            View.OnClickListener listener) {
+        showEmptyState(activeListAdapter,
+                R.drawable.ic_work_apps_off,
+                R.string.resolver_turn_on_work_apps_view,
+                /* subtitleRes */ 0,
+                listener);
+    }
+
+    @Override
+    protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
+        showEmptyState(activeListAdapter,
+                R.drawable.ic_sharing_disabled,
+                R.string.resolver_cant_access_work_apps,
+                R.string.resolver_cant_access_work_apps_explanation);
+    }
+
+    @Override
+    protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
+        showEmptyState(activeListAdapter,
+                R.drawable.ic_sharing_disabled,
+                R.string.resolver_cant_access_personal_apps,
+                R.string.resolver_cant_access_personal_apps_explanation);
     }
 
     class ResolverProfileDescriptor extends ProfileDescriptor {

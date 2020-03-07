@@ -248,23 +248,27 @@ TEST(CollationTest, PassOnLogFromModuleAtom) {
     Atoms atoms;
     int errorCount = collate_atoms(ModuleAtoms::descriptor(), &atoms);
     EXPECT_EQ(errorCount, 0);
-    EXPECT_EQ(atoms.decls.size(), 3ul);
+    EXPECT_EQ(atoms.decls.size(), 4ul);
 }
 
 TEST(CollationTest, RecognizeModuleAtom) {
     Atoms atoms;
     int errorCount = collate_atoms(ModuleAtoms::descriptor(), &atoms);
     EXPECT_EQ(errorCount, 0);
-    EXPECT_EQ(atoms.decls.size(), 3ul);
+    EXPECT_EQ(atoms.decls.size(), 4ul);
     for (const auto& atomDecl: atoms.decls) {
         if (atomDecl.code == 1) {
-            EXPECT_TRUE(atomDecl.hasModule);
-            EXPECT_EQ(atomDecl.moduleName, "module1");
+            EXPECT_EQ(1ul, atomDecl.moduleNames.size());
+            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module1"));
         } else if (atomDecl.code == 2) {
-            EXPECT_TRUE(atomDecl.hasModule);
-            EXPECT_EQ(atomDecl.moduleName, "module2");
+            EXPECT_EQ(1ul, atomDecl.moduleNames.size());
+            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module2"));
+        } else if (atomDecl.code == 3) {
+            EXPECT_EQ(2ul, atomDecl.moduleNames.size());
+            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module1"));
+            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module2"));
         } else {
-            EXPECT_FALSE(atomDecl.hasModule);
+            EXPECT_TRUE(atomDecl.moduleNames.empty());
         }
     }
 

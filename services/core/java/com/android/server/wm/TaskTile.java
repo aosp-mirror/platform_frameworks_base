@@ -147,7 +147,7 @@ public class TaskTile extends ActivityStack {
      */
     void updateResolvedConfig(Configuration inOutResolvedConfig) {
         Rect resolveBounds = inOutResolvedConfig.windowConfiguration.getBounds();
-        if (resolveBounds == null || resolveBounds.isEmpty()) {
+        if (resolveBounds.isEmpty()) {
             resolveBounds.set(getRequestedOverrideBounds());
         }
         int stackMode = inOutResolvedConfig.windowConfiguration.getWindowingMode();
@@ -161,6 +161,17 @@ public class TaskTile extends ActivityStack {
                 == Configuration.SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             inOutResolvedConfig.smallestScreenWidthDp =
                     getRequestedOverrideConfiguration().smallestScreenWidthDp;
+        }
+        if (inOutResolvedConfig.screenWidthDp == Configuration.SCREEN_WIDTH_DP_UNDEFINED) {
+            inOutResolvedConfig.screenWidthDp = getRequestedOverrideConfiguration().screenWidthDp;
+        }
+        if (inOutResolvedConfig.screenHeightDp == Configuration.SCREEN_HEIGHT_DP_UNDEFINED) {
+            inOutResolvedConfig.screenHeightDp = getRequestedOverrideConfiguration().screenHeightDp;
+        }
+        Rect resolveAppBounds = inOutResolvedConfig.windowConfiguration.getAppBounds();
+        if (resolveAppBounds == null || resolveAppBounds.isEmpty()) {
+            inOutResolvedConfig.windowConfiguration.setAppBounds(
+                    getRequestedOverrideConfiguration().windowConfiguration.getAppBounds());
         }
     }
 
@@ -184,7 +195,6 @@ public class TaskTile extends ActivityStack {
         boolean isResizable = topTask == null || topTask.isResizeable();
         info.resizeMode = isResizable ? RESIZE_MODE_RESIZEABLE : RESIZE_MODE_UNRESIZEABLE;
         info.topActivityType = top == null ? ACTIVITY_TYPE_UNDEFINED : top.getActivityType();
-        info.configuration.setTo(getRequestedOverrideConfiguration());
     }
 
     @Override

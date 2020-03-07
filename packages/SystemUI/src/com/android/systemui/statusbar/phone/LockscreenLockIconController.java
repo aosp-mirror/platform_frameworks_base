@@ -18,19 +18,28 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricSourceType;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.R;
+import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator.WakeUpListener;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
+
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -47,6 +56,9 @@ public class LockscreenLockIconController {
     private final KeyguardIndicationController mKeyguardIndicationController;
     private final StatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
+    private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
+    private final KeyguardBypassController mKeyguardBypassController;
+    private final Optional<DockManager> mDockManager;
     private LockIcon mLockIcon;
 
     private View.OnAttachStateChangeListener mOnAttachStateChangeListener =
@@ -55,6 +67,10 @@ public class LockscreenLockIconController {
         public void onViewAttachedToWindow(View v) {
             mStatusBarStateController.addCallback(mSBStateListener);
             mConfigurationController.addCallback(mConfigurationListener);
+            mNotificationWakeUpCoordinator.addListener(mWakeUpListener);
+            mKeyguardUpdateMonitor.registerCallback(mUpdateMonitorCallback);
+
+            mDockManager.ifPresent(dockManager -> dockManager.addListener(mDockEventListener));
 
             mConfigurationListener.onThemeChanged();
         }
@@ -63,6 +79,11 @@ public class LockscreenLockIconController {
         public void onViewDetachedFromWindow(View v) {
             mStatusBarStateController.removeCallback(mSBStateListener);
             mConfigurationController.removeCallback(mConfigurationListener);
+            mNotificationWakeUpCoordinator.removeListener(mWakeUpListener);
+            mKeyguardUpdateMonitor.removeCallback(mUpdateMonitorCallback);
+
+
+            mDockManager.ifPresent(dockManager -> dockManager.removeListener(mDockEventListener));
         }
     };
 
@@ -115,6 +136,47 @@ public class LockscreenLockIconController {
         }
     };
 
+    private final WakeUpListener mWakeUpListener = new WakeUpListener() {
+        @Override
+        public void onFullyHiddenChanged(boolean isFullyHidden) {
+            if (mKeyguardBypassController.getBypassEnabled()) {
+                boolean changed = mLockIcon.updateIconVisibility();
+                if (changed) {
+                    mLockIcon.update();
+                }
+            }
+        }
+    };
+
+    private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
+            new KeyguardUpdateMonitorCallback() {
+                @Override
+                public void onSimStateChanged(int subId, int slotId, int simState) {
+                    mLockIcon.setSimLocked(mKeyguardUpdateMonitor.isSimPinSecure());
+                    mLockIcon.update();
+                }
+
+                @Override
+                public void onKeyguardVisibilityChanged(boolean showing) {
+                    mLockIcon.update();
+                }
+
+                @Override
+                public void onBiometricRunningStateChanged(boolean running,
+                        BiometricSourceType biometricSourceType) {
+                    mLockIcon.update();
+                }
+
+                @Override
+                public void onStrongAuthStateChanged(int userId) {
+                    mLockIcon.update();
+                }
+            };
+
+    private final DockManager.DockEventListener mDockEventListener =
+            event -> mLockIcon.setDocked(event == DockManager.STATE_DOCKED
+                    || event == DockManager.STATE_DOCKED_HIDE);
+
     @Inject
     public LockscreenLockIconController(LockscreenGestureLogger lockscreenGestureLogger,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -123,7 +185,10 @@ public class LockscreenLockIconController {
             AccessibilityController accessibilityController,
             KeyguardIndicationController keyguardIndicationController,
             StatusBarStateController statusBarStateController,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            NotificationWakeUpCoordinator notificationWakeUpCoordinator,
+            KeyguardBypassController keyguardBypassController,
+            @Nullable DockManager dockManager) {
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
@@ -132,6 +197,9 @@ public class LockscreenLockIconController {
         mKeyguardIndicationController = keyguardIndicationController;
         mStatusBarStateController = statusBarStateController;
         mConfigurationController = configurationController;
+        mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
+        mKeyguardBypassController = keyguardBypassController;
+        mDockManager = dockManager == null ? Optional.empty() : Optional.of(dockManager);
 
         mKeyguardIndicationController.setLockIconController(this);
     }

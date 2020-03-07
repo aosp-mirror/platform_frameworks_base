@@ -27,6 +27,7 @@ import android.content.pm.SharedLibraryInfo;
 import com.android.internal.util.DataClass;
 import com.android.server.pm.PackageSetting;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -86,6 +87,22 @@ public class PackageStateUnserialized {
             latestUse = Math.max(latestUse, getLastPackageUsageTimeInMills()[reason]);
         }
         return latestUse;
+    }
+
+    public void updateFrom(PackageStateUnserialized other) {
+        this.hiddenUntilInstalled = other.hiddenUntilInstalled;
+
+        if (!other.usesLibraryInfos.isEmpty()) {
+            this.usesLibraryInfos = new ArrayList<>(other.usesLibraryInfos);
+        }
+
+        if (!other.usesLibraryFiles.isEmpty()) {
+            this.usesLibraryFiles = new ArrayList<>(other.usesLibraryFiles);
+        }
+
+        this.updatedSystemApp = other.updatedSystemApp;
+        this.lastPackageUsageTimeInMills = other.lastPackageUsageTimeInMills;
+        this.overrideSeInfo = other.overrideSeInfo;
     }
 
 

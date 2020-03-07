@@ -163,7 +163,7 @@ public class ResolverActivity extends Activity implements
      * TODO(arangelov): Remove a couple of weeks after work/personal tabs are finalized.
      */
     @VisibleForTesting
-    public static boolean ENABLE_TABBED_VIEW = false;
+    public static boolean ENABLE_TABBED_VIEW = true;
     private static final String TAB_TAG_PERSONAL = "personal";
     private static final String TAB_TAG_WORK = "work";
 
@@ -989,6 +989,8 @@ public class ResolverActivity extends Activity implements
         }
         if (shouldShowEmptyState(listAdapter)) {
             mMultiProfilePagerAdapter.showEmptyState(listAdapter);
+        } else {
+            mMultiProfilePagerAdapter.showListView(listAdapter);
         }
         if (doPostProcessing) {
             if (mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
@@ -1337,9 +1339,12 @@ public class ResolverActivity extends Activity implements
                     + "cannot be null.");
         }
         // We partially rebuild the inactive adapter to determine if we should auto launch
-        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true);
+        // isTabLoaded will be true here if the empty state screen is shown instead of the list.
+        boolean rebuildCompleted = mMultiProfilePagerAdapter.rebuildActiveTab(true)
+                || mMultiProfilePagerAdapter.getActiveListAdapter().isTabLoaded();
         if (shouldShowTabs()) {
-            boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false);
+            boolean rebuildInactiveCompleted = mMultiProfilePagerAdapter.rebuildInactiveTab(false)
+                    || mMultiProfilePagerAdapter.getInactiveListAdapter().isTabLoaded();
             rebuildCompleted = rebuildCompleted && rebuildInactiveCompleted;
         }
 
@@ -1399,8 +1404,8 @@ public class ResolverActivity extends Activity implements
         if (numberOfProfiles == 1 && maybeAutolaunchIfSingleTarget()) {
             return true;
         } else if (numberOfProfiles == 2
-                && mMultiProfilePagerAdapter.getActiveListAdapter().isListLoaded()
-                && mMultiProfilePagerAdapter.getInactiveListAdapter().isListLoaded()
+                && mMultiProfilePagerAdapter.getActiveListAdapter().isTabLoaded()
+                && mMultiProfilePagerAdapter.getInactiveListAdapter().isTabLoaded()
                 && (maybeAutolaunchIfNoAppsOnInactiveTab()
                         || maybeAutolaunchIfCrossProfileSupported())) {
             return true;
@@ -1595,9 +1600,17 @@ public class ResolverActivity extends Activity implements
     }
 
     private void resetTabsHeaderStyle(TabWidget tabWidget) {
+        String workContentDescription = getString(R.string.resolver_work_tab_accessibility);
+        String personalContentDescription = getString(R.string.resolver_personal_tab_accessibility);
         for (int i = 0; i < tabWidget.getChildCount(); i++) {
-            TextView title = tabWidget.getChildAt(i).findViewById(android.R.id.title);
+            View tabView = tabWidget.getChildAt(i);
+            TextView title = tabView.findViewById(android.R.id.title);
             title.setTextColor(getColor(R.color.resolver_tabs_inactive_color));
+            if (title.getText().equals(getString(R.string.resolver_personal_tab))) {
+                tabView.setContentDescription(personalContentDescription);
+            } else if (title.getText().equals(getString(R.string.resolver_work_tab))) {
+                tabView.setContentDescription(workContentDescription);
+            }
         }
     }
 

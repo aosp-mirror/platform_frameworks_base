@@ -40,4 +40,8 @@
 
     <integer name="magnification_default_scale">2</integer>
 
+    <!-- The position of the volume dialog on the screen.
+         See com.android.systemui.volume.VolumeDialogImpl.
+         Value 21 corresponds to RIGHT|CENTER_VERTICAL. -->
+    <integer name="volume_dialog_gravity">21</integer>
 </resources>
