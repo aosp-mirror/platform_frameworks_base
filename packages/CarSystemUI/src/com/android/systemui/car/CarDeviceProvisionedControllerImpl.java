@@ -44,8 +44,9 @@ public class CarDeviceProvisionedControllerImpl extends DeviceProvisionedControl
             CarSettings.Secure.KEY_SETUP_WIZARD_IN_PROGRESS);
     private final ContentObserver mCarSettingsObserver = new ContentObserver(
             Dependency.get(Dependency.MAIN_HANDLER)) {
+
         @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
+        public void onChange(boolean selfChange, Uri uri, int flags) {
             if (USER_SETUP_IN_PROGRESS_URI.equals(uri)) {
                 notifyUserSetupInProgressChanged();
             }
