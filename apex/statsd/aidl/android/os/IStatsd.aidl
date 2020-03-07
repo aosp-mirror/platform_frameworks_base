@@ -186,8 +186,9 @@ interface IStatsd {
     * Registers a puller callback function that, when invoked, pulls the data
     * for the specified atom tag.
     */
-    oneway void registerPullAtomCallback(int uid, int atomTag, long coolDownNs, long timeoutNs,
-                           in int[] additiveFields, IPullAtomCallback pullerCallback);
+    oneway void registerPullAtomCallback(int uid, int atomTag, long coolDownMillis,
+                                         long timeoutMillis,in int[] additiveFields,
+                                         IPullAtomCallback pullerCallback);
 
    /**
     * Registers a puller callback function that, when invoked, pulls the data

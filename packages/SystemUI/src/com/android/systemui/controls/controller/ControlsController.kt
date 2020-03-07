@@ -124,6 +124,18 @@ interface ControlsController : UserAwareController {
     fun getFavoritesForComponent(componentName: ComponentName): List<StructureInfo>
 
     /**
+     * Adds a single favorite to a given component and structure
+     * @param componentName the name of the service that provides the [Control]
+     * @param structureName the name of the structure that holds the [Control]
+     * @param controlInfo persistent information about the [Control] to be added.
+     */
+    fun addFavorite(
+        componentName: ComponentName,
+        structureName: CharSequence,
+        controlInfo: ControlInfo
+    )
+
+    /**
      * Replaces the favorites for the given structure.
      *
      * Calling this method will eliminate the previous selection of favorites and replace it with a

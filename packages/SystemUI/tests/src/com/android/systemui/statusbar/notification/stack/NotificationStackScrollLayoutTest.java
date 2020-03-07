@@ -46,6 +46,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -139,6 +140,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     private UserChangedListener mUserChangedListener;
     private TestableNotificationEntryManager mEntryManager;
     private int mOriginalInterruptionModelSetting;
+    private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
 
 
     @Before
@@ -214,7 +216,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mFeatureFlags,
                 mock(NotifPipeline.class),
                 mEntryManager,
-                mock(NotifCollection.class)
+                mock(NotifCollection.class),
+                mUiEventLoggerFake
         );
         verify(mLockscreenUserManager).addUserChangedListener(userChangedCaptor.capture());
         mUserChangedListener = userChangedCaptor.getValue();
@@ -506,6 +509,22 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 MetricsProto.MetricsEvent.TYPE_ACTION));
     }
 
+    @Test
+    public void testClearNotifications_All() {
+        mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_ALL, true);
+        assertEquals(1, mUiEventLoggerFake.numLogs());
+        assertEquals(NotificationStackScrollLayout.NotificationPanelEvent
+                .DISMISS_ALL_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));
+    }
+
+    @Test
+    public void testClearNotifications_Gentle() {
+        mStackScroller.clearNotifications(NotificationStackScrollLayout.ROWS_GENTLE, false);
+        assertEquals(1, mUiEventLoggerFake.numLogs());
+        assertEquals(NotificationStackScrollLayout.NotificationPanelEvent
+                .DISMISS_SILENT_NOTIFICATIONS_PANEL.getId(), mUiEventLoggerFake.eventId(0));
+    }
+
     private void setBarStateForTest(int state) {
         // Can't inject this through the listener or we end up on the actual implementation
         // rather than the mock because the spy just coppied the anonymous inner /shruggie.
@@ -516,9 +535,5 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         for (NotificationEntry e : entries) {
             mEntryManager.addActiveNotificationForTest(e);
         }
-    }
-
-    private void addActiveNotificationsToManager(List<NotificationEntry> entries) {
-        mEntryManager.setActiveNotificationList(entries);
     }
 }

@@ -74,17 +74,17 @@ public class ImsManager {
             "android.telephony.ims.action.WFC_IMS_REGISTRATION_ERROR";
 
     /**
-     * An extra key corresponding to a String value which contains the carrier specific title to be
-     * displayed as part of the message shown to the user when there is an error registering for
-     * WiFi calling.
+     * An extra key corresponding to a {@link CharSequence} value which contains the carrier
+     * specific title to be displayed as part of the message shown to the user when there is an
+     * error registering for WiFi calling.
      */
     public static final String EXTRA_WFC_REGISTRATION_FAILURE_TITLE =
             "android.telephony.ims.extra.WFC_REGISTRATION_FAILURE_TITLE";
 
     /**
-     * An extra key corresponding to a String value which contains the carrier specific message to
-     * be displayed as part of the message shown to the user when there is an error registering for
-     * WiFi calling.
+     * An extra key corresponding to a {@link CharSequence} value which contains the carrier
+     * specific message to  be displayed as part of the message shown to the user when there is an
+     * error registering for WiFi calling.
      */
     public static final String EXTRA_WFC_REGISTRATION_FAILURE_MESSAGE =
             "android.telephony.ims.extra.WFC_REGISTRATION_FAILURE_MESSAGE";

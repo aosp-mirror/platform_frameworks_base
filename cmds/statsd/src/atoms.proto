@@ -3600,9 +3600,10 @@ message Notification {
     // See NotificationSectionsManager.PriorityBucket.
     enum NotificationSection {
         SECTION_UNKNOWN = 0;
-        SECTION_PEOPLE = 1;
-        SECTION_ALERTING = 2;
-        SECTION_SILENT = 3;
+        SECTION_HEADS_UP = 1;
+        SECTION_PEOPLE = 2;
+        SECTION_ALERTING = 3;
+        SECTION_SILENT = 4;
     }
     optional NotificationSection section = 6;
 }

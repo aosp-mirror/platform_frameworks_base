@@ -22,6 +22,7 @@ import android.os.PowerManager;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
@@ -30,7 +31,6 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.concurrent.Executor;
@@ -57,7 +57,7 @@ public class KeyguardModule {
             LockPatternUtils lockPatternUtils,
             BroadcastDispatcher broadcastDispatcher,
             NotificationShadeWindowController notificationShadeWindowController,
-            Lazy<StatusBarKeyguardViewManager> statusBarKeyguardViewManagerLazy,
+            Lazy<KeyguardViewController> statusBarKeyguardViewManagerLazy,
             DismissCallbackRegistry dismissCallbackRegistry,
             KeyguardUpdateMonitor updateMonitor,
             DumpManager dumpManager,

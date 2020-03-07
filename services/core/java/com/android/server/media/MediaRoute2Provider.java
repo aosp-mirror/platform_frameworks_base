@@ -111,7 +111,6 @@ abstract class MediaRoute2Provider {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
                 @Nullable RoutingSessionInfo sessionInfo, long requestId);
-        void onSessionCreationFailed(@NonNull MediaRoute2Provider provider, long requestId);
         void onSessionUpdated(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo);
         void onSessionReleased(@NonNull MediaRoute2Provider provider,

@@ -25,6 +25,7 @@ import android.app.Notification;
 import android.media.MediaMetadata;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
@@ -66,6 +67,9 @@ public class NotificationMediaTemplateViewWrapperTest extends SysuiTestCase {
         allowTestableLooperAsMainThread();
 
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
+
+        // These tests are for regular media style notifications, not controls in quick settings
+        Settings.System.putInt(mContext.getContentResolver(), "qs_media_player", 0);
     }
 
     private void makeTestNotification(long duration, boolean allowSeeking) throws Exception {

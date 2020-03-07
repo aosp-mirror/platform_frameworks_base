@@ -56,16 +56,6 @@ public class ControlActionTest {
     }
 
     @Test
-    public void testUnparcelingCorrectClass_multiFloat() {
-        ControlAction toParcel = new MultiFloatAction(TEST_ID, new float[] {0f, 1f});
-
-        ControlAction fromParcel = parcelAndUnparcel(toParcel);
-
-        assertEquals(ControlAction.TYPE_MULTI_FLOAT, fromParcel.getActionType());
-        assertTrue(fromParcel instanceof MultiFloatAction);
-    }
-
-    @Test
     public void testUnparcelingCorrectClass_mode() {
         ControlAction toParcel = new ModeAction(TEST_ID, 1);
 

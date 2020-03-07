@@ -1340,7 +1340,7 @@ public class ChooserActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_turn_on_work_apps))
+        onView(withText(R.string.resolver_turn_on_work_apps_share))
                 .check(matches(isDisplayed()));
     }
 

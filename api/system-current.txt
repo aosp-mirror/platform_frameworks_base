@@ -702,12 +702,12 @@ package android.app {
   public final class StatsManager {
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void addConfig(long, byte[]) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean addConfiguration(long, byte[]);
+    method @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM) public void clearPullAtomCallback(int);
     method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getData(long);
     method @Deprecated @Nullable @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getMetadata();
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] getRegisteredExperimentIds() throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getReports(long) throws android.app.StatsManager.StatsUnavailableException;
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public byte[] getStatsMetadata() throws android.app.StatsManager.StatsUnavailableException;
-    method @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM) public void registerPullAtomCallback(int, @Nullable android.app.StatsManager.PullAtomMetadata, @NonNull java.util.concurrent.Executor, @NonNull android.app.StatsManager.StatsPullAtomCallback);
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void removeConfig(long) throws android.app.StatsManager.StatsUnavailableException;
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean removeConfiguration(long);
     method @NonNull @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public long[] setActiveConfigsChangedOperation(@Nullable android.app.PendingIntent) throws android.app.StatsManager.StatsUnavailableException;
@@ -715,7 +715,7 @@ package android.app {
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public boolean setDataFetchOperation(long, android.app.PendingIntent);
     method @RequiresPermission(allOf={android.Manifest.permission.DUMP, android.Manifest.permission.PACKAGE_USAGE_STATS}) public void setFetchReportsOperation(android.app.PendingIntent, long) throws android.app.StatsManager.StatsUnavailableException;
-    method @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM) public void unregisterPullAtomCallback(int);
+    method @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM) public void setPullAtomCallback(int, @Nullable android.app.StatsManager.PullAtomMetadata, @NonNull java.util.concurrent.Executor, @NonNull android.app.StatsManager.StatsPullAtomCallback);
     field public static final String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
     field public static final String EXTRA_STATS_ACTIVE_CONFIG_KEYS = "android.app.extra.STATS_ACTIVE_CONFIG_KEYS";
     field public static final String EXTRA_STATS_BROADCAST_SUBSCRIBER_COOKIES = "android.app.extra.STATS_BROADCAST_SUBSCRIBER_COOKIES";
@@ -729,14 +729,17 @@ package android.app {
   }
 
   public static class StatsManager.PullAtomMetadata {
+    method @Nullable public int[] getAdditiveFields();
+    method public long getCoolDownMillis();
+    method public long getTimeoutMillis();
   }
 
   public static class StatsManager.PullAtomMetadata.Builder {
     ctor public StatsManager.PullAtomMetadata.Builder();
     method @NonNull public android.app.StatsManager.PullAtomMetadata build();
     method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setAdditiveFields(@NonNull int[]);
-    method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setCoolDownNs(long);
-    method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setTimeoutNs(long);
+    method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setCoolDownMillis(long);
+    method @NonNull public android.app.StatsManager.PullAtomMetadata.Builder setTimeoutMillis(long);
   }
 
   public static interface StatsManager.StatsPullAtomCallback {
@@ -5077,6 +5080,7 @@ package android.media.tv.tuner.filter {
     field public static final int TYPE_MMTP = 2; // 0x2
     field public static final int TYPE_TLV = 8; // 0x8
     field public static final int TYPE_TS = 1; // 0x1
+    field public static final int TYPE_UNDEFINED = 0; // 0x0
   }
 
   public interface FilterCallback {
@@ -9127,6 +9131,7 @@ package android.provider {
     field public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
     field public static final String NAMESPACE_BIOMETRICS = "biometrics";
+    field public static final String NAMESPACE_BLOBSTORE = "blobstore";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field @Deprecated public static final String NAMESPACE_DEX_BOOT = "dex_boot";
@@ -11665,7 +11670,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAnyRadioPoweredOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
-    method public boolean isCurrentSimOperator(@NonNull String, int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataAllowedInVoiceCall();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionEnabled();
     method public boolean isDataConnectivityPossible();
@@ -11684,6 +11688,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isTetheringApnRequired();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isVideoCallingEnabled();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean matchesCurrentSimOperator(@NonNull String, int, @Nullable String);
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method public boolean needsOtaServiceProvisioning();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();

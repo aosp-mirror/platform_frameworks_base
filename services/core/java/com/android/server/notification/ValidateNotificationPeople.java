@@ -106,9 +106,8 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
             mHandler = new Handler();
             mObserver = new ContentObserver(mHandler) {
                 @Override
-                public void onChange(boolean selfChange, Iterable<Uri> uris,
-                        int flags, int userId) {
-                    super.onChange(selfChange, uris, flags, userId);
+                public void onChange(boolean selfChange, Uri uri, int userId) {
+                    super.onChange(selfChange, uri, userId);
                     if (DEBUG || mEvictionCount % 100 == 0) {
                         if (VERBOSE) Slog.i(TAG, "mEvictionCount: " + mEvictionCount);
                     }

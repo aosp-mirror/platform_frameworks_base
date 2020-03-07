@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.internal.R;
@@ -167,6 +168,32 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
     @Override
     String getMetricsCategory() {
         return ResolverActivity.METRICS_CATEGORY_CHOOSER;
+    }
+
+    @Override
+    protected void showWorkProfileOffEmptyState(ResolverListAdapter activeListAdapter,
+            View.OnClickListener listener) {
+        showEmptyState(activeListAdapter,
+                R.drawable.ic_work_apps_off,
+                R.string.resolver_turn_on_work_apps_share,
+                /* subtitleRes */ 0,
+                listener);
+    }
+
+    @Override
+    protected void showNoPersonalToWorkIntentsEmptyState(ResolverListAdapter activeListAdapter) {
+        showEmptyState(activeListAdapter,
+                R.drawable.ic_sharing_disabled,
+                R.string.resolver_cant_share_with_work_apps,
+                R.string.resolver_cant_share_cross_profile_explanation);
+    }
+
+    @Override
+    protected void showNoWorkToPersonalIntentsEmptyState(ResolverListAdapter activeListAdapter) {
+        showEmptyState(activeListAdapter,
+                R.drawable.ic_sharing_disabled,
+                R.string.resolver_cant_share_with_personal_apps,
+                R.string.resolver_cant_share_cross_profile_explanation);
     }
 
     class ChooserProfileDescriptor extends ProfileDescriptor {

@@ -98,8 +98,7 @@ struct AtomDecl {
 
     vector<int> binaryFields;
 
-    bool hasModule = false;
-    string moduleName;
+    set<string> moduleNames;
 
     AtomDecl();
     AtomDecl(const AtomDecl& that);

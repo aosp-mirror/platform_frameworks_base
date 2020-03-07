@@ -165,6 +165,7 @@ public class NavigationBarController implements Callbacks {
     private void removeNavigationBar(int displayId) {
         NavigationBarFragment navBar = mNavigationBars.get(displayId);
         if (navBar != null) {
+            navBar.setAutoHideController(/* autoHideController */ null);
             View navigationWindow = navBar.getView().getRootView();
             WindowManagerGlobal.getInstance()
                     .removeView(navigationWindow, true /* immediate */);
