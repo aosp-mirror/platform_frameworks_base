@@ -53,6 +53,7 @@ public:
     void setReceiverPkg(const string& pkg);
     void setReceiverCls(const string& cls);
     void addHeader(const vector<uint8_t>& headerProto);
+    void setGzip(bool gzip);
 
     inline bool all() const { return mAll; }
     bool containsSection(int section, bool specific) const;
@@ -61,6 +62,7 @@ public:
     inline const string& receiverPkg() const { return mReceiverPkg; }
     inline const string& receiverCls() const { return mReceiverCls; }
     inline const vector<vector<uint8_t>>& headers() const { return mHeaders; }
+    inline bool gzip() const {return mGzip; }
 
     void merge(const IncidentReportArgs& that);
 
@@ -71,6 +73,7 @@ private:
     int mPrivacyPolicy;
     string mReceiverPkg;
     string mReceiverCls;
+    bool mGzip;
 };
 
 }

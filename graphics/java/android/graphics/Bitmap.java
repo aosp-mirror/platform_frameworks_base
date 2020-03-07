@@ -39,6 +39,7 @@ import dalvik.annotation.optimization.CriticalNative;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -85,6 +86,7 @@ public final class Bitmap implements Parcelable {
     private int mWidth;
     @UnsupportedAppUsage
     private int mHeight;
+    private WeakReference<HardwareBuffer> mHardwareBuffer;
     private boolean mRecycled;
 
     private ColorSpace mColorSpace;
@@ -366,6 +368,7 @@ public final class Bitmap implements Parcelable {
             nativeRecycle(mNativePtr);
             mNinePatchChunk = null;
             mRecycled = true;
+            mHardwareBuffer = null;
         }
     }
 
@@ -748,7 +751,12 @@ public final class Bitmap implements Parcelable {
         if (colorSpace == null) {
             colorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
         }
-        return nativeWrapHardwareBufferBitmap(hardwareBuffer, colorSpace.getNativeInstance());
+        Bitmap bitmap = nativeWrapHardwareBufferBitmap(hardwareBuffer,
+                colorSpace.getNativeInstance());
+        if (bitmap != null) {
+            bitmap.mHardwareBuffer = new WeakReference<HardwareBuffer>(hardwareBuffer);
+        }
+        return bitmap;
     }
 
     /**
@@ -2244,12 +2252,22 @@ public final class Bitmap implements Parcelable {
      *
      * Note: the HardwareBuffer does *not* have an associated {@link ColorSpace}.
      * To render this object the same as its rendered with this Bitmap, you
-     * should also call {@link getColorSpace}.
+     * should also call {@link #getColorSpace()}.</p>
      *
-     * @hide
+     * Must not be modified while a wrapped Bitmap is accessing it. Doing so will
+     * result in undefined behavior.</p>
+     *
+     * @throws IllegalStateException if the bitmap's config is not {@link Config#HARDWARE}
+     * or if the bitmap has been recycled.
      */
-    public HardwareBuffer getHardwareBuffer() {
-        return nativeGetHardwareBuffer(mNativePtr);
+    public @NonNull HardwareBuffer getHardwareBuffer() {
+        checkRecycled("Can't getHardwareBuffer from a recycled bitmap");
+        HardwareBuffer hardwareBuffer = mHardwareBuffer == null ? null : mHardwareBuffer.get();
+        if (hardwareBuffer == null) {
+            hardwareBuffer = nativeGetHardwareBuffer(mNativePtr);
+            mHardwareBuffer = new WeakReference<HardwareBuffer>(hardwareBuffer);
+        }
+        return hardwareBuffer;
     }
 
     //////////// native methods

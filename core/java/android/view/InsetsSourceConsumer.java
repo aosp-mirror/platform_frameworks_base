@@ -87,6 +87,7 @@ public class InsetsSourceConsumer {
         if (mSourceControl == control) {
             return;
         }
+        final InsetsSourceControl lastControl = mSourceControl;
         mSourceControl = control;
 
         // We are loosing control
@@ -97,25 +98,27 @@ public class InsetsSourceConsumer {
             mState.getSource(getType()).setVisible(
                     mController.getLastDispatchedState().getSource(getType()).isVisible());
             applyLocalVisibilityOverride();
-            return;
-        }
-
-        // We are gaining control, and need to run an animation since previous state didn't match
-        if (mRequestedVisible != mState.getSource(mType).isVisible()) {
-            if (mRequestedVisible) {
-                showTypes[0] |= toPublicType(getType());
+        } else {
+            // We are gaining control, and need to run an animation since previous state
+            // didn't match
+            if (mRequestedVisible != mState.getSource(mType).isVisible()) {
+                if (mRequestedVisible) {
+                    showTypes[0] |= toPublicType(getType());
+                } else {
+                    hideTypes[0] |= toPublicType(getType());
+                }
             } else {
-                hideTypes[0] |= toPublicType(getType());
+              // We are gaining control, but don't need to run an animation.
+              // However make sure that the leash visibility is still up to date.
+              if (applyLocalVisibilityOverride()) {
+                  mController.notifyVisibilityChanged();
+              }
+              applyHiddenToControl();
             }
-            return;
         }
-
-        // We are gaining control, but don't need to run an animation. However make sure that the
-        // leash visibility is still up to date.
-        if (applyLocalVisibilityOverride()) {
-            mController.notifyVisibilityChanged();
+        if (lastControl != null) {
+            lastControl.release();
         }
-        applyHiddenToControl();
     }
 
     @VisibleForTesting

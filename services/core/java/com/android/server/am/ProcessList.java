@@ -61,6 +61,7 @@ import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -70,6 +71,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ProcessInfo;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.LocalSocket;
@@ -343,6 +345,14 @@ public final class ProcessList {
     @ChangeId
     @EnabledAfter(targetSdkVersion = VersionCodes.Q)
     private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
+
+    /**
+     * Enable sampled memory bug detection in the app.
+     * @see <a href="https://source.android.com/devices/tech/debug/gwp-asan">GWP-ASan</a>.
+     */
+    @ChangeId
+    @Disabled
+    private static final long GWP_ASAN = 135634846; // This is a bug id.
 
     /**
      * Apps have no access to the private data directories of any other app, even if the other
@@ -1634,6 +1644,28 @@ public final class ProcessList {
         return gidArray;
     }
 
+    private int decideGwpAsanLevel(ProcessRecord app) {
+        // Look at the process attribute first.
+        if (app.processInfo != null && app.processInfo.enableGwpAsan != null) {
+            return app.processInfo.enableGwpAsan ? Zygote.GWP_ASAN_LEVEL_ALWAYS
+                                                 : Zygote.GWP_ASAN_LEVEL_NEVER;
+        }
+        // Then at the applicaton attribute.
+        if (app.info.isGwpAsanEnabled() != null) {
+            return app.info.isGwpAsanEnabled() ? Zygote.GWP_ASAN_LEVEL_ALWAYS
+                                               : Zygote.GWP_ASAN_LEVEL_NEVER;
+        }
+        // If the app does not specify enableGwpAsan, the default behavior is lottery among the
+        // system apps, and disabled for user apps, unless overwritten by the compat feature.
+        if (mPlatformCompat.isChangeEnabled(GWP_ASAN, app.info)) {
+            return Zygote.GWP_ASAN_LEVEL_ALWAYS;
+        }
+        if ((app.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+            return Zygote.GWP_ASAN_LEVEL_LOTTERY;
+        }
+        return Zygote.GWP_ASAN_LEVEL_NEVER;
+    }
+
     /**
      * @return {@code true} if process start is successful, false otherwise.
      */
@@ -1802,6 +1834,8 @@ public final class ProcessList {
                     && mPlatformCompat.isChangeEnabled(NATIVE_HEAP_POINTER_TAGGING, app.info)) {
                 runtimeFlags |= Zygote.MEMORY_TAG_LEVEL_TBI;
             }
+
+            runtimeFlags |= decideGwpAsanLevel(app);
 
             String invokeWith = null;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {

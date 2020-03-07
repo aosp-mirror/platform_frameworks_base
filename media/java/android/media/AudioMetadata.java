@@ -16,10 +16,18 @@
 
 package android.media;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.util.Log;
 import android.util.Pair;
 
+import java.lang.reflect.ParameterizedType;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
@@ -30,6 +38,8 @@ import java.util.Set;
  * configuration and capability requests within the Audio Framework.
  */
 public final class AudioMetadata {
+    private static final String TAG = "AudioMetadata";
+
     /**
      * Key interface for the map.
      *
@@ -273,7 +283,7 @@ public final class AudioMetadata {
      * @hide
      */
     @NonNull
-    public static <T> Key<T> createKey(String name, Class<T> type) {
+    public static <T> Key<T> createKey(@NonNull String name, @NonNull Class<T> type) {
         // Implementation specific.
         return new Key<T>() {
             private final String mName = name;
@@ -295,6 +305,26 @@ public final class AudioMetadata {
             @Override
             public boolean isFromFramework() {
                 return true;
+            }
+
+            /**
+             * Return true if the name and the type of two objects are the same.
+             */
+            @Override
+            public boolean equals(Object obj) {
+                if (obj == this) {
+                    return true;
+                }
+                if (!(obj instanceof Key)) {
+                    return false;
+                }
+                Key<?> other = (Key<?>) obj;
+                return mName.equals(other.getName()) && mType.equals(other.getValueClass());
+            }
+
+            @Override
+            public int hashCode() {
+                return Objects.hash(mName, mType);
             }
         };
     }
@@ -364,6 +394,27 @@ public final class AudioMetadata {
             return mHashMap.size();
         }
 
+        /**
+         * Return true if the object is a BaseMap and the content from two BaseMap are the same.
+         * Note: Need to override the equals functions of Key<T> for HashMap comparison.
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) {
+                return true;
+            }
+            if (!(obj instanceof BaseMap)) {
+                return false;
+            }
+            BaseMap other = (BaseMap) obj;
+            return mHashMap.equals(other.mHashMap);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mHashMap);
+        }
+
         /*
          * Implementation specific.
          *
@@ -399,6 +450,445 @@ public final class AudioMetadata {
          */
         private final HashMap<Pair<String, Class<?>>, Pair<Key<?>, Object>> mHashMap =
                 new HashMap();
+    }
+
+    // The audio metadata object type index should be kept the same as
+    // the ones in audio_utils::metadata::metadata_types
+    private static final int AUDIO_METADATA_OBJ_TYPE_NONE = 0;
+    private static final int AUDIO_METADATA_OBJ_TYPE_INT = 1;
+    private static final int AUDIO_METADATA_OBJ_TYPE_LONG = 2;
+    private static final int AUDIO_METADATA_OBJ_TYPE_FLOAT = 3;
+    private static final int AUDIO_METADATA_OBJ_TYPE_DOUBLE = 4;
+    private static final int AUDIO_METADATA_OBJ_TYPE_STRING = 5;
+    // BaseMap is corresponding to audio_utils::metadata::Data
+    private static final int AUDIO_METADATA_OBJ_TYPE_BASEMAP = 6;
+
+    private static final HashMap<Class, Integer> AUDIO_METADATA_OBJ_TYPES = new HashMap<>() {{
+            put(Integer.class, AUDIO_METADATA_OBJ_TYPE_INT);
+            put(Long.class, AUDIO_METADATA_OBJ_TYPE_LONG);
+            put(Float.class, AUDIO_METADATA_OBJ_TYPE_FLOAT);
+            put(Double.class, AUDIO_METADATA_OBJ_TYPE_DOUBLE);
+            put(String.class, AUDIO_METADATA_OBJ_TYPE_STRING);
+            put(BaseMap.class, AUDIO_METADATA_OBJ_TYPE_BASEMAP);
+        }};
+
+    private static final Charset AUDIO_METADATA_CHARSET = StandardCharsets.UTF_8;
+
+    /**
+     * An auto growing byte buffer
+     */
+    private static class AutoGrowByteBuffer {
+        private static final int INTEGER_BYTE_COUNT = Integer.SIZE / Byte.SIZE;
+        private static final int LONG_BYTE_COUNT = Long.SIZE / Byte.SIZE;
+        private static final int FLOAT_BYTE_COUNT = Float.SIZE / Byte.SIZE;
+        private static final int DOUBLE_BYTE_COUNT = Double.SIZE / Byte.SIZE;
+
+        private ByteBuffer mBuffer;
+
+        AutoGrowByteBuffer() {
+            this(1024);
+        }
+
+        AutoGrowByteBuffer(@IntRange(from = 0) int initialCapacity) {
+            mBuffer = ByteBuffer.allocateDirect(initialCapacity);
+        }
+
+        public ByteBuffer getRawByteBuffer() {
+            // Slice the buffer from 0 to position.
+            int limit = mBuffer.limit();
+            int position = mBuffer.position();
+            mBuffer.limit(position);
+            mBuffer.position(0);
+            ByteBuffer buffer = mBuffer.slice();
+
+            // Restore position and limit.
+            mBuffer.limit(limit);
+            mBuffer.position(position);
+            return buffer;
+        }
+
+        public ByteOrder order() {
+            return mBuffer.order();
+        }
+
+        public int position() {
+            return mBuffer.position();
+        }
+
+        public AutoGrowByteBuffer position(int newPosition) {
+            mBuffer.position(newPosition);
+            return this;
+        }
+
+        public AutoGrowByteBuffer order(ByteOrder order) {
+            mBuffer.order(order);
+            return this;
+        }
+
+        public AutoGrowByteBuffer putInt(int value) {
+            ensureCapacity(INTEGER_BYTE_COUNT);
+            mBuffer.putInt(value);
+            return this;
+        }
+
+        public AutoGrowByteBuffer putLong(long value) {
+            ensureCapacity(LONG_BYTE_COUNT);
+            mBuffer.putLong(value);
+            return this;
+        }
+
+        public AutoGrowByteBuffer putFloat(float value) {
+            ensureCapacity(FLOAT_BYTE_COUNT);
+            mBuffer.putFloat(value);
+            return this;
+        }
+
+        public AutoGrowByteBuffer putDouble(double value) {
+            ensureCapacity(DOUBLE_BYTE_COUNT);
+            mBuffer.putDouble(value);
+            return this;
+        }
+
+        public AutoGrowByteBuffer put(byte[] src) {
+            ensureCapacity(src.length);
+            mBuffer.put(src);
+            return this;
+        }
+
+        /**
+         * Ensures capacity to append at least <code>count</code> values.
+         */
+        private void ensureCapacity(@IntRange int count) {
+            if (mBuffer.remaining() < count) {
+                int newCapacity = mBuffer.position() + count;
+                if (newCapacity > Integer.MAX_VALUE >> 1) {
+                    throw new IllegalStateException(
+                            "Item memory requirements too large: " + newCapacity);
+                }
+                newCapacity <<= 1;
+                ByteBuffer buffer = ByteBuffer.allocateDirect(newCapacity);
+                buffer.order(mBuffer.order());
+
+                // Copy data from old buffer to new buffer
+                mBuffer.flip();
+                buffer.put(mBuffer);
+
+                // Set buffer to new buffer
+                mBuffer = buffer;
+            }
+        }
+    }
+
+    /**
+     * @hide
+     * Describes a unpacking/packing contract of type {@code T} out of a {@link ByteBuffer}
+     *
+     * @param <T> the type being unpack
+     */
+    private interface DataPackage<T> {
+        /**
+         * Read an item from a {@link ByteBuffer}.
+         *
+         * The parceling format is assumed the same as the one described in
+         * audio_utils::Metadata.h. Copied here as a reference.
+         * All values are native endian order.
+         *
+         * Datum = { (type_size_t)  Type (the type index from type_as_value<T>.)
+         *           (datum_size_t) Size (size of datum, including the size field)
+         *           (byte string)  Payload<Type>
+         *         }
+         *
+         * Primitive types:
+         * Payload<Type> = { bytes in native endian order }
+         *
+         * Vector, Map, Container types:
+         * Payload<Type> = { (index_size_t) number of elements
+         *                   (byte string)  Payload<Element_Type> * number
+         *                 }
+         *
+         * Pair container types:
+         * Payload<Type> = { (byte string) Payload<first>,
+         *                   (byte string) Payload<second>
+         *                 }
+         *
+         * @param buffer the byte buffer to read from
+         * @return an object, which types is given type for {@link DataPackage}
+         * @throws BufferUnderflowException when there is no enough data remaining
+         *      in the buffer for unpacking.
+         */
+        @Nullable
+        T unpack(ByteBuffer buffer);
+
+        /**
+         * Pack the item into a byte array. This is the reversed way of unpacking.
+         *
+         * @param output is the stream to which to write the data
+         * @param obj the item to pack
+         * @return true if packing successfully. Otherwise, return false.
+         */
+        boolean pack(AutoGrowByteBuffer output, T obj);
+
+        /**
+         * Return what kind of data is contained in the package.
+         */
+        default Class getMyType() {
+            return (Class) ((ParameterizedType) getClass().getGenericInterfaces()[0])
+                    .getActualTypeArguments()[0];
+        }
+    }
+
+    /*****************************************************************************************
+     * Following class are common {@link DataPackage} implementations, which include types
+     * that are defined in audio_utils::metadata::metadata_types
+     *
+     * For Java
+     *     int32_t corresponds to Integer
+     *     int64_t corresponds to Long
+     *     float corresponds to Float
+     *     double corresponds to Double
+     *     std::string corresponds to String
+     *     Data corresponds to BaseMap
+     *     Datum corresponds to Object
+     ****************************************************************************************/
+
+    private static final HashMap<Integer, DataPackage<?>> DATA_PACKAGES = new HashMap<>() {{
+            put(AUDIO_METADATA_OBJ_TYPE_INT, new DataPackage<Integer>() {
+                @Override
+                @Nullable
+                public Integer unpack(ByteBuffer buffer) {
+                    return buffer.getInt();
+                }
+
+                @Override
+                public boolean pack(AutoGrowByteBuffer output, Integer obj) {
+                    output.putInt(obj);
+                    return true;
+                }
+            });
+            put(AUDIO_METADATA_OBJ_TYPE_LONG, new DataPackage<Long>() {
+                @Override
+                @Nullable
+                public Long unpack(ByteBuffer buffer) {
+                    return buffer.getLong();
+                }
+
+                @Override
+                public boolean pack(AutoGrowByteBuffer output, Long obj) {
+                    output.putLong(obj);
+                    return true;
+                }
+            });
+            put(AUDIO_METADATA_OBJ_TYPE_FLOAT, new DataPackage<Float>() {
+                @Override
+                @Nullable
+                public Float unpack(ByteBuffer buffer) {
+                    return buffer.getFloat();
+                }
+
+                @Override
+                public boolean pack(AutoGrowByteBuffer output, Float obj) {
+                    output.putFloat(obj);
+                    return true;
+                }
+            });
+            put(AUDIO_METADATA_OBJ_TYPE_DOUBLE, new DataPackage<Double>() {
+                @Override
+                @Nullable
+                public Double unpack(ByteBuffer buffer) {
+                    return buffer.getDouble();
+                }
+
+                @Override
+                public boolean pack(AutoGrowByteBuffer output, Double obj) {
+                    output.putDouble(obj);
+                    return true;
+                }
+            });
+            put(AUDIO_METADATA_OBJ_TYPE_STRING, new DataPackage<String>() {
+                @Override
+                @Nullable
+                public String unpack(ByteBuffer buffer) {
+                    int dataSize = buffer.getInt();
+                    if (buffer.position() + dataSize > buffer.limit()) {
+                        return null;
+                    }
+                    byte[] valueArr = new byte[dataSize];
+                    buffer.get(valueArr);
+                    String value = new String(valueArr, AUDIO_METADATA_CHARSET);
+                    return value;
+                }
+
+                /**
+                 * This is a reversed operation of unpack. It is needed to write the String
+                 * at bytes encoded with AUDIO_METADATA_CHARSET. There should be an integer
+                 * value representing the length of the bytes written before the bytes.
+                 */
+                @Override
+                public boolean pack(AutoGrowByteBuffer output, String obj) {
+                    byte[] valueArr = obj.getBytes(AUDIO_METADATA_CHARSET);
+                    output.putInt(valueArr.length);
+                    output.put(valueArr);
+                    return true;
+                }
+            });
+            put(AUDIO_METADATA_OBJ_TYPE_BASEMAP, new BaseMapPackage());
+        }};
+    // ObjectPackage is a special case that it is expected to unpack audio_utils::metadata::Datum,
+    // which contains data type and data size besides the payload for the data.
+    private static final ObjectPackage OBJECT_PACKAGE = new ObjectPackage();
+
+    private static class ObjectPackage implements DataPackage<Pair<Class, Object>> {
+        /**
+         * The {@link ObjectPackage} will unpack byte string for audio_utils::metadata::Datum.
+         * Since the Datum is a std::any, {@link Object} is used to carrying the data. The
+         * data type is stored in the data package header. In that case, a {@link Class}
+         * will also be returned to indicate the actual type for the object.
+         */
+        @Override
+        @Nullable
+        public Pair<Class, Object> unpack(ByteBuffer buffer) {
+            int dataType = buffer.getInt();
+            DataPackage dataPackage = DATA_PACKAGES.get(dataType);
+            if (dataPackage == null) {
+                Log.e(TAG, "Cannot find DataPackage for type:" + dataType);
+                return null;
+            }
+            int dataSize = buffer.getInt();
+            int position = buffer.position();
+            Object obj = dataPackage.unpack(buffer);
+            if (buffer.position() - position != dataSize) {
+                Log.e(TAG, "Broken data package");
+                return null;
+            }
+            return new Pair<Class, Object>(dataPackage.getMyType(), obj);
+        }
+
+        @Override
+        public boolean pack(AutoGrowByteBuffer output, Pair<Class, Object> obj) {
+            final Integer dataType = AUDIO_METADATA_OBJ_TYPES.get(obj.first);
+            if (dataType == null) {
+                Log.e(TAG, "Cannot find data type for " + obj.first);
+                return false;
+            }
+            DataPackage dataPackage = DATA_PACKAGES.get(dataType);
+            if (dataPackage == null) {
+                Log.e(TAG, "Cannot find DataPackage for type:" + dataType);
+                return false;
+            }
+            output.putInt(dataType);
+            int position = output.position(); // Keep current position.
+            output.putInt(0); // Keep a place for the size of payload.
+            int payloadIdx = output.position();
+            if (!dataPackage.pack(output, obj.second)) {
+                Log.i(TAG, "Failed to pack object: " + obj.second);
+                return false;
+            }
+            // Put the actual payload size.
+            int currentPosition = output.position();
+            output.position(position);
+            output.putInt(currentPosition - payloadIdx);
+            output.position(currentPosition);
+            return true;
+        }
+    }
+
+    /**
+     * BaseMap will be corresponding to audio_utils::metadata::Data.
+     */
+    private static class BaseMapPackage implements DataPackage<BaseMap> {
+        @Override
+        @Nullable
+        public BaseMap unpack(ByteBuffer buffer) {
+            BaseMap ret = new BaseMap();
+            int mapSize = buffer.getInt();
+            DataPackage<String> strDataPackage =
+                    (DataPackage<String>) DATA_PACKAGES.get(AUDIO_METADATA_OBJ_TYPE_STRING);
+            if (strDataPackage == null) {
+                Log.e(TAG, "Cannot find DataPackage for String");
+                return null;
+            }
+            for (int i = 0; i < mapSize; i++) {
+                String key = strDataPackage.unpack(buffer);
+                if (key == null) {
+                    Log.e(TAG, "Failed to unpack key for map");
+                    return null;
+                }
+                Pair<Class, Object> value = OBJECT_PACKAGE.unpack(buffer);
+                if (value == null) {
+                    Log.e(TAG, "Failed to unpack value for map");
+                    return null;
+                }
+                ret.set(createKey(key, value.first), value.first.cast(value.second));
+            }
+            return ret;
+        }
+
+        @Override
+        public boolean pack(AutoGrowByteBuffer output, BaseMap obj) {
+            output.putInt(obj.size());
+            DataPackage<String> strDataPackage =
+                    (DataPackage<String>) DATA_PACKAGES.get(AUDIO_METADATA_OBJ_TYPE_STRING);
+            if (strDataPackage == null) {
+                Log.e(TAG, "Cannot find DataPackage for String");
+                return false;
+            }
+            for (Key<?> key : obj.keySet()) {
+                if (!strDataPackage.pack(output, key.getName())) {
+                    Log.i(TAG, "Failed to pack key: " + key.getName());
+                    return false;
+                }
+                if (!OBJECT_PACKAGE.pack(output, new Pair<>(key.getValueClass(), obj.get(key)))) {
+                    Log.i(TAG, "Failed to pack value: " + obj.get(key));
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * @hide
+     * Extract a {@link BaseMap} from a given {@link ByteBuffer}
+     * @param buffer is a byte string that contains information to unpack.
+     * @return a {@link BaseMap} object if extracting successfully from given byte buffer.
+     *     Otherwise, returns {@code null}.
+     */
+    @Nullable
+    public static BaseMap fromByteBuffer(ByteBuffer buffer) {
+        DataPackage dataPackage = DATA_PACKAGES.get(AUDIO_METADATA_OBJ_TYPE_BASEMAP);
+        if (dataPackage == null) {
+            Log.e(TAG, "Cannot find DataPackage for BaseMap");
+            return null;
+        }
+        try {
+            return (BaseMap) dataPackage.unpack(buffer);
+        } catch (BufferUnderflowException e) {
+            Log.e(TAG, "No enough data to unpack");
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     * Pack a {link BaseMap} to a {@link ByteBuffer}
+     * @param data is the object for packing
+     * @param order is the byte order
+     * @return a {@link ByteBuffer} if successfully packing the data.
+     *     Otherwise, returns {@code null};
+     */
+    @Nullable
+    public static ByteBuffer toByteBuffer(BaseMap data, ByteOrder order) {
+        DataPackage dataPackage = DATA_PACKAGES.get(AUDIO_METADATA_OBJ_TYPE_BASEMAP);
+        if (dataPackage == null) {
+            Log.e(TAG, "Cannot find DataPackage for BaseMap");
+            return null;
+        }
+        AutoGrowByteBuffer output = new AutoGrowByteBuffer();
+        output.order(order);
+        if (dataPackage.pack(output, data)) {
+            return output.getRawByteBuffer();
+        }
+        return null;
     }
 
     // Delete the constructor as there is nothing to implement here.

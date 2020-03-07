@@ -17,6 +17,7 @@ package com.android.server.appsearch;
 
 import android.annotation.NonNull;
 import android.app.appsearch.AppSearchBatchResult;
+import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.IAppSearchManager;
 import android.content.Context;
 import android.os.Binder;
@@ -35,6 +36,7 @@ import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.protobuf.InvalidProtocolBufferException;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -56,7 +58,10 @@ public class AppSearchManagerService extends SystemService {
 
     private class Stub extends IAppSearchManager.Stub {
         @Override
-        public void setSchema(byte[] schemaBytes, boolean forceOverride, AndroidFuture callback) {
+        public void setSchema(
+                @NonNull byte[] schemaBytes,
+                boolean forceOverride,
+                @NonNull AndroidFuture<AppSearchResult> callback) {
             Preconditions.checkNotNull(schemaBytes);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
@@ -66,9 +71,9 @@ public class AppSearchManagerService extends SystemService {
                 SchemaProto schema = SchemaProto.parseFrom(schemaBytes);
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 impl.setSchema(callingUid, schema, forceOverride);
-                callback.complete(null);
+                callback.complete(AppSearchResult.newSuccessfulResult(/*value=*/ null));
             } catch (Throwable t) {
-                callback.completeExceptionally(t);
+                callback.complete(throwableToFailedResult(t));
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
@@ -76,7 +81,8 @@ public class AppSearchManagerService extends SystemService {
 
         @Override
         public void putDocuments(
-                List documentsBytes, AndroidFuture<AppSearchBatchResult> callback) {
+                @NonNull List documentsBytes,
+                @NonNull AndroidFuture<AppSearchBatchResult> callback) {
             Preconditions.checkNotNull(documentsBytes);
             Preconditions.checkNotNull(callback);
             int callingUid = Binder.getCallingUidOrThrow();
@@ -85,7 +91,7 @@ public class AppSearchManagerService extends SystemService {
             try {
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
-                        AppSearchBatchResult.newBuilder();
+                        new AppSearchBatchResult.Builder<>();
                 for (int i = 0; i < documentsBytes.size(); i++) {
                     byte[] documentBytes = (byte[]) documentsBytes.get(i);
                     DocumentProto document = DocumentProto.parseFrom(documentBytes);
@@ -93,7 +99,7 @@ public class AppSearchManagerService extends SystemService {
                         impl.putDocument(callingUid, document);
                         resultBuilder.setSuccess(document.getUri(), /*value=*/ null);
                     } catch (Throwable t) {
-                        resultBuilder.setFailure(document.getUri(), t);
+                        resultBuilder.setResult(document.getUri(), throwableToFailedResult(t));
                     }
                 }
                 callback.complete(resultBuilder.build());
@@ -103,6 +109,41 @@ public class AppSearchManagerService extends SystemService {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
         }
+
+        @Override
+        public void getDocuments(
+                @NonNull List<String> uris, @NonNull AndroidFuture<AppSearchBatchResult> callback) {
+            Preconditions.checkNotNull(uris);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                AppSearchBatchResult.Builder<String, byte[]> resultBuilder =
+                        new AppSearchBatchResult.Builder<>();
+                for (int i = 0; i < uris.size(); i++) {
+                    String uri = uris.get(i);
+                    try {
+                        DocumentProto document = impl.getDocument(callingUid, uri);
+                        if (document == null) {
+                            resultBuilder.setFailure(
+                                    uri, AppSearchResult.RESULT_NOT_FOUND, /*errorMessage=*/ null);
+                        } else {
+                            resultBuilder.setSuccess(uri, document.toByteArray());
+                        }
+                    } catch (Throwable t) {
+                        resultBuilder.setResult(uri, throwableToFailedResult(t));
+                    }
+                }
+                callback.complete(resultBuilder.build());
+            } catch (Throwable t) {
+                callback.completeExceptionally(t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
         // TODO(sidchhabra):Init FakeIcing properly.
         // TODO(sidchhabra): Do this in a threadpool.
         @Override
@@ -120,6 +161,25 @@ public class AppSearchManagerService extends SystemService {
             SearchResultProto searchResults =
                     mFakeIcing.query(searchSpecProto.getQuery());
             callback.complete(searchResults.toByteArray());
+        }
+
+        private <ValueType> AppSearchResult<ValueType> throwableToFailedResult(
+                @NonNull Throwable t) {
+            if (t instanceof AppSearchException) {
+                return ((AppSearchException) t).toAppSearchResult();
+            }
+
+            @AppSearchResult.ResultCode int resultCode;
+            if (t instanceof IllegalStateException) {
+                resultCode = AppSearchResult.RESULT_INTERNAL_ERROR;
+            } else if (t instanceof IllegalArgumentException) {
+                resultCode = AppSearchResult.RESULT_INVALID_ARGUMENT;
+            } else if (t instanceof IOException) {
+                resultCode = AppSearchResult.RESULT_IO_ERROR;
+            } else {
+                resultCode = AppSearchResult.RESULT_UNKNOWN_ERROR;
+            }
+            return AppSearchResult.newFailedResult(resultCode, t.getMessage());
         }
     }
 }

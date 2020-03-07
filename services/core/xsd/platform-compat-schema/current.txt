@@ -7,12 +7,14 @@ package com.android.server.compat.config {
     method public boolean getDisabled();
     method public int getEnableAfterTargetSdk();
     method public long getId();
+    method public boolean getLoggingOnly();
     method public String getName();
     method public String getValue();
     method public void setDescription(String);
     method public void setDisabled(boolean);
     method public void setEnableAfterTargetSdk(int);
     method public void setId(long);
+    method public void setLoggingOnly(boolean);
     method public void setName(String);
     method public void setValue(String);
   }

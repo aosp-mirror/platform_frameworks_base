@@ -20,6 +20,9 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 
+import static com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.TYPE_NON_PERSON;
+import static com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.TYPE_PERSON;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -60,8 +63,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         final NotificationEntry entry = new NotificationEntryBuilder()
                 .setImportance(IMPORTANCE_HIGH)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getRanking()))
-                .thenReturn(false);
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry.getSbn(), entry.getRanking()))
+                .thenReturn(TYPE_NON_PERSON);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -76,8 +80,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getRanking()))
-                .thenReturn(true);
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry.getSbn(), entry.getRanking()))
+                .thenReturn(TYPE_PERSON);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -92,8 +97,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
         final NotificationEntry entry = new NotificationEntryBuilder()
                 .setNotification(notification)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getRanking()))
-                .thenReturn(false);
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry.getSbn(), entry.getRanking()))
+                .thenReturn(TYPE_NON_PERSON);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -109,8 +115,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setImportance(IMPORTANCE_LOW)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getRanking()))
-                .thenReturn(false);
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry.getSbn(), entry.getRanking()))
+                .thenReturn(TYPE_NON_PERSON);
 
         // THEN it has high priority
         assertTrue(mHighPriorityProvider.isHighPriority(entry));
@@ -126,8 +133,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setImportance(IMPORTANCE_MIN)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getRanking()))
-                .thenReturn(false);
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry.getSbn(), entry.getRanking()))
+                .thenReturn(TYPE_NON_PERSON);
 
         // THEN it does NOT have high priority
         assertFalse(mHighPriorityProvider.isHighPriority(entry));
@@ -149,8 +157,9 @@ public class HighPriorityProviderTest extends SysuiTestCase {
                 .setNotification(notification)
                 .setChannel(channel)
                 .build();
-        when(mPeopleNotificationIdentifier.isPeopleNotification(entry.getSbn(), entry.getRanking()))
-                .thenReturn(true);
+        when(mPeopleNotificationIdentifier
+                .getPeopleNotificationType(entry.getSbn(), entry.getRanking()))
+                .thenReturn(TYPE_PERSON);
 
         // THEN it does NOT have high priority
         assertFalse(mHighPriorityProvider.isHighPriority(entry));

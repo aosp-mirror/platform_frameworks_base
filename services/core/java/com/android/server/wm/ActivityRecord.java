@@ -7628,6 +7628,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
+    boolean canCreateRemoteAnimationTarget() {
+        return true;
+    }
+
+    @Override
     void getAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
             Rect outSurfaceInsets) {
         final WindowState win = findMainWindow();

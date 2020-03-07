@@ -5385,26 +5385,36 @@
         <xliff:g id="package_name" example="com.android.example">%1$s</xliff:g> has been put into the RESTRICTED bucket</string>
 
     <!-- ResolverActivity - profile tabs -->
-    <!-- Label for the perosnal tab of the share sheet and intent resolver [CHAR LIMIT=NONE] -->
+    <!-- Label of a tab on a screen. A user can tap this tap to switch to the 'Personal' view (that shows their personal content) if they have a work profile on their device. [CHAR LIMIT=NONE] -->
     <string name="resolver_personal_tab">Personal</string>
-    <!-- Label for the work tab of the share sheet and intent resolver [CHAR LIMIT=NONE] -->
+    <!-- Label of a tab on a screen. A user can tap this tab to switch to the 'Work' view (that shows their work content) if they have a work profile on their device. [CHAR LIMIT=NONE] -->
     <string name="resolver_work_tab">Work</string>
-    <!-- Label to indicate that the user cannot share with work apps [CHAR LIMIT=NONE] -->
+    <!-- Accessibility label for the personal tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_personal_tab_accessibility">Personal view</string>
+    <!-- Accessibility label for the work tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_work_tab_accessibility">Work view</string>
+    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share personal content with work apps. [CHAR LIMIT=NONE] -->
     <string name="resolver_cant_share_with_work_apps">Can\u2019t share with work apps</string>
-    <!-- Label to indicate that the user cannot share with personal apps [CHAR LIMIT=NONE] -->
+    <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share work content with personal apps. [CHAR LIMIT=NONE] -->
     <string name="resolver_cant_share_with_personal_apps">Can\u2019t share with personal apps</string>
-    <!-- Label to explain to the user that sharing between personal and work apps is not enabled by the IT admin [CHAR LIMIT=NONE] -->
-    <string name="resolver_cant_share_cross_profile_explanation">Your IT admin blocked sharing between personal and work apps</string>
-    <!-- Label to indicate that the user has to turn on work apps in order to access work data [CHAR LIMIT=NONE] -->
-    <string name="resolver_turn_on_work_apps">Turn on work apps</string>
-    <!-- Label to explain that the user has to turn on work apps in order to access work data [CHAR LIMIT=NONE] -->
-    <string name="resolver_turn_on_work_apps_explanation">Turn on work apps to access work apps &amp; contacts</string>
-    <!-- Label to indicate that no apps are resolved [CHAR LIMIT=NONE] -->
+    <!-- Error message. This text is explaining that the user's IT admin doesn't allow sharing between personal and work apps. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_share_cross_profile_explanation">Your IT admin blocked sharing between personal and work profiles</string>
+    <!-- Title of an error screen. This error message lets the user know that their IT admin blocked access to work apps, and the personal content that they're trying to view in a work app, such as Chrome, isn't allowed. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_work_apps">Can\u2019t access work apps</string>
+    <!-- Error message. This message lets the user know that their IT admin blocked access to work apps, and the personal content that they're trying to view in a work app, such as Chrome, isn't allowed. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_work_apps_explanation">Your IT admin doesn\u2019t let you view personal content in work apps</string>
+    <!-- Title of an error screen. This error message lets the user know that their IT admin blocked access to personal apps, and the work content that they're trying to view in a personal app, such as Chrome, isn't allowed. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_personal_apps">Can\u2019t access personal apps</string>
+    <!-- Error message. This message lets the user know that their IT admin blocked access to personal apps, and the work content that they're trying to view in a personal app, such as Chrome, isn't allowed. [CHAR LIMIT=NONE] -->
+    <string name="resolver_cant_access_personal_apps_explanation">Your IT admin doesn\u2019t let you view work content in personal apps</string>
+    <!-- Error message. This text lets the user know that they need to turn on work apps in order to share content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
+    <string name="resolver_turn_on_work_apps_share">Turn on work profile to share content</string>
+    <!-- Error message. This text lets the user know that they need to turn on work apps in order to view content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
+    <string name="resolver_turn_on_work_apps_view">Turn on work profile to view content</string>
+    <!-- Error message. This text lets the user know that work apps aren't available on the device. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_apps_available">No apps available</string>
-    <!-- Label to explain that no apps are resolved [CHAR LIMIT=NONE] -->
-    <string name="resolver_no_apps_available_explanation">We couldn\u2019t find any apps</string>
-    <!-- Button which switches on the disabled work profile [CHAR LIMIT=NONE] -->
-    <string name="resolver_switch_on_work">Switch on work</string>
+    <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Turn on</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permlab_accessCallAudio">Record or play audio in telephony calls</string>

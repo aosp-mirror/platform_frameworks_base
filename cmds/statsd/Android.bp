@@ -122,7 +122,6 @@ cc_defaults {
         "libbinder_ndk",
         "libincident",
         "liblog",
-        "libstatssocket",
         "statsd-aidl-ndk_platform",
     ],
 }
@@ -164,10 +163,6 @@ cc_library_static {
     ],
     export_generated_headers: [
         "atoms_info.h",
-    ],
-    shared_libs: [
-        "libcutils",
-        "libstatslog",
     ],
     apex_available: [
         //TODO(b/149782403): Remove this once statsd no longer links against libstatsmetadata
@@ -215,7 +210,10 @@ cc_binary {
         type: "lite",
     },
 
-    shared_libs: ["libgtest_prod"],
+    shared_libs: [
+        "libgtest_prod",
+        "libstatssocket",
+    ],
 
     apex_available: [
         "com.android.os.statsd",

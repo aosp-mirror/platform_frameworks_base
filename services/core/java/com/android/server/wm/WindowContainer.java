@@ -2196,6 +2196,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return null;
     }
 
+    boolean canCreateRemoteAnimationTarget() {
+        return false;
+    }
+
     boolean okToDisplay() {
         final DisplayContent dc = getDisplayContent();
         return dc != null && dc.okToDisplay();

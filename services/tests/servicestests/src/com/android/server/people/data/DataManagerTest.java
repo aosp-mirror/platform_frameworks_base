@@ -269,7 +269,7 @@ public final class DataManagerTest {
         assertEquals(1, conversations.size());
         assertEquals("sc_1", conversations.get(0).getShortcutId());
 
-        mDataManager.onUserStopped(USER_ID_PRIMARY);
+        mDataManager.onUserStopping(USER_ID_PRIMARY);
         conversations = getConversationsInPrimary();
         assertTrue(conversations.isEmpty());
     }

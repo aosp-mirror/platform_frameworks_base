@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,10 +74,14 @@ public final class RoutingSessionInfo implements Parcelable {
         mClientPackageName = builder.mClientPackageName;
         mProviderId = builder.mProviderId;
 
-        mSelectedRoutes = Collections.unmodifiableList(builder.mSelectedRoutes);
-        mSelectableRoutes = Collections.unmodifiableList(builder.mSelectableRoutes);
-        mDeselectableRoutes = Collections.unmodifiableList(builder.mDeselectableRoutes);
-        mTransferableRoutes = Collections.unmodifiableList(builder.mTransferableRoutes);
+        mSelectedRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mSelectedRoutes));
+        mSelectableRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mSelectableRoutes));
+        mDeselectableRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mDeselectableRoutes));
+        mTransferableRoutes = Collections.unmodifiableList(
+                convertToUniqueRouteIds(builder.mTransferableRoutes));
 
         mVolumeHandling = builder.mVolumeHandling;
         mVolumeMax = builder.mVolumeMax;
@@ -326,6 +331,24 @@ public final class RoutingSessionInfo implements Parcelable {
         return result.toString();
     }
 
+    private List<String> convertToUniqueRouteIds(@NonNull List<String> routeIds) {
+        if (routeIds == null) {
+            Log.w(TAG, "routeIds is null. Returning an empty list");
+            return Collections.emptyList();
+        }
+
+        // mProviderId can be null if not set. Return the original list for this case.
+        if (mProviderId == null) {
+            return routeIds;
+        }
+
+        List<String> result = new ArrayList<>();
+        for (String routeId : routeIds) {
+            result.add(MediaRouter2Utils.toUniqueId(mProviderId, routeId));
+        }
+        return result;
+    }
+
     /**
      * Builder class for {@link RoutingSessionInfo}.
      */
@@ -345,7 +368,6 @@ public final class RoutingSessionInfo implements Parcelable {
         Bundle mControlHints;
         boolean mIsSystemSession;
 
-        //TODO: Remove this.
         /**
          * Constructor for builder to create {@link RoutingSessionInfo}.
          * <p>
@@ -392,6 +414,14 @@ public final class RoutingSessionInfo implements Parcelable {
             mDeselectableRoutes = new ArrayList<>(sessionInfo.mDeselectableRoutes);
             mTransferableRoutes = new ArrayList<>(sessionInfo.mTransferableRoutes);
 
+            if (mProviderId != null) {
+                // They must have unique IDs.
+                mSelectedRoutes.replaceAll(MediaRouter2Utils::getOriginalId);
+                mSelectableRoutes.replaceAll(MediaRouter2Utils::getOriginalId);
+                mDeselectableRoutes.replaceAll(MediaRouter2Utils::getOriginalId);
+                mTransferableRoutes.replaceAll(MediaRouter2Utils::getOriginalId);
+            }
+
             mVolumeHandling = sessionInfo.mVolumeHandling;
             mVolumeMax = sessionInfo.mVolumeMax;
             mVolume = sessionInfo.mVolume;
@@ -431,12 +461,6 @@ public final class RoutingSessionInfo implements Parcelable {
                 throw new IllegalArgumentException("providerId must not be empty");
             }
             mProviderId = providerId;
-
-            mSelectedRoutes.replaceAll(routeId -> getUniqueId(mProviderId, routeId));
-            mSelectableRoutes.replaceAll(routeId -> getUniqueId(mProviderId, routeId));
-            mDeselectableRoutes.replaceAll(routeId -> getUniqueId(mProviderId, routeId));
-            mTransferableRoutes.replaceAll(routeId -> getUniqueId(mProviderId, routeId));
-
             return this;
         }
 
@@ -457,7 +481,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mSelectedRoutes.add(getUniqueId(mProviderId, routeId));
+            mSelectedRoutes.add(routeId);
             return this;
         }
 
@@ -469,7 +493,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mSelectedRoutes.remove(getUniqueId(mProviderId, routeId));
+            mSelectedRoutes.remove(routeId);
             return this;
         }
 
@@ -490,7 +514,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mSelectableRoutes.add(getUniqueId(mProviderId, routeId));
+            mSelectableRoutes.add(routeId);
             return this;
         }
 
@@ -502,7 +526,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mSelectableRoutes.remove(getUniqueId(mProviderId, routeId));
+            mSelectableRoutes.remove(routeId);
             return this;
         }
 
@@ -523,7 +547,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mDeselectableRoutes.add(getUniqueId(mProviderId, routeId));
+            mDeselectableRoutes.add(routeId);
             return this;
         }
 
@@ -535,7 +559,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mDeselectableRoutes.remove(getUniqueId(mProviderId, routeId));
+            mDeselectableRoutes.remove(routeId);
             return this;
         }
 
@@ -556,7 +580,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mTransferableRoutes.add(getUniqueId(mProviderId, routeId));
+            mTransferableRoutes.add(routeId);
             return this;
         }
 
@@ -568,7 +592,7 @@ public final class RoutingSessionInfo implements Parcelable {
             if (TextUtils.isEmpty(routeId)) {
                 throw new IllegalArgumentException("routeId must not be empty");
             }
-            mTransferableRoutes.remove(getUniqueId(mProviderId, routeId));
+            mTransferableRoutes.remove(routeId);
             return this;
         }
 
@@ -633,16 +657,5 @@ public final class RoutingSessionInfo implements Parcelable {
             }
             return new RoutingSessionInfo(this);
         }
-    }
-
-    private static String getUniqueId(String providerId, String routeId) {
-        if (TextUtils.isEmpty(providerId)) {
-            return routeId;
-        }
-        String originalId = MediaRouter2Utils.getOriginalId(routeId);
-        if (originalId == null) {
-            originalId = routeId;
-        }
-        return MediaRouter2Utils.toUniqueId(providerId, originalId);
     }
 }

@@ -3017,6 +3017,7 @@
       <public name="mimeGroup" />
       <public name="allowDontAutoRevokeWhenUnused" />
       <public name="dontAutoRevokeWhenUnused" />
+      <public name="enableGwpAsan" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">

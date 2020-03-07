@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.people
 
-import android.app.PendingIntent
 import android.graphics.drawable.Drawable
 
 /**
@@ -45,10 +44,11 @@ data class PeopleHubModel(val people: Collection<PersonModel>)
 /** `Model` for a single "Person" in PeopleHub. */
 data class PersonModel(
     val key: PersonKey,
+    val userId: Int,
+    // TODO: these should live in the ViewModel
     val name: CharSequence,
     val avatar: Drawable,
-    val clickRunnable: Runnable,
-    val userId: Int
+    val clickRunnable: Runnable
 )
 
 /** Unique identifier for a Person in PeopleHub. */

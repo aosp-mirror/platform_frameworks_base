@@ -242,6 +242,8 @@ public abstract class EasyConnectStatusCallback {
      *                         to scan to find the network, see the "DPP Connection Status Object"
      *                         section in the specification for the format, and Table E-4 in
      *                         IEEE Std 802.11-2016 - Global operating classes for more details.
+     *                         The sparse array key is the Global Operating class, and the value
+     *                         is an integer array of Wi-Fi channels.
      * @param operatingClassArray Array of bands the Enrollee supports as expressed as the Global
      *                            Operating Class, see Table E-4 in IEEE Std 802.11-2016 - Global
      *                            operating classes.

@@ -17299,11 +17299,13 @@ public class PackageManagerService extends IPackageManager.Stub
             // and whether there are any web-nav filters that fit the profile for running
             // a verification pass now.
             if (needToVerify) {
+                final boolean needsVerification = needsNetworkVerificationLPr(packageName);
                 final int verificationId = mIntentFilterVerificationToken++;
                 for (ParsedActivity a : activities) {
                     for (ParsedIntentInfo filter : a.getIntents()) {
-                        if (filter.handlesWebUris(true)
-                                && needsNetworkVerificationLPr(a.getPackageName())) {
+                        // Run verification against hosts mentioned in any web-nav intent filter,
+                        // even if the filter matches non-web schemes as well
+                        if (needsVerification && filter.handlesWebUris(false)) {
                             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG,
                                     "Verification needed for IntentFilter:" + filter.toString());
                             mIntentFilterVerifier.addOneIntentFilterVerification(
@@ -18562,9 +18564,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 Slog.d(TAG, "Updating package:" + ps.name + " install state for user:"
                         + nextUserId);
             }
-
-            destroyAppDataLIF(pkg, nextUserId,
-                    FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+            if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
+                destroyAppDataLIF(pkg, nextUserId,
+                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
+            }
             clearDefaultBrowserIfNeededForUser(ps.name, nextUserId);
             removeKeystoreDataIfNeeded(mInjector.getUserManagerInternal(), nextUserId, ps.appId);
             clearPackagePreferredActivities(ps.name, nextUserId);

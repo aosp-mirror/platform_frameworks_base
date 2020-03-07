@@ -608,7 +608,8 @@ class MediaRouter2ServiceImpl {
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::requestCreateSessionOnHandler,
                         routerRecord.mUserRecord.mHandler,
-                        routerRecord, route, uniqueRequestId, sessionHints));
+                        routerRecord, /* managerRecord= */ null, route, uniqueRequestId,
+                        sessionHints));
     }
 
     private void selectRouteWithRouter2Locked(@NonNull IMediaRouter2 router,
@@ -788,7 +789,8 @@ class MediaRouter2ServiceImpl {
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::requestCreateSessionOnHandler,
                         routerRecord.mUserRecord.mHandler,
-                        routerRecord, route, uniqueRequestId, null /* sessionHints */));
+                        routerRecord, managerRecord, route, uniqueRequestId,
+                        /* sessionHints= */ null));
     }
 
     private void selectRouteWithManagerLocked(@NonNull IMediaRouter2Manager manager,
@@ -927,7 +929,7 @@ class MediaRouter2ServiceImpl {
         return ((long) routerOrManagerId << 32) | originalRequestId;
     }
 
-    static int toRouterOrManagerId(long uniqueRequestId) {
+    static int toRequesterId(long uniqueRequestId) {
         return (int) (uniqueRequestId >> 32);
     }
 
@@ -1107,11 +1109,6 @@ class MediaRouter2ServiceImpl {
                     this, provider, sessionInfo, requestId));
         }
 
-        @Override
-        public void onSessionCreationFailed(@NonNull MediaRoute2Provider provider, long requestId) {
-            sendMessage(PooledLambda.obtainMessage(UserHandler::onSessionCreationFailedOnHandler,
-                    this, provider, requestId));
-        }
 
         @Override
         public void onSessionUpdated(@NonNull MediaRoute2Provider provider,
@@ -1223,7 +1220,8 @@ class MediaRouter2ServiceImpl {
         }
 
         private void requestCreateSessionOnHandler(@NonNull RouterRecord routerRecord,
-                @NonNull MediaRoute2Info route, long requestId, @Nullable Bundle sessionHints) {
+                @Nullable ManagerRecord managerRecord, @NonNull MediaRoute2Info route,
+                long requestId, @Nullable Bundle sessionHints) {
 
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
@@ -1235,7 +1233,7 @@ class MediaRouter2ServiceImpl {
 
             // TODO: Apply timeout for each request (How many seconds should we wait?)
             SessionCreationRequest request =
-                    new SessionCreationRequest(routerRecord, route, requestId);
+                    new SessionCreationRequest(routerRecord, managerRecord, route, requestId);
             mSessionCreationRequests.add(request);
 
             provider.requestCreateSession(routerRecord.mPackageName, route.getOriginalId(),
@@ -1421,30 +1419,6 @@ class MediaRouter2ServiceImpl {
             mSessionToRouterMap.put(sessionInfo.getId(), routerRecord);
         }
 
-        private void onSessionCreationFailedOnHandler(@NonNull MediaRoute2Provider provider,
-                long requestId) {
-            SessionCreationRequest matchingRequest = null;
-
-            for (SessionCreationRequest request : mSessionCreationRequests) {
-                if (request.mRequestId == requestId
-                        && TextUtils.equals(
-                                request.mRoute.getProviderId(), provider.getUniqueId())) {
-                    matchingRequest = request;
-                    break;
-                }
-            }
-
-            if (matchingRequest == null) {
-                Slog.w(TAG, "Ignoring session creation failed result for unknown request. "
-                        + "requestId=" + requestId);
-                return;
-            }
-
-            mSessionCreationRequests.remove(matchingRequest);
-            notifySessionCreationFailedToRouter(matchingRequest.mRouterRecord,
-                    toOriginalRequestId(requestId));
-        }
-
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             List<IMediaRouter2Manager> managers = getManagers();
@@ -1483,30 +1457,56 @@ class MediaRouter2ServiceImpl {
 
         private void onRequestFailedOnHandler(@NonNull MediaRoute2Provider provider,
                 long requestId, int reason) {
-            final int managerId = toRouterOrManagerId(requestId);
-
-            MediaRouter2ServiceImpl service = mServiceRef.get();
-            if (service == null) {
+            if (handleSessionCreationRequestFailed(provider, requestId, reason)) {
                 return;
             }
 
-            ManagerRecord managerToNotifyFailure = null;
-            synchronized (service.mLock) {
-                for (ManagerRecord manager : mUserRecord.mManagerRecords) {
-                    if (manager.mManagerId == managerId) {
-                        managerToNotifyFailure = manager;
-                        break;
-                    }
+            final int requesterId = toRequesterId(requestId);
+            for (ManagerRecord manager : getManagerRecords()) {
+                if (manager.mManagerId == requesterId) {
+                    notifyRequestFailedToManager(
+                            manager.mManager, toOriginalRequestId(requestId), reason);
+                    return;
                 }
             }
 
-            if (managerToNotifyFailure == null) {
-                Slog.w(TAG, "No matching managerRecord found for managerId=" + managerId);
-                return;
+            // Currently, only the manager can get notified of failures.
+            // TODO: Notify router too when the related callback is introduced.
+        }
+
+        // TODO: Find a way to prevent providers from notifying error on random requestId.
+        //       Solutions can be:
+        //       1) Record the other type of requests too (not only session creation request)
+        //       2) Throw exception on providers when they try to notify error on random requestId.
+        private boolean handleSessionCreationRequestFailed(@NonNull MediaRoute2Provider provider,
+                long requestId, int reason) {
+            // Check whether the failure is about creating a session
+            SessionCreationRequest matchingRequest = null;
+            for (SessionCreationRequest request : mSessionCreationRequests) {
+                if (request.mRequestId == requestId && TextUtils.equals(
+                        request.mRoute.getProviderId(), provider.getUniqueId())) {
+                    matchingRequest = request;
+                    break;
+                }
             }
 
-            notifyRequestFailedToManager(
-                    managerToNotifyFailure.mManager, toOriginalRequestId(requestId), reason);
+            if (matchingRequest == null) {
+                // The failure is not about creating a session.
+                return false;
+            }
+
+            mSessionCreationRequests.remove(matchingRequest);
+
+            // Notify the requester about the failure.
+            // The call should be made by either MediaRouter2 or MediaRouter2Manager.
+            if (matchingRequest.mRequestedManagerRecord == null) {
+                notifySessionCreationFailedToRouter(
+                        matchingRequest.mRouterRecord, toOriginalRequestId(requestId));
+            } else {
+                notifyRequestFailedToManager(matchingRequest.mRequestedManagerRecord.mManager,
+                        toOriginalRequestId(requestId), reason);
+            }
+            return true;
         }
 
         private void notifySessionCreatedToRouter(@NonNull RouterRecord routerRecord,
@@ -1594,6 +1594,16 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return managers;
+        }
+
+        private List<ManagerRecord> getManagerRecords() {
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return new ArrayList<>();
+            }
+            synchronized (service.mLock) {
+                return new ArrayList<>(mUserRecord.mManagerRecords);
+            }
         }
 
         private void notifyRoutesToRouter(@NonNull IMediaRouter2 router) {
@@ -1789,12 +1799,16 @@ class MediaRouter2ServiceImpl {
 
         final class SessionCreationRequest {
             public final RouterRecord mRouterRecord;
+            public final ManagerRecord mRequestedManagerRecord;
             public final MediaRoute2Info mRoute;
             public final long mRequestId;
 
+            // requestedManagerRecord is not null only when the request is made by manager.
             SessionCreationRequest(@NonNull RouterRecord routerRecord,
+                    @Nullable ManagerRecord requestedManagerRecord,
                     @NonNull MediaRoute2Info route, long requestId) {
                 mRouterRecord = routerRecord;
+                mRequestedManagerRecord = requestedManagerRecord;
                 mRoute = route;
                 mRequestId = requestId;
             }

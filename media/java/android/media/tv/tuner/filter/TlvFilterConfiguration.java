@@ -29,6 +29,27 @@ import android.media.tv.tuner.TunerUtils;
  */
 @SystemApi
 public class TlvFilterConfiguration extends FilterConfiguration {
+    /**
+     * IPv4 packet type.
+     */
+    public static final int PACKET_TYPE_IPV4 = 0x01;
+    /**
+     * IPv6 packet type.
+     */
+    public static final int PACKET_TYPE_IPV6 = 0x02;
+    /**
+     * Compressed packet type.
+     */
+    public static final int PACKET_TYPE_COMPRESSED = 0x03;
+    /**
+     * Signaling packet type.
+     */
+    public static final int PACKET_TYPE_SIGNALING = 0xFE;
+    /**
+     * NULL packet type.
+     */
+    public static final int PACKET_TYPE_NULL = 0xFF;
+
     private final int mPacketType;
     private final boolean mIsCompressedIpPacket;
     private final boolean mPassthrough;
@@ -48,8 +69,9 @@ public class TlvFilterConfiguration extends FilterConfiguration {
 
     /**
      * Gets packet type.
+     *
+     * <p>The description of each packet type value is shown in ITU-R BT.1869 table 2.
      */
-    @FilterConfiguration.PacketType
     public int getPacketType() {
         return mPacketType;
     }
@@ -96,9 +118,11 @@ public class TlvFilterConfiguration extends FilterConfiguration {
 
         /**
          * Sets packet type.
+         *
+         * <p>The description of each packet type value is shown in ITU-R BT.1869 table 2.
          */
         @NonNull
-        public Builder setPacketType(@FilterConfiguration.PacketType int packetType) {
+        public Builder setPacketType(int packetType) {
             mPacketType = packetType;
             return this;
         }

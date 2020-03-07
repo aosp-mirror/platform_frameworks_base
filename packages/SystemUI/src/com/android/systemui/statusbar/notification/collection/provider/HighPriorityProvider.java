@@ -103,8 +103,8 @@ public class HighPriorityProvider {
     }
 
     private boolean isPeopleNotification(NotificationEntry entry) {
-        return mPeopleNotificationIdentifier.isPeopleNotification(
-                entry.getSbn(), entry.getRanking());
+        return mPeopleNotificationIdentifier.getPeopleNotificationType(
+                entry.getSbn(), entry.getRanking()) != PeopleNotificationIdentifier.TYPE_NON_PERSON;
     }
 
     private boolean hasUserSetImportance(NotificationEntry entry) {

@@ -16,8 +16,13 @@
 
 package android.database;
 
+import android.annotation.NonNull;
+import android.annotation.UserIdInt;
+import android.content.ContentResolver.NotifyFlags;
 import android.net.Uri;
 import android.os.*;
+
+import java.util.ArrayList;
 
 
 /**
@@ -76,9 +81,18 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
+        public void onChange(boolean selfChange, @NonNull Iterable<Uri> uris,
+                @NotifyFlags int flags, @UserIdInt int userId) {
+            // Since we deliver changes from the most-specific to least-specific
+            // overloads, we only need to redirect from the most-specific local
+            // method to the most-specific remote method
+
+            final ArrayList<Uri> asList = new ArrayList<>();
+            uris.forEach(asList::add);
+            final Uri[] asArray = asList.toArray(new Uri[asList.size()]);
+
             try {
-                mRemote.onChange(selfChange, uri, android.os.Process.myUid());
+                mRemote.onChangeEtc(selfChange, asArray, flags, userId);
             } catch (RemoteException ex) {
                 // Do nothing, the far side is dead
             }

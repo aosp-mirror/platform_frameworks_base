@@ -332,6 +332,10 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
                 // Put it at the end of the list.
                 peopleHeaderTarget = lastNotifIndex;
             }
+            // Offset the target to account for the current position of the people header.
+            if (currentPeopleHeaderIdx != -1 && currentPeopleHeaderIdx < peopleHeaderTarget) {
+                peopleHeaderTarget--;
+            }
         }
 
         // Add headers in reverse order to preserve indices
@@ -457,6 +461,11 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     @VisibleForTesting
     ExpandableView getPeopleHeaderView() {
         return mPeopleHubView;
+    }
+
+    @VisibleForTesting
+    void setPeopleHubVisible(boolean visible) {
+        mPeopleHubVisible = visible;
     }
 
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener() {

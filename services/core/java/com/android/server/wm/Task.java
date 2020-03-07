@@ -3121,6 +3121,11 @@ class Task extends WindowContainer<WindowContainer> {
         return activity != null ? activity.createRemoteAnimationTarget(record) : null;
     }
 
+    @Override
+    boolean canCreateRemoteAnimationTarget() {
+        return true;
+    }
+
     WindowState getTopVisibleAppMainWindow() {
         final ActivityRecord activity = getTopVisibleActivity();
         return activity != null ? activity.findMainWindow() : null;

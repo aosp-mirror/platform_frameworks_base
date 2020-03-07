@@ -21,7 +21,7 @@
 
 #include <SkCanvas.h>
 #include <SkDrawable.h>
-#include <ui/FatVector.h>
+#include <utils/FatVector.h>
 
 namespace android {
 namespace uirenderer {

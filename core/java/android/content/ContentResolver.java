@@ -629,7 +629,10 @@ public abstract class ContentResolver implements ContentInterface {
     /** @hide */
     @IntDef(flag = true, prefix = { "NOTIFY_" }, value = {
             NOTIFY_SYNC_TO_NETWORK,
-            NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS
+            NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS,
+            NOTIFY_INSERT,
+            NOTIFY_UPDATE,
+            NOTIFY_DELETE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface NotifyFlags {}
@@ -649,6 +652,36 @@ public abstract class ContentResolver implements ContentInterface {
      * when sending the former, so that observers of "X and descendants" only see the latter.
      */
     public static final int NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS = 1<<1;
+
+    /**
+     * Flag for {@link #notifyChange(Uri, ContentObserver, int)}: typically set
+     * by a {@link ContentProvider} to indicate that this notification is the
+     * result of an {@link ContentProvider#insert} call.
+     * <p>
+     * Sending these detailed flags are optional, but providers are strongly
+     * recommended to send them.
+     */
+    public static final int NOTIFY_INSERT = 1 << 2;
+
+    /**
+     * Flag for {@link #notifyChange(Uri, ContentObserver, int)}: typically set
+     * by a {@link ContentProvider} to indicate that this notification is the
+     * result of an {@link ContentProvider#update} call.
+     * <p>
+     * Sending these detailed flags are optional, but providers are strongly
+     * recommended to send them.
+     */
+    public static final int NOTIFY_UPDATE = 1 << 3;
+
+    /**
+     * Flag for {@link #notifyChange(Uri, ContentObserver, int)}: typically set
+     * by a {@link ContentProvider} to indicate that this notification is the
+     * result of a {@link ContentProvider#delete} call.
+     * <p>
+     * Sending these detailed flags are optional, but providers are strongly
+     * recommended to send them.
+     */
+    public static final int NOTIFY_DELETE = 1 << 4;
 
     /**
      * No exception, throttled by app standby normally.

@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include "incidentd_util.h"
 #include "FdBuffer.h"
 #include "WorkDirectory.h"
 
@@ -63,9 +64,11 @@ public:
 
     sp<IIncidentReportStatusListener> getListener() { return mListener; }
 
-    int getFd() { return mFd; }
+    int getFd();
 
     int setPersistedFd(int fd);
+
+    status_t initGzipIfNecessary();
 
     void closeFd();
 
@@ -74,6 +77,8 @@ private:
     int mFd;
     bool mIsStreaming;
     status_t mStatus;
+    pid_t mZipPid;
+    Fpipe mZipPipe;
 };
 
 // ================================================================================

@@ -4050,8 +4050,15 @@ public class AudioTrack extends PlayerBase
         }
 
         if (what == NATIVE_EVENT_CODEC_FORMAT_CHANGE) {
-            track.mCodecFormatChangedListeners.notify(
-                    0 /* eventCode, unused */, (AudioMetadata.ReadMap) obj);
+            ByteBuffer buffer = (ByteBuffer) obj;
+            buffer.order(ByteOrder.nativeOrder());
+            buffer.rewind();
+            AudioMetadata.ReadMap audioMetaData = AudioMetadata.fromByteBuffer(buffer);
+            if (audioMetaData == null) {
+                Log.e(TAG, "Unable to get audio metadata from byte buffer");
+                return;
+            }
+            track.mCodecFormatChangedListeners.notify(0 /* eventCode, unused */, audioMetaData);
             return;
         }
 

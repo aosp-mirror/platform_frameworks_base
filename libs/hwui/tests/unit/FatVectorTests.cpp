@@ -15,7 +15,7 @@
  */
 
 #include <gtest/gtest.h>
-#include <ui/FatVector.h>
+#include <utils/FatVector.h>
 
 #include <tests/common/TestUtils.h>
 

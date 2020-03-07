@@ -315,6 +315,24 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         verify(mNssl).changeViewPosition(mSectionsManager.getPeopleHeaderView(), 0);
     }
 
+    @Test
+    public void testPeopleFiltering_keepPeopleHeaderWhenSectionEmpty() {
+        mSectionsManager.setPeopleHubVisible(true);
+        enablePeopleFiltering();
+
+        setStackState(
+                ChildType.PEOPLE_HEADER,
+                ChildType.ALERTING_HEADER,
+                ChildType.ALERTING,
+                ChildType.GENTLE_HEADER,
+                ChildType.GENTLE
+        );
+        mSectionsManager.updateSectionBoundaries();
+
+        verify(mNssl, never()).removeView(mSectionsManager.getPeopleHeaderView());
+        verify(mNssl).changeViewPosition(mSectionsManager.getPeopleHeaderView(), 0);
+    }
+
     private void enablePeopleFiltering() {
         when(mSectionsFeatureManager.isFilteringEnabled()).thenReturn(true);
         when(mSectionsFeatureManager.getNumberOfBuckets()).thenReturn(4);

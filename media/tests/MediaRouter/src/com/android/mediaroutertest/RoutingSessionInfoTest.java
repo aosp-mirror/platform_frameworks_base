@@ -70,7 +70,7 @@ public class RoutingSessionInfoTest {
 
         RoutingSessionInfo sessionInfoWithOtherProviderId =
                 new RoutingSessionInfo.Builder(sessionInfoWithProviderId)
-                .setProviderId(TEST_OTHER_PROVIDER_ID).build();
+                        .setProviderId(TEST_OTHER_PROVIDER_ID).build();
 
         assertNotEquals(sessionInfoWithOtherProviderId.getSelectedRoutes(),
                 sessionInfoWithProviderId.getSelectedRoutes());

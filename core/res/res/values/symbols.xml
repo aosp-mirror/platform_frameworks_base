@@ -3874,7 +3874,9 @@
   <java-symbol type="color" name="resolver_tabs_active_color" />
   <java-symbol type="color" name="resolver_tabs_inactive_color" />
   <java-symbol type="string" name="resolver_personal_tab" />
+  <java-symbol type="string" name="resolver_personal_tab_accessibility" />
   <java-symbol type="string" name="resolver_work_tab" />
+  <java-symbol type="string" name="resolver_work_tab_accessibility" />
   <java-symbol type="id" name="stub" />
   <java-symbol type="id" name="resolver_empty_state" />
   <java-symbol type="id" name="resolver_empty_state_icon" />
@@ -3886,11 +3888,13 @@
   <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />
   <java-symbol type="string" name="resolver_cant_share_cross_profile_explanation" />
-  <java-symbol type="string" name="resolver_turn_on_work_apps" />
-  <java-symbol type="string" name="resolver_turn_on_work_apps_explanation" />
+  <java-symbol type="string" name="resolver_cant_access_work_apps" />
+  <java-symbol type="string" name="resolver_cant_access_work_apps_explanation" />
+  <java-symbol type="string" name="resolver_cant_access_personal_apps" />
+  <java-symbol type="string" name="resolver_cant_access_personal_apps_explanation" />
+  <java-symbol type="string" name="resolver_turn_on_work_apps_view" />
+  <java-symbol type="string" name="resolver_turn_on_work_apps_share" />
   <java-symbol type="string" name="resolver_no_apps_available" />
-  <java-symbol type="string" name="resolver_no_apps_available_explanation" />
-  <java-symbol type="string" name="resolver_no_apps_available_explanation" />
   <java-symbol type="string" name="resolver_switch_on_work" />
   <java-symbol type="drawable" name="ic_work_apps_off" />
   <java-symbol type="drawable" name="ic_sharing_disabled" />

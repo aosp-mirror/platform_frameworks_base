@@ -391,8 +391,9 @@ public class PackageInfoUtils {
         ArrayMap<String, ProcessInfo> retProcs = new ArrayMap<>(numProcs);
         for (String key : procs.keySet()) {
             ParsedProcess proc = procs.get(key);
-            retProcs.put(proc.getName(), new ProcessInfo(proc.getName(),
-                    new ArraySet<>(proc.getDeniedPermissions())));
+            retProcs.put(proc.getName(),
+                    new ProcessInfo(proc.getName(), new ArraySet<>(proc.getDeniedPermissions()),
+                            proc.getEnableGwpAsan()));
         }
         return retProcs;
     }

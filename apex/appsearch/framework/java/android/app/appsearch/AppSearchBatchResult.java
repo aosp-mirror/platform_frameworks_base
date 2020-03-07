@@ -26,30 +26,32 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Provides access to multiple results from a batch operation accepting multiple inputs.
+ * Provides access to multiple {@link AppSearchResult}s from a batch operation accepting multiple
+ * inputs.
  *
- * @param <KeyType> The type of the keys for {@link #getResults} and {@link #getFailures}.
+ * @param <KeyType> The type of the keys for {@link #getSuccesses} and {@link #getFailures}.
  * @param <ValueType> The type of result objects associated with the keys.
  * @hide
  */
 public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
-    @NonNull private final Map<KeyType, ValueType> mResults;
-    @NonNull private final Map<KeyType, Throwable> mFailures;
+    @NonNull private final Map<KeyType, ValueType> mSuccesses;
+    @NonNull private final Map<KeyType, AppSearchResult<ValueType>> mFailures;
 
     private AppSearchBatchResult(
-            @NonNull Map<KeyType, ValueType> results, @NonNull Map<KeyType, Throwable> failures) {
-        mResults = results;
+            @NonNull Map<KeyType, ValueType> successes,
+            @NonNull Map<KeyType, AppSearchResult<ValueType>> failures) {
+        mSuccesses = successes;
         mFailures = failures;
     }
 
     private AppSearchBatchResult(@NonNull Parcel in) {
-        mResults = Collections.unmodifiableMap(in.readHashMap(/*loader=*/ null));
+        mSuccesses = Collections.unmodifiableMap(in.readHashMap(/*loader=*/ null));
         mFailures = Collections.unmodifiableMap(in.readHashMap(/*loader=*/ null));
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeMap(mResults);
+        dest.writeMap(mSuccesses);
         dest.writeMap(mFailures);
     }
 
@@ -59,23 +61,24 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     }
 
     /**
-     * Returns a {@link Map} of all successful keys mapped to the results they produced.
+     * Returns a {@link Map} of all successful keys mapped to the successful {@link ValueType}
+     * values they produced.
      *
-     * <p>The values of the {@link Map} may be {@code null}.
+     * <p>The values of the {@link Map} will not be {@code null}.
      */
     @NonNull
-    public Map<KeyType, ValueType> getResults() {
-        return mResults;
+    public Map<KeyType, ValueType> getSuccesses() {
+        return mSuccesses;
     }
 
     /**
-     * Returns a {@link Map} of all failed keys mapped to a {@link Throwable} representing the cause
-     * of failure.
+     * Returns a {@link Map} of all failed keys mapped to the failed {@link AppSearchResult}s they
+     * produced.
      *
-     * <p>The values of the {@link Map} may be {@code null}.
+     * <p>The values of the {@link Map} will not be {@code null}.
      */
     @NonNull
-    public Map<KeyType, Throwable> getFailures() {
+    public Map<KeyType, AppSearchResult<ValueType>> getFailures() {
         return mFailures;
     }
 
@@ -100,15 +103,6 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
     };
 
     /**
-     * Creates a new {@link Builder} for this {@link AppSearchBatchResult}.
-     * @hide
-     */
-    @NonNull
-    public static <KeyType, ValueType> Builder<KeyType, ValueType> newBuilder() {
-        return new Builder<>();
-    }
-
-    /**
      * Builder for {@link AppSearchBatchResult} objects.
      *
      * @param <KeyType> The type of keys.
@@ -116,35 +110,54 @@ public class AppSearchBatchResult<KeyType, ValueType> implements Parcelable {
      * @hide
      */
     public static final class Builder<KeyType, ValueType> {
-        @NonNull private final Map<KeyType, ValueType> mResults = new ArrayMap<>();
-        @NonNull private final Map<KeyType, Throwable> mFailures = new ArrayMap<>();
+        private final Map<KeyType, ValueType> mSuccesses = new ArrayMap<>();
+        private final Map<KeyType, AppSearchResult<ValueType>> mFailures = new ArrayMap<>();
 
-        private Builder() {}
+        /** Creates a new {@link Builder} for this {@link AppSearchBatchResult}. */
+        public Builder() {}
 
         /**
-         * Registers that the {@code key} was processed successfully and associates it with
-         * {@code value}. Any previous mapping for a key, whether success or failure, is deleted.
+         * Associates the {@code key} with the given successful return value.
+         *
+         * <p>Any previous mapping for a key, whether success or failure, is deleted.
          */
-        public Builder setSuccess(@NonNull KeyType key, @Nullable ValueType value) {
-            mResults.put(key, value);
-            mFailures.remove(key);
-            return this;
+        public Builder setSuccess(@NonNull KeyType key, @Nullable ValueType result) {
+            return setResult(key, AppSearchResult.newSuccessfulResult(result));
         }
 
         /**
-         * Registers that the {@code key} failed and associates it with {@code throwable}. Any
-         * previous mapping for a key, whether success or failure, is deleted.
+         * Associates the {@code key} with the given failure code and error message.
+         *
+         * <p>Any previous mapping for a key, whether success or failure, is deleted.
          */
-        public Builder setFailure(@NonNull KeyType key, @Nullable Throwable throwable) {
-            mFailures.put(key, throwable);
-            mResults.remove(key);
+        public Builder setFailure(
+                @NonNull KeyType key,
+                @AppSearchResult.ResultCode int resultCode,
+                @Nullable String errorMessage) {
+            return setResult(key, AppSearchResult.newFailedResult(resultCode, errorMessage));
+        }
+
+        /**
+         * Associates the {@code key} with the given {@code result}.
+         *
+         * <p>Any previous mapping for a key, whether success or failure, is deleted.
+         */
+        @NonNull
+        public Builder setResult(@NonNull KeyType key, @NonNull AppSearchResult<ValueType> result) {
+            if (result.isSuccess()) {
+                mSuccesses.put(key, result.getResultValue());
+                mFailures.remove(key);
+            } else {
+                mFailures.put(key, result);
+                mSuccesses.remove(key);
+            }
             return this;
         }
 
         /** Builds an {@link AppSearchBatchResult} from the contents of this {@link Builder}. */
         @NonNull
         public AppSearchBatchResult<KeyType, ValueType> build() {
-            return new AppSearchBatchResult<>(mResults, mFailures);
+            return new AppSearchBatchResult<>(mSuccesses, mFailures);
         }
     }
 }

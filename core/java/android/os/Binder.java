@@ -263,6 +263,8 @@ public class Binder implements IBinder {
      * system services to determine its identity and check permissions.
      * If the current thread is not currently executing an incoming transaction,
      * then its own pid is returned.
+     *
+     * Warning: oneway transactions do not receive PID.
      */
     @CriticalNative
     public static final native int getCallingPid();

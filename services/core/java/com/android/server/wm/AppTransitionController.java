@@ -446,7 +446,7 @@ public class AppTransitionController {
             siblings.add(current);
             boolean canPromote = true;
 
-            if (parent == null) {
+            if (parent == null || !parent.canCreateRemoteAnimationTarget()) {
                 canPromote = false;
             } else {
                 // In case a descendant of the parent belongs to the other group, we cannot promote

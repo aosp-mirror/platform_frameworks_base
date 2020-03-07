@@ -19,6 +19,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.robolectric.Shadows.shadowOf;
 
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -27,6 +29,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 
 import java.util.ArrayList;
 
@@ -35,13 +38,16 @@ public class SchedulesProviderTest {
     private static final String INVALID_PACKAGE = "com.android.sunny";
     private static final String VALID_PACKAGE = "com.android.settings";
     private static final String INVALID_METHOD = "queryTestData";
+
+    private final Context mContext = RuntimeEnvironment.application;
+
     private TestSchedulesProvider mProvider;
 
     @Before
     public void setUp() {
         mProvider = Robolectric.setupContentProvider(TestSchedulesProvider.class);
         shadowOf(mProvider).setCallingPackage(VALID_PACKAGE);
-        mProvider.setScheduleInfos(TestSchedulesProvider.createOneValidScheduleInfo());
+        mProvider.setScheduleInfos(TestSchedulesProvider.createOneValidScheduleInfo(mContext));
     }
 
     @Test
@@ -76,7 +82,7 @@ public class SchedulesProviderTest {
 
     @Test
     public void call_addTwoValidData_returnScheduleInfoData() {
-        mProvider.setScheduleInfos(TestSchedulesProvider.createTwoValidScheduleInfos());
+        mProvider.setScheduleInfos(TestSchedulesProvider.createTwoValidScheduleInfos(mContext));
         final Bundle bundle = mProvider.call(SchedulesProvider.METHOD_GENERATE_SCHEDULE_INFO_LIST,
                 null /* arg */, null /* extras */);
 
@@ -89,7 +95,8 @@ public class SchedulesProviderTest {
 
     @Test
     public void call_addTwoValidDataAndOneInvalidData_returnTwoScheduleInfoData() {
-        mProvider.setScheduleInfos(TestSchedulesProvider.createTwoValidAndOneInvalidScheduleInfo());
+        mProvider.setScheduleInfos(
+                TestSchedulesProvider.createTwoValidAndOneInvalidScheduleInfo(mContext));
         final Bundle bundle = mProvider.call(SchedulesProvider.METHOD_GENERATE_SCHEDULE_INFO_LIST,
                 null /* arg */, null /* extras */);
 
@@ -112,55 +119,56 @@ public class SchedulesProviderTest {
             mScheduleInfos = scheduleInfos;
         }
 
-        private static ArrayList<ScheduleInfo> createOneValidScheduleInfo() {
+        private static ArrayList<ScheduleInfo> createOneValidScheduleInfo(Context context) {
             final ArrayList<ScheduleInfo> scheduleInfos = new ArrayList<>();
-            final Intent intent = new Intent("android.settings.NIGHT_DISPLAY_SETTINGS").addCategory(
-                    Intent.CATEGORY_DEFAULT);
-            final ScheduleInfo info = new ScheduleInfo.Builder().setTitle(
-                    "Night Light").setSummary("This a sunny test").setIntent(intent).build();
+
+            final ScheduleInfo info = new ScheduleInfo.Builder().setTitle("Night Light").setSummary(
+                    "This a sunny test").setPendingIntent(createTestPendingIntent(context,
+                    "android.settings.NIGHT_DISPLAY_SETTINGS")).build();
             scheduleInfos.add(info);
 
             return scheduleInfos;
         }
 
-        private static ArrayList<ScheduleInfo> createTwoValidScheduleInfos() {
+        private static ArrayList<ScheduleInfo> createTwoValidScheduleInfos(Context context) {
             final ArrayList<ScheduleInfo> scheduleInfos = new ArrayList<>();
-            Intent intent = new Intent("android.settings.NIGHT_DISPLAY_SETTINGS").addCategory(
-                    Intent.CATEGORY_DEFAULT);
-            ScheduleInfo info = new ScheduleInfo.Builder().setTitle(
-                    "Night Light").setSummary("This a sunny test").setIntent(intent).build();
+            ScheduleInfo info = new ScheduleInfo.Builder().setTitle("Night Light").setSummary(
+                    "This a sunny test").setPendingIntent(createTestPendingIntent(context,
+                    "android.settings.NIGHT_DISPLAY_SETTINGS")).build();
             scheduleInfos.add(info);
 
-            intent = new Intent("android.settings.DISPLAY_SETTINGS").addCategory(
-                    Intent.CATEGORY_DEFAULT);
             info = new ScheduleInfo.Builder().setTitle("Display").setSummary(
-                    "Display summary").setIntent(intent).build();
+                    "Display summary").setPendingIntent(
+                    createTestPendingIntent(context, "android.settings.DISPLAY_SETTINGS")).build();
             scheduleInfos.add(info);
 
             return scheduleInfos;
         }
 
-        private static ArrayList<ScheduleInfo> createTwoValidAndOneInvalidScheduleInfo() {
+        private static ArrayList<ScheduleInfo> createTwoValidAndOneInvalidScheduleInfo(
+                Context context) {
             final ArrayList<ScheduleInfo> scheduleInfos = new ArrayList<>();
-            Intent intent = new Intent("android.settings.NIGHT_DISPLAY_SETTINGS").addCategory(
-                    Intent.CATEGORY_DEFAULT);
-            ScheduleInfo info = new ScheduleInfo.Builder().setTitle(
-                    "Night Light").setSummary("This a sunny test").setIntent(intent).build();
+            ScheduleInfo info = new ScheduleInfo.Builder().setTitle("Night Light").setSummary(
+                    "This a sunny test").setPendingIntent(createTestPendingIntent(context,
+                    "android.settings.NIGHT_DISPLAY_SETTINGS")).build();
             scheduleInfos.add(info);
 
-            intent = new Intent("android.settings.DISPLAY_SETTINGS").addCategory(
-                    Intent.CATEGORY_DEFAULT);
             info = new ScheduleInfo.Builder().setTitle("Display").setSummary(
-                    "Display summary").setIntent(intent).build();
+                    "Display summary").setPendingIntent(
+                    createTestPendingIntent(context, "android.settings.DISPLAY_SETTINGS")).build();
             scheduleInfos.add(info);
 
-            intent = new Intent("android.settings.DISPLAY_SETTINGS").addCategory(
-                    Intent.CATEGORY_DEFAULT);
-            info = new ScheduleInfo.Builder().setTitle("").setSummary("Display summary").setIntent(
-                    intent).build();
+            info = new ScheduleInfo.Builder().setTitle("").setSummary(
+                    "Display summary").setPendingIntent(
+                    createTestPendingIntent(context, "android.settings.DISPLAY_SETTINGS")).build();
             scheduleInfos.add(info);
 
             return scheduleInfos;
+        }
+
+        private static PendingIntent createTestPendingIntent(Context context, String action) {
+            final Intent intent = new Intent(action).addCategory(Intent.CATEGORY_DEFAULT);
+            return PendingIntent.getActivity(context, 0 /* requestCode */, intent, 0 /* flags */);
         }
     }
 }

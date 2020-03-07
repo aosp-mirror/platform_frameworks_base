@@ -26,7 +26,8 @@ namespace os {
 IncidentReportArgs::IncidentReportArgs()
     :mSections(),
      mAll(false),
-     mPrivacyPolicy(-1)
+     mPrivacyPolicy(-1),
+     mGzip(false)
 {
 }
 
@@ -36,7 +37,8 @@ IncidentReportArgs::IncidentReportArgs(const IncidentReportArgs& that)
      mAll(that.mAll),
      mPrivacyPolicy(that.mPrivacyPolicy),
      mReceiverPkg(that.mReceiverPkg),
-     mReceiverCls(that.mReceiverCls)
+     mReceiverCls(that.mReceiverCls),
+     mGzip(that.mGzip)
 {
 }
 
@@ -89,6 +91,11 @@ IncidentReportArgs::writeToParcel(Parcel* out) const
     }
 
     err = out->writeString16(String16(mReceiverCls.c_str()));
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    err = out->writeInt32(mGzip);
     if (err != NO_ERROR) {
         return err;
     }
@@ -149,6 +156,15 @@ IncidentReportArgs::readFromParcel(const Parcel* in)
     mReceiverPkg = String8(in->readString16()).string();
     mReceiverCls = String8(in->readString16()).string();
 
+    int32_t gzip;
+    err = in->readInt32(&gzip);
+    if (err != NO_ERROR) {
+        return err;
+    }
+    if (gzip != 0) {
+        mGzip = gzip;
+    }
+
     return OK;
 }
 
@@ -191,6 +207,12 @@ void
 IncidentReportArgs::addHeader(const vector<uint8_t>& headerProto)
 {
     mHeaders.push_back(headerProto);
+}
+
+void
+IncidentReportArgs::setGzip(bool gzip)
+{
+    mGzip = gzip;
 }
 
 bool

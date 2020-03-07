@@ -1196,13 +1196,16 @@ static jobject Bitmap_wrapHardwareBufferBitmap(JNIEnv* env, jobject, jobject har
 static jobject Bitmap_getHardwareBuffer(JNIEnv* env, jobject, jlong bitmapPtr) {
 #ifdef __ANDROID__ // Layoutlib does not support graphic buffer
     LocalScopedBitmap bitmapHandle(bitmapPtr);
-    LOG_ALWAYS_FATAL_IF(!bitmapHandle->isHardware(),
+    if (!bitmapHandle->isHardware()) {
+        jniThrowException(env, "java/lang/IllegalStateException",
             "Hardware config is only supported config in Bitmap_getHardwareBuffer");
+        return nullptr;
+    }
 
     Bitmap& bitmap = bitmapHandle->bitmap();
     return AHardwareBuffer_toHardwareBuffer(env, bitmap.hardwareBuffer());
 #else
-    return NULL;
+    return nullptr;
 #endif
 }
 

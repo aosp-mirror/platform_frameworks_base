@@ -64,7 +64,7 @@ public class InputConsumerController {
     private final class InputEventReceiver extends BatchedInputEventReceiver {
 
         public InputEventReceiver(InputChannel inputChannel, Looper looper) {
-            super(inputChannel, looper, Choreographer.getSfInstance());
+            super(inputChannel, looper, Choreographer.getInstance());
         }
 
         @Override

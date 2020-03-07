@@ -245,5 +245,8 @@ public class SecureSettingsValidators {
                 new InclusiveIntegerRangeValidator(
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN,
                         Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
+        VALIDATORS.put(
+                Secure.ACCESSIBILITY_BUTTON_LONG_PRESS_TARGETS,
+                ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
     }
 }

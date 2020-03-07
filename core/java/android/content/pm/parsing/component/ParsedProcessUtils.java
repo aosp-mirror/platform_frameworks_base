@@ -103,6 +103,11 @@ public class ParsedProcessUtils {
             if (proc.name == null || proc.name.length() <= 0) {
                 return input.error("<process> does not specify android:process");
             }
+
+            if (sa.hasValue(R.styleable.AndroidManifestProcess_enableGwpAsan)) {
+                proc.enableGwpAsan =
+                        sa.getBoolean(R.styleable.AndroidManifestProcess_enableGwpAsan, false);
+            }
         } finally {
             sa.recycle();
         }

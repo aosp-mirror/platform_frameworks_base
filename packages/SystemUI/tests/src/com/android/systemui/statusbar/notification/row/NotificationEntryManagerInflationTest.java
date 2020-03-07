@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -76,6 +77,7 @@ import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -84,12 +86,11 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
-import java.util.concurrent.CountDownLatch;
-
 /**
  * Functional tests for notification inflation from {@link NotificationEntryManager}.
  */
 @SmallTest
+@Ignore("Flaking")
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationEntryManagerInflationTest extends SysuiTestCase {
@@ -131,7 +132,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
     private NotificationEntryManager mEntryManager;
     private NotificationRowBinderImpl mRowBinder;
     private Handler mHandler;
-    private CountDownLatch mCountDownLatch;
 
     @Before
     public void setUp() {
@@ -307,7 +307,9 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         verify(mEntryListener).onPendingEntryAdded(entryCaptor.capture());
         NotificationEntry entry = entryCaptor.getValue();
 
-        waitForInflation();
+        // Wait for inflation
+        // row inflation, system notification, remote views, contracted view
+        waitForMessages(4);
 
         // THEN the notification has its row inflated
         assertNotNull(entry.getRow());
@@ -334,7 +336,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 NotificationEntry.class);
         verify(mEntryListener).onPendingEntryAdded(entryCaptor.capture());
         NotificationEntry entry = entryCaptor.getValue();
-        waitForInflation();
+        waitForMessages(4);
 
         Mockito.reset(mEntryListener);
         Mockito.reset(mPresenter);
@@ -342,7 +344,9 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         // WHEN the notification is updated
         mEntryManager.updateNotification(mSbn, mRankingMap);
 
-        waitForInflation();
+        // Wait for inflation
+        // remote views, contracted view
+        waitForMessages(2);
 
         // THEN the notification has its row and inflated
         assertNotNull(entry.getRow());
@@ -355,31 +359,32 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         verify(mPresenter).updateNotificationViews();
     }
 
-    private void waitForInflation() {
+    /**
+     * Wait for a certain number of messages to finish before continuing, timing out if they never
+     * occur.
+     *
+     * As part of the inflation pipeline, the main thread is forced to deal with several callbacks
+     * due to the nature of the API used (generally because they're {@link android.os.AsyncTask}
+     * callbacks). In order, these are
+     *
+     * 1) Callback after row inflation. See {@link RowInflaterTask}.
+     * 2) Callback checking if row is system notification. See
+     *    {@link ExpandableNotificationRow#setEntry}
+     * 3) Callback after remote views are created. See
+     *    {@link NotificationContentInflater.AsyncInflationTask}.
+     * 4-6) Callback after each content view is inflated/rebound from remote view. See
+     *      {@link NotificationContentInflater#applyRemoteView} and {@link InflationFlag}.
+     *
+     * Depending on the test, only some of these will be necessary. For example, generally, not
+     * every content view is inflated or the row may not be inflated if one already exists.
+     *
+     * Currently, the burden is on the developer to figure these out until we have a much more
+     * test-friendly way of executing inflation logic (i.e. pass in an executor).
+     */
+    private void waitForMessages(int numMessages) {
         mHandler.postDelayed(TIMEOUT_RUNNABLE, TIMEOUT_TIME);
-        final CountDownLatch latch = new CountDownLatch(1);
-        NotificationEntryListener inflationListener = new NotificationEntryListener() {
-            @Override
-            public void onEntryInflated(NotificationEntry entry) {
-                latch.countDown();
-            }
-
-            @Override
-            public void onEntryReinflated(NotificationEntry entry) {
-                latch.countDown();
-            }
-
-            @Override
-            public void onInflationError(StatusBarNotification notification, Exception exception) {
-                latch.countDown();
-            }
-        };
-        mEntryManager.addNotificationEntryListener(inflationListener);
-        while (latch.getCount() != 0) {
-            TestableLooper.get(this).processMessages(1);
-        }
+        TestableLooper.get(this).processMessages(numMessages);
         mHandler.removeCallbacks(TIMEOUT_RUNNABLE);
-        mEntryManager.removeNotificationEntryListener(inflationListener);
     }
 
 }

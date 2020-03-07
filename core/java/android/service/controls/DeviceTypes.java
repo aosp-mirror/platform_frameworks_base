@@ -27,7 +27,7 @@ import java.lang.annotation.RetentionPolicy;
 public class DeviceTypes {
 
     // Update this when adding new concrete types. Does not count TYPE_UNKNOWN
-    private static final int NUM_CONCRETE_TYPES = 51;
+    private static final int NUM_CONCRETE_TYPES = 52;
 
     public static final @DeviceType int TYPE_UNKNOWN = 0;
     public static final @DeviceType int TYPE_AC_HEATER = 1;
@@ -86,6 +86,11 @@ public class DeviceTypes {
 
     public static final @DeviceType int TYPE_CAMERA = 50;
     public static final @DeviceType int TYPE_DOORBELL = 51;
+
+    /*
+     * Also known as macros, routines can aggregate a series of actions across multiple devices
+     */
+    public static final @DeviceType int TYPE_ROUTINE = 52;
 
     // Update this when adding new generic types.
     private static final int NUM_GENERIC_TYPES = 7;
@@ -165,7 +170,8 @@ public class DeviceTypes {
             TYPE_REFRIGERATOR,
             TYPE_THERMOSTAT,
             TYPE_CAMERA,
-            TYPE_DOORBELL
+            TYPE_DOORBELL,
+            TYPE_ROUTINE
             })
     public @interface DeviceType {}
 

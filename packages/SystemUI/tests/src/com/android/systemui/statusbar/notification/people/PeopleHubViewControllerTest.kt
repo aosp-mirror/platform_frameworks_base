@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.people
 
-import android.app.PendingIntent
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.testing.AndroidTestingRunner
 import android.view.View
@@ -151,7 +149,7 @@ private fun fakePersonModel(
     clickRunnable: Runnable,
     userId: Int = 0
 ): PersonModel =
-        PersonModel(id, name, mock(Drawable::class.java), clickRunnable, userId)
+        PersonModel(id, userId, name, mock(Drawable::class.java), clickRunnable)
 
 private fun fakePersonViewModel(name: CharSequence): PersonViewModel =
         PersonViewModel(name, mock(Drawable::class.java), mock({}.javaClass))

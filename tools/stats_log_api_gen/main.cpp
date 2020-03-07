@@ -212,7 +212,7 @@ run(int argc, char const*const* argv)
             return 1;
         }
         errorCount = android::stats_log_api_gen::write_atoms_info_cpp(
-            out, atoms, cppNamespace, atomsInfoCppHeaderImport, cppHeaderImport);
+            out, atoms, cppNamespace, atomsInfoCppHeaderImport);
         fclose(out);
     }
 

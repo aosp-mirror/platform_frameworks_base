@@ -54,6 +54,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -333,21 +334,6 @@ public class TelephonyManager {
     };
 
     /** @hide */
-    @IntDef(prefix = {"MODEM_COUNT_"},
-            value = {
-                    MODEM_COUNT_NO_MODEM,
-                    MODEM_COUNT_SINGLE_MODEM,
-                    MODEM_COUNT_DUAL_MODEM,
-                    MODEM_COUNT_TRI_MODEM
-            })
-    public @interface ModemCount {}
-
-    public static final int MODEM_COUNT_NO_MODEM     = 0;
-    public static final int MODEM_COUNT_SINGLE_MODEM = 1;
-    public static final int MODEM_COUNT_DUAL_MODEM   = 2;
-    public static final int MODEM_COUNT_TRI_MODEM    = 3;
-
-    /** @hide */
     @UnsupportedAppUsage
     public TelephonyManager(Context context) {
       this(context, SubscriptionManager.DEFAULT_SUBSCRIPTION_ID);
@@ -465,22 +451,22 @@ public class TelephonyManager {
      * Returns 2 for Dual standby mode (Dual SIM functionality).
      * Returns 3 for Tri standby mode (Tri SIM functionality).
      */
-    public @ModemCount int getActiveModemCount() {
+    public int getActiveModemCount() {
         int modemCount = 1;
         switch (getMultiSimConfiguration()) {
             case UNKNOWN:
-                modemCount = MODEM_COUNT_SINGLE_MODEM;
+                modemCount = 1;
                 // check for voice and data support, 0 if not supported
                 if (!isVoiceCapable() && !isSmsCapable() && !isDataCapable()) {
-                    modemCount = MODEM_COUNT_NO_MODEM;
+                    modemCount = 0;
                 }
                 break;
             case DSDS:
             case DSDA:
-                modemCount = MODEM_COUNT_DUAL_MODEM;
+                modemCount = 2;
                 break;
             case TSTS:
-                modemCount = MODEM_COUNT_TRI_MODEM;
+                modemCount = 3;
                 break;
         }
         return modemCount;
@@ -493,7 +479,7 @@ public class TelephonyManager {
      * dual-SIM capable device operating in single SIM mode (only one logical modem is turned on),
      * {@link #getActiveModemCount} returns 1 while this API returns 2.
      */
-    public @ModemCount int getSupportedModemCount() {
+    public int getSupportedModemCount() {
         return TelephonyProperties.max_active_modems().orElse(getActiveModemCount());
     }
 
@@ -11652,11 +11638,9 @@ public class TelephonyManager {
     }
 
     /**
-     * Override the file path for testing OTA emergency number database in a file partition.
+     * Override the file path for OTA emergency number database in a file partition.
      *
-     * @param otaFilePath The test OTA emergency number database file path;
-     *                    if "RESET", recover the original database file partition.
-     *                    Format: <root file folder>@<file path>
+     * @param otaParcelFileDescriptor parcelable file descriptor for OTA emergency number database.
      *
      * <p> Requires permission:
      * {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
@@ -11666,16 +11650,42 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
     @SystemApi
     @TestApi
-    public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String otaFilePath) {
+    public void updateOtaEmergencyNumberDbFilePath(
+            @NonNull ParcelFileDescriptor otaParcelFileDescriptor) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.updateTestOtaEmergencyNumberDbFilePath(otaFilePath);
+                telephony.updateOtaEmergencyNumberDbFilePath(otaParcelFileDescriptor);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            Log.e(TAG, "notifyOtaEmergencyNumberDatabaseInstalled RemoteException", ex);
+            Log.e(TAG, "updateOtaEmergencyNumberDbFilePath RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Reset the file path to default for OTA emergency number database in a file partition.
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
+    @SystemApi
+    @TestApi
+    public void resetOtaEmergencyNumberDbFilePath() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.resetOtaEmergencyNumberDbFilePath();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "resetOtaEmergencyNumberDbFilePath RemoteException", ex);
             ex.rethrowAsRuntimeException();
         }
     }
@@ -12661,7 +12671,8 @@ public class TelephonyManager {
      * {@hide}
      */
     @SystemApi
-    public boolean isCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public boolean matchesCurrentSimOperator(@NonNull String mccmnc, @MvnoType int mvnoType,
             @Nullable String mvnoMatchData) {
         try {
             if (!mccmnc.equals(getSimOperator())) {
