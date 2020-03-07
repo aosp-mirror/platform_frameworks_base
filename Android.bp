@@ -1076,12 +1076,12 @@ python_defaults {
     name: "base_default",
     version: {
         py2: {
-            enabled: true,
-            embedded_launcher: true,
-        },
-        py3: {
             enabled: false,
             embedded_launcher: false,
+        },
+        py3: {
+            enabled: true,
+            embedded_launcher: true,
         },
     },
 }
