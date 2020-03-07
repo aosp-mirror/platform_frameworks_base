@@ -99,8 +99,10 @@ public class ThemeOverlayController extends SystemUI {
                 Settings.Secure.getUriFor(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES),
                 false,
                 new ContentObserver(mBgHandler) {
+
                     @Override
-                    public void onChange(boolean selfChange, Uri uri, int userId) {
+                    public void onChange(boolean selfChange, Iterable<Uri> uris, int flags,
+                            int userId) {
                         if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
                         if (ActivityManager.getCurrentUser() == userId) {
                             updateThemeOverlays();

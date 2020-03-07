@@ -125,14 +125,19 @@ class ControlsControllerImpl @Inject constructor (
 
     @VisibleForTesting
     internal val settingObserver = object : ContentObserver(null) {
-        override fun onChange(selfChange: Boolean, uri: Uri, userId: Int) {
+        override fun onChange(
+            selfChange: Boolean,
+            uris: MutableIterable<Uri>,
+            flags: Int,
+            userId: Int
+        ) {
             // Do not listen to changes in the middle of user change, those will be read by the
             // user-switch receiver.
             if (userChanging || userId != currentUserId) {
                 return
             }
             available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
-                    DEFAULT_ENABLED, currentUserId) != 0
+                DEFAULT_ENABLED, currentUserId) != 0
             resetFavorites(available)
         }
     }
