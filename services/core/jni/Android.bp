@@ -146,6 +146,7 @@ cc_defaults {
         "android.hardware.light@2.0",
         "android.hardware.power@1.0",
         "android.hardware.power@1.1",
+        "android.hardware.power-cpp",
         "android.hardware.power.stats@1.0",
         "android.hardware.thermal@1.0",
         "android.hardware.tv.cec@1.0",
