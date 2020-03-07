@@ -19,9 +19,7 @@
 
 #include <android-base/unique_fd.h>
 #include <binder/BinderService.h>
-
-#include <optional>
-#include <string>
+#include <binder/Nullable.h>
 
 #include "android/os/BnIdmap2.h"
 
@@ -46,7 +44,7 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
   binder::Status createIdmap(const std::string& target_apk_path,
                              const std::string& overlay_apk_path, int32_t fulfilled_policies,
                              bool enforce_overlayable, int32_t user_id,
-                             std::optional<std::string>* _aidl_return) override;
+                             aidl::nullable<std::string>* _aidl_return) override;
 };
 
 }  // namespace android::os
