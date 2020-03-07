@@ -37,8 +37,10 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class provides a system service that manages the TV tuner resources.
@@ -52,16 +54,12 @@ public class TunerResourceManagerService extends SystemService {
     public static final int INVALID_CLIENT_ID = -1;
     private static final int MAX_CLIENT_PRIORITY = 1000;
 
-    // Array of the registered client profiles
-    @VisibleForTesting private SparseArray<ClientProfile> mClientProfiles = new SparseArray<>();
+    // Map of the registered client profiles
+    private Map<Integer, ClientProfile> mClientProfiles = new HashMap<>();
     private int mNextUnusedClientId = 0;
-    private List<Integer> mRegisteredClientIds = new ArrayList<Integer>();
 
-    // Array of the current available frontend resources
-    @VisibleForTesting
-    private SparseArray<FrontendResource> mFrontendResources = new SparseArray<>();
-    // Array of the current available frontend ids
-    private List<Integer> mAvailableFrontendIds = new ArrayList<Integer>();
+    // Map of the current available frontend resources
+    private Map<Integer, FrontendResource> mFrontendResources = new HashMap<>();
 
     private SparseArray<IResourcesReclaimListener> mListeners = new SparseArray<>();
 
@@ -261,9 +259,8 @@ public class TunerResourceManagerService extends SystemService {
                                               .build();
         clientProfile.setPriority(getClientPriority(profile.getUseCase(), pid));
 
-        mClientProfiles.append(clientId[0], clientProfile);
+        addClientProfile(clientId[0], clientProfile);
         mListeners.append(clientId[0], listener);
-        mRegisteredClientIds.add(clientId[0]);
     }
 
     @VisibleForTesting
@@ -271,15 +268,8 @@ public class TunerResourceManagerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "unregisterClientProfile(clientId=" + clientId + ")");
         }
-        for (int id : getClientProfile(clientId).getInUseFrontendIds()) {
-            getFrontendResource(id).removeOwner();
-            for (int groupMemberId : getFrontendResource(id).getExclusiveGroupMemberFeIds()) {
-                getFrontendResource(groupMemberId).removeOwner();
-            }
-        }
-        mClientProfiles.remove(clientId);
+        removeClientProfile(clientId);
         mListeners.remove(clientId);
-        mRegisteredClientIds.remove(clientId);
     }
 
     @VisibleForTesting
@@ -313,56 +303,32 @@ public class TunerResourceManagerService extends SystemService {
             }
         }
 
-        // An arrayList to record the frontends pending on updating. Ids will be removed
-        // from this list once its updating finished. Any frontend left in this list when all
-        // the updates are done will be removed from mAvailableFrontendIds and
-        // mFrontendResources.
-        List<Integer> updatingFrontendIds = new ArrayList<>(mAvailableFrontendIds);
+        // A set to record the frontends pending on updating. Ids will be removed
+        // from this set once its updating finished. Any frontend left in this set when all
+        // the updates are done will be removed from mFrontendResources.
+        Set<Integer> updatingFrontendIds = new HashSet<>(getFrontendResources().keySet());
 
-        // Update frontendResources sparse array and other mappings accordingly
+        // Update frontendResources map and other mappings accordingly
         for (int i = 0; i < infos.length; i++) {
             if (getFrontendResource(infos[i].getId()) != null) {
                 if (DEBUG) {
                     Slog.d(TAG, "Frontend id=" + infos[i].getId() + "exists.");
                 }
-                updatingFrontendIds.remove(new Integer(infos[i].getId()));
+                updatingFrontendIds.remove(infos[i].getId());
             } else {
                 // Add a new fe resource
                 FrontendResource newFe = new FrontendResource.Builder(infos[i].getId())
                                                  .type(infos[i].getFrontendType())
                                                  .exclusiveGroupId(infos[i].getExclusiveGroupId())
                                                  .build();
-                // Update the exclusive group member list in all the existing Frontend resource
-                for (Integer feId : mAvailableFrontendIds) {
-                    FrontendResource fe = getFrontendResource(feId.intValue());
-                    if (fe.getExclusiveGroupId() == newFe.getExclusiveGroupId()) {
-                        newFe.addExclusiveGroupMemberFeId(fe.getId());
-                        newFe.addExclusiveGroupMemberFeId(fe.getExclusiveGroupMemberFeIds());
-                        for (Integer excGroupmemberFeId : fe.getExclusiveGroupMemberFeIds()) {
-                            getFrontendResource(excGroupmemberFeId.intValue())
-                                    .addExclusiveGroupMemberFeId(newFe.getId());
-                        }
-                        fe.addExclusiveGroupMemberFeId(newFe.getId());
-                        break;
-                    }
-                }
-                // Update resource list and available id list
-                mFrontendResources.append(newFe.getId(), newFe);
-                mAvailableFrontendIds.add(newFe.getId());
+                addFrontendResource(newFe);
             }
         }
 
         // TODO check if the removing resource is in use or not. Handle the conflict.
-        for (Integer removingId : updatingFrontendIds) {
-            // update the exclusive group id memver list
-            FrontendResource fe = getFrontendResource(removingId.intValue());
-            fe.removeExclusiveGroupMemberFeId(new Integer(fe.getId()));
-            for (Integer excGroupmemberFeId : fe.getExclusiveGroupMemberFeIds()) {
-                getFrontendResource(excGroupmemberFeId.intValue())
-                        .removeExclusiveGroupMemberFeId(new Integer(fe.getId()));
-            }
-            mFrontendResources.remove(removingId.intValue());
-            mAvailableFrontendIds.remove(removingId);
+        for (int removingId : updatingFrontendIds) {
+            // update the exclusive group id member list
+            removeFrontendResource(removingId);
         }
     }
 
@@ -383,25 +349,24 @@ public class TunerResourceManagerService extends SystemService {
         int inUseLowestPriorityFrId = -1;
         // Priority max value is 1000
         int currentLowestPriority = MAX_CLIENT_PRIORITY + 1;
-        for (int id : mAvailableFrontendIds) {
-            FrontendResource fr = getFrontendResource(id);
+        for (FrontendResource fr : getFrontendResources().values()) {
             if (fr.getType() == request.getFrontendType()) {
                 if (!fr.isInUse()) {
                     // Grant unused frontend with no exclusive group members first.
-                    if (fr.getExclusiveGroupMemberFeIds().size() == 0) {
-                        grantingFrontendId = id;
+                    if (fr.getExclusiveGroupMemberFeIds().isEmpty()) {
+                        grantingFrontendId = fr.getId();
                         break;
                     } else if (grantingFrontendId < 0) {
                         // Grant the unused frontend with lower id first if all the unused
                         // frontends have exclusive group members.
-                        grantingFrontendId = id;
+                        grantingFrontendId = fr.getId();
                     }
                 } else if (grantingFrontendId < 0) {
                     // Record the frontend id with the lowest client priority among all the
                     // in use frontends when no available frontend has been found.
-                    int priority = getOwnerClientPriority(id);
+                    int priority = getOwnerClientPriority(fr);
                     if (currentLowestPriority > priority) {
-                        inUseLowestPriorityFrId = id;
+                        inUseLowestPriorityFrId = fr.getId();
                         currentLowestPriority = priority;
                     }
                 }
@@ -471,33 +436,73 @@ public class TunerResourceManagerService extends SystemService {
     /**
      * Get the owner client's priority from the frontend id.
      *
-     * @param frontendId an in use frontend id.
+     * @param frontend an in use frontend.
      * @return the priority of the owner client of the frontend.
      */
-    private int getOwnerClientPriority(int frontendId) {
-        return getClientProfile(getFrontendResource(frontendId).getOwnerClientId()).getPriority();
+    private int getOwnerClientPriority(FrontendResource frontend) {
+        return getClientProfile(frontend.getOwnerClientId()).getPriority();
     }
 
-    private ClientProfile getClientProfile(int clientId) {
-        return mClientProfiles.get(clientId);
-    }
-
+    @VisibleForTesting
+    @Nullable
     protected FrontendResource getFrontendResource(int frontendId) {
         return mFrontendResources.get(frontendId);
     }
 
     @VisibleForTesting
-    protected SparseArray<ClientProfile> getClientProfiles() {
-        return mClientProfiles;
-    }
-
-    @VisibleForTesting
-    protected SparseArray<FrontendResource> getFrontendResources() {
+    protected Map<Integer, FrontendResource> getFrontendResources() {
         return mFrontendResources;
     }
 
+    private void addFrontendResource(FrontendResource newFe) {
+        // Update the exclusive group member list in all the existing Frontend resource
+        for (FrontendResource fe : getFrontendResources().values()) {
+            if (fe.getExclusiveGroupId() == newFe.getExclusiveGroupId()) {
+                newFe.addExclusiveGroupMemberFeId(fe.getId());
+                newFe.addExclusiveGroupMemberFeIds(fe.getExclusiveGroupMemberFeIds());
+                for (int excGroupmemberFeId : fe.getExclusiveGroupMemberFeIds()) {
+                    getFrontendResource(excGroupmemberFeId)
+                            .addExclusiveGroupMemberFeId(newFe.getId());
+                }
+                fe.addExclusiveGroupMemberFeId(newFe.getId());
+                break;
+            }
+        }
+        // Update resource list and available id list
+        mFrontendResources.put(newFe.getId(), newFe);
+    }
+
+    private void removeFrontendResource(int removingId) {
+        FrontendResource fe = getFrontendResource(removingId);
+        for (int excGroupmemberFeId : fe.getExclusiveGroupMemberFeIds()) {
+            getFrontendResource(excGroupmemberFeId)
+                    .removeExclusiveGroupMemberFeId(fe.getId());
+        }
+        mFrontendResources.remove(removingId);
+    }
+
+    @VisibleForTesting
+    @Nullable
+    protected ClientProfile getClientProfile(int clientId) {
+        return mClientProfiles.get(clientId);
+    }
+
+    private void addClientProfile(int clientId, ClientProfile profile) {
+        mClientProfiles.put(clientId, profile);
+    }
+
+    private void removeClientProfile(int clientId) {
+        for (int id : getClientProfile(clientId).getInUseFrontendIds()) {
+            getFrontendResource(id).removeOwner();
+            for (int groupMemberId : getFrontendResource(id).getExclusiveGroupMemberFeIds()) {
+                getFrontendResource(groupMemberId).removeOwner();
+            }
+        }
+        mClientProfiles.remove(clientId);
+    }
+
     private boolean checkClientExists(int clientId) {
-        return mRegisteredClientIds.contains(clientId);
+        return mClientProfiles.keySet().contains(clientId);
     }
 
     private void enforceAccessPermission() {
