@@ -251,7 +251,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * accommodate different screen densities.  Corresponds to
      * {@link android.R.styleable#AndroidManifestSupportsScreens_anyDensity
      * android:anyDensity}.
+     *
+     * @deprecated Set by default when targeting API 4 or higher and apps
+     *             should not set this to false.
      */
+    @Deprecated
     public static final int FLAG_SUPPORTS_SCREEN_DENSITIES = 1<<13;
     
     /**
