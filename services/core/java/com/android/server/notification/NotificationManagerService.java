@@ -2192,19 +2192,19 @@ public class NotificationManagerService extends SystemService {
 
     private void registerNotificationPreferencesPullers() {
         mPullAtomCallback = new StatsPullAtomCallbackImpl();
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 PACKAGE_NOTIFICATION_PREFERENCES,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
                 mPullAtomCallback
         );
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),
                 mPullAtomCallback
         );
-        mStatsManager.registerPullAtomCallback(
+        mStatsManager.setPullAtomCallback(
                 PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES,
                 null, // use default PullAtomMetadata values
                 BackgroundThread.getExecutor(),

@@ -119,14 +119,12 @@ public final class StatsManager {
     /**
      * @hide
      **/
-    @VisibleForTesting
-    public static final long DEFAULT_COOL_DOWN_NS = 1_000_000_000L; // 1 second.
+    @VisibleForTesting public static final long DEFAULT_COOL_DOWN_MILLIS = 1_000L; // 1 second.
 
     /**
      * @hide
      **/
-    @VisibleForTesting
-    public static final long DEFAULT_TIMEOUT_NS = 10_000_000_000L; // 10 seconds.
+    @VisibleForTesting public static final long DEFAULT_TIMEOUT_MILLIS = 10_000L; // 10 seconds.
 
     /**
      * Constructor for StatsManagerClient.
@@ -489,23 +487,24 @@ public final class StatsManager {
     }
 
     /**
-     * Registers a callback for an atom when that atom is to be pulled. The stats service will
+     * Sets a callback for an atom when that atom is to be pulled. The stats service will
      * invoke pullData in the callback when the stats service determines that this atom needs to be
      * pulled. This method should not be called by third-party apps.
      *
      * @param atomTag           The tag of the atom for this puller callback.
      * @param metadata          Optional metadata specifying the timeout, cool down time, and
      *                          additive fields for mapping isolated to host uids.
-     * @param callback          The callback to be invoked when the stats service pulls the atom.
      * @param executor          The executor in which to run the callback.
+     * @param callback          The callback to be invoked when the stats service pulls the atom.
      *
      */
     @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM)
-    public void registerPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
+    public void setPullAtomCallback(int atomTag, @Nullable PullAtomMetadata metadata,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull StatsPullAtomCallback callback) {
-        long coolDownNs = metadata == null ? DEFAULT_COOL_DOWN_NS : metadata.mCoolDownNs;
-        long timeoutNs = metadata == null ? DEFAULT_TIMEOUT_NS : metadata.mTimeoutNs;
+        long coolDownMillis =
+                metadata == null ? DEFAULT_COOL_DOWN_MILLIS : metadata.mCoolDownMillis;
+        long timeoutMillis = metadata == null ? DEFAULT_TIMEOUT_MILLIS : metadata.mTimeoutMillis;
         int[] additiveFields = metadata == null ? new int[0] : metadata.mAdditiveFields;
         if (additiveFields == null) {
             additiveFields = new int[0];
@@ -516,8 +515,8 @@ public final class StatsManager {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
                 PullAtomCallbackInternal rec =
                     new PullAtomCallbackInternal(atomTag, callback, executor);
-                service.registerPullAtomCallback(atomTag, coolDownNs, timeoutNs, additiveFields,
-                        rec);
+                service.registerPullAtomCallback(
+                        atomTag, coolDownMillis, timeoutMillis, additiveFields, rec);
             } catch (RemoteException e) {
                 throw new RuntimeException("Unable to register pull callback", e);
             }
@@ -525,14 +524,14 @@ public final class StatsManager {
     }
 
     /**
-     * Unregisters a callback for an atom when that atom is to be pulled. Note that any ongoing
+     * Clears a callback for an atom when that atom is to be pulled. Note that any ongoing
      * pulls will still occur. This method should not be called by third-party apps.
      *
      * @param atomTag           The tag of the atom of which to unregister
      *
      */
     @RequiresPermission(android.Manifest.permission.REGISTER_STATS_PULL_ATOM)
-    public void unregisterPullAtomCallback(int atomTag) {
+    public void clearPullAtomCallback(int atomTag) {
         synchronized (sLock) {
             try {
                 IStatsManagerService service = getIStatsManagerServiceLocked();
@@ -585,14 +584,14 @@ public final class StatsManager {
      *
      */
     public static class PullAtomMetadata {
-        private final long mCoolDownNs;
-        private final long mTimeoutNs;
+        private final long mCoolDownMillis;
+        private final long mTimeoutMillis;
         private final int[] mAdditiveFields;
 
         // Private Constructor for builder
-        private PullAtomMetadata(long coolDownNs, long timeoutNs, int[] additiveFields) {
-            mCoolDownNs = coolDownNs;
-            mTimeoutNs = timeoutNs;
+        private PullAtomMetadata(long coolDownMillis, long timeoutMillis, int[] additiveFields) {
+            mCoolDownMillis = coolDownMillis;
+            mTimeoutMillis = timeoutMillis;
             mAdditiveFields = additiveFields;
         }
 
@@ -600,8 +599,8 @@ public final class StatsManager {
          *  Builder for PullAtomMetadata.
          */
         public static class Builder {
-            private long mCoolDownNs;
-            private long mTimeoutNs;
+            private long mCoolDownMillis;
+            private long mTimeoutMillis;
             private int[] mAdditiveFields;
 
             /**
@@ -609,27 +608,28 @@ public final class StatsManager {
              * StatsManager#registerPullAtomCallback
              */
             public Builder() {
-                mCoolDownNs = DEFAULT_COOL_DOWN_NS;
-                mTimeoutNs = DEFAULT_TIMEOUT_NS;
+                mCoolDownMillis = DEFAULT_COOL_DOWN_MILLIS;
+                mTimeoutMillis = DEFAULT_TIMEOUT_MILLIS;
                 mAdditiveFields = null;
             }
 
             /**
-             * Set the cool down time of the pull in nanoseconds. If two successive pulls are issued
-             * within the cool down, a cached version of the first will be used for the second.
+             * Set the cool down time of the pull in milliseconds. If two successive pulls are
+             * issued within the cool down, a cached version of the first pull will be used for the
+             * second pull.
              */
             @NonNull
-            public Builder setCoolDownNs(long coolDownNs) {
-                mCoolDownNs = coolDownNs;
+            public Builder setCoolDownMillis(long coolDownMillis) {
+                mCoolDownMillis = coolDownMillis;
                 return this;
             }
 
             /**
-             * Set the maximum time the pull can take in nanoseconds.
+             * Set the maximum time the pull can take in milliseconds.
              */
             @NonNull
-            public Builder setTimeoutNs(long timeoutNs) {
-                mTimeoutNs = timeoutNs;
+            public Builder setTimeoutMillis(long timeoutMillis) {
+                mTimeoutMillis = timeoutMillis;
                 return this;
             }
 
@@ -652,30 +652,32 @@ public final class StatsManager {
              */
             @NonNull
             public PullAtomMetadata build() {
-                return new PullAtomMetadata(mCoolDownNs, mTimeoutNs, mAdditiveFields);
+                return new PullAtomMetadata(mCoolDownMillis, mTimeoutMillis, mAdditiveFields);
             }
         }
 
         /**
-         * @hide
+         * Return the cool down time of this pull in milliseconds.
          */
-        @VisibleForTesting
-        public long getCoolDownNs() {
-            return mCoolDownNs;
+        public long getCoolDownMillis() {
+            return mCoolDownMillis;
         }
 
         /**
-         * @hide
+         * Return the maximum amount of time this pull can take in milliseconds.
          */
-        @VisibleForTesting
-        public long getTimeoutNs() {
-            return mTimeoutNs;
+        public long getTimeoutMillis() {
+            return mTimeoutMillis;
         }
 
         /**
-         * @hide
+         * Return the additive fields of this pulled atom.
+         *
+         * This is only applicable for atoms that have a uid field. When tasks are run in
+         * isolated processes, the data will be attributed to the host uid. Additive fields
+         * will be combined when the non-additive fields are the same.
          */
-        @VisibleForTesting
+        @Nullable
         public int[] getAdditiveFields() {
             return mAdditiveFields;
         }
