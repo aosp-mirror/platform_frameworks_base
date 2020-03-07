@@ -43,11 +43,9 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.car.notification.CarHeadsUpNotificationManager;
 import com.android.car.notification.CarNotificationListener;
 import com.android.car.notification.CarNotificationView;
 import com.android.car.notification.CarUxRestrictionManagerWrapper;
-import com.android.car.notification.HeadsUpEntry;
 import com.android.car.notification.NotificationClickHandlerFactory;
 import com.android.car.notification.NotificationDataManager;
 import com.android.car.notification.NotificationViewController;
@@ -133,7 +131,6 @@ import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
@@ -185,14 +182,15 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private final Lazy<PowerManagerHelper> mPowerManagerHelperLazy;
     private final ShadeController mShadeController;
     private final CarServiceProvider mCarServiceProvider;
+    private final NotificationDataManager mNotificationDataManager;
     private final CarDeviceProvisionedController mCarDeviceProvisionedController;
     private final ScreenLifecycle mScreenLifecycle;
+    private final CarNotificationListener mCarNotificationListener;
 
     private boolean mDeviceIsSetUpForUser = true;
     private boolean mIsUserSetupInProgress = false;
     private PowerManagerHelper mPowerManagerHelper;
     private FlingAnimationUtils mFlingAnimationUtils;
-    private NotificationDataManager mNotificationDataManager;
     private NotificationClickHandlerFactory mNotificationClickHandlerFactory;
 
     // The container for the notifications.
@@ -230,24 +228,8 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
     private boolean mIsNotificationCardSwiping;
     // If notification shade is being swiped vertically to close.
     private boolean mIsSwipingVerticallyToClose;
-    // Whether heads-up notifications should be shown when shade is open.
-    private boolean mEnableHeadsUpNotificationWhenNotificationShadeOpen;
 
-    private CarUxRestrictionManagerWrapper mCarUxRestrictionManagerWrapper;
-
-    private final CarPowerStateListener mCarPowerStateListener =
-            (int state) -> {
-                // When the car powers on, clear all notifications and mute/unread states.
-                Log.d(TAG, "New car power state: " + state);
-                if (state == CarPowerStateListener.ON) {
-                    if (mNotificationClickHandlerFactory != null) {
-                        mNotificationClickHandlerFactory.clearAllNotifications();
-                    }
-                    if (mNotificationDataManager != null) {
-                        mNotificationDataManager.clearAll();
-                    }
-                }
-            };
+    private final CarUxRestrictionManagerWrapper mCarUxRestrictionManagerWrapper;
 
     public CarStatusBar(
             Context context,
@@ -288,7 +270,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             BubbleController bubbleController,
             NotificationGroupManager groupManager,
             VisualStabilityManager visualStabilityManager,
-            DeviceProvisionedController deviceProvisionedController,
+            CarDeviceProvisionedController carDeviceProvisionedController,
             NavigationBarController navigationBarController,
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
@@ -330,7 +312,10 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             CarServiceProvider carServiceProvider,
             Lazy<PowerManagerHelper> powerManagerHelperLazy,
             CarNavigationBarController carNavigationBarController,
-            FlingAnimationUtils.Builder flingAnimationUtilsBuilder) {
+            FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
+            NotificationDataManager notificationDataManager,
+            CarUxRestrictionManagerWrapper carUxRestrictionManagerWrapper,
+            CarNotificationListener carNotificationListener) {
         super(
                 context,
                 notificationsController,
@@ -370,7 +355,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 bubbleController,
                 groupManager,
                 visualStabilityManager,
-                deviceProvisionedController,
+                carDeviceProvisionedController,
                 navigationBarController,
                 assistManagerLazy,
                 configurationController,
@@ -411,14 +396,16 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mUserSwitcherController = userSwitcherController;
         mScrimController = scrimController;
         mLockscreenLockIconController = lockscreenLockIconController;
-        mCarDeviceProvisionedController =
-                (CarDeviceProvisionedController) deviceProvisionedController;
+        mCarDeviceProvisionedController = carDeviceProvisionedController;
         mShadeController = shadeController;
         mCarServiceProvider = carServiceProvider;
         mPowerManagerHelperLazy = powerManagerHelperLazy;
         mCarNavigationBarController = carNavigationBarController;
         mFlingAnimationUtilsBuilder = flingAnimationUtilsBuilder;
         mScreenLifecycle = screenLifecycle;
+        mNotificationDataManager = notificationDataManager;
+        mCarUxRestrictionManagerWrapper = carUxRestrictionManagerWrapper;
+        mCarNotificationListener = carNotificationListener;
     }
 
     @Override
@@ -461,7 +448,17 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
         mCarBatteryController.startListening();
 
         mPowerManagerHelper = mPowerManagerHelperLazy.get();
-        mPowerManagerHelper.setCarPowerStateListener(mCarPowerStateListener);
+        mPowerManagerHelper.setCarPowerStateListener(
+                state -> {
+                    // When the car powers on, clear all notifications and mute/unread states.
+                    Log.d(TAG, "New car power state: " + state);
+                    if (state == CarPowerStateListener.ON) {
+                        if (mNotificationClickHandlerFactory != null) {
+                            mNotificationClickHandlerFactory.clearAllNotifications();
+                        }
+                        mNotificationDataManager.clearAll();
+                    }
+                });
         mPowerManagerHelper.connectToCarService();
 
         mCarDeviceProvisionedController.addCallback(
@@ -612,26 +609,12 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 mShadeController.animateCollapsePanels();
             }
         });
-        CarNotificationListener carNotificationListener = new CarNotificationListener();
-        mCarUxRestrictionManagerWrapper = new CarUxRestrictionManagerWrapper();
-
-        mNotificationDataManager = new NotificationDataManager();
 
         mNotificationDataManager.setOnUnseenCountUpdateListener(() -> {
-            if (mNotificationDataManager != null) {
-                onUseenCountUpdate(mNotificationDataManager.getUnseenNotificationCount());
-            }
+            onUseenCountUpdate(mNotificationDataManager.getUnseenNotificationCount());
         });
 
-        mEnableHeadsUpNotificationWhenNotificationShadeOpen = mContext.getResources().getBoolean(
-                R.bool.config_enableHeadsUpNotificationWhenNotificationShadeOpen);
-        CarHeadsUpNotificationManager carHeadsUpNotificationManager =
-                new CarSystemUIHeadsUpNotificationManager(mContext,
-                        mNotificationClickHandlerFactory, mNotificationDataManager);
         mNotificationClickHandlerFactory.setNotificationDataManager(mNotificationDataManager);
-
-        carNotificationListener.registerAsSystemService(mContext, mCarUxRestrictionManagerWrapper,
-                carHeadsUpNotificationManager, mNotificationDataManager);
 
         final View glassPane = mNotificationShadeWindowView.findViewById(R.id.glass_pane);
         mNotificationView = mNotificationShadeWindowView.findViewById(R.id.notification_view);
@@ -735,7 +718,7 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     mNotificationViewController = new NotificationViewController(
                             mNotificationView,
                             PreprocessingManager.getInstance(mContext),
-                            carNotificationListener,
+                            mCarNotificationListener,
                             mCarUxRestrictionManagerWrapper,
                             mNotificationDataManager);
                     mNotificationViewController.enable();
@@ -1219,63 +1202,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                     mNotificationView.getHeight() - (int) (event1.getRawY() - event2.getRawY());
             setNotificationViewClipBounds(clipHeight);
             return true;
-        }
-    }
-
-    /**
-     * SystemUi version of the notification manager that overrides methods such that the
-     * notifications end up in the status bar layouts instead of a standalone window.
-     */
-    private class CarSystemUIHeadsUpNotificationManager extends CarHeadsUpNotificationManager {
-
-        CarSystemUIHeadsUpNotificationManager(Context context,
-                NotificationClickHandlerFactory clickHandlerFactory,
-                NotificationDataManager notificationDataManager) {
-            super(context, clickHandlerFactory, notificationDataManager);
-        }
-
-        @Override
-        protected View createHeadsUpPanel() {
-            // In SystemUi the view is already in the window so just return a reference.
-            return mNotificationShadeWindowView.findViewById(R.id.notification_headsup);
-        }
-
-        @Override
-        protected void addHeadsUpPanelToDisplay() {
-            // Set the panel initial state to invisible
-            mHeadsUpPanel.setVisibility(View.INVISIBLE);
-        }
-
-        @Override
-        protected void setInternalInsetsInfo(ViewTreeObserver.InternalInsetsInfo info,
-                HeadsUpEntry currentNotification, boolean panelExpanded) {
-            super.setInternalInsetsInfo(info, currentNotification, mPanelExpanded);
-        }
-
-        @Override
-        protected void setHeadsUpVisible() {
-            // if the Notifications panel is showing or SUW for user is in progress then don't show
-            // heads up notifications
-            if ((!mEnableHeadsUpNotificationWhenNotificationShadeOpen && mPanelExpanded)
-                    || !isDeviceSetupForUser()) {
-                return;
-            }
-
-            super.setHeadsUpVisible();
-            if (mHeadsUpPanel.getVisibility() == View.VISIBLE) {
-                mNotificationShadeWindowController.setHeadsUpShowing(true);
-                mStatusBarWindowController.setForceStatusBarVisible(true);
-            }
-        }
-
-        @Override
-        protected void removeNotificationFromPanel(HeadsUpEntry currentHeadsUpNotification) {
-            super.removeNotificationFromPanel(currentHeadsUpNotification);
-            // If the panel ended up empty and hidden we can remove it from SystemUi
-            if (mHeadsUpPanel.getVisibility() != View.VISIBLE) {
-                mNotificationShadeWindowController.setHeadsUpShowing(false);
-                mStatusBarWindowController.setForceStatusBarVisible(false);
-            }
         }
     }
 }
