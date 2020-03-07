@@ -26,7 +26,7 @@ import java.util.concurrent.Executor
 
 import kotlin.math.roundToInt
 
-const val TAG = "CameraOpTransitionController"
+const val TAG = "CameraAvailabilityListener"
 
 /**
  * Listens for usage of the Camera and controls the ScreenDecorations transition to show extra
