@@ -294,6 +294,17 @@ filegroup {
     ]
 }
 
+java_library {
+    name: "framework-updatable-stubs-module_libs_api",
+    static_libs: [
+        "framework-sdkextensions-stubs-module_libs_api",
+        "framework-tethering-stubs-module_libs_api",
+        "updatable_media_stubs",
+    ],
+    sdk_version: "module_current",
+    visibility: [":__pkg__"],
+}
+
 filegroup {
     name: "framework-all-sources",
     srcs: [
@@ -324,9 +335,11 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
-            "telephony/java",
             "wifi/java",
             "wifi/aidl-export",
+
+            // TODO(b/147699819): remove this
+            "telephony/java",
         ],
     },
 }
@@ -396,7 +409,7 @@ java_defaults {
         "app-compat-annotations",
         "ext",
         "unsupportedappusage",
-        "updatable_media_stubs",
+        "framework-updatable-stubs-module_libs_api",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -455,9 +468,6 @@ java_library {
     name: "framework-minus-apex",
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
-    libs: [
-        "framework-tethering-stubs-module_libs_api",
-    ],
     installable: true,
     javac_shard_size: 150,
     required: [
@@ -494,9 +504,7 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "updatable_media_stubs",
-        "framework-sdkextensions-stubs-systemapi",
-        "framework-tethering-stubs-module_libs_api",
+        "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
