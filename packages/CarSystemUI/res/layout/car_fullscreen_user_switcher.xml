@@ -18,8 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fullscreen_user_switcher"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/container"
@@ -28,11 +27,10 @@
         android:layout_alignParentTop="true"
         android:orientation="vertical">
 
-        <!-- TODO(b/150302361): Status bar is commented out since a top inset is being added which causes it to be displayed below the top of the screen. -->
-        <!--        <include
-                    layout="@layout/car_status_bar_header"
-                    android:layout_alignParentTop="true"
-                    android:theme="@android:style/Theme"/>-->
+        <include
+            layout="@layout/car_status_bar_header"
+            android:layout_alignParentTop="true"
+            android:theme="@android:style/Theme"/>
 
 
         <FrameLayout
@@ -42,9 +40,8 @@
                 android:id="@+id/user_grid"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"/>
-            <!-- TODO(b/150302361): Re-add marginTop once status bar has been added back. -->
-            <!--                android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>-->
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="@dimen/car_user_switcher_margin_top"/>
         </FrameLayout>
 
     </LinearLayout>
