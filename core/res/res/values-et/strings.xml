@@ -249,10 +249,8 @@
       <item quantity="other">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast.</item>
       <item quantity="one">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_0">%d</xliff:g> sekundi pärast.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Veaaruandega koos jäädvustati ekraanipilt"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Ekraanipildi jäädvustamine koos veaaruandega ebaõnnestus"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Hääletu režiim"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Heli on VÄLJAS"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Heli on SEES"</string>
@@ -454,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Lubab rakendusel jätkata kõnet, mida alustati teises rakenduses."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lugeda telefoninumbreid"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Rakendusel lubatakse juurde pääseda seadme telefoninumbritele."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hoida auto ekraani sisselülitatuna"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"tahvelarvuti uinumise vältimine"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"takistada Android TV seadme unerežiimi lülitumist"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"väldi telefoni uinumist"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Lubab rakendusel auto ekraani sisselülitatuna hoida."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Võimaldab rakendusel vältida tahvelarvuti uinumist."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Võimaldab rakendusel takistada Android TV seadme unerežiimi aktiveerumist."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Võimaldab rakendusel vältida telefoni uinumist."</string>
@@ -1631,6 +1631,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Kas suurendada helitugevuse taset üle soovitatud taseme?\n\nPikaajaline valju helitugevusega kuulamine võib kuulmist kahjustada."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Kas kasutada juurdepääsetavuse otseteed?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kui otsetee on sisse lülitatud, käivitab mõlema helitugevuse nupu kolm sekundit all hoidmine juurdepääsetavuse funktsiooni."</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Muuda otseteid"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Tühista"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Lülita otsetee välja"</string>
@@ -1853,8 +1859,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Kategoriseerimata"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Teie määrasite nende märguannete tähtsuse."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"See on tähtis osalevate inimeste tõttu."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Rakenduse kohandatud märguanne"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g> (selle kontoga kasutaja on juba olemas)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Keele lisamine"</string>
@@ -2028,14 +2033,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on lisatud salve PIIRANGUTEGA"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Isiklik"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Töö"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Töörakendustega ei saa jagada"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Isiklike rakendustega ei saa jagada"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Teie IT-administraator blokeeris isiklike ja töörakenduste vahel jagamise"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Lülita sisse töörakendused"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Lülitage sisse töörakendused, et töörakendustele ja -kontaktidele juurde pääseda"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Ühtegi rakendust pole saadaval"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Me ei leidnud ühtegi rakendust"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Lülita sisse tööprofiil"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Telefonikõnede heli salvestamine ja esitamine"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Kui see rakendus on määratud helistamise vaikerakenduseks, lubatakse sellel salvestada ja esitada telefonikõnede heli."</string>
 </resources>
