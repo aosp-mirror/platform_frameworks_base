@@ -6750,7 +6750,7 @@ public class ConnectivityServiceTest {
     public void testCheckConnectivityDiagnosticsPermissionsNetworkStack() throws Exception {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
-                        null, null, null, null, null, new NetworkCapabilities(), null,
+                        null, null, null, null, null, new NetworkCapabilities(), 0,
                         mServiceContext, null, null, mService, null, null, null, 0);
 
         mServiceContext.setPermission(
@@ -6766,7 +6766,7 @@ public class ConnectivityServiceTest {
     public void testCheckConnectivityDiagnosticsPermissionsNoLocationPermission() throws Exception {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
-                        null, null, null, null, null, new NetworkCapabilities(), null,
+                        null, null, null, null, null, new NetworkCapabilities(), 0,
                         mServiceContext, null, null, mService, null, null, null, 0);
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
@@ -6782,7 +6782,7 @@ public class ConnectivityServiceTest {
     public void testCheckConnectivityDiagnosticsPermissionsActiveVpn() throws Exception {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
-                        null, null, null, null, null, new NetworkCapabilities(), null,
+                        null, null, null, null, null, new NetworkCapabilities(), 0,
                         mServiceContext, null, null, mService, null, null, null, 0);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
@@ -6808,7 +6808,7 @@ public class ConnectivityServiceTest {
         nc.setAdministratorUids(Arrays.asList(Process.myUid()));
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
-                        null, null, null, null, null, nc, null, mServiceContext, null, null,
+                        null, null, null, null, null, nc, 0, mServiceContext, null, null,
                         mService, null, null, null, 0);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
@@ -6830,7 +6830,7 @@ public class ConnectivityServiceTest {
         nc.setAdministratorUids(Arrays.asList(Process.myUid()));
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
-                        null, null, null, null, null, nc, null, mServiceContext, null, null,
+                        null, null, null, null, null, nc, 0, mServiceContext, null, null,
                         mService, null, null, null, 0);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
