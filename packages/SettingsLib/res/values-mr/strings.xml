@@ -357,8 +357,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU डीबग स्तर सुरू करा"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग अ‍ॅप्ससाठी GPU डीबग स्तर लोड करण्याची अनुमती द्या"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"व्हर्बोझ विक्रेता लॉगिंग सुरू करा"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"बग रिपोर्टमध्ये अतिरिक्त डिव्हाइस-विशिष्ट विक्रेता लॉगचा समावेश करा ज्यामध्ये खाजगी माहिती असू शकते, अधिक बॅटरी आणि/किंवा अधिक स्टोरेज वापरले जाईल."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विंडो ॲनिमेशन स्केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांझिशन ॲनिमेशन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ॲनिमेटर कालावधी स्केल"</string>
