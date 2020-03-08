@@ -558,6 +558,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Il tuo profilo di lavoro è gestito da <xliff:g id="ORGANIZATION">%1$s</xliff:g> ed è collegato a <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, da cui è possibile monitorare la tua attività di rete lavorativa, inclusi siti web, email e app.\n\nSei collegato anche a <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, da cui è possibile monitorare la tua attività di rete personale."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Sbloccato da TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Il dispositivo resterà bloccato fino allo sblocco manuale"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Ricevi notifiche più velocemente"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Visualizza prima di sbloccare"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"No, grazie"</string>
@@ -979,12 +980,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Sposta in basso a sinistra"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Sposta in basso a destra"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ignora"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Tieni davanti le chat"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"Le nuove chat da <xliff:g id="APP_NAME">%1$s</xliff:g> verranno visualizzate come bolle. Tocca una bolla per aprirla. Trascinala per spostarla.\n\nTocca la bolla"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tocca Gestisci per disattivare le bolle dall\'app"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigazione del sistema aggiornata. Per apportare modifiche, usa le Impostazioni."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Usa le Impostazioni per aggiornare la navigazione del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
@@ -1004,4 +1002,10 @@
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"Tutti"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossibile caricare l\'elenco di tutti i controlli."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altro"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <skip />
 </resources>
