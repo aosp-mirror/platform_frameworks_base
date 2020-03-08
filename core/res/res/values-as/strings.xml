@@ -249,10 +249,8 @@
       <item quantity="one">ত্ৰুটি সম্পর্কীয় অভিযোগৰ বাবে <xliff:g id="NUMBER_1">%d</xliff:g>ছেকেণ্ডৰ ভিতৰত স্ক্ৰীণশ্বট লোৱা হ\'ব।</item>
       <item quantity="other">ত্ৰুটি সম্পর্কীয় অভিযোগৰ বাবে <xliff:g id="NUMBER_1">%d</xliff:g>ছেকেণ্ডৰ ভিতৰত স্ক্ৰীণশ্বট লোৱা হ\'ব।</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"বাগ ৰিপ’ৰ্টৰ সৈতে স্ক্ৰীনশ্বট লোৱা হ’ল"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"বাগ ৰিপ’ৰ্টৰ সৈতে স্ক্ৰীনশ্বট ল’ব পৰা নগ’ল"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"নিঃশব্দ ম\'ড"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ধ্বনি অফ আছে"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ধ্বনি অন আছে"</string>
@@ -454,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"এপটোক এনে কল কৰিবলৈ দিয়ে যিটোৰ আৰম্ভণি অইন এটা এপত হৈছিল।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ফ\'ন নম্বৰসমূহ পঢ়ে"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"এপটোক ডিভাইচটোৰ ফ\'ন নম্বৰসমূহ চাবলৈ অনুমতি দিয়ে।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"গাড়ীৰ স্ক্রীনখন অন কৰি ৰখা"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"টে\'বলেট সুপ্ত অৱস্থালৈ যোৱাত বাধা দিয়ক"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"আপোনাৰ Android TV ডিভাইচটো সুপ্ত অৱস্থালৈ যোৱাত বাধা দিয়ক"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ফ\'ন সুপ্ত অৱস্থালৈ যোৱাত বাধা দিয়ক"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"এপ্‌টোক গাড়ীৰ স্ক্রীনখন অন কৰি ৰাখিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"টে\'বলেট সুপ্ত অৱস্থালৈ যোৱাৰ পৰা প্ৰতিৰোধ কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"এপ্‌টোক আপোনাৰ Android TV ডিভাইচটো সুপ্ত অৱস্থালৈ যোৱাত বাধা দিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ফ\'ন সুপ্ত অৱস্থালৈ যোৱাৰ পৰা প্ৰতিৰোধ কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
@@ -1631,6 +1631,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"অনুমোদিত স্তৰতকৈ ওপৰলৈ ভলিউম বঢ়াব নেকি?\n\nদীৰ্ঘ সময়ৰ বাবে উচ্চ ভলিউমত শুনাৰ ফলত শ্ৰৱণ ক্ষমতাৰ ক্ষতি হ\'ব পাৰে।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"দিব্যাংগসকলৰ সুবিধাৰ শ্বৰ্টকাট ব্যৱহাৰ কৰেনে?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শ্বৰ্টকাটটো অন হৈ থকাৰ সময়ত দুয়োটা ভলিউম বুটাম ৩ ছেকেণ্ডৰ বাবে হেঁচি ধৰি ৰাখিলে এটা সাধ্য সুবিধা আৰম্ভ হ’ব।"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"শ্বৰ্টকাটসমূহ সম্পাদনা কৰক"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"বাতিল কৰক"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"শ্বৰ্টকাট অফ কৰক"</string>
@@ -2028,14 +2034,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>ক সীমাবদ্ধ বাকেটটোত ৰখা হৈছে"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ব্যক্তিগত"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"কৰ্মস্থান"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"কৰ্মস্থানৰ এপ্‌সমূহৰ সৈতে শ্বেয়াৰ কৰিব নোৱাৰি"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ব্যক্তিগত এপ্‌সমূহৰ সৈতে শ্বেয়াৰ কৰিব নোৱাৰি"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"আপোনাৰ আইটি প্ৰশাসকে ব্যক্তিগত আৰু কৰ্মস্থানৰ এপ্‌সমূহৰ মাজত সমল শ্বেয়াৰ কৰাটো অৱৰোধ কৰিছে"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"কৰ্মস্থানৰ এপ্‌সমূহ অন কৰক"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"কৰ্মস্থানৰ এপ্‌ আৰু সম্পৰ্কসমূহ এক্সেছ কৰিবলৈ কৰ্মস্থানৰ এপ্‌সমূহ অন কৰক"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"কোনো এপ্‌ উপলব্ধ নহয়"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"আমি কোনো এপ্‌ বিচাৰি নাপালোঁ"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"কৰ্মস্থানৰ প্ৰ’ফাইল অন কৰক"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"টেলিফ’নী কলসমূহত অডিঅ’ ৰেকৰ্ড অথবা প্লে’ কৰক"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ডিফ’ল্ট ডায়েলাৰ এপ্লিকেশ্বন হিচাপে আবণ্টন কৰিলে, এই এপ্‌টোক টেলিফ’নী কলসমূহত অডিঅ’ ৰেকৰ্ড অথবা প্লে’ কৰিবলৈ অনুমতি দিয়ে।"</string>
 </resources>

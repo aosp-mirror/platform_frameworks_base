@@ -357,7 +357,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏הפעלת שכבות לניפוי באגים ב-GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏טעינת שכבות לניפוי באגים ב-GPU לאפליקציות ניפוי באגים"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"הפעלת רישום ספקים מפורט ביומן"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"הכללת יומני ספקים נוספים, ספציפיים למכשירים, בדוחות על באגים, שעשויים להכיל מידע פרטי, לצרוך יותר מהסוללה ו/או להשתמש ביותר אחסון."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"הוספת רישומי יומן של יצרנים למכשירים ספציפיים בדוחות על באגים. דוחות אלה עשויים להכיל מידע פרטי, להגביר את צריכת הסוללה ולצרוך שטח אחסון גדול יותר."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"קנה מידה לאנימציה של חלון"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"קנה מידה לאנימציית מעבר"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"קנה מידה למשך זמן אנימציה"</string>

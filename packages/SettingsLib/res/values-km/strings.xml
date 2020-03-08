@@ -357,7 +357,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"បើក​ស្រទាប់​ជួសជុល GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"អនុញ្ញាតឱ្យ​ផ្ទុក​ស្រទាប់​ជួស​ជុល GPU សម្រាប់​កម្មវិធី​ជួសជុល"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"បើកកំណត់ហេតុរៀបរាប់អំពីអ្នកលក់"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"រួមមានកំណត់​ហេតុបន្ថែមអំពី​អ្នកលក់ឧបករណ៍ជាក់លាក់​នៅក្នុងរបាយការណ៍​អំពីបញ្ហា ដែលអាច​មានព័ត៌មាន​ឯកជន ប្រើប្រាស់​ថ្មច្រើនជាងមុន និង/ឬប្រើប្រាស់​ទំហំផ្ទុកច្រើនជាងមុន។"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"រួមមានកំណត់​ហេតុបន្ថែមអំពី​អ្នកផ្គត់ផ្គង់សម្រាប់ឧបករណ៍ជាក់លាក់​នៅក្នុងរបាយការណ៍​អំពីបញ្ហា ដែលអាច​មានព័ត៌មាន​ឯកជន ប្រើប្រាស់​ថ្មច្រើនជាងមុន និង/ឬប្រើប្រាស់​ទំហំផ្ទុកច្រើនជាងមុន។"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"មាត្រដ្ឋាន​ចលនា​វិនដូ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"មាត្រដ្ឋាន​ដំណើរ​ផ្លាស់ប្ដូរ​ចលនា"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"មាត្រដ្ឋាន​រយៈពេល​នៃ​កម្មវិធី​ចលនា"</string>

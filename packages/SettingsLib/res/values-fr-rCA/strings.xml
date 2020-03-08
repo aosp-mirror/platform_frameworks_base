@@ -357,8 +357,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Activer couches débogage GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Autoriser couches débogage GPU pour applis de débogage"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activer le journal détaillé des fournisseurs"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Incluez les journaux supplémentaires du fournisseur propres à l\'appareil dans les rapports de bogue. Ils peuvent contenir des données personnelles, épuiser la pile plus rapidement et/ou utiliser plus d\'espace de stockage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Échelle animation fenêtres"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Échelle animination transitions"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Échelle durée animation"</string>

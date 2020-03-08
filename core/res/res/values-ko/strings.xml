@@ -249,10 +249,8 @@
       <item quantity="other">버그 신고 스크린샷을 <xliff:g id="NUMBER_1">%d</xliff:g>초 후에 찍습니다.</item>
       <item quantity="one">버그 신고 스크린샷을 <xliff:g id="NUMBER_0">%d</xliff:g>초 후에 찍습니다.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"버그 신고용 스크린샷 촬영 완료"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"버그 신고용 스크린샷 촬영 실패"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"무음 모드"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"소리 꺼짐"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"소리 켜짐"</string>
@@ -454,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"다른 앱에서 수신한 전화를 계속하려면 앱을 허용합니다."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"전화번호 읽기"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"앱에서 기기의 전화번호에 액세스하도록 허용합니다."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"차량 화면 켜진 상태로 유지"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV 기기 절전 모드 해제"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"앱에서 차량 화면을 켜진 상태로 유지하도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"앱이 태블릿의 절전 모드 전환을 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"앱이 Android TV 기기가 절전 모드로 전환되지 않게 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"앱이 휴대전화의 절전 모드 전환을 막도록 허용합니다."</string>
@@ -1631,6 +1631,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"단축키 수정"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"취소"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"단축키 사용 중지"</string>
@@ -1853,8 +1859,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"지정된 카테고리 없음"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"이러한 알림의 중요도를 설정했습니다."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"관련된 사용자가 있으므로 중요합니다."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"맞춤 앱 알림"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정으로 신규 사용자를 만들도록 허용하시겠습니까? 이 계정으로 등록된 사용자가 이미 존재합니다."</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>에서 <xliff:g id="ACCOUNT">%2$s</xliff:g> 계정으로 신규 사용자를 만들도록 허용하시겠습니까?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"언어 추가"</string>
@@ -2028,14 +2033,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 항목이 RESTRICTED 버킷으로 이동함"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"개인"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"직장"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"직장 앱과 공유할 수 없음"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"개인 앱과 공유할 수 없음"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"IT 관리자가 개인 앱과 직장 앱 간의 공유를 차단함"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"직장 앱 사용 설정"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"직장 앱 및 연락처에 액세스하도록 직장 앱 사용 설정"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"사용 가능한 앱 없음"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"앱을 찾을 수 없음"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"직장 프로필 사용"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"전화 통화 중에 오디오 녹음 또는 재생"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"이 앱이 기본 다이얼러 애플리케이션으로 지정되었을 때 전화 통화 중에 오디오를 녹음하거나 재생하도록 허용합니다."</string>
 </resources>

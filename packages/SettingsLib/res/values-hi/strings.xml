@@ -358,8 +358,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"प्रोफ़ाइल HWUI रेंडरिंग"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"जीपीयू डीबग लेयर चालू करें"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग ऐप के लिए जीपीयू डीबग लेयर लोड करने दें"</string>
-    <!-- no translation found for enable_verbose_vendor_logging (1196698788267682072) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"वर्बोस वेंडर लॉगिंग चालू करें"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"गड़बड़ियों की रिपोर्ट में खास डिवाइस से जुड़े वेंडर लॉग शामिल करें. इन लॉग में निजी जानकारी, बैटरी का ज़्यादा इस्तेमाल, और/या डिवाइस की मेमोरी ज़्यादा इस्तेमाल करने की जानकारी हो सकती है."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"विंडो एनिमेशन स्‍केल"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ट्रांज़िशन एनिमेशन स्‍केल"</string>
@@ -508,9 +507,7 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"हर बार पूछें"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"जब तक आप इसे बंद नहीं करते"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"अभी-अभी"</string>
-    <!-- no translation found for media_transfer_this_device_name (2716555073132169240) -->
-    <skip />
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"फ़ोन का स्पीकर"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"कनेक्ट करने में समस्या हो रही है. डिवाइस को बंद करके चालू करें"</string>
-    <!-- no translation found for media_transfer_wired_device_name (4447880899964056007) -->
-    <skip />
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"वायर वाला ऑडियो डिवाइस"</string>
 </resources>

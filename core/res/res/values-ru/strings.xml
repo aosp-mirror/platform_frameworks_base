@@ -255,10 +255,8 @@
       <item quantity="many">Скриншот будет сделан через <xliff:g id="NUMBER_1">%d</xliff:g> секунд</item>
       <item quantity="other">Скриншот будет сделан через <xliff:g id="NUMBER_1">%d</xliff:g> секунды</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Сделан скриншот с информацией об ошибке."</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Не удалось сделать скриншот с информацией об ошибке."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Режим без звука"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Выключить"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Включить"</string>
@@ -460,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Разрешает приложению продолжить вызов, начатый в другом приложении."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"чтение номеров телефонов"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Разрешает приложению доступ к телефонным номерам устройства."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"Не выключать экран автомобиля"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"Отключение спящего режима"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"запрещать переход устройства Android TV в спящий режим"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"Отключение спящего режима"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Приложение сможет держать экран автомобиля включенным."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Приложение сможет запрещать перевод планшетного ПК в спящий режим."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Приложение сможет препятствовать переводу устройства Android TV в спящий режим."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Приложение сможет запрещать перевод телефона в спящий режим."</string>
@@ -1675,6 +1675,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Установить громкость выше рекомендуемого уровня?\n\nВоздействие громкого звука в течение долгого времени может привести к повреждению слуха."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Использовать быстрое включение?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Чтобы использовать функцию специальных возможностей, когда она включена, нажмите и удерживайте обе кнопки регулировки громкости в течение трех секунд."</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменить быстрые клавиши"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Отмена"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Деактивировать быстрое включение"</string>
@@ -1917,8 +1923,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Без категории"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Вы определяете важность этих уведомлений."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Важное (люди)"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Уведомление пользовательского приложения"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Разрешить приложению \"<xliff:g id="APP">%1$s</xliff:g>\" создать нового пользователя с аккаунтом <xliff:g id="ACCOUNT">%2$s</xliff:g> (пользователь с этим аккаунтом уже существует)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Разрешить приложению \"<xliff:g id="APP">%1$s</xliff:g>\" создать нового пользователя с аккаунтом <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Добавьте язык"</string>
@@ -2096,14 +2101,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Приложение \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" помещено в категорию с ограниченным доступом."</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Личный"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Рабочий"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Нельзя обмениваться данными с рабочими приложениями"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Нельзя обмениваться данными с личными приложениями"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Обмен данными между личными и рабочими приложениями заблокирован системным администратором."</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Включите рабочие приложения"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Включите рабочие приложения, чтобы получить доступ к ним и контактам."</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Нет доступных приложений"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Приложения не найдены."</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Включить рабочий профиль"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Запись и воспроизведение телефонных разговоров"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Если это приложение используется для звонков по умолчанию, оно сможет записывать и воспроизводить телефонные разговоры."</string>
 </resources>
