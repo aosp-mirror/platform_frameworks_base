@@ -357,8 +357,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ഡീബഗ് ലെയറുകൾ പ്രവർത്തനക്ഷമമാക്കൂ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ഡീബഗ് ആപ്പുകൾക്കായി GPU ഡീബഗ് ലെയറുകൾ ലോഡ് ചെയ്യാൻ അനുവദിക്കുക"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"വെർബോസ് വെണ്ടർ ലോഗ് ചെയ്യൽ പ്രവർത്തനക്ഷമമാക്കൂ"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ബഗ് റിപ്പോർട്ടുകളിൽ ഉപകരണ-നിർദ്ദിഷ്ട വെണ്ടർ അധിക ലോഗുകൾ ഉൾപ്പെടുത്തുക, അതിൽ സ്വകാര്യ വിവരങ്ങൾ അടങ്ങിയിരിക്കാം, കൂടുതൽ ബാറ്ററി ഉപയോഗിക്കാം കൂടാതെ/അല്ലെങ്കിൽ കൂടുതൽ സ്‌റ്റോറേജ് ഇടം ഉപയോഗിക്കാം."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"വിൻഡോ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"സംക്രമണ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ആനിമേറ്റർ ദൈർഘ്യ സ്‌കെയിൽ"</string>

@@ -357,8 +357,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Virkja villuleit skják."</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Leyfa villuleit skjákorts fyrir villuleit forrita"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Nákvæm skráning söluaðila"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Taka með viðbótarannála söluaðila fyrir tiltekin tæki í villutilkynningum, sem gætu innihaldið viðkvæmar upplýsingar, notað meiri rafhlöðuorku og/eða þurft meira geymslupláss."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Kvarði gluggahreyfinga"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Lengd hreyfiumbreytinga"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Tímalengd hreyfiáhrifa"</string>

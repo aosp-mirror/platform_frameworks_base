@@ -357,8 +357,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ଡିବଗ୍‌ ଲେୟର୍‌ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ଡିବଗ୍‌ ଆପ୍‌ଗୁଡ଼ିକ ପାଇଁ GPU ଡିବଗ୍‌ ଲେୟର୍‌ ଲୋଡ୍ କରିବାର ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"ଭର୍ବୋସ ଭେଣ୍ଡର୍ ଲଗିଂ ସକ୍ଷମ କରନ୍ତୁ"</string>
-    <!-- no translation found for enable_verbose_vendor_logging_summary (5426292185780393708) -->
-    <skip />
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ବଗ୍ ରିପୋର୍ଟଗୁଡ଼ିକରେ ଅତିରିକ୍ତ ଡିଭାଇସ୍-ନିର୍ଦ୍ଦିଷ୍ଟ ଲଗଗୁଡ଼ିକ ସାମିଲ କରନ୍ତୁ, ଯେଉଁଥିରେ ବ୍ୟକ୍ତିଗତ ସୂଚନା ଥାଇପାରେ, ଯାହା ଅଧିକ ବ୍ୟାଟେରୀ ଏବଂ/କିମ୍ବା ଅଧିକ ଷ୍ଟୋରେଜ୍ ବ୍ୟବହାର କରିପାରେ।"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ୱିଣ୍ଡୋ ଆନିମେସନ୍‌ ସ୍କେଲ୍‌"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ଟ୍ରାଞ୍ଜିସନ୍‌ ଆନିମେସନ୍‌ ସ୍କେଲ୍‌"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ଆନିମେଟର୍‌ ଅବଧି ସ୍କେଲ୍‌"</string>

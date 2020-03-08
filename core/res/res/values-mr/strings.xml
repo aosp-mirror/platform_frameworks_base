@@ -193,14 +193,10 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तुमची संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"तुमच्या ॲडमिनने स्थान सेटिंग्ज बदलल्या आहेत"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"तुमची स्थान सेटिंग्ज पाहण्यासाठी टॅप करा."</string>
-    <!-- no translation found for country_detector (7023275114706088854) -->
-    <skip />
-    <!-- no translation found for location_service (2439187616018455546) -->
-    <skip />
-    <!-- no translation found for sensor_notification_service (7474531979178682676) -->
-    <skip />
-    <!-- no translation found for twilight_service (8964898045693187224) -->
-    <skip />
+    <string name="country_detector" msgid="7023275114706088854">"कंट्री डिटेक्टर"</string>
+    <string name="location_service" msgid="2439187616018455546">"स्थान सेवा"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"सेंसर सूचना सेवा"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"ट्वायलाइट सेवा"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"तुमचे डिव्हाइस मिटविले जाईल"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"प्रशासक अ‍ॅप वापरता येणार नाही. तुमचे डिव्हाइस आता साफ केले जाईल.\n\nतुम्हाला कुठलेही प्रश्न असल्यास, तुमच्या संस्थेच्या प्रशासकाशी संपर्क साधा."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> नी प्रिंट करणे बंद केले आहे."</string>
@@ -253,10 +249,8 @@
       <item quantity="other">दोष अहवालासाठी <xliff:g id="NUMBER_1">%d</xliff:g> सेकंदांमध्‍ये स्क्रीनशॉट घेत आहे.</item>
       <item quantity="one">दोष अहवालासाठी <xliff:g id="NUMBER_0">%d</xliff:g> सेकंदामध्‍ये स्क्रीनशॉट घेत आहे.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"बग रिपोर्टसह घेतलेला स्क्रीनशॉट"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"बग रिपोर्टसह स्क्रीनशॉट घेता आला नाही"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"मूक मोड"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ध्वनी बंद आहे"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ध्वनी चालू आहे"</string>
@@ -458,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"दुसऱ्या ॲपमध्ये सुरू झालेल्या कॉलला पुढे सुरू ठेवण्याची ॲपला अनुमती देते."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फोन नंबर वाचा"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ॲपला डिव्हाइसच्या फोन नंबरमध्ये प्रवेश करण्याची अनुमती देते."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"कारची स्क्रीन सुरू ठेवा"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"टॅबलेट निष्क्रिय होण्यापासून प्रतिबंधित करा"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"तुमच्या Android TV डिव्हाइसला स्लीप मोडमध्ये जाण्यापासून थांबवा"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"फोन निष्‍क्रिय होण्‍यापासून प्रतिबंधित करा"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ॲपला कारची स्क्रीन सुरू ठेवण्याची अनुमती देते."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"टॅब्लेटला निष्क्रिय होण्यापासून प्रतिबंधित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Android TV डिव्हाइसला स्लीप मोडमध्ये जाण्यापासून प्रतिबंधित करण्यासाठी ॲपला अनुमती देते."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"फोनला निष्क्रिय होण्यापासून प्रतिबंधित करण्यासाठी अ‍ॅप ला अनुमती देते."</string>
@@ -1635,6 +1631,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"प्रवेशयोग्यता शॉर्टकट वापरायचा?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी दाबून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"शॉर्टकट संपादित करा"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"रद्द करा"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"शॉर्टकट बंद करा"</string>
@@ -2032,14 +2034,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> हे प्रतिबंधित बादलीमध्ये ठेवण्यात आले आहे"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"वैयक्तिक"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ऑफिस"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ऑफिस ॲप्स सोबत शेअर करू शकत नाही"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"वैयक्तिक अ‍ॅप्स सोबत शेअर करू शकत नाही"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"तुमच्या आयटी ॲडमिनने वैयक्तिक आणि ऑफिस ॲप्स दरम्यान शेअर करणे ब्लॉक केले आहे"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ऑफिस अ‍ॅप्स सुरू करा"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ऑफिस ॲप्स &amp; संपर्क अ‍ॅक्सेस करण्यासाठी ऑफिस ॲप्स सुरू करा"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"कोणतीही अ‍ॅप्स उपलब्ध नाहीत"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"आम्हाला कोणतीही अ‍ॅप्स सापडली नाहीत"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ऑफिस प्रोफाइलवर स्विच करा"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"टेलिफोनी कॉलमध्ये ऑडिओ रेकॉर्ड करा किंवा प्ले करा"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"टेलिफोनी कॉलमध्ये ऑडिओ रेकॉर्ड करण्याची किंवा प्ले करण्यासाठी डीफॉल्ट डायलर अ‍ॅप्लिकेशन म्हणून असाइन केले असताना या ॲपला परवानगी देते."</string>
 </resources>
