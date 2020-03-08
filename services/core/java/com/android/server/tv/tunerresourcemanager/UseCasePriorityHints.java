@@ -31,8 +31,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class provides the Tuner Resource Manager use case priority hints config info including a
@@ -56,7 +56,7 @@ public class UseCasePriorityHints {
      */
     SparseArray<int[]> mPriorityHints = new SparseArray<>();
 
-    List<Integer> mVendorDefinedUseCase = new ArrayList<>();
+    Set<Integer> mVendorDefinedUseCase = new HashSet<>();
 
     private int mDefaultForeground = 150;
     private int mDefaultBackground = 50;
