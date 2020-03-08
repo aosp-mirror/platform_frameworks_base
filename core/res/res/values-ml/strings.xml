@@ -249,10 +249,8 @@
       <item quantity="other">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
       <item quantity="one">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_0">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ബഗ് റിപ്പോർട്ടിന്റെ സ്ക്രീൻഷോട്ട് എടുത്തു"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ബഗ് റിപ്പോർട്ടിന്റെ സ്ക്രീൻഷോട്ട് എടുക്കാനായില്ല"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"നിശബ്‌ദ മോഡ്"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ശബ്‌ദം ഓഫാണ്"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ശബ്‌ദം ഓണാണ്"</string>
@@ -454,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ഉപകരണത്തിന്റെ ഫോൺ നമ്പറുകൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"കാറിലെ സ്ക്രീൻ ഓണാക്കി വയ്ക്കുക"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ഉറങ്ങുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"നിങ്ങളുടെ Android ടിവി ഉറങ്ങുന്നതിൽ നിന്ന് തടയുക"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ഉറങ്ങുന്നതിൽ നിന്ന് ഫോണിനെ തടയുക"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"കാറിലെ സ്ക്രീൻ ഓണാക്കി വയ്ക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ടാബ്‌ലെറ്റ് സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"നിങ്ങളുടെ Android ടിവിയെ ഉറങ്ങുന്നതിൽ നിന്ന് തടയാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ഫോൺ സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -1631,6 +1631,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"കുറുക്കുവഴി ഓണായിരിക്കുമ്പോൾ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും."</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"കുറുക്കുവഴികൾ തിരുത്തുക"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"റദ്ദാക്കുക"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
@@ -2028,14 +2034,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരമായത്"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"വ്യക്തിപരമാക്കിയ ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"വ്യക്തിപരമാക്കിയ ആപ്പുകളുടെയും ഔദ്യോഗിക ആപ്പുകളുടെയും ഇടയിലുള്ള പങ്കിടൽ നിങ്ങളുടെ ഐടി അഡ്മിൻ ബ്ലോക്ക് ചെയ്തു"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ഔദ്യോഗിക ആപ്പുകൾ ഓണാക്കുക"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ഔദ്യോഗിക ആപ്പുകൾ, കോൺടാക്റ്റുകൾ എന്നിവ ആക്സസ് ചെയ്യാൻ ഔദ്യോഗിക ആപ്പുകൾ ഓണാക്കുക"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ആപ്പുകളൊന്നും ലഭ്യമല്ല"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ഞങ്ങൾക്ക് ആപ്പുകളൊന്നും കണ്ടെത്താൻ കഴിഞ്ഞില്ല"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യുക അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യുക"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ഡിഫോൾട്ട് ഡയലർ ആപ്പായി അസെെൻ ചെയ്യുന്ന സമയത്ത്, ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യാൻ അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യാൻ ഈ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
 </resources>

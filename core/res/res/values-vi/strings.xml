@@ -249,10 +249,8 @@
       <item quantity="other">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_1">%d</xliff:g> giây.</item>
       <item quantity="one">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_0">%d</xliff:g> giây.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Đã chụp được ảnh màn hình báo cáo lỗi"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Không chụp được ảnh màn hình báo cáo lỗi"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Chế độ im lặng"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Âm thanh TẮT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Âm thanh BẬT"</string>
@@ -454,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Cho phép ứng dụng tiếp tục cuộc gọi được bắt đầu trong một ứng dụng khác."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"đọc số điện thoại"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Cho phép ứng dụng truy cập số điện thoại của thiết bị."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"duy trì trạng thái bật của màn hình ô tô"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ngăn máy tính bảng chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ngăn thiết bị Android TV chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ngăn điện thoại chuyển sang chế độ ngủ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Cho phép ứng dụng này duy trì trạng thái bật của màn hình ô tô."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Cho phép ứng dụng ngăn máy tính bảng chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Cho phép ứng dụng ngăn thiết bị Android TV chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Cho phép ứng dụng ngăn điện thoại chuyển sang chế độ ngủ."</string>
@@ -1631,6 +1631,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bạn tăng âm lượng lên quá mức khuyên dùng?\n\nViệc nghe ở mức âm lượng cao trong thời gian dài có thể gây tổn thương thính giác của bạn."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Sử dụng phím tắt Hỗ trợ tiếp cận?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Khi phím tắt này đang bật, thao tác nhấn cả hai nút âm lượng trong 3 giây sẽ mở tính năng hỗ trợ tiếp cận."</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Chỉnh sửa phím tắt"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Hủy"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tắt phím tắt"</string>
@@ -1853,8 +1859,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Chưa được phân loại"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Bạn đặt tầm quan trọng của các thông báo này."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Thông báo này quan trọng vì những người có liên quan."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Thông báo tùy chỉnh cho ứng dụng"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (đã tồn tại người dùng có tài khoản này)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Thêm ngôn ngữ"</string>
@@ -2028,14 +2033,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Đã đưa <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> vào bộ chứa BỊ HẠN CHẾ"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Cá nhân"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Cơ quan"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Không thể chia sẻ với các ứng dụng công việc"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Không thể chia sẻ với các ứng dụng cá nhân"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Quản trị viên CNTT của bạn đã chặn hoạt động chia sẻ giữa các ứng dụng cá nhân và công việc"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Bật các ứng dụng công việc"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Bật ứng dụng công việc để truy cập vào phần những người liên hệ và ứng dụng công việc"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Không có ứng dụng nào"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Chúng tôi không tìm thấy bất kỳ ứng dụng nào"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Bật hồ sơ công việc"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Cho phép ứng dụng này ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại khi được chỉ định làm ứng dụng trình quay số mặc định."</string>
 </resources>

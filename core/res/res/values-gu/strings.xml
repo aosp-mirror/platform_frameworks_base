@@ -249,10 +249,8 @@
       <item quantity="one">બગ રિપોર્ટ માટે <xliff:g id="NUMBER_1">%d</xliff:g> સેકન્ડમાં સ્ક્રીનશોટ લઈ રહ્યાં છે.</item>
       <item quantity="other">બગ રિપોર્ટ માટે <xliff:g id="NUMBER_1">%d</xliff:g> સેકન્ડમાં સ્ક્રીનશોટ લઈ રહ્યાં છે.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ખામીની જાણકારી સાથે સ્ક્રીનશૉટ લેવામાં આવ્યો"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ખામીની જાણકારી સાથે સ્ક્રીનશૉટ લેવામાં નિષ્ફળ થયા"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"સાઇલેન્ટ મોડ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"અવાજ બંધ છે"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ધ્વનિ ચાલુ છે"</string>
@@ -454,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"એક અન્ય તૃતીય પક્ષ ઍપમાં ચાલુ થયેલા કૉલને આ ઍપમાં ચાલુ રાખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ફોન નંબર વાંચો"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ઍપ્લિકેશનને ઉપકરણનાં ફોન નંબરને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"કારની સ્ક્રીન ચાલુ રાખો."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ટેબ્લેટને નિષ્ક્રિય થતું અટકાવો"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"તમારા Android TV ડિવાઇસને નિષ્ક્રિય થવાથી અટકાવો"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ફોનને નિષ્ક્રિય થતો અટકાવો"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ઍપને કારની સ્ક્રીન ચાલુ રાખવાની મંજૂરી આપો."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"એપ્લિકેશનને ટેબ્લેટને નિષ્ક્રિય થઈ જતો અટકાવવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"ઍપને તમારા Android TV ડિવાઇસને નિષ્ક્રિય થઈ જવાથી અટકાવવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"એપ્લિકેશનને ફોનને નિષ્ક્રિય થઈ જતો અટકાવવાની મંજૂરી આપે છે."</string>
@@ -1631,6 +1631,12 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ભલામણ કરેલ સ્તરની ઉપર વૉલ્યૂમ વધાર્યો?\n\nલાંબા સમય સુધી ઊંચા અવાજે સાંભળવું તમારી શ્રવણક્ષમતાને નુકસાન પહોંચાડી શકે છે."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ઍક્સેસિબિલિટી શૉર્ટકટનો ઉપયોગ કરીએ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"જ્યારે શૉર્ટકટ ચાલુ હોય, ત્યારે બન્ને વૉલ્યૂમ બટનને 3 સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા શરૂ થઈ જશે."</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"શૉર્ટકટમાં ફેરફાર કરો"</string>
     <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"રદ કરો"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"શૉર્ટકટ બંધ કરો"</string>
@@ -2028,14 +2034,29 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>ને પ્રતિબંધિત સમૂહમાં મૂકવામાં આવ્યું છે"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"વ્યક્તિગત"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"કાર્યાલય"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ઑફિસ માટેની ઍપની સાથે શેર કરી શકતાં નથી"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"વ્યક્તિગત ઍપની સાથે શેર કરી શકતાં નથી"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"તમારા IT વ્યવસ્થાપકે વ્યક્તિગત અને ઑફિસ માટેની ઍપ વચ્ચે શેરિંગની સુવિધાને બ્લૉક કરી છે"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ઑફિસ માટેની ઍપ ચાલુ કરો"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ઑફિસ માટેની ઍપ અને સંપર્કોને ઍક્સેસ કરવા માટે ઑફિસ માટેની ઍપ ચાલુ કરો"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"કોઈ ઍપ ઉપલબ્ધ નથી"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"અમે કોઈપણ ઍપ શોધી શક્યાં નથી"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ઑફિસ માટેની પ્રોફાઇલ પર સ્વિચ કરો"</string>
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરો અથવા ચલાવો"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ડિફૉલ્ટ ડાયલર ઍપ તરીકે સોંપણી કરવામાં આવવા પર આ ઍપને ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરવાની અથવા ચલાવવાની મંજૂરી આપે છે."</string>
 </resources>
