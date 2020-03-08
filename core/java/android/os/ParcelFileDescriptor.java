@@ -282,9 +282,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
      * @param listener to be invoked when the returned descriptor has been
      *            closed.
      * @return a new ParcelFileDescriptor pointing to the given file.
-     * @hide
      */
-    @SystemApi
     // We can't accept a generic Executor here, since we need to use
     // MessageQueue.addOnFileDescriptorEventListener()
     @SuppressLint("ExecutorRegistration")
