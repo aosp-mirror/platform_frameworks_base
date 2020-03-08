@@ -122,6 +122,12 @@ public class TestableDeviceConfigTest {
         properties = DeviceConfig.getProperties(sNamespace, sKey, newKey);
         assertThat(properties.getString(sKey, null)).isEqualTo(sValue);
         assertThat(properties.getString(newKey, null)).isEqualTo(newValue);
+
+        String unsetKey = "key3";
+        properties = DeviceConfig.getProperties(sNamespace, newKey, unsetKey);
+        assertThat(properties.getKeyset()).containsExactly(newKey, unsetKey);
+        assertThat(properties.getString(newKey, null)).isEqualTo(newValue);
+        assertThat(properties.getString(unsetKey, null)).isNull();
     }
 
     @Test
