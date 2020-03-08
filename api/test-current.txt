@@ -784,6 +784,8 @@ package android.content {
   }
 
   public abstract class ContentResolver {
+    method @NonNull public static android.net.Uri decodeFromFile(@NonNull java.io.File);
+    method @NonNull public static java.io.File encodeToFile(@NonNull android.net.Uri);
     method public static String[] getSyncAdapterPackagesForAuthorityAsUser(String, int);
   }
 
@@ -2917,6 +2919,11 @@ package android.provider {
     method @NonNull public android.provider.DeviceConfig.Properties.Builder setInt(@NonNull String, int);
     method @NonNull public android.provider.DeviceConfig.Properties.Builder setLong(@NonNull String, long);
     method @NonNull public android.provider.DeviceConfig.Properties.Builder setString(@NonNull String, @Nullable String);
+  }
+
+  public final class DocumentsContract {
+    method public static boolean isManageMode(@NonNull android.net.Uri);
+    method @NonNull public static android.net.Uri setManageMode(@NonNull android.net.Uri);
   }
 
   public final class MediaStore {
