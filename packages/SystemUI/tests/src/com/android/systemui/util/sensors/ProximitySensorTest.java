@@ -104,6 +104,30 @@ public class ProximitySensorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDuplicateListener() {
+        TestableListener listenerA = new TestableListener();
+
+        assertFalse(mProximitySensor.isRegistered());
+
+        mProximitySensor.register(listenerA);
+        waitForSensorManager();
+        assertTrue(mProximitySensor.isRegistered());
+        mProximitySensor.register(listenerA);
+        waitForSensorManager();
+        assertTrue(mProximitySensor.isRegistered());
+        assertNull(listenerA.mLastEvent);
+
+        mFakeProximitySensor.sendProximityResult(true);
+        assertFalse(listenerA.mLastEvent.getNear());
+        assertEquals(listenerA.mCallCount, 1);
+        mFakeProximitySensor.sendProximityResult(false);
+        assertTrue(listenerA.mLastEvent.getNear());
+        assertEquals(listenerA.mCallCount, 2);
+
+        mProximitySensor.unregister(listenerA);
+        waitForSensorManager();
+    }
+    @Test
     public void testUnregister() {
         TestableListener listener = new TestableListener();
 

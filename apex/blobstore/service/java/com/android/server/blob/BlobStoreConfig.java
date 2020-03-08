@@ -15,11 +15,22 @@
  */
 package com.android.server.blob;
 
+import static android.provider.DeviceConfig.NAMESPACE_BLOBSTORE;
+import static android.text.format.Formatter.FLAG_IEC_UNITS;
+import static android.text.format.Formatter.formatFileSize;
+import static android.util.TimeUtils.formatDuration;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.Environment;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfig.Properties;
+import android.util.DataUnit;
 import android.util.Log;
 import android.util.Slog;
+
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.io.File;
 import java.util.concurrent.TimeUnit;
@@ -32,8 +43,9 @@ class BlobStoreConfig {
     public static final int XML_VERSION_INIT = 1;
     // Added a string variant of lease description.
     public static final int XML_VERSION_ADD_STRING_DESC = 2;
+    public static final int XML_VERSION_ADD_DESC_RES_NAME = 3;
 
-    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_STRING_DESC;
+    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_DESC_RES_NAME;
 
     private static final String ROOT_DIR_NAME = "blobstore";
     private static final String BLOBS_DIR_NAME = "blobs";
@@ -53,6 +65,76 @@ class BlobStoreConfig {
      * Timeout in millis after which sessions with no updates will be deleted.
      */
     public static final long SESSION_EXPIRY_TIMEOUT_MILLIS = TimeUnit.DAYS.toMillis(7);
+
+    public static class DeviceConfigProperties {
+        /**
+         * Denotes how low the limit for the amount of data, that an app will be allowed to acquire
+         * a lease on, can be.
+         */
+        public static final String KEY_TOTAL_BYTES_PER_APP_LIMIT_FLOOR =
+                "total_bytes_per_app_limit_floor";
+        public static final long DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FLOOR =
+                DataUnit.MEBIBYTES.toBytes(300); // 300 MiB
+        public static long TOTAL_BYTES_PER_APP_LIMIT_FLOOR =
+                DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FLOOR;
+
+        /**
+         * Denotes the maximum amount of data an app can acquire a lease on, in terms of fraction
+         * of total disk space.
+         */
+        public static final String KEY_TOTAL_BYTES_PER_APP_LIMIT_FRACTION =
+                "total_bytes_per_app_limit_fraction";
+        public static final float DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FRACTION = 0.01f;
+        public static float TOTAL_BYTES_PER_APP_LIMIT_FRACTION =
+                DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FRACTION;
+
+        static void refresh(Properties properties) {
+            if (!NAMESPACE_BLOBSTORE.equals(properties.getNamespace())) {
+                return;
+            }
+            properties.getKeyset().forEach(key -> {
+                switch (key) {
+                    case KEY_TOTAL_BYTES_PER_APP_LIMIT_FLOOR:
+                        TOTAL_BYTES_PER_APP_LIMIT_FLOOR = properties.getLong(key,
+                                DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FLOOR);
+                        break;
+                    case KEY_TOTAL_BYTES_PER_APP_LIMIT_FRACTION:
+                        TOTAL_BYTES_PER_APP_LIMIT_FRACTION = properties.getFloat(key,
+                                DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FRACTION);
+                        break;
+                    default:
+                        Slog.wtf(TAG, "Unknown key in device config properties: " + key);
+                }
+            });
+        }
+
+        static void dump(IndentingPrintWriter fout, Context context) {
+            final String dumpFormat = "%s: [cur: %s, def: %s]";
+            fout.println(String.format(dumpFormat, KEY_TOTAL_BYTES_PER_APP_LIMIT_FLOOR,
+                    formatFileSize(context, TOTAL_BYTES_PER_APP_LIMIT_FLOOR, FLAG_IEC_UNITS),
+                    formatFileSize(context, DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FLOOR,
+                            FLAG_IEC_UNITS)));
+            fout.println(String.format(dumpFormat, KEY_TOTAL_BYTES_PER_APP_LIMIT_FRACTION,
+                    TOTAL_BYTES_PER_APP_LIMIT_FRACTION,
+                    DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FRACTION));
+        }
+    }
+
+    public static void initialize(Context context) {
+        DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_BLOBSTORE,
+                context.getMainExecutor(),
+                properties -> DeviceConfigProperties.refresh(properties));
+        DeviceConfigProperties.refresh(DeviceConfig.getProperties(NAMESPACE_BLOBSTORE));
+    }
+
+    /**
+     * Returns the maximum amount of data that an app can acquire a lease on.
+     */
+    public static long getAppDataBytesLimit() {
+        final long totalBytesLimit = (long) (Environment.getDataSystemDirectory().getTotalSpace()
+                * DeviceConfigProperties.TOTAL_BYTES_PER_APP_LIMIT_FRACTION);
+        return Math.max(DeviceConfigProperties.TOTAL_BYTES_PER_APP_LIMIT_FLOOR, totalBytesLimit);
+    }
 
     @Nullable
     public static File prepareBlobFile(long sessionId) {
@@ -121,5 +203,22 @@ class BlobStoreConfig {
     @NonNull
     public static File getBlobStoreRootDir() {
         return new File(Environment.getDataSystemDirectory(), ROOT_DIR_NAME);
+    }
+
+    public static void dump(IndentingPrintWriter fout, Context context) {
+        fout.println("XML current version: " + XML_VERSION_CURRENT);
+
+        fout.println("Idle job ID: " + IDLE_JOB_ID);
+        fout.println("Idle job period: " + formatDuration(IDLE_JOB_PERIOD_MILLIS));
+
+        fout.println("Session expiry timeout: " + formatDuration(SESSION_EXPIRY_TIMEOUT_MILLIS));
+
+        fout.println("Total bytes per app limit: " + formatFileSize(context,
+                getAppDataBytesLimit(), FLAG_IEC_UNITS));
+
+        fout.println("Device config properties:");
+        fout.increaseIndent();
+        DeviceConfigProperties.dump(fout, context);
+        fout.decreaseIndent();
     }
 }

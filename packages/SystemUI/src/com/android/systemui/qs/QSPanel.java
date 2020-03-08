@@ -50,6 +50,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -60,6 +61,7 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.settings.BrightnessController;
 import com.android.systemui.settings.ToggleSliderView;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
@@ -70,6 +72,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -94,6 +97,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private final LinearLayout mMediaCarousel;
     private final ArrayList<QSMediaPlayer> mMediaPlayers = new ArrayList<>();
+    private final NotificationMediaManager mNotificationMediaManager;
+    private final Executor mBackgroundExecutor;
     private LocalMediaManager mLocalMediaManager;
     private MediaDevice mDevice;
     private boolean mUpdateCarousel = false;
@@ -128,7 +133,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             if (mDevice == null || !mDevice.equals(currentDevice)) {
                 mDevice = currentDevice;
                 for (QSMediaPlayer p : mMediaPlayers) {
-                    p.updateChip(mDevice);
+                    p.updateDevice(mDevice);
                 }
             }
         }
@@ -138,7 +143,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             if (mDevice == null || !mDevice.equals(device)) {
                 mDevice = device;
                 for (QSMediaPlayer p : mMediaPlayers) {
-                    p.updateChip(mDevice);
+                    p.updateDevice(mDevice);
                 }
             }
         }
@@ -150,12 +155,16 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             AttributeSet attrs,
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
-            QSLogger qsLogger
+            QSLogger qsLogger,
+            NotificationMediaManager notificationMediaManager,
+            @Background Executor backgroundExecutor
     ) {
         super(context, attrs);
         mContext = context;
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
+        mNotificationMediaManager = notificationMediaManager;
+        mBackgroundExecutor = backgroundExecutor;
 
         setOrientation(VERTICAL);
 
@@ -255,7 +264,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         if (player == null) {
             Log.d(TAG, "creating new player");
-            player = new QSMediaPlayer(mContext, this);
+            player = new QSMediaPlayer(mContext, this, mNotificationMediaManager,
+                    mBackgroundExecutor);
 
             if (player.isPlaying()) {
                 mMediaCarousel.addView(player.getView(), 0, lp); // add in front
@@ -268,7 +278,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
 
         Log.d(TAG, "setting player session");
-        player.setMediaSession(this, token, icon, iconColor, bgColor, actionsContainer,
+        player.setMediaSession(token, icon, iconColor, bgColor, actionsContainer,
                 notif.getNotification(), mDevice);
 
         if (mMediaPlayers.size() > 0) {

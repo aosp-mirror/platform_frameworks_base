@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.view.Gravity;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -56,12 +55,7 @@ public class DismissCircleView extends FrameLayout {
     /** Retrieves the current dimensions for the icon and circle and applies them. */
     private void setViewSizes() {
         final Resources res = getResources();
-
-        int iconSize = res.getDimensionPixelSize(R.dimen.dismiss_target_x_size);
-        int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
-
-        setLayoutParams(new ViewGroup.LayoutParams(targetSize, targetSize));
-
+        final int iconSize = res.getDimensionPixelSize(R.dimen.dismiss_target_x_size);
         mIconView.setLayoutParams(
                 new FrameLayout.LayoutParams(iconSize, iconSize, Gravity.CENTER));
     }

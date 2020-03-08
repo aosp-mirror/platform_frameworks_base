@@ -32,7 +32,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
@@ -44,7 +43,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.IRemoteCallback;
-import android.os.NativeHandle;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -53,6 +51,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
+import android.view.Surface;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -224,9 +223,9 @@ public abstract class BiometricServiceBase extends SystemService
         public AuthenticationClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie, boolean requireConfirmation,
-                IBiometricNativeHandle windowId) {
+                Surface surface) {
             super(context, getConstants(), daemon, halDeviceId, token, listener, targetUserId,
-                    groupId, opId, restricted, owner, cookie, requireConfirmation, windowId);
+                    groupId, opId, restricted, owner, cookie, requireConfirmation, surface);
         }
 
         @Override
@@ -287,10 +286,10 @@ public abstract class BiometricServiceBase extends SystemService
         public EnrollClientImpl(Context context, DaemonWrapper daemon, long halDeviceId,
                 IBinder token, ServiceListener listener, int userId, int groupId,
                 byte[] cryptoToken, boolean restricted, String owner,
-                final int[] disabledFeatures, int timeoutSec, IBiometricNativeHandle windowId) {
+                final int[] disabledFeatures, int timeoutSec, Surface surface) {
             super(context, getConstants(), daemon, halDeviceId, token, listener,
                     userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
-                    disabledFeatures, timeoutSec, windowId);
+                    disabledFeatures, timeoutSec, surface);
         }
 
         @Override
@@ -476,13 +475,13 @@ public abstract class BiometricServiceBase extends SystemService
      */
     protected interface DaemonWrapper {
         int ERROR_ESRCH = 3; // Likely HAL is dead. see errno.h.
-        int authenticate(long operationId, int groupId, NativeHandle windowId)
+        int authenticate(long operationId, int groupId, Surface surface)
                 throws RemoteException;
         int cancel() throws RemoteException;
         int remove(int groupId, int biometricId) throws RemoteException;
         int enumerate() throws RemoteException;
         int enroll(byte[] token, int groupId, int timeout,
-                ArrayList<Integer> disabledFeatures, NativeHandle windowId) throws RemoteException;
+                ArrayList<Integer> disabledFeatures, Surface surface) throws RemoteException;
         void resetLockout(byte[] token) throws RemoteException;
     }
 

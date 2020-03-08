@@ -24,15 +24,18 @@ import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 
 import org.junit.rules.TestRule;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
@@ -109,6 +112,27 @@ public final class TestableDeviceConfig implements StaticMockFixture {
             String name = invocationOnMock.getArgument(1);
             return mKeyValueMap.get(getKey(namespace, name));
         }).when(() -> DeviceConfig.getProperty(anyString(), anyString()));
+
+        doAnswer((Answer<Properties>) invocationOnMock -> {
+            String namespace = invocationOnMock.getArgument(0);
+            final int varargStartIdx = 1;
+            Map<String, String> keyValues = new ArrayMap<>();
+            if (invocationOnMock.getArguments().length == varargStartIdx) {
+                mKeyValueMap.entrySet().forEach(entry -> {
+                    Pair<String, String> nameSpaceAndName = getNameSpaceAndName(entry.getKey());
+                    if (!nameSpaceAndName.first.equals(namespace)) {
+                        return;
+                    }
+                    keyValues.put(nameSpaceAndName.second.toLowerCase(), entry.getValue());
+                });
+            } else {
+                for (int i = varargStartIdx; i < invocationOnMock.getArguments().length; ++i) {
+                    String name = invocationOnMock.getArgument(i);
+                    keyValues.put(name.toLowerCase(), mKeyValueMap.get(getKey(namespace, name)));
+                }
+            }
+            return getProperties(namespace, keyValues);
+        }).when(() -> DeviceConfig.getProperties(anyString(), ArgumentMatchers.<String>any()));
     }
 
     /**
@@ -124,15 +148,25 @@ public final class TestableDeviceConfig implements StaticMockFixture {
         return namespace + "/" + name;
     }
 
+    private Pair<String, String> getNameSpaceAndName(String key) {
+        final String[] values = key.split("/");
+        return Pair.create(values[0], values[1]);
+    }
+
     private Properties getProperties(String namespace, String name, String value) {
+        return getProperties(namespace, Collections.singletonMap(name.toLowerCase(), value));
+    }
+
+    private Properties getProperties(String namespace, Map<String, String> keyValues) {
         Properties properties = Mockito.mock(Properties.class);
         when(properties.getNamespace()).thenReturn(namespace);
-        when(properties.getKeyset()).thenReturn(Collections.singleton(name));
+        when(properties.getKeyset()).thenReturn(keyValues.keySet());
         when(properties.getBoolean(anyString(), anyBoolean())).thenAnswer(
                 invocation -> {
                     String key = invocation.getArgument(0);
                     boolean defaultValue = invocation.getArgument(1);
-                    if (name.equalsIgnoreCase(key) && value != null) {
+                    final String value = keyValues.get(key.toLowerCase());
+                    if (value != null) {
                         return Boolean.parseBoolean(value);
                     } else {
                         return defaultValue;
@@ -143,7 +177,8 @@ public final class TestableDeviceConfig implements StaticMockFixture {
                 invocation -> {
                     String key = invocation.getArgument(0);
                     float defaultValue = invocation.getArgument(1);
-                    if (name.equalsIgnoreCase(key) && value != null) {
+                    final String value = keyValues.get(key.toLowerCase());
+                    if (value != null) {
                         try {
                             return Float.parseFloat(value);
                         } catch (NumberFormatException e) {
@@ -158,7 +193,8 @@ public final class TestableDeviceConfig implements StaticMockFixture {
                 invocation -> {
                     String key = invocation.getArgument(0);
                     int defaultValue = invocation.getArgument(1);
-                    if (name.equalsIgnoreCase(key) && value != null) {
+                    final String value = keyValues.get(key.toLowerCase());
+                    if (value != null) {
                         try {
                             return Integer.parseInt(value);
                         } catch (NumberFormatException e) {
@@ -173,7 +209,8 @@ public final class TestableDeviceConfig implements StaticMockFixture {
                 invocation -> {
                     String key = invocation.getArgument(0);
                     long defaultValue = invocation.getArgument(1);
-                    if (name.equalsIgnoreCase(key) && value != null) {
+                    final String value = keyValues.get(key.toLowerCase());
+                    if (value != null) {
                         try {
                             return Long.parseLong(value);
                         } catch (NumberFormatException e) {
@@ -184,11 +221,12 @@ public final class TestableDeviceConfig implements StaticMockFixture {
                     }
                 }
         );
-        when(properties.getString(anyString(), anyString())).thenAnswer(
+        when(properties.getString(anyString(), nullable(String.class))).thenAnswer(
                 invocation -> {
                     String key = invocation.getArgument(0);
                     String defaultValue = invocation.getArgument(1);
-                    if (name.equalsIgnoreCase(key) && value != null) {
+                    final String value = keyValues.get(key.toLowerCase());
+                    if (value != null) {
                         return value;
                     } else {
                         return defaultValue;

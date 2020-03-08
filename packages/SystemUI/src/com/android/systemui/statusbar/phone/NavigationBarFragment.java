@@ -205,6 +205,28 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     private final Handler mHandler;
 
+    private final AutoHideUiElement mAutoHideUiElement = new AutoHideUiElement() {
+        @Override
+        public void synchronizeState() {
+            checkNavBarModes();
+        }
+
+        @Override
+        public boolean shouldHideOnTouch() {
+            return !mNotificationRemoteInputManager.getController().isRemoteInputActive();
+        }
+
+        @Override
+        public boolean isVisible() {
+            return isTransientShown();
+        }
+
+        @Override
+        public void hide() {
+            clearTransient();
+        }
+    };
+
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
         public void onConnectionChanged(boolean isConnected) {
@@ -1052,28 +1074,13 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
 
     /** Sets {@link AutoHideController} to the navigation bar. */
     public void setAutoHideController(AutoHideController autoHideController) {
+        if (mAutoHideController != null) {
+            mAutoHideController.removeAutoHideUiElement(mAutoHideUiElement);
+        }
         mAutoHideController = autoHideController;
-        mAutoHideController.addAutoHideUiElement(new AutoHideUiElement() {
-            @Override
-            public void synchronizeState() {
-                checkNavBarModes();
-            }
-
-            @Override
-            public boolean shouldHideOnTouch() {
-                return !mNotificationRemoteInputManager.getController().isRemoteInputActive();
-            }
-
-            @Override
-            public boolean isVisible() {
-                return isTransientShown();
-            }
-
-            @Override
-            public void hide() {
-                clearTransient();
-            }
-        });
+        if (mAutoHideController != null) {
+            mAutoHideController.addAutoHideUiElement(mAutoHideUiElement);
+        }
     }
 
     private boolean isTransientShown() {

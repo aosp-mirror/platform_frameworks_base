@@ -23,16 +23,11 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.NativeHandle;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
-
-import java.io.FileDescriptor;
-import java.io.IOException;
 
 public class Utils {
     public static boolean isDebugEnabled(Context context, int targetUserId) {
@@ -260,32 +255,5 @@ public class Utils {
             default:
                 throw new IllegalArgumentException("Unsupported dismissal reason: " + reason);
         }
-    }
-
-    /**
-     * Converts an {@link IBiometricNativeHandle} to a {@link NativeHandle} by duplicating the
-     * the underlying file descriptors.
-     *
-     * Both the original and new handle must be closed after use.
-     *
-     * @param h {@link IBiometricNativeHandle} received as a binder call argument. Usually used to
-     *          identify a WindowManager window. Can be null.
-     * @return A {@link NativeHandle} representation of {@code h}. Will be null if either {@code h}
-     *          or its contents are null.
-     */
-    public static NativeHandle dupNativeHandle(IBiometricNativeHandle h) {
-        NativeHandle handle = null;
-        if (h != null && h.fds != null && h.ints != null) {
-            FileDescriptor[] fds = new FileDescriptor[h.fds.length];
-            for (int i = 0; i < h.fds.length; ++i) {
-                try {
-                    fds[i] = h.fds[i].dup().getFileDescriptor();
-                } catch (IOException e) {
-                    return null;
-                }
-            }
-            handle = new NativeHandle(fds, h.ints, true /* own */);
-        }
-        return handle;
     }
 }

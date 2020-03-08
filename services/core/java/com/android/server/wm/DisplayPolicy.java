@@ -42,7 +42,10 @@ import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
+import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
@@ -3269,11 +3272,19 @@ public class DisplayPolicy {
         mService.getStackBounds(inSplitScreen ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         : WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_UNDEFINED, mNonDockedStackBounds);
-        final Pair<Integer, Boolean> result =
+        final Pair<Integer, WindowState> result =
                 updateSystemBarsLw(win, mLastSystemUiFlags, tmpVisibility);
         final int visibility = result.first;
-        final int appearance = win.mAttrs.insetsFlags.appearance
-                | InsetsFlags.getAppearance(visibility);
+        final WindowState navColorWin = result.second;
+        final boolean isNavbarColorManagedByIme =
+                navColorWin != null && navColorWin == mDisplayContent.mInputMethodWindow;
+        final int opaqueAppearance = InsetsFlags.getAppearance(visibility)
+                & (APPEARANCE_OPAQUE_STATUS_BARS | APPEARANCE_OPAQUE_NAVIGATION_BARS);
+        final int appearance = ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL
+                ? updateLightNavigationBarAppearanceLw(win.mAttrs.insetsFlags.appearance,
+                        mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState,
+                        mDisplayContent.mInputMethodWindow, navColorWin) | opaqueAppearance
+                : InsetsFlags.getAppearance(visibility);
         final int diff = visibility ^ mLastSystemUiFlags;
         final InsetsPolicy insetsPolicy = getInsetsPolicy();
         final boolean isFullscreen = (visibility & (View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -3320,7 +3331,6 @@ public class DisplayPolicy {
                         new AppearanceRegion(dockedAppearance, dockedStackBounds)}
                 : new AppearanceRegion[]{
                         new AppearanceRegion(fullscreenAppearance, fullscreenStackBounds)};
-        final boolean isNavbarColorManagedByIme = result.second;
         String cause = win.toString();
         mHandler.post(() -> {
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
@@ -3448,7 +3458,25 @@ public class DisplayPolicy {
         return vis;
     }
 
-    private Pair<Integer, Boolean> updateSystemBarsLw(WindowState win, int oldVis, int vis) {
+    @VisibleForTesting
+    static int updateLightNavigationBarAppearanceLw(int appearance, WindowState opaque,
+            WindowState opaqueOrDimming, WindowState imeWindow, WindowState navColorWin) {
+
+        if (navColorWin != null) {
+            if (navColorWin == imeWindow || navColorWin == opaque) {
+                // Respect the light flag.
+                appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
+                appearance |= navColorWin.mAttrs.insetsFlags.appearance
+                        & APPEARANCE_LIGHT_NAVIGATION_BARS;
+            } else if (navColorWin == opaqueOrDimming && navColorWin.isDimming()) {
+                // Clear the light flag for dimming window.
+                appearance &= ~APPEARANCE_LIGHT_NAVIGATION_BARS;
+            }
+        }
+        return appearance;
+    }
+
+    private Pair<Integer, WindowState> updateSystemBarsLw(WindowState win, int oldVis, int vis) {
         final boolean dockedStackVisible =
                 mDisplayContent.isStackVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         final boolean freeformStackVisible =
@@ -3587,11 +3615,8 @@ public class DisplayPolicy {
         vis = updateLightNavigationBarLw(vis, mTopFullscreenOpaqueWindowState,
                 mTopFullscreenOpaqueOrDimmingWindowState,
                 mDisplayContent.mInputMethodWindow, navColorWin);
-        // Navbar color is controlled by the IME.
-        final boolean isManagedByIme =
-                navColorWin != null && navColorWin == mDisplayContent.mInputMethodWindow;
 
-        return Pair.create(vis, isManagedByIme);
+        return Pair.create(vis, navColorWin);
     }
 
     private boolean drawsBarBackground(int vis, WindowState win, BarController controller,
