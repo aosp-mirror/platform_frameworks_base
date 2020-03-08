@@ -32,7 +32,6 @@ import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
-import android.net.NetworkScore;
 import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -232,10 +231,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // validated).
     private boolean mLingering;
 
-    // This represents the characteristics of a network that affects how good the network is
-    // considered for a particular use.
-    @NonNull
-    private NetworkScore mNetworkScore;
+    // This represents the quality of the network with no clear scale.
+    private int mScore;
 
     // The list of NetworkRequests being satisfied by this Network.
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
@@ -264,7 +261,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
-            LinkProperties lp, NetworkCapabilities nc, @NonNull NetworkScore ns, Context context,
+            LinkProperties lp, NetworkCapabilities nc, int score, Context context,
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber) {
         this.messenger = messenger;
@@ -273,7 +270,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkInfo = info;
         linkProperties = lp;
         networkCapabilities = nc;
-        mNetworkScore = ns;
+        mScore = score;
         clatd = new Nat464Xlat(this, netd, dnsResolver, nms);
         mConnService = connService;
         mContext = context;
@@ -487,7 +484,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             return ConnectivityConstants.EXPLICITLY_SELECTED_NETWORK_SCORE;
         }
 
-        int score = mNetworkScore.getIntExtension(NetworkScore.LEGACY_SCORE);
+        int score = mScore;
         if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty() && !isVPN()) {
             score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
         }
@@ -516,13 +513,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return getCurrentScore(true);
     }
 
-    public void setNetworkScore(@NonNull NetworkScore ns) {
-        mNetworkScore = ns;
-    }
-
-    @NonNull
-    public NetworkScore getNetworkScore() {
-        return mNetworkScore;
+    public void setScore(final int score) {
+        mScore = score;
     }
 
     public NetworkState getNetworkState() {
