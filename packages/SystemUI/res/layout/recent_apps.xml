@@ -25,5 +25,6 @@
     android:contentDescription="@string/accessibility_recent"
     android:paddingStart="@dimen/navigation_key_padding"
     android:paddingEnd="@dimen/navigation_key_padding"
+    systemui:keyCode="187"
     />
 

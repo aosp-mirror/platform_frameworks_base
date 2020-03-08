@@ -78,6 +78,7 @@
     <java-symbol type="integer" name="config_doubleTapOnHomeBehaviorHwkeys" />
     <java-symbol type="integer" name="config_longPressOnMenuBehaviorHwkeys" />
     <java-symbol type="integer" name="config_pressOnAppSwitchBehaviorHwkeys" />
+    <java-symbol type="integer" name="config_longPressOnAppSwitchBehavior" />
     <java-symbol type="integer" name="config_longPressOnAppSwitchBehaviorHwkeys" />
     <java-symbol type="integer" name="config_pressOnAssistBehaviorHwkeys" />
     <java-symbol type="integer" name="config_longPressOnAssistBehaviorHwkeys" />
