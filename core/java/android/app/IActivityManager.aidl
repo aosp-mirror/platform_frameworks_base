@@ -652,4 +652,27 @@ interface IActivityManager {
      */
     void setActivityLocusContext(in ComponentName activity, in LocusId locusId,
             in IBinder appToken);
+
+    /**
+     * Set custom state data for this process. It will be included in the record of
+     * {@link ApplicationExitInfo} on the death of the current calling process; the new process
+     * of the app can retrieve this state data by calling
+     * {@link ApplicationExitInfo#getProcessStateSummary} on the record returned by
+     * {@link #getHistoricalProcessExitReasons}.
+     *
+     * <p> This would be useful for the calling app to save its stateful data: if it's
+     * killed later for any reason, the new process of the app can know what the
+     * previous process of the app was doing. For instance, you could use this to encode
+     * the current level in a game, or a set of features/experiments that were enabled. Later you
+     * could analyze under what circumstances the app tends to crash or use too much memory.
+     * However, it's not suggested to rely on this to restore the applications previous UI state
+     * or so, it's only meant for analyzing application healthy status.</p>
+     *
+     * <p> System might decide to throttle the calls to this API; so call this API in a reasonable
+     * manner, excessive calls to this API could result a {@link java.lang.RuntimeException}.
+     * </p>
+     *
+     * @param state The customized state data
+     */
+    void setProcessStateSummary(in byte[] state);
 }
