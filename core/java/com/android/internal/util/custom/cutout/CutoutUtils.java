@@ -19,22 +19,31 @@ import android.content.Context;
 
 public class CutoutUtils {
     public static boolean hasCutout(Context context) {
+        return hasCutout(context, false);
+    }
+
+    public static boolean hasCutout(Context context, boolean ignoreCutoutMasked) {
         boolean hasCutout = context.getResources().getBoolean(com.android.internal.R.bool.config_physicalDisplayCutout);
-        if (hasCutout){
+        if (!ignoreCutoutMasked && hasCutout){
             return !context.getResources().getBoolean(
                 com.android.internal.R.bool.config_maskMainBuiltInDisplayCutout);
         }
-        return false;
+        return hasCutout;
     }
-    public static boolean hasBigCutout(Context context) {
-        if (!hasCutout(context)){
+
+    public static boolean hasCenteredCutout(Context context) {
+        return hasCenteredCutout(context, false);
+    }
+
+    public static boolean hasCenteredCutout(Context context, boolean ignoreCutoutMasked) {
+        if (!hasCutout(context, ignoreCutoutMasked)){
             return false;
         }
-        boolean hasBigCutout = context.getResources().getBoolean(com.android.internal.R.bool.config_bigPhysicalDisplayCutout);
-        if (hasBigCutout){
+        boolean hasCenteredCutout = context.getResources().getBoolean(com.android.internal.R.bool.config_physicalDisplayCutoutCentered);
+        if (!ignoreCutoutMasked && hasCenteredCutout){
             return !context.getResources().getBoolean(
                 com.android.internal.R.bool.config_maskMainBuiltInDisplayCutout);
         }
-        return false;
+        return hasCenteredCutout;
     }
 }
