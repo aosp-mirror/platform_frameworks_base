@@ -22,6 +22,7 @@ import android.annotation.IdRes;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
@@ -481,6 +482,7 @@ public class BlobStoreManager {
      *
      * @hide
      */
+    @TestApi
     public void waitForIdle(long timeoutMillis) throws InterruptedException, TimeoutException {
         try {
             final CountDownLatch countDownLatch = new CountDownLatch(1);
