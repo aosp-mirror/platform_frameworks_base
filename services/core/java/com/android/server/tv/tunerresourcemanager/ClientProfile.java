@@ -15,8 +15,8 @@
  */
 package com.android.server.tv.tunerresourcemanager;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
   * A client profile object used by the Tuner Resource Manager to record the registered clients'
@@ -65,7 +65,7 @@ public final class ClientProfile {
     /**
      * List of the frontend ids that are used by the current client.
      */
-    private List<Integer> mUsingFrontendIds = new ArrayList<>();
+    private Set<Integer> mUsingFrontendIds = new HashSet<>();
 
     /**
      * Optional arbitrary priority value given by the client.
@@ -131,7 +131,7 @@ public final class ClientProfile {
         mUsingFrontendIds.add(frontendId);
     }
 
-    public List<Integer> getInUseFrontendIds() {
+    public Iterable<Integer> getInUseFrontendIds() {
         return mUsingFrontendIds;
     }
 

@@ -29,18 +29,21 @@ import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.SignalState;
 import com.android.systemui.plugins.qs.QSTile.State;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -72,9 +75,12 @@ public class QuickQSPanel extends QSPanel {
             AttributeSet attrs,
             DumpManager dumpManager,
             BroadcastDispatcher broadcastDispatcher,
-            QSLogger qsLogger
+            QSLogger qsLogger,
+            NotificationMediaManager notificationMediaManager,
+            @Background Executor backgroundExecutor
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger);
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, notificationMediaManager,
+                backgroundExecutor);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }
@@ -93,7 +99,8 @@ public class QuickQSPanel extends QSPanel {
             mHorizontalLinearLayout.setClipToPadding(false);
 
             int marginSize = (int) mContext.getResources().getDimension(R.dimen.qqs_media_spacing);
-            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout);
+            mMediaPlayer = new QuickQSMediaPlayer(mContext, mHorizontalLinearLayout,
+                    notificationMediaManager, backgroundExecutor);
             LayoutParams lp2 = new LayoutParams(0, LayoutParams.MATCH_PARENT, 1);
             lp2.setMarginEnd(marginSize);
             lp2.setMarginStart(0);
