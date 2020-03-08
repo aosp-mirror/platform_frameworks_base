@@ -32,7 +32,6 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/header"
         android:layout_marginBottom="16dp"
     >
 
@@ -73,7 +72,7 @@
 
             <!-- Song name -->
             <TextView
-                android:id="@+id/header_text"
+                android:id="@+id/header_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
