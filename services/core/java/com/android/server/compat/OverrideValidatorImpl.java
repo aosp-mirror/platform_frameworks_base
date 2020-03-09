@@ -20,6 +20,7 @@ import static com.android.internal.compat.OverrideAllowedState.ALLOWED;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NON_TARGET_SDK;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NOT_DEBUGGABLE;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_TARGET_SDK_TOO_HIGH;
+import static com.android.internal.compat.OverrideAllowedState.LOGGING_ONLY_CHANGE;
 import static com.android.internal.compat.OverrideAllowedState.PACKAGE_DOES_NOT_EXIST;
 
 import android.content.Context;
@@ -51,12 +52,13 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
 
     @Override
     public OverrideAllowedState getOverrideAllowedState(long changeId, String packageName) {
-        boolean debuggableBuild = false;
-        boolean finalBuild = false;
-        int minTargetSdk = mCompatConfig.minTargetSdkForChangeId(changeId);
+        if (mCompatConfig.isLoggingOnly(changeId)) {
+            return new OverrideAllowedState(LOGGING_ONLY_CHANGE, -1, -1);
+        }
 
-        debuggableBuild = mAndroidBuildClassifier.isDebuggableBuild();
-        finalBuild = mAndroidBuildClassifier.isFinalBuild();
+        boolean debuggableBuild = mAndroidBuildClassifier.isDebuggableBuild();
+        boolean finalBuild = mAndroidBuildClassifier.isFinalBuild();
+        int minTargetSdk = mCompatConfig.minTargetSdkForChangeId(changeId);
 
         // Allow any override for userdebug or eng builds.
         if (debuggableBuild) {
