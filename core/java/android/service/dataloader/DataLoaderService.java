@@ -172,7 +172,7 @@ public abstract class DataLoaderService extends Service {
         @Override
         public void prepareImage(InstallationFileParcel[] addedFiles, String[] removedFiles) {
             if (!nativePrepareImage(mId, addedFiles, removedFiles)) {
-                Slog.w(TAG, "Failed to destroy loader: " + mId);
+                Slog.w(TAG, "Failed to prepare image for data loader: " + mId);
             }
         }
     }

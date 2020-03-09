@@ -2014,7 +2014,6 @@ package android.content.pm {
   }
 
   public final class InstallationFile {
-    ctor public InstallationFile(int, @NonNull String, long, @Nullable byte[], @Nullable byte[]);
     method public long getLengthBytes();
     method public int getLocation();
     method @Nullable public byte[] getMetadata();
