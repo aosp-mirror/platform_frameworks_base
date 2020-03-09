@@ -3773,7 +3773,7 @@ public final class ProcessList {
         }
 
         Watchdog.getInstance().processDied(app.processName, app.pid);
-        mAppExitInfoTracker.scheduleNoteProcessDiedLocked(app);
+        mAppExitInfoTracker.scheduleNoteProcessDied(app);
     }
 
     /**
