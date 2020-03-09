@@ -129,6 +129,9 @@ public final class AppSearchImpl {
     public DocumentProto getDocument(int callingUid, @NonNull String uri) {
         String typePrefix = getTypePrefix(callingUid);
         DocumentProto document = mFakeIcing.get(uri);
+        if (document == null) {
+            return null;
+        }
 
         // TODO(b/146526096): Since FakeIcing doesn't currently handle namespaces, we perform a
         //  post-filter to make sure we don't return documents we shouldn't. This should be removed
@@ -206,6 +209,25 @@ public final class AppSearchImpl {
             }
         }
         return searchResultsBuilder.build();
+    }
+
+    /** Deletes the given document by URI */
+    public boolean delete(int callingUid, @NonNull String uri) {
+        DocumentProto document = mFakeIcing.get(uri);
+        if (document == null) {
+            return false;
+        }
+
+        // TODO(b/146526096): Since FakeIcing doesn't currently handle namespaces, we perform a
+        //     post-filter to make sure we don't delete documents we shouldn't. This should be
+        //     removed once the real Icing Lib is implemented.
+        String typePrefix = getTypePrefix(callingUid);
+        if (!typePrefix.equals(document.getNamespace())) {
+            throw new SecurityException(
+                    "Failed to delete document " + uri + "; URI collision in FakeIcing");
+        }
+
+        return mFakeIcing.delete(uri);
     }
 
     /**

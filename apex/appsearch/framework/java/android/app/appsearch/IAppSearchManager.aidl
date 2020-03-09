@@ -74,6 +74,20 @@ interface IAppSearchManager {
         in AndroidFuture<AppSearchResult> callback);
 
     /**
+     * Deletes documents by URI.
+     *
+     * @param uris The URIs of the documents to delete
+     * @param callback
+     *     {@link AndroidFuture}&lt;{@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;&gt;.
+     *     If the call fails to start, {@code callback} will be completed exceptionally. Otherwise,
+     *     {@code callback} will be completed with an
+     *     {@link AppSearchBatchResult}&lt;{@link String}, {@link Void}&gt;
+     *     where the keys are document URIs. If a document doesn't exist, it will be reported as a
+     *     failure where the {@code throwable} is {@code null}.
+     */
+    void delete(in List<String> uris, in AndroidFuture<AppSearchBatchResult> callback);
+
+    /**
      * Deletes all documents belonging to the calling app.
      *
      * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link Void}&gt;&gt;.
