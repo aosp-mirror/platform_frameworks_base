@@ -16,7 +16,6 @@
 package android.provider;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.net.Uri;
@@ -240,7 +239,6 @@ public class BlockedNumberContract {
      * blocked.
      * @hide
      */
-    @SystemApi
     public static final int STATUS_NOT_BLOCKED = 0;
 
     /**
@@ -248,7 +246,6 @@ public class BlockedNumberContract {
      * because it is in the list of blocked numbers maintained by the provider.
      * @hide
      */
-    @SystemApi
     public static final int STATUS_BLOCKED_IN_LIST = 1;
 
     /**
@@ -256,7 +253,6 @@ public class BlockedNumberContract {
      * because it is from a restricted number.
      * @hide
      */
-    @SystemApi
     public static final int STATUS_BLOCKED_RESTRICTED = 2;
 
     /**
@@ -264,7 +260,6 @@ public class BlockedNumberContract {
      * because it is from an unknown number.
      * @hide
      */
-    @SystemApi
     public static final int STATUS_BLOCKED_UNKNOWN_NUMBER = 3;
 
     /**
@@ -272,7 +267,6 @@ public class BlockedNumberContract {
      * because it is from a pay phone.
      * @hide
      */
-    @SystemApi
     public static final int STATUS_BLOCKED_PAYPHONE = 4;
 
     /**
@@ -280,14 +274,12 @@ public class BlockedNumberContract {
      * because it is from a number not in the users contacts.
      * @hide
      */
-    @SystemApi
     public static final int STATUS_BLOCKED_NOT_IN_CONTACTS = 5;
 
     /**
      * Integer reason indicating whether a call was blocked, and if so why.
      * @hide
      */
-    @SystemApi
     public static final String RES_BLOCK_STATUS = "block_status";
 
     /** @hide */
@@ -296,31 +288,6 @@ public class BlockedNumberContract {
     /** @hide */
     public static final String METHOD_CAN_CURRENT_USER_BLOCK_NUMBERS =
             "can_current_user_block_numbers";
-
-    /** @hide */
-    @SystemApi
-    public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
-
-    /** @hide */
-    public static final String METHOD_END_BLOCK_SUPPRESSION = "end_block_suppression";
-
-    /** @hide */
-    @SystemApi
-    public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
-
-    /** @hide */
-    public static final String METHOD_GET_BLOCK_SUPPRESSION_STATUS =
-            "get_block_suppression_status";
-
-    /** @hide */
-    public static final String METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION =
-            "should_show_emergency_call_notification";
-
-    /** @hide */
-    public static final String METHOD_GET_ENHANCED_BLOCK_SETTING = "get_enhanced_block_setting";
-
-    /** @hide */
-    public static final String METHOD_SET_ENHANCED_BLOCK_SETTING = "set_enhanced_block_setting";
 
     /** @hide */
     public static final String RES_CAN_BLOCK_NUMBERS = "can_block";
@@ -439,10 +406,25 @@ public class BlockedNumberContract {
         public static final String ACTION_BLOCK_SUPPRESSION_STATE_CHANGED =
                 "android.provider.action.BLOCK_SUPPRESSION_STATE_CHANGED";
 
+        public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
+
+        public static final String METHOD_END_BLOCK_SUPPRESSION = "end_block_suppression";
+
+        public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
+
+        public static final String METHOD_GET_BLOCK_SUPPRESSION_STATUS =
+                "get_block_suppression_status";
+
+        public static final String METHOD_SHOULD_SHOW_EMERGENCY_CALL_NOTIFICATION =
+                "should_show_emergency_call_notification";
+
         public static final String RES_IS_BLOCKING_SUPPRESSED = "blocking_suppressed";
 
         public static final String RES_BLOCKING_SUPPRESSED_UNTIL_TIMESTAMP =
                 "blocking_suppressed_until_timestamp";
+
+        public static final String METHOD_GET_ENHANCED_BLOCK_SETTING = "get_enhanced_block_setting";
+        public static final String METHOD_SET_ENHANCED_BLOCK_SETTING = "set_enhanced_block_setting";
 
         /* Preference key of block numbers not in contacts setting. */
         public static final String ENHANCED_SETTING_KEY_BLOCK_UNREGISTERED =
