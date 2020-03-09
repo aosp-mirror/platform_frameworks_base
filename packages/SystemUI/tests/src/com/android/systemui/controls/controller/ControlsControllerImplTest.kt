@@ -340,6 +340,8 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         controlLoadCallbackCaptor.value.error("")
 
+        delayableExecutor.runAllReady()
+
         assertTrue(loaded)
     }
 

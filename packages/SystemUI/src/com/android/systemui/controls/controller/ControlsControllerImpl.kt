@@ -253,17 +253,21 @@ class ControlsControllerImpl @Inject constructor (
                     }
 
                     override fun error(message: String) {
-                        val loadData = Favorites.getControlsForComponent(componentName).let {
-                            controls ->
+                        executor.execute {
+                            val loadData = Favorites.getControlsForComponent(componentName)
+                                .let { controls ->
                                 val keys = controls.map { it.controlId }
                                 createLoadDataObject(
-                                    controls.map { createRemovedStatus(componentName, it, false) },
-                                    keys,
-                                    true
+                                        controls.map {
+                                            createRemovedStatus(componentName, it, false)
+                                        },
+                                        keys,
+                                        true
                                 )
-                        }
+                            }
 
-                        dataCallback.accept(loadData)
+                            dataCallback.accept(loadData)
+                        }
                     }
                 }
         )
