@@ -44,6 +44,9 @@ import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_SERVICE_UNAVAIL;
 import static android.net.TetheringManager.TETHER_ERROR_UNAVAIL_IFACE;
 import static android.net.TetheringManager.TETHER_ERROR_UNKNOWN_IFACE;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
 import static android.net.util.TetheringMessageBase.BASE_MASTER;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
@@ -237,6 +240,7 @@ public class Tethering {
     private TetherStatesParcel mTetherStatesParcel;
     private boolean mDataSaverEnabled = false;
     private String mWifiP2pTetherInterface = null;
+    private int mOffloadStatus = TETHER_HARDWARE_OFFLOAD_STOPPED;
 
     @GuardedBy("mPublicSync")
     private EthernetManager.TetheredInterfaceRequest mEthernetIfaceRequest;
@@ -1901,12 +1905,15 @@ public class Tethering {
         // OffloadController implementation.
         class OffloadWrapper {
             public void start() {
-                mOffloadController.start();
+                final int status = mOffloadController.start() ? TETHER_HARDWARE_OFFLOAD_STARTED
+                        : TETHER_HARDWARE_OFFLOAD_FAILED;
+                updateOffloadStatus(status);
                 sendOffloadExemptPrefixes();
             }
 
             public void stop() {
                 mOffloadController.stop();
+                updateOffloadStatus(TETHER_HARDWARE_OFFLOAD_STOPPED);
             }
 
             public void updateUpstreamNetworkState(UpstreamNetworkState ns) {
@@ -1967,6 +1974,13 @@ public class Tethering {
 
                 mOffloadController.setLocalPrefixes(localPrefixes);
             }
+
+            private void updateOffloadStatus(final int newStatus) {
+                if (newStatus == mOffloadStatus) return;
+
+                mOffloadStatus = newStatus;
+                reportOffloadStatusChanged(mOffloadStatus);
+            }
         }
     }
 
@@ -2001,6 +2015,7 @@ public class Tethering {
             parcel.tetheredClients = hasListPermission
                     ? mConnectedClientsTracker.getLastTetheredClients()
                     : Collections.emptyList();
+            parcel.offloadStatus = mOffloadStatus;
             try {
                 callback.onCallbackStarted(parcel);
             } catch (RemoteException e) {
@@ -2086,6 +2101,21 @@ public class Tethering {
                             (CallbackCookie) mTetheringEventCallbacks.getBroadcastCookie(i);
                     if (!cookie.hasListClientsPermission) continue;
                     mTetheringEventCallbacks.getBroadcastItem(i).onTetherClientsChanged(clients);
+                } catch (RemoteException e) {
+                    // Not really very much to do here.
+                }
+            }
+        } finally {
+            mTetheringEventCallbacks.finishBroadcast();
+        }
+    }
+
+    private void reportOffloadStatusChanged(final int status) {
+        final int length = mTetheringEventCallbacks.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mTetheringEventCallbacks.getBroadcastItem(i).onOffloadStatusChanged(status);
                 } catch (RemoteException e) {
                     // Not really very much to do here.
                 }
