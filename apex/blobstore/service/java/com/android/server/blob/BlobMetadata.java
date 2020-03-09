@@ -15,7 +15,6 @@
  */
 package com.android.server.blob;
 
-import static android.app.blob.BlobStoreManager.DESC_RES_TYPE_STRING;
 import static android.app.blob.XmlTags.ATTR_DESCRIPTION;
 import static android.app.blob.XmlTags.ATTR_DESCRIPTION_RES_NAME;
 import static android.app.blob.XmlTags.ATTR_EXPIRY_TIME;
@@ -30,16 +29,16 @@ import static android.app.blob.XmlTags.TAG_LEASEE;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.O_RDONLY;
 
-import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_DESC_RES_NAME;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_STRING_DESC;
+import static com.android.server.blob.BlobStoreUtils.getDescriptionResourceId;
+import static com.android.server.blob.BlobStoreUtils.getPackageResources;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.blob.BlobHandle;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.content.res.ResourceId;
 import android.content.res.Resources;
 import android.os.ParcelFileDescriptor;
@@ -65,6 +64,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 class BlobMetadata {
     private final Object mMetadataLock = new Object();
@@ -279,6 +279,10 @@ class BlobMetadata {
             }
         }
         return false;
+    }
+
+    void forEachLeasee(Consumer<Leasee> consumer) {
+        mLeasees.forEach(consumer);
     }
 
     File getBlobFile() {
@@ -506,16 +510,9 @@ class BlobMetadata {
             if (resources == null) {
                 return null;
             }
-            try {
-                final int resId = resources.getIdentifier(descriptionResEntryName,
-                        DESC_RES_TYPE_STRING, packageName);
-                return resId <= 0 ? null : resources.getString(resId);
-            } catch (Resources.NotFoundException e) {
-                if (LOGV) {
-                    Slog.w(TAG, "Description resource not found", e);
-                }
-                return null;
-            }
+            final int resId = getDescriptionResourceId(resources, descriptionResEntryName,
+                    packageName);
+            return resId == Resources.ID_NULL ? null : resources.getString(resId);
         }
 
         @Nullable
@@ -544,19 +541,6 @@ class BlobMetadata {
                 desc = description.toString();
             }
             return desc == null ? "<none>" : desc;
-        }
-
-        @Nullable
-        private static Resources getPackageResources(@NonNull Context context,
-                @NonNull String packageName, int userId) {
-            try {
-                return context.getPackageManager()
-                        .getResourcesForApplicationAsUser(packageName, userId);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.d(TAG, "Unknown package in user " + userId + ": "
-                        + packageName, e);
-                return null;
-            }
         }
 
         void writeToXml(@NonNull XmlSerializer out) throws IOException {
