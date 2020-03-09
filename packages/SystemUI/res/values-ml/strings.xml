@@ -558,6 +558,8 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ആണ് നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ മാനേജുചെയ്യുന്നത്. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ആപ്പിലേക്ക് പ്രൊഫൈൽ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് ഇമെയിലുകൾ, ആപ്പുകൾ, വെബ്‌സൈറ്റുകൾ എന്നിവ ഉൾപ്പെടെ നിങ്ങളുടെ ഔദ്യോഗിക നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും.\n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ആപ്പിലേക്കും നിങ്ങൾ കണക്റ്റുചെയ്‌തിരിക്കുന്നു, അതിന് നിങ്ങളുടെ വ്യക്തിഗത നെറ്റ്‌വർക്ക് ആക്റ്റിവിറ്റി നിരീക്ഷിക്കാനാകും."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ഉപയോഗിച്ച് അൺലോക്ക് ചെയ്‌തത്"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"നിങ്ങൾ സ്വമേധയാ അൺലോക്കുചെയ്യുന്നതുവരെ ഉപകരണം ലോക്കുചെയ്‌തതായി തുടരും"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked_plugged_in (2323452175329362855) -->
+    <skip />
     <string name="hidden_notifications_title" msgid="1782412844777612795">"അറിയിപ്പുകൾ വേഗത്തിൽ സ്വീകരിക്കുക"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"അൺലോക്കുചെയ്യുന്നതിന് മുമ്പ് അവ കാണുക"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"വേണ്ട, നന്ദി"</string>
@@ -979,12 +981,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ചുവടെ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"ചാറ്റുകൾ ഏറ്റവും ആദ്യം കാണുന്ന രീതിയിൽ വയ്ക്കുക"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിൽ നിന്നുള്ള പുതിയ ചാറ്റുകൾ ബബിളുകളായി ദൃശ്യമാവും. ഇത് തുറക്കാൻ ബബിൾ ടാപ്പ് ചെയ്യുക. ഇത് നീക്കാൻ വലിച്ചിടുക.\n\nബബിൾ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ഈ ആപ്പിൽ നിന്നുള്ള ബബിളുകൾ ഓഫാക്കാൻ \'മാനേജ് ചെയ്യുക\' ടാപ്പ് ചെയ്യുക"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്‌തു. മാറ്റങ്ങൾ വരുത്താൻ ക്രമീകരണത്തിലേക്ക് പോവുക."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്യാൻ ക്രമീകരണത്തിലേക്ക് പോവുക"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"സ്‌റ്റാൻഡ്‌ബൈ"</string>
@@ -994,12 +993,20 @@
     <string name="quick_controls_title" msgid="525285759614231333">"ദ്രുത നിയന്ത്രണങ്ങൾ"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"നിയന്ത്രണങ്ങൾ ചേർക്കാൻ ഒരു ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
-    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> നിയന്ത്രണങ്ങൾ ചേർത്തു.</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> നിയന്ത്രണം ചേർത്തു.</item>
+    </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"നിയന്ത്രണങ്ങൾ"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"അതിവേഗ ആക്‌സസിനുള്ള നിയന്ത്രണങ്ങൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"പ്രിയപ്പെട്ടവ"</string>
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"എല്ലാം"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"എല്ലാ നിയന്ത്രണങ്ങളുടെയും ലിസ്റ്റ് ലോഡ് ചെയ്യാനായില്ല."</string>
-    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
     <skip />
 </resources>

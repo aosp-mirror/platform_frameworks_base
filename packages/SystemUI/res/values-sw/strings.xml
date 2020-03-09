@@ -558,6 +558,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Wasifu wako wa kazini unasimamiwa na <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Wasifu umeunganishwa kwenye <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, ambayo inaweza kufuatilia shughuli zako kwenye mtandao wa kazini, ikiwa ni pamoja na barua pepe, programu na tovuti.\n\n Umeunganishwa pia kwenye  <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, ambayo inaweza kufuatilia shughuli zako kwenye mtandao wa binafsi."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Imefunguliwa na kipengele cha kutathmini hali ya kuaminika"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Kifaa kitaendelea kuwa katika hali ya kufungwa hadi utakapokifungua mwenyewe"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Pata arifa kwa haraka"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Zitazame kabla hujafungua"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Hapana"</string>
@@ -979,12 +980,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Sogeza chini kushoto"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Sogeza chini kulia"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ondoa"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Zipe gumzo kipaumbele"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"Gumzo mpya kutoka <xliff:g id="APP_NAME">%1$s</xliff:g> zitaonekana kama viputo. Gusa kiputo ili ukifungue. Buruta ili ukisogeze.\n\nGusa kiputo"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Gusa Dhibiti ili uzime viputo kwenye programu hii"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Umesasisha usogezaji kwenye mfumo. Ili ubadilishe, nenda kwenye Mipangilio."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Nenda kwenye mipangilio ili usasishe usogezaji kwenye mfumo"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Hali tuli"</string>
@@ -1004,4 +1002,10 @@
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"Vyote"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Imeshindwa kupakia orodha ya vidhibiti vyote."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Nyingine"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <skip />
 </resources>

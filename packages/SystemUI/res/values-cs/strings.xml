@@ -564,6 +564,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Váš pracovní profil spravuje organizace <xliff:g id="ORGANIZATION">%1$s</xliff:g>. Je připojen k aplikaci <xliff:g id="APPLICATION_WORK">%2$s</xliff:g>, která může sledovat vaši aktivitu v síti, včetně e-mailů, aplikací a webů.\n\nTaké jste připojeni k aplikaci <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g>, která může sledovat vaši osobní aktivitu v síti."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Odemknutí udržováno funkcí TrustAgent"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Zařízení zůstane uzamčeno, dokud je ručně neodemknete"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Čtěte si oznámení rychleji"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Můžete si je přečíst před odemčením obrazovky."</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Ne, děkuji"</string>
@@ -989,12 +990,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Přesunout vlevo dolů"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Přesunout vpravo dolů"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Zavřít"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Zobrazovat chaty v popředí"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"Nové chaty z aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> se budou zobrazovat jako bubliny. Bublinu otevřete klepnutím. Přetažením ji přemístíte.\n\nKlepnout na bublinu"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bubliny pro tuto aplikaci můžete vypnout klepnutím na Spravovat"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systémová navigace byla aktualizována. Chcete-li provést změny, přejděte do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Přejděte do Nastavení a aktualizujte systémovou navigaci"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
@@ -1016,4 +1014,10 @@
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"Vše"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Načtení seznamu všech ovládacích prvků se nezdařilo."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Jiné"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <skip />
 </resources>

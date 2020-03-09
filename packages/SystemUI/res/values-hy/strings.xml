@@ -558,6 +558,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"Ձեր աշխատանքային պրոֆիլի կառավարիչն է <xliff:g id="ORGANIZATION">%1$s</xliff:g> կազմակերպությունը: Այն կապակցված է <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> հավելվածին, որը կարող է վերահսկել աշխատանքային ցանցում կատարած գործունեությունը, այդ թվում նաև էլփոստի հաշիվները, հավելվածները և կայքերը:\n\nԴուք կապակցված եք նաև <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> հավելվածին, որը կարող է վերահսկել անձնական ցանցում կատարած ձեր գործողությունները:"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"Ապակողպվում է TrustAgent-ի միջոցով"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Սարքը կմնա արգելափակված՝ մինչև ձեռքով չբացեք"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Ավելի արագ ստացեք ծանուցումները"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Տեսեք դրանք մինչև ապակողպելը"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Ոչ"</string>
@@ -1001,4 +1002,10 @@
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"Բոլորը"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Չհաջողվեց բեռնել բոլոր կառավարների ցանկը։"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Այլ"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <skip />
 </resources>

@@ -558,6 +558,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> erakundeak kudeatzen dizu laneko profila. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> aplikaziora dago konektatuta profila, eta aplikazio horrek sarean egiten dituzun jarduerak kontrola ditzake, mezu elektronikoak, aplikazioak eta webguneak barne. \n\n<xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> aplikaziora ere zaude konektatuta, eta hark sare pertsonalean egiten dituzun jarduerak kontrola ditzake."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent bidez desblokeatuta"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"Gailua blokeatuta egongo da eskuz desblokeatu arte"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"Eskuratu jakinarazpenak azkarrago"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"Ikusi desblokeatu baino lehen"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"Ez, eskerrik asko"</string>
@@ -979,12 +980,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Eraman behealdera, ezkerretara"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Eraman behealdera, eskuinetara"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Baztertu"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Utzi txatak aurrealdean"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren txat berriak burbuila gisa agertuko dira. Burbuilak irekitzeko, saka itzazu. Mugitzeko, berriz, arrasta itzazu.\n\nSakatu burbuila"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Aplikazioaren burbuilak desaktibatzeko, sakatu Kudeatu"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Eguneratu da sistemaren nabigazioa. Aldaketak egiteko, joan Ezarpenak atalera."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistemaren nabigazioa eguneratzeko, joan Ezarpenak atalera"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Egonean"</string>
@@ -1004,4 +1002,10 @@
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"Guztiak"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ezin izan da kargatu kontrol guztien zerrenda."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Beste bat"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <skip />
 </resources>

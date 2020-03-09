@@ -498,7 +498,7 @@
     <string name="notification_section_header_conversations" msgid="821834744538345661">"مکالمه‌ها"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"پاک کردن همه اعلان‌های بی‌صدا"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"اعلان‌ها توسط «مزاحم نشوید» موقتاً متوقف شدند"</string>
-    <string name="media_projection_action_text" msgid="3634906766918186440">"اکنون شروع شود"</string>
+    <string name="media_projection_action_text" msgid="3634906766918186440">"اکنون شروع کنید"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"اعلانی موجود نیست"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"شاید نمایه کنترل شود"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"ممکن است شبکه کنترل شود"</string>
@@ -558,6 +558,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"نمایه کاری‌تان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این نمایه به <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> متصل است که می‌تواند تنظیمات، دسترسی شرکتی، برنامه‌ها، داده‌های مرتبط با دستگاه و اطلاعات مکان دستگاه شما را پایش کند.\n\nشما همچنین به <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> متصل هستید که می‌تواند فعالیت خصوصی شما را در شبکه پایش کند."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏با TrustAgent قفل را باز نگه‌دارید"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"دستگاه قفل باقی می‌ماند تا زمانی که قفل آن را به صورت دستی باز کنید"</string>
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"دریافت سریع‌تر اعلان‌ها"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"قبل از باز کردن قفل آنها را مشاهده کنید"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"نه متشکرم"</string>
@@ -979,12 +980,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"انتقال به پایین سمت راست"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"انتقال به پایین سمت چپ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"رد کردن"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"نگه داشتن گپ‌ها در جلو"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"گپ‌های جدید از <xliff:g id="APP_NAME">%1$s</xliff:g> به‌صورت «حباب» نمایش داده می‌شوند. روی «حباب» ضربه بزنید تا باز شود. آن را بکشید تا جابه‌جا شود.\n\nروی «حباب» ضربه بزنید"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"برای خاموش کردن «حباب‌ها» از این برنامه، روی «مدیریت» ضربه بزنید"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"پیمایش سیستم به‌روزرسانی شد. برای انجام تغییرات به «تنظیمات» بروید."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"برای به‌روزرسانی پیمایش سیستم، به «تنظیمات» بروید"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"آماده‌به‌کار"</string>
@@ -1004,4 +1002,10 @@
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"همه"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"فهرست همه کنترل‌ها را نمی‌توان بارگیری کرد."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"موارد دیگر"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <skip />
 </resources>
