@@ -19,20 +19,24 @@ package com.android.systemui.controls.management
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.text.TextUtils
 import android.view.View
 import android.view.ViewStub
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.controls.controller.StructureInfo
+import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.controls.controller.ControlsControllerImpl
+import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.qs.PageIndicator
 import com.android.systemui.settings.CurrentUserTracker
+import java.text.Collator
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 import javax.inject.Inject
@@ -40,6 +44,7 @@ import javax.inject.Inject
 class ControlsFavoritingActivity @Inject constructor(
     @Main private val executor: Executor,
     private val controller: ControlsControllerImpl,
+    private val listingController: ControlsListingController,
     broadcastDispatcher: BroadcastDispatcher
 ) : Activity() {
 
@@ -48,12 +53,18 @@ class ControlsFavoritingActivity @Inject constructor(
         const val EXTRA_APP = "extra_app_label"
     }
 
-    private lateinit var recyclerViewAll: RecyclerView
-    private lateinit var adapterAll: ControlAdapter
-    private lateinit var statusText: TextView
-    private var model: ControlsModel? = null
     private var component: ComponentName? = null
-    private var structureName: CharSequence = ""
+    private var appName: CharSequence? = null
+
+    private lateinit var structurePager: ViewPager2
+    private lateinit var statusText: TextView
+    private lateinit var titleView: TextView
+    private lateinit var iconView: ImageView
+    private lateinit var iconFrame: View
+    private lateinit var pageIndicator: PageIndicator
+    private var listOfStructures = emptyList<StructureContainer>()
+
+    private lateinit var comparator: Comparator<StructureContainer>
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {
         private val startingUser = controller.currentUserId
@@ -66,29 +77,117 @@ class ControlsFavoritingActivity @Inject constructor(
         }
     }
 
+    private val listingCallback = object : ControlsListingController.ControlsListingCallback {
+        private var icon: Drawable? = null
+
+        override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
+            val newIcon = serviceInfos.firstOrNull { it.componentName == component }?.loadIcon()
+            if (icon == newIcon) return
+            icon = newIcon
+            executor.execute {
+                if (icon != null) {
+                    iconView.setImageDrawable(icon)
+                }
+                iconFrame.visibility = if (icon != null) View.VISIBLE else View.GONE
+            }
+        }
+    }
+
     override fun onBackPressed() {
         finish()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val collator = Collator.getInstance(resources.configuration.locales[0])
+        comparator = compareBy(collator) { it.structureName }
+        appName = intent.getCharSequenceExtra(EXTRA_APP)
+        component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
+
+        bindViews()
+
+        setUpPager()
+
+        loadControls()
+
+        listingController.addCallback(listingCallback)
+
+        currentUserTracker.startTracking()
+    }
+
+    private fun loadControls() {
+        component?.let {
+            statusText.text = resources.getText(com.android.internal.R.string.loading)
+            val emptyZoneString = resources.getText(
+                    R.string.controls_favorite_other_zone_header)
+            controller.loadForComponent(it, Consumer { data ->
+                val allControls = data.allControls
+                val favoriteKeys = data.favoritesIds
+                val error = data.errorOnLoad
+                val controlsByStructure = allControls.groupBy { it.control.structure ?: "" }
+                listOfStructures = controlsByStructure.map {
+                    StructureContainer(it.key, AllModel(it.value, favoriteKeys, emptyZoneString))
+                }.sortedWith(comparator)
+                executor.execute {
+                    structurePager.adapter = StructureAdapter(listOfStructures)
+                    if (error) {
+                        statusText.text = resources.getText(R.string.controls_favorite_load_error)
+                    } else {
+                        statusText.visibility = View.GONE
+                    }
+                    pageIndicator.setNumPages(listOfStructures.size)
+                    pageIndicator.setLocation(0f)
+                    pageIndicator.visibility =
+                        if (listOfStructures.size > 1) View.VISIBLE else View.GONE
+                }
+            })
+        }
+    }
+
+    private fun setUpPager() {
+        structurePager.apply {
+            adapter = StructureAdapter(emptyList())
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    val name = listOfStructures[position].structureName
+                    titleView.text = if (!TextUtils.isEmpty(name)) name else appName
+                }
+
+                override fun onPageScrolled(
+                    position: Int,
+                    positionOffset: Float,
+                    positionOffsetPixels: Int
+                ) {
+                    super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+                    pageIndicator.setLocation(position + positionOffset)
+                }
+            })
+        }
+    }
+
+    private fun bindViews() {
         setContentView(R.layout.controls_management)
         requireViewById<ViewStub>(R.id.stub).apply {
             layoutResource = R.layout.controls_management_favorites
             inflate()
         }
 
-        val app = intent.getCharSequenceExtra(EXTRA_APP)
-        component = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
         statusText = requireViewById(R.id.status_message)
+        pageIndicator = requireViewById(R.id.structure_page_indicator)
 
-        setUpRecyclerView()
-
-        requireViewById<TextView>(R.id.title).text = app?.let { it }
-                ?: resources.getText(R.string.controls_favorite_default_title)
+        titleView = requireViewById<TextView>(R.id.title).apply {
+            text = appName ?: resources.getText(R.string.controls_favorite_default_title)
+        }
         requireViewById<TextView>(R.id.subtitle).text =
                 resources.getText(R.string.controls_favorite_subtitle)
+        iconView = requireViewById(com.android.internal.R.id.icon)
+        iconFrame = requireViewById(R.id.icon_frame)
+        structurePager = requireViewById<ViewPager2>(R.id.structure_pager)
+        bindButtons()
+    }
 
+    private fun bindButtons() {
         requireViewById<Button>(R.id.other_apps).apply {
             visibility = View.VISIBLE
             setOnClickListener {
@@ -98,64 +197,21 @@ class ControlsFavoritingActivity @Inject constructor(
 
         requireViewById<Button>(R.id.done).setOnClickListener {
             if (component == null) return@setOnClickListener
-            val favoritesForStorage = model?.favorites?.map {
-                it.build()
-            }
-            if (favoritesForStorage != null) {
-                controller.replaceFavoritesForStructure(StructureInfo(component!!, structureName,
+            listOfStructures.forEach {
+                val favoritesForStorage = it.model.favorites.map { it.build() }
+                controller.replaceFavoritesForStructure(StructureInfo(component!!, it.structureName,
                         favoritesForStorage))
-                finishAffinity()
             }
-        }
 
-        component?.let {
-            statusText.text = resources.getText(com.android.internal.R.string.loading)
-            controller.loadForComponent(it, Consumer { data ->
-                val allControls = data.allControls
-                val favoriteKeys = data.favoritesIds
-                val error = data.errorOnLoad
-                val structures = allControls.fold(hashSetOf<CharSequence>()) {
-                    s, c ->
-                        s.add(c.control.structure ?: "")
-                        s
-                }
-                // TODO add multi structure switching support
-                executor.execute {
-                    val emptyZoneString = resources.getText(
-                            R.string.controls_favorite_other_zone_header)
-                    val model = AllModel(allControls, favoriteKeys, emptyZoneString)
-                    adapterAll.changeModel(model)
-                    this.model = model
-                    if (error) {
-                        statusText.text = resources.getText(R.string.controls_favorite_load_error)
-                    } else {
-                        statusText.visibility = View.GONE
-                    }
-                }
-            })
-        }
-
-        currentUserTracker.startTracking()
-    }
-
-    private fun setUpRecyclerView() {
-        val margin = resources.getDimensionPixelSize(R.dimen.controls_card_margin)
-        val itemDecorator = MarginItemDecorator(margin, margin)
-        val layoutInflater = LayoutInflater.from(applicationContext)
-        val elevation = resources.getFloat(R.dimen.control_card_elevation)
-
-        adapterAll = ControlAdapter(layoutInflater, elevation)
-        recyclerViewAll = requireViewById<RecyclerView>(R.id.listAll).apply {
-            adapter = adapterAll
-            layoutManager = GridLayoutManager(applicationContext, 2).apply {
-                spanSizeLookup = adapterAll.spanSizeLookup
-            }
-            addItemDecoration(itemDecorator)
+            finishAffinity()
         }
     }
 
     override fun onDestroy() {
         currentUserTracker.stopTracking()
+        listingController.removeCallback(listingCallback)
         super.onDestroy()
     }
 }
+
+data class StructureContainer(val structureName: CharSequence, val model: ControlsModel)
