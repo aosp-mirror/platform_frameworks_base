@@ -112,38 +112,6 @@ public final class MediaRoute2Info implements Parcelable {
     public @interface Type {}
 
     /**
-     * The default receiver device type of the route indicating the type is unknown.
-     *
-     * @see #getDeviceType
-     */
-    public static final int DEVICE_TYPE_UNKNOWN = 0;
-
-    /**
-     * A receiver device type of the route indicating the presentation of the media is happening
-     * on a TV.
-     *
-     * @see #getDeviceType
-     */
-    public static final int DEVICE_TYPE_REMOTE_TV = 1;
-
-    /**
-     * A receiver device type of the route indicating the presentation of the media is happening
-     * on a speaker.
-     *
-     * @see #getDeviceType
-     */
-    public static final int DEVICE_TYPE_REMOTE_SPEAKER = 2;
-
-    /**
-     * A receiver device type of the route indicating the presentation of the media is happening
-     * on a bluetooth device such as a bluetooth speaker.
-     *
-     * @see #getDeviceType
-     */
-    public static final int DEVICE_TYPE_BLUETOOTH = 3;
-
-
-    /**
      * The default route type indicating the type is unknown.
      *
      * @see #getType
@@ -396,18 +364,6 @@ public final class MediaRoute2Info implements Parcelable {
     }
 
     /**
-     * Gets the type of the receiver device associated with this route.
-     *
-     * @return The type of the receiver device associated with this route:
-     * {@link #DEVICE_TYPE_REMOTE_TV}, {@link #DEVICE_TYPE_REMOTE_SPEAKER},
-     * {@link #DEVICE_TYPE_BLUETOOTH}.
-     */
-    @Type
-    public int getDeviceType() {
-        return getType();
-    }
-
-    /**
      * Gets the type of this route.
      *
      * @return The type of this route:
@@ -599,7 +555,6 @@ public final class MediaRoute2Info implements Parcelable {
                 .append("id=").append(getId())
                 .append(", name=").append(getName())
                 .append(", features=").append(getFeatures())
-                .append(", deviceType=").append(getDeviceType())
                 .append(", iconUri=").append(getIconUri())
                 .append(", description=").append(getDescription())
                 .append(", connectionState=").append(getConnectionState())
@@ -749,14 +704,6 @@ public final class MediaRoute2Info implements Parcelable {
         public Builder clearFeatures() {
             mFeatures.clear();
             return this;
-        }
-
-        /**
-         * Sets the route's device type.
-         */
-        @NonNull
-        public Builder setDeviceType(@Type int type) {
-            return setType(type);
         }
 
         /**
