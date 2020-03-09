@@ -1311,7 +1311,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private class BubblesImeListener extends PinnedStackListenerForwarder.PinnedStackListener {
         @Override
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-            if (mStackView != null && mStackView.getBubbleCount() > 0) {
+            if (mStackView != null) {
                 mStackView.post(() -> mStackView.onImeVisibilityChanged(imeVisible, imeHeight));
             }
         }
