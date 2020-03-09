@@ -213,6 +213,16 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRegisterTaskOrganizerWithExistingTasks() throws RemoteException {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        stack.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_PINNED);
+        verify(organizer, times(1)).taskAppeared(any());
+    }
+
+    @Test
     public void testTaskTransaction() {
         removeGlobalMinSizeRestriction();
         final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)

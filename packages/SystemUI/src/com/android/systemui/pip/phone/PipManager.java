@@ -232,6 +232,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
 
+        // Ensure that we have the display info in case we get calls to update the bounds before the
+        // listener calls back
+        final DisplayInfo displayInfo = new DisplayInfo();
+        context.getDisplay().getDisplayInfo(displayInfo);
+        mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
+
         try {
             ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(
                     mPipTaskOrganizer, WINDOWING_MODE_PINNED);
