@@ -1245,7 +1245,8 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
-     * @deprecated use {@link #setExpanded(boolean)} and {@link #setSelectedBubble(Bubble)}
+     * @deprecated use {@link #setExpanded(boolean)} and
+     * {@link BubbleData#setSelectedBubble(Bubble)}
      */
     @Deprecated
     @MainThread
