@@ -2588,8 +2588,13 @@ public final class OomAdjuster {
             return;
         }
 
+        // if an app is already frozen and shouldNotFreeze becomes true, immediately unfreeze
+        if (app.frozen && app.shouldNotFreeze) {
+            mCachedAppOptimizer.unfreezeAppLocked(app);
+        }
+
         // Use current adjustment when freezing, set adjustment when unfreezing.
-        if (app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ && !app.frozen) {
+        if (app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ && !app.frozen && !app.shouldNotFreeze) {
             mCachedAppOptimizer.freezeAppAsync(app);
         } else if (app.setAdj < ProcessList.CACHED_APP_MIN_ADJ && app.frozen) {
             mCachedAppOptimizer.unfreezeAppLocked(app);
