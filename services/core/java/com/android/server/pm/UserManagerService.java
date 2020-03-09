@@ -41,10 +41,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.pm.CrossProfileAppsInternal;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
@@ -261,8 +259,6 @@ public class UserManagerService extends IUserManager.Stub {
     /** Installs system packages based on user-type. */
     private final UserSystemPackageInstaller mSystemPackageInstaller;
 
-    private PackageManagerInternal mPmInternal;
-    private CrossProfileAppsInternal mCrossProfileAppsInternal;
     private DevicePolicyManagerInternal mDevicePolicyManagerInternal;
 
     /**
@@ -5143,23 +5139,6 @@ public class UserManagerService extends IUserManager.Stub {
             throw new SecurityException("Specified package " + callingPackage
                     + " does not match the calling uid " + callingUid);
         }
-    }
-
-    /** Retrieves the internal package manager interface. */
-    private PackageManagerInternal getPackageManagerInternal() {
-        // Don't need to synchonize; worst-case scenario LocalServices will be called twice.
-        if (mPmInternal == null) {
-            mPmInternal = LocalServices.getService(PackageManagerInternal.class);
-        }
-        return mPmInternal;
-    }
-
-    /** Retrieve the internal cross profile apps interface. */
-    private CrossProfileAppsInternal getCrossProfileAppsInternal() {
-        if (mCrossProfileAppsInternal == null) {
-            mCrossProfileAppsInternal = LocalServices.getService(CrossProfileAppsInternal.class);
-        }
-        return mCrossProfileAppsInternal;
     }
 
     /** Returns the internal device policy manager interface. */
