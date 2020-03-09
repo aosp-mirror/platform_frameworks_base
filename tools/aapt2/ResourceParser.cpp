@@ -449,6 +449,7 @@ bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
     ParsedResource parsed_resource;
     parsed_resource.config = config_;
     parsed_resource.source = source_.WithLine(parser->line_number());
+    // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
     parsed_resource.comment = std::move(comment);
     if (options_.visibility) {
       parsed_resource.visibility_level = options_.visibility.value();
@@ -979,6 +980,7 @@ bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource
       child_resource.name.type = *parsed_type;
       child_resource.name.entry = maybe_name.value().to_string();
       child_resource.id = next_id;
+      // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
       child_resource.comment = std::move(comment);
       child_resource.source = item_source;
       child_resource.visibility_level = Visibility::Level::kPublic;
@@ -1698,6 +1700,7 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
       ParsedResource child_resource;
       child_resource.name = child_ref.name.value();
       child_resource.source = item_source;
+      // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
       child_resource.comment = std::move(comment);
       if (options_.visibility) {
         child_resource.visibility_level = options_.visibility.value();
