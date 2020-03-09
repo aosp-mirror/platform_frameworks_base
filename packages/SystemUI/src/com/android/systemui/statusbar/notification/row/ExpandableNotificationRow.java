@@ -1057,19 +1057,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return getShowingLayout().getVisibleNotificationHeader();
     }
 
-
-    /**
-     * @return the contracted notification header. This can be different from
-     * {@link #getNotificationHeader()} and also {@link #getVisibleNotificationHeader()} and only
-     * returns the contracted version.
-     */
-    public NotificationHeaderView getContractedNotificationHeader() {
-        if (mIsSummaryWithChildren) {
-            return mChildrenContainer.getHeaderView();
-        }
-        return mPrivateLayout.getContractedNotificationHeader();
-    }
-
     public void setLongPressListener(LongPressListener longPressListener) {
         mLongPressListener = longPressListener;
     }
