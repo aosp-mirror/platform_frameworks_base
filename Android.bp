@@ -701,6 +701,7 @@ filegroup {
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",
+        "core/java/android/annotation/WorkerThread.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
         "core/java/com/android/internal/annotations/Immutable.java",
