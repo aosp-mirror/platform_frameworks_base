@@ -16,9 +16,8 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
@@ -36,7 +35,6 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
-import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -50,12 +48,12 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
@@ -64,7 +62,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 
 import java.util.ArrayList;
 
@@ -75,9 +72,6 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
 
 
     private StatusBarNotificationPresenter mStatusBarNotificationPresenter;
-    private NotificationInterruptStateProvider mNotificationInterruptStateProvider =
-            mock(NotificationInterruptStateProvider.class);
-    private NotificationInterruptSuppressor mInterruptSuppressor;
     private CommandQueue mCommandQueue;
     private FakeMetricsLogger mMetricsLogger;
     private ShadeController mShadeController = mock(ShadeController.class);
@@ -101,11 +95,11 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mDependency.injectMockDependency(NotificationViewHierarchyManager.class);
         mDependency.injectMockDependency(NotificationRemoteInputManager.Callback.class);
         mDependency.injectMockDependency(NotificationLockscreenUserManager.class);
+        mDependency.injectMockDependency(NotificationInterruptionStateProvider.class);
         mDependency.injectMockDependency(NotificationMediaManager.class);
         mDependency.injectMockDependency(VisualStabilityManager.class);
         mDependency.injectMockDependency(NotificationGutsManager.class);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
-        mDependency.injectMockDependency(ForegroundServiceNotificationListener.class);
         NotificationEntryManager entryManager =
                 mDependency.injectMockDependency(NotificationEntryManager.class);
         when(entryManager.getActiveNotificationsForCurrentUser()).thenReturn(new ArrayList<>());
@@ -113,25 +107,18 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         NotificationShadeWindowView notificationShadeWindowView =
                 mock(NotificationShadeWindowView.class);
         when(notificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
-
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(mContext,
                 mock(NotificationPanelViewController.class), mock(HeadsUpManagerPhone.class),
                 notificationShadeWindowView, mock(NotificationListContainerViewGroup.class),
                 mock(DozeScrimController.class), mock(ScrimController.class),
                 mock(ActivityLaunchAnimator.class), mock(DynamicPrivacyController.class),
-                mock(KeyguardStateController.class),
+                mock(NotificationAlertingManager.class), mock(KeyguardStateController.class),
                 mock(KeyguardIndicationController.class), mStatusBar,
-                mock(ShadeControllerImpl.class), mCommandQueue, mInitController,
-                mNotificationInterruptStateProvider);
-        mInitController.executePostInitTasks();
-        ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
-                ArgumentCaptor.forClass(NotificationInterruptSuppressor.class);
-        verify(mNotificationInterruptStateProvider).addSuppressor(suppressorCaptor.capture());
-        mInterruptSuppressor = suppressorCaptor.getValue();
+                mock(ShadeControllerImpl.class), mCommandQueue, mInitController);
     }
 
     @Test
-    public void testSuppressHeadsUp_disabledStatusBar() {
+    public void testHeadsUp_disabledStatusBar() {
         Notification n = new Notification.Builder(getContext(), "a").build();
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setPkg("a")
@@ -143,12 +130,12 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 false /* animate */);
         TestableLooper.get(this).processAllMessages();
 
-        assertTrue("The panel should suppress heads up while disabled",
-                mInterruptSuppressor.suppressAwakeHeadsUp(entry));
+        assertFalse("The panel shouldn't allow heads up while disabled",
+                mStatusBarNotificationPresenter.canHeadsUp(entry, entry.getSbn()));
     }
 
     @Test
-    public void testSuppressHeadsUp_disabledNotificationShade() {
+    public void testHeadsUp_disabledNotificationShade() {
         Notification n = new Notification.Builder(getContext(), "a").build();
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setPkg("a")
@@ -160,39 +147,8 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 false /* animate */);
         TestableLooper.get(this).processAllMessages();
 
-        assertTrue("The panel should suppress interruptions while notification shade "
-                        + "disabled",
-                mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testSuppressInterruptions_vrMode() {
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-        mStatusBarNotificationPresenter.mVrMode = true;
-
-        assertTrue("Vr mode should suppress interruptions",
-                mInterruptSuppressor.suppressAwakeInterruptions(entry));
-    }
-
-    @Test
-    public void testSuppressInterruptions_statusBarAlertsDisabled() {
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-        when(mStatusBar.areNotificationAlertsDisabled()).thenReturn(true);
-
-        assertTrue("StatusBar alerts disabled shouldn't allow interruptions",
-                mInterruptSuppressor.suppressInterruptions(entry));
+        assertFalse("The panel shouldn't allow heads up while notitifcation shade disabled",
+                mStatusBarNotificationPresenter.canHeadsUp(entry, entry.getSbn()));
     }
 
     @Test
@@ -216,3 +172,4 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         }
     }
 }
+

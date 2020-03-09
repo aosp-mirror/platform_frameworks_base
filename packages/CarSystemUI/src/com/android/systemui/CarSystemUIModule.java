@@ -22,6 +22,7 @@ import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 import android.content.Context;
 
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
+import com.android.systemui.car.CarNotificationInterruptionStateProvider;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
@@ -38,6 +39,7 @@ import com.android.systemui.statusbar.car.CarShadeControllerImpl;
 import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
@@ -60,6 +62,10 @@ import dagger.Provides;
 
 @Module(includes = {DividerModule.class})
 abstract class CarSystemUIModule {
+
+    @Binds
+    abstract NotificationInterruptionStateProvider bindNotificationInterruptionStateProvider(
+            CarNotificationInterruptionStateProvider notificationInterruptionStateProvider);
 
     @Singleton
     @Provides
