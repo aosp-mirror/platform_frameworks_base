@@ -26,9 +26,9 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
-import android.graphics.GraphicBuffer;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.util.Slog;
 
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
@@ -174,7 +174,7 @@ class TaskSnapshotLoader {
                 Slog.w(TAG, "Failed to create hardware bitmap: " + bitmapFile.getPath());
                 return null;
             }
-            final GraphicBuffer buffer = hwBitmap.createGraphicBufferHandle();
+            final HardwareBuffer buffer = hwBitmap.getHardwareBuffer();
             if (buffer == null) {
                 Slog.w(TAG, "Failed to retrieve gralloc buffer for bitmap: "
                         + bitmapFile.getPath());

@@ -22,9 +22,10 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATI
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.GraphicBuffer;
+import android.graphics.ColorSpace;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -81,10 +82,15 @@ class SurfaceFreezer {
 
         SurfaceControl freezeTarget = mAnimatable.getFreezeSnapshotTarget();
         if (freezeTarget != null) {
-            GraphicBuffer snapshot = createSnapshotBuffer(freezeTarget, startBounds);
-            if (snapshot != null) {
-                mSnapshot = new Snapshot(mWmService.mSurfaceFactory, t, snapshot, mLeash);
+            SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer = createSnapshotBuffer(
+                    freezeTarget, startBounds);
+            final HardwareBuffer buffer = screenshotBuffer == null ? null
+                    : screenshotBuffer.getHardwareBuffer();
+            if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
+                return;
             }
+            mSnapshot = new Snapshot(mWmService.mSurfaceFactory, t, buffer,
+                    screenshotBuffer.getColorSpace(), mLeash);
         }
     }
 
@@ -122,22 +128,15 @@ class SurfaceFreezer {
         return mLeash != null;
     }
 
-    private static GraphicBuffer createSnapshotBuffer(@NonNull SurfaceControl target,
-            @Nullable Rect bounds) {
+    private static SurfaceControl.ScreenshotHardwareBuffer createSnapshotBuffer(
+            @NonNull SurfaceControl target, @Nullable Rect bounds) {
         Rect cropBounds = null;
         if (bounds != null) {
             cropBounds = new Rect(bounds);
             cropBounds.offsetTo(0, 0);
         }
-        final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                SurfaceControl.captureLayers(
-                        target, cropBounds, 1.f /* frameScale */, PixelFormat.RGBA_8888);
-        final GraphicBuffer buffer = screenshotBuffer != null ? screenshotBuffer.getGraphicBuffer()
-                : null;
-        if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
-            return null;
-        }
-        return buffer;
+        return SurfaceControl.captureLayers(target, cropBounds, 1.f /* frameScale */,
+                PixelFormat.RGBA_8888);
     }
 
     class Snapshot {
@@ -150,7 +149,7 @@ class SurfaceFreezer {
          * @param thumbnailHeader A thumbnail or placeholder for thumbnail to initialize with.
          */
         Snapshot(Supplier<Surface> surfaceFactory, SurfaceControl.Transaction t,
-                GraphicBuffer thumbnailHeader, SurfaceControl parent) {
+                HardwareBuffer thumbnailHeader, ColorSpace colorSpace, SurfaceControl parent) {
             Surface drawSurface = surfaceFactory.get();
             // We can't use a delegating constructor since we need to
             // reference this::onAnimationFinished
@@ -168,7 +167,7 @@ class SurfaceFreezer {
 
             // Transfer the thumbnail to the surface
             drawSurface.copyFrom(mSurfaceControl);
-            drawSurface.attachAndQueueBuffer(thumbnailHeader);
+            drawSurface.attachAndQueueBufferWithColorSpace(thumbnailHeader, colorSpace);
             drawSurface.release();
             t.show(mSurfaceControl);
 

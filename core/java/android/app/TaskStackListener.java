@@ -155,9 +155,9 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     @UnsupportedAppUsage
     public void onTaskSnapshotChanged(int taskId, TaskSnapshot snapshot) throws RemoteException {
         if (Binder.getCallingPid() != android.os.Process.myPid()
-                && snapshot != null && snapshot.getSnapshot() != null) {
+                && snapshot != null && snapshot.getHardwareBuffer() != null) {
             // Preemptively clear any reference to the buffer
-            snapshot.getSnapshot().destroy();
+            snapshot.getHardwareBuffer().close();
         }
     }
 
