@@ -329,7 +329,7 @@ public class MediaRouter2Manager {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.requestCreateSessionWithManager(
-                        client, sessionInfo.getClientPackageName(), route, requestId);
+                        client, requestId, sessionInfo.getClientPackageName(), route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to select media route", ex);
             }
@@ -373,7 +373,7 @@ public class MediaRouter2Manager {
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
-                mMediaRouterService.setRouteVolumeWithManager(client, route, volume, requestId);
+                mMediaRouterService.setRouteVolumeWithManager(client, requestId, route, volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -406,7 +406,7 @@ public class MediaRouter2Manager {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.setSessionVolumeWithManager(
-                        client, sessionInfo.getId(), volume, requestId);
+                        client, requestId, sessionInfo.getId(), volume);
             } catch (RemoteException ex) {
                 Log.e(TAG, "Unable to send control request.", ex);
             }
@@ -594,7 +594,7 @@ public class MediaRouter2Manager {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.selectRouteWithManager(
-                        mClient, sessionInfo.getId(), route, requestId);
+                        mClient, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "selectRoute: Failed to send a request.", ex);
             }
@@ -639,7 +639,7 @@ public class MediaRouter2Manager {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.deselectRouteWithManager(
-                        mClient, sessionInfo.getId(), route, requestId);
+                        mClient, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "deselectRoute: Failed to send a request.", ex);
             }
@@ -675,7 +675,7 @@ public class MediaRouter2Manager {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.transferToRouteWithManager(
-                        mClient, sessionInfo.getId(), route, requestId);
+                        mClient, requestId, sessionInfo.getId(), route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "transferToRoute: Failed to send a request.", ex);
             }
@@ -703,7 +703,7 @@ public class MediaRouter2Manager {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.releaseSessionWithManager(
-                        mClient, sessionInfo.getId(), requestId);
+                        mClient, requestId, sessionInfo.getId());
             } catch (RemoteException ex) {
                 Log.e(TAG, "releaseSession: Failed to send a request", ex);
             }
