@@ -258,6 +258,7 @@ import javax.inject.Named;
 
 import dagger.Subcomponent;
 
+import com.android.internal.util.custom.cutout.CutoutUtils;
 import com.android.internal.util.custom.NavbarUtils;
 
 public class StatusBar extends SystemUI implements DemoMode,
@@ -1782,11 +1783,24 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateTheme();
     }
 
+    private boolean isCenteredClock() {
+        return Settings.System.getInt(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_CLOCK, 2) == 1;
+    }
+
+    private void moveClockToLeft() {
+        Settings.System.putInt(mContext.getContentResolver(),
+                Settings.System.STATUS_BAR_CLOCK, 2);
+    }
+
     private void updateCutoutOverlay() {
         boolean displayCutoutHidden = Settings.System.getIntForUser(mContext.getContentResolver(),
                         Settings.System.DISPLAY_CUTOUT_HIDDEN, 0, UserHandle.USER_CURRENT) == 1;
         if (mDisplayCutoutHidden != displayCutoutHidden){
             mDisplayCutoutHidden = displayCutoutHidden;
+            if (!mDisplayCutoutHidden && CutoutUtils.hasCenteredCutout(mContext, true) && isCenteredClock()){
+                moveClockToLeft();
+            }
             mUiOffloadThread.submit(() -> {
                 try {
                     mOverlayManager.setEnabled("org.pixelexperience.overlay.hidecutout",
