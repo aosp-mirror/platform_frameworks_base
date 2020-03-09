@@ -7525,6 +7525,9 @@ public class Notification implements Parcelable
                     mBuilder.getPrimaryTextColor(p));
             contentView.setInt(R.id.status_bar_latest_event_content, "setMessageTextColor",
                     mBuilder.getSecondaryTextColor(p));
+            contentView.setInt(R.id.status_bar_latest_event_content,
+                    "setNotificationBackgroundColor",
+                    mBuilder.resolveBackgroundColor(p));
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsCollapsed",
                     isCollapsed);
             contentView.setIcon(R.id.status_bar_latest_event_content, "setAvatarReplacement",

@@ -24,6 +24,7 @@ import android.app.Notification;
 import android.app.Person;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -524,6 +525,14 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setSenderTextColor(int color) {
         mSenderTextColor = color;
+    }
+
+    /**
+     * @param color the color of the notification background
+     */
+    @RemotableViewMethod
+    public void setNotificationBackgroundColor(int color) {
+        mConversationIconBadge.setBackgroundTintList(ColorStateList.valueOf(color));
     }
 
     @RemotableViewMethod

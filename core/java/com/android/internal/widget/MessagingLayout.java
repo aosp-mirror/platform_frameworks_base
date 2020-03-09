@@ -382,6 +382,15 @@ public class MessagingLayout extends FrameLayout
         mSenderTextColor = color;
     }
 
+
+    /**
+     * @param color the color of the notification background
+     */
+    @RemotableViewMethod
+    public void setNotificationBackgroundColor(int color) {
+        // Nothing to do with this
+    }
+
     @RemotableViewMethod
     public void setMessageTextColor(int color) {
         mMessageTextColor = color;
