@@ -7476,10 +7476,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public ActivityManager.TaskSnapshot getTaskSnapshotNoRestore(int taskId,
-                boolean isLowResolution) {
+        public ActivityManager.TaskSnapshot getTaskSnapshotBlocking(
+                int taskId, boolean isLowResolution) {
             return ActivityTaskManagerService.this.getTaskSnapshot(taskId, isLowResolution,
-                    false /* restoreFromDisk */);
+                    true /* restoreFromDisk */);
         }
 
         @Override
