@@ -358,7 +358,7 @@ abstract class MagnetizedObject<T : Any>(
             targetObjectIsStuckTo = targetObjectIsInMagneticFieldOf
             cancelAnimations()
             magnetListener.onStuckToTarget(targetObjectIsInMagneticFieldOf!!)
-            animateStuckToTarget(targetObjectIsInMagneticFieldOf!!, velX, velY, false)
+            animateStuckToTarget(targetObjectIsInMagneticFieldOf, velX, velY, false)
 
             vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
         } else if (targetObjectIsInMagneticFieldOf == null && objectStuckToTarget) {
