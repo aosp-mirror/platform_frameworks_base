@@ -2,6 +2,30 @@ android_library {
 
     name: "SettingsLib",
 
+    defaults: [
+        "SettingsLibDependenciesWithoutWifiTracker",
+    ],
+
+    // TODO(b/149540986): revert this change.
+    static_libs: [
+         // All other dependent components should be put in
+         // "SettingsLibDependenciesWithoutWifiTracker".
+        "WifiTrackerLib",
+    ],
+
+    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
+    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
+
+    resource_dirs: ["res"],
+
+    srcs: ["src/**/*.java", "src/**/*.kt"],
+
+    min_sdk_version: "21",
+
+}
+
+java_defaults {
+    name: "SettingsLibDependenciesWithoutWifiTracker",
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.legacy_legacy-support-v4",
@@ -25,20 +49,9 @@ android_library {
         "SettingsLibProgressBar",
         "SettingsLibAdaptiveIcon",
         "SettingsLibRadioButtonPreference",
-        "WifiTrackerLib",
         "SettingsLibDisplayDensityUtils",
         "SettingsLibSchedulesProvider",
     ],
-
-    // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
-    // LOCAL_SHARED_JAVA_LIBRARIES := androidx.lifecycle_lifecycle-common
-
-    resource_dirs: ["res"],
-
-    srcs: ["src/**/*.java", "src/**/*.kt"],
-
-    min_sdk_version: "21",
-
 }
 
 // NOTE: Keep this module in sync with ./common.mk
