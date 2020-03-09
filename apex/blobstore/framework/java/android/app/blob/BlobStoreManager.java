@@ -27,11 +27,13 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.UserHandle;
 
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -144,9 +146,6 @@ public class BlobStoreManager {
 
     /** @hide */
     public static final int INVALID_RES_ID = -1;
-
-    /** @hide */
-    public static final String DESC_RES_TYPE_STRING = "string";
 
     private final Context mContext;
     private final IBlobStoreManager mService;
@@ -489,6 +488,31 @@ public class BlobStoreManager {
                 throw new TimeoutException("Timed out waiting for service to become idle");
             }
         } catch (ParcelableException e) {
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    @NonNull
+    public List<BlobInfo> queryBlobsForUser(@NonNull UserHandle user) throws IOException {
+        try {
+            return mService.queryBlobsForUser(user.getIdentifier());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /** @hide */
+    public void deleteBlob(@NonNull BlobInfo blobInfo) throws IOException {
+        try {
+            mService.deleteBlob(blobInfo.getId());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
