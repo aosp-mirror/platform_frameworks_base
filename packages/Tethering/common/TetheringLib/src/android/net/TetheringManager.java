@@ -1131,6 +1131,25 @@ public class TetheringManager {
     public boolean isTetheringSupported() {
         final String callerPkg = mContext.getOpPackageName();
 
+        return isTetheringSupported(callerPkg);
+    }
+
+    /**
+     * Check if the device allows for tethering. It may be disabled via {@code ro.tether.denied}
+     * system property, Settings.TETHER_SUPPORTED or due to device configuration. This is useful
+     * for system components that query this API on behalf of an app. In particular, Bluetooth
+     * has @UnsupportedAppUsage calls that will let apps turn on bluetooth tethering if they have
+     * the right permissions, but such an app needs to know whether it can (permissions as well
+     * as support from the device) turn on tethering in the first place to show the appropriate UI.
+     *
+     * @param callerPkg The caller package name, if it is not matching the calling uid,
+     *       SecurityException would be thrown.
+     * @return a boolean - {@code true} indicating Tethering is supported.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public boolean isTetheringSupported(@NonNull final String callerPkg) {
+
         final RequestDispatcher dispatcher = new RequestDispatcher();
         final int ret = dispatcher.waitForResult((connector, listener) -> {
             try {
