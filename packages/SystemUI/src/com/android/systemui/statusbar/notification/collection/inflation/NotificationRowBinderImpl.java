@@ -37,8 +37,8 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationClicker;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline;
@@ -66,7 +66,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     private static final String TAG = "NotificationViewManager";
 
-    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
 
     private final Context mContext;
     private final NotifBindPipeline mNotifBindPipeline;
@@ -97,7 +97,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             StatusBarStateController statusBarStateController,
             NotificationGroupManager notificationGroupManager,
             NotificationGutsManager notificationGutsManager,
-            NotificationInterruptStateProvider notificationInterruptionStateProvider,
+            NotificationInterruptionStateProvider notificationInterruptionStateProvider,
             Provider<RowInflaterTask> rowInflaterTaskProvider,
             ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder) {
         mContext = context;
@@ -106,7 +106,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mMessagingUtil = notificationMessagingUtil;
         mNotificationRemoteInputManager = notificationRemoteInputManager;
         mNotificationLockscreenUserManager = notificationLockscreenUserManager;
-        mNotificationInterruptStateProvider = notificationInterruptionStateProvider;
+        mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
         mRowInflaterTaskProvider = rowInflaterTaskProvider;
         mExpandableNotificationRowComponentBuilder = expandableNotificationRowComponentBuilder;
     }
@@ -243,7 +243,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         params.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         params.setUseLowPriority(entry.isAmbient());
 
-        if (mNotificationInterruptStateProvider.shouldHeadsUp(entry)) {
+        if (mNotificationInterruptionStateProvider.shouldHeadsUp(entry)) {
             params.requireContentViews(FLAG_CONTENT_VIEW_HEADS_UP);
         }
         //TODO: Replace this API with RowContentBindParams directly

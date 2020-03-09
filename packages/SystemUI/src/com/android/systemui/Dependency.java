@@ -71,11 +71,12 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.NotificationFilter;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.interruption.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ChannelEditorDialogController;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
@@ -288,6 +289,7 @@ public class Dependency {
     @Inject Lazy<NotificationLogger> mNotificationLogger;
     @Inject Lazy<NotificationViewHierarchyManager> mNotificationViewHierarchyManager;
     @Inject Lazy<NotificationFilter> mNotificationFilter;
+    @Inject Lazy<NotificationInterruptionStateProvider> mNotificationInterruptionStateProvider;
     @Inject Lazy<KeyguardDismissUtil> mKeyguardDismissUtil;
     @Inject Lazy<SmartReplyController> mSmartReplyController;
     @Inject Lazy<RemoteInputQuickSettingsDisabler> mRemoteInputQuickSettingsDisabler;
@@ -487,6 +489,8 @@ public class Dependency {
         mProviders.put(NotificationViewHierarchyManager.class,
                 mNotificationViewHierarchyManager::get);
         mProviders.put(NotificationFilter.class, mNotificationFilter::get);
+        mProviders.put(NotificationInterruptionStateProvider.class,
+                mNotificationInterruptionStateProvider::get);
         mProviders.put(KeyguardDismissUtil.class, mKeyguardDismissUtil::get);
         mProviders.put(SmartReplyController.class, mSmartReplyController::get);
         mProviders.put(RemoteInputQuickSettingsDisabler.class,
