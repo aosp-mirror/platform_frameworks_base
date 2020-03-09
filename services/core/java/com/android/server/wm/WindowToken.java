@@ -28,13 +28,13 @@ import static com.android.server.wm.ProtoLogGroup.WM_ERROR;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static com.android.server.wm.WindowContainerChildProto.WINDOW_TOKEN;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowTokenProto.HASH_CODE;
 import static com.android.server.wm.WindowTokenProto.PAUSED;
 import static com.android.server.wm.WindowTokenProto.WAITING_TO_SHOW;
-import static com.android.server.wm.WindowTokenProto.WINDOWS;
 import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
@@ -539,13 +539,14 @@ class WindowToken extends WindowContainer<WindowState> {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(HASH_CODE, System.identityHashCode(this));
-        for (int i = 0; i < mChildren.size(); i++) {
-            final WindowState w = mChildren.get(i);
-            w.dumpDebug(proto, WINDOWS, logLevel);
-        }
         proto.write(WAITING_TO_SHOW, waitingToShow);
         proto.write(PAUSED, paused);
         proto.end(token);
+    }
+
+    @Override
+    long getProtoFieldId() {
+        return WINDOW_TOKEN;
     }
 
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
