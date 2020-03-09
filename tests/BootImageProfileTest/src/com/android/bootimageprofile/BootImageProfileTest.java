@@ -30,6 +30,7 @@ public class BootImageProfileTest implements IDeviceTest {
     private ITestDevice mTestDevice;
     private static final String SYSTEM_SERVER_PROFILE =
             "/data/misc/profiles/cur/0/android/primary.prof";
+    private static final boolean USE_PHENOTYPE = false;
 
     @Override
     public void setDevice(ITestDevice testDevice) {
@@ -41,15 +42,32 @@ public class BootImageProfileTest implements IDeviceTest {
         return mTestDevice;
     }
 
+    private String getProperty(String property) throws Exception {
+        if (USE_PHENOTYPE) {
+            return mTestDevice.getProperty("persist.device_config.runtime_native_boot."
+                    + property);
+        } else {
+            return mTestDevice.getProperty("dalvik.vm." + property);
+        }
+    }
+
+    private String setProperty(String property, String value) throws Exception {
+        if (USE_PHENOTYPE) {
+            return mTestDevice.executeShellCommand(
+                "device_config put runtime_native_boot " + property + " " + value);
+        } else {
+            return mTestDevice.executeShellCommand(
+                "setprop dalvik.vm." + property + " " + value);
+        }
+    }
+
     /**
      * Validate that the boot image profile properties are set.
      */
     public void validateProperties() throws Exception {
-        String res = mTestDevice.getProperty(
-                "persist.device_config.runtime_native_boot.profilebootclasspath");
+        String res = getProperty("profilebootclasspath");
         assertTrue("profile boot class path not enabled", res != null && res.equals("true"));
-        res = mTestDevice.getProperty(
-                "persist.device_config.runtime_native_boot.profilesystemserver");
+        res = getProperty("profilesystemserver");
         assertTrue("profile system server not enabled", res != null && res.equals("true"));
     }
 
@@ -67,13 +85,12 @@ public class BootImageProfileTest implements IDeviceTest {
     @Test
     public void testSystemServerProfile() throws Exception {
         final int numIterations = 20;
+        String res;
+        // Set properties and wait for them to be readable.
         for (int i = 1; i <= numIterations; ++i) {
-            String res;
-            res = mTestDevice.getProperty(
-                    "persist.device_config.runtime_native_boot.profilebootclasspath");
+            res = getProperty("profilebootclasspath");
             boolean profileBootClassPath = res != null && res.equals("true");
-            res = mTestDevice.getProperty(
-                    "persist.device_config.runtime_native_boot.profilesystemserver");
+            res = getProperty("profilesystemserver");
             boolean profileSystemServer = res != null && res.equals("true");
             if (profileBootClassPath && profileSystemServer) {
                 break;
@@ -83,17 +100,33 @@ public class BootImageProfileTest implements IDeviceTest {
                 assertTrue("profile boot class path not enabled", profileSystemServer);
             }
 
-            res = mTestDevice.executeShellCommand(
-                    "device_config put runtime_native_boot profilebootclasspath true");
-            res = mTestDevice.executeShellCommand(
-                    "device_config put runtime_native_boot profilesystemserver true");
-            res = mTestDevice.executeShellCommand("stop");
-            res = mTestDevice.executeShellCommand("start");
-            Thread.sleep(5000);
+            res = setProperty("profilebootclasspath", "true");
+            res = setProperty("profilesystemserver", "true");
+            Thread.sleep(1000);
         }
+
+        // Restart shell and wait for system boot.
+        res = mTestDevice.executeShellCommand("stop");
+        assertTrue("stop shell: " + res, res.length() == 0);
+        res = mTestDevice.executeShellCommand("start");
+        assertTrue("start shell: " + res, res.length() == 0);
+        for (int i = 1; i <= numIterations; ++i) {
+            res = getProperty("profilebootclasspath");
+            boolean profileBootClassPath = res != null && res.equals("true");
+            res = getProperty("profilesystemserver");
+            boolean profileSystemServer = res != null && res.equals("true");
+            if (profileBootClassPath && profileSystemServer) {
+                break;
+            }
+            if (i == numIterations) {
+                assertTrue("profile system server not enabled", profileSystemServer);
+                assertTrue("profile boot class path not enabled", profileSystemServer);
+            }
+            Thread.sleep(1000);
+        }
+
         // Trunacte the profile before force it to be saved to prevent previous profiles
         // causing the test to pass.
-        String res;
         res = mTestDevice.executeShellCommand("truncate -s 0 " + SYSTEM_SERVER_PROFILE).trim();
         assertTrue(res, res.length() == 0);
         // Wait up to 20 seconds for the profile to be saved.
