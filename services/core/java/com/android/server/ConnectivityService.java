@@ -101,7 +101,6 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkProvider;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
-import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
@@ -2731,8 +2730,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     break;
                 }
                 case NetworkAgent.EVENT_NETWORK_SCORE_CHANGED: {
-                    final NetworkScore ns = (NetworkScore) msg.obj;
-                    updateNetworkScore(nai, ns);
+                    updateNetworkScore(nai, msg.arg1);
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
@@ -5819,12 +5817,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
         // satisfies mDefaultRequest.
         final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
-        final NetworkScore ns = new NetworkScore();
-        ns.putIntExtension(NetworkScore.LEGACY_SCORE, currentScore);
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
                 new Network(mNetIdManager.reserveNetId()), new NetworkInfo(networkInfo), lp, nc,
-                ns, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig), this,
-                mNetd, mDnsResolver, mNMS, providerId);
+                currentScore, mContext, mTrackerHandler, new NetworkAgentConfig(networkAgentConfig),
+                this, mNetd, mDnsResolver, mNMS, providerId);
         // Make sure the network capabilities reflect what the agent info says.
         nai.getAndSetNetworkCapabilities(mixInCapabilities(nai, nc));
         final String extraInfo = networkInfo.getExtraInfo();
@@ -7082,9 +7078,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void updateNetworkScore(NetworkAgentInfo nai, NetworkScore ns) {
-        if (VDBG || DDBG) log("updateNetworkScore for " + nai.toShortString() + " to " + ns);
-        nai.setNetworkScore(ns);
+    private void updateNetworkScore(@NonNull final NetworkAgentInfo nai, final int score) {
+        if (VDBG || DDBG) log("updateNetworkScore for " + nai.toShortString() + " to " + score);
+        nai.setScore(score);
         rematchAllNetworksAndRequests();
         sendUpdatedScoreToFactories(nai);
     }
