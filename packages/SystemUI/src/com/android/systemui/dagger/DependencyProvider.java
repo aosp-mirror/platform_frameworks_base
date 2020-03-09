@@ -90,7 +90,7 @@ public class DependencyProvider {
 
     /** */
     @Provides
-    public AmbientDisplayConfiguration provideAmbientDisplayConfiguration(Context context) {
+    public AmbientDisplayConfiguration provideAmbientDispalyConfiguration(Context context) {
         return new AmbientDisplayConfiguration(context);
     }
 
