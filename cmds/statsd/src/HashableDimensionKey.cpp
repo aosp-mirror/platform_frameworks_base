@@ -40,53 +40,62 @@ const static int STATS_DIMENSIONS_VALUE_TUPLE_TYPE = 7;
  * Recursive helper function that populates a parent StatsDimensionsValueParcel
  * with children StatsDimensionsValueParcels.
  *
+ * \param parent parcel that will be populated with children
+ * \param childDepth depth of children FieldValues
+ * \param childPrefix expected FieldValue prefix of children
  * \param dims vector of FieldValues stored by HashableDimensionKey
- * \param index positions in dims vector to start reading children from
- * \param depth level of parent parcel in the full StatsDimensionsValueParcel
- * tree
+ * \param index position in dims to start reading children from
  */
-static void populateStatsDimensionsValueParcelChildren(StatsDimensionsValueParcel &parentParcel,
-                                                const vector<FieldValue>& dims, size_t& index,
-                                                int depth, int prefix) {
+static void populateStatsDimensionsValueParcelChildren(StatsDimensionsValueParcel& parent,
+                                                       int childDepth, int childPrefix,
+                                                       const vector<FieldValue>& dims,
+                                                       size_t& index) {
+    if (childDepth > 2) {
+        ALOGE("Depth > 2 not supported by StatsDimensionsValueParcel.");
+        return;
+    }
+
     while (index < dims.size()) {
         const FieldValue& dim = dims[index];
         int fieldDepth = dim.mField.getDepth();
-        int fieldPrefix = dim.mField.getPrefix(depth);
-        StatsDimensionsValueParcel childParcel;
-        childParcel.field = dim.mField.getPosAtDepth(depth);
-        if (depth > 2) {
-            ALOGE("Depth > 2 not supported by StatsDimensionsValueParcel.");
-            return;
-        }
-        if (depth == fieldDepth && prefix == fieldPrefix) {
+        int fieldPrefix = dim.mField.getPrefix(childDepth);
+
+        StatsDimensionsValueParcel child;
+        child.field = dim.mField.getPosAtDepth(childDepth);
+
+        if (fieldDepth == childDepth && fieldPrefix == childPrefix) {
             switch (dim.mValue.getType()) {
                 case INT:
-                    childParcel.valueType = STATS_DIMENSIONS_VALUE_INT_TYPE;
-                    childParcel.intValue = dim.mValue.int_value;
+                    child.valueType = STATS_DIMENSIONS_VALUE_INT_TYPE;
+                    child.intValue = dim.mValue.int_value;
                     break;
                 case LONG:
-                    childParcel.valueType = STATS_DIMENSIONS_VALUE_LONG_TYPE;
-                    childParcel.longValue = dim.mValue.long_value;
+                    child.valueType = STATS_DIMENSIONS_VALUE_LONG_TYPE;
+                    child.longValue = dim.mValue.long_value;
                     break;
                 case FLOAT:
-                    childParcel.valueType = STATS_DIMENSIONS_VALUE_FLOAT_TYPE;
-                    childParcel.floatValue = dim.mValue.float_value;
+                    child.valueType = STATS_DIMENSIONS_VALUE_FLOAT_TYPE;
+                    child.floatValue = dim.mValue.float_value;
                     break;
                 case STRING:
-                    childParcel.valueType = STATS_DIMENSIONS_VALUE_STRING_TYPE;
-                    childParcel.stringValue = dim.mValue.str_value;
+                    child.valueType = STATS_DIMENSIONS_VALUE_STRING_TYPE;
+                    child.stringValue = dim.mValue.str_value;
                     break;
                 default:
                     ALOGE("Encountered FieldValue with unsupported value type.");
                     break;
             }
             index++;
-            parentParcel.tupleValue.push_back(childParcel);
-        } else if (fieldDepth > depth && fieldPrefix == prefix) {
-            childParcel.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
-            populateStatsDimensionsValueParcelChildren(childParcel, dims, index, depth + 1,
-                                                       dim.mField.getPrefix(depth + 1));
-            parentParcel.tupleValue.push_back(childParcel);
+            parent.tupleValue.push_back(child);
+        } else if (fieldDepth > childDepth && fieldPrefix == childPrefix) {
+            // This FieldValue is not a child of the current parent, but it is
+            // an indirect descendant. Thus, create a direct child of TUPLE_TYPE
+            // and recurse to parcel the indirect descendants.
+            child.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
+            populateStatsDimensionsValueParcelChildren(child, childDepth + 1,
+                                                       dim.mField.getPrefix(childDepth + 1), dims,
+                                                       index);
+            parent.tupleValue.push_back(child);
         } else {
             return;
         }
@@ -94,17 +103,21 @@ static void populateStatsDimensionsValueParcelChildren(StatsDimensionsValueParce
 }
 
 StatsDimensionsValueParcel HashableDimensionKey::toStatsDimensionsValueParcel() const {
-    StatsDimensionsValueParcel parcel;
+    StatsDimensionsValueParcel root;
     if (mValues.size() == 0) {
-        return parcel;
+        return root;
     }
 
-    parcel.field = mValues[0].mField.getTag();
-    parcel.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
+    root.field = mValues[0].mField.getTag();
+    root.valueType = STATS_DIMENSIONS_VALUE_TUPLE_TYPE;
 
+    // Children of the root correspond to top-level (depth = 0) FieldValues.
+    int childDepth = 0;
+    int childPrefix = 0;
     size_t index = 0;
-    populateStatsDimensionsValueParcelChildren(parcel, mValues, index, /*depth=*/0, /*prefix=*/0);
-    return parcel;
+    populateStatsDimensionsValueParcelChildren(root, childDepth, childPrefix, mValues, index);
+
+    return root;
 }
 
 android::hash_t hashDimension(const HashableDimensionKey& value) {
