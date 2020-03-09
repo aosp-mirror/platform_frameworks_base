@@ -60,8 +60,6 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import com.android.internal.util.custom.cutout.CutoutUtils;
-
 /**
  * The header group on Keyguard.
  */
@@ -102,9 +100,6 @@ public class KeyguardStatusBarView extends RelativeLayout
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
     private int mCutoutSideNudge = 0;
-
-    // Cutout
-    private boolean mHasBigCutout;
 
     public KeyguardStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -173,7 +168,6 @@ public class KeyguardStatusBarView extends RelativeLayout
                 R.dimen.system_icons_super_container_avatarless_margin_end);
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
-        mHasBigCutout = CutoutUtils.hasBigCutout(getContext());
         mShowPercentAvailable = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
     }
@@ -191,7 +185,7 @@ public class KeyguardStatusBarView extends RelativeLayout
             // If we have no keyguard switcher, the screen width is under 600dp. In this case,
             // we only show the multi-user switch if it's enabled through UserManager as well as
             // by the user.
-            if (!mHasBigCutout && mMultiUserSwitch.isMultiUserEnabled()) {
+            if (mMultiUserSwitch.isMultiUserEnabled()) {
                 mMultiUserSwitch.setVisibility(View.VISIBLE);
             } else {
                 mMultiUserSwitch.setVisibility(View.GONE);
@@ -459,7 +453,6 @@ public class KeyguardStatusBarView extends RelativeLayout
 
     @Override
     public void onOverlayChanged() {
-        mHasBigCutout = CutoutUtils.hasBigCutout(getContext());
         mShowPercentAvailable = getContext().getResources().getBoolean(
                 com.android.internal.R.bool.config_battery_percentage_setting_available);
         mCarrierLabel.setTextAppearance(
