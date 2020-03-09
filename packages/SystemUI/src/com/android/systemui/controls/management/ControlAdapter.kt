@@ -42,7 +42,6 @@ private typealias ModelFavoriteChanger = (String, Boolean) -> Unit
  * @param onlyFavorites set to true to only display favorites instead of all controls
  */
 class ControlAdapter(
-    private val layoutInflater: LayoutInflater,
     private val elevation: Float
 ) : RecyclerView.Adapter<Holder>() {
 
@@ -60,6 +59,7 @@ class ControlAdapter(
     private var model: ControlsModel? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
+        val layoutInflater = LayoutInflater.from(parent.context)
         return when (viewType) {
             TYPE_CONTROL -> {
                 ControlHolder(
