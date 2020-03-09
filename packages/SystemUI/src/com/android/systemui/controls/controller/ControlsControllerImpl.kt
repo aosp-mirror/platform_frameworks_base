@@ -127,7 +127,7 @@ class ControlsControllerImpl @Inject constructor (
     internal val settingObserver = object : ContentObserver(null) {
         override fun onChange(
             selfChange: Boolean,
-            uris: MutableIterable<Uri>,
+            uris: Collection<Uri>,
             flags: Int,
             userId: Int
         ) {

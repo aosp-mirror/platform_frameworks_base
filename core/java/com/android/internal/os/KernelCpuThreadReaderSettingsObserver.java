@@ -29,6 +29,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -99,7 +100,7 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
     }
 
     @Override
-    public void onChange(boolean selfChange, Uri uri, int userId) {
+    public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
         updateReader();
     }
 
