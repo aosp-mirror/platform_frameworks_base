@@ -66,7 +66,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @RequiresPermission(android.Manifest.permission.DUMP)
     public void startBugreport(int callingUidUnused, String callingPackage,
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
-            int bugreportMode, IDumpstateListener listener) {
+            int bugreportMode, IDumpstateListener listener, boolean isScreenshotRequested) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, "startBugreport");
         Objects.requireNonNull(callingPackage);
         Objects.requireNonNull(bugreportFd);
@@ -88,7 +88,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         }
         synchronized (mLock) {
             startBugreportLocked(callingUid, callingPackage, bugreportFd, screenshotFd,
-                    bugreportMode, listener);
+                    bugreportMode, listener, isScreenshotRequested);
         }
     }
 
@@ -145,7 +145,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
     @GuardedBy("mLock")
     private void startBugreportLocked(int callingUid, String callingPackage,
             FileDescriptor bugreportFd, FileDescriptor screenshotFd,
-            int bugreportMode, IDumpstateListener listener) {
+            int bugreportMode, IDumpstateListener listener, boolean isScreenshotRequested) {
         if (isDumpstateBinderServiceRunningLocked()) {
             Slog.w(TAG, "'dumpstate' is already running. Cannot start a new bugreport"
                     + " while another one is currently in progress.");
@@ -165,7 +165,7 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
         IDumpstateListener myListener = new DumpstateListener(listener, ds);
         try {
             ds.startBugreport(callingUid, callingPackage,
-                    bugreportFd, screenshotFd, bugreportMode, myListener);
+                    bugreportFd, screenshotFd, bugreportMode, myListener, isScreenshotRequested);
         } catch (RemoteException e) {
             // bugreportd service is already started now. We need to kill it to manage the
             // lifecycle correctly. If we don't subsequent callers will get

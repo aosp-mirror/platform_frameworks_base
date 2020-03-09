@@ -157,20 +157,20 @@ public final class BugreportManager {
             Preconditions.checkNotNull(executor);
             Preconditions.checkNotNull(callback);
 
-            boolean validScreenshotFd = screenshotFd != null;
+            boolean isScreenshotRequested = screenshotFd != null;
             if (screenshotFd == null) {
                 // Binder needs a valid File Descriptor to be passed
                 screenshotFd = ParcelFileDescriptor.open(new File("/dev/null"),
                         ParcelFileDescriptor.MODE_READ_ONLY);
             }
             DumpstateListener dsListener = new DumpstateListener(executor, callback,
-                    validScreenshotFd);
+                    isScreenshotRequested);
             // Note: mBinder can get callingUid from the binder transaction.
             mBinder.startBugreport(-1 /* callingUid */,
                     mContext.getOpPackageName(),
                     bugreportFd.getFileDescriptor(),
                     screenshotFd.getFileDescriptor(),
-                    params.getMode(), dsListener);
+                    params.getMode(), dsListener, isScreenshotRequested);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (FileNotFoundException e) {
@@ -225,13 +225,13 @@ public final class BugreportManager {
     private final class DumpstateListener extends IDumpstateListener.Stub {
         private final Executor mExecutor;
         private final BugreportCallback mCallback;
-        private final boolean mValidScreenshotFd;
+        private final boolean mIsScreenshotRequested;
 
         DumpstateListener(Executor executor, BugreportCallback callback,
-                boolean validScreenshotFd) {
+                boolean isScreenshotRequested) {
             mExecutor = executor;
             mCallback = callback;
-            mValidScreenshotFd = validScreenshotFd;
+            mIsScreenshotRequested = isScreenshotRequested;
         }
 
         @Override
@@ -272,7 +272,7 @@ public final class BugreportManager {
 
         @Override
         public void onScreenshotTaken(boolean success) throws RemoteException {
-            if (!mValidScreenshotFd) {
+            if (!mIsScreenshotRequested) {
                 return;
             }
 
