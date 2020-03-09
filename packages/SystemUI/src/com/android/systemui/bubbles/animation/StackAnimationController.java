@@ -118,8 +118,11 @@ public class StackAnimationController extends
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
 
-    /** The most recent position in which the stack was resting on the edge of the screen. */
-    @Nullable private PointF mRestingStackPosition;
+    /**
+     * The stack's most recent position along the edge of the screen. This is saved when the last
+     * bubble is removed, so that the stack can be restored in its previous position.
+     */
+    private PointF mRestingStackPosition;
 
     /** The height of the most recently visible IME. */
     private float mImeHeight = 0f;
@@ -465,7 +468,6 @@ public class StackAnimationController extends
 
                 .addEndListener((animation, canceled, endValue, endVelocity) -> {
                     if (!canceled) {
-                        mRestingStackPosition = new PointF();
                         mRestingStackPosition.set(mStackPosition);
 
                         springFirstBubbleWithStackFollowing(property, spring, endVelocity,
@@ -853,7 +855,12 @@ public class StackAnimationController extends
     public void setStackPosition(PointF pos) {
         Log.d(TAG, String.format("Setting position to (%f, %f).", pos.x, pos.y));
         mStackPosition.set(pos.x, pos.y);
-        mRestingStackPosition = mStackPosition;
+
+        if (mRestingStackPosition == null) {
+            mRestingStackPosition = new PointF();
+        }
+
+        mRestingStackPosition.set(mStackPosition);
 
         // If we're not the active controller, we don't want to physically move the bubble views.
         if (isActiveController()) {
