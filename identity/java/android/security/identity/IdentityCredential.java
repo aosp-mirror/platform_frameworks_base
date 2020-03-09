@@ -209,6 +209,11 @@ public abstract class IdentityCredential {
      * <p>Note that only items referenced in {@code entriesToRequest} are returned - the
      * {@code requestMessage} parameter is only used to for enforcing reader authentication.
      *
+     * <p>The reason for having {@code requestMessage} and {@code entriesToRequest} as separate
+     * parameters is that the former represents a request from the remote verifier device
+     * (optionally signed) and this allows the application to filter the request to not include
+     * data elements which the user has not consented to sharing.
+     *
      * @param requestMessage         If not {@code null}, must contain CBOR data conforming to
      *                               the schema mentioned above.
      * @param entriesToRequest       The entries to request, organized as a map of namespace
