@@ -129,7 +129,7 @@ public final class AppExitInfoTracker {
     private final ProcessMap<AppExitInfoContainer> mData;
 
     /** A pool of raw {@link android.app.ApplicationExitInfo} records. */
-    @GuardedBy("mService")
+    @GuardedBy("mLock")
     private final SynchronizedPool<ApplicationExitInfo> mRawRecordsPool;
 
     /**
@@ -204,8 +204,7 @@ public final class AppExitInfoTracker {
         });
     }
 
-    @GuardedBy("mService")
-    void scheduleNoteProcessDiedLocked(final ProcessRecord app) {
+    void scheduleNoteProcessDied(final ProcessRecord app) {
         if (app == null || app.info == null) {
             return;
         }
@@ -214,11 +213,9 @@ public final class AppExitInfoTracker {
             if (!mAppExitInfoLoaded) {
                 return;
             }
+            mKillHandler.obtainMessage(KillHandler.MSG_PROC_DIED, obtainRawRecordLocked(app))
+                    .sendToTarget();
         }
-        // The current thread is holding the global lock, let's extract the info from it
-        // and schedule the info note task in the kill handler.
-        mKillHandler.obtainMessage(KillHandler.MSG_PROC_DIED, obtainRawRecordLocked(app))
-                .sendToTarget();
     }
 
     void scheduleNoteAppKill(final ProcessRecord app, final @Reason int reason,
@@ -227,8 +224,6 @@ public final class AppExitInfoTracker {
             if (!mAppExitInfoLoaded) {
                 return;
             }
-        }
-        synchronized (mService) {
             if (app == null || app.info == null) {
                 return;
             }
@@ -247,8 +242,6 @@ public final class AppExitInfoTracker {
             if (!mAppExitInfoLoaded) {
                 return;
             }
-        }
-        synchronized (mService) {
             ProcessRecord app;
             synchronized (mService.mPidsSelfLocked) {
                 app = mService.mPidsSelfLocked.get(pid);
@@ -823,7 +816,7 @@ public final class AppExitInfoTracker {
     }
 
     @VisibleForTesting
-    @GuardedBy("mService")
+    @GuardedBy("mLock")
     ApplicationExitInfo obtainRawRecordLocked(ProcessRecord app) {
         ApplicationExitInfo info = mRawRecordsPool.acquire();
         if (info == null) {
@@ -850,7 +843,7 @@ public final class AppExitInfoTracker {
     }
 
     @VisibleForTesting
-    @GuardedBy("mService")
+    @GuardedBy("mLock")
     void recycleRawRecordLocked(ApplicationExitInfo info) {
         info.setProcessName(null);
         info.setDescription(null);
@@ -1135,8 +1128,6 @@ public final class AppExitInfoTracker {
                     ApplicationExitInfo raw = (ApplicationExitInfo) msg.obj;
                     synchronized (mLock) {
                         handleNoteProcessDiedLocked(raw);
-                    }
-                    synchronized (mService) {
                         recycleRawRecordLocked(raw);
                     }
                 }
@@ -1145,8 +1136,6 @@ public final class AppExitInfoTracker {
                     ApplicationExitInfo raw = (ApplicationExitInfo) msg.obj;
                     synchronized (mLock) {
                         handleNoteAppKillLocked(raw);
-                    }
-                    synchronized (mService) {
                         recycleRawRecordLocked(raw);
                     }
                 }
