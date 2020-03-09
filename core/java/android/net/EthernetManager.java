@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -248,6 +249,10 @@ public class EthernetManager {
      * interface, the existing interface will be used.
      * @param callback A callback to be called once the request has been fulfilled.
      */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
     @NonNull
     public TetheredInterfaceRequest requestTetheredInterface(@NonNull final Executor executor,
             @NonNull final TetheredInterfaceCallback callback) {
