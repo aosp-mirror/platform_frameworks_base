@@ -5128,7 +5128,7 @@ public abstract class Context {
      * {@link android.os.incremental.IncrementalManager}.
      * @hide
      */
-    public static final String INCREMENTAL_SERVICE = "incremental_service";
+    public static final String INCREMENTAL_SERVICE = "incremental";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
