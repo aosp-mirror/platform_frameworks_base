@@ -35,4 +35,5 @@ oneway interface ITetheringEventCallback
     void onConfigurationChanged(in TetheringConfigurationParcel config);
     void onTetherStatesChanged(in TetherStatesParcel states);
     void onTetherClientsChanged(in List<TetheredClient> clients);
+    void onOffloadStatusChanged(int status);
 }
