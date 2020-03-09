@@ -142,6 +142,18 @@ public class FakeIcing {
         }
     }
 
+    /** Deletes all documents belonging to the given namespace. */
+    public void deleteByNamespace(@NonNull String namespace) {
+        for (int i = 0; i < mDocStore.size(); i++) {
+            DocumentProto document = mDocStore.valueAt(i);
+            if (namespace.equals(document.getNamespace())) {
+                mDocStore.removeAt(i);
+                mUriToDocIdMap.remove(document.getUri());
+                i--;
+            }
+        }
+    }
+
     private void indexDocument(int docId, DocumentProto document) {
         for (PropertyProto property : document.getPropertiesList()) {
             for (String stringValue : property.getStringValuesList()) {
