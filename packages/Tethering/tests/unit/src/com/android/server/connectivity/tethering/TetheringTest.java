@@ -46,6 +46,8 @@ import static android.net.wifi.WifiManager.IFACE_IP_MODE_TETHERED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+import static com.android.server.connectivity.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,7 +55,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.notNull;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -188,6 +189,7 @@ public class TetheringTest {
     @Mock private NetworkRequest mNetworkRequest;
     @Mock private ConnectivityManager mCm;
     @Mock private EthernetManager mEm;
+    @Mock private TetheringNotificationUpdater mNotificationUpdater;
 
     private final MockIpServerDependencies mIpServerDependencies =
             spy(new MockIpServerDependencies());
@@ -206,6 +208,7 @@ public class TetheringTest {
     private Tethering mTethering;
     private PhoneStateListener mPhoneStateListener;
     private InterfaceConfigurationParcel mInterfaceConfiguration;
+
 
     private class TestContext extends BroadcastInterceptingContext {
         TestContext(Context base) {
@@ -248,11 +251,6 @@ public class TetheringTest {
         public String getSystemServiceName(Class<?> serviceClass) {
             if (TelephonyManager.class.equals(serviceClass)) return Context.TELEPHONY_SERVICE;
             return super.getSystemServiceName(serviceClass);
-        }
-
-        @Override
-        public Context createContextAsUser(UserHandle user, int flags) {
-            return mContext;
         }
     }
 
@@ -315,12 +313,10 @@ public class TetheringTest {
     public class MockTetheringDependencies extends TetheringDependencies {
         StateMachine mUpstreamNetworkMonitorMasterSM;
         ArrayList<IpServer> mIpv6CoordinatorNotifyList;
-        int mIsTetheringSupportedCalls;
 
         public void reset() {
             mUpstreamNetworkMonitorMasterSM = null;
             mIpv6CoordinatorNotifyList = null;
-            mIsTetheringSupportedCalls = 0;
         }
 
         @Override
@@ -354,7 +350,6 @@ public class TetheringTest {
 
         @Override
         public boolean isTetheringSupported() {
-            mIsTetheringSupportedCalls++;
             return true;
         }
 
@@ -383,6 +378,11 @@ public class TetheringTest {
         public BluetoothAdapter getBluetoothAdapter() {
             // TODO: add test for bluetooth tethering.
             return null;
+        }
+
+        @Override
+        public TetheringNotificationUpdater getNotificationUpdater(Context ctx) {
+            return mNotificationUpdater;
         }
     }
 
@@ -472,7 +472,6 @@ public class TetheringTest {
         when(mOffloadHardwareInterface.getForwardedStats(any())).thenReturn(mForwardedStats);
 
         mServiceContext = new TestContext(mContext);
-        when(mContext.getSystemService(Context.NOTIFICATION_SERVICE)).thenReturn(null);
         mContentResolver = new MockContentResolver(mServiceContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
         mIntents = new Vector<>();
@@ -605,7 +604,8 @@ public class TetheringTest {
         // it creates a IpServer and sends out a broadcast indicating that the
         // interface is "available".
         if (emulateInterfaceStatusChanged) {
-            assertEquals(1, mTetheringDependencies.mIsTetheringSupportedCalls);
+            // There is 1 IpServer state change event: STATE_AVAILABLE
+            verify(mNotificationUpdater, times(1)).onDownstreamChanged(DOWNSTREAM_NONE);
             verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
             verify(mWifiManager).updateInterfaceIpState(
                     TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_UNSPECIFIED);
@@ -689,9 +689,8 @@ public class TetheringTest {
         verifyNoMoreInteractions(mWifiManager);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_ACTIVE_LOCAL_ONLY);
         verify(mUpstreamNetworkMonitor, times(1)).startObserveAllNetworks();
-        // This will be called twice, one is on entering IpServer.STATE_AVAILABLE,
-        // and another one is on IpServer.STATE_TETHERED/IpServer.STATE_LOCAL_ONLY.
-        assertEquals(2, mTetheringDependencies.mIsTetheringSupportedCalls);
+        // There are 2 IpServer state change events: STATE_AVAILABLE -> STATE_LOCAL_ONLY
+        verify(mNotificationUpdater, times(2)).onDownstreamChanged(DOWNSTREAM_NONE);
 
         // Emulate externally-visible WifiManager effects, when hotspot mode
         // is being torn down.
@@ -917,7 +916,8 @@ public class TetheringTest {
         sendWifiApStateChanged(WIFI_AP_STATE_ENABLED);
         mLooper.dispatchAll();
 
-        assertEquals(1, mTetheringDependencies.mIsTetheringSupportedCalls);
+        // There is 1 IpServer state change event: STATE_AVAILABLE
+        verify(mNotificationUpdater, times(1)).onDownstreamChanged(DOWNSTREAM_NONE);
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         verify(mWifiManager).updateInterfaceIpState(
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_UNSPECIFIED);
@@ -961,9 +961,9 @@ public class TetheringTest {
         // In tethering mode, in the default configuration, an explicit request
         // for a mobile network is also made.
         verify(mUpstreamNetworkMonitor, times(1)).registerMobileNetworkRequest();
-        // This will be called twice, one is on entering IpServer.STATE_AVAILABLE,
-        // and another one is on IpServer.STATE_TETHERED/IpServer.STATE_LOCAL_ONLY.
-        assertEquals(2, mTetheringDependencies.mIsTetheringSupportedCalls);
+        // There are 2 IpServer state change events: STATE_AVAILABLE -> STATE_TETHERED
+        verify(mNotificationUpdater, times(1)).onDownstreamChanged(DOWNSTREAM_NONE);
+        verify(mNotificationUpdater, times(1)).onDownstreamChanged(eq(1 << TETHERING_WIFI));
 
         /////
         // We do not currently emulate any upstream being found.
@@ -1034,9 +1034,10 @@ public class TetheringTest {
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_UNSPECIFIED);
         verify(mWifiManager).updateInterfaceIpState(
                 TEST_WLAN_IFNAME, WifiManager.IFACE_IP_MODE_TETHERED);
-        // There are 3 state change event:
-        // AVAILABLE -> STATE_TETHERED -> STATE_AVAILABLE.
-        assertEquals(3, mTetheringDependencies.mIsTetheringSupportedCalls);
+        // There are 3 IpServer state change event:
+        //         STATE_AVAILABLE -> STATE_TETHERED -> STATE_AVAILABLE.
+        verify(mNotificationUpdater, times(2)).onDownstreamChanged(DOWNSTREAM_NONE);
+        verify(mNotificationUpdater, times(1)).onDownstreamChanged(eq(1 << TETHERING_WIFI));
         verifyTetheringBroadcast(TEST_WLAN_IFNAME, EXTRA_AVAILABLE_TETHER);
         // This is called, but will throw.
         verify(mNetd, times(1)).ipfwdEnableForwarding(TETHERING_NAME);
@@ -1069,9 +1070,6 @@ public class TetheringTest {
         ural.mDisallowTethering = currentDisallow;
 
         ural.onUserRestrictionsChanged();
-
-        verify(mockTethering, times(expectedInteractionsWithShowNotification))
-                .showTetheredNotification(anyInt(), eq(false));
 
         verify(mockTethering, times(expectedInteractionsWithShowNotification))
                 .untetherAll();
@@ -1429,9 +1427,8 @@ public class TetheringTest {
         verifyNoMoreInteractions(mNetd);
         verifyTetheringBroadcast(TEST_P2P_IFNAME, EXTRA_ACTIVE_LOCAL_ONLY);
         verify(mUpstreamNetworkMonitor, times(1)).startObserveAllNetworks();
-        // This will be called twice, one is on entering IpServer.STATE_AVAILABLE,
-        // and another one is on IpServer.STATE_TETHERED/IpServer.STATE_LOCAL_ONLY.
-        assertEquals(2, mTetheringDependencies.mIsTetheringSupportedCalls);
+        // There are 2 IpServer state change events: STATE_AVAILABLE -> STATE_LOCAL_ONLY
+        verify(mNotificationUpdater, times(2)).onDownstreamChanged(DOWNSTREAM_NONE);
 
         assertEquals(TETHER_ERROR_NO_ERROR, mTethering.getLastTetherError(TEST_P2P_IFNAME));
 
