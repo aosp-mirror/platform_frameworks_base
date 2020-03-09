@@ -23,6 +23,8 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 
+import com.android.server.pm.RestrictionsSet;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -57,21 +59,18 @@ public abstract class UserManagerInternal {
      * Called by {@link com.android.server.devicepolicy.DevicePolicyManagerService} to set
      * restrictions enforced by the user.
      *
-     * @param originatingUserId user id of the user where the restriction originated.
-     * @param restrictions a bundle of user restrictions.
-     * @param restrictionOwnerType determines which admin {@code userId} corresponds to.
-     *             The admin can be either
-     *             {@link UserManagerInternal#OWNER_TYPE_DEVICE_OWNER},
-     *             {@link UserManagerInternal#OWNER_TYPE_PROFILE_OWNER},
-     *             {@link UserManagerInternal#OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE}
-     *             or {@link UserManagerInternal#OWNER_TYPE_NO_OWNER}.
-     *             If the admin is a DEVICE_OWNER or a PROFILE_OWNER_ORG_OWNED_DEVICE then
-     *             a restriction may be applied globally depending on which restriction it is,
-     *             otherwise it will be applied just on the current user.
-     * @see OwnerType
+     * @param originatingUserId user id of the user where the restrictions originated.
+     * @param global            a bundle of global user restrictions. Global restrictions are
+     *                          restrictions that apply device-wide: to the managed profile,
+     *                          primary profile and secondary users and any profile created in
+     *                          any secondary user.
+     * @param local             a restriction set of local user restrictions. The key is the user
+     *                          id of the user whom the restrictions are targeting.
+     * @param isDeviceOwner     whether {@code originatingUserId} corresponds to device owner
+     *                          user id.
      */
     public abstract void setDevicePolicyUserRestrictions(int originatingUserId,
-            @Nullable Bundle restrictions, @OwnerType int restrictionOwnerType);
+            @Nullable Bundle global, @Nullable RestrictionsSet local, boolean isDeviceOwner);
 
     /**
      * Returns the "base" user restrictions.
