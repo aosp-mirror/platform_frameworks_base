@@ -47,6 +47,7 @@ package android.net {
     method @NonNull public String[] getTetheredIfaces();
     method @NonNull public String[] getTetheringErroredIfaces();
     method public boolean isTetheringSupported();
+    method public boolean isTetheringSupported(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.TetheringEventCallback);
     method @RequiresPermission(anyOf={"android.permission.TETHER_PRIVILEGED", android.Manifest.permission.WRITE_SETTINGS}) public void requestLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.TetheringManager.OnTetheringEntitlementResultListener);
     method public void requestLatestTetheringEntitlementResult(int, @NonNull android.os.ResultReceiver, boolean);
