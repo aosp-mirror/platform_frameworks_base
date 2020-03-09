@@ -62,7 +62,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.security.FileIntegrityManager;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -136,7 +135,6 @@ public class AppIntegrityManagerServiceImplTest {
     @Mock RuleEvaluationEngine mRuleEvaluationEngine;
     @Mock IntegrityFileManager mIntegrityFileManager;
     @Mock Handler mHandler;
-    FileIntegrityManager mFileIntegrityManager;
 
     private final Context mRealContext = InstrumentationRegistry.getTargetContext();
 
@@ -165,16 +163,12 @@ public class AppIntegrityManagerServiceImplTest {
             Files.copy(inputStream, mTestApkSourceStamp.toPath(), REPLACE_EXISTING);
         }
 
-        mFileIntegrityManager =
-                (FileIntegrityManager)
-                        mRealContext.getSystemService(Context.FILE_INTEGRITY_SERVICE);
         mService =
                 new AppIntegrityManagerServiceImpl(
                         mMockContext,
                         mPackageManagerInternal,
                         mRuleEvaluationEngine,
                         mIntegrityFileManager,
-                        mFileIntegrityManager,
                         mHandler);
 
         mSpyPackageManager = spy(mRealContext.getPackageManager());
@@ -379,7 +373,7 @@ public class AppIntegrityManagerServiceImplTest {
         AppInstallMetadata appInstallMetadata = metadataCaptor.getValue();
         assertTrue(appInstallMetadata.isStampPresent());
         assertTrue(appInstallMetadata.isStampVerified());
-        assertFalse(appInstallMetadata.isStampTrusted());
+        assertTrue(appInstallMetadata.isStampTrusted());
         assertEquals(SOURCE_STAMP_CERTIFICATE_HASH, appInstallMetadata.getStampCertificateHash());
     }
 
