@@ -29,13 +29,13 @@ oneway interface IMediaRoute2ProviderService {
     // MediaRoute2ProviderService#MediaRoute2ProviderServiceStub for readability.
     void setCallback(IMediaRoute2ProviderServiceCallback callback);
     void updateDiscoveryPreference(in RouteDiscoveryPreference discoveryPreference);
-    void setRouteVolume(String routeId, int volume, long requestId);
+    void setRouteVolume(long requestId, String routeId, int volume);
 
-    void requestCreateSession(String packageName, String routeId, long requestId,
+    void requestCreateSession(long requestId, String packageName, String routeId,
             in @nullable Bundle sessionHints);
-    void selectRoute(String sessionId, String routeId, long requestId);
-    void deselectRoute(String sessionId, String routeId, long requestId);
-    void transferToRoute(String sessionId, String routeId, long requestId);
-    void setSessionVolume(String sessionId, int volume, long requestId);
-    void releaseSession(String sessionId, long requestId);
+    void selectRoute(long requestId, String sessionId, String routeId);
+    void deselectRoute(long requestId, String sessionId, String routeId);
+    void transferToRoute(long requestId, String sessionId, String routeId);
+    void setSessionVolume(long requestId, String sessionId, int volume);
+    void releaseSession(long requestId, String sessionId);
 }
