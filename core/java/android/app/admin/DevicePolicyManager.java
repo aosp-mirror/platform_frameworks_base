@@ -6001,7 +6001,7 @@ public class DevicePolicyManager {
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param required Whether auto time is set required or not.
      * @throws SecurityException if {@code admin} is not a device owner.
-     * @deprecated From {@link android.os.Build.VERSION_CODES#R}. Use {@link #setAutoTime}
+     * @deprecated From {@link android.os.Build.VERSION_CODES#R}. Use {@link #setAutoTimeEnabled}
      * to turn auto time on or off and use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
      * to prevent the user from changing this setting.
      */
@@ -6019,7 +6019,7 @@ public class DevicePolicyManager {
 
     /**
      * @return true if auto time is required.
-     * @deprecated From {@link android.os.Build.VERSION_CODES#R}. Use {@link #getAutoTime}
+     * @deprecated From {@link android.os.Build.VERSION_CODES#R}. Use {@link #getAutoTimeEnabled}
      */
     @Deprecated
     public boolean getAutoTimeRequired() {
@@ -6049,10 +6049,10 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile.
      */
-    public void setAutoTime(@NonNull ComponentName admin, boolean enabled) {
+    public void setAutoTimeEnabled(@NonNull ComponentName admin, boolean enabled) {
         if (mService != null) {
             try {
-                mService.setAutoTime(admin, enabled);
+                mService.setAutoTimeEnabled(admin, enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6064,10 +6064,10 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile.
      */
-    public boolean getAutoTime(@NonNull ComponentName admin) {
+    public boolean getAutoTimeEnabled(@NonNull ComponentName admin) {
         if (mService != null) {
             try {
-                return mService.getAutoTime(admin);
+                return mService.getAutoTimeEnabled(admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6090,11 +6090,11 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile.
      */
-    public void setAutoTimeZone(@NonNull ComponentName admin, boolean enabled) {
+    public void setAutoTimeZoneEnabled(@NonNull ComponentName admin, boolean enabled) {
         throwIfParentInstance("setAutoTimeZone");
         if (mService != null) {
             try {
-                mService.setAutoTimeZone(admin, enabled);
+                mService.setAutoTimeZoneEnabled(admin, enabled);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6106,11 +6106,11 @@ public class DevicePolicyManager {
      * @throws SecurityException if caller is not a device owner, a profile owner for the
      * primary user, or a profile owner of an organization-owned managed profile.
      */
-    public boolean getAutoTimeZone(@NonNull ComponentName admin) {
+    public boolean getAutoTimeZoneEnabled(@NonNull ComponentName admin) {
         throwIfParentInstance("getAutoTimeZone");
         if (mService != null) {
             try {
-                return mService.getAutoTimeZone(admin);
+                return mService.getAutoTimeZoneEnabled(admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

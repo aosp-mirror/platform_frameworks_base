@@ -308,11 +308,11 @@ interface IDevicePolicyManager {
     void setAutoTimeRequired(in ComponentName who, boolean required);
     boolean getAutoTimeRequired();
 
-    void setAutoTime(in ComponentName who, boolean enabled);
-    boolean getAutoTime(in ComponentName who);
+    void setAutoTimeEnabled(in ComponentName who, boolean enabled);
+    boolean getAutoTimeEnabled(in ComponentName who);
 
-    void setAutoTimeZone(in ComponentName who, boolean enabled);
-    boolean getAutoTimeZone(in ComponentName who);
+    void setAutoTimeZoneEnabled(in ComponentName who, boolean enabled);
+    boolean getAutoTimeZoneEnabled(in ComponentName who);
 
     void setForceEphemeralUsers(in ComponentName who, boolean forceEpehemeralUsers);
     boolean getForceEphemeralUsers(in ComponentName who);

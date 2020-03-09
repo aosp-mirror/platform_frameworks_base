@@ -7774,7 +7774,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Set whether auto time is enabled on the device.
      */
     @Override
-    public void setAutoTime(ComponentName who, boolean enabled) {
+    public void setAutoTimeEnabled(ComponentName who, boolean enabled) {
         if (!mHasFeature) {
             return;
         }
@@ -7795,7 +7795,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Returns whether auto time is used on the device or not.
      */
     @Override
-    public boolean getAutoTime(ComponentName who) {
+    public boolean getAutoTimeEnabled(ComponentName who) {
         if (!mHasFeature) {
             return false;
         }
@@ -7809,7 +7809,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Set whether auto time zone is enabled on the device.
      */
     @Override
-    public void setAutoTimeZone(ComponentName who, boolean enabled) {
+    public void setAutoTimeZoneEnabled(ComponentName who, boolean enabled) {
         if (!mHasFeature) {
             return;
         }
@@ -7830,7 +7830,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Returns whether auto time zone is used on the device or not.
      */
     @Override
-    public boolean getAutoTimeZone(ComponentName who) {
+    public boolean getAutoTimeZoneEnabled(ComponentName who) {
         if (!mHasFeature) {
             return false;
         }
