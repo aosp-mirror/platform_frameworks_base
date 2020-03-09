@@ -125,14 +125,14 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void requestCreateSession(String packageName, String routeId, long requestId,
+    public void requestCreateSession(long requestId, String packageName, String routeId,
             Bundle sessionHints) {
         // Handle it as an internal transfer.
-        transferToRoute(SYSTEM_SESSION_ID, routeId, requestId);
+        transferToRoute(requestId, SYSTEM_SESSION_ID, routeId);
     }
 
     @Override
-    public void releaseSession(String sessionId, long requestId) {
+    public void releaseSession(long requestId, String sessionId) {
         // Do nothing
     }
 
@@ -142,17 +142,17 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void selectRoute(String sessionId, String routeId, long requestId) {
+    public void selectRoute(long requestId, String sessionId, String routeId) {
         // Do nothing since we don't support multiple BT yet.
     }
 
     @Override
-    public void deselectRoute(String sessionId, String routeId, long requestId) {
+    public void deselectRoute(long requestId, String sessionId, String routeId) {
         // Do nothing since we don't support multiple BT yet.
     }
 
     @Override
-    public void transferToRoute(String sessionId, String routeId, long requestId) {
+    public void transferToRoute(long requestId, String sessionId, String routeId) {
         if (TextUtils.equals(routeId, mDefaultRoute.getId())) {
             mBtRouteProvider.transferTo(null);
         } else {
@@ -161,7 +161,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void setRouteVolume(String routeId, int volume, long requestId) {
+    public void setRouteVolume(long requestId, String routeId, int volume) {
         if (!TextUtils.equals(routeId, mSelectedRouteId)) {
             return;
         }
@@ -169,7 +169,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     @Override
-    public void setSessionVolume(String sessionId, int volume, long requestId) {
+    public void setSessionVolume(long requestId, String sessionId, int volume) {
         // Do nothing since we don't support grouping volume yet.
     }
 
