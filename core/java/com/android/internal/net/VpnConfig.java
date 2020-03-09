@@ -232,7 +232,7 @@ public class VpnConfig implements Parcelable {
                 .append(", allowIPv4=").append(allowIPv4)
                 .append(", allowIPv6=").append(allowIPv6)
                 .append(", underlyingNetworks=").append(Arrays.toString(underlyingNetworks))
-                .append(", proxyInfo=").append(proxyInfo.toString())
+                .append(", proxyInfo=").append(proxyInfo)
                 .append("}")
                 .toString();
     }
