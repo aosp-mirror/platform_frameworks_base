@@ -2646,4 +2646,11 @@
     <string name="controls_dialog_ok">Add to favorites</string>
     <!-- Controls dialog message [CHAR LIMIT=NONE] -->
     <string name="controls_dialog_message"><xliff:g id="app" example="System UI">%s</xliff:g> suggested this control to add to your favorites.</string>
+
+    <!-- Controls PIN entry dialog, switch to alphanumeric keyboard [CHAR LIMIT=100] -->
+    <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
+    <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
+    <string name="controls_pin_verify">Verify device PIN</string>
+    <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
+    <string name="controls_pin_instructions">Enter PIN</string>
 </resources>
