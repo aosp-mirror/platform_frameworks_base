@@ -200,6 +200,7 @@ import static com.android.server.wm.TaskPersister.IMAGE_EXTENSION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static com.android.server.wm.WindowContainerChildProto.ACTIVITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
@@ -7447,6 +7448,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (hasProcess()) {
             proto.write(PROC_ID, app.getPid());
         }
+    }
+
+    @Override
+    long getProtoFieldId() {
+        return ACTIVITY;
     }
 
     @Override
