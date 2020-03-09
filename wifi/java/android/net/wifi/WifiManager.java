@@ -2826,7 +2826,7 @@ public class WifiManager {
      */
     @Nullable
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String getCountryCode() {
         try {
             return mService.getCountryCode();
