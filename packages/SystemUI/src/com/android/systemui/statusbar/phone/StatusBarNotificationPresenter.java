@@ -60,13 +60,13 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
+import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -98,6 +98,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             (SysuiStatusBarStateController) Dependency.get(StatusBarStateController.class);
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
+    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider =
+            Dependency.get(NotificationInterruptionStateProvider.class);
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
     private final VisualStabilityManager mVisualStabilityManager =
@@ -138,13 +140,13 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             ScrimController scrimController,
             ActivityLaunchAnimator activityLaunchAnimator,
             DynamicPrivacyController dynamicPrivacyController,
+            NotificationAlertingManager notificationAlertingManager,
             KeyguardStateController keyguardStateController,
             KeyguardIndicationController keyguardIndicationController,
             StatusBar statusBar,
             ShadeController shadeController,
             CommandQueue commandQueue,
-            InitController initController,
-            NotificationInterruptStateProvider notificationInterruptStateProvider) {
+            InitController initController) {
         mContext = context;
         mKeyguardStateController = keyguardStateController;
         mNotificationPanel = panel;
@@ -214,7 +216,8 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             mEntryManager.addNotificationLifetimeExtender(mGutsManager);
             mEntryManager.addNotificationLifetimeExtenders(
                     remoteInputManager.getLifetimeExtenders());
-            notificationInterruptStateProvider.addSuppressor(mInterruptSuppressor);
+            mNotificationInterruptionStateProvider.setUpWithPresenter(
+                    this, mHeadsUpManager, this::canHeadsUp);
             mLockscreenUserManager.setUpWithPresenter(this);
             mMediaManager.setUpWithPresenter(this);
             mVisualStabilityManager.setUpWithPresenter(this);
@@ -331,6 +334,39 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
 
     public boolean hasActiveNotifications() {
         return mEntryManager.hasActiveNotifications();
+    }
+
+    public boolean canHeadsUp(NotificationEntry entry, StatusBarNotification sbn) {
+        if (mStatusBar.isOccluded()) {
+            boolean devicePublic = mLockscreenUserManager.
+                    isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
+            boolean userPublic = devicePublic
+                    || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
+            boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
+            if (userPublic && needsRedaction) {
+                // TODO(b/135046837): we can probably relax this with dynamic privacy
+                return false;
+            }
+        }
+
+        if (!mCommandQueue.panelsEnabled()) {
+            if (DEBUG) {
+                Log.d(TAG, "No heads up: disabled panel : " + sbn.getKey());
+            }
+            return false;
+        }
+
+        if (sbn.getNotification().fullScreenIntent != null) {
+            if (mAccessibilityManager.isTouchExplorationEnabled()) {
+                if (DEBUG) Log.d(TAG, "No heads up: accessible fullscreen: " + sbn.getKey());
+                return false;
+            } else {
+                // we only allow head-up on the lockscreen if it doesn't have a fullscreen intent
+                return !mKeyguardStateController.isShowing()
+                        || mStatusBar.isOccluded();
+            }
+        }
+        return true;
     }
 
     @Override
@@ -469,68 +505,6 @@ public class StatusBarNotificationPresenter implements NotificationPresenter,
             } catch (RemoteException e) {
                 // if we're here we're dead
             }
-        }
-    };
-
-    private final NotificationInterruptSuppressor mInterruptSuppressor =
-            new NotificationInterruptSuppressor() {
-        @Override
-        public String getName() {
-            return TAG;
-        }
-
-        @Override
-        public boolean suppressAwakeHeadsUp(NotificationEntry entry) {
-            final StatusBarNotification sbn = entry.getSbn();
-            if (mStatusBar.isOccluded()) {
-                boolean devicePublic = mLockscreenUserManager
-                        .isLockscreenPublicMode(mLockscreenUserManager.getCurrentUserId());
-                boolean userPublic = devicePublic
-                        || mLockscreenUserManager.isLockscreenPublicMode(sbn.getUserId());
-                boolean needsRedaction = mLockscreenUserManager.needsRedaction(entry);
-                if (userPublic && needsRedaction) {
-                    // TODO(b/135046837): we can probably relax this with dynamic privacy
-                    return true;
-                }
-            }
-
-            if (!mCommandQueue.panelsEnabled()) {
-                if (DEBUG) {
-                    Log.d(TAG, "No heads up: disabled panel : " + sbn.getKey());
-                }
-                return true;
-            }
-
-            if (sbn.getNotification().fullScreenIntent != null) {
-                // we don't allow head-up on the lockscreen (unless there's a
-                // "showWhenLocked" activity currently showing)  if
-                // the potential HUN has a fullscreen intent
-                if (mKeyguardStateController.isShowing() && !mStatusBar.isOccluded()) {
-                    if (DEBUG) {
-                        Log.d(TAG, "No heads up: entry has fullscreen intent on lockscreen "
-                                + sbn.getKey());
-                    }
-                    return true;
-                }
-
-                if (mAccessibilityManager.isTouchExplorationEnabled()) {
-                    if (DEBUG) {
-                        Log.d(TAG, "No heads up: accessible fullscreen: " + sbn.getKey());
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public boolean suppressAwakeInterruptions(NotificationEntry entry) {
-            return isDeviceInVrMode();
-        }
-
-        @Override
-        public boolean suppressInterruptions(NotificationEntry entry) {
-            return mStatusBar.areNotificationAlertsDisabled();
         }
     };
 }
