@@ -31,4 +31,5 @@ parcelable TetheringCallbackStartedParcel {
     TetheringConfigurationParcel config;
     TetherStatesParcel states;
     List<TetheredClient> tetheredClients;
+    int offloadStatus;
 }
