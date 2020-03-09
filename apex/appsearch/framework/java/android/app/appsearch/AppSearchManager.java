@@ -333,6 +333,17 @@ public class AppSearchManager {
         return AppSearchResult.newSuccessfulResult(new SearchResults(searchResultProto));
     }
 
+    /** Deletes all documents owned by the calling app. */
+    public AppSearchResult<Void> deleteAll() {
+        AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
+        try {
+            mService.deleteAll(future);
+        } catch (RemoteException e) {
+            future.completeExceptionally(e);
+        }
+        return getFutureOrThrow(future);
+    }
+
     private static <T> T getFutureOrThrow(@NonNull AndroidFuture<T> future) {
         try {
             return future.get();
