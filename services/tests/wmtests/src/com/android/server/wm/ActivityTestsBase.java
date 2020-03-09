@@ -234,6 +234,10 @@ class ActivityTestsBase extends SystemServiceTestsBase {
                 mTask = new TaskBuilder(mService.mStackSupervisor)
                         .setComponent(mComponent)
                         .setStack(mStack).build();
+            } else if (mTask == null && mStack != null && DisplayContent.alwaysCreateStack(
+                    mStack.getWindowingMode(), mStack.getActivityType())) {
+                // The stack can be the task root.
+                mTask = mStack;
             }
 
             Intent intent = new Intent();
