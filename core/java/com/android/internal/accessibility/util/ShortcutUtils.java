@@ -39,6 +39,33 @@ public final class ShortcutUtils {
             new TextUtils.SimpleStringSplitter(SERVICES_SEPARATOR);
 
     /**
+     * Opts in component name into colon-separated {@link UserShortcutType}
+     * key's string in Settings.
+     *
+     * @param context The current context.
+     * @param shortcutType The preferred shortcut type user selected.
+     * @param componentId The component id that need to be opted out from Settings.
+     */
+    public static void optInValueToSettings(Context context, @UserShortcutType int shortcutType,
+            String componentId) {
+        final StringJoiner joiner = new StringJoiner(String.valueOf(SERVICES_SEPARATOR));
+        final String targetKey = convertToKey(shortcutType);
+        final String targetString = Settings.Secure.getString(context.getContentResolver(),
+                targetKey);
+
+        if (hasValueInSettings(context, shortcutType, componentId)) {
+            return;
+        }
+
+        if (!TextUtils.isEmpty(targetString)) {
+            joiner.add(targetString);
+        }
+        joiner.add(componentId);
+
+        Settings.Secure.putString(context.getContentResolver(), targetKey, joiner.toString());
+    }
+
+    /**
      * Opts out component name into colon-separated {@code shortcutType} key's string in Settings.
      *
      * @param context The current context.
