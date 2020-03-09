@@ -18,6 +18,7 @@ package com.android.systemui.controls.ui
 
 import android.accounts.Account
 import android.accounts.AccountManager
+import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -28,6 +29,7 @@ import android.graphics.drawable.LayerDrawable
 import android.os.IBinder
 import android.service.controls.Control
 import android.service.controls.TokenProvider
+import android.service.controls.actions.ControlAction
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -49,8 +51,8 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.R
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.R
 
 import dagger.Lazy
 
@@ -152,7 +154,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var parent: ViewGroup
     private lateinit var lastItems: List<SelectionItem>
     private var popup: ListPopupWindow? = null
-
+    private var activeDialog: Dialog? = null
     private val addControlsItem: SelectionItem
 
     init {
@@ -388,6 +390,7 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun hide() {
         Log.d(ControlsUiController.TAG, "hide()")
         popup?.dismiss()
+        activeDialog?.dismiss()
 
         controlsController.get().unsubscribe()
         context.unbindService(tokenProviderConnection)
@@ -418,7 +421,15 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun onActionResponse(componentName: ComponentName, controlId: String, response: Int) {
         val key = ControlKey(componentName, controlId)
         uiExecutor.execute {
-            controlViewsById.get(key)?.actionResponse(response)
+            controlViewsById.get(key)?.let { cvh ->
+                when (response) {
+                    ControlAction.RESPONSE_CHALLENGE_PIN -> {
+                        activeDialog = ChallengeDialogs.createPinDialog(cvh)
+                        activeDialog?.show()
+                    }
+                    else -> cvh.actionResponse(response)
+                }
+            }
         }
     }
 
