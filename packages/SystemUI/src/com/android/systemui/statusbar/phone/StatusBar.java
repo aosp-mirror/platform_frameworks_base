@@ -2333,7 +2333,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     void checkBarModes() {
         if (mDemoMode) return;
-        if (mNotificationShadeWindowViewController != null) {
+        if (mNotificationShadeWindowViewController != null && getStatusBarTransitions() != null) {
             checkBarMode(mStatusBarMode, mStatusBarWindowState, getStatusBarTransitions());
         }
         mNavigationBarController.checkNavBarModes(mDisplayId);
