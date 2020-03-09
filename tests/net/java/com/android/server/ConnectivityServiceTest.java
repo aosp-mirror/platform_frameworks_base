@@ -5927,6 +5927,12 @@ public class ConnectivityServiceTest {
         final LinkAddress myIpv6 = new LinkAddress("2001:db8:1::1/64");
         final String kNat64PrefixString = "2001:db8:64:64:64:64::";
         final IpPrefix kNat64Prefix = new IpPrefix(InetAddress.getByName(kNat64PrefixString), 96);
+        final RouteInfo defaultRoute = new RouteInfo((IpPrefix) null, myIpv6.getAddress(),
+                                                     MOBILE_IFNAME);
+        final RouteInfo hostRoute = new RouteInfo(myIpv6, null, MOBILE_IFNAME);
+        final RouteInfo ipv4Default = new RouteInfo(myIpv4, null, MOBILE_IFNAME);
+        final RouteInfo stackedDefault = new RouteInfo((IpPrefix) null, myIpv4.getAddress(),
+                                                       CLAT_PREFIX + MOBILE_IFNAME);
 
         final NetworkRequest networkRequest = new NetworkRequest.Builder()
                 .addTransportType(TRANSPORT_CELLULAR)
@@ -5939,15 +5945,13 @@ public class ConnectivityServiceTest {
         final LinkProperties cellLp = new LinkProperties();
         cellLp.setInterfaceName(MOBILE_IFNAME);
         cellLp.addLinkAddress(myIpv6);
-        cellLp.addRoute(new RouteInfo((IpPrefix) null, myIpv6.getAddress(), MOBILE_IFNAME));
-        cellLp.addRoute(new RouteInfo(myIpv6, null, MOBILE_IFNAME));
+        cellLp.addRoute(defaultRoute);
+        cellLp.addRoute(hostRoute);
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp);
         reset(mNetworkManagementService);
         reset(mMockDnsResolver);
         reset(mMockNetd);
         reset(mBatteryStatsService);
-        when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
-                .thenReturn(getClatInterfaceConfig(myIpv4));
 
         // Connect with ipv6 link properties. Expect prefix discovery to be started.
         mCellNetworkAgent.connect(true);
@@ -5955,6 +5959,8 @@ public class ConnectivityServiceTest {
         waitForIdle();
 
         verify(mMockNetd, times(1)).networkCreatePhysical(eq(cellNetId), anyInt());
+        verify(mNetworkManagementService, times(1)).addRoute(eq(cellNetId), eq(defaultRoute));
+        verify(mNetworkManagementService, times(1)).addRoute(eq(cellNetId), eq(hostRoute));
         verify(mMockDnsResolver, times(1)).createNetworkCache(eq(cellNetId));
         verify(mBatteryStatsService).noteNetworkInterfaceType(cellLp.getInterfaceName(),
                 TYPE_MOBILE);
@@ -5980,12 +5986,14 @@ public class ConnectivityServiceTest {
 
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
+        reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
+        when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
+                .thenReturn(getClatInterfaceConfig(myIpv4));
 
         // Remove IPv4 address. Expect prefix discovery to be started again.
         cellLp.removeLinkAddress(myIpv4);
-        cellLp.removeRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
@@ -6007,6 +6015,7 @@ public class ConnectivityServiceTest {
         List<LinkProperties> stackedLps = mCm.getLinkProperties(mCellNetworkAgent.getNetwork())
                 .getStackedLinks();
         assertEquals(makeClatLinkProperties(myIpv4), stackedLps.get(0));
+        verify(mNetworkManagementService).addRoute(eq(cellNetId), eq(stackedDefault));
 
         // Change trivial linkproperties and see if stacked link is preserved.
         cellLp.addDnsServer(InetAddress.getByName("8.8.8.8"));
@@ -6032,8 +6041,9 @@ public class ConnectivityServiceTest {
         // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
         // linkproperties are cleaned up.
         cellLp.addLinkAddress(myIpv4);
-        cellLp.addRoute(new RouteInfo(myIpv4, null, MOBILE_IFNAME));
+        cellLp.addRoute(ipv4Default);
         mCellNetworkAgent.sendLinkProperties(cellLp);
+        verify(mNetworkManagementService).addRoute(eq(cellNetId), eq(stackedDefault));
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
         verify(mMockDnsResolver, times(1)).stopPrefix64Discovery(cellNetId);
@@ -6052,8 +6062,11 @@ public class ConnectivityServiceTest {
 
         verifyNoMoreInteractions(mMockNetd);
         verifyNoMoreInteractions(mMockDnsResolver);
+        reset(mNetworkManagementService);
         reset(mMockNetd);
         reset(mMockDnsResolver);
+        when(mNetworkManagementService.getInterfaceConfig(CLAT_PREFIX + MOBILE_IFNAME))
+                .thenReturn(getClatInterfaceConfig(myIpv4));
 
         // Stopping prefix discovery causes netd to tell us that the NAT64 prefix is gone.
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, false /* added */,
@@ -6067,6 +6080,7 @@ public class ConnectivityServiceTest {
         cellLp.removeDnsServer(InetAddress.getByName("8.8.8.8"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
+        verify(mNetworkManagementService, times(1)).removeRoute(eq(cellNetId), eq(ipv4Default));
         verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, true /* added */,
                 kNat64PrefixString, 96);
