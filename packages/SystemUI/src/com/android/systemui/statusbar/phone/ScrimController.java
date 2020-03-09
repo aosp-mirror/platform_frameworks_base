@@ -473,9 +473,9 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mCurrentBehindTint = ColorUtils.blendARGB(ScrimState.BOUNCER.getBehindTint(),
                     mState.getBehindTint(), interpolatedFract);
         }
-        if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha)) {
+        if (isNaN(mCurrentBehindAlpha) || isNaN(mCurrentInFrontAlpha)) {
             throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
-                    + ", front: " + mInFrontAlpha + ", back: " + mBehindAlpha);
+                    + ", front: " + mCurrentInFrontAlpha + ", back: " + mCurrentBehindAlpha);
         }
     }
 
