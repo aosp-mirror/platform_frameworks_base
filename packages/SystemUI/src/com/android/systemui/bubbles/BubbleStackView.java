@@ -126,6 +126,11 @@ public class BubbleStackView extends FrameLayout {
     @VisibleForTesting
     static final int FLYOUT_HIDE_AFTER = 5000;
 
+    private static final PhysicsAnimator.SpringConfig FLYOUT_IME_ANIMATION_SPRING_CONFIG =
+            new PhysicsAnimator.SpringConfig(
+                    StackAnimationController.IME_ANIMATION_STIFFNESS,
+                    StackAnimationController.DEFAULT_BOUNCINESS);
+
     /**
      * Interface to synchronize {@link View} state and the screen.
      *
@@ -1354,8 +1359,23 @@ public class BubbleStackView extends FrameLayout {
     public void onImeVisibilityChanged(boolean visible, int height) {
         mStackAnimationController.setImeHeight(visible ? height + mImeOffset : 0);
 
-        if (!mIsExpanded) {
-            mStackAnimationController.animateForImeVisibility(visible);
+        if (!mIsExpanded && getBubbleCount() > 0) {
+            final float stackDestinationY =
+                    mStackAnimationController.animateForImeVisibility(visible);
+
+            // How far the stack is animating due to IME, we'll just animate the flyout by that
+            // much too.
+            final float stackDy =
+                    stackDestinationY - mStackAnimationController.getStackPosition().y;
+
+            // If the flyout is visible, translate it along with the bubble stack.
+            if (mFlyout.getVisibility() == VISIBLE) {
+                PhysicsAnimator.getInstance(mFlyout)
+                        .spring(DynamicAnimation.TRANSLATION_Y,
+                                mFlyout.getTranslationY() + stackDy,
+                                FLYOUT_IME_ANIMATION_SPRING_CONFIG)
+                        .start();
+            }
         }
     }
 
