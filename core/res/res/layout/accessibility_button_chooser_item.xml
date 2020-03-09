@@ -21,10 +21,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp">
+    android:padding="16dp">
+
+    <CheckBox
+        android:id="@+id/accessibility_button_target_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:background="@null"
+        android:clickable="false"
+        android:focusable="false"
+        android:visibility="gone"/>
 
     <ImageView
         android:id="@+id/accessibility_button_target_icon"
@@ -36,31 +43,18 @@
         android:id="@+id/accessibility_button_target_label"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
+        android:layout_marginStart="16dp"
         android:layout_weight="1"
         android:textSize="20sp"
         android:textColor="?attr/textColorPrimary"
         android:fontFamily="sans-serif-medium"/>
 
-    <FrameLayout
-        android:id="@+id/accessibility_button_target_item_container"
+    <Switch
+        android:id="@+id/accessibility_button_target_switch_item"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="56dp">
-
-        <ImageView
-            android:id="@+id/accessibility_button_target_view_item"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"/>
-
-        <Switch android:id="@+id/accessibility_button_target_switch_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:background="@null"
-                android:clickable="false"
-                android:focusable="false"/>
-    </FrameLayout>
+        android:background="@null"
+        android:clickable="false"
+        android:focusable="false"/>
 </LinearLayout>
 
