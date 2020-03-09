@@ -47,6 +47,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
+ * This API is not generally intended for third party application developers.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+  <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
+ * Library</a> for consistent behavior across all devices.
+ *
  * Media Router 2 allows applications to control the routing of media channels
  * and streams from the current device to remote speakers and devices.
  */
