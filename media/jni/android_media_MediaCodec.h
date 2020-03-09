@@ -61,7 +61,6 @@ struct JMediaCodec : public AHandler {
 
     void registerSelf();
     void release();
-    void releaseAsync();
 
     status_t enableOnFrameRenderedListener(jboolean enable);
 
