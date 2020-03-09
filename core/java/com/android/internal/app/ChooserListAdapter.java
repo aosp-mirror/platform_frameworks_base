@@ -32,8 +32,10 @@ import android.content.pm.ShortcutInfo;
 import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.DeviceConfig;
 import android.service.chooser.ChooserTarget;
 import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -44,16 +46,25 @@ import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.MultiDisplayResolveInfo;
 import com.android.internal.app.chooser.SelectableTargetInfo;
 import com.android.internal.app.chooser.TargetInfo;
+import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ChooserListAdapter extends ResolverListAdapter {
     private static final String TAG = "ChooserListAdapter";
     private static final boolean DEBUG = false;
+
+    private boolean mAppendDirectShareEnabled = DeviceConfig.getBoolean(
+            DeviceConfig.NAMESPACE_SYSTEMUI,
+            SystemUiDeviceConfigFlags.APPEND_DIRECT_SHARE_ENABLED,
+            false);
 
     private boolean mEnableStackedApps = true;
 
@@ -84,6 +95,11 @@ public class ChooserListAdapter extends ResolverListAdapter {
     // Reserve spots for incoming direct share targets by adding placeholders
     private ChooserTargetInfo
             mPlaceHolderTargetInfo = new ChooserActivity.PlaceHolderTargetInfo();
+    private int mValidServiceTargetsNum = 0;
+    private final Map<ComponentName, Pair<List<ChooserTargetInfo>, Integer>>
+            mParkingDirectShareTargets = new HashMap<>();
+    private Set<ComponentName> mPendingChooserTargetService = new HashSet<>();
+    private Set<ComponentName> mShortcutComponents = new HashSet<>();
     private final List<ChooserTargetInfo> mServiceTargets = new ArrayList<>();
     private final List<TargetInfo> mCallerTargets = new ArrayList<>();
 
@@ -189,6 +205,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     void refreshListView() {
         if (mListViewDataChanged) {
+            if (mAppendDirectShareEnabled) {
+                appendServiceTargetsWithQuota();
+            }
             super.notifyDataSetChanged();
         }
         mListViewDataChanged = false;
@@ -198,6 +217,10 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private void createPlaceHolders() {
         mNumShortcutResults = 0;
         mServiceTargets.clear();
+        mValidServiceTargetsNum = 0;
+        mParkingDirectShareTargets.clear();
+        mPendingChooserTargetService.clear();
+        mShortcutComponents.clear();
         for (int i = 0; i < MAX_SERVICE_TARGETS; i++) {
             mServiceTargets.add(mPlaceHolderTargetInfo);
         }
@@ -393,12 +416,19 @@ public class ChooserListAdapter extends ResolverListAdapter {
      */
     public void addServiceResults(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
             @ChooserActivity.ShareTargetType int targetType,
-            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos) {
+            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos,
+            List<ChooserActivity.ChooserTargetServiceConnection>
+                    pendingChooserTargetServiceConnections) {
         if (DEBUG) {
-            Log.d(TAG, "addServiceResults " + origTarget + ", " + targets.size()
+            Log.d(TAG, "addServiceResults " + origTarget.getResolvedComponentName() + ", "
+                    + targets.size()
                     + " targets");
         }
-
+        if (mAppendDirectShareEnabled) {
+            parkTargetIntoMemory(origTarget, targets, targetType, directShareToShortcutInfos,
+                    pendingChooserTargetServiceConnections);
+            return;
+        }
         if (targets.size() == 0) {
             return;
         }
@@ -449,6 +479,126 @@ public class ChooserListAdapter extends ResolverListAdapter {
         }
     }
 
+    /**
+     * Park {@code targets} into memory for the moment to surface them later when view is refreshed.
+     * Components pending on ChooserTargetService query are also recorded.
+     */
+    private void parkTargetIntoMemory(DisplayResolveInfo origTarget, List<ChooserTarget> targets,
+            @ChooserActivity.ShareTargetType int targetType,
+            Map<ChooserTarget, ShortcutInfo> directShareToShortcutInfos,
+            List<ChooserActivity.ChooserTargetServiceConnection>
+                    pendingChooserTargetServiceConnections) {
+        ComponentName origComponentName = origTarget.getResolvedComponentName();
+        mPendingChooserTargetService = pendingChooserTargetServiceConnections.stream()
+                .map(ChooserActivity.ChooserTargetServiceConnection::getComponentName)
+                .filter(componentName -> !componentName.equals(origComponentName))
+                .collect(Collectors.toSet());
+        // Park targets in memory
+        if (!targets.isEmpty() && !mParkingDirectShareTargets.containsKey(origComponentName)) {
+            final boolean isShortcutResult =
+                    (targetType == TARGET_TYPE_SHORTCUTS_FROM_SHORTCUT_MANAGER
+                            || targetType == TARGET_TYPE_SHORTCUTS_FROM_PREDICTION_SERVICE);
+            Context contextAsUser = mContext.createContextAsUser(getUserHandle(),
+                    0 /* flags */);
+            List<ChooserTargetInfo> parkingTargetInfos = targets.stream()
+                    .map(target ->
+                            new SelectableTargetInfo(
+                                    contextAsUser, origTarget, target, target.getScore(),
+                                    mSelectableTargetInfoComunicator,
+                                    (isShortcutResult ? directShareToShortcutInfos.get(target)
+                                            : null))
+                    )
+                    .collect(Collectors.toList());
+            mParkingDirectShareTargets.put(origComponentName,
+                    new Pair<>(parkingTargetInfos, 0));
+            if (isShortcutResult) {
+                mShortcutComponents.add(origComponentName);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Append targets of top ranked share app into direct share row with quota limit. Remove
+     * appended ones from memory.
+     */
+    private void appendServiceTargetsWithQuota() {
+        int maxRankedTargets = mChooserListCommunicator.getMaxRankedTargets();
+        List<ComponentName> topComponentNames = getTopComponentNames(maxRankedTargets);
+        int appRank = 0;
+        for (ComponentName component : topComponentNames) {
+            if (!mPendingChooserTargetService.contains(component)
+                    && !mParkingDirectShareTargets.containsKey(component)) {
+                continue;
+            }
+            appRank++;
+            Pair<List<ChooserTargetInfo>, Integer> parkingTargetsItem =
+                    mParkingDirectShareTargets.get(component);
+            if (parkingTargetsItem != null && parkingTargetsItem.second == 0) {
+                List<ChooserTargetInfo> parkingTargets = parkingTargetsItem.first;
+                int initTargetsQuota = appRank <= maxRankedTargets / 2 ? 2 : 1;
+                int insertedNum = 0;
+                while (insertedNum < initTargetsQuota && !parkingTargets.isEmpty()) {
+                    if (!checkDuplicateTarget(parkingTargets.get(0))) {
+                        mServiceTargets.add(mValidServiceTargetsNum, parkingTargets.get(0));
+                        mValidServiceTargetsNum++;
+                        insertedNum++;
+                    }
+                    parkingTargets.remove(0);
+                }
+                mParkingDirectShareTargets.put(component, new Pair<>(parkingTargets, insertedNum));
+                if (mShortcutComponents.contains(component)) {
+                    mNumShortcutResults += insertedNum;
+                }
+            }
+        }
+    }
+
+    /**
+     * Append all remaining targets (parking in memory) into direct share row as per their ranking.
+     */
+    private void fillAllServiceTargets() {
+        int maxRankedTargets = mChooserListCommunicator.getMaxRankedTargets();
+        List<ComponentName> topComponentNames = getTopComponentNames(maxRankedTargets);
+        // Append all remaining targets of top recommended components into direct share row.
+        for (ComponentName component : topComponentNames) {
+            if (!mParkingDirectShareTargets.containsKey(component)) {
+                continue;
+            }
+            mParkingDirectShareTargets.get(component).first.stream()
+                    .filter(target -> !checkDuplicateTarget(target))
+                    .forEach(target -> {
+                        if (mShortcutComponents.contains(component)) {
+                            mNumShortcutResults++;
+                        }
+                        mServiceTargets.add(target);
+                    });
+            mParkingDirectShareTargets.remove(component);
+        }
+        // Append all remaining shortcuts targets into direct share row.
+        List<ChooserTargetInfo> remainingTargets = new ArrayList<>();
+        mParkingDirectShareTargets.entrySet().stream()
+                .filter(entry -> mShortcutComponents.contains(entry.getKey()))
+                .map(entry -> entry.getValue())
+                .map(pair -> pair.first)
+                .forEach(remainingTargets::addAll);
+        remainingTargets.sort(
+                (t1, t2) -> -Float.compare(t1.getModifiedScore(), t2.getModifiedScore()));
+        mServiceTargets.addAll(remainingTargets);
+        mNumShortcutResults += remainingTargets.size();
+        mParkingDirectShareTargets.clear();
+    }
+
+    private boolean checkDuplicateTarget(ChooserTargetInfo chooserTargetInfo) {
+        // Check for duplicates and abort if found
+        for (ChooserTargetInfo otherTargetInfo : mServiceTargets) {
+            if (chooserTargetInfo.isSimilar(otherTargetInfo)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     int getNumShortcutResults() {
         return mNumShortcutResults;
     }
@@ -487,7 +637,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
      */
     public void completeServiceTargetLoading() {
         mServiceTargets.removeIf(o -> o instanceof ChooserActivity.PlaceHolderTargetInfo);
-
+        if (mAppendDirectShareEnabled) {
+            fillAllServiceTargets();
+        }
         if (mServiceTargets.isEmpty()) {
             mServiceTargets.add(new ChooserActivity.EmptyTargetInfo());
         }

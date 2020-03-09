@@ -987,7 +987,8 @@ public class ChooserActivityTest {
                                 /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET,
-                        directShareToShortcutInfos)
+                        directShareToShortcutInfos,
+                        null)
         );
 
         // Thread.sleep shouldn't be a thing in an integration test but it's
@@ -1058,7 +1059,8 @@ public class ChooserActivityTest {
                                 /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET,
-                        directShareToShortcutInfos)
+                        directShareToShortcutInfos,
+                        null)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
@@ -1145,7 +1147,8 @@ public class ChooserActivityTest {
                                 /* resolveInfoPresentationGetter */ null),
                         serviceTargets,
                         TARGET_TYPE_CHOOSER_TARGET,
-                        directShareToShortcutInfos)
+                        directShareToShortcutInfos,
+                        null)
         );
         // Thread.sleep shouldn't be a thing in an integration test but it's
         // necessary here because of the way the code is structured
