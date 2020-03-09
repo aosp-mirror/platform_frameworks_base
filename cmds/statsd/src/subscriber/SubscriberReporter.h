@@ -78,7 +78,7 @@ public:
                                                          int64_t subscriberId);
 
 private:
-    SubscriberReporter() {};
+    SubscriberReporter();
 
     mutable mutex mLock;
 
@@ -94,6 +94,14 @@ private:
                              const Subscription& subscription,
                              const vector<string>& cookies,
                              const MetricDimensionKey& dimKey) const;
+
+    ::ndk::ScopedAIBinder_DeathRecipient mBroadcastSubscriberDeathRecipient;
+
+    /**
+     * Death recipient callback that is called when a broadcast subscriber dies.
+     * The cookie is a pointer to a BroadcastSubscriberDeathCookie.
+     */
+    static void broadcastSubscriberDied(void* cookie);
 };
 
 }  // namespace statsd
