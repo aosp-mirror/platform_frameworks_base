@@ -68,9 +68,10 @@ public class StackAnimationController extends
     /**
      * Values to use for the default {@link SpringForce} provided to the physics animation layout.
      */
-    private static final int DEFAULT_STIFFNESS = 12000;
+    public static final int DEFAULT_STIFFNESS = 12000;
+    public static final float IME_ANIMATION_STIFFNESS = SpringForce.STIFFNESS_LOW;
     private static final int FLING_FOLLOW_STIFFNESS = 20000;
-    private static final float DEFAULT_BOUNCINESS = 0.9f;
+    public static final float DEFAULT_BOUNCINESS = 0.9f;
 
     /**
      * Friction applied to fling animations. Since the stack must land on one of the sides of the
@@ -503,8 +504,10 @@ public class StackAnimationController extends
     /**
      * Animates the stack either away from the newly visible IME, or back to its original position
      * due to the IME going away.
+     *
+     * @return The destination Y value of the stack due to the IME movement.
      */
-    public void animateForImeVisibility(boolean imeVisible) {
+    public float animateForImeVisibility(boolean imeVisible) {
         final float maxBubbleY = getAllowableStackPositionRegion().bottom;
         float destinationY = Float.MIN_VALUE;
 
@@ -525,12 +528,14 @@ public class StackAnimationController extends
             springFirstBubbleWithStackFollowing(
                     DynamicAnimation.TRANSLATION_Y,
                     getSpringForce(DynamicAnimation.TRANSLATION_Y, /* view */ null)
-                            .setStiffness(SpringForce.STIFFNESS_LOW),
+                            .setStiffness(IME_ANIMATION_STIFFNESS),
                     /* startVel */ 0f,
                     destinationY);
 
             notifyFloatingCoordinatorStackAnimatingTo(mStackPosition.x, destinationY);
         }
+
+        return destinationY;
     }
 
     /**
@@ -585,7 +590,7 @@ public class StackAnimationController extends
                             - mBubblePaddingTop
                             - (mImeHeight > Float.MIN_VALUE ? mImeHeight + mBubblePaddingTop : 0f)
                             - Math.max(
-                            insets.getSystemWindowInsetBottom(),
+                            insets.getStableInsetBottom(),
                             insets.getDisplayCutout() != null
                                     ? insets.getDisplayCutout().getSafeInsetBottom()
                                     : 0);
