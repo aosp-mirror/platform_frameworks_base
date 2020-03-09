@@ -88,22 +88,35 @@ public class FakeIcing {
     }
 
     /**
-     * Returns documents containing the given term.
+     * Returns documents containing all words in the given query string.
      *
-     * @param term A single exact term to look up in the index.
+     * @param queryExpression A set of words to search for. They will be implicitly AND-ed together.
+     *     No operators are supported.
      * @return A {@link SearchResultProto} containing the matching documents, which may have no
      *   results if no documents match.
      */
     @NonNull
-    public SearchResultProto query(@NonNull String term) {
-        String normTerm = normalizeString(term);
-        Set<Integer> docIds = mIndex.get(normTerm);
+    public SearchResultProto query(@NonNull String queryExpression) {
+        String[] terms = normalizeString(queryExpression).split("\\s+");
         SearchResultProto.Builder results = SearchResultProto.newBuilder()
                 .setStatus(StatusProto.newBuilder().setCode(StatusProto.Code.OK));
+        if (terms.length == 0) {
+            return results.build();
+        }
+        Set<Integer> docIds = mIndex.get(terms[0]);
         if (docIds == null || docIds.isEmpty()) {
             return results.build();
         }
-
+        for (int i = 1; i < terms.length; i++) {
+            Set<Integer> termDocIds = mIndex.get(terms[i]);
+            if (termDocIds == null) {
+                return results.build();
+            }
+            docIds.retainAll(termDocIds);
+            if (docIds.isEmpty()) {
+                return results.build();
+            }
+        }
         for (int docId : docIds) {
             DocumentProto document = mDocStore.get(docId);
             if (document != null) {

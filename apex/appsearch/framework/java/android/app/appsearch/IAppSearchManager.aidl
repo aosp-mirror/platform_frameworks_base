@@ -66,9 +66,10 @@ interface IAppSearchManager {
      * @param searchSpecBytes Serialized SearchSpecProto.
      * @param resultSpecBytes Serialized SearchResultsProto.
      * @param scoringSpecBytes Serialized ScoringSpecProto.
-     * @param callback {@link AndroidFuture}. Will be completed with a serialized
-     *     {@link SearchResultsProto}, or completed exceptionally if query fails.
+     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link byte[]}&gt;&gt;
+     *     Will be completed with a serialized {@link SearchResultsProto}.
      */
-    void query(in byte[] searchSpecBytes, in byte[] resultSpecBytes,
-            in byte[] scoringSpecBytes, in AndroidFuture callback);
+    void query(
+        in byte[] searchSpecBytes, in byte[] resultSpecBytes, in byte[] scoringSpecBytes,
+        in AndroidFuture<AppSearchResult> callback);
 }
