@@ -52,7 +52,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.security.FileIntegrityManager;
 import android.util.Slog;
 import android.util.apk.SourceStampVerificationResult;
 import android.util.apk.SourceStampVerifier;
@@ -122,7 +121,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
     private final PackageManagerInternal mPackageManagerInternal;
     private final RuleEvaluationEngine mEvaluationEngine;
     private final IntegrityFileManager mIntegrityFileManager;
-    private final FileIntegrityManager mFileIntegrityManager;
 
     /** Create an instance of {@link AppIntegrityManagerServiceImpl}. */
     public static AppIntegrityManagerServiceImpl create(Context context) {
@@ -134,7 +132,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 LocalServices.getService(PackageManagerInternal.class),
                 RuleEvaluationEngine.getRuleEvaluationEngine(),
                 IntegrityFileManager.getInstance(),
-                (FileIntegrityManager) context.getSystemService(Context.FILE_INTEGRITY_SERVICE),
                 handlerThread.getThreadHandler());
     }
 
@@ -144,13 +141,11 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             PackageManagerInternal packageManagerInternal,
             RuleEvaluationEngine evaluationEngine,
             IntegrityFileManager integrityFileManager,
-            FileIntegrityManager fileIntegrityManager,
             Handler handler) {
         mContext = context;
         mPackageManagerInternal = packageManagerInternal;
         mEvaluationEngine = evaluationEngine;
         mIntegrityFileManager = integrityFileManager;
-        mFileIntegrityManager = fileIntegrityManager;
         mHandler = handler;
 
         IntentFilter integrityVerificationFilter = new IntentFilter();
@@ -476,6 +471,8 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 SourceStampVerifier.verify(installationPath.getAbsolutePath());
         appInstallMetadata.setIsStampPresent(sourceStampVerificationResult.isPresent());
         appInstallMetadata.setIsStampVerified(sourceStampVerificationResult.isVerified());
+        // A verified stamp is set to be trusted.
+        appInstallMetadata.setIsStampTrusted(sourceStampVerificationResult.isVerified());
         if (sourceStampVerificationResult.isVerified()) {
             X509Certificate sourceStampCertificate =
                     (X509Certificate) sourceStampVerificationResult.getCertificate();
@@ -487,16 +484,6 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             } catch (NoSuchAlgorithmException | CertificateEncodingException e) {
                 throw new IllegalArgumentException(
                         "Error computing source stamp certificate digest", e);
-            }
-            // Checks if the source stamp certificate is trusted.
-            try {
-                appInstallMetadata.setIsStampTrusted(
-                        mFileIntegrityManager.isApkVeritySupported()
-                                && mFileIntegrityManager.isAppSourceCertificateTrusted(
-                                        sourceStampCertificate));
-            } catch (CertificateEncodingException e) {
-                throw new IllegalArgumentException(
-                        "Error checking if source stamp certificate is trusted", e);
             }
         }
     }
