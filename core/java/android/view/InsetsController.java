@@ -992,4 +992,23 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
         return mViewRoot.mWindowAttributes.insetsFlags.behavior;
     }
+
+    /**
+     * At the time we receive new leashes (e.g. InsetsSourceConsumer is processing
+     * setControl) we need to release the old leash. But we may have already scheduled
+     * a SyncRtSurfaceTransaction applier to use it from the RenderThread. To avoid
+     * synchronization issues we also release from the RenderThread so this release
+     * happens after any existing items on the work queue.
+     */
+    public void releaseSurfaceControlFromRt(SurfaceControl sc) {
+        if (mViewRoot.mView != null && mViewRoot.mView.isHardwareAccelerated()) {
+            mViewRoot.registerRtFrameCallback(frame -> {
+                  sc.release();
+            });
+            // Make sure a frame gets scheduled.
+            mViewRoot.mView.invalidate();
+        } else {
+              sc.release();
+        }
+    }
 }
