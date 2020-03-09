@@ -930,8 +930,6 @@ Status StatsService::informOnePackage(const string& app, int32_t uid, int64_t ve
     ENFORCE_UID(AID_SYSTEM);
 
     VLOG("StatsService::informOnePackage was called");
-    // TODO(b/149254662): This is gross. We should consider changing statsd
-    // internals to use std::string.
     String16 utf16App = String16(app.c_str());
     String16 utf16VersionString = String16(versionString.c_str());
     String16 utf16Installer = String16(installer.c_str());
