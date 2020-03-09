@@ -36,7 +36,7 @@ public class SurfaceViewRequestUtils {
     }
 
     /**
-     * Retrieves the SurfaceControl from an Intent created by
+     * Retrieves the SurfaceControl from a bundle created by
      * {@link #createSurfaceBundle(SurfaceView)}.
      **/
     public static SurfaceControl getSurfaceControl(Bundle bundle) {
@@ -44,7 +44,7 @@ public class SurfaceViewRequestUtils {
     }
 
     /**
-     * Retrieves the input token from an Intent created by
+     * Retrieves the input token from a bundle created by
      * {@link #createSurfaceBundle(SurfaceView)}.
      **/
     public static @Nullable IBinder getHostToken(Bundle bundle) {
