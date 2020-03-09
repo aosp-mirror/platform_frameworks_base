@@ -5929,8 +5929,8 @@ public class ConnectivityServiceTest {
         final IpPrefix kNat64Prefix = new IpPrefix(InetAddress.getByName(kNat64PrefixString), 96);
         final RouteInfo defaultRoute = new RouteInfo((IpPrefix) null, myIpv6.getAddress(),
                                                      MOBILE_IFNAME);
-        final RouteInfo hostRoute = new RouteInfo(myIpv6, null, MOBILE_IFNAME);
-        final RouteInfo ipv4Default = new RouteInfo(myIpv4, null, MOBILE_IFNAME);
+        final RouteInfo ipv6Subnet = new RouteInfo(myIpv6, null, MOBILE_IFNAME);
+        final RouteInfo ipv4Subnet = new RouteInfo(myIpv4, null, MOBILE_IFNAME);
         final RouteInfo stackedDefault = new RouteInfo((IpPrefix) null, myIpv4.getAddress(),
                                                        CLAT_PREFIX + MOBILE_IFNAME);
 
@@ -5946,7 +5946,7 @@ public class ConnectivityServiceTest {
         cellLp.setInterfaceName(MOBILE_IFNAME);
         cellLp.addLinkAddress(myIpv6);
         cellLp.addRoute(defaultRoute);
-        cellLp.addRoute(hostRoute);
+        cellLp.addRoute(ipv6Subnet);
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR, cellLp);
         reset(mNetworkManagementService);
         reset(mMockDnsResolver);
@@ -5959,8 +5959,7 @@ public class ConnectivityServiceTest {
         waitForIdle();
 
         verify(mMockNetd, times(1)).networkCreatePhysical(eq(cellNetId), anyInt());
-        verify(mNetworkManagementService, times(1)).addRoute(eq(cellNetId), eq(defaultRoute));
-        verify(mNetworkManagementService, times(1)).addRoute(eq(cellNetId), eq(hostRoute));
+        assertRoutesAdded(cellNetId, ipv6Subnet, defaultRoute);
         verify(mMockDnsResolver, times(1)).createNetworkCache(eq(cellNetId));
         verify(mBatteryStatsService).noteNetworkInterfaceType(cellLp.getInterfaceName(),
                 TYPE_MOBILE);
@@ -5976,6 +5975,7 @@ public class ConnectivityServiceTest {
         cellLp.addLinkAddress(myIpv4);
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
+        assertRoutesAdded(cellNetId, ipv4Subnet);
         verify(mMockDnsResolver, times(1)).stopPrefix64Discovery(cellNetId);
         verify(mMockDnsResolver, atLeastOnce()).setResolverConfiguration(any());
 
@@ -5997,6 +5997,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
         verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
+        assertRoutesRemoved(cellNetId, ipv4Subnet);
 
         // When NAT64 prefix discovery succeeds, LinkProperties are updated and clatd is started.
         Nat464Xlat clat = getNat464Xlat(mCellNetworkAgent);
@@ -6015,7 +6016,7 @@ public class ConnectivityServiceTest {
         List<LinkProperties> stackedLps = mCm.getLinkProperties(mCellNetworkAgent.getNetwork())
                 .getStackedLinks();
         assertEquals(makeClatLinkProperties(myIpv4), stackedLps.get(0));
-        verify(mNetworkManagementService).addRoute(eq(cellNetId), eq(stackedDefault));
+        assertRoutesAdded(cellNetId, stackedDefault);
 
         // Change trivial linkproperties and see if stacked link is preserved.
         cellLp.addDnsServer(InetAddress.getByName("8.8.8.8"));
@@ -6041,10 +6042,10 @@ public class ConnectivityServiceTest {
         // Add ipv4 address, expect that clatd and prefix discovery are stopped and stacked
         // linkproperties are cleaned up.
         cellLp.addLinkAddress(myIpv4);
-        cellLp.addRoute(ipv4Default);
+        cellLp.addRoute(ipv4Subnet);
         mCellNetworkAgent.sendLinkProperties(cellLp);
-        verify(mNetworkManagementService).addRoute(eq(cellNetId), eq(stackedDefault));
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
+        assertRoutesAdded(cellNetId, ipv4Subnet);
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
         verify(mMockDnsResolver, times(1)).stopPrefix64Discovery(cellNetId);
 
@@ -6055,6 +6056,7 @@ public class ConnectivityServiceTest {
         expected.setNat64Prefix(kNat64Prefix);
         assertEquals(expected, actualLpAfterIpv4);
         assertEquals(0, actualLpAfterIpv4.getStackedLinks().size());
+        assertRoutesRemoved(cellNetId, stackedDefault);
 
         // The interface removed callback happens but has no effect after stop is called.
         clat.interfaceRemoved(CLAT_PREFIX + MOBILE_IFNAME);
@@ -6080,7 +6082,7 @@ public class ConnectivityServiceTest {
         cellLp.removeDnsServer(InetAddress.getByName("8.8.8.8"));
         mCellNetworkAgent.sendLinkProperties(cellLp);
         networkCallback.expectCallback(CallbackEntry.LINK_PROPERTIES_CHANGED, mCellNetworkAgent);
-        verify(mNetworkManagementService, times(1)).removeRoute(eq(cellNetId), eq(ipv4Default));
+        assertRoutesRemoved(cellNetId, ipv4Subnet);  // Directly-connected routes auto-added.
         verify(mMockDnsResolver, times(1)).startPrefix64Discovery(cellNetId);
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, true /* added */,
                 kNat64PrefixString, 96);
@@ -6092,15 +6094,20 @@ public class ConnectivityServiceTest {
         clat.interfaceLinkStateChanged(CLAT_PREFIX + MOBILE_IFNAME, true);
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
                 (lp) -> lp.getStackedLinks().size() == 1 && lp.getNat64Prefix() != null);
+        assertRoutesAdded(cellNetId, stackedDefault);
 
         // NAT64 prefix is removed. Expect that clat is stopped.
         mService.mNetdEventCallback.onNat64PrefixEvent(cellNetId, false /* added */,
                 kNat64PrefixString, 96);
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
                 (lp) -> lp.getStackedLinks().size() == 0 && lp.getNat64Prefix() == null);
+        assertRoutesRemoved(cellNetId, ipv4Subnet, stackedDefault);
+
+        // Stop has no effect because clat is already stopped.
         verify(mMockNetd, times(1)).clatdStop(MOBILE_IFNAME);
         networkCallback.expectLinkPropertiesThat(mCellNetworkAgent,
                 (lp) -> lp.getStackedLinks().size() == 0);
+        verifyNoMoreInteractions(mMockNetd);
 
         // Clean up.
         mCellNetworkAgent.disconnect();
@@ -6665,6 +6672,20 @@ public class ConnectivityServiceTest {
                     mConnectivityDiagnosticsCallback, request, mContext.getPackageName());
             fail("registerConnectivityDiagnosticsCallback should throw on invalid NetworkRequest");
         } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    private void assertRoutesAdded(int netId, RouteInfo... routes) throws Exception {
+        InOrder inOrder = inOrder(mNetworkManagementService);
+        for (int i = 0; i < routes.length; i++) {
+            inOrder.verify(mNetworkManagementService).addRoute(eq(netId), eq(routes[i]));
+        }
+    }
+
+    private void assertRoutesRemoved(int netId, RouteInfo... routes) throws Exception {
+        InOrder inOrder = inOrder(mNetworkManagementService);
+        for (int i = 0; i < routes.length; i++) {
+            inOrder.verify(mNetworkManagementService).removeRoute(eq(netId), eq(routes[i]));
         }
     }
 
