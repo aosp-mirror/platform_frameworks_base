@@ -23,8 +23,6 @@ import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.net.ConnectivityDiagnosticsManager.ConnectivityReport;
-import static android.net.ConnectivityDiagnosticsManager.DataStallReport;
 import static android.net.ConnectivityManager.ACTION_CAPTIVE_PORTAL_SIGN_IN;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION_SUPL;
@@ -100,6 +98,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Matchers.anyInt;
@@ -6870,8 +6869,13 @@ public class ConnectivityServiceTest {
         HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Verify onConnectivityReport fired
-        verify(mConnectivityDiagnosticsCallback)
-                .onConnectivityReport(any(ConnectivityReport.class));
+        verify(mConnectivityDiagnosticsCallback).onConnectivityReport(
+                argThat(report -> {
+                    final NetworkCapabilities nc = report.getNetworkCapabilities();
+                    return nc.getUids() == null
+                            && nc.getAdministratorUids().isEmpty()
+                            && nc.getOwnerUid() == Process.INVALID_UID;
+                }));
     }
 
     @Test
@@ -6886,7 +6890,13 @@ public class ConnectivityServiceTest {
         HandlerUtilsKt.waitForIdle(mCsHandlerThread, TIMEOUT_MS);
 
         // Verify onDataStallSuspected fired
-        verify(mConnectivityDiagnosticsCallback).onDataStallSuspected(any(DataStallReport.class));
+        verify(mConnectivityDiagnosticsCallback).onDataStallSuspected(
+                argThat(report -> {
+                    final NetworkCapabilities nc = report.getNetworkCapabilities();
+                    return nc.getUids() == null
+                            && nc.getAdministratorUids().isEmpty()
+                            && nc.getOwnerUid() == Process.INVALID_UID;
+                }));
     }
 
     @Test
