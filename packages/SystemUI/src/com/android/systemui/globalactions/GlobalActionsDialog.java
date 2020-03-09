@@ -1574,7 +1574,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private ControlsUiController mControlsUiController;
         private ViewGroup mControlsView;
-        private ViewGroup mContainerView;
 
         ActionsDialog(Context context, MyAdapter adapter,
                 GlobalActionsPanelPlugin.PanelViewController plugin, BlurUtils blurUtils,
@@ -1671,7 +1670,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mControlsView = findViewById(com.android.systemui.R.id.global_actions_controls);
             mGlobalActionsLayout = findViewById(com.android.systemui.R.id.global_actions_view);
             mGlobalActionsLayout.setOutsideTouchListener(view -> dismiss());
-            ((View) mGlobalActionsLayout.getParent()).setOnClickListener(view -> dismiss());
             mGlobalActionsLayout.setListViewAccessibilityDelegate(new View.AccessibilityDelegate() {
                 @Override
                 public boolean dispatchPopulateAccessibilityEvent(
@@ -1684,6 +1682,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mGlobalActionsLayout.setRotationListener(this::onRotate);
             mGlobalActionsLayout.setAdapter(mAdapter);
 
+            View globalActionsParent = (View) mGlobalActionsLayout.getParent();
+            globalActionsParent.setOnClickListener(v -> dismiss());
+
+            // add fall-through dismiss handling to root view
+            View rootView = findViewById(com.android.systemui.R.id.global_actions_grid_root);
+            if (rootView != null) {
+                rootView.setOnClickListener(v -> dismiss());
+            }
+
             if (shouldUsePanel()) {
                 initializePanel();
             }
@@ -1692,14 +1699,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mScrimAlpha = ScrimController.BUSY_SCRIM_ALPHA;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
-
-            if (mControlsView != null) {
-                mContainerView = findViewById(com.android.systemui.R.id.global_actions_container);
-                mContainerView.setOnTouchListener((v, e) -> {
-                    dismiss();
-                    return true;
-                });
-            }
         }
 
         private void fixNavBarClipping() {
