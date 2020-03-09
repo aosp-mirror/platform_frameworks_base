@@ -23,13 +23,10 @@ import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 
 import static com.android.internal.util.Preconditions.checkState;
-import static com.android.server.wm.DisplayAreaChildProto.DISPLAY_AREA;
-import static com.android.server.wm.DisplayAreaChildProto.UNKNOWN;
-import static com.android.server.wm.DisplayAreaChildProto.WINDOW;
-import static com.android.server.wm.DisplayAreaProto.CHILDREN;
 import static com.android.server.wm.DisplayAreaProto.NAME;
 import static com.android.server.wm.DisplayAreaProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
+import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
@@ -111,22 +108,12 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(NAME, mName);
-        for (int i = 0; i < getChildCount(); i++) {
-            final long childToken = proto.start(CHILDREN);
-            final T child = getChildAt(i);
-            if (child instanceof ActivityStack) {
-                // TODO(display-area): Dump stacks & tasks here, instead of in DisplayContent's
-                //  dumpDebug. For now, skip them here to avoid dumping them as UNKNOWN.
-            } else if (child instanceof WindowToken) {
-                ((WindowToken) child).dumpDebug(proto, WINDOW, logLevel);
-            } else if (child instanceof DisplayArea) {
-                child.dumpDebug(proto, DISPLAY_AREA, logLevel);
-            } else {
-                proto.write(UNKNOWN, child.getClass().getSimpleName());
-            }
-            proto.end(childToken);
-        }
         proto.end(token);
+    }
+
+    @Override
+    long getProtoFieldId() {
+        return DISPLAY_AREA;
     }
 
     /**
