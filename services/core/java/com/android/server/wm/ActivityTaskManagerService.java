@@ -680,12 +680,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
-            if (mFontScaleUri.equals(uri)) {
-                updateFontScaleIfNeeded(userId);
-            } else if (mHideErrorDialogsUri.equals(uri)) {
-                synchronized (mGlobalLock) {
-                    updateShouldShowDialogsLocked(getGlobalConfiguration());
+        public void onChange(boolean selfChange, Iterable<Uri> uris, int flags,
+                @UserIdInt int userId) {
+            for (Uri uri : uris) {
+                if (mFontScaleUri.equals(uri)) {
+                    updateFontScaleIfNeeded(userId);
+                } else if (mHideErrorDialogsUri.equals(uri)) {
+                    synchronized (mGlobalLock) {
+                        updateShouldShowDialogsLocked(getGlobalConfiguration());
+                    }
                 }
             }
         }
