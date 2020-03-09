@@ -1249,6 +1249,7 @@
     <dimen name="controls_app_icon_size">32dp</dimen>
     <dimen name="controls_app_icon_frame_side_padding">8dp</dimen>
     <dimen name="controls_app_icon_frame_top_padding">4dp</dimen>
+    <dimen name="controls_app_icon_frame_bottom_padding">@dimen/controls_app_icon_frame_top_padding</dimen>
     <dimen name="controls_app_bottom_margin">8dp</dimen>
     <dimen name="controls_app_text_padding">8dp</dimen>
     <dimen name="controls_app_divider_height">2dp</dimen>
