@@ -9867,10 +9867,10 @@ package android.service.autofill.augmented {
   public static final class FillResponse.Builder {
     ctor public FillResponse.Builder();
     method @NonNull public android.service.autofill.augmented.FillResponse build();
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@Nullable android.service.autofill.augmented.FillWindow);
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineActions(@Nullable java.util.List<android.service.autofill.InlinePresentation>);
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineSuggestions(@Nullable java.util.List<android.service.autofill.Dataset>);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setClientState(@NonNull android.os.Bundle);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@NonNull android.service.autofill.augmented.FillWindow);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineActions(@NonNull java.util.List<android.service.autofill.InlinePresentation>);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineSuggestions(@NonNull java.util.List<android.service.autofill.Dataset>);
   }
 
   public final class FillWindow implements java.lang.AutoCloseable {
