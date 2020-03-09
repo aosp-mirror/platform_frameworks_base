@@ -34,6 +34,9 @@ import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_UNKNOWN_IFACE;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
@@ -169,6 +172,7 @@ public class TetheringTest {
     @Mock private Context mContext;
     @Mock private NetworkStatsManager mStatsManager;
     @Mock private OffloadHardwareInterface mOffloadHardwareInterface;
+    @Mock private OffloadHardwareInterface.ForwardedStats mForwardedStats;
     @Mock private Resources mResources;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private UsbManager mUsbManager;
@@ -463,6 +467,9 @@ public class TetheringTest {
         mInterfaceConfiguration.flags = new String[0];
         when(mRouterAdvertisementDaemon.start())
                 .thenReturn(true);
+        initOffloadConfiguration(true /* offloadConfig */, true /* offloadControl */,
+                0 /* defaultDisabled */);
+        when(mOffloadHardwareInterface.getForwardedStats(any())).thenReturn(mForwardedStats);
 
         mServiceContext = new TestContext(mContext);
         when(mContext.getSystemService(Context.NOTIFICATION_SERVICE)).thenReturn(null);
@@ -1136,6 +1143,7 @@ public class TetheringTest {
         private final ArrayList<TetheringConfigurationParcel> mTetheringConfigs =
                 new ArrayList<>();
         private final ArrayList<TetherStatesParcel> mTetherStates = new ArrayList<>();
+        private final ArrayList<Integer> mOffloadStatus = new ArrayList<>();
 
         // This function will remove the recorded callbacks, so it must be called once for
         // each callback. If this is called after multiple callback, the order matters.
@@ -1171,6 +1179,11 @@ public class TetheringTest {
             assertNoConfigChangeCallback();
         }
 
+        public void expectOffloadStatusChanged(final int expectedStatus) {
+            assertOffloadStatusChangedCallback();
+            assertEquals(mOffloadStatus.remove(0), new Integer(expectedStatus));
+        }
+
         public TetherStatesParcel pollTetherStatesChanged() {
             assertStateChangeCallback();
             return mTetherStates.remove(0);
@@ -1197,10 +1210,16 @@ public class TetheringTest {
         }
 
         @Override
+        public void onOffloadStatusChanged(final int status) {
+            mOffloadStatus.add(status);
+        }
+
+        @Override
         public void onCallbackStarted(TetheringCallbackStartedParcel parcel) {
             mActualUpstreams.add(parcel.upstreamNetwork);
             mTetheringConfigs.add(parcel.config);
             mTetherStates.add(parcel.states);
+            mOffloadStatus.add(parcel.offloadStatus);
         }
 
         @Override
@@ -1220,6 +1239,10 @@ public class TetheringTest {
 
         public void assertStateChangeCallback() {
             assertFalse(mTetherStates.isEmpty());
+        }
+
+        public void assertOffloadStatusChangedCallback() {
+            assertFalse(mOffloadStatus.isEmpty());
         }
 
         public void assertNoCallback() {
@@ -1270,6 +1293,7 @@ public class TetheringTest {
                 mTethering.getTetheringConfiguration().toStableParcelable());
         TetherStatesParcel tetherState = callback.pollTetherStatesChanged();
         assertTetherStatesNotNullButEmpty(tetherState);
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STOPPED);
         // 2. Enable wifi tethering.
         UpstreamNetworkState upstreamState = buildMobileDualStackUpstreamState();
         when(mUpstreamNetworkMonitor.getCurrentPreferredUpstream()).thenReturn(upstreamState);
@@ -1287,6 +1311,7 @@ public class TetheringTest {
         tetherState = callback.pollTetherStatesChanged();
         assertArrayEquals(tetherState.tetheredList, new String[] {TEST_WLAN_IFNAME});
         callback.expectUpstreamChanged(upstreamState.network);
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STARTED);
 
         // 3. Register second callback.
         mTethering.registerTetheringEventCallback(callback2);
@@ -1296,6 +1321,7 @@ public class TetheringTest {
                 mTethering.getTetheringConfiguration().toStableParcelable());
         tetherState = callback2.pollTetherStatesChanged();
         assertEquals(tetherState.tetheredList, new String[] {TEST_WLAN_IFNAME});
+        callback2.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STARTED);
 
         // 4. Unregister first callback and disable wifi tethering
         mTethering.unregisterTetheringEventCallback(callback);
@@ -1307,7 +1333,56 @@ public class TetheringTest {
         assertArrayEquals(tetherState.availableList, new String[] {TEST_WLAN_IFNAME});
         mLooper.dispatchAll();
         callback2.expectUpstreamChanged(new Network[] {null});
+        callback2.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STOPPED);
         callback.assertNoCallback();
+    }
+
+    @Test
+    public void testReportFailCallbackIfOffloadNotSupported() throws Exception {
+        final UpstreamNetworkState upstreamState = buildMobileDualStackUpstreamState();
+        TestTetheringEventCallback callback = new TestTetheringEventCallback();
+        mTethering.registerTetheringEventCallback(callback);
+        mLooper.dispatchAll();
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STOPPED);
+
+        // 1. Offload fail if no OffloadConfig.
+        initOffloadConfiguration(false /* offloadConfig */, true /* offloadControl */,
+                0 /* defaultDisabled */);
+        runUsbTethering(upstreamState);
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_FAILED);
+        runStopUSBTethering();
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STOPPED);
+        reset(mUsbManager);
+        // 2. Offload fail if no OffloadControl.
+        initOffloadConfiguration(true /* offloadConfig */, false /* offloadControl */,
+                0 /* defaultDisabled */);
+        runUsbTethering(upstreamState);
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_FAILED);
+        runStopUSBTethering();
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STOPPED);
+        reset(mUsbManager);
+        // 3. Offload fail if disabled by settings.
+        initOffloadConfiguration(true /* offloadConfig */, true /* offloadControl */,
+                1 /* defaultDisabled */);
+        runUsbTethering(upstreamState);
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_FAILED);
+        runStopUSBTethering();
+        callback.expectOffloadStatusChanged(TETHER_HARDWARE_OFFLOAD_STOPPED);
+    }
+
+    private void runStopUSBTethering() {
+        mTethering.stopTethering(TETHERING_USB);
+        mLooper.dispatchAll();
+        mTethering.interfaceRemoved(TEST_USB_IFNAME);
+        mLooper.dispatchAll();
+    }
+
+    private void initOffloadConfiguration(final boolean offloadConfig,
+            final boolean offloadControl, final int defaultDisabled) {
+        when(mOffloadHardwareInterface.initOffloadConfig()).thenReturn(offloadConfig);
+        when(mOffloadHardwareInterface.initOffloadControl(any())).thenReturn(offloadControl);
+        when(mOffloadHardwareInterface.getDefaultTetherOffloadDisabled()).thenReturn(
+                defaultDisabled);
     }
 
     @Test
