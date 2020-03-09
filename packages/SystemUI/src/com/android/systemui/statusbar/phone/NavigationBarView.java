@@ -645,7 +645,8 @@ public class NavigationBarView extends FrameLayout implements
         final boolean isImeShown =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_IME_SHOWN) != 0;
         final boolean showCursorKeys = mShowCursorKeys
-                && (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
+                && (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0
+                && !isGesturalMode(mNavBarMode);
         final boolean showImeSwitcher = isImeShown
                 // IME switcher in 3-button mode and cursor keys take the same spot in
                 // the view, so one can only use one or the other
