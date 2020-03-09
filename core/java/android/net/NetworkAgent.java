@@ -126,7 +126,7 @@ public abstract class NetworkAgent {
     /**
      * Sent by the NetworkAgent to ConnectivityService to pass the current
      * network score.
-     * obj = network score Integer
+     * arg1 = network score int
      * @hide
      */
     public static final int EVENT_NETWORK_SCORE_CHANGED = BASE + 4;
@@ -650,18 +650,7 @@ public abstract class NetworkAgent {
         if (score < 0) {
             throw new IllegalArgumentException("Score must be >= 0");
         }
-        final NetworkScore ns = new NetworkScore();
-        ns.putIntExtension(NetworkScore.LEGACY_SCORE, score);
-        updateScore(ns);
-    }
-
-    /**
-     * Must be called by the agent when it has a new {@link NetworkScore} for this network.
-     * @param ns the new score.
-     * @hide TODO: unhide the NetworkScore class, and rename to sendNetworkScore.
-     */
-    public void updateScore(@NonNull NetworkScore ns) {
-        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, new NetworkScore(ns));
+        queueOrSendMessage(EVENT_NETWORK_SCORE_CHANGED, score, 0);
     }
 
     /**
