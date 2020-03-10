@@ -269,6 +269,8 @@ public final class Parcel {
     private static final int EX_UNSUPPORTED_OPERATION = -7;
     private static final int EX_SERVICE_SPECIFIC = -8;
     private static final int EX_PARCELABLE = -9;
+    private static final int EX_TIMEOUT = -10;
+
     /** @hide */
     public static final int EX_HAS_NOTED_APPOPS_REPLY_HEADER = -127; // special; see below
     private static final int EX_HAS_STRICTMODE_REPLY_HEADER = -128;  // special; see below
@@ -2156,6 +2158,7 @@ public final class Parcel {
      * <li>{@link SecurityException}
      * <li>{@link UnsupportedOperationException}
      * <li>{@link NetworkOnMainThreadException}
+     * <li>{@link AndroidTimeoutException}
      * </ul>
      *
      * @param e The Exception to be written.
@@ -2225,6 +2228,8 @@ public final class Parcel {
             code = EX_UNSUPPORTED_OPERATION;
         } else if (e instanceof ServiceSpecificException) {
             code = EX_SERVICE_SPECIFIC;
+        } else if (e instanceof AndroidTimeoutException) {
+            code = EX_TIMEOUT;
         }
         return code;
     }
@@ -2403,6 +2408,8 @@ public final class Parcel {
                 return new UnsupportedOperationException(msg);
             case EX_SERVICE_SPECIFIC:
                 return new ServiceSpecificException(readInt(), msg);
+            case EX_TIMEOUT:
+                return new AndroidTimeoutException(msg);
             default:
                 return null;
         }
