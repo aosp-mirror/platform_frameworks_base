@@ -16,8 +16,8 @@
 
 package com.android.systemui.controls.management
 
+import android.content.ComponentName
 import android.graphics.Rect
-import android.graphics.drawable.Icon
 import android.service.controls.DeviceTypes
 import android.view.LayoutInflater
 import android.view.View
@@ -147,7 +147,7 @@ private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChang
     override fun bindData(wrapper: ElementWrapper) {
         wrapper as ControlWrapper
         val data = wrapper.controlStatus
-        val renderInfo = getRenderInfo(data.control.deviceType)
+        val renderInfo = getRenderInfo(data.component, data.control.deviceType)
         title.text = data.control.title
         subtitle.text = data.control.subtitle
         favorite.isChecked = data.favorite
@@ -160,16 +160,17 @@ private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChang
     }
 
     private fun getRenderInfo(
+        component: ComponentName,
         @DeviceTypes.DeviceType deviceType: Int
     ): RenderInfo {
-        return RenderInfo.lookup(deviceType, true)
+        return RenderInfo.lookup(itemView.context, component, deviceType, true)
     }
 
     private fun applyRenderInfo(ri: RenderInfo) {
         val context = itemView.context
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
 
-        icon.setImageIcon(Icon.createWithResource(context, ri.iconResourceId))
+        icon.setImageDrawable(ri.icon)
         icon.setImageTintList(fg)
     }
 }
