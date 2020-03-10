@@ -262,7 +262,8 @@ public class TunerServiceImpl extends TunerService {
         }
 
         @Override
-        public void onChange(boolean selfChange, Iterable<Uri> uris, int flags, int userId) {
+        public void onChange(boolean selfChange, java.util.Collection<Uri> uris,
+                int flags, int userId) {
             if (userId == ActivityManager.getCurrentUser()) {
                 for (Uri u : uris) {
                     reloadSetting(u);
