@@ -1078,6 +1078,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_PROFILE_OFF_DEADLINE = "profile-off-deadline";
         private static final String TAG_ALWAYS_ON_VPN_PACKAGE = "vpn-package";
         private static final String TAG_ALWAYS_ON_VPN_LOCKDOWN = "vpn-lockdown";
+        private static final String TAG_COMMON_CRITERIA_MODE = "common-criteria-mode";
         DeviceAdminInfo info;
 
 
@@ -1208,7 +1209,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         public String mAlwaysOnVpnPackage;
         public boolean mAlwaysOnVpnLockdown;
-
+        boolean mCommonCriteriaMode;
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -1454,6 +1455,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             if (mAlwaysOnVpnLockdown) {
                 writeAttributeValueToXml(out, TAG_ALWAYS_ON_VPN_LOCKDOWN, mAlwaysOnVpnLockdown);
+            }
+            if (mCommonCriteriaMode) {
+                writeAttributeValueToXml(out, TAG_COMMON_CRITERIA_MODE, mCommonCriteriaMode);
             }
         }
 
@@ -1705,6 +1709,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 } else if (TAG_ALWAYS_ON_VPN_LOCKDOWN.equals(tag)) {
                     mAlwaysOnVpnLockdown = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_COMMON_CRITERIA_MODE.equals(tag)) {
+                    mCommonCriteriaMode = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -1941,6 +1948,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             pw.println(mAlwaysOnVpnPackage);
             pw.print("mAlwaysOnVpnLockdown=");
             pw.println(mAlwaysOnVpnLockdown);
+            pw.print("mCommonCriteriaMode=");
+            pw.println(mCommonCriteriaMode);
         }
     }
 
@@ -15612,28 +15621,38 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setCommonCriteriaModeEnabled(ComponentName admin, boolean enabled) {
+    public void setCommonCriteriaModeEnabled(ComponentName who, boolean enabled) {
+        final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin,
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+            admin.mCommonCriteriaMode = enabled;
+            saveSettingsLocked(userId);
         }
-        mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.settingsGlobalPutInt(Settings.Global.COMMON_CRITERIA_MODE,
-                        enabled ? 1 : 0));
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_COMMON_CRITERIA_MODE)
-                .setAdmin(admin)
+                .setAdmin(who)
                 .setBoolean(enabled)
                 .write();
     }
 
     @Override
-    public boolean isCommonCriteriaModeEnabled(ComponentName admin) {
-        synchronized (getLockObject()) {
-            getActiveAdminForCallerLocked(admin,
-                    DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+    public boolean isCommonCriteriaModeEnabled(ComponentName who) {
+        if (who != null) {
+            synchronized (getLockObject()) {
+                final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                        DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER);
+                return admin.mCommonCriteriaMode;
+            }
         }
-        return mInjector.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0) != 0;
+        // Return aggregated state if caller is not admin (who == null).
+        synchronized (getLockObject()) {
+            // Only DO or COPE PO can turn on CC mode, so take a shortcut here and only look at
+            // their ActiveAdmin, instead of iterating through all admins.
+            final ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked(
+                    UserHandle.USER_SYSTEM);
+            return admin != null ? admin.mCommonCriteriaMode : false;
+        }
     }
 
     @Override

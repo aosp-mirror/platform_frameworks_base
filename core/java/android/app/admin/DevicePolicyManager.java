@@ -11886,13 +11886,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to return
-     * whether Common Criteria mode is currently enabled for the device.
+     * Returns whether Common Criteria mode is currently enabled. Device owner and profile owner of
+     * an organization-owned managed profile can query its own Common Criteria mode setting by
+     * calling this method with its admin {@link ComponentName}. Any caller can obtain the
+     * aggregated device-wide Common Criteria mode state by passing {@code null} as the
+     * {@code admin} argument.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with, or
+     *     {@code null} if the caller is not a device admin.
      * @return {@code true} if Common Criteria mode is enabled, {@code false} otherwise.
      */
-    public boolean isCommonCriteriaModeEnabled(@NonNull ComponentName admin) {
+    public boolean isCommonCriteriaModeEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isCommonCriteriaModeEnabled");
         if (mService != null) {
             try {

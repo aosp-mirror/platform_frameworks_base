@@ -6020,26 +6020,29 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testSetCommonCriteriaMode_asDeviceOwner() throws Exception {
         setDeviceOwner();
 
-        dpm.setCommonCriteriaModeEnabled(admin1, true);
-        verify(getServices().settings).settingsGlobalPutInt(
-                Settings.Global.COMMON_CRITERIA_MODE, 1);
+        assertFalse(dpm.isCommonCriteriaModeEnabled(admin1));
+        assertFalse(dpm.isCommonCriteriaModeEnabled(null));
 
-        when(getServices().settings.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0))
-                .thenReturn(1);
+        dpm.setCommonCriteriaModeEnabled(admin1, true);
+
         assertTrue(dpm.isCommonCriteriaModeEnabled(admin1));
+        assertTrue(dpm.isCommonCriteriaModeEnabled(null));
     }
 
     public void testSetCommonCriteriaMode_asPoOfOrgOwnedDevice() throws Exception {
-        setupProfileOwner();
-        configureProfileOwnerOfOrgOwnedDevice(admin1, DpmMockContext.CALLER_USER_HANDLE);
+        final int managedProfileUserId = 15;
+        final int managedProfileAdminUid = UserHandle.getUid(managedProfileUserId, 19436);
+        addManagedProfile(admin1, managedProfileAdminUid, admin1);
+        configureProfileOwnerOfOrgOwnedDevice(admin1, managedProfileUserId);
+        mContext.binder.callingUid = managedProfileAdminUid;
+
+        assertFalse(dpm.isCommonCriteriaModeEnabled(admin1));
+        assertFalse(dpm.isCommonCriteriaModeEnabled(null));
 
         dpm.setCommonCriteriaModeEnabled(admin1, true);
-        verify(getServices().settings).settingsGlobalPutInt(
-                Settings.Global.COMMON_CRITERIA_MODE, 1);
 
-        when(getServices().settings.settingsGlobalGetInt(Settings.Global.COMMON_CRITERIA_MODE, 0))
-                .thenReturn(1);
         assertTrue(dpm.isCommonCriteriaModeEnabled(admin1));
+        assertTrue(dpm.isCommonCriteriaModeEnabled(null));
     }
 
     public void testCanProfileOwnerResetPasswordWhenLocked_nonDirectBootAwarePo()

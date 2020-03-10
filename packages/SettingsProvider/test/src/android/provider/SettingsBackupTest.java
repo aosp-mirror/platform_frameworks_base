@@ -199,7 +199,6 @@ public class SettingsBackupTest {
                     Settings.Global.CERT_PIN_UPDATE_CONTENT_URL,
                     Settings.Global.CERT_PIN_UPDATE_METADATA_URL,
                     Settings.Global.COMPATIBILITY_MODE,
-                    Settings.Global.COMMON_CRITERIA_MODE,
                     Settings.Global.CONNECTIVITY_CHANGE_DELAY,
                     Settings.Global.CONNECTIVITY_METRICS_BUFFER_SIZE,
                     Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,

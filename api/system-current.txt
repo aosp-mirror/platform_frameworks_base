@@ -9349,7 +9349,6 @@ package android.provider {
     field public static final String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
     field public static final String CARRIER_APP_NAMES = "carrier_app_names";
     field public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
-    field public static final String COMMON_CRITERIA_MODE = "common_criteria_mode";
     field public static final String DEFAULT_SM_DP_PLUS = "default_sm_dp_plus";
     field public static final String DEVICE_DEMO_MODE = "device_demo_mode";
     field public static final String DEVICE_PROVISIONING_MOBILE_DATA_ENABLED = "device_provisioning_mobile_data";
