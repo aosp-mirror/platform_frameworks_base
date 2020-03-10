@@ -18,7 +18,6 @@ package android.telephony.data;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.hardware.radio.V1_5.ApnTypes;
@@ -139,7 +138,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_ALL_STRING = "*";
 
     /**
@@ -147,7 +145,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_DEFAULT_STRING = "default";
 
 
@@ -156,7 +153,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_MMS_STRING = "mms";
 
 
@@ -165,7 +161,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_SUPL_STRING = "supl";
 
     /**
@@ -173,7 +168,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_DUN_STRING = "dun";
 
     /**
@@ -181,7 +175,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_HIPRI_STRING = "hipri";
 
     /**
@@ -189,7 +182,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_FOTA_STRING = "fota";
 
     /**
@@ -197,7 +189,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_IMS_STRING = "ims";
 
     /**
@@ -205,7 +196,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_CBS_STRING = "cbs";
 
     /**
@@ -213,7 +203,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_IA_STRING = "ia";
 
     /**
@@ -222,7 +211,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_EMERGENCY_STRING = "emergency";
 
     /**
@@ -230,7 +218,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_MCX_STRING = "mcx";
 
     /**
@@ -238,7 +225,6 @@ public class ApnSetting implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String TYPE_XCAP_STRING = "xcap";
 
 
@@ -1416,7 +1402,6 @@ public class ApnSetting implements Parcelable {
      * @return comma delimited list of APN types.
      * @hide
      */
-    @SystemApi
     @NonNull
     public static String getApnTypesStringFromBitmask(int apnTypeBitmask) {
         List<String> types = new ArrayList<>();
