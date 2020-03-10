@@ -18,10 +18,14 @@ package com.android.server.wm;
 
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.ITYPE_INVALID;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.ViewRootImpl.sNewInsetsMode;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,6 +36,7 @@ import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.WindowManager;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -74,15 +79,40 @@ class InsetsStateController {
      * @param target The client we dispatch the state to.
      * @return The state stripped of the necessary information.
      */
-    InsetsState getInsetsForDispatch(WindowState target) {
+    InsetsState getInsetsForDispatch(@NonNull WindowState target) {
         final InsetsSourceProvider provider = target.getControllableInsetProvider();
         if (provider == null) {
             return mState;
         }
+        final @InternalInsetsType int type = provider.getSource().getType();
+        return getInsetsForType(type);
+    }
 
+    InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
+        final @InternalInsetsType int type = getInsetsTypeForWindowType(attrs.type);
+        if (type == ITYPE_INVALID) {
+            return mState;
+        }
+        return getInsetsForType(type);
+    }
+
+    @InternalInsetsType
+    private static int getInsetsTypeForWindowType(int type) {
+        switch(type) {
+            case TYPE_STATUS_BAR:
+                return ITYPE_STATUS_BAR;
+            case TYPE_NAVIGATION_BAR:
+                return ITYPE_NAVIGATION_BAR;
+            case TYPE_INPUT_METHOD:
+                return ITYPE_IME;
+            default:
+                return ITYPE_INVALID;
+        }
+    }
+
+    private InsetsState getInsetsForType(@InternalInsetsType int type) {
         final InsetsState state = new InsetsState();
         state.set(mState);
-        final int type = provider.getSource().getType();
         state.removeSource(type);
 
         // Navigation bar doesn't get influenced by anything else
