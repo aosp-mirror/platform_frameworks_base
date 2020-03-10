@@ -54,7 +54,6 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import com.android.internal.telephony.IccCardConstants;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -481,9 +480,9 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         int subscription = simInited
                 ? 1/* mock subid=1 */ : SubscriptionManager.DUMMY_SUBSCRIPTION_ID_BASE;
         if (data != null) intent.putExtras(data);
-        intent.putExtra(PhoneConstants.PHONE_NAME_KEY, "Phone");
-        intent.putExtra("subscription", subscription);
-        intent.putExtra("slot", 0/* SLOT 1 */);
+
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subscription);
+        intent.putExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
         return intent;
     }
 
