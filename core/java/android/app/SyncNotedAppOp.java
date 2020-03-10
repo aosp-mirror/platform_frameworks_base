@@ -28,9 +28,9 @@ import com.android.internal.util.DataClass;
  * Description of an app-op that was noted for the current process.
  *
  * <p>This is either delivered after a
- * {@link AppOpsManager.AppOpsCollector#onNoted(SyncNotedAppOp) two way binder call} or
+ * {@link AppOpsManager.OnOpNotedCallback#onNoted(SyncNotedAppOp) two way binder call} or
  * when the app
- * {@link AppOpsManager.AppOpsCollector#onSelfNoted(SyncNotedAppOp) notes an app-op for
+ * {@link AppOpsManager.OnOpNotedCallback#onSelfNoted(SyncNotedAppOp) notes an app-op for
  * itself}.
  */
 @Immutable
