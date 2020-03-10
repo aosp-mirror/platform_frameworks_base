@@ -493,10 +493,12 @@ private object Favorites {
                 updatedStructure
             } else { s }
 
-            structures.add(newStructure)
+            if (!newStructure.controls.isEmpty()) {
+                structures.add(newStructure)
+            }
         }
 
-        if (!replaced) {
+        if (!replaced && !updatedStructure.controls.isEmpty()) {
             structures.add(updatedStructure)
         }
 
