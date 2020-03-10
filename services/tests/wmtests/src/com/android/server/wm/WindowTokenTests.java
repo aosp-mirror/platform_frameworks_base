@@ -25,7 +25,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -128,5 +130,29 @@ public class WindowTokenTests extends WindowTestsBase {
         assertNull(token.getParent());
         // Verify that the token windows are no longer attached to it.
         assertEquals(0, token.getWindowsCount());
+    }
+
+    /**
+     * Test that {@link WindowToken} constructor parameters is set with expectation.
+     */
+    @Test
+    public void testWindowTokenConstructorSanity() {
+        WindowToken token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
+                TYPE_TOAST, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */);
+        assertFalse(token.mRoundedCornerOverlay);
+        assertFalse(token.mFromClientToken);
+
+        token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
+                true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
+                true /* roundedCornerOverlay */);
+        assertTrue(token.mRoundedCornerOverlay);
+        assertFalse(token.mFromClientToken);
+
+        token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
+                true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
+                true /* roundedCornerOverlay */, true /* fromClientToken */);
+        assertTrue(token.mRoundedCornerOverlay);
+        assertTrue(token.mFromClientToken);
     }
 }
