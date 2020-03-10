@@ -681,7 +681,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * </p>
      *
      *<p>Devices capable of streaming concurrently with other devices as described by
-     * {@link android.hardware.camera2.CameraManager#getConcurrentStreamingCameraIds} have the
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds} have the
      * following guaranteed streams (when streaming concurrently with other devices)</p>
      *
      * <table>
