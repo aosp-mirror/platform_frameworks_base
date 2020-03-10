@@ -279,7 +279,8 @@ class Bubble implements BubbleViewProvider {
     /**
      * @return the display id of the virtual display on which bubble contents is drawn.
      */
-    int getDisplayId() {
+    @Override
+    public int getDisplayId() {
         return mExpandedView != null ? mExpandedView.getVirtualDisplayId() : INVALID_DISPLAY;
     }
 

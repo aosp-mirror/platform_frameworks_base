@@ -41,4 +41,6 @@ interface BubbleViewProvider {
     Path getDotPath();
 
     boolean showDot();
+
+    int getDisplayId();
 }

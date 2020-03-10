@@ -399,7 +399,8 @@ public class BubbleControllerTest extends SysuiTestCase {
         // Switch which bubble is expanded
         mBubbleController.selectBubble(mRow.getEntry().getKey());
         mBubbleData.setExpanded(true);
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubble().getEntry());
+        assertEquals(mRow.getEntry(),
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
 
@@ -492,21 +493,25 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().getKey());
 
         // Last added is the one that is expanded
-        assertEquals(mRow2.getEntry(), stackView.getExpandedBubble().getEntry());
+        assertEquals(mRow2.getEntry(),
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow2.getEntry()));
 
         // Dismiss currently expanded
-        mBubbleController.removeBubble(stackView.getExpandedBubble().getEntry(),
+        mBubbleController.removeBubble(
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().getKey());
 
         // Make sure first bubble is selected
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubble().getEntry());
+        assertEquals(mRow.getEntry(),
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
 
         // Dismiss that one
-        mBubbleController.removeBubble(stackView.getExpandedBubble().getEntry(),
+        mBubbleController.removeBubble(
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
