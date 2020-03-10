@@ -88,6 +88,9 @@ public class DividerWindowManager {
     }
 
     public void setTouchable(boolean touchable) {
+        if (mView == null) {
+            return;
+        }
         boolean changed = false;
         if (!touchable && (mLp.flags & FLAG_NOT_TOUCHABLE) == 0) {
             mLp.flags |= FLAG_NOT_TOUCHABLE;
