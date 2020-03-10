@@ -551,6 +551,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final Task task = createTaskInStack(stackController1, 0 /* userId */);
         final ITaskOrganizer organizer = registerMockOrganizer();
         final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
+        makeWindowVisible(w);
 
         BLASTSyncEngine bse = new BLASTSyncEngine();
 
@@ -564,6 +565,28 @@ public class TaskOrganizerTests extends WindowTestsBase {
         verify(transactionListener, never())
             .transactionReady(anyInt(), any());
         w.finishDrawing(null);
+        verify(transactionListener)
+            .transactionReady(anyInt(), any());
+    }
+
+    @Test
+    public void testBLASTCallbackWithInvisibleWindow() {
+        final ActivityStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
+
+        BLASTSyncEngine bse = new BLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener transactionListener =
+            mock(BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = bse.startSyncSet(transactionListener);
+        bse.addToSyncSet(id, task);
+        bse.setReady(id);
+
+        // Since the window was invisible, the Task had no visible leaves and the sync should
+        // complete as soon as we call setReady.
         verify(transactionListener)
             .transactionReady(anyInt(), any());
     }

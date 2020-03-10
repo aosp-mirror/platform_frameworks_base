@@ -5693,6 +5693,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
             int waitingId) {
+        if (!isVisible()) {
+            return false;
+        }
         mWaitingListener = waitingListener;
         mWaitingSyncId = waitingId;
         mUsingBLASTSyncTransaction = true;
