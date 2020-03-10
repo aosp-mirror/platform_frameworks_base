@@ -237,16 +237,24 @@ public class StatusBarNotification implements Parcelable {
     public StatusBarNotification cloneLight() {
         final Notification no = new Notification();
         this.notification.cloneInto(no, false); // light copy
-        return new StatusBarNotification(this.pkg, this.opPkg,
-                this.id, this.tag, this.uid, this.initialPid,
-                no, this.user, this.overrideGroupKey, this.postTime);
+        return cloneShallow(no);
     }
 
     @Override
     public StatusBarNotification clone() {
-        return new StatusBarNotification(this.pkg, this.opPkg,
+        return cloneShallow(this.notification.clone());
+    }
+
+    /**
+     * @param notification Some kind of clone of this.notification.
+     * @return A shallow copy of self, with notification in place of this.notification.
+     */
+    StatusBarNotification cloneShallow(Notification notification) {
+        StatusBarNotification result = new StatusBarNotification(this.pkg, this.opPkg,
                 this.id, this.tag, this.uid, this.initialPid,
-                this.notification.clone(), this.user, this.overrideGroupKey, this.postTime);
+                notification, this.user, this.overrideGroupKey, this.postTime);
+        result.setInstanceId(this.mInstanceId);
+        return result;
     }
 
     @Override
