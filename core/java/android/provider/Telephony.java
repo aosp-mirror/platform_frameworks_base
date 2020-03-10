@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -4036,6 +4037,7 @@ public final class Telephony {
          * @hide
          */
         @ChangeId
+        @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.Q)
         public static final long APN_READING_PERMISSION_CHANGE_ID = 124107808L;
     }
 
