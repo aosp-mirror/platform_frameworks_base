@@ -66,11 +66,9 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
-import static com.android.server.wm.RootWindowContainerProto.DISPLAYS;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
 import static com.android.server.wm.RootWindowContainerProto.PENDING_ACTIVITIES;
-import static com.android.server.wm.RootWindowContainerProto.WINDOWS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
@@ -1278,18 +1276,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
-        if (mWmService.mDisplayReady) {
-            final int count = mChildren.size();
-            for (int i = 0; i < count; ++i) {
-                final DisplayContent displayContent = mChildren.get(i);
-                displayContent.dumpDebug(proto, DISPLAYS, logLevel);
-            }
-        }
-        if (logLevel == WindowTraceLogLevel.ALL) {
-            forAllWindows((w) -> {
-                w.dumpDebug(proto, WINDOWS, logLevel);
-            }, true);
-        }
 
         mStackSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
         proto.write(IS_HOME_RECENTS_COMPONENT,
