@@ -3871,6 +3871,29 @@ public class ActivityManager {
     }
 
     /**
+     * Updates mcc mnc configuration and applies changes to the entire system.
+     *
+     * @param mcc mcc configuration to update.
+     * @param mnc mnc configuration to update.
+     * @throws RemoteException; IllegalArgumentException if mcc or mnc is null;
+     * @return Returns {@code true} if the configuration was updated successfully;
+     *         {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION)
+    public boolean updateMccMncConfiguration(@NonNull String mcc, @NonNull String mnc) {
+        if (mcc == null || mnc == null) {
+            throw new IllegalArgumentException("mcc or mnc cannot be null.");
+        }
+        try {
+            return getService().updateMccMncConfiguration(mcc, mnc);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Logs out current current foreground user by switching to the system user and stopping the
      * user being switched from.
      * @hide
