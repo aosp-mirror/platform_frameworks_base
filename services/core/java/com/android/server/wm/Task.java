@@ -85,6 +85,7 @@ import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static com.android.server.wm.WindowContainerChildProto.TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -4120,5 +4121,10 @@ class Task extends WindowContainer<WindowContainer> {
 
     SurfaceControl.Transaction getMainWindowSizeChangeTransaction() {
         return mMainWindowSizeChangeTransaction;
+    }
+
+    @Override
+    long getProtoFieldId() {
+        return TASK;
     }
 }
