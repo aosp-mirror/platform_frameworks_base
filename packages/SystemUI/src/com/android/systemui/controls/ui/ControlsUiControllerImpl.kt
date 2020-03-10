@@ -188,36 +188,23 @@ class ControlsUiControllerImpl @Inject constructor (
         parent.removeAllViews()
         controlViewsById.clear()
 
-        val inflater = LayoutInflater.from(context)
-        inflater.inflate(R.layout.controls_with_favorites, parent, true)
+        createListView()
+        createDropDown(items)
+    }
 
-        val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
-        var lastRow: ViewGroup = createRow(inflater, listView)
-        selectedStructure.controls.forEach {
-            if (lastRow.getChildCount() == 2) {
-                lastRow = createRow(inflater, listView)
-            }
-            val item = inflater.inflate(
-                R.layout.controls_base_item, lastRow, false) as ViewGroup
-            lastRow.addView(item)
-            val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor, bgExecutor)
-            val key = ControlKey(selectedStructure.componentName, it.controlId)
-            cvh.bindData(controlsById.getValue(key))
-            controlViewsById.put(key, cvh)
-        }
-
-        // add spacer if necessary to keep control size consistent
-        if ((selectedStructure.controls.size % 2) == 1) {
-            lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
+    private fun createDropDown(items: List<SelectionItem>) {
+        items.forEach {
+            RenderInfo.registerComponentIcon(it.componentName, it.icon)
         }
 
         val itemsByComponent = items.associateBy { it.componentName }
-        var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
-            val listItems = allStructures.mapNotNull {
-                itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
-            }
+        val itemsWithStructure = allStructures.mapNotNull {
+            itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
+        }
+        val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
 
-            addAll(listItems + addControlsItem)
+        var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
+            addAll(itemsWithStructure + addControlsItem)
         }
 
         /*
@@ -225,16 +212,15 @@ class ControlsUiControllerImpl @Inject constructor (
          * for this dialog. Use a textView with the ListPopupWindow to achieve
          * a similar effect
          */
-        val item = adapter.findSelectionItem(selectedStructure) ?: adapter.getItem(0)
         parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
-            setText(item.getTitle())
+            setText(selectionItem.getTitle())
             // override the default color on the dropdown drawable
             (getBackground() as LayerDrawable).getDrawable(1)
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
         parent.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription(item.getTitle())
-            setImageDrawable(item.icon)
+            setContentDescription(selectionItem.getTitle())
+            setImageDrawable(selectionItem.icon)
         }
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
         anchor.setOnClickListener(object : View.OnClickListener {
@@ -270,6 +256,36 @@ class ControlsUiControllerImpl @Inject constructor (
                 }
             }
         })
+    }
+
+    private fun createListView() {
+        val inflater = LayoutInflater.from(context)
+        inflater.inflate(R.layout.controls_with_favorites, parent, true)
+
+        val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
+        var lastRow: ViewGroup = createRow(inflater, listView)
+        selectedStructure.controls.forEach {
+            if (lastRow.getChildCount() == 2) {
+                lastRow = createRow(inflater, listView)
+            }
+            val baseLayout = inflater.inflate(
+                R.layout.controls_base_item, lastRow, false) as ViewGroup
+            lastRow.addView(baseLayout)
+            val cvh = ControlViewHolder(
+                baseLayout,
+                controlsController.get(),
+                uiExecutor,
+                bgExecutor
+            )
+            val key = ControlKey(selectedStructure.componentName, it.controlId)
+            cvh.bindData(controlsById.getValue(key))
+            controlViewsById.put(key, cvh)
+        }
+
+        // add spacer if necessary to keep control size consistent
+        if ((selectedStructure.controls.size % 2) == 1) {
+            lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
+        }
     }
 
     private fun loadPreference(structures: List<StructureInfo>): StructureInfo {
@@ -320,6 +336,8 @@ class ControlsUiControllerImpl @Inject constructor (
         controlsById.clear()
         controlViewsById.clear()
         controlsListingController.get().removeCallback(listingCallback)
+
+        RenderInfo.clearCache()
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
@@ -358,6 +376,11 @@ class ControlsUiControllerImpl @Inject constructor (
         listView.addView(row)
         return row
     }
+
+    private fun findSelectionItem(si: StructureInfo, items: List<SelectionItem>): SelectionItem? =
+        items.firstOrNull {
+            it.componentName == si.componentName && it.structure == si.structure
+        }
 }
 
 private data class SelectionItem(
@@ -387,18 +410,5 @@ private class ItemAdapter(
             setImageDrawable(item.icon)
         }
         return view
-    }
-
-    fun findSelectionItem(si: StructureInfo): SelectionItem? {
-        var i = 0
-        while (i < getCount()) {
-            val item = getItem(i)
-            if (item.componentName == si.componentName &&
-                item.structure == si.structure) {
-                return item
-            }
-            i++
-        }
-        return null
     }
 }

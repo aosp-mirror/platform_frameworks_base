@@ -17,6 +17,7 @@
 package com.android.systemui.controls.management
 
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.service.controls.Control
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
@@ -70,6 +71,7 @@ open class FavoriteModelTest : SysuiTestCase() {
                     Control.StatelessBuilder("$idPrefix$it", pendingIntent)
                             .setZone((it % 3).toString())
                             .build(),
+                    ComponentName("", ""),
                     it in favoritesIndices
             )
         }
