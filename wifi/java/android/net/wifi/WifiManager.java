@@ -727,8 +727,9 @@ public class WifiManager {
 
     /**
      *  If Soft Ap client is blocked, this reason code means that client doesn't exist in the
-     *  specified configuration {@link SoftApConfiguration.Builder#setClientList(List, List)}
-     *  and the {@link SoftApConfiguration.Builder#enableClientControlByUser(true)}
+     *  specified configuration {@link SoftApConfiguration.Builder#setBlockedClientList(List)}
+     *  and {@link SoftApConfiguration.Builder#setAllowedClientList(List)}
+     *  and the {@link SoftApConfiguration.Builder#setClientControlByUserEnabled(boolean)}
      *  is configured as well.
      *  @hide
      */
@@ -3406,9 +3407,10 @@ public class WifiManager {
      * If the API is called while the tethered soft AP is enabled, the configuration will apply to
      * the current soft AP if the new configuration only includes
      * {@link SoftApConfiguration.Builder#setMaxNumberOfClients(int)}
-     * or {@link SoftApConfiguration.Builder#setShutdownTimeoutMillis(int)}
-     * or {@link SoftApConfiguration.Builder#enableClientControlByUser(boolean)}
-     * or {@link SoftApConfiguration.Builder#setClientList(List, List)}.
+     * or {@link SoftApConfiguration.Builder#setShutdownTimeoutMillis(long)}
+     * or {@link SoftApConfiguration.Builder#setClientControlByUserEnabled(boolean)}
+     * or {@link SoftApConfiguration.Builder#setBlockedClientList(List)}
+     * or {@link SoftApConfiguration.Builder#setAllowedClientList(List)}
      *
      * Otherwise, the configuration changes will be applied when the Soft AP is next started
      * (the framework will not stop/start the AP).
