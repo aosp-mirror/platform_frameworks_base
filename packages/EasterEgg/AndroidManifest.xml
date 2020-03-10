@@ -12,7 +12,8 @@
         <activity android:name=".quares.QuaresActivity"
             android:icon="@drawable/q_icon"
             android:label="@string/q_egg_name"
-            android:theme="@style/QuaresTheme">
+            android:theme="@style/QuaresTheme"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,7 +27,8 @@
             android:configChanges="orientation|keyboardHidden|screenSize|uiMode"
             android:icon="@drawable/p_icon"
             android:label="@string/p_egg_name"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
