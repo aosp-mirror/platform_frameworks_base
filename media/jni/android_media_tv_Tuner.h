@@ -114,7 +114,22 @@ struct FilterCallback : public IFilterCallback {
     jobject handleToLinearBlock(const native_handle_t* handle, uint32_t size);
 private:
     jweak mFilter;
-    jobject getMediaEvent(const DemuxFilterEvent::Event& event);
+    jobjectArray getSectionEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getMediaEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getPesEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getTsRecordEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getMmtpRecordEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getDownloadEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getIpPayloadEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
+    jobjectArray getTemiEvent(
+            jobjectArray& arr, const std::vector<DemuxFilterEvent::Event>& events);
 };
 
 struct FrontendCallback : public IFrontendCallback {
@@ -129,7 +144,7 @@ struct FrontendCallback : public IFrontendCallback {
 };
 
 struct Filter : public RefBase {
-    Filter(sp<IFilter> sp, jweak obj);
+    Filter(sp<IFilter> sp, jobject obj);
     ~Filter();
     int close();
     sp<IFilter> getIFilter();
