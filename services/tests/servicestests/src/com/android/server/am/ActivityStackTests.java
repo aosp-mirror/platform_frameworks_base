@@ -122,4 +122,17 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertEquals(task.getTopActivity(true /* includeOverlays */), taskOverlay);
         assertNotNull(result.r);
     }
+
+    @Test
+    public void testNavigateUpTo() {
+        final ActivityManagerService service = createActivityManagerService();
+        final TaskRecord task = createTask(service, testActivityComponent, TEST_STACK_ID);
+        final ActivityRecord activityRecord = createActivity(service, testActivityComponent, task);
+        activityRecord.app = new ProcessRecord(null, activityRecord.appInfo,
+                activityRecord.processName, activityRecord.getUid());
+        final ActivityStack testStack = service.mStackSupervisor.getStack(TEST_STACK_ID);
+        // No-op if the source activity record doesn't have attached process (app.thread == null).
+        assertFalse(testStack.navigateUpToLocked(activityRecord, activityRecord.intent,
+                0 /* resultCode */, null /* resultData */));
+    }
 }
