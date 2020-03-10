@@ -1386,13 +1386,14 @@ public class BubbleStackView extends FrameLayout {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
         }
-        maybeShowManageEducation(false);
         mExpandedAnimationController.prepareForBubbleDrag(bubble, mMagneticTarget);
 
         // We're dragging an individual bubble, so set the magnetized object to the magnetized
         // bubble.
         mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
         mMagnetizedObject.setMagnetListener(mIndividualBubbleMagnetListener);
+
+        maybeShowManageEducation(false);
     }
 
     /** Called with the coordinates to which an individual bubble has been dragged. */
