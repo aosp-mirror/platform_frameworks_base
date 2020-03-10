@@ -48,6 +48,17 @@ public final class InstanceId implements Parcelable {
         return mId;
     }
 
+    /**
+     * Create a fake instance ID for testing purposes.  Not for production use. See also
+     * InstanceIdSequenceFake, which is a testing replacement for InstanceIdSequence.
+     * @param id The ID you want to assign.
+     * @return new InstanceId.
+     */
+    @VisibleForTesting
+    public static InstanceId fakeInstanceId(int id) {
+        return new InstanceId(id);
+    }
+
     @Override
     public int hashCode() {
         return mId;
