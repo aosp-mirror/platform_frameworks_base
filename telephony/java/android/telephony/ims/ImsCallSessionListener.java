@@ -58,7 +58,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionProgressing(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -71,7 +71,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionInitiated(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -85,7 +85,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionInitiatedFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -98,7 +98,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionTerminated(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -115,7 +115,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionHeld(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -128,7 +128,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionHoldFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -141,7 +141,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionHoldReceived(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -155,7 +155,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionResumed(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -169,7 +169,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionResumeFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -182,7 +182,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionResumeReceived(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -201,7 +201,7 @@ public class ImsCallSessionListener {
             mListener.callSessionMergeStarted(newSession != null ?
                             newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -216,7 +216,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionMergeStarted(newSession, profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -232,7 +232,7 @@ public class ImsCallSessionListener {
             mListener.callSessionMergeComplete(newSession != null ?
                     newSession.getServiceImpl() : null);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -247,7 +247,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionMergeComplete(newSession);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -260,7 +260,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionMergeFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -273,7 +273,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionUpdated(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -286,7 +286,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionUpdateFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -299,7 +299,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionUpdateReceived(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -319,7 +319,7 @@ public class ImsCallSessionListener {
             mListener.callSessionConferenceExtended(
                     newSession != null ? newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -333,7 +333,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionConferenceExtended(newSession, profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -347,7 +347,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionConferenceExtendFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -364,7 +364,7 @@ public class ImsCallSessionListener {
             mListener.callSessionConferenceExtendReceived(newSession != null
                     ? newSession.getServiceImpl() : null, profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -379,7 +379,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionConferenceExtendReceived(newSession, profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -391,7 +391,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionInviteParticipantsRequestDelivered();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -407,7 +407,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionInviteParticipantsRequestFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -419,7 +419,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionRemoveParticipantsRequestDelivered();
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -435,7 +435,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionInviteParticipantsRequestFailed(reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -448,7 +448,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionConferenceStateUpdated(state);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -465,7 +465,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionUssdMessageReceived(mode, ussdMessage);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -501,7 +501,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionMayHandover(srcNetworkType, targetNetworkType);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -537,7 +537,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionHandover(srcNetworkType, targetNetworkType, reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -570,7 +570,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionHandoverFailed(srcNetworkType, targetNetworkType, reasonInfo);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -587,7 +587,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionTtyModeReceived(mode);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -600,7 +600,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionMultipartyStateChanged(isMultiParty);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -614,7 +614,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionSuppServiceReceived(suppSrvNotification);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -628,7 +628,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionRttModifyRequestReceived(callProfile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -641,7 +641,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionRttModifyResponseReceived(status);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -654,7 +654,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionRttMessageReceived(rttMessage);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -667,7 +667,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callSessionRttAudioIndicatorChanged(profile);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 
@@ -680,7 +680,7 @@ public class ImsCallSessionListener {
         try {
             mListener.callQualityChanged(callQuality);
         } catch (RemoteException e) {
-            throw new RuntimeException(e);
+            e.rethrowFromSystemServer();
         }
     }
 }
