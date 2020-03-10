@@ -38,7 +38,8 @@
 
         <receiver
                 android:name=".IntentFilterVerificationReceiver"
-                android:permission="android.permission.BIND_INTENT_FILTER_VERIFIER">
+                android:permission="android.permission.BIND_INTENT_FILTER_VERIFIER"
+                android:exported="true">
             <!-- Set the priority 1 so newer implementation can have higher priority. -->
             <intent-filter
                     android:priority="1">
