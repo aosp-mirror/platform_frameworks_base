@@ -2681,7 +2681,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         response, filterText, response.getInlineActions(), mCurrentViewId,
                         this, () -> {
                             synchronized (mLock) {
-                                requestHideFillUi(mCurrentViewId);
+                                mInlineSuggestionSession.hideInlineSuggestionsUi(mCurrentViewId);
                             }
                         }, remoteRenderService);
         if (inlineSuggestionsResponse == null) {
