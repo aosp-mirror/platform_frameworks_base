@@ -127,7 +127,6 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         private static final int SNAPSHOT_HEIGHT = 100;
 
         private float mScaleFraction = 1f;
-        private boolean mIsLowResolution = false;
         private boolean mIsRealSnapshot = true;
         private boolean mIsTranslucent = false;
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
@@ -139,11 +138,6 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
         TaskSnapshotBuilder setScaleFraction(float scale) {
             mScaleFraction = scale;
-            return this;
-        }
-
-        TaskSnapshotBuilder setIsLowResolution(boolean isLowResolution) {
-            mIsLowResolution = isLowResolution;
             return this;
         }
 
@@ -186,8 +180,11 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             return new TaskSnapshot(MOCK_SNAPSHOT_ID, new ComponentName("", ""), buffer,
                     ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
                     mRotation, taskSize, TEST_INSETS,
-                    mIsLowResolution, mIsRealSnapshot,
-                    mWindowingMode, mSystemUiVisibility, mIsTranslucent);
+                    // When building a TaskSnapshot with the Builder class, isLowResolution
+                    // is always false. Low-res snapshots are only created when loading from
+                    // disk.
+                    false /* isLowResolution */,
+                    mIsRealSnapshot, mWindowingMode, mSystemUiVisibility, mIsTranslucent);
         }
     }
 }

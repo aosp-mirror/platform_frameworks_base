@@ -81,8 +81,8 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
         assertEquals(TEST_INSETS, snapshot.getContentInsets());
         assertNotNull(snapshot.getSnapshot());
         assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
+        assertNull(mLoader.loadTask(1, mTestUserId, true /* isLowResolution */));
     }
-
 
     @Test
     public void testRemoveObsoleteFiles() {
@@ -132,9 +132,17 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 false /* restoreFromDisk */, false /* isLowResolution */));
 
-        // Load it from disk
+        // Attempt to load the low-res snapshot from the disk
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 true /* restoreFromDisk */, true /* isLowResolution */));
+
+        // Load the high-res (default) snapshot from disk
+        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
+                true /* restoreFromDisk */, false /* isLowResolution */));
+
+        // Make sure it's not in the cache now.
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
+                false /* restoreFromDisk */, true /* isLowResolution */));
 
         // Make sure it's not in the cache now.
         assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,

@@ -293,35 +293,6 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     }
 
     @Test
-    public void testDisabledLowResolutionPersistAndLoadSnapshot() {
-        mPersister.setEnableLowResSnapshots(false);
-
-        TaskSnapshot a = new TaskSnapshotBuilder()
-                .setScaleFraction(0.5f)
-                .setIsLowResolution(true)
-                .build();
-        assertTrue(a.isLowResolution());
-        mPersister.persistSnapshot(1, mTestUserId, a);
-        mPersister.waitForQueueEmpty();
-        final File[] files = new File[]{new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
-                new File(FILES_DIR.getPath() + "/snapshots/1.jpg")};
-        final File[] nonExistsFiles = new File[]{
-                new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg"),
-        };
-        assertTrueForFiles(files, File::exists, " must exist");
-        assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
-        final TaskSnapshot snapshot = mLoader.loadTask(1, mTestUserId, false /* isLowResolution */);
-        assertNotNull(snapshot);
-        assertEquals(TEST_INSETS, snapshot.getContentInsets());
-        assertNotNull(snapshot.getSnapshot());
-        assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
-
-        final TaskSnapshot snapshotNotExist = mLoader.loadTask(1, mTestUserId,
-                true /* isLowResolution */);
-        assertNull(snapshotNotExist);
-    }
-
-    @Test
     public void testIsRealSnapshotPersistAndLoadSnapshot() {
         TaskSnapshot a = new TaskSnapshotBuilder()
                 .setIsRealSnapshot(true)

@@ -99,10 +99,10 @@ class TaskSnapshotPersister {
 
         if (lowResTaskSnapshotScale > 0) {
             mLowResScaleFactor = lowResTaskSnapshotScale / highResTaskSnapshotScale;
-            setEnableLowResSnapshots(true);
+            mEnableLowResSnapshots = true;
         } else {
             mLowResScaleFactor = 0;
-            setEnableLowResSnapshots(false);
+            mEnableLowResSnapshots = false;
         }
 
         mUse16BitFormat = service.mContext.getResources().getBoolean(
@@ -172,14 +172,6 @@ class TaskSnapshotPersister {
 
     boolean enableLowResSnapshots() {
         return mEnableLowResSnapshots;
-    }
-
-    /**
-     * Not to be used. Only here for testing.
-     */
-    @VisibleForTesting
-    void setEnableLowResSnapshots(boolean enabled) {
-        mEnableLowResSnapshots = enabled;
     }
 
     /**
@@ -405,7 +397,7 @@ class TaskSnapshotPersister {
                 return false;
             }
 
-            if (!enableLowResSnapshots()) {
+            if (!mEnableLowResSnapshots) {
                 swBitmap.recycle();
                 return true;
             }
