@@ -35,10 +35,13 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.graphics.Rect;
 import android.text.Layout;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -50,11 +53,13 @@ import com.android.frameworks.coretests.R;
 
 import com.google.common.base.Strings;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RunWith(AndroidJUnit4.class)
@@ -70,11 +75,20 @@ public class EditorCursorDragTest {
 
     private Instrumentation mInstrumentation;
     private Activity mActivity;
+    private Set<MotionEvent> mMotionEvents = new ArraySet<>();
 
     @Before
     public void before() throws Throwable {
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mActivity = mActivityRule.getActivity();
+    }
+
+    @After
+    public void after() throws Throwable {
+        for (MotionEvent event : mMotionEvents) {
+            event.recycle();
+        }
+        mMotionEvents.clear();
     }
 
     @Test
@@ -243,45 +257,45 @@ public class EditorCursorDragTest {
 
         // Simulate a tap-and-drag gesture.
         long event1Time = 1001;
-        MotionEvent event1 = downEvent(event1Time, event1Time, 5f, 10f);
+        MotionEvent event1 = downEvent(tv, event1Time, event1Time, 5f, 10f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event2Time = 1002;
-        MotionEvent event2 = moveEvent(event1Time, event2Time, 50f, 10f);
+        MotionEvent event2 = moveEvent(tv, event1Time, event2Time, 50f, 10f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
         assertTrue(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event3Time = 1003;
-        MotionEvent event3 = moveEvent(event1Time, event3Time, 100f, 10f);
+        MotionEvent event3 = moveEvent(tv, event1Time, event3Time, 100f, 10f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
         assertTrue(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event4Time = 2004;
-        MotionEvent event4 = upEvent(event1Time, event4Time, 100f, 10f);
+        MotionEvent event4 = upEvent(tv, event1Time, event4Time, 100f, 10f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event4));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         // Simulate a quick tap after the drag, near the location where the drag ended.
         long event5Time = 2005;
-        MotionEvent event5 = downEvent(event5Time, event5Time, 90f, 10f);
+        MotionEvent event5 = downEvent(tv, event5Time, event5Time, 90f, 10f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event5));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event6Time = 2006;
-        MotionEvent event6 = upEvent(event5Time, event6Time, 90f, 10f);
+        MotionEvent event6 = upEvent(tv, event5Time, event6Time, 90f, 10f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event6));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         // Simulate another quick tap in the same location; now selection should be triggered.
         long event7Time = 2007;
-        MotionEvent event7 = downEvent(event7Time, event7Time, 90f, 10f);
+        MotionEvent event7 = downEvent(tv, event7Time, event7Time, 90f, 10f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event7));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertTrue(editor.getSelectionController().isCursorBeingModified());
@@ -298,19 +312,19 @@ public class EditorCursorDragTest {
 
         // Simulate a mouse click and drag. This should NOT trigger a cursor drag.
         long event1Time = 1001;
-        MotionEvent event1 = mouseDownEvent(event1Time, event1Time, 20f, 30f);
+        MotionEvent event1 = mouseDownEvent(tv, event1Time, event1Time, 20f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event2Time = 1002;
-        MotionEvent event2 = mouseMoveEvent(event1Time, event2Time, 120f, 30f);
+        MotionEvent event2 = mouseMoveEvent(tv, event1Time, event2Time, 120f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertTrue(editor.getSelectionController().isCursorBeingModified());
 
         long event3Time = 1003;
-        MotionEvent event3 = mouseUpEvent(event1Time, event3Time, 120f, 30f);
+        MotionEvent event3 = mouseUpEvent(tv, event1Time, event3Time, 120f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
@@ -327,25 +341,25 @@ public class EditorCursorDragTest {
 
         // Simulate a tap-and-drag gesture. This should trigger a cursor drag.
         long event1Time = 1001;
-        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        MotionEvent event1 = downEvent(tv, event1Time, event1Time, 20f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event2Time = 1002;
-        MotionEvent event2 = moveEvent(event1Time, event2Time, 21f, 30f);
+        MotionEvent event2 = moveEvent(tv, event1Time, event2Time, 21f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event3Time = 1003;
-        MotionEvent event3 = moveEvent(event1Time, event3Time, 120f, 30f);
+        MotionEvent event3 = moveEvent(tv, event1Time, event3Time, 120f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
         assertTrue(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event4Time = 1004;
-        MotionEvent event4 = upEvent(event1Time, event4Time, 120f, 30f);
+        MotionEvent event4 = upEvent(tv, event1Time, event4Time, 120f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event4));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
@@ -362,31 +376,31 @@ public class EditorCursorDragTest {
 
         // Simulate a double-tap followed by a drag. This should trigger a selection drag.
         long event1Time = 1001;
-        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        MotionEvent event1 = downEvent(tv, event1Time, event1Time, 20f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event2Time = 1002;
-        MotionEvent event2 = upEvent(event1Time, event2Time, 20f, 30f);
+        MotionEvent event2 = upEvent(tv, event1Time, event2Time, 20f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event2));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
 
         long event3Time = 1003;
-        MotionEvent event3 = downEvent(event3Time, event3Time, 20f, 30f);
+        MotionEvent event3 = downEvent(tv, event3Time, event3Time, 20f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event3));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertTrue(editor.getSelectionController().isCursorBeingModified());
 
         long event4Time = 1004;
-        MotionEvent event4 = moveEvent(event3Time, event4Time, 120f, 30f);
+        MotionEvent event4 = moveEvent(tv, event3Time, event4Time, 120f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event4));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertTrue(editor.getSelectionController().isCursorBeingModified());
 
         long event5Time = 1005;
-        MotionEvent event5 = upEvent(event3Time, event5Time, 120f, 30f);
+        MotionEvent event5 = upEvent(tv, event3Time, event5Time, 120f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event5));
         assertFalse(editor.getInsertionController().isCursorBeingModified());
         assertFalse(editor.getSelectionController().isCursorBeingModified());
@@ -403,7 +417,7 @@ public class EditorCursorDragTest {
 
         // Simulate a tap. No error should be thrown.
         long event1Time = 1001;
-        MotionEvent event1 = downEvent(event1Time, event1Time, 20f, 30f);
+        MotionEvent event1 = downEvent(tv, event1Time, event1Time, 20f, 30f);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event1));
 
         // Swipe left to right. No error should be thrown.
@@ -440,7 +454,8 @@ public class EditorCursorDragTest {
     public void testCursorDrag_snapToHandle() throws Throwable {
         String text = "line1: This is the 1st line: A\n"
                     + "line2: This is the 2nd line: B\n"
-                    + "line3: This is the 3rd line: C\n";
+                    + "line3: This is the 3rd line: C\n"
+                    + "line4: This is the 4th line: D\n";
         onView(withId(R.id.textview)).perform(replaceText(text));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(0));
         TextView tv = mActivity.findViewById(R.id.textview);
@@ -454,8 +469,8 @@ public class EditorCursorDragTest {
                 // Start dragging along the first line
                 motionEventInfo(text.indexOf("line1"), 1.0f),
                 motionEventInfo(text.indexOf("This is the 1st"), 1.0f),
-                // Move to the bottom of the third line; cursor should end up on second line
-                motionEventInfo(text.indexOf("he 3rd"), 0.0f, text.indexOf("he 2nd")),
+                // Move to the middle of the fourth line; cursor should end up on second line
+                motionEventInfo(text.indexOf("he 4th"), 0.5f, text.indexOf("he 2nd")),
                 // Move to the middle of the second line; cursor should end up on the first line
                 motionEventInfo(text.indexOf("he 2nd"), 0.5f, text.indexOf("he 1st"))
         };
@@ -473,37 +488,137 @@ public class EditorCursorDragTest {
         simulateDrag(tv, events, true);
     }
 
-    private static MotionEvent downEvent(long downTime, long eventTime, float x, float y) {
-        return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_DOWN, x, y, 0);
+    @Test
+    public void testCursorDrag_snapDistance() throws Throwable {
+        String text = "line1: This is the 1st line: A\n"
+                + "line2: This is the 2nd line: B\n"
+                + "line3: This is the 3rd line: C\n";
+        onView(withId(R.id.textview)).perform(replaceText(text));
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Editor editor = tv.getEditorForTesting();
+        final int startIndex = text.indexOf("he 2nd");
+        Layout layout = tv.getLayout();
+        final float cursorStartX = layout.getPrimaryHorizontal(startIndex) + tv.getTotalPaddingLeft();
+        final float cursorStartY = layout.getLineTop(1) + tv.getTotalPaddingTop();
+        final float dragHandleStartX = 20;
+        final float dragHandleStartY = 20;
+
+        // Drag the handle from the 2nd line to the 3rd line.
+        tapAtPoint(tv, cursorStartX, cursorStartY);
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(startIndex));
+        View handleView = editor.getInsertionController().getHandle();
+        final int rawYOfHandleDrag = dragDownUntilLineChange(
+                handleView, dragHandleStartX, dragHandleStartY, tv.getSelectionStart());
+
+        // Drag the cursor from the 2nd line to the 3rd line.
+        tapAtPoint(tv, cursorStartX, cursorStartY);
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(startIndex));
+        final int rawYOfCursorDrag =
+                dragDownUntilLineChange(tv, cursorStartX, cursorStartY, tv.getSelectionStart());
+
+        // Drag the handle with touch through from the 2nd line to the 3rd line.
+        tv.getEditorForTesting().setFlagInsertionHandleGesturesEnabled(true);
+        tapAtPoint(tv, cursorStartX, cursorStartY);
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(startIndex));
+        handleView = editor.getInsertionController().getHandle();
+        int rawYOfHandleDragWithTouchThrough =
+                dragDownUntilLineChange(handleView, dragHandleStartX, dragHandleStartY, tv.getSelectionStart());
+
+        String msg = String.format(
+                "rawYOfHandleDrag: %d, rawYOfCursorDrag: %d, rawYOfHandleDragWithTouchThrough: %d",
+                rawYOfHandleDrag, rawYOfCursorDrag, rawYOfHandleDragWithTouchThrough);
+        final int max = Math.max(
+                rawYOfCursorDrag, Math.max(rawYOfHandleDrag, rawYOfHandleDragWithTouchThrough));
+        final int min = Math.min(
+                rawYOfCursorDrag, Math.min(rawYOfHandleDrag, rawYOfHandleDragWithTouchThrough));
+        // The drag step is 5 pixels in dragDownUntilLineChange().
+        // The difference among the 3 raw Y values should be no bigger than the drag step.
+        assertWithMessage(msg).that(max - min).isLessThan(6);
     }
 
-    private static MotionEvent upEvent(long downTime, long eventTime, float x, float y) {
-        return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_UP, x, y, 0);
+    private void dispatchTouchEvent(View view, MotionEvent event) {
+        mInstrumentation.runOnMainSync(() -> view.dispatchTouchEvent(event));
     }
 
-    private static MotionEvent moveEvent(long downTime, long eventTime, float x, float y) {
-        return MotionEvent.obtain(downTime, eventTime, MotionEvent.ACTION_MOVE, x, y, 0);
+    private void tapAtPoint(TextView tv, final float x, final float y) {
+        long downTime = sTicker.addAndGet(10_000);
+        dispatchTouchEvent(tv, downEvent(tv, downTime, downTime, x, y));
+        dispatchTouchEvent(tv, upEvent(tv, downTime, downTime + 1, x, y));
     }
 
-    private static MotionEvent mouseDownEvent(long downTime, long eventTime, float x, float y) {
-        MotionEvent event = downEvent(downTime, eventTime, x, y);
-        event.setSource(InputDevice.SOURCE_MOUSE);
-        event.setButtonState(MotionEvent.BUTTON_PRIMARY);
+    private int dragDownUntilLineChange(View view, final float startX, final float startY,
+            final int startOffset) {
+        TextView tv = mActivity.findViewById(R.id.textview);
+        final int startLine = tv.getLayout().getLineForOffset(startOffset);
+
+        int rawY = 0;
+        long downTime = sTicker.addAndGet(10_000);
+        long eventTime = downTime;
+        // Move horizontally first to initiate the cursor drag.
+        dispatchTouchEvent(view, downEvent(view, downTime, eventTime++, startX, startY));
+        dispatchTouchEvent(view, moveEvent(view, downTime, eventTime++, startX + 50, startY));
+        dispatchTouchEvent(view, moveEvent(view, downTime, eventTime++, startX, startY));
+        // Move downwards 5 pixels at a time until a line change occurs.
+        for (int i = 0; i < 200; i++) {
+            MotionEvent ev = moveEvent(view, downTime, eventTime++, startX, startY + i * 5);
+            rawY = (int) ev.getRawY();
+            dispatchTouchEvent(view, ev);
+            if (tv.getLayout().getLineForOffset(tv.getSelectionStart()) > startLine) {
+                break;
+            }
+        }
+        String msg = String.format("The cursor didn't jump from %d!", startOffset);
+        assertWithMessage(msg).that(
+                tv.getLayout().getLineForOffset(tv.getSelectionStart())).isGreaterThan(startLine);
+        dispatchTouchEvent(view, upEvent(view, downTime, eventTime, startX, startY));
+        return rawY;
+    }
+
+    private MotionEvent obtainTouchEvent(
+            View view, int action, long downTime, long eventTime, float x, float y) {
+        Rect r = new Rect();
+        view.getBoundsOnScreen(r);
+        float rawX = x + r.left;
+        float rawY = y + r.top;
+        MotionEvent event =
+                MotionEvent.obtain(downTime, eventTime, action, rawX, rawY, 0);
+        view.toLocalMotionEvent(event);
+        mMotionEvents.add(event);
         return event;
     }
 
-    private static MotionEvent mouseUpEvent(long downTime, long eventTime, float x, float y) {
-        MotionEvent event = upEvent(downTime, eventTime, x, y);
+    private MotionEvent obtainMouseEvent(
+            View view, int action, long downTime, long eventTime, float x, float y) {
+        MotionEvent event = obtainTouchEvent(view, action, downTime, eventTime, x, y);
         event.setSource(InputDevice.SOURCE_MOUSE);
-        event.setButtonState(0);
+        if (action != MotionEvent.ACTION_UP) {
+            event.setButtonState(MotionEvent.BUTTON_PRIMARY);
+        }
         return event;
     }
 
-    private static MotionEvent mouseMoveEvent(long downTime, long eventTime, float x, float y) {
-        MotionEvent event = moveEvent(downTime, eventTime, x, y);
-        event.setSource(InputDevice.SOURCE_MOUSE);
-        event.setButtonState(MotionEvent.BUTTON_PRIMARY);
-        return event;
+    private MotionEvent downEvent(View view, long downTime, long eventTime, float x, float y) {
+        return obtainTouchEvent(view, MotionEvent.ACTION_DOWN, downTime, eventTime, x, y);
+    }
+
+    private MotionEvent moveEvent(View view, long downTime, long eventTime, float x, float y) {
+        return obtainTouchEvent(view, MotionEvent.ACTION_MOVE, downTime, eventTime, x, y);
+    }
+
+    private MotionEvent upEvent(View view, long downTime, long eventTime, float x, float y) {
+        return obtainTouchEvent(view, MotionEvent.ACTION_UP, downTime, eventTime, x, y);
+    }
+
+    private MotionEvent mouseDownEvent(View view, long downTime, long eventTime, float x, float y) {
+        return obtainMouseEvent(view, MotionEvent.ACTION_DOWN, downTime, eventTime, x, y);
+    }
+
+    private MotionEvent mouseMoveEvent(View view, long downTime, long eventTime, float x, float y) {
+        return obtainMouseEvent(view, MotionEvent.ACTION_MOVE, downTime, eventTime, x, y);
+    }
+
+    private MotionEvent mouseUpEvent(View view, long downTime, long eventTime, float x, float y) {
+        return obtainMouseEvent(view, MotionEvent.ACTION_UP, downTime, eventTime, x, y);
     }
 
     public static MotionEventInfo motionEventInfo(int index, float ratioToLineTop) {
@@ -543,14 +658,15 @@ public class EditorCursorDragTest {
 
         float[] downCoords = events[0].getCoordinates(tv);
         long downEventTime = sTicker.addAndGet(10_000);
-        MotionEvent downEvent = downEvent(downEventTime, downEventTime,
+        MotionEvent downEvent = downEvent(tv,  downEventTime, downEventTime,
                 downCoords[0], downCoords[1]);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(downEvent));
 
         for (int i = 1; i < events.length; i++) {
             float[] moveCoords = events[i].getCoordinates(tv);
             long eventTime = downEventTime + i;
-            MotionEvent event = moveEvent(downEventTime, eventTime, moveCoords[0], moveCoords[1]);
+            MotionEvent event = moveEvent(tv, downEventTime, eventTime, moveCoords[0],
+                    moveCoords[1]);
             mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(event));
             assertCursorPosition(tv, events[i].expectedCursorIndex, runAssertions);
         }
@@ -558,7 +674,7 @@ public class EditorCursorDragTest {
         MotionEventInfo lastEvent = events[events.length - 1];
         float[] upCoords = lastEvent.getCoordinates(tv);
         long upEventTime = downEventTime + events.length;
-        MotionEvent upEvent = upEvent(downEventTime, upEventTime, upCoords[0], upCoords[1]);
+        MotionEvent upEvent = upEvent(tv, downEventTime, upEventTime, upCoords[0], upCoords[1]);
         mInstrumentation.runOnMainSync(() -> editor.onTouchEvent(upEvent));
     }
 
