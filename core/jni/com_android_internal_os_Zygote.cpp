@@ -134,6 +134,11 @@ static jmethodID gCreateSystemServerClassLoader;
 static bool gIsSecurityEnforced = true;
 
 /**
+ * True if the app process is running in its mount namespace.
+ */
+static bool gInAppMountNamespace = false;
+
+/**
  * The maximum number of characters (not including a null terminator) that a
  * process name may contain.
  */
@@ -548,6 +553,17 @@ static void SetGids(JNIEnv* env, jintArray managed_gids, fail_fn_t fail_fn) {
   }
 }
 
+static void ensureInAppMountNamespace(fail_fn_t fail_fn) {
+  if (gInAppMountNamespace) {
+    // In app mount namespace already
+    return;
+  }
+  if (unshare(CLONE_NEWNS) == -1) {
+    fail_fn(CREATE_ERROR("Failed to unshare(): %s", strerror(errno)));
+  }
+  gInAppMountNamespace = true;
+}
+
 // Sets the resource limits via setrlimit(2) for the values in the
 // two-dimensional array of integers that's passed in. The second dimension
 // contains a tuple of length 3: (resource, rlim_cur, rlim_max). nullptr is
@@ -811,9 +827,7 @@ static void MountEmulatedStorage(uid_t uid, jint mount_mode,
   }
 
   // Create a second private mount namespace for our process
-  if (unshare(CLONE_NEWNS) == -1) {
-    fail_fn(CREATE_ERROR("Failed to unshare(): %s", strerror(errno)));
-  }
+  ensureInAppMountNamespace(fail_fn);
 
   // Handle force_mount_namespace with MOUNT_EXTERNAL_NONE.
   if (mount_mode == MOUNT_EXTERNAL_NONE) {
@@ -1319,6 +1333,7 @@ static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
   if ((size % 3) != 0) {
     fail_fn(CREATE_ERROR("Wrong pkg_inode_list size %d", size));
   }
+  ensureInAppMountNamespace(fail_fn);
 
   // Mount tmpfs on all possible data directories, so app no longer see the original apps data.
   char internalCePath[PATH_MAX];
