@@ -417,7 +417,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     /**
      * Get battery level from remote device
-     * @return battery level in percentage [0-100], or {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
+     * @return battery level in percentage [0-100],
+     * {@link BluetoothDevice#BATTERY_LEVEL_BLUETOOTH_OFF}, or
+     * {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
      */
     public int getBatteryLevel() {
         return mDevice.getBatteryLevel();
@@ -862,12 +864,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         String batteryLevelPercentageString = null;
-        // Android framework should only set mBatteryLevel to valid range [0-100] or
-        // BluetoothDevice.BATTERY_LEVEL_UNKNOWN, any other value should be a framework bug.
-        // Thus assume here that if value is not BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must
-        // be valid
+        // Android framework should only set mBatteryLevel to valid range [0-100],
+        // BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN,
+        // any other value should be a framework bug. Thus assume here that if value is greater
+        // than BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
         final int batteryLevel = getBatteryLevel();
-        if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+        if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
             // TODO: name com.android.settingslib.bluetooth.Utils something different
             batteryLevelPercentageString =
                     com.android.settingslib.Utils.formatPercentage(batteryLevel);
@@ -970,12 +972,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         String batteryLevelPercentageString = null;
-        // Android framework should only set mBatteryLevel to valid range [0-100] or
-        // BluetoothDevice.BATTERY_LEVEL_UNKNOWN, any other value should be a framework bug.
-        // Thus assume here that if value is not BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must
-        // be valid
+        // Android framework should only set mBatteryLevel to valid range [0-100],
+        // BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN,
+        // any other value should be a framework bug. Thus assume here that if value is greater
+        // than BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
         final int batteryLevel = getBatteryLevel();
-        if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+        if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
             // TODO: name com.android.settingslib.bluetooth.Utils something different
             batteryLevelPercentageString =
                     com.android.settingslib.Utils.formatPercentage(batteryLevel);
