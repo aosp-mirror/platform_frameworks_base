@@ -22,13 +22,9 @@ import android.gsi.AvbPublicKey;
 import android.gsi.GsiProgress;
 import android.gsi.IGsiService;
 import android.gsi.IGsiServiceCallback;
-import android.gsi.IGsid;
 import android.os.Environment;
-import android.os.IBinder;
-import android.os.IBinder.DeathRecipient;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.image.IDynamicSystemService;
@@ -42,9 +38,8 @@ import java.io.File;
  * DynamicSystemService implements IDynamicSystemService. It provides permission check before
  * passing requests to gsid
  */
-public class DynamicSystemService extends IDynamicSystemService.Stub implements DeathRecipient {
+public class DynamicSystemService extends IDynamicSystemService.Stub {
     private static final String TAG = "DynamicSystemService";
-    private static final String NO_SERVICE_ERROR = "no gsiservice";
     private static final int GSID_ROUGH_TIMEOUT_MS = 8192;
     private static final String PATH_DEFAULT = "/data/gsi/";
     private Context mContext;
@@ -55,57 +50,12 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
         mContext = context;
     }
 
-    private static IGsiService connect(DeathRecipient recipient) throws RemoteException {
-        IBinder binder = ServiceManager.getService("gsiservice");
-        if (binder == null) {
-            return null;
-        }
-        /**
-         * The init will restart gsiservice if it crashed and the proxy object will need to be
-         * re-initialized in this case.
-         */
-        binder.linkToDeath(recipient, 0);
-
-        IGsid gsid = IGsid.Stub.asInterface(binder);
-        return gsid.getClient();
-    }
-
-    /** implements DeathRecipient */
-    @Override
-    public void binderDied() {
-        Slog.w(TAG, "gsiservice died; reconnecting");
-        synchronized (this) {
-            mGsiService = null;
-        }
-    }
-
     private IGsiService getGsiService() throws RemoteException {
         checkPermission();
-
-        if (!"running".equals(SystemProperties.get("init.svc.gsid"))) {
-            SystemProperties.set("ctl.start", "gsid");
+        if (mGsiService != null) {
+            return mGsiService;
         }
-
-        for (int sleepMs = 64; sleepMs <= (GSID_ROUGH_TIMEOUT_MS << 1); sleepMs <<= 1) {
-            synchronized (this) {
-                if (mGsiService == null) {
-                    mGsiService = connect(this);
-                }
-                if (mGsiService != null) {
-                    return mGsiService;
-                }
-            }
-
-            try {
-                Slog.d(TAG, "GsiService is not ready, wait for " + sleepMs + "ms");
-                Thread.sleep(sleepMs);
-            } catch (InterruptedException e) {
-                Slog.e(TAG, "Interrupted when waiting for GSID");
-                return null;
-            }
-        }
-
-        throw new RemoteException(NO_SERVICE_ERROR);
+        return IGsiService.Stub.asInterface(waitForService("gsiservice"));
     }
 
     private void checkPermission() {
@@ -133,6 +83,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub implements 
     @Override
     public boolean startInstallation(String dsuSlot) throws RemoteException {
         IGsiService service = getGsiService();
+        mGsiService = service;
         // priority from high to low: sysprop -> sdcard -> /data
         String path = SystemProperties.get("os.aot.path");
         if (path.isEmpty()) {
