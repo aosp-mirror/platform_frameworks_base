@@ -17,7 +17,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="0dp"
     android:orientation="vertical">
 
     <TextView
@@ -29,11 +29,17 @@
         android:gravity="center_horizontal"
     />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/listAll"
-        android:layout_width="match_parent"
+    <com.android.systemui.controls.management.ManagementPageIndicator
+        android:id="@+id/structure_page_indicator"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_gravity="center"
         android:layout_marginTop="@dimen/controls_management_list_margin"
-        android:nestedScrollingEnabled="false"/>
+        android:visibility="gone" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/structure_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

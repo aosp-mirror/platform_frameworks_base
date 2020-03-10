@@ -2265,8 +2265,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 final ActivityStack focusedStack = display.getFocusedStack();
                 if (focusedStack != null) {
                     result |= focusedStack.resumeTopActivityUncheckedLocked(target, targetOptions);
-                } else if (targetStack == null && display.getStackCount() == 0) {
-                    result |= resumeHomeActivity(null /* prev */, "empty-display",
+                } else if (targetStack == null) {
+                    result |= resumeHomeActivity(null /* prev */, "no-focusable-task",
                             display.mDisplayId);
                 }
             }

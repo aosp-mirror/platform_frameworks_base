@@ -4403,27 +4403,72 @@
         accessibility feature.
     </string>
 
+    <!-- Title for a warning about security implications of enabling an accessibility
+    service. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_enable_service_title">Allow
+        <xliff:g id="service" example="TalkBack">%1$s</xliff:g> to have full control of your
+        device?</string>
+
+    <!-- Warning that the device data will not be encrypted with password or PIN if
+    enabling an accessibility service and there is a secure lock setup. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_enable_service_encryption_warning">If you turn on
+        <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, your device won’t use your screen
+        lock to enhance data encryption.
+    </string>
+
+    <!-- Warning description that explains that it's appropriate for accessibility
+     services to have full control to help users with accessibility needs. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_warning_description">Full control is appropriate for apps
+        that help you with accessibility needs, but not for most apps.
+    </string>
+
+    <!-- Title for the screen control in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_screen_control_title">View and control screen</string>
+
+    <!-- Description for the screen control in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_screen_control_description">It can read all content on the
+        screen and display content over other apps.
+    </string>
+
+    <!-- Title for the action perform in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_action_perform_title">View and perform actions</string>
+
+    <!-- Description for the action perform in accessibility dialog. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_service_action_perform_description">It can track your interactions
+        with an app or a hardware sensor, and interact with apps on your behalf.
+    </string>
+
+    <!-- String for the allow button in accessibility permission dialog. [CHAR LIMIT=10] -->
+    <string name="accessibility_dialog_button_allow">Allow</string>
+    <!-- String for the deny button in accessibility permission dialog. [CHAR LIMIT=10] -->
+    <string name="accessibility_dialog_button_deny">Deny</string>
+
     <!-- Title for accessibility select shortcut menu dialog. [CHAR LIMIT=100] -->
-    <string name="accessibility_select_shortcut_menu_title">Tap the accessibility app you want to use</string>
+    <string name="accessibility_select_shortcut_menu_title">Tap a feature to start using it:</string>
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
     from accessibility button. [CHAR LIMIT=100] -->
-    <string name="accessibility_edit_shortcut_menu_button_title">Choose apps you want to use with
+    <string name="accessibility_edit_shortcut_menu_button_title">Choose apps to use with the
         accessibility button
     </string>
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
     from volume key shortcut. [CHAR LIMIT=100] -->
-    <string name="accessibility_edit_shortcut_menu_volume_title">Choose apps you want to use with
+    <string name="accessibility_edit_shortcut_menu_volume_title">Choose apps to use with the
         volume key shortcut
     </string>
+
+    <!-- Text for showing the warning to user when uncheck the legacy app item in the accessibility
+    shortcut menu, user can aware the service to be disabled. [CHAR LIMIT=100] -->
+    <string name="accessibility_uncheck_legacy_item_warning">
+        <xliff:g id="service_name" example="TalkBack">%s</xliff:g> has been turned off</string>
 
     <!-- Text in button that edit the accessibility shortcut menu, user can delete
     any service item in the menu list. [CHAR LIMIT=100] -->
     <string name="edit_accessibility_shortcut_menu_button">Edit shortcuts</string>
 
-    <!-- Text in button that cancel the accessibility shortcut menu changed status. [CHAR LIMIT=100] -->
-    <string name="cancel_accessibility_shortcut_menu_button">Cancel</string>
+    <!-- Text in button that complete the accessibility shortcut menu changed status. [CHAR LIMIT=100] -->
+    <string name="done_accessibility_shortcut_menu_button">Done</string>
 
     <!-- Text in button that turns off the accessibility shortcut -->
     <string name="disable_accessibility_shortcut">Turn off Shortcut</string>

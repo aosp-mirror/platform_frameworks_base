@@ -14,12 +14,18 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<androidx.recyclerview.widget.RecyclerView
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/list"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="0dp"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:layout_marginTop="@dimen/controls_management_list_margin">
 
-</androidx.recyclerview.widget.RecyclerView>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+    />
+
+</androidx.core.widget.NestedScrollView>

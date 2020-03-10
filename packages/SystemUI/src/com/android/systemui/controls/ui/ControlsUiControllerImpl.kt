@@ -16,18 +16,15 @@
 
 package com.android.systemui.controls.ui
 
-import android.accounts.Account
-import android.accounts.AccountManager
+import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
-import android.os.IBinder
 import android.service.controls.Control
-import android.service.controls.TokenProvider
+import android.service.controls.actions.ControlAction
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -49,8 +46,8 @@ import com.android.systemui.controls.management.ControlsListingController
 import com.android.systemui.controls.management.ControlsProviderSelectorActivity
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.R
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.R
 
 import dagger.Lazy
 
@@ -58,68 +55,6 @@ import java.text.Collator
 
 import javax.inject.Inject
 import javax.inject.Singleton
-
-// TEMP CODE for MOCK
-private const val TOKEN = "https://www.googleapis.com/auth/assistant"
-private const val SCOPE = "oauth2:" + TOKEN
-private var tokenProviderConnection: TokenProviderConnection? = null
-class TokenProviderConnection(
-    val cc: ControlsController,
-    val context: Context,
-    val structure: StructureInfo?
-) : ServiceConnection {
-    private var mTokenProvider: TokenProvider? = null
-
-    override fun onServiceConnected(cName: ComponentName, binder: IBinder) {
-        Thread({
-            Log.i(ControlsUiController.TAG, "TokenProviderConnection connected")
-            mTokenProvider = TokenProvider.Stub.asInterface(binder)
-
-            val mLastAccountName = mTokenProvider?.getAccountName()
-
-            if (mLastAccountName == null || mLastAccountName.isEmpty()) {
-                Log.e(ControlsUiController.TAG, "NO ACCOUNT IS SET. Open HomeMock app")
-            } else {
-                mTokenProvider?.setAuthToken(getAuthToken(mLastAccountName))
-                structure?.let {
-                    cc.subscribeToFavorites(it)
-                }
-            }
-        }, "TokenProviderThread").start()
-    }
-
-    override fun onServiceDisconnected(cName: ComponentName) {
-        mTokenProvider = null
-    }
-
-    fun getAuthToken(accountName: String): String? {
-        val am = AccountManager.get(context)
-        val accounts = am.getAccountsByType("com.google")
-        if (accounts == null || accounts.size == 0) {
-            Log.w(ControlsUiController.TAG, "No com.google accounts found")
-            return null
-        }
-
-        var account: Account? = null
-        for (a in accounts) {
-            if (a.name.equals(accountName)) {
-                account = a
-                break
-            }
-        }
-
-        if (account == null) {
-            account = accounts[0]
-        }
-
-        try {
-            return am.blockingGetAuthToken(account!!, SCOPE, true)
-        } catch (e: Throwable) {
-            Log.e(ControlsUiController.TAG, "Error getting auth token", e)
-            return null
-        }
-    }
-}
 
 private data class ControlKey(val componentName: ComponentName, val controlId: String)
 
@@ -152,7 +87,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var parent: ViewGroup
     private lateinit var lastItems: List<SelectionItem>
     private var popup: ListPopupWindow? = null
-
+    private var activeDialog: Dialog? = null
     private val addControlsItem: SelectionItem
 
     init {
@@ -213,21 +148,10 @@ class ControlsUiControllerImpl @Inject constructor (
                 ControlKey(selectedStructure.componentName, it.ci.controlId)
             }
             listingCallback = createCallback(::showControlsView)
+            controlsController.get().subscribeToFavorites(selectedStructure)
         }
 
         controlsListingController.get().addCallback(listingCallback)
-
-        // Temp code to pass auth
-        tokenProviderConnection = TokenProviderConnection(controlsController.get(), context,
-                selectedStructure)
-
-        val serviceIntent = Intent()
-        serviceIntent.setComponent(ComponentName("com.android.systemui.home.mock",
-                "com.android.systemui.home.mock.AuthService"))
-        if (!context.bindService(serviceIntent, tokenProviderConnection!!,
-                Context.BIND_AUTO_CREATE)) {
-            controlsController.get().subscribeToFavorites(selectedStructure)
-        }
     }
 
     private fun showInitialSetupView(items: List<SelectionItem>) {
@@ -388,10 +312,9 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun hide() {
         Log.d(ControlsUiController.TAG, "hide()")
         popup?.dismiss()
+        activeDialog?.dismiss()
 
         controlsController.get().unsubscribe()
-        context.unbindService(tokenProviderConnection)
-        tokenProviderConnection = null
 
         parent.removeAllViews()
         controlsById.clear()
@@ -418,7 +341,15 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun onActionResponse(componentName: ComponentName, controlId: String, response: Int) {
         val key = ControlKey(componentName, controlId)
         uiExecutor.execute {
-            controlViewsById.get(key)?.actionResponse(response)
+            controlViewsById.get(key)?.let { cvh ->
+                when (response) {
+                    ControlAction.RESPONSE_CHALLENGE_PIN -> {
+                        activeDialog = ChallengeDialogs.createPinDialog(cvh)
+                        activeDialog?.show()
+                    }
+                    else -> cvh.actionResponse(response)
+                }
+            }
         }
     }
 

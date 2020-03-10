@@ -270,11 +270,12 @@ public class ImsConfig {
         /**
          * Requested expiration for Published Offline availability.
          * Value is in Integer format.
-         * @deprecated use {@link ProvisioningManager#KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC}.
+         * @deprecated use
+         *     {@link ProvisioningManager#KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC}.
          */
         @Deprecated
         public static final int PUBLISH_TIMER_EXTENDED =
-                ProvisioningManager.KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC;
+                ProvisioningManager.KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC;
 
         /**
          *

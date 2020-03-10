@@ -239,7 +239,7 @@ public class SampleMediaRoute2ProviderService extends MediaRoute2ProviderService
                 // Set control hints with given sessionHints
                 .setControlHints(sessionHints)
                 .build();
-        notifySessionCreated(sessionInfo, requestId);
+        notifySessionCreated(requestId, sessionInfo);
         publishRoutes();
     }
 

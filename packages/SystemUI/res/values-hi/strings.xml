@@ -92,7 +92,7 @@
     <string name="screenrecord_description" msgid="1123231719680353736">"रिकॉर्ड करते समय, Android सिस्टम आपकी स्क्रीन पर दिखने वाली या चलाई जाने वाली संवेदनशील जानकारी को कैप्चर कर सकता है. इसमें पासवर्ड, पैसे चुकाने से जुड़ी जानकारी, फ़ोटो, मैसेज, और ऑडियो शामिल हैं."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडियो रिकॉर्ड करें"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिवाइस ऑडियो"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"आपके डिवाइस से आने वाली आवाज़. जैसे कि संगीत, कॉल, और रिंगटोन"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"आपके डिवाइस से आने वाली आवाज़ जैसे कि संगीत, कॉल, और रिंगटोन"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"माइक्रोफ़ोन"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिवाइस ऑडियो और माइक्रोफ़ोन"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"शुरू करें"</string>
@@ -558,6 +558,8 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"आपकी वर्क प्रोफ़ाइल का प्रबंधन <xliff:g id="ORGANIZATION">%1$s</xliff:g> करता है. प्रोफ़ाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nआप <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> से भी कनेक्ट हैं, जो आपकी व्यक्तिगत नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent की वजह से अनलॉक रखा गया है"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक डिवाइस लॉक रहेगा"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked_plugged_in (2323452175329362855) -->
+    <skip />
     <string name="hidden_notifications_title" msgid="1782412844777612795">"सूचनाएं ज़्यादा तेज़ी से पाएं"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"  उन्हें अनलॉक किए जाने से पहले देखें"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"रहने दें"</string>
@@ -979,12 +981,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"बाईं ओर सबसे नीचे ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"सबसे नीचे दाईं ओर ले जाएं"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"खारिज करें"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"चैट को पहले से तैयार रखें"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"<xliff:g id="APP_NAME">%1$s</xliff:g> की नई चैट बबल्स की तरह दिखेंगी. इसे खोलने के लिए किसी बबल पर टैप करें. इसे एक जगह से दूसरी जगह ले जाने के लिए, खींचें और छोड़ें.\n\nबबल पर टैप करें"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"इस ऐप्लिकेशन पर बबल्स को बंद करने के लिए \'प्रबंधित करें\' पर टैप करें"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
@@ -994,12 +993,20 @@
     <string name="quick_controls_title" msgid="525285759614231333">"फटाफट नियंत्रण"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"कंट्राेल जोड़ें"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"वह ऐप्लिकेशन चुनें जिससे आप कंट्राेल जोड़ना चाहते हैं"</string>
-    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> कंट्रोल जोड़ा गया.</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> कंट्रोल जोड़े गए.</item>
+    </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"झटपट ऐक्सेस पाने के लिए कंट्राेल चुनें"</string>
     <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"पसंदीदा"</string>
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"सभी"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
-    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
     <skip />
 </resources>

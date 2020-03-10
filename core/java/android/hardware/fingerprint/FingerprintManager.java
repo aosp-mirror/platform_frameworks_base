@@ -129,10 +129,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             super(mac);
         }
 
-        public CryptoObject(@NonNull IdentityCredential credential) {
-            super(credential);
-        }
-
         /**
          * Get {@link Signature} object.
          * @return {@link Signature} object or null if this doesn't contain one.
@@ -160,8 +156,9 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         /**
          * Get {@link IdentityCredential} object.
          * @return {@link IdentityCredential} object or null if this doesn't contain one.
+         * @hide
          */
-        public @Nullable IdentityCredential getIdentityCredential() {
+        public IdentityCredential getIdentityCredential() {
             return super.getIdentityCredential();
         }
     }

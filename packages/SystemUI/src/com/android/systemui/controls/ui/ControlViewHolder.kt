@@ -27,7 +27,6 @@ import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.service.controls.templates.ToggleTemplate
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -57,6 +56,7 @@ class ControlViewHolder(
     lateinit var cws: ControlWithState
     var cancelUpdate: Runnable? = null
     var behavior: Behavior? = null
+    var lastAction: ControlAction? = null
 
     init {
         val ld = layout.getBackground() as LayerDrawable
@@ -98,7 +98,6 @@ class ControlViewHolder(
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
         // TODO: b/150931809 - handle response codes
-        Log.d(ControlsUiController.TAG, "Received response code: $response")
     }
 
     fun setTransientStatus(tempStatus: String) {
@@ -115,6 +114,7 @@ class ControlViewHolder(
     }
 
     fun action(action: ControlAction) {
+        lastAction = action
         controlsController.action(cws.componentName, cws.ci, action)
     }
 

@@ -18,6 +18,7 @@ package android.net;
 import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -34,6 +35,8 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -171,6 +174,23 @@ public class TetheringManager {
     public static final int TETHER_ERROR_ENTITLEMENT_UNKNOWN = 13;
     public static final int TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION = 14;
     public static final int TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION = 15;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = false, value = {
+            TETHER_HARDWARE_OFFLOAD_STOPPED,
+            TETHER_HARDWARE_OFFLOAD_STARTED,
+            TETHER_HARDWARE_OFFLOAD_FAILED,
+    })
+    public @interface TetherOffloadStatus {
+    }
+
+    /** Tethering offload status is stopped. */
+    public static final int TETHER_HARDWARE_OFFLOAD_STOPPED = 0;
+    /** Tethering offload status is started. */
+    public static final int TETHER_HARDWARE_OFFLOAD_STARTED = 1;
+    /** Fail to start tethering offload. */
+    public static final int TETHER_HARDWARE_OFFLOAD_FAILED = 2;
 
     /**
      * Create a TetheringManager object for interacting with the tethering service.
@@ -377,6 +397,9 @@ public class TetheringManager {
 
         @Override
         public void onTetherClientsChanged(List<TetheredClient> clients) { }
+
+        @Override
+        public void onOffloadStatusChanged(int status) { }
 
         public void waitForStarted() {
             mWaitForCallback.block(DEFAULT_TIMEOUT_MS);
@@ -802,6 +825,14 @@ public class TetheringManager {
          * @param clients The new set of tethered clients; the collection is not ordered.
          */
         public void onClientsChanged(@NonNull Collection<TetheredClient> clients) {}
+
+        /**
+         * Called when tethering offload status changes.
+         *
+         * <p>This will be called immediately after the callback is registered.
+         * @param status The offload status.
+         */
+        public void onOffloadStatusChanged(@TetherOffloadStatus int status) {}
     }
 
     /**
@@ -925,6 +956,7 @@ public class TetheringManager {
                         maybeSendTetherableIfacesChangedCallback(parcel.states);
                         maybeSendTetheredIfacesChangedCallback(parcel.states);
                         callback.onClientsChanged(parcel.tetheredClients);
+                        callback.onOffloadStatusChanged(parcel.offloadStatus);
                     });
                 }
 
@@ -959,6 +991,11 @@ public class TetheringManager {
                 @Override
                 public void onTetherClientsChanged(final List<TetheredClient> clients) {
                     executor.execute(() -> callback.onClientsChanged(clients));
+                }
+
+                @Override
+                public void onOffloadStatusChanged(final int status) {
+                    executor.execute(() -> callback.onOffloadStatusChanged(status));
                 }
             };
             getConnector(c -> c.registerTetheringEventCallback(remoteCallback, callerPkg));
@@ -1130,6 +1167,25 @@ public class TetheringManager {
     @SystemApi(client = MODULE_LIBRARIES)
     public boolean isTetheringSupported() {
         final String callerPkg = mContext.getOpPackageName();
+
+        return isTetheringSupported(callerPkg);
+    }
+
+    /**
+     * Check if the device allows for tethering. It may be disabled via {@code ro.tether.denied}
+     * system property, Settings.TETHER_SUPPORTED or due to device configuration. This is useful
+     * for system components that query this API on behalf of an app. In particular, Bluetooth
+     * has @UnsupportedAppUsage calls that will let apps turn on bluetooth tethering if they have
+     * the right permissions, but such an app needs to know whether it can (permissions as well
+     * as support from the device) turn on tethering in the first place to show the appropriate UI.
+     *
+     * @param callerPkg The caller package name, if it is not matching the calling uid,
+     *       SecurityException would be thrown.
+     * @return a boolean - {@code true} indicating Tethering is supported.
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    public boolean isTetheringSupported(@NonNull final String callerPkg) {
 
         final RequestDispatcher dispatcher = new RequestDispatcher();
         final int ret = dispatcher.waitForResult((connector, listener) -> {
