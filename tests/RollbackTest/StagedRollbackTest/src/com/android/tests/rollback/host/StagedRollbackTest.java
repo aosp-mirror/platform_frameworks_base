@@ -22,7 +22,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
-import static org.testng.Assert.assertThrows;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
@@ -136,7 +135,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().reboot();
         runPhase("testBadApkOnly_Phase2");
 
-        assertThrows(AssertionError.class, () -> runPhase("testBadApkOnly_Phase3"));
+        // Trigger rollback and wait for reboot to happen
+        runPhase("testBadApkOnly_Phase3");
+        assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(2)));
+
         getDevice().waitForDeviceAvailable();
 
         runPhase("testBadApkOnly_Phase4");
