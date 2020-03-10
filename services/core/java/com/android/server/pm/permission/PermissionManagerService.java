@@ -40,6 +40,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
 import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
 
+import static com.android.server.pm.ApexManager.MATCH_ACTIVE_PACKAGE;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_PACKAGE_SCANNING;
 import static com.android.server.pm.PackageManagerService.DEBUG_PERMISSIONS;
@@ -128,6 +129,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.pm.ApexManager;
 import com.android.server.pm.PackageManagerServiceUtils;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.SharedUserSetting;
@@ -3321,8 +3323,16 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         if (!privappPermissionsDisable && privilegedPermission && pkg.isPrivileged()
                 && !platformPackage && platformPermission) {
             if (!hasPrivappWhitelistEntry(perm, pkg)) {
-                // Only report violations for apps on system image
-                if (!mSystemReady && !pkgSetting.getPkgState().isUpdatedSystemApp()) {
+                ApexManager apexMgr = ApexManager.getInstance();
+                String apexContainingPkg = apexMgr.getActiveApexPackageNameContainingPackage(pkg);
+
+                // Only enforce whitelist this on boot
+                if (!mSystemReady
+                        // Updated system apps do not need to be whitelisted
+                        && !pkgSetting.getPkgState().isUpdatedSystemApp()
+                        // Apps that are in updated apexs' do not need to be whitelisted
+                        && (apexContainingPkg == null || apexMgr.isFactory(
+                        apexMgr.getPackageInfo(apexContainingPkg, MATCH_ACTIVE_PACKAGE)))) {
                     // it's only a reportable violation if the permission isn't explicitly denied
                     ArraySet<String> deniedPermissions = null;
                     if (pkg.isVendor()) {

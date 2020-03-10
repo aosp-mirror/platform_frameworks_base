@@ -62,6 +62,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -74,7 +75,7 @@ public abstract class ApexManager {
 
     private static final String TAG = "ApexManager";
 
-    static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
+    public static final int MATCH_ACTIVE_PACKAGE = 1 << 0;
     static final int MATCH_FACTORY_PACKAGE = 1 << 1;
 
     private static final Singleton<ApexManager> sApexManagerSingleton =
@@ -163,7 +164,7 @@ public abstract class ApexManager {
      *         is not found.
      */
     @Nullable
-    abstract PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags);
+    public abstract PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags);
 
     /**
      * Retrieves information about all active APEX packages.
@@ -196,6 +197,27 @@ public abstract class ApexManager {
      * @return {@code true} if {@code packageName} is an apex package.
      */
     abstract boolean isApexPackage(String packageName);
+
+    /**
+     * Whether the APEX package is pre-installed or not.
+     *
+     * @param packageInfo the package to check
+     * @return {@code true} if this package is pre-installed, {@code false} otherwise.
+     */
+    public static boolean isFactory(@NonNull PackageInfo packageInfo) {
+        return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /**
+     * Returns the active apex package's name that contains the (apk) package.
+     *
+     * @param containedPackage The (apk) package that might be in a apex
+     * @return the apex package's name of {@code null} if the {@code containedPackage} is not inside
+     *         any apex.
+     */
+    @Nullable
+    public abstract String getActiveApexPackageNameContainingPackage(
+            @NonNull AndroidPackage containedPackage);
 
     /**
      * Retrieves information about an apexd staged session i.e. the internal state used by apexd to
@@ -351,7 +373,7 @@ public abstract class ApexManager {
          * difference between {@code packageName} and {@code apexModuleName}.
          */
         @GuardedBy("mLock")
-        private Map<String, List<String>> mApksInApex = new ArrayMap<>();
+        private ArrayMap<String, List<String>> mApksInApex = new ArrayMap<>();
 
         @GuardedBy("mLock")
         private List<PackageInfo> mAllPackagesCache;
@@ -366,7 +388,7 @@ public abstract class ApexManager {
          * the apk container to {@code apexModuleName} of the apex-payload inside.
          */
         @GuardedBy("mLock")
-        private Map<String, String> mPackageNameToApexModuleName;
+        private ArrayMap<String, String> mPackageNameToApexModuleName;
 
         ApexManagerImpl(IApexService apexService) {
             mApexService = apexService;
@@ -380,16 +402,6 @@ public abstract class ApexManager {
          */
         private static boolean isActive(PackageInfo packageInfo) {
             return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0;
-        }
-
-        /**
-         * Whether the APEX package is pre-installed or not.
-         *
-         * @param packageInfo the package to check
-         * @return {@code true} if this package is pre-installed, {@code false} otherwise.
-         */
-        private static boolean isFactory(PackageInfo packageInfo) {
-            return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
         }
 
         @Override
@@ -503,7 +515,9 @@ public abstract class ApexManager {
         }
 
         @Override
-        @Nullable PackageInfo getPackageInfo(String packageName, @PackageInfoFlags int flags) {
+        @Nullable
+        public PackageInfo getPackageInfo(String packageName,
+                @PackageInfoFlags int flags) {
             Preconditions.checkState(mAllPackagesCache != null,
                     "APEX packages have not been scanned");
             boolean matchActive = (flags & MATCH_ACTIVE_PACKAGE) != 0;
@@ -561,6 +575,36 @@ public abstract class ApexManager {
                 }
             }
             return false;
+        }
+
+        @Override
+        @Nullable
+        public String getActiveApexPackageNameContainingPackage(
+                @NonNull AndroidPackage containedPackage) {
+            Preconditions.checkState(mPackageNameToApexModuleName != null,
+                    "APEX packages have not been scanned");
+
+            Objects.requireNonNull(containedPackage);
+
+            synchronized (mLock) {
+                int numApksInApex = mApksInApex.size();
+                for (int apkInApexNum = 0; apkInApexNum < numApksInApex; apkInApexNum++) {
+                    if (mApksInApex.valueAt(apkInApexNum).contains(
+                            containedPackage.getPackageName())) {
+                        String apexModuleName = mApksInApex.keyAt(apkInApexNum);
+
+                        int numApexPkgs = mPackageNameToApexModuleName.size();
+                        for (int apexPkgNum = 0; apexPkgNum < numApexPkgs; apexPkgNum++) {
+                            if (mPackageNameToApexModuleName.valueAt(apexPkgNum).equals(
+                                    apexModuleName)) {
+                                return mPackageNameToApexModuleName.keyAt(apexPkgNum);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         @Override
@@ -893,7 +937,7 @@ public abstract class ApexManager {
         }
 
         @Override
-        PackageInfo getPackageInfo(String packageName, int flags) {
+        public PackageInfo getPackageInfo(String packageName, int flags) {
             return null;
         }
 
@@ -915,6 +959,15 @@ public abstract class ApexManager {
         @Override
         boolean isApexPackage(String packageName) {
             return false;
+        }
+
+        @Override
+        @Nullable
+        public String getActiveApexPackageNameContainingPackage(
+                @NonNull AndroidPackage containedPackage) {
+            Objects.requireNonNull(containedPackage);
+
+            return null;
         }
 
         @Override
