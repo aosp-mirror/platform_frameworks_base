@@ -53,6 +53,12 @@ public interface BatteryController extends DemoMode, Dumpable,
     boolean isAodPowerSave();
 
     /**
+     * Set reverse state.
+     * @param isReverse true if turn on reverse, false otherwise
+     */
+    default void setReverseState(boolean isReverse) {}
+
+    /**
      * A listener that will be notified whenever a change in battery level or power save mode has
      * occurred.
      */
@@ -62,6 +68,9 @@ public interface BatteryController extends DemoMode, Dumpable,
         }
 
         default void onPowerSaveChanged(boolean isPowerSave) {
+        }
+
+        default void onReverseChanged(boolean isReverse, int level, String name) {
         }
     }
 
