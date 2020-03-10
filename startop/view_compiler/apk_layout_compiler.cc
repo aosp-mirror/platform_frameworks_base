@@ -100,10 +100,12 @@ void CompileApkAssetsLayouts(const std::unique_ptr<const android::ApkAssets>& as
       dex_file.MakeClass(StringPrintf("%s.CompiledView", package_name.c_str()))};
   std::vector<dex::MethodBuilder> methods;
 
-  assets->ForEachFile("res/", [&](const android::StringPiece& s, android::FileType) {
+  assets->GetAssetsProvider()->ForEachFile("res/", [&](const android::StringPiece& s,
+                                                       android::FileType) {
     if (s == "layout") {
       auto path = StringPrintf("res/%s/", s.to_string().c_str());
-      assets->ForEachFile(path, [&](const android::StringPiece& layout_file, android::FileType) {
+      assets->GetAssetsProvider()->ForEachFile(path, [&](const android::StringPiece& layout_file,
+                                                         android::FileType) {
         auto layout_path = StringPrintf("%s%s", path.c_str(), layout_file.to_string().c_str());
         android::ApkAssetsCookie cookie = android::kInvalidCookie;
         auto asset = resources.OpenNonAsset(layout_path, android::Asset::ACCESS_RANDOM, &cookie);

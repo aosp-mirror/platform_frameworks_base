@@ -463,7 +463,7 @@ std::unique_ptr<AssetDir> AssetManager2::OpenDir(const std::string& dirname) con
       files->add(info);
     };
 
-    if (!apk_assets->ForEachFile(full_path, func)) {
+    if (!apk_assets->GetAssetsProvider()->ForEachFile(full_path, func)) {
       return {};
     }
   }
@@ -487,7 +487,7 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
       continue;
     }
 
-    std::unique_ptr<Asset> asset = apk_assets_[i]->Open(filename, mode);
+    std::unique_ptr<Asset> asset = apk_assets_[i]->GetAssetsProvider()->Open(filename, mode);
     if (asset) {
       if (out_cookie != nullptr) {
         *out_cookie = i;
@@ -508,7 +508,7 @@ std::unique_ptr<Asset> AssetManager2::OpenNonAsset(const std::string& filename,
   if (cookie < 0 || static_cast<size_t>(cookie) >= apk_assets_.size()) {
     return {};
   }
-  return apk_assets_[cookie]->Open(filename, mode);
+  return apk_assets_[cookie]->GetAssetsProvider()->Open(filename, mode);
 }
 
 ApkAssetsCookie AssetManager2::FindEntry(uint32_t resid, uint16_t density_override,

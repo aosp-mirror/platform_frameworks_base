@@ -212,6 +212,22 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
                 null);
     }
 
+    /**
+     * Creates a ResourcesProvider from a directory path.
+     *
+     * File-based resources will be resolved within the directory as if the directory is an APK.
+     *
+     * @param path the path of the directory to treat as an APK
+     * @param assetsProvider the assets provider that overrides the loading of file-based resources
+     */
+    @NonNull
+    public static ResourcesProvider loadFromDirectory(@NonNull String path,
+            @Nullable AssetsProvider assetsProvider) throws IOException {
+        return new ResourcesProvider(ApkAssets.loadFromDir(path, ApkAssets.PROPERTY_LOADER),
+                assetsProvider);
+    }
+
+
     private ResourcesProvider(@NonNull ApkAssets apkAssets,
             @Nullable AssetsProvider assetsProvider) {
         this.mApkAssets = apkAssets;

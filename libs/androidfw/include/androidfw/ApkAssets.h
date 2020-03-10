@@ -35,13 +35,46 @@ namespace android {
 
 class LoadedIdmap;
 
+// Interface for retrieving assets provided by an ApkAssets.
+class AssetsProvider {
+ public:
+  virtual ~AssetsProvider() = default;
+
+  // Opens a file for reading.
+  std::unique_ptr<Asset> Open(const std::string& path,
+                              Asset::AccessMode mode = Asset::AccessMode::ACCESS_RANDOM,
+                              bool* file_exists = nullptr) const {
+    return OpenInternal(path, mode, file_exists);
+  }
+
+  // Iterate over all files and directories provided by the zip. The order of iteration is stable.
+  virtual bool ForEachFile(const std::string& /* path */,
+                           const std::function<void(const StringPiece&, FileType)>& /* f */) const {
+    return true;
+  }
+
+ protected:
+  AssetsProvider() = default;
+
+  virtual std::unique_ptr<Asset> OpenInternal(const std::string& path,
+                                              Asset::AccessMode mode,
+                                              bool* file_exists) const = 0;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AssetsProvider);
+};
+
+class ZipAssetsProvider;
+
 // Holds an APK.
 class ApkAssets {
+ public:
   // This means the data extends to the end of the file.
   static constexpr off64_t kUnknownLength = -1;
 
- public:
-  // Creates an ApkAssets from the zip path.
+  // Creates an ApkAssets.
+  // If `system` is true, the package is marked as a system package, and allows some functions to
+  // filter out this package when computing what configurations/resources are available.
   static std::unique_ptr<const ApkAssets> Load(const std::string& path,
                                                package_property_t flags = 0U);
 
@@ -75,17 +108,20 @@ class ApkAssets {
   static std::unique_ptr<const ApkAssets> LoadOverlay(const std::string& idmap_path,
                                                       package_property_t flags = 0U);
 
+  // Creates an ApkAssets from the directory path. File-based resources are read within the
+  // directory as if the directory is an APK.
+  static std::unique_ptr<const ApkAssets> LoadFromDir(const std::string& path,
+                                                      package_property_t flags = 0U);
+
   // Creates a totally empty ApkAssets with no resources table and no file entries.
   static std::unique_ptr<const ApkAssets> LoadEmpty(package_property_t flags = 0U);
 
-  std::unique_ptr<Asset> Open(const std::string& path,
-                              Asset::AccessMode mode = Asset::AccessMode::ACCESS_RANDOM) const;
-
-  bool ForEachFile(const std::string& path,
-                   const std::function<void(const StringPiece&, FileType)>& f) const;
-
   inline const std::string& GetPath() const {
     return path_;
+  }
+
+  inline const AssetsProvider* GetAssetsProvider() const {
+    return assets_provider_.get();
   }
 
   // This is never nullptr.
@@ -122,7 +158,7 @@ class ApkAssets {
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
 
-  static std::unique_ptr<const ApkAssets> LoadImpl(ZipArchiveHandle unmanaged_handle,
+  static std::unique_ptr<const ApkAssets> LoadImpl(std::unique_ptr<const AssetsProvider> assets,
                                                    const std::string& path,
                                                    std::unique_ptr<Asset> idmap_asset,
                                                    std::unique_ptr<const LoadedIdmap> idmap,
@@ -132,14 +168,12 @@ class ApkAssets {
                                                         const std::string& path,
                                                         package_property_t property_flags);
 
-  ApkAssets(ZipArchiveHandle unmanaged_handle,
+  ApkAssets(std::unique_ptr<const AssetsProvider> assets_provider,
             std::string path,
             time_t last_mod_time,
             package_property_t property_flags);
 
-  using ZipArchivePtr = std::unique_ptr<ZipArchive, void (*)(ZipArchiveHandle)>;
-
-  ZipArchivePtr zip_handle_;
+  std::unique_ptr<const AssetsProvider> assets_provider_;
   const std::string path_;
   time_t last_mod_time_;
   package_property_t property_flags_ = 0U;

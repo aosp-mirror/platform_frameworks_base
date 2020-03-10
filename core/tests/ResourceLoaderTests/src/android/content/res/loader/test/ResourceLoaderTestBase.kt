@@ -28,6 +28,8 @@ import org.junit.After
 import org.junit.Before
 import java.io.Closeable
 import java.io.FileOutputStream
+import java.io.File
+import java.util.zip.ZipInputStream
 
 abstract class ResourceLoaderTestBase {
     protected val PROVIDER_ONE: String = "FrameworksResourceLoaderTests_ProviderOne"
@@ -134,7 +136,41 @@ abstract class ResourceLoaderTestBase {
         DataType.SPLIT -> {
             ResourcesProvider.loadFromSplit(context, "${this}_Split")
         }
+        DataType.DIRECTORY -> {
+            ResourcesProvider.loadFromDirectory(zipToDir("${this}.apk").absolutePath, null)
+        }
     }
+
+
+    /** Extracts an archive-based asset into a directory on disk. */
+    private fun zipToDir(name : String, suffix : String = "") : File {
+        val root = File(context.filesDir, name.split('.')[0] + suffix)
+        if (root.exists()) {
+            return root
+        }
+
+        root.mkdir()
+        ZipInputStream(context.assets.open(name)).use { zis ->
+            while (true) {
+                val entry = zis.nextEntry ?: break
+                val file = File(root, entry.name)
+                if (entry.isDirectory) {
+                    continue
+                }
+
+                file.parentFile.mkdirs()
+                file.outputStream().use { output ->
+                    var b = zis.read()
+                    while (b != -1) {
+                        output.write(b)
+                        b = zis.read()
+                    }
+                }
+            }
+        }
+        return root
+    }
+
 
     /** Loads the asset into a temporary file stored in RAM. */
     private fun loadAssetIntoMemory(asset: AssetFileDescriptor,
@@ -175,5 +211,6 @@ abstract class ResourceLoaderTestBase {
         ARSC_RAM_MEMORY,
         ARSC_RAM_MEMORY_OFFSETS,
         SPLIT,
+        DIRECTORY
     }
 }

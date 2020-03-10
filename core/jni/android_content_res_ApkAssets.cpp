@@ -48,6 +48,9 @@ enum : format_type_t {
 
   // The path used to load the apk assets represents an resources.arsc file.
   FORMAT_ARSC = 2,
+
+  // The path used to load the apk assets represents the a directory.
+  FORMAT_DIRECTORY = 3,
 };
 
 static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
@@ -69,6 +72,9 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t forma
       break;
     case FORMAT_ARSC:
       apk_assets = ApkAssets::LoadTable(path.c_str(), property_flags);
+      break;
+    case FORMAT_DIRECTORY:
+      apk_assets = ApkAssets::LoadFromDir(path.c_str(), property_flags);
       break;
     default:
       const std::string error_msg = base::StringPrintf("Unsupported format type %d", format);
@@ -224,8 +230,8 @@ static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring fil
   }
 
   const ApkAssets* apk_assets = reinterpret_cast<const ApkAssets*>(ptr);
-  std::unique_ptr<Asset> asset = apk_assets->Open(path_utf8.c_str(),
-                                                  Asset::AccessMode::ACCESS_RANDOM);
+  std::unique_ptr<Asset> asset = apk_assets->GetAssetsProvider()->Open(
+      path_utf8.c_str(),Asset::AccessMode::ACCESS_RANDOM);
   if (asset == nullptr) {
     jniThrowException(env, "java/io/FileNotFoundException", path_utf8.c_str());
     return 0;

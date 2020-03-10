@@ -104,7 +104,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
                     listOf(DataType.APK_DISK_FD, DataType.APK_DISK_FD_OFFSETS, DataType.APK_RAM_FD,
                             DataType.APK_RAM_OFFSETS, DataType.ARSC_DISK_FD,
                             DataType.ARSC_DISK_FD_OFFSETS, DataType.ARSC_RAM_MEMORY,
-                            DataType.ARSC_RAM_MEMORY_OFFSETS, DataType.SPLIT)
+                            DataType.ARSC_RAM_MEMORY_OFFSETS, DataType.SPLIT, DataType.DIRECTORY)
             )
 
             // Test resolution of file-based resources and assets with no assets provider.
@@ -164,7 +164,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
                             "layout" to "TableLayout",
                             "drawablePng" to Color.WHITE.toString()),
                     listOf(DataType.APK_DISK_FD, DataType.APK_DISK_FD_OFFSETS, DataType.APK_RAM_FD,
-                            DataType.APK_RAM_OFFSETS, DataType.SPLIT)
+                            DataType.APK_RAM_OFFSETS, DataType.SPLIT, DataType.DIRECTORY)
             )
 
             return parameters.flatMap { parameter ->

@@ -86,11 +86,15 @@ public final class ApkAssets {
     /** The path used to load the apk assets represents an resources.arsc file. */
     private static final int FORMAT_ARSC = 2;
 
+    /** the path used to load the apk assets represents a directory. */
+    private static final int FORMAT_DIR = 3;
+
     // Format types that change how the apk assets are loaded.
     @IntDef(prefix = { "FORMAT_" }, value = {
             FORMAT_APK,
             FORMAT_IDMAP,
             FORMAT_ARSC,
+            FORMAT_DIR
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FormatType {}
@@ -224,6 +228,20 @@ public final class ApkAssets {
             @NonNull String friendlyName, long offset, long length, @PropertyFlags int flags)
             throws IOException {
         return new ApkAssets(FORMAT_ARSC, fd, friendlyName, offset, length, flags);
+    }
+
+    /**
+     * Creates a new ApkAssets instance from the given directory path. The directory should have the
+     * file structure of an APK.
+     *
+     * @param path The path to a directory on disk.
+     * @param flags flags that change the behavior of loaded apk assets
+     * @return a new instance of ApkAssets.
+     * @throws IOException if a disk I/O error or parsing error occurred.
+     */
+    public static @NonNull ApkAssets loadFromDir(@NonNull String path,
+            @PropertyFlags int flags) throws IOException {
+        return new ApkAssets(FORMAT_DIR, path, flags);
     }
 
     /**

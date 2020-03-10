@@ -159,6 +159,7 @@ private:
     /* AssetManager needs access to our "create" functions */
     friend class AssetManager;
     friend class ApkAssets;
+    friend class ZipAssetsProvider;
 
     /*
      * Create the asset from a named file on disk.
