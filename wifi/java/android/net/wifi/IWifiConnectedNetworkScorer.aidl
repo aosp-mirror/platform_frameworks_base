@@ -16,7 +16,7 @@
 
 package android.net.wifi;
 
-import android.net.wifi.IScoreChangeCallback;
+import android.net.wifi.IScoreUpdateObserver;
 
 /**
  * Interface for Wi-Fi connected network scorer.
@@ -25,9 +25,9 @@ import android.net.wifi.IScoreChangeCallback;
  */
 oneway interface IWifiConnectedNetworkScorer
 {
-    void start(int sessionId);
+    void onStart(int sessionId);
 
-    void stop(int sessionId);
+    void onStop(int sessionId);
 
-    void setScoreChangeCallback(IScoreChangeCallback cbImpl);
+    void onSetScoreUpdateObserver(IScoreUpdateObserver observerImpl);
 }
