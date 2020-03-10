@@ -4661,6 +4661,7 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int RECOMPUTE_FOCUS = 61;
         public static final int ON_POINTER_DOWN_OUTSIDE_FOCUS = 62;
         public static final int LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED = 63;
+        public static final int WINDOW_STATE_BLAST_SYNC_TIMEOUT = 64;
 
         /**
          * Used to denote that an integer field in a message will not be used.
@@ -5038,6 +5039,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mGlobalLock) {
                         final DisplayContent displayContent = (DisplayContent) msg.obj;
                         displayContent.layoutAndAssignWindowLayersIfNeeded();
+                    }
+                    break;
+                }
+                case WINDOW_STATE_BLAST_SYNC_TIMEOUT: {
+                    synchronized (mGlobalLock) {
+                      final WindowState ws = (WindowState) msg.obj;
+                      ws.finishDrawing(null);
                     }
                     break;
                 }

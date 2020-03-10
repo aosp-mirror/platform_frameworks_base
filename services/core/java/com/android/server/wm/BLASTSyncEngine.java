@@ -114,7 +114,6 @@ class BLASTSyncEngine {
         return st.addToSync(wc);
     }
 
-    // TODO(b/148476626): TIMEOUTS!
     void setReady(int id) {
         final SyncState st = mPendingSyncs.get(id);
         st.setReady();
