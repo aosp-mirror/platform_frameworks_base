@@ -20,9 +20,11 @@ import static android.view.RemoteAnimationTargetProto.CLIP_RECT;
 import static android.view.RemoteAnimationTargetProto.CONTENT_INSETS;
 import static android.view.RemoteAnimationTargetProto.IS_TRANSLUCENT;
 import static android.view.RemoteAnimationTargetProto.LEASH;
+import static android.view.RemoteAnimationTargetProto.LOCAL_BOUNDS;
 import static android.view.RemoteAnimationTargetProto.MODE;
 import static android.view.RemoteAnimationTargetProto.POSITION;
 import static android.view.RemoteAnimationTargetProto.PREFIX_ORDER_INDEX;
+import static android.view.RemoteAnimationTargetProto.SCREEN_SPACE_BOUNDS;
 import static android.view.RemoteAnimationTargetProto.SOURCE_CONTAINER_BOUNDS;
 import static android.view.RemoteAnimationTargetProto.START_BOUNDS;
 import static android.view.RemoteAnimationTargetProto.START_LEASH;
@@ -130,17 +132,36 @@ public class RemoteAnimationTarget implements Parcelable {
      * The source position of the app, in screen spaces coordinates. If the position of the leash
      * is modified from the controlling app, any animation transform needs to be offset by this
      * amount.
+     * @deprecated Use {@link #localBounds} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public final Point position;
+
+    /**
+     * Bounds of the target relative to its parent.
+     * When the app target animating on its parent, we need to use the local coordinates relative to
+     * its parent with {@code localBounds.left} & {@code localBounds.top} rather than using
+     * {@code position} in screen coordinates.
+     */
+    public final Rect localBounds;
 
     /**
      * The bounds of the source container the app lives in, in screen space coordinates. If the crop
      * of the leash is modified from the controlling app, it needs to take the source container
      * bounds into account when calculating the crop.
+     * @deprecated Renamed to {@link #screenSpaceBounds}
      */
+    @Deprecated
     @UnsupportedAppUsage
     public final Rect sourceContainerBounds;
+
+    /**
+     * Bounds of the target relative to the screen. If the crop of the leash is modified from the
+     * controlling app, it needs to take the screen space bounds into account when calculating the
+     * crop.
+     */
+    public final Rect screenSpaceBounds;
 
     /**
      * The starting bounds of the source container in screen space coordinates. This is {@code null}
@@ -165,7 +186,8 @@ public class RemoteAnimationTarget implements Parcelable {
 
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
             Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
-            Rect sourceContainerBounds, WindowConfiguration windowConfig, boolean isNotInRecents,
+            Rect localBounds, Rect screenSpaceBounds,
+            WindowConfiguration windowConfig, boolean isNotInRecents,
             SurfaceControl startLeash, Rect startBounds) {
         this.mode = mode;
         this.taskId = taskId;
@@ -175,7 +197,9 @@ public class RemoteAnimationTarget implements Parcelable {
         this.contentInsets = new Rect(contentInsets);
         this.prefixOrderIndex = prefixOrderIndex;
         this.position = new Point(position);
-        this.sourceContainerBounds = new Rect(sourceContainerBounds);
+        this.localBounds = new Rect(localBounds);
+        this.sourceContainerBounds = new Rect(screenSpaceBounds);
+        this.screenSpaceBounds = new Rect(screenSpaceBounds);
         this.windowConfiguration = windowConfig;
         this.isNotInRecents = isNotInRecents;
         this.startLeash = startLeash;
@@ -191,7 +215,9 @@ public class RemoteAnimationTarget implements Parcelable {
         contentInsets = in.readParcelable(null);
         prefixOrderIndex = in.readInt();
         position = in.readParcelable(null);
+        localBounds = in.readParcelable(null);
         sourceContainerBounds = in.readParcelable(null);
+        screenSpaceBounds = in.readParcelable(null);
         windowConfiguration = in.readParcelable(null);
         isNotInRecents = in.readBoolean();
         startLeash = in.readParcelable(null);
@@ -213,7 +239,9 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeParcelable(contentInsets, 0 /* flags */);
         dest.writeInt(prefixOrderIndex);
         dest.writeParcelable(position, 0 /* flags */);
+        dest.writeParcelable(localBounds, 0 /* flags */);
         dest.writeParcelable(sourceContainerBounds, 0 /* flags */);
+        dest.writeParcelable(screenSpaceBounds, 0 /* flags */);
         dest.writeParcelable(windowConfiguration, 0 /* flags */);
         dest.writeBoolean(isNotInRecents);
         dest.writeParcelable(startLeash, 0 /* flags */);
@@ -229,6 +257,8 @@ public class RemoteAnimationTarget implements Parcelable {
         pw.print(" prefixOrderIndex="); pw.print(prefixOrderIndex);
         pw.print(" position="); position.printShortString(pw);
         pw.print(" sourceContainerBounds="); sourceContainerBounds.printShortString(pw);
+        pw.print(" screenSpaceBounds="); screenSpaceBounds.printShortString(pw);
+        pw.print(" localBounds="); localBounds.printShortString(pw);
         pw.println();
         pw.print(prefix); pw.print("windowConfiguration="); pw.println(windowConfiguration);
         pw.print(prefix); pw.print("leash="); pw.println(leash);
@@ -245,6 +275,8 @@ public class RemoteAnimationTarget implements Parcelable {
         proto.write(PREFIX_ORDER_INDEX, prefixOrderIndex);
         position.dumpDebug(proto, POSITION);
         sourceContainerBounds.dumpDebug(proto, SOURCE_CONTAINER_BOUNDS);
+        screenSpaceBounds.dumpDebug(proto, SCREEN_SPACE_BOUNDS);
+        localBounds.dumpDebug(proto, LOCAL_BOUNDS);
         windowConfiguration.dumpDebug(proto, WINDOW_CONFIGURATION);
         if (startLeash != null) {
             startLeash.dumpDebug(proto, START_LEASH);

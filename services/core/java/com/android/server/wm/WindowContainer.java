@@ -2103,9 +2103,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         // Delaying animation start isn't compatible with remote animations at all.
         if (controller != null && !mSurfaceAnimator.isAnimationStartDelayed()) {
+            final Rect localBounds = new Rect(mTmpRect);
+            localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
             final RemoteAnimationController.RemoteAnimationRecord adapters =
-                    controller.createRemoteAnimationRecord(this, mTmpPoint, mTmpRect,
-                            (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+                    controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
+                            mTmpRect, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
             resultAdapters = new Pair<>(adapters.mAdapter, adapters.mThumbnailAdapter);
         } else if (isChanging) {
             final float durationScale = mWmService.getTransitionAnimationScaleLocked();
