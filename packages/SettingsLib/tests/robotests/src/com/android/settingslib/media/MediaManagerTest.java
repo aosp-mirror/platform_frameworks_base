@@ -136,4 +136,14 @@ public class MediaManagerTest {
 
         assertThat(device).isNull();
     }
+
+    @Test
+    public void dispatchOnRequestFailed_registerCallback_shouldDispatchCallback() {
+        mMediaManager.registerCallback(mCallback);
+
+        mMediaManager.dispatchOnRequestFailed(1);
+
+        verify(mCallback).onRequestFailed(1);
+    }
+
 }
