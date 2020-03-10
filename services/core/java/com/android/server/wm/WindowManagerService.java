@@ -6135,7 +6135,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
 
                 mRoot.forAllWindows((w) -> {
-                    if ((!visibleOnly || w.mWinAnimator.getShown())
+                    if ((!visibleOnly || w.isVisible())
                             && (!appsOnly || w.mActivityRecord != null)) {
                         windows.add(w);
                     }
