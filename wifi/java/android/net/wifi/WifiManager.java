@@ -2563,7 +2563,7 @@ public class WifiManager {
      *        valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
      * @return {@code true} if supported, {@code false} otherwise.
      */
-    public boolean isWifiStandardSupported(@ScanResult.WifiStandard int standard) {
+    public boolean isWifiStandardSupported(@WifiAnnotations.WifiStandard int standard) {
         try {
             return mService.isWifiStandardSupported(standard);
         } catch (RemoteException e) {
