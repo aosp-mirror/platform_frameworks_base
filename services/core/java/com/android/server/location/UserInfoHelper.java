@@ -18,8 +18,8 @@ package com.android.server.location;
 
 import static android.os.UserManager.DISALLOW_SHARE_LOCATION;
 
-import static com.android.server.LocationManagerService.D;
-import static com.android.server.LocationManagerService.TAG;
+import static com.android.server.location.LocationManagerService.D;
+import static com.android.server.location.LocationManagerService.TAG;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;

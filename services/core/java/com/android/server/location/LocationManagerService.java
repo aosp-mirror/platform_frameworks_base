@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.location;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
@@ -92,25 +92,13 @@ import com.android.internal.location.ProviderRequest;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.AbstractLocationProvider;
+import com.android.server.FgThread;
+import com.android.server.LocalServices;
+import com.android.server.PendingIntentUtils;
+import com.android.server.SystemService;
 import com.android.server.location.AbstractLocationProvider.State;
-import com.android.server.location.AppForegroundHelper;
-import com.android.server.location.AppOpsHelper;
-import com.android.server.location.GeocoderProxy;
-import com.android.server.location.GeofenceManager;
-import com.android.server.location.GeofenceProxy;
-import com.android.server.location.HardwareActivityRecognitionProxy;
-import com.android.server.location.LocationFudger;
-import com.android.server.location.LocationProviderProxy;
-import com.android.server.location.LocationRequestStatistics;
 import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
-import com.android.server.location.LocationUsageLogger;
-import com.android.server.location.MockProvider;
-import com.android.server.location.MockableLocationProvider;
-import com.android.server.location.PassiveProvider;
-import com.android.server.location.SettingsHelper;
-import com.android.server.location.UserInfoHelper;
 import com.android.server.location.UserInfoHelper.UserListener;
 import com.android.server.location.gnss.GnssManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -1627,8 +1615,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             // For now, make sure callers have supplied an attribution tag for use with
             // AppOpsManager. This might be relaxed in the future.
             final List<WorkChain> workChains = workSource.getWorkChains();
-            return workChains != null && !workChains.isEmpty() &&
-                    workChains.get(0).getAttributionTag() != null;
+            return workChains != null && !workChains.isEmpty()
+                    && workChains.get(0).getAttributionTag() != null;
         }
     }
 
