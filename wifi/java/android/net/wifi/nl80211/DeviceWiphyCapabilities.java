@@ -19,6 +19,8 @@ package android.net.wifi.nl80211;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.wifi.ScanResult;
+import android.net.wifi.WifiAnnotations.ChannelWidth;
+import android.net.wifi.WifiAnnotations.WifiStandard;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -27,6 +29,9 @@ import java.util.Objects;
 
 /**
  * DeviceWiphyCapabilities for wificond
+ *
+ * Contains the WiFi physical layer attributes and capabilities of the device.
+ * It is used to collect these attributes from the device driver via wificond.
  *
  * @hide
  */
@@ -61,7 +66,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
      *        valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
      * @return {@code true} if supported, {@code false} otherwise.
      */
-    public boolean isWifiStandardSupported(int standard) {
+    public boolean isWifiStandardSupported(@WifiStandard int standard) {
         switch (standard) {
             case ScanResult.WIFI_STANDARD_LEGACY:
                 return true;
@@ -84,7 +89,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
      *        valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
      * @param support {@code true} if supported, {@code false} otherwise.
      */
-    public void setWifiStandardSupport(int standard, boolean support) {
+    public void setWifiStandardSupport(@WifiStandard int standard, boolean support) {
         switch (standard) {
             case ScanResult.WIFI_STANDARD_11N:
                 m80211nSupported = support;
@@ -107,7 +112,7 @@ public final class DeviceWiphyCapabilities implements Parcelable {
      *
      * @return {@code true} if supported, {@code false} otherwise.
      */
-    public boolean isChannelWidthSupported(int chWidth) {
+    public boolean isChannelWidthSupported(@ChannelWidth int chWidth) {
         switch (chWidth) {
             case ScanResult.CHANNEL_WIDTH_20MHZ:
                 return true;
@@ -131,8 +136,10 @@ public final class DeviceWiphyCapabilities implements Parcelable {
      * @param chWidth valid values are {@link ScanResult#CHANNEL_WIDTH_160MHZ} and
      *        {@link ScanResult#CHANNEL_WIDTH_80MHZ_PLUS_MHZ}
      * @param support {@code true} if supported, {@code false} otherwise.
+     *
+     * @hide
      */
-    public void setChannelWidthSupported(int chWidth, boolean support) {
+    public void setChannelWidthSupported(@ChannelWidth int chWidth, boolean support) {
         switch (chWidth) {
             case ScanResult.CHANNEL_WIDTH_160MHZ:
                 mChannelWidth160MhzSupported = support;
@@ -159,6 +166,8 @@ public final class DeviceWiphyCapabilities implements Parcelable {
      * Set maximum number of transmit spatial streams
      *
      * @param streams number of spatial streams
+     *
+     * @hide
      */
     public void setMaxNumberTxSpatialStreams(int streams) {
         mMaxNumberTxSpatialStreams = streams;
@@ -177,6 +186,8 @@ public final class DeviceWiphyCapabilities implements Parcelable {
      * Set maximum number of receive spatial streams
      *
      * @param streams number of streams
+     *
+     * @hide
      */
     public void setMaxNumberRxSpatialStreams(int streams) {
         mMaxNumberRxSpatialStreams = streams;
