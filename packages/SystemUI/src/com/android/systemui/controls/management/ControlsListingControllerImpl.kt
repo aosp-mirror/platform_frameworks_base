@@ -88,6 +88,8 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     init {
         serviceListing.addCallback(serviceListingCallback)
+        serviceListing.setListening(true)
+        serviceListing.reload()
     }
 
     override fun changeUser(newUser: UserHandle) {
@@ -95,11 +97,12 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
             callbacks.clear()
             availableServices = emptyList()
             serviceListing.setListening(false)
-            serviceListing.removeCallback(serviceListingCallback)
             currentUserId = newUser.identifier
             val contextForUser = context.createContextAsUser(newUser, 0)
             serviceListing = serviceListingBuilder(contextForUser)
             serviceListing.addCallback(serviceListingCallback)
+            serviceListing.setListening(true)
+            serviceListing.reload()
         }
     }
 
@@ -118,12 +121,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
         backgroundExecutor.execute {
             Log.d(TAG, "Subscribing callback")
             callbacks.add(listener)
-            if (callbacks.size == 1) {
-                serviceListing.setListening(true)
-                serviceListing.reload()
-            } else {
-                listener.onServicesUpdated(getCurrentServices())
-            }
+            listener.onServicesUpdated(getCurrentServices())
         }
     }
 
@@ -136,9 +134,6 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
         backgroundExecutor.execute {
             Log.d(TAG, "Unsubscribing callback")
             callbacks.remove(listener)
-            if (callbacks.size == 0) {
-                serviceListing.setListening(false)
-            }
         }
     }
 
