@@ -41,7 +41,11 @@ import android.app.IActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.res.Resources;
+import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
+import android.os.Handler;
+import android.os.PowerManager;
+import android.service.dreams.IDreamManager;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -57,12 +61,10 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
@@ -212,15 +214,17 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
-        TestableNotificationInterruptionStateProvider interruptionStateProvider =
-                new TestableNotificationInterruptionStateProvider(mContext,
+        TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
+                new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
+                        mock(PowerManager.class),
+                        mock(IDreamManager.class),
+                        mock(AmbientDisplayConfiguration.class),
                         mock(NotificationFilter.class),
                         mock(StatusBarStateController.class),
-                        mock(BatteryController.class));
-        interruptionStateProvider.setUpWithPresenter(
-                mock(NotificationPresenter.class),
-                mock(HeadsUpManager.class),
-                mock(NotificationInterruptionStateProvider.HeadsUpSuppressor.class));
+                        mock(BatteryController.class),
+                        mock(HeadsUpManager.class),
+                        mock(Handler.class)
+                );
         mBubbleData = new BubbleData(mContext);
         when(mFeatureFlagsNewPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
         mBubbleController = new TestableBubbleController(

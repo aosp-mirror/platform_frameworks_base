@@ -31,10 +31,8 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
-import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
@@ -44,6 +42,9 @@ import com.android.systemui.statusbar.notification.collection.provider.HighPrior
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerImpl;
 import com.android.systemui.statusbar.notification.init.NotificationsControllerStub;
+import com.android.systemui.statusbar.notification.interruption.NotificationAlertingManager;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -56,6 +57,7 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Singleton;
 
+import dagger.Binds;
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
@@ -125,7 +127,7 @@ public interface NotificationsModule {
             NotificationRemoteInputManager remoteInputManager,
             VisualStabilityManager visualStabilityManager,
             StatusBarStateController statusBarStateController,
-            NotificationInterruptionStateProvider notificationInterruptionStateProvider,
+            NotificationInterruptStateProvider notificationInterruptStateProvider,
             NotificationListener notificationListener,
             HeadsUpManager headsUpManager) {
         return new NotificationAlertingManager(
@@ -133,7 +135,7 @@ public interface NotificationsModule {
                 remoteInputManager,
                 visualStabilityManager,
                 statusBarStateController,
-                notificationInterruptionStateProvider,
+                notificationInterruptStateProvider,
                 notificationListener,
                 headsUpManager);
     }
@@ -199,4 +201,9 @@ public interface NotificationsModule {
             NotificationEntryManager entryManager) {
         return featureFlags.isNewNotifPipelineRenderingEnabled() ? pipeline.get() : entryManager;
     }
+
+    /** */
+    @Binds
+    NotificationInterruptStateProvider bindNotificationInterruptStateProvider(
+            NotificationInterruptStateProviderImpl notificationInterruptStateProviderImpl);
 }

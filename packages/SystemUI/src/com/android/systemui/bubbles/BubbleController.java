@@ -83,11 +83,11 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ShadeController;
@@ -169,7 +169,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     // Callback that updates BubbleOverflowActivity on data change.
     @Nullable private Runnable mOverflowCallback = null;
 
-    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private IStatusBarService mBarService;
 
     // Used for determining view rect for touch interaction
@@ -279,7 +279,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             ShadeController shadeController,
             BubbleData data,
             ConfigurationController configurationController,
-            NotificationInterruptionStateProvider interruptionStateProvider,
+            NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManager groupManager,
@@ -304,7 +304,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             BubbleData data,
             @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             ConfigurationController configurationController,
-            NotificationInterruptionStateProvider interruptionStateProvider,
+            NotificationInterruptStateProvider interruptionStateProvider,
             ZenModeController zenModeController,
             NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManager groupManager,
@@ -316,7 +316,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
-        mNotificationInterruptionStateProvider = interruptionStateProvider;
+        mNotificationInterruptStateProvider = interruptionStateProvider;
         mNotifUserManager = notifUserManager;
         mZenModeController = zenModeController;
         mFloatingContentCoordinator = floatingContentCoordinator;
@@ -632,7 +632,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         for (NotificationEntry e :
                 mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
             if (savedBubbleKeys.contains(e.getKey())
-                    && mNotificationInterruptionStateProvider.shouldBubbleUp(e)
+                    && mNotificationInterruptStateProvider.shouldBubbleUp(e)
                     && canLaunchInActivityView(mContext, e)) {
                 updateBubble(e, /* suppressFlyout= */ true);
             }
@@ -894,7 +894,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
                 mContext, entry, previouslyUserCreated, userBlocked);
 
-        if (mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
+        if (mNotificationInterruptStateProvider.shouldBubbleUp(entry)
                 && (canLaunchInActivityView(mContext, entry) || wasAdjusted)) {
             if (wasAdjusted && !previouslyUserCreated) {
                 // Gotta treat the auto-bubbled / whitelisted packaged bubbles as usercreated
@@ -910,7 +910,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         boolean wasAdjusted = BubbleExperimentConfig.adjustForExperiments(
                 mContext, entry, previouslyUserCreated, userBlocked);
 
-        boolean shouldBubble = mNotificationInterruptionStateProvider.shouldBubbleUp(entry)
+        boolean shouldBubble = mNotificationInterruptStateProvider.shouldBubbleUp(entry)
                 && (canLaunchInActivityView(mContext, entry) || wasAdjusted);
         if (!shouldBubble && mBubbleData.hasBubbleWithKey(entry.getKey())) {
             // It was previously a bubble but no longer a bubble -- lets remove it
