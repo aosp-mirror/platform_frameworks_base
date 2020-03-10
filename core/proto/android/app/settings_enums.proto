@@ -724,6 +724,16 @@ enum Action {
     // CATEGORY: SETTINGS
     // OS: R
     ACTION_ADB_WIRELESS_OFF = 1735;
+
+    // ACTION: Change Wi-Fi hotspot name
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_SETTINGS_CHANGE_WIFI_HOTSPOT_NAME = 1736;
+
+    // ACTION: Change Wi-Fi hotspot password
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_SETTINGS_CHANGE_WIFI_HOTSPOT_PASSWORD = 1737;
 }
 
 /**
