@@ -188,6 +188,16 @@ interface IActivityManager {
      */
     @UnsupportedAppUsage
     boolean updateConfiguration(in Configuration values);
+    /**
+     * Updates mcc mnc configuration and applies changes to the entire system.
+     *
+     * @param mcc mcc configuration to update.
+     * @param mnc mnc configuration to update.
+     * @throws RemoteException; IllegalArgumentException if mcc or mnc is null.
+     * @return Returns {@code true} if the configuration was updated;
+     *         {@code false} otherwise.
+     */
+    boolean updateMccMncConfiguration(in String mcc, in String mnc);
     boolean stopServiceToken(in ComponentName className, in IBinder token, int startId);
     @UnsupportedAppUsage
     void setProcessLimit(int max);
