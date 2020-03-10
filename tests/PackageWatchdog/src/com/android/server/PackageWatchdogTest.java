@@ -1063,6 +1063,20 @@ public class PackageWatchdogTest {
         assertThat(bootObserver2.mitigatedBootLoop()).isFalse();
     }
 
+    /**
+     * Ensure that passing a null list of failed packages does not cause any mitigation logic to
+     * execute.
+     */
+    @Test
+    public void testNullFailedPackagesList() {
+        PackageWatchdog watchdog = createWatchdog();
+        TestObserver observer1 = new TestObserver(OBSERVER_NAME_1);
+        watchdog.startObservingHealth(observer1, List.of(APP_A), LONG_DURATION);
+
+        raiseFatalFailureAndDispatch(watchdog, null, PackageWatchdog.FAILURE_REASON_APP_CRASH);
+        assertThat(observer1.mMitigatedPackages).isEmpty();
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()

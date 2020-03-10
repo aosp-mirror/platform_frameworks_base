@@ -354,6 +354,10 @@ public class PackageWatchdog {
      */
     public void onPackageFailure(List<VersionedPackage> packages,
             @FailureReasons int failureReason) {
+        if (packages == null) {
+            Slog.w(TAG, "Could not resolve a list of failing packages");
+            return;
+        }
         mLongTaskHandler.post(() -> {
             synchronized (mLock) {
                 if (mAllObservers.isEmpty()) {
