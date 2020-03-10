@@ -11881,7 +11881,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (extraDataKey.equals(AccessibilityNodeInfo.EXTRA_DATA_RENDERING_INFO_KEY)) {
             final AccessibilityNodeInfo.ExtraRenderingInfo extraRenderingInfo =
                     AccessibilityNodeInfo.ExtraRenderingInfo.obtain();
-            extraRenderingInfo.setLayoutParams(getLayoutParams().width, getLayoutParams().height);
+            extraRenderingInfo.setLayoutSize(getLayoutParams().width, getLayoutParams().height);
             extraRenderingInfo.setTextSizeInPx(getTextSize());
             extraRenderingInfo.setTextSizeUnit(getTextSizeUnit());
             info.setExtraRenderingInfo(extraRenderingInfo);
