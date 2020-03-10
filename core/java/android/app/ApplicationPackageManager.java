@@ -3337,6 +3337,15 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    @Override
+    public boolean isAutoRevokeWhitelisted() {
+        try {
+            return mPM.isAutoRevokeWhitelisted(mContext.getPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
     public void setMimeGroup(String mimeGroup, Set<String> mimeTypes) {
         try {
             mPM.setMimeGroup(mContext.getPackageName(), mimeGroup,

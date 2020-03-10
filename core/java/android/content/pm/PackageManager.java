@@ -7835,6 +7835,15 @@ public abstract class PackageManager {
     }
 
     /**
+     * @return whether this package is whitelisted from having its runtime permission be
+     *         auto-revoked if unused for an extended period of time.
+     */
+    public boolean isAutoRevokeWhitelisted() {
+        throw new UnsupportedOperationException(
+                "isAutoRevokeWhitelisted not implemented in subclass");
+    }
+
+    /**
      * Returns if the provided drawable represents the default activity icon provided by the system.
      *
      * PackageManager silently returns a default application icon for any package/activity if the
