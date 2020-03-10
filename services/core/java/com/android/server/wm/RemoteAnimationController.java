@@ -80,16 +80,17 @@ class RemoteAnimationController implements DeathRecipient {
      *
      * @param windowContainer The windows to animate.
      * @param position The position app bounds, in screen coordinates.
+     * @param localBounds The bounds of the app relative to its parent.
      * @param stackBounds The stack bounds of the app relative to position.
      * @param startBounds The stack bounds before the transition, in screen coordinates
      * @return The record representing animation(s) to run on the app.
      */
     RemoteAnimationRecord createRemoteAnimationRecord(WindowContainer windowContainer,
-            Point position, Rect stackBounds, Rect startBounds) {
+            Point position, Rect localBounds, Rect stackBounds, Rect startBounds) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "createAnimationAdapter(): container=%s",
                 windowContainer);
-        final RemoteAnimationRecord adapters =
-                new RemoteAnimationRecord(windowContainer, position, stackBounds, startBounds);
+        final RemoteAnimationRecord adapters = new RemoteAnimationRecord(windowContainer, position,
+                localBounds, stackBounds, startBounds);
         mPendingAnimations.add(adapters);
         return adapters;
     }
@@ -355,17 +356,18 @@ class RemoteAnimationController implements DeathRecipient {
         final WindowContainer mWindowContainer;
         final Rect mStartBounds;
 
-        RemoteAnimationRecord(WindowContainer windowContainer, Point endPos, Rect endBounds,
-                Rect startBounds) {
+        RemoteAnimationRecord(WindowContainer windowContainer, Point endPos, Rect localBounds,
+                Rect endBounds, Rect startBounds) {
             mWindowContainer = windowContainer;
-            mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, endBounds);
+            mAdapter = new RemoteAnimationAdapterWrapper(this, endPos, localBounds, endBounds);
             if (startBounds != null) {
                 mStartBounds = new Rect(startBounds);
                 mTmpRect.set(startBounds);
                 mTmpRect.offsetTo(0, 0);
                 if (mRemoteAnimationAdapter.getChangeNeedsSnapshot()) {
                     mThumbnailAdapter =
-                            new RemoteAnimationAdapterWrapper(this, new Point(0, 0), mTmpRect);
+                            new RemoteAnimationAdapterWrapper(this, new Point(0, 0), localBounds,
+                                    mTmpRect);
                 }
             } else {
                 mStartBounds = null;
@@ -401,12 +403,14 @@ class RemoteAnimationController implements DeathRecipient {
         private OnAnimationFinishedCallback mCapturedFinishCallback;
         private @AnimationType int mAnimationType;
         final Point mPosition = new Point();
+        final Rect mLocalBounds;
         final Rect mStackBounds = new Rect();
 
         RemoteAnimationAdapterWrapper(RemoteAnimationRecord record, Point position,
-                Rect stackBounds) {
+                Rect localBounds, Rect stackBounds) {
             mRecord = record;
             mPosition.set(position.x, position.y);
+            mLocalBounds = localBounds;
             mStackBounds.set(stackBounds);
         }
 
