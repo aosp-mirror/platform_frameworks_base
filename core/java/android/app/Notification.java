@@ -7536,6 +7536,8 @@ public class Notification implements Parcelable
                     nameReplacement);
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsOneToOne",
                     isOneToOne);
+            contentView.setCharSequence(R.id.status_bar_latest_event_content,
+                    "setConversationTitle", conversationTitle);
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
                     mBuilder.mN.mLargeIcon);
             contentView.setBundle(R.id.status_bar_latest_event_content, "setData",

@@ -109,7 +109,7 @@
                     android:paddingStart="@dimen/conversation_content_start"
                 >
                     <TextView
-                        android:id="@+id/header_text"
+                        android:id="@+id/conversation_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/notification_header_separating_margin"
@@ -117,27 +117,6 @@
                         android:textSize="16sp"
                         android:singleLine="true"
                         />
-                    <TextView
-                        android:id="@+id/header_text_divider"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?attr/notificationHeaderTextAppearance"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
-                        android:layout_marginEnd="4dp"
-                        android:text="@string/notification_header_divider_symbol"
-                        android:paddingTop="1sp"
-                        android:layout_gravity="center"
-                        android:visibility="gone"/>
-
-                    <TextView
-                        android:id="@+id/header_text_secondary"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
-                        android:layout_marginEnd="@dimen/notification_header_separating_margin"
-                        android:textSize="16sp"
-                        android:visibility="gone"
-                        android:singleLine="true"/>
 
                     <TextView
                         android:id="@+id/time_divider"

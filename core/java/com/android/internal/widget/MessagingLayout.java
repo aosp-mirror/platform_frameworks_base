@@ -159,6 +159,16 @@ public class MessagingLayout extends FrameLayout
         // Unused
     }
 
+    /**
+     * Sets the conversation title of this conversation.
+     *
+     * @param conversationTitle the conversation title
+     */
+    @RemotableViewMethod
+    public void setConversationTitle(CharSequence conversationTitle) {
+        // Unused
+    }
+
     @RemotableViewMethod
     public void setData(Bundle extras) {
         Parcelable[] messages = extras.getParcelableArray(Notification.EXTRA_MESSAGES);

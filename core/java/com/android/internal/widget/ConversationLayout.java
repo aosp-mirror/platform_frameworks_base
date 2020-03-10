@@ -104,7 +104,7 @@ public class ConversationLayout extends FrameLayout
     private boolean mIsCollapsed;
     private ImageResolver mImageResolver;
     private ImageView mConversationIcon;
-    private TextView mHeaderText;
+    private TextView mConversationText;
     private View mConversationIconBadge;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
@@ -119,6 +119,9 @@ public class ConversationLayout extends FrameLayout
     private int mExpandButtonExpandedSize;
     private View mConversationFacePile;
     private int mNotificationBackgroundColor;
+    private CharSequence mFallbackChatName;
+    private CharSequence mFallbackGroupChatName;
+    private CharSequence mConversationTitle;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -161,7 +164,7 @@ public class ConversationLayout extends FrameLayout
             // Where the icon is being hidden externally like in group children.
             mConversationIconBadge.setVisibility(visibility);
         });
-        mHeaderText = findViewById(R.id.header_text);
+        mConversationText = findViewById(R.id.conversation_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
         mExpandButton = findViewById(R.id.expand_button);
@@ -178,6 +181,10 @@ public class ConversationLayout extends FrameLayout
         mExpandedGroupTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_icon_margin_top_centered);
         mConversationFacePile = findViewById(R.id.conversation_face_pile);
+        mFallbackChatName = getResources().getString(
+                R.string.conversation_title_fallback_one_to_one);
+        mFallbackGroupChatName = getResources().getString(
+                R.string.conversation_title_fallback_group_chat);
     }
 
     @RemotableViewMethod
@@ -295,11 +302,11 @@ public class ConversationLayout extends FrameLayout
     private void updateConversationLayout() {
         // TODO: resolve this from shortcuts
         // Set avatar and name
-        CharSequence personOnTop = null;
+        CharSequence conversationText = mConversationTitle;
+        // TODO: display the secondary text somewhere
         if (mIsOneToOne) {
             // Let's resolve the icon / text from the last sender
             mConversationIcon.setVisibility(VISIBLE);
-            mHeaderText.setVisibility(VISIBLE);
             mConversationFacePile.setVisibility(GONE);
             CharSequence userKey = getKey(mUser);
             for (int i = mGroups.size() - 1; i >= 0; i--) {
@@ -307,16 +314,20 @@ public class ConversationLayout extends FrameLayout
                 Person messageSender = messagingGroup.getSender();
                 if ((messageSender != null && !TextUtils.equals(userKey, getKey(messageSender)))
                         || i == 0) {
-                    // Make sure the header is actually visible
-                    // TODO: figure out what to do if there's a converationtitle + a Sender
-                    mHeaderText.setText(messagingGroup.getSenderName());
-                    mConversationIcon.setImageIcon(messagingGroup.getAvatarIcon());
-                    personOnTop = messagingGroup.getSenderName();
+                    if (TextUtils.isEmpty(conversationText)) {
+                        // We use the sendername as header text if no conversation title is provided
+                        // (This usually happens for most 1:1 conversations)
+                        conversationText = messagingGroup.getSenderName();
+                    }
+                    Icon avatarIcon = messagingGroup.getAvatarIcon();
+                    if (avatarIcon == null) {
+                        avatarIcon = createAvatarSymbol(conversationText, "", mLayoutColor);
+                    }
+                    mConversationIcon.setImageIcon(avatarIcon);
                     break;
                 }
             }
         } else {
-            mHeaderText.setVisibility(GONE);
             if (mIsCollapsed) {
                 if (mLargeIcon != null) {
                     mConversationIcon.setVisibility(VISIBLE);
@@ -334,13 +345,17 @@ public class ConversationLayout extends FrameLayout
                 mConversationIcon.setVisibility(GONE);
             }
         }
+        if (TextUtils.isEmpty(conversationText)) {
+            conversationText = mIsOneToOne ? mFallbackChatName : mFallbackGroupChatName;
+        }
+        mConversationText.setText(conversationText);
         // Update if the groups can hide the sender if they are first (applies to 1:1 conversations)
         // This needs to happen after all of the above o update all of the groups
         for (int i = mGroups.size() - 1; i >= 0; i--) {
             MessagingGroup messagingGroup = mGroups.get(i);
             CharSequence messageSender = messagingGroup.getSenderName();
             boolean canHide = mIsOneToOne
-                    && TextUtils.equals(personOnTop, messageSender);
+                    && TextUtils.equals(conversationText, messageSender);
             messagingGroup.setCanHideSenderIfFirst(canHide);
         }
         updateIconPositionAndSize();
@@ -423,6 +438,16 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setLargeIcon(Icon largeIcon) {
         mLargeIcon = largeIcon;
+    }
+
+    /**
+     * Sets the conversation title of this conversation.
+     *
+     * @param conversationTitle the conversation title
+     */
+    @RemotableViewMethod
+    public void setConversationTitle(CharSequence conversationTitle) {
+        mConversationTitle = conversationTitle;
     }
 
     private void removeGroups(ArrayList<MessagingGroup> oldGroups) {

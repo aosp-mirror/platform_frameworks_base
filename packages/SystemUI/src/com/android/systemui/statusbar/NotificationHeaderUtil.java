@@ -185,10 +185,6 @@ public class NotificationHeaderUtil {
         if (child != null) {
             ViewGroup header = child.findViewById(
                     com.android.internal.R.id.notification_header);
-            if (header == null) {
-                header = child.findViewById(
-                        com.android.internal.R.id.conversation_header);
-            }
             sanitizeHeader(header);
         }
     }
