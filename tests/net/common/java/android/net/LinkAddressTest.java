@@ -367,6 +367,9 @@ public class LinkAddressTest {
                     -2, 100000L);
             fail("negative deprecation time should cause exception");
         } catch (IllegalArgumentException expected) { }
+
+        LinkAddress addr = new LinkAddress(V6_ADDRESS, 64, 0, 456, 100000L, 200000L);
+        assertEquals(100000L, addr.getDeprecationTime());
     }
 
     @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
@@ -382,6 +385,9 @@ public class LinkAddressTest {
                     100000L, -2);
             fail("negative expiration time should cause exception");
         } catch (IllegalArgumentException expected) { }
+
+        LinkAddress addr = new LinkAddress(V6_ADDRESS, 64, 0, 456, 100000L, 200000L);
+        assertEquals(200000L, addr.getExpirationTime());
     }
 
     @Test
