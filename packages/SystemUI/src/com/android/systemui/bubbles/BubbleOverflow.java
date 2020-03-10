@@ -16,6 +16,7 @@
 
 package com.android.systemui.bubbles;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.GONE;
 
 import static com.android.systemui.bubbles.BadgedImageView.DEFAULT_PATH_SIZE;
@@ -45,7 +46,7 @@ public class BubbleOverflow implements BubbleViewProvider {
     public static final String KEY = "Overflow";
 
     private BadgedImageView mOverflowBtn;
-    private BubbleExpandedView mOverflowExpandedView;
+    private BubbleExpandedView mExpandedView;
     private LayoutInflater mInflater;
     private Context mContext;
     private Bitmap mIcon;
@@ -63,11 +64,11 @@ public class BubbleOverflow implements BubbleViewProvider {
     }
 
     void setUpOverflow(ViewGroup parentViewGroup, BubbleStackView stackView) {
-        mOverflowExpandedView = (BubbleExpandedView) mInflater.inflate(
+        mExpandedView = (BubbleExpandedView) mInflater.inflate(
                 R.layout.bubble_expanded_view, parentViewGroup /* root */,
                 false /* attachToRoot */);
-        mOverflowExpandedView.setOverflow(true);
-        mOverflowExpandedView.setStackView(stackView);
+        mExpandedView.setOverflow(true);
+        mExpandedView.setStackView(stackView);
 
         updateIcon(mContext, parentViewGroup);
     }
@@ -124,7 +125,7 @@ public class BubbleOverflow implements BubbleViewProvider {
 
     @Override
     public BubbleExpandedView getExpandedView() {
-        return mOverflowExpandedView;
+        return mExpandedView;
     }
 
     @Override
@@ -149,7 +150,7 @@ public class BubbleOverflow implements BubbleViewProvider {
 
     @Override
     public void setContentVisibility(boolean visible) {
-        mOverflowExpandedView.setContentVisibility(visible);
+        mExpandedView.setContentVisibility(visible);
     }
 
     @Override
@@ -166,5 +167,10 @@ public class BubbleOverflow implements BubbleViewProvider {
     @Override
     public String getKey() {
         return BubbleOverflow.KEY;
+    }
+
+    @Override
+    public int getDisplayId() {
+        return mExpandedView != null ? mExpandedView.getVirtualDisplayId() : INVALID_DISPLAY;
     }
 }
