@@ -130,19 +130,15 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private FloatingContentCoordinator mFloatingContentCoordinator;
-
     @Captor
     private ArgumentCaptor<NotifCollectionListener> mNotifListenerCaptor;
-
     private TestableBubbleController mBubbleController;
     private NotificationShadeWindowController mNotificationShadeWindowController;
     private NotifCollectionListener mEntryListener;
-
     private NotificationTestHelper mNotificationTestHelper;
     private ExpandableNotificationRow mRow;
     private ExpandableNotificationRow mRow2;
     private ExpandableNotificationRow mNonBubbleNotifRow;
-
     @Mock
     private BubbleController.BubbleStateChangeListener mBubbleStateChangeListener;
     @Mock
@@ -309,7 +305,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         verify(mNotifCallback, times(1)).invalidateNotifications(anyString());
         assertNotNull(mBubbleData.getBubbleWithKey(mRow.getEntry().getKey()));
         mBubbleController.updateBubble(mRow2.getEntry());
-        verify(mNotifCallback,  times(2)).invalidateNotifications(anyString());
+        verify(mNotifCallback, times(2)).invalidateNotifications(anyString());
         assertNotNull(mBubbleData.getBubbleWithKey(mRow2.getEntry().getKey()));
         assertTrue(mBubbleController.hasBubbles());
 
@@ -379,7 +375,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         // Switch which bubble is expanded
         mBubbleController.selectBubble(mRow.getEntry().getKey());
         mBubbleData.setExpanded(true);
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubble().getEntry());
+        assertEquals(mRow.getEntry(),
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
 
@@ -471,21 +468,25 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().getKey());
 
         // Last added is the one that is expanded
-        assertEquals(mRow2.getEntry(), stackView.getExpandedBubble().getEntry());
+        assertEquals(mRow2.getEntry(),
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow2.getEntry()));
 
         // Dismiss currently expanded
-        mBubbleController.removeBubble(stackView.getExpandedBubble().getEntry(),
+        mBubbleController.removeBubble(
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().getKey());
 
         // Make sure first bubble is selected
-        assertEquals(mRow.getEntry(), stackView.getExpandedBubble().getEntry());
+        assertEquals(mRow.getEntry(),
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
 
         // Dismiss that one
-        mBubbleController.removeBubble(stackView.getExpandedBubble().getEntry(),
+        mBubbleController.removeBubble(
+                mBubbleData.getBubbleWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
                 BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
@@ -645,7 +646,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void removeBubble_intercepted()  {
+    public void removeBubble_intercepted() {
         mEntryListener.onEntryAdded(mRow.getEntry());
         mBubbleController.updateBubble(mRow.getEntry());
 
