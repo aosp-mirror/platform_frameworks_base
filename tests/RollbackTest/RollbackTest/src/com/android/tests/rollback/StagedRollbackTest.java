@@ -127,18 +127,12 @@ public class StagedRollbackTest {
 
     /**
      * Test rollbacks of staged installs involving only apks with bad update.
-     * Trigger rollback phase. This is expected to fail due to watchdog
-     * rebooting the test out from under it.
+     * Trigger rollback phase.
      */
     @Test
     public void testBadApkOnly_Phase3() throws Exception {
         // One more crash to trigger rollback
         RollbackUtils.sendCrashBroadcast(TestApp.A, 1);
-
-        // We expect the device to be rebooted automatically. Wait for that to happen.
-        // This device method will fail and the host will catch the assertion.
-        // If reboot doesn't happen, the host will fail the assertion.
-        Thread.sleep(TimeUnit.SECONDS.toMillis(120));
     }
 
     /**
