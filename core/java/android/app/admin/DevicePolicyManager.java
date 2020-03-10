@@ -8781,23 +8781,35 @@ public class DevicePolicyManager {
     }
 
     /**
+     * This method is mostly deprecated.
+     * Most of the settings that still have an effect have dedicated setter methods or user
+     * restrictions. See individual settings for details.
+     * <p>
      * Called by device owner to update {@link android.provider.Settings.Global} settings.
      * Validation that the value of the setting is in the correct form for the setting type should
      * be performed by the caller.
      * <p>
      * The settings that can be updated with this method are:
      * <ul>
-     * <li>{@link android.provider.Settings.Global#ADB_ENABLED}</li>
-     * <li>{@link android.provider.Settings.Global#AUTO_TIME}</li>
-     * <li>{@link android.provider.Settings.Global#AUTO_TIME_ZONE}</li>
-     * <li>{@link android.provider.Settings.Global#DATA_ROAMING}</li>
+     * <li>{@link android.provider.Settings.Global#ADB_ENABLED} : use
+     * {@link UserManager#DISALLOW_DEBUGGING_FEATURES} instead to restrict users from enabling
+     * debugging features and this setting to turn adb on.</li>
      * <li>{@link android.provider.Settings.Global#USB_MASS_STORAGE_ENABLED}</li>
-     * <li>{@link android.provider.Settings.Global#WIFI_SLEEP_POLICY}</li>
      * <li>{@link android.provider.Settings.Global#STAY_ON_WHILE_PLUGGED_IN} This setting is only
      * available from {@link android.os.Build.VERSION_CODES#M} onwards and can only be set if
      * {@link #setMaximumTimeToLock} is not used to set a timeout.</li>
      * <li>{@link android.provider.Settings.Global#WIFI_DEVICE_OWNER_CONFIGS_LOCKDOWN}</li> This
      * setting is only available from {@link android.os.Build.VERSION_CODES#M} onwards.</li>
+     * </ul>
+     * <p>
+     * The following settings used to be supported, but can be controlled in other ways:
+     * <ul>
+     * <li>{@link android.provider.Settings.Global#AUTO_TIME} : Use {@link #setAutoTime} and
+     * {@link UserManager#DISALLOW_CONFIG_DATE_TIME} instead.</li>
+     * <li>{@link android.provider.Settings.Global#AUTO_TIME_ZONE} : Use {@link #setAutoTimeZone}
+     * and {@link UserManager#DISALLOW_CONFIG_DATE_TIME} instead.</li>
+     * <li>{@link android.provider.Settings.Global#DATA_ROAMING} : Use
+     * {@link UserManager#DISALLOW_DATA_ROAMING} instead.</li>
      * </ul>
      * <p>
      * Changing the following settings has no effect as of {@link android.os.Build.VERSION_CODES#M}:
@@ -8811,6 +8823,7 @@ public class DevicePolicyManager {
      * <li>{@link android.provider.Settings.Global#NETWORK_PREFERENCE}</li>
      * <li>{@link android.provider.Settings.Global#WIFI_ON}. Use
      * {@link android.net.wifi.WifiManager#setWifiEnabled(boolean)} instead.</li>
+     * <li>{@link android.provider.Settings.Global#WIFI_SLEEP_POLICY}. No longer has effect.</li>
      * </ul>
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
@@ -8989,6 +9002,11 @@ public class DevicePolicyManager {
     }
 
     /**
+     * This method is mostly deprecated.
+     * Most of the settings that still have an effect have dedicated setter methods
+     * (e.g. {@link #setLocationEnabled}) or user restrictions.
+     * <p>
+     *
      * Called by profile or device owners to update {@link android.provider.Settings.Secure}
      * settings. Validation that the value of the setting is in the correct form for the setting
      * type should be performed by the caller.
@@ -9001,7 +9019,7 @@ public class DevicePolicyManager {
      * <p>
      * A device owner can additionally update the following settings:
      * <ul>
-     * <li>{@link android.provider.Settings.Secure#LOCATION_MODE}</li>
+     * <li>{@link android.provider.Settings.Secure#LOCATION_MODE}, but see note below.</li>
      * </ul>
      *
      * <strong>Note: Starting from Android O, apps should no longer call this method with the
@@ -10355,19 +10373,23 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Indicates the entity that controls the device or profile owner. Two users/profiles are
-     * affiliated if the set of ids set by their device or profile owners intersect.
+     * Indicates the entity that controls the device. Two users are
+     * affiliated if the set of ids set by the device owner and the admin of the secondary user.
      *
-     * <p>A user/profile that is affiliated with the device owner user is considered to be
+     * <p>A user that is affiliated with the device owner user is considered to be
      * affiliated with the device.
      *
      * <p><strong>Note:</strong> Features that depend on user affiliation (such as security logging
-     * or {@link #bindDeviceAdminServiceAsUser}) won't be available when a secondary user or profile
+     * or {@link #bindDeviceAdminServiceAsUser}) won't be available when a secondary user
      * is created, until it becomes affiliated. Therefore it is recommended that the appropriate
-     * affiliation ids are set by its profile owner as soon as possible after the user/profile is
+     * affiliation ids are set by its owner as soon as possible after the user is
      * created.
+     * <p>
+     * Note: This method used to be available for affiliating device owner and profile
+     * owner. However, since Android 11, this combination is not possible. This method is now
+     * only useful for affiliating the primary user with managed secondary users.
      *
-     * @param admin Which profile or device owner this request is associated with.
+     * @param admin Which device owner, or owner of secondary user, this request is associated with.
      * @param ids A set of opaque non-empty affiliation ids.
      *
      * @throws IllegalArgumentException if {@code ids} is null or contains an empty string.
@@ -10399,10 +10421,10 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether this user/profile is affiliated with the device.
+     * Returns whether this user is affiliated with the device.
      * <p>
      * By definition, the user that the device owner runs on is always affiliated with the device.
-     * Any other user/profile is considered affiliated with the device if the set specified by its
+     * Any other user is considered affiliated with the device if the set specified by its
      * profile owner via {@link #setAffiliationIds} intersects with the device owner's.
      * @see #setAffiliationIds
      */
@@ -10706,14 +10728,18 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device owner to bind to a service from a profile owner or vice versa.
-     * See {@link #getBindDeviceAdminTargetUsers} for a definition of which
-     * device/profile owners are allowed to bind to services of another profile/device owner.
+     * Called by a device owner to bind to a service from a secondary managed user or vice versa.
+     * See {@link #getBindDeviceAdminTargetUsers} for the pre-requirements of a
+     * device owner to bind to services of another managed user.
      * <p>
      * The service must be protected by {@link android.Manifest.permission#BIND_DEVICE_ADMIN}.
      * Note that the {@link Context} used to obtain this
      * {@link DevicePolicyManager} instance via {@link Context#getSystemService(Class)} will be used
      * to bind to the {@link android.app.Service}.
+     * <p>
+     * Note: This method used to be available for communication between device owner and profile
+     * owner. However, since Android 11, this combination is not possible. This method is now
+     * only useful for communication between device owner and managed secondary users.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param serviceIntent Identifies the service to connect to.  The Intent must specify either an
@@ -10751,14 +10777,11 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of target users that the calling device or profile owner can use when
-     * calling {@link #bindDeviceAdminServiceAsUser}.
+     * Returns the list of target users that the calling device owner or owner of secondary user
+     * can use when calling {@link #bindDeviceAdminServiceAsUser}.
      * <p>
-     * A device owner can bind to a service from a profile owner and vice versa, provided that:
-     * <ul>
-     * <li>Both belong to the same package name.
-     * <li>Both users are affiliated. See {@link #setAffiliationIds}.
-     * </ul>
+     * A device owner can bind to a service from a secondary managed user and vice versa, provided
+     * that both users are affiliated. See {@link #setAffiliationIds}.
      */
     public @NonNull List<UserHandle> getBindDeviceAdminTargetUsers(@NonNull ComponentName admin) {
         throwIfParentInstance("getBindDeviceAdminTargetUsers");
