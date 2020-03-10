@@ -27,7 +27,6 @@ import static com.android.server.wm.utils.RegionUtils.forEachRect;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
-import android.app.Service;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -127,7 +126,7 @@ final class AccessibilityController {
     public boolean setWindowsForAccessibilityCallbackLocked(int displayId,
             WindowsForAccessibilityCallback callback) {
         if (callback != null) {
-            final DisplayContent dc = mService.mRoot.getDisplayContent(displayId);
+            final DisplayContent dc = mService.mRoot.getDisplayContentOrCreate(displayId);
             if (dc == null) {
                 return false;
             }
