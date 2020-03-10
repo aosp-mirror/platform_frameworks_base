@@ -146,12 +146,11 @@ CopyResult Readback::copyImageInto(const sk_sp<SkImage>& image, Matrix4& texTran
     }
 
     Layer layer(mRenderThread.renderState(), nullptr, 255, SkBlendMode::kSrc);
-    bool disableFilter = MathUtils::areEqual(skiaSrcRect.width(), skiaDestRect.width()) &&
-                         MathUtils::areEqual(skiaSrcRect.height(), skiaDestRect.height());
-    layer.setForceFilter(!disableFilter);
     layer.setSize(displayedWidth, displayedHeight);
     texTransform.copyTo(layer.getTexTransform());
     layer.setImage(image);
+    // Scaling filter is not explicitly set here, because it is done inside copyLayerInfo
+    // after checking the necessity based on the src/dest rect size and the transformation.
     if (copyLayerInto(&layer, &skiaSrcRect, &skiaDestRect, bitmap)) {
         copyResult = CopyResult::Success;
     }
