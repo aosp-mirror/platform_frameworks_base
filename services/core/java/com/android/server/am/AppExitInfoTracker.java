@@ -505,9 +505,13 @@ public final class AppExitInfoTracker {
     @VisibleForTesting
     void onPackageRemoved(String packageName, int uid, boolean allUsers) {
         if (packageName != null) {
-            mAppExitInfoSourceZygote.removeByUid(uid, allUsers);
-            mAppExitInfoSourceLmkd.removeByUid(uid, allUsers);
-            mIsolatedUidRecords.removeAppUid(uid, allUsers);
+            final boolean removeUid = TextUtils.isEmpty(
+                    mService.mPackageManagerInt.getNameForUid(uid));
+            if (removeUid) {
+                mAppExitInfoSourceZygote.removeByUid(uid, allUsers);
+                mAppExitInfoSourceLmkd.removeByUid(uid, allUsers);
+                mIsolatedUidRecords.removeAppUid(uid, allUsers);
+            }
             removePackage(packageName, allUsers ? UserHandle.USER_ALL : UserHandle.getUserId(uid));
             schedulePersistProcessExitInfo(true);
         }
@@ -533,6 +537,11 @@ public final class AppExitInfoTracker {
         mService.mContext.registerReceiverForAllUsers(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                boolean replacing = intent.getBooleanExtra(
+                        Intent.EXTRA_REPLACING, false);
+                if (replacing) {
+                    return;
+                }
                 int uid = intent.getIntExtra(Intent.EXTRA_UID, UserHandle.USER_NULL);
                 boolean allUsers = intent.getBooleanExtra(
                         Intent.EXTRA_REMOVED_FOR_ALL_USERS, false);
@@ -835,8 +844,8 @@ public final class AppExitInfoTracker {
         info.setReason(ApplicationExitInfo.REASON_UNKNOWN);
         info.setStatus(0);
         info.setImportance(procStateToImportance(app.setProcState));
-        info.setPss(app.lastMemInfo == null ? 0 : app.lastMemInfo.getTotalPss());
-        info.setRss(app.lastMemInfo == null ? 0 : app.lastMemInfo.getTotalRss());
+        info.setPss(app.lastPss);
+        info.setRss(app.mLastRss);
         info.setTimestamp(System.currentTimeMillis());
 
         return info;
