@@ -35,7 +35,6 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.Signature;
 import android.content.rollback.IRollbackManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -107,8 +106,19 @@ public class StagingManager {
         return new ParceledListSlice<>(result);
     }
 
-    private void validateApexSignature(String apexPath, String packageName)
+    /**
+     * Validates the signature used to sign the container of the new apex package
+     *
+     * @param newApexPkg The new apex package that is being installed
+     * @param installFlags flags related to the session
+     * @throws PackageManagerException
+     */
+    private void validateApexSignature(PackageInfo newApexPkg, int installFlags)
             throws PackageManagerException {
+        // Get signing details of the new package
+        final String apexPath = newApexPkg.applicationInfo.sourceDir;
+        final String packageName = newApexPkg.packageName;
+
         final SigningDetails signingDetails;
         try {
             signingDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
@@ -117,9 +127,10 @@ public class StagingManager {
                     "Failed to parse APEX package " + apexPath, e);
         }
 
-        final PackageInfo packageInfo = mApexManager.getPackageInfo(packageName,
+        // Get signing details of the existing package
+        final PackageInfo existingApexPkg = mApexManager.getPackageInfo(packageName,
                 ApexManager.MATCH_ACTIVE_PACKAGE);
-        if (packageInfo == null) {
+        if (existingApexPkg == null) {
             // This should never happen, because submitSessionToApexService ensures that no new
             // apexes were installed.
             throw new IllegalStateException("Unknown apex package " + packageName);
@@ -128,22 +139,22 @@ public class StagingManager {
         final SigningDetails existingSigningDetails;
         try {
             existingSigningDetails = ApkSignatureVerifier.verify(
-                packageInfo.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
+                existingApexPkg.applicationInfo.sourceDir, SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                    "Failed to parse APEX package " + packageInfo.applicationInfo.sourceDir, e);
+                    "Failed to parse APEX package " + existingApexPkg.applicationInfo.sourceDir, e);
         }
 
-        // Now that we have both sets of signatures, demand that they're an exact match.
-        if (Signature.areExactMatch(existingSigningDetails.signatures, signingDetails.signatures)) {
+        // Verify signing details for upgrade
+        if (signingDetails.checkCapability(existingSigningDetails,
+                PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
             return;
         }
 
         throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
-                "APK-container signature verification failed for package "
-                        + packageName + ". Signature of file "
-                        + apexPath + " does not match the signature of "
-                        + " the package already installed.");
+                "APK-container signature of APEX package " + packageName + " with version "
+                        + newApexPkg.versionCodeMajor + " and path " + apexPath + " is not"
+                        + " compatible with the one currently installed on device");
     }
 
     private List<PackageInfo> submitSessionToApexService(
@@ -240,8 +251,7 @@ public class StagingManager {
             try {
                 final List<PackageInfo> apexPackages = submitSessionToApexService(session);
                 for (PackageInfo apexPackage : apexPackages) {
-                    validateApexSignature(apexPackage.applicationInfo.sourceDir,
-                            apexPackage.packageName);
+                    validateApexSignature(apexPackage, session.params.installFlags);
                 }
             } catch (PackageManagerException e) {
                 session.setStagedSessionFailed(e.error, e.getMessage());
