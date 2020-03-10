@@ -6221,6 +6221,17 @@ public class Notification implements Parcelable
             }
             return loadHeaderAppName();
         }
+
+        /**
+         * @return if this builder uses a template
+         *
+         * @hide
+         */
+        public boolean usesTemplate() {
+            return (mN.contentView == null && mN.headsUpContentView == null
+                    && mN.bigContentView == null)
+                    || (mStyle != null && mStyle.displayCustomViewInline());
+        }
     }
 
     /**
