@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationRankin
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinder
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.util.leak.LeakDetector
+import dagger.Lazy
 import java.util.concurrent.CountDownLatch
 
 /**
@@ -35,12 +36,12 @@ class TestableNotificationEntryManager(
     rm: NotificationRankingManager,
     ke: KeyguardEnvironment,
     ff: FeatureFlags,
-    rb: dagger.Lazy<NotificationRowBinder>,
-    notificationRemoteInputManagerLazy: dagger.Lazy<NotificationRemoteInputManager>,
+    rb: Lazy<NotificationRowBinder>,
+    notificationRemoteInputManagerLazy: Lazy<NotificationRemoteInputManager>,
     leakDetector: LeakDetector,
     fgsFeatureController: ForegroundServiceDismissalFeatureController
-) : NotificationEntryManager(logger, gm, rm, ke, ff, rb,
-        notificationRemoteInputManagerLazy, leakDetector, fgsFeatureController) {
+) : NotificationEntryManager(logger, gm, rm, ke, ff, rb, notificationRemoteInputManagerLazy,
+        leakDetector, fgsFeatureController) {
 
     public var countDownLatch: CountDownLatch = CountDownLatch(1)
 

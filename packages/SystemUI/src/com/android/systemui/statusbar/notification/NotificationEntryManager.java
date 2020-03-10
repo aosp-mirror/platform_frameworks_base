@@ -558,6 +558,10 @@ public class NotificationEntryManager implements
                 ranking,
                 mFgsFeatureController.isForegroundServiceDismissalEnabled(),
                 SystemClock.uptimeMillis());
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryBind(entry, notification);
+        }
+        mAllNotifications.add(entry);
 
         mLeakDetector.trackInstance(entry);
 
@@ -612,7 +616,9 @@ public class NotificationEntryManager implements
         updateRankingAndSort(ranking, "updateNotificationInternal");
         StatusBarNotification oldSbn = entry.getSbn();
         entry.setSbn(notification);
-        mGroupManager.onEntryUpdated(entry, oldSbn);
+        for (NotifCollectionListener listener : mNotifCollectionListeners) {
+            listener.onEntryBind(entry, notification);
+        }        mGroupManager.onEntryUpdated(entry, oldSbn);
 
         mLogger.logNotifUpdated(entry.getKey());
         for (NotificationEntryListener listener : mNotificationEntryListeners) {
