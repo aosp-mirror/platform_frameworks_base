@@ -477,4 +477,13 @@ public class LocalMediaManagerTest {
         assertThat(mLocalMediaManager.mMediaDevices).hasSize(3);
         verify(mCallback).onDeviceListUpdate(any());
     }
+
+    @Test
+    public void onRequestFailed_shouldDispatchOnRequestFailed() {
+        mLocalMediaManager.registerCallback(mCallback);
+
+        mLocalMediaManager.mMediaDeviceCallback.onRequestFailed(1);
+
+        verify(mCallback).onRequestFailed(1);
+    }
 }
