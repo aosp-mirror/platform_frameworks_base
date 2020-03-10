@@ -521,13 +521,23 @@ class ControlsControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testReplaceFavoritesForStructure_noFavorites() {
+    fun testReplaceFavoritesForStructure_noExistingFavorites() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
         delayableExecutor.runAllReady()
 
         assertEquals(1, controller.countFavoritesForComponent(TEST_COMPONENT))
         assertEquals(listOf(TEST_STRUCTURE_INFO),
             controller.getFavoritesForComponent(TEST_COMPONENT))
+    }
+
+    @Test
+    fun testReplaceFavoritesForStructure_doNotStoreEmptyStructure() {
+        controller.replaceFavoritesForStructure(
+            StructureInfo(TEST_COMPONENT, "Home", emptyList<ControlInfo>()))
+        delayableExecutor.runAllReady()
+
+        assertEquals(0, controller.countFavoritesForComponent(TEST_COMPONENT))
+        assertEquals(emptyList<ControlInfo>(), controller.getFavoritesForComponent(TEST_COMPONENT))
     }
 
     @Test
