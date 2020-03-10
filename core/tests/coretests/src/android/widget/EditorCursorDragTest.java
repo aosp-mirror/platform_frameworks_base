@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import static android.text.Spanned.SPAN_INCLUSIVE_EXCLUSIVE;
 import static android.widget.espresso.TextViewActions.clickOnTextAtIndex;
 import static android.widget.espresso.TextViewActions.dragOnText;
 import static android.widget.espresso.TextViewAssertions.hasInsertionPointerAtIndex;
@@ -37,6 +38,9 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.graphics.Rect;
 import android.text.Layout;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.AbsoluteSizeSpan;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.InputDevice;
@@ -486,6 +490,38 @@ public class EditorCursorDragTest {
                 motionEventInfo(text.indexOf("he 2nd"), 0.5f, text.indexOf("he 2nd")),
         };
         simulateDrag(tv, events, true);
+    }
+
+    @Test
+    public void testLineChangeSlop() throws Throwable {
+        TextView tv = mActivity.findViewById(R.id.textview);
+        Spannable s = new SpannableString("a\nb\nc");
+        s.setSpan(new AbsoluteSizeSpan(10), 2, 4, SPAN_INCLUSIVE_EXCLUSIVE);
+        s.setSpan(new AbsoluteSizeSpan(32), 4, 5, SPAN_INCLUSIVE_EXCLUSIVE);
+        mInstrumentation.runOnMainSync(() -> tv.setText(s));
+
+        Layout layout = tv.getLayout();
+        Editor editor = tv.getEditorForTesting();
+        final float verticalOffset = tv.getExtendedPaddingTop();
+        editor.setLineChangeSlopMinMaxForTesting(30, 65);
+        // Hit top part of upper line, jump to upper line.
+        assertThat(editor.getCurrentLineAdjustedForSlop(layout, 1, 5 + verticalOffset))
+                .isEqualTo(0);
+        // Hit bottom part of upper line, stay at current line.
+        assertThat(editor.getCurrentLineAdjustedForSlop(layout, 1, 40 + verticalOffset))
+                .isEqualTo(1);
+        // Hit current line, stay at current line.
+        assertThat(editor.getCurrentLineAdjustedForSlop(layout, 1, 70 + verticalOffset))
+                .isEqualTo(1);
+        // Hit top part of lower line, stay at current line.
+        assertThat(editor.getCurrentLineAdjustedForSlop(layout, 1, 85 + verticalOffset))
+                .isEqualTo(1);
+        // Hit bottom part of lower line, jump to lower line.
+        assertThat(editor.getCurrentLineAdjustedForSlop(layout, 1, 110 + verticalOffset))
+                .isEqualTo(2);
+        // Hit lower line of lower line, jump to target line.
+        assertThat(editor.getCurrentLineAdjustedForSlop(layout, 0, 110 + verticalOffset))
+                .isEqualTo(2);
     }
 
     @Test
