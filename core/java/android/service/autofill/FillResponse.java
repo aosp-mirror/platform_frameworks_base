@@ -89,7 +89,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable int[] mCancelIds;
     private final boolean mSupportsInlineSuggestions;
     // TODO(b/149240554): revert back to use ParceledListSlice after the bug is resolved.
-    private final @Nullable ArrayList<InlinePresentation> mInlineActions;
+    private final @Nullable ArrayList<InlineAction> mInlineActions;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -213,7 +213,7 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
-    public @Nullable List<InlinePresentation> getInlineActions() {
+    public @Nullable List<InlineAction> getInlineActions() {
         return mInlineActions;
     }
 
@@ -239,7 +239,7 @@ public final class FillResponse implements Parcelable {
         private UserData mUserData;
         private int[] mCancelIds;
         private boolean mSupportsInlineSuggestions;
-        private ArrayList<InlinePresentation> mInlineActions;
+        private ArrayList<InlineAction> mInlineActions;
 
         /**
          * Triggers a custom UI before before autofilling the screen with any data set in this
@@ -656,15 +656,12 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
-         * Adds a new {@link InlinePresentation} to this response representing an action UI.
-         *
-         * <p> For example, the UI can be associated with an intent which can open an activity for
-         * the user to manage the Autofill provider settings.
+         * Adds a new {@link InlineAction} to this response representing an action UI.
          *
          * @return This builder.
          */
         @NonNull
-        public Builder addInlineAction(@NonNull InlinePresentation inlineAction) {
+        public Builder addInlineAction(@NonNull InlineAction inlineAction) {
             throwIfDestroyed();
             throwIfAuthenticationCalled();
             if (mInlineActions == null) {
@@ -881,10 +878,10 @@ public final class FillResponse implements Parcelable {
             final int[] cancelIds = parcel.createIntArray();
             builder.setPresentationCancelIds(cancelIds);
 
-            final List<InlinePresentation> inlineActions = parcel.createTypedArrayList(
-                    InlinePresentation.CREATOR);
+            final List<InlineAction> inlineActions = parcel.createTypedArrayList(
+                    InlineAction.CREATOR);
             if (inlineActions != null) {
-                for (InlinePresentation inlineAction : inlineActions) {
+                for (InlineAction inlineAction : inlineActions) {
                     builder.addInlineAction(inlineAction);
                 }
             }
