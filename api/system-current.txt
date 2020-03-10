@@ -6137,7 +6137,7 @@ package android.net {
   }
 
   public class EthernetManager {
-    method @NonNull public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
   }
 
   public static interface EthernetManager.TetheredInterfaceCallback {
@@ -6603,6 +6603,9 @@ package android.net {
     field public static final int TETHER_ERROR_UNKNOWN_IFACE = 1; // 0x1
     field public static final int TETHER_ERROR_UNSUPPORTED = 3; // 0x3
     field public static final int TETHER_ERROR_UNTETHER_IFACE_ERROR = 7; // 0x7
+    field public static final int TETHER_HARDWARE_OFFLOAD_FAILED = 2; // 0x2
+    field public static final int TETHER_HARDWARE_OFFLOAD_STARTED = 1; // 0x1
+    field public static final int TETHER_HARDWARE_OFFLOAD_STOPPED = 0; // 0x0
   }
 
   public static interface TetheringManager.OnTetheringEntitlementResultListener {
@@ -6619,6 +6622,7 @@ package android.net {
     ctor public TetheringManager.TetheringEventCallback();
     method public void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
     method public void onError(@NonNull String, int);
+    method public void onOffloadStatusChanged(int);
     method @Deprecated public void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
     method public void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
     method public void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
@@ -8478,10 +8482,6 @@ package android.os {
     method public boolean hasSingleFileDescriptor();
   }
 
-  public class ParcelFileDescriptor implements java.io.Closeable android.os.Parcelable {
-    method @NonNull public static android.os.ParcelFileDescriptor wrap(@NonNull android.os.ParcelFileDescriptor, @NonNull android.os.Handler, @NonNull android.os.ParcelFileDescriptor.OnCloseListener) throws java.io.IOException;
-  }
-
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
@@ -9217,9 +9217,9 @@ package android.provider {
 
   public final class MediaStore {
     method @NonNull public static android.net.Uri rewriteToLegacy(@NonNull android.net.Uri);
-    method @NonNull public static android.net.Uri scanFile(@NonNull android.content.ContentResolver, @NonNull java.io.File);
-    method public static void scanVolume(@NonNull android.content.ContentResolver, @NonNull String);
-    method public static void waitForIdle(@NonNull android.content.ContentResolver);
+    method @NonNull @WorkerThread public static android.net.Uri scanFile(@NonNull android.content.ContentResolver, @NonNull java.io.File);
+    method @WorkerThread public static void scanVolume(@NonNull android.content.ContentResolver, @NonNull String);
+    method @WorkerThread public static void waitForIdle(@NonNull android.content.ContentResolver);
     field public static final String AUTHORITY_LEGACY = "media_legacy";
     field @NonNull public static final android.net.Uri AUTHORITY_LEGACY_URI;
   }

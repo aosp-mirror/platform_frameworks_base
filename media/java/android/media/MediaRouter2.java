@@ -47,6 +47,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
+ * This API is not generally intended for third party application developers.
+ * Use the <a href="{@docRoot}jetpack/androidx.html">AndroidX</a>
+  <a href="{@docRoot}reference/androidx/mediarouter/media/package-summary.html">Media Router
+ * Library</a> for consistent behavior across all devices.
+ *
  * Media Router 2 allows applications to control the routing of media channels
  * and streams from the current device to remote speakers and devices.
  */
@@ -429,11 +434,11 @@ public class MediaRouter2 {
         if (stub != null) {
             try {
                 mMediaRouterService.requestCreateSessionWithRouter2(
-                        stub, route, requestId, controllerHints);
+                        stub, requestId, route, controllerHints);
             } catch (RemoteException ex) {
                 Log.e(TAG, "transfer: Unable to request to create controller.", ex);
                 mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
-                        MediaRouter2.this, null, requestId));
+                        MediaRouter2.this, requestId, null));
             }
         }
     }
@@ -559,7 +564,7 @@ public class MediaRouter2 {
      * <p>
      * Pass {@code null} to sessionInfo for the failure case.
      */
-    void createControllerOnHandler(@Nullable RoutingSessionInfo sessionInfo, int requestId) {
+    void createControllerOnHandler(int requestId, @Nullable RoutingSessionInfo sessionInfo) {
         ControllerCreationRequest matchingRequest = null;
         for (ControllerCreationRequest request : mControllerCreationRequests) {
             if (request.mRequestId == requestId) {
@@ -1378,9 +1383,9 @@ public class MediaRouter2 {
         }
 
         @Override
-        public void notifySessionCreated(@Nullable RoutingSessionInfo sessionInfo, int requestId) {
+        public void notifySessionCreated(int requestId, @Nullable RoutingSessionInfo sessionInfo) {
             mHandler.sendMessage(obtainMessage(MediaRouter2::createControllerOnHandler,
-                    MediaRouter2.this, sessionInfo, requestId));
+                    MediaRouter2.this, requestId, sessionInfo));
         }
 
         @Override

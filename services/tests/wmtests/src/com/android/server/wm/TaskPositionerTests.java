@@ -36,7 +36,6 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -71,18 +70,21 @@ public class TaskPositionerTests extends WindowTestsBase {
     public void setUp() {
         TaskPositioner.setFactory(null);
 
-        final Display display = mDisplayContent.getDisplay();
-        final DisplayMetrics dm = new DisplayMetrics();
-        display.getMetrics(dm);
+        final DisplayMetrics dm = mDisplayContent.getDisplayMetrics();
 
         // This should be the same calculation as the TaskPositioner uses.
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, dm);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
         removeGlobalMinSizeRestriction();
 
-        WindowState win = createWindow(null, TYPE_BASE_APPLICATION, "window");
-        mPositioner = new TaskPositioner(mWm, mWm.mAtmService);
-
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(stack.mAtmService)
+                .setStack(stack)
+                // In real case, there is no additional level for freeform mode.
+                .setCreateTask(false)
+                .build();
+        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "window");
+        mPositioner = new TaskPositioner(mWm);
         mPositioner.register(mDisplayContent, win);
 
         win.getRootTask().setWindowingMode(WINDOWING_MODE_FREEFORM);
@@ -107,6 +109,28 @@ public class TaskPositionerTests extends WindowTestsBase {
 
         assertNull(TaskPositioner.create(mWm));
         assertTrue(created[0]);
+    }
+
+    /** This tests that the window can move in all directions. */
+    @Test
+    public void testMoveWindow() {
+        final Rect displayBounds = mDisplayContent.getBounds();
+        final int windowSize = Math.min(displayBounds.width(), displayBounds.height()) / 2;
+        final int left = displayBounds.centerX() - windowSize / 2;
+        final int top = displayBounds.centerY() - windowSize / 2;
+        final Rect r = new Rect(left, top, left + windowSize, top + windowSize);
+        mPositioner.mTask.setBounds(r);
+        mPositioner.startDrag(false /* resizing */, false /* preserveOrientation */, left, top);
+
+        // Move upper left.
+        mPositioner.notifyMoveLocked(left - MOUSE_DELTA_X, top - MOUSE_DELTA_Y);
+        r.offset(-MOUSE_DELTA_X, -MOUSE_DELTA_Y);
+        assertBoundsEquals(r, mPositioner.getWindowDragBounds());
+
+        // Move bottom right.
+        mPositioner.notifyMoveLocked(left, top);
+        r.offset(MOUSE_DELTA_X, MOUSE_DELTA_Y);
+        assertBoundsEquals(r, mPositioner.getWindowDragBounds());
     }
 
     /**

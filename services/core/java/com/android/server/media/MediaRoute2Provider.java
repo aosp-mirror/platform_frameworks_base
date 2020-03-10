@@ -51,17 +51,17 @@ abstract class MediaRoute2Provider {
         mCallback = callback;
     }
 
-    public abstract void requestCreateSession(String packageName, String routeId, long requestId,
+    public abstract void requestCreateSession(long requestId, String packageName, String routeId,
             @Nullable Bundle sessionHints);
-    public abstract void releaseSession(String sessionId, long requestId);
+    public abstract void releaseSession(long requestId, String sessionId);
     public abstract void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference);
 
-    public abstract void selectRoute(String sessionId, String routeId, long requestId);
-    public abstract void deselectRoute(String sessionId, String routeId, long requestId);
-    public abstract void transferToRoute(String sessionId, String routeId, long requestId);
+    public abstract void selectRoute(long requestId, String sessionId, String routeId);
+    public abstract void deselectRoute(long requestId, String sessionId, String routeId);
+    public abstract void transferToRoute(long requestId, String sessionId, String routeId);
 
-    public abstract void setRouteVolume(String routeId, int volume, long requestId);
-    public abstract void setSessionVolume(String sessionId, int volume, long requestId);
+    public abstract void setRouteVolume(long requestId, String routeId, int volume);
+    public abstract void setSessionVolume(long requestId, String sessionId, int volume);
 
     @NonNull
     public String getUniqueId() {
@@ -110,7 +110,7 @@ abstract class MediaRoute2Provider {
     public interface Callback {
         void onProviderStateChanged(@Nullable MediaRoute2Provider provider);
         void onSessionCreated(@NonNull MediaRoute2Provider provider,
-                @Nullable RoutingSessionInfo sessionInfo, long requestId);
+                long requestId, @Nullable RoutingSessionInfo sessionInfo);
         void onSessionUpdated(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo);
         void onSessionReleased(@NonNull MediaRoute2Provider provider,

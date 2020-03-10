@@ -861,6 +861,12 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * Switch the current capture session and a given set of registered camera surfaces
      * to offline processing mode.
      *
+     * <p>Devices support this method will report
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING OFFLINE_PROCESSING}
+     * capability in {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}. When this method
+     * is supported, applications can use it to improve the latency of closing camera or recreating
+     * capture session without losing the in progresss capture request outputs.</p>
+     *
      * <p>Offline processing mode and the corresponding {@link CameraOfflineSession} differ from
      * a regular online camera capture session in several ways. Successful offline switches will
      * close the currently active camera capture session. Camera clients are also allowed
@@ -915,10 +921,12 @@ public abstract class CameraCaptureSession implements AutoCloseable {
      * @see CameraOfflineSession
      * @see CameraOfflineSessionCallback
      * @see #supportsOfflineProcessing
+     * @see CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_OFFLINE_PROCESSING
      */
     @Nullable
     public CameraOfflineSession switchToOffline(@NonNull Collection<Surface> offlineSurfaces,
-            @NonNull Executor executor, @NonNull CameraOfflineSessionCallback listener)
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CameraOfflineSessionCallback listener)
             throws CameraAccessException {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }

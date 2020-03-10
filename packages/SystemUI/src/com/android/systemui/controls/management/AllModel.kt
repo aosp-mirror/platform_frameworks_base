@@ -22,14 +22,20 @@ import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.controller.ControlInfo
 
 /**
- * This model is used to show all controls separated by zones.
+ * This model is used to show controls separated by zones.
  *
  * The model will sort the controls and zones in the following manner:
  *  * The zones will be sorted in a first seen basis
  *  * The controls in each zone will be sorted in a first seen basis.
  *
- * @property controls List of all controls as returned by loading
- * @property initialFavoriteIds sorted ids of favorite controls
+ *  The controls passed should belong to the same structure, as an instance of this model will be
+ *  created for each structure.
+ *
+ *  The list of favorite ids can contain ids for controls not passed to this model. Those will be
+ *  filtered out.
+ *
+ * @property controls List of controls as returned by loading
+ * @property initialFavoriteIds sorted ids of favorite controls.
  * @property noZoneString text to use as header for all controls that have blank or `null` zone.
  */
 class AllModel(
@@ -50,7 +56,10 @@ class AllModel(
             }
         }
 
-    private val favoriteIds = initialFavoriteIds.toMutableList()
+    private val favoriteIds = run {
+        val ids = controls.mapTo(HashSet()) { it.control.controlId }
+        initialFavoriteIds.filter { it in ids }.toMutableList()
+    }
 
     override val elements: List<ElementWrapper> = createWrappers(controls)
 

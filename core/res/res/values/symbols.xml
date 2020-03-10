@@ -3239,23 +3239,30 @@
   <java-symbol type="string" name="accessibility_select_shortcut_menu_title" />
   <java-symbol type="string" name="accessibility_edit_shortcut_menu_button_title" />
   <java-symbol type="string" name="accessibility_edit_shortcut_menu_volume_title" />
+  <java-symbol type="string" name="accessibility_uncheck_legacy_item_warning" />
+
+  <java-symbol type="layout" name="accessibility_enable_service_encryption_warning" />
+  <java-symbol type="id" name="accessibility_permissionDialog_icon" />
+  <java-symbol type="id" name="accessibility_permissionDialog_title" />
+  <java-symbol type="id" name="accessibility_encryption_warning" />
+  <java-symbol type="id" name="accessibility_permission_enable_allow_button" />
+  <java-symbol type="id" name="accessibility_permission_enable_deny_button" />
+  <java-symbol type="string" name="accessibility_enable_service_title" />
+  <java-symbol type="string" name="accessibility_enable_service_encryption_warning" />
 
   <!-- Accessibility Button -->
   <java-symbol type="layout" name="accessibility_button_chooser_item" />
+  <java-symbol type="id" name="accessibility_button_target_checkbox" />
   <java-symbol type="id" name="accessibility_button_target_icon" />
   <java-symbol type="id" name="accessibility_button_target_label" />
-  <java-symbol type="id" name="accessibility_button_target_item_container" />
-  <java-symbol type="id" name="accessibility_button_target_view_item" />
   <java-symbol type="id" name="accessibility_button_target_switch_item" />
   <java-symbol type="string" name="accessibility_magnification_chooser_text" />
   <java-symbol type="string" name="edit_accessibility_shortcut_menu_button" />
-  <java-symbol type="string" name="cancel_accessibility_shortcut_menu_button" />
+  <java-symbol type="string" name="done_accessibility_shortcut_menu_button" />
 
   <java-symbol type="drawable" name="ic_accessibility_color_inversion" />
   <java-symbol type="drawable" name="ic_accessibility_color_correction" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
-
-  <java-symbol type="drawable" name="ic_delete_item" />
 
   <!-- com.android.internal.widget.RecyclerView -->
   <java-symbol type="id" name="item_touch_helper_previous_elevation"/>

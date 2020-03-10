@@ -60,6 +60,9 @@ using ::android::sp;
 
 static jobject convertSurfaceToNativeHandle(JNIEnv* env, jobject /* clazz */,
                                             jobject previewSurface) {
+    if (previewSurface == nullptr) {
+        return nullptr;
+    }
     ANativeWindow* previewAnw = ANativeWindow_fromSurface(env, previewSurface);
     sp<Surface> surface = static_cast<Surface*>(previewAnw);
     sp<IGraphicBufferProducer> igbp = surface->getIGraphicBufferProducer();

@@ -18,6 +18,7 @@ package com.android.systemui;
 
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bubbles.dagger.BubbleModule;
+import com.android.systemui.car.notification.CarNotificationModule;
 import com.android.systemui.globalactions.GlobalActionsComponent;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
@@ -49,7 +50,8 @@ import dagger.multibindings.IntoMap;
 
 /** Binder for car specific {@link SystemUI} modules. */
 @Module(includes = {RecentsModule.class, CarStatusBarModule.class, NotificationsModule.class,
-        BubbleModule.class, KeyguardModule.class, OverlayWindowModule.class})
+        BubbleModule.class, KeyguardModule.class, OverlayWindowModule.class,
+        CarNotificationModule.class})
 public abstract class CarSystemUIBinder {
     /** Inject into AuthController. */
     @Binds

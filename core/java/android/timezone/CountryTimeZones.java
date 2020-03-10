@@ -140,7 +140,7 @@ public final class CountryTimeZones {
         @Override
         public String toString() {
             return "OffsetResult{"
-                    + "mTimeZone=" + mTimeZone
+                    + "mTimeZone(ID)=" + mTimeZone.getID()
                     + ", mIsOnlyMatch=" + mIsOnlyMatch
                     + '}';
         }
@@ -158,7 +158,7 @@ public final class CountryTimeZones {
      * supplied.
      */
     public boolean matchesCountryCode(@NonNull String countryIso) {
-        return mDelegate.isForCountryCode(countryIso);
+        return mDelegate.matchesCountryCode(countryIso);
     }
 
     /**

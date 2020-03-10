@@ -15,7 +15,6 @@
  */
 package android.app.appsearch;
 
-import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -35,8 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
 
 /**
  * This class provides access to the centralized AppSearch index maintained by the system.
@@ -82,8 +79,8 @@ public class AppSearchManager {
      *     <li>Removal of an existing type
      *     <li>Removal of a property from a type
      *     <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
-     *     <li>For properties of {@code Document} type, changing the schema type of
-     *         {@code Document Documents} of that property
+     *     <li>For properties of {@code AppSearchDocument} type, changing the schema type of
+     *         {@code AppSearchDocument}s of that property
      *     <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an
      *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
      *             OPTIONAL} property into a
@@ -156,15 +153,15 @@ public class AppSearchManager {
     }
 
     /**
-     * Index {@link AppSearchDocument Documents} into AppSearch.
+     * Index {@link AppSearchDocument}s into AppSearch.
      *
      * <p>You should not call this method directly; instead, use the
      * {@code AppSearch#putDocuments()} API provided by JetPack.
      *
-     * <p>Each {@link AppSearchDocument Document's} {@code schemaType} field must be set to the
-     * name of a schema type previously registered via the {@link #setSchema} method.
+     * <p>Each {@link AppSearchDocument}'s {@code schemaType} field must be set to the name of a
+     * schema type previously registered via the {@link #setSchema} method.
      *
-     * @param documents {@link AppSearchDocument Documents} that need to be indexed.
+     * @param documents {@link AppSearchDocument}s that need to be indexed.
      * @return An {@link AppSearchBatchResult} mapping the document URIs to {@link Void} if they
      *     were successfully indexed, or a {@link Throwable} describing the failure if they could
      *     not be indexed.
@@ -253,10 +250,12 @@ public class AppSearchManager {
     }
 
     /**
-     * This method searches for documents based on a given query string. It also accepts
-     * specifications regarding how to search and format the results.
+     * Searches a document based on a given query string.
      *
-     *<p>Currently we support following features in the raw query format:
+     * <p>You should not call this method directly; instead, use the {@code AppSearch#query()} API
+     * provided by JetPack.
+     *
+     * <p>Currently we support following features in the raw query format:
      * <ul>
      *     <li>AND
      *     <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and
@@ -288,59 +287,50 @@ public class AppSearchManager {
      *     ‘Video’ schema type.
      * </ul>
      *
-     * <p> It is strongly recommended to use Jetpack APIs.
-     *
      * @param queryExpression Query String to search.
      * @param searchSpec Spec for setting filters, raw query etc.
-     * @param executor Executor on which to invoke the callback.
-     * @param callback  Callback to receive errors resulting from the query operation. If the
-     *                 operation succeeds, the callback will be invoked with {@code null}.
      * @hide
      */
     @NonNull
-    public void query(
-            @NonNull String queryExpression,
-            @NonNull SearchSpec searchSpec,
-            @NonNull @CallbackExecutor Executor executor,
-            @NonNull BiConsumer<? super SearchResults, ? super Throwable> callback) {
-        AndroidFuture<byte[]> future = new AndroidFuture<>();
-        future.whenCompleteAsync((searchResultBytes, err) -> {
-            if (err != null) {
-                callback.accept(null, err);
-                return;
-            }
-            if (searchResultBytes != null) {
-                SearchResultProto searchResultProto;
-                try {
-                    searchResultProto = SearchResultProto.parseFrom(searchResultBytes);
-                } catch (InvalidProtocolBufferException e) {
-                    callback.accept(null, e);
-                    return;
-                }
-                if (searchResultProto.getStatus().getCode() != StatusProto.Code.OK) {
-                    // TODO(sidchhabra): Add better exception handling.
-                    callback.accept(
-                            null,
-                            new RuntimeException(searchResultProto.getStatus().getMessage()));
-                    return;
-                }
-                SearchResults searchResults = new SearchResults(searchResultProto);
-                callback.accept(searchResults, null);
-                return;
-            }
-            // Nothing was supplied in the future at all
-            callback.accept(
-                    null, new IllegalStateException("Unknown failure occurred while querying"));
-        }, executor);
+    public AppSearchResult<SearchResults> query(
+            @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
+        // TODO(b/146386470): Transmit the result documents as a RemoteStream instead of sending
+        //     them in one big list.
+        AndroidFuture<AppSearchResult> searchResultFuture = new AndroidFuture<>();
         try {
             SearchSpecProto searchSpecProto = searchSpec.getSearchSpecProto();
             searchSpecProto = searchSpecProto.toBuilder().setQuery(queryExpression).build();
-            mService.query(searchSpecProto.toByteArray(),
+            mService.query(
+                    searchSpecProto.toByteArray(),
                     searchSpec.getResultSpecProto().toByteArray(),
-                    searchSpec.getScoringSpecProto().toByteArray(), future);
+                    searchSpec.getScoringSpecProto().toByteArray(),
+                    searchResultFuture);
         } catch (RemoteException e) {
-            future.completeExceptionally(e);
+            searchResultFuture.completeExceptionally(e);
         }
+
+        // Deserialize the protos into Document objects
+        AppSearchResult<byte[]> searchResultBytes = getFutureOrThrow(searchResultFuture);
+        if (!searchResultBytes.isSuccess()) {
+            return AppSearchResult.newFailedResult(
+                    searchResultBytes.getResultCode(), searchResultBytes.getErrorMessage());
+        }
+        SearchResultProto searchResultProto;
+        try {
+            searchResultProto = SearchResultProto.parseFrom(searchResultBytes.getResultValue());
+        } catch (InvalidProtocolBufferException e) {
+            return AppSearchResult.newFailedResult(
+                    AppSearchResult.RESULT_INTERNAL_ERROR, e.getMessage());
+        }
+        if (searchResultProto.getStatus().getCode() != StatusProto.Code.OK) {
+            // This should never happen; AppSearchManagerService should catch failed searchResults
+            // entries and transmit them as a failed AppSearchResult.
+            return AppSearchResult.newFailedResult(
+                    AppSearchResult.RESULT_INTERNAL_ERROR,
+                    searchResultProto.getStatus().getMessage());
+        }
+
+        return AppSearchResult.newSuccessfulResult(new SearchResults(searchResultProto));
     }
 
     private static <T> T getFutureOrThrow(@NonNull AndroidFuture<T> future) {

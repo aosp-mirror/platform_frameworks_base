@@ -27,14 +27,15 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 import com.android.server.appsearch.impl.AppSearchImpl;
-import com.android.server.appsearch.impl.FakeIcing;
 import com.android.server.appsearch.impl.ImplInstanceManager;
 
 import com.google.android.icing.proto.DocumentProto;
+import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.SchemaProto;
+import com.google.android.icing.proto.ScoringSpecProto;
 import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
-import com.google.android.icing.protobuf.InvalidProtocolBufferException;
+import com.google.android.icing.proto.StatusProto;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,10 +47,7 @@ public class AppSearchManagerService extends SystemService {
 
     public AppSearchManagerService(Context context) {
         super(context);
-        mFakeIcing = new FakeIcing();
     }
-
-    private final FakeIcing mFakeIcing;
 
     @Override
     public void onStart() {
@@ -144,23 +142,43 @@ public class AppSearchManagerService extends SystemService {
             }
         }
 
-        // TODO(sidchhabra):Init FakeIcing properly.
         // TODO(sidchhabra): Do this in a threadpool.
         @Override
-        public void query(@NonNull byte[] searchSpec, @NonNull byte[] resultSpec,
-                @NonNull byte[] scoringSpec, AndroidFuture callback) {
-            Preconditions.checkNotNull(searchSpec);
-            Preconditions.checkNotNull(resultSpec);
-            Preconditions.checkNotNull(scoringSpec);
-            SearchSpecProto searchSpecProto = null;
+        public void query(
+                @NonNull byte[] searchSpecBytes,
+                @NonNull byte[] resultSpecBytes,
+                @NonNull byte[] scoringSpecBytes,
+                @NonNull AndroidFuture<AppSearchResult> callback) {
+            Preconditions.checkNotNull(searchSpecBytes);
+            Preconditions.checkNotNull(resultSpecBytes);
+            Preconditions.checkNotNull(scoringSpecBytes);
+            Preconditions.checkNotNull(callback);
+            int callingUid = Binder.getCallingUidOrThrow();
+            int callingUserId = UserHandle.getUserId(callingUid);
+            long callingIdentity = Binder.clearCallingIdentity();
             try {
-                searchSpecProto = SearchSpecProto.parseFrom(searchSpec);
-            } catch (InvalidProtocolBufferException e) {
-                throw new RuntimeException(e);
+                SearchSpecProto searchSpecProto = SearchSpecProto.parseFrom(searchSpecBytes);
+                ResultSpecProto resultSpecProto = ResultSpecProto.parseFrom(resultSpecBytes);
+                ScoringSpecProto scoringSpecProto = ScoringSpecProto.parseFrom(scoringSpecBytes);
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                SearchResultProto searchResultProto =
+                        impl.query(callingUid, searchSpecProto, resultSpecProto, scoringSpecProto);
+                // TODO(sidchhabra): Translate SearchResultProto errors into error codes. This might
+                //     better be done in AppSearchImpl by throwing an AppSearchException.
+                if (searchResultProto.getStatus().getCode() != StatusProto.Code.OK) {
+                    callback.complete(
+                            AppSearchResult.newFailedResult(
+                                    AppSearchResult.RESULT_INTERNAL_ERROR,
+                                    searchResultProto.getStatus().getMessage()));
+                } else {
+                    callback.complete(
+                            AppSearchResult.newSuccessfulResult(searchResultProto.toByteArray()));
+                }
+            } catch (Throwable t) {
+                callback.complete(throwableToFailedResult(t));
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
-            SearchResultProto searchResults =
-                    mFakeIcing.query(searchSpecProto.getQuery());
-            callback.complete(searchResults.toByteArray());
         }
 
         private <ValueType> AppSearchResult<ValueType> throwableToFailedResult(

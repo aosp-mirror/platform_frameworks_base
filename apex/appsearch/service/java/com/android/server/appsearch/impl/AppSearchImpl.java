@@ -20,14 +20,21 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
+import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
 
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.PropertyProto;
+import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.SchemaProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
+import com.google.android.icing.proto.ScoringSpecProto;
+import com.google.android.icing.proto.SearchResultProto;
+import com.google.android.icing.proto.SearchSpecProto;
+
+import java.util.Set;
 
 /**
  * Manages interaction with {@link FakeIcing} and other components to implement AppSearch
@@ -122,10 +129,83 @@ public final class AppSearchImpl {
     public DocumentProto getDocument(int callingUid, @NonNull String uri) {
         String typePrefix = getTypePrefix(callingUid);
         DocumentProto document = mFakeIcing.get(uri);
+
+        // TODO(b/146526096): Since FakeIcing doesn't currently handle namespaces, we perform a
+        //  post-filter to make sure we don't return documents we shouldn't. This should be removed
+        //  once the real Icing Lib is implemented.
+        if (!document.getNamespace().equals(typePrefix)) {
+            return null;
+        }
+
         // Rewrite the type names to remove the app's prefix
         DocumentProto.Builder documentBuilder = document.toBuilder();
         rewriteDocumentTypes(typePrefix, documentBuilder, /*add=*/ false);
         return documentBuilder.build();
+    }
+
+    /**
+     * Executes a query against the AppSearch index and returns results.
+     *
+     * @param callingUid The uid of the app calling AppSearch.
+     * @param searchSpec Defines what and how to search
+     * @param resultSpec Defines what results to show
+     * @param scoringSpec Defines how to order results
+     * @return The results of performing this search  The proto might have no {@code results} if no
+     *     documents matched the query.
+     */
+    @NonNull
+    public SearchResultProto query(
+            int callingUid,
+            @NonNull SearchSpecProto searchSpec,
+            @NonNull ResultSpecProto resultSpec,
+            @NonNull ScoringSpecProto scoringSpec) {
+        String typePrefix = getTypePrefix(callingUid);
+        SearchResultProto searchResults = mFakeIcing.query(searchSpec.getQuery());
+        if (searchResults.getResultsCount() == 0) {
+            return searchResults;
+        }
+        Set<String> qualifiedSearchFilters = null;
+        if (searchSpec.getSchemaTypeFiltersCount() > 0) {
+            qualifiedSearchFilters = new ArraySet<>(searchSpec.getSchemaTypeFiltersCount());
+            for (String schema : searchSpec.getSchemaTypeFiltersList()) {
+                String qualifiedSchema = typePrefix + schema;
+                qualifiedSearchFilters.add(qualifiedSchema);
+            }
+        }
+        // Rewrite the type names to remove the app's prefix
+        SearchResultProto.Builder searchResultsBuilder = searchResults.toBuilder();
+        for (int i = 0; i < searchResultsBuilder.getResultsCount(); i++) {
+            if (searchResults.getResults(i).hasDocument()) {
+                SearchResultProto.ResultProto.Builder resultBuilder =
+                        searchResultsBuilder.getResults(i).toBuilder();
+
+                // TODO(b/145631811): Since FakeIcing doesn't currently handle namespaces, we
+                //  perform a post-filter to make sure we don't return documents we shouldn't. This
+                //  should be removed once the real Icing Lib is implemented.
+                if (!resultBuilder.getDocument().getNamespace().equals(typePrefix)) {
+                    searchResultsBuilder.removeResults(i);
+                    i--;
+                    continue;
+                }
+
+                // TODO(b/145631811): Since FakeIcing doesn't currently handle type names, we
+                //  perform a post-filter to make sure we don't return documents we shouldn't. This
+                //  should be removed once the real Icing Lib is implemented.
+                if (qualifiedSearchFilters != null
+                        && !qualifiedSearchFilters.contains(
+                                resultBuilder.getDocument().getSchema())) {
+                    searchResultsBuilder.removeResults(i);
+                    i--;
+                    continue;
+                }
+
+                DocumentProto.Builder documentBuilder = resultBuilder.getDocument().toBuilder();
+                rewriteDocumentTypes(typePrefix, documentBuilder, /*add=*/false);
+                resultBuilder.setDocument(documentBuilder);
+                searchResultsBuilder.setResults(i, resultBuilder);
+            }
+        }
+        return searchResultsBuilder.build();
     }
 
     /**
