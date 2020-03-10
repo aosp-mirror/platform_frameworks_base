@@ -82,6 +82,9 @@ public class SystemConfig {
     // property for runtime configuration differentiation
     private static final String SKU_PROPERTY = "ro.boot.product.hardware.sku";
 
+    // property for runtime configuration differentiation in vendor
+    private static final String VENDOR_SKU_PROPERTY = "ro.boot.product.vendor.sku";
+
     // Group-ids that are given to all packages as read from etc/permissions/*.xml.
     int[] mGlobalGids;
 
@@ -467,6 +470,17 @@ public class SystemConfig {
                 Environment.getVendorDirectory(), "etc", "sysconfig"), vendorPermissionFlag);
         readPermissions(Environment.buildPath(
                 Environment.getVendorDirectory(), "etc", "permissions"), vendorPermissionFlag);
+
+        String vendorSkuProperty = SystemProperties.get(VENDOR_SKU_PROPERTY, "");
+        if (!vendorSkuProperty.isEmpty()) {
+            String vendorSkuDir = "sku_" + vendorSkuProperty;
+            readPermissions(Environment.buildPath(
+                    Environment.getVendorDirectory(), "etc", "sysconfig", vendorSkuDir),
+                    vendorPermissionFlag);
+            readPermissions(Environment.buildPath(
+                    Environment.getVendorDirectory(), "etc", "permissions", vendorSkuDir),
+                    vendorPermissionFlag);
+        }
 
         // Allow ODM to customize system configs as much as Vendor, because /odm is another
         // vendor partition other than /vendor.
