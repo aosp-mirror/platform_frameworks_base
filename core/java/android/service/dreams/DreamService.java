@@ -906,22 +906,27 @@ public class DreamService extends Service implements Window.Callback {
             if (!mActivity.isFinishing()) {
                 // In case the activity is not finished yet, do it now.
                 mActivity.finishAndRemoveTask();
-                return;
             }
-        } else if (!mWindowless) {
-            Slog.w(TAG, "Finish was called before the dream was attached.");
+            return;
         }
 
-        if (!mFinished) {
-            mFinished = true;
+        if (mFinished) {
+            return;
+        }
+        mFinished = true;
 
-            try {
-                // finishSelf will unbind the dream controller from the dream service. This will
-                // trigger DreamService.this.onDestroy and DreamService.this will die.
-                mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
-            } catch (RemoteException ex) {
-                // system server died
-            }
+        if (mDreamToken == null) {
+            Slog.w(TAG, "Finish was called before the dream was attached.");
+            stopSelf();
+            return;
+        }
+
+        try {
+            // finishSelf will unbind the dream controller from the dream service. This will
+            // trigger DreamService.this.onDestroy and DreamService.this will die.
+            mDreamManager.finishSelf(mDreamToken, true /*immediate*/);
+        } catch (RemoteException ex) {
+            // system server died
         }
     }
 
