@@ -33,7 +33,8 @@
         <!-- These activities don't actually exist; define them just to test the filters !-->
 
         <!-- install test; [some] high priority filters granted -->
-        <activity android:name=".InstallPriority">
+        <activity android:name=".InstallPriority"
+            android:exported="true">
             <!-- normal actions; priority will be granted -->
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.SEARCH" />
@@ -57,7 +58,8 @@
         </activity>
 
         <!-- upgrade test; single, equivalent filter -->
-        <activity android:name=".UpgradeMatch">
+        <activity android:name=".UpgradeMatch"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.MATCH" />
                 <category android:name="android.intent.category.INFO" />
@@ -65,7 +67,8 @@
         </activity>
 
         <!-- upgrade test; multiple, equivalent filters -->
-        <activity android:name=".UpgradeMatchMultiple">
+        <activity android:name=".UpgradeMatchMultiple"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.MATCH_MULTIPLE" />
                 <category android:name="android.intent.category.INFO" />
@@ -83,7 +86,8 @@
         </activity>
 
         <!-- upgrade test; lower priority -->
-        <activity android:name=".UpgradeLowerPriority">
+        <activity android:name=".UpgradeLowerPriority"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.LOWER_PRIORITY" />
                 <category android:name="android.intent.category.INFO" />
@@ -91,7 +95,8 @@
         </activity>
 
         <!-- upgrade test; action subset -->
-        <activity android:name=".UpgradeActionSubset">
+        <activity android:name=".UpgradeActionSubset"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.ACTION_SUB" />
                 <action android:name="com.android.cts.action.ACTION_SUB_2" />
@@ -101,7 +106,8 @@
         </activity>
 
         <!-- upgrade test; category subset -->
-        <activity android:name=".UpgradeCategorySubset">
+        <activity android:name=".UpgradeCategorySubset"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.CATEGORY_SUB" />
                 <category android:name="android.intent.category.INFO" />
@@ -110,7 +116,8 @@
         </activity>
 
         <!-- upgrade test; scheme subset -->
-        <activity android:name=".UpgradeSchemeSubset">
+        <activity android:name=".UpgradeSchemeSubset"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.SCHEME_SUB" />
                 <data android:scheme="content" />
@@ -120,7 +127,8 @@
         </activity>
 
         <!-- upgrade test; authority subset -->
-        <activity android:name=".UpgradeAuthoritySubset">
+        <activity android:name=".UpgradeAuthoritySubset"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.AUTHORITY_SUB" />
                 <data android:host="www.google.com" android:port="80" />
@@ -132,7 +140,8 @@
 
 
         <!-- upgrade test; new action -->
-        <activity android:name=".UpgradeNewAction">
+        <activity android:name=".UpgradeNewAction"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.NEW_ACTION" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -140,7 +149,8 @@
         </activity>
 
         <!-- upgrade test; new category -->
-        <activity android:name=".UpgradeNewCategory">
+        <activity android:name=".UpgradeNewCategory"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.NEW_CATEGORY" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -148,7 +158,8 @@
         </activity>
 
         <!-- upgrade test; new scheme -->
-        <activity android:name=".UpgradeNewScheme">
+        <activity android:name=".UpgradeNewScheme"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.NEW_SCHEME" />
                 <data android:scheme="content" />
@@ -156,7 +167,8 @@
         </activity>
 
         <!-- upgrade test; new authority -->
-        <activity android:name=".UpgradeNewAuthority">
+        <activity android:name=".UpgradeNewAuthority"
+            android:exported="true">
             <intent-filter android:priority="100">
                 <action android:name="com.android.cts.action.NEW_AUTHORITY" />
                 <data android:host="www.google.com" android:port="80" />
