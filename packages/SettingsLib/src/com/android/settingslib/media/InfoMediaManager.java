@@ -24,6 +24,7 @@ import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
@@ -50,6 +51,7 @@ import java.util.concurrent.Executors;
 public class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
+    private static final boolean DEBUG = false;
 
     @VisibleForTesting
     final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
@@ -339,6 +341,9 @@ public class InfoMediaManager extends MediaManager {
 
     private void buildAllRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAllRoutes()) {
+            if (DEBUG) {
+                Log.d(TAG, "buildAllRoutes() route : " + route.getName());
+            }
             if (route.isSystemRoute()) {
                 addMediaDevice(route);
             }
@@ -347,6 +352,9 @@ public class InfoMediaManager extends MediaManager {
 
     private void buildAvailableRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
+            if (DEBUG) {
+                Log.d(TAG, "buildAvailableRoutes() route : " + route.getName());
+            }
             addMediaDevice(route);
         }
     }
@@ -363,7 +371,8 @@ public class InfoMediaManager extends MediaManager {
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName);
                 if (!TextUtils.isEmpty(mPackageName)
-                        && TextUtils.equals(route.getClientPackageName(), mPackageName)) {
+                        && TextUtils.equals(route.getClientPackageName(), mPackageName)
+                        && mCurrentConnectedDevice == null) {
                     mCurrentConnectedDevice = mediaDevice;
                 }
                 break;
@@ -409,12 +418,41 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onRoutesChanged(List<MediaRoute2Info> routes) {
-            refreshDevices();
+            mMediaDevices.clear();
+            mCurrentConnectedDevice = null;
+            if (TextUtils.isEmpty(mPackageName)) {
+                buildAllRoutes();
+            } else {
+                buildAvailableRoutes();
+            }
+
+            final String id = mCurrentConnectedDevice != null
+                    ? mCurrentConnectedDevice.getId()
+                    : null;
+            dispatchConnectedDeviceChanged(id);
         }
 
         @Override
         public void onRoutesRemoved(List<MediaRoute2Info> routes) {
             refreshDevices();
+        }
+
+        @Override
+        public void onTransferred(RoutingSessionInfo oldSession, RoutingSessionInfo newSession) {
+            if (DEBUG) {
+                Log.d(TAG, "onTransferred() oldSession : " + oldSession.getName()
+                        + ", newSession : " + newSession.getName());
+            }
+        }
+
+        @Override
+        public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
+            dispatchOnRequestFailed(REASON_UNKNOWN_ERROR);
+        }
+
+        @Override
+        public void onRequestFailed(int reason) {
+            dispatchOnRequestFailed(reason);
         }
     }
 }
