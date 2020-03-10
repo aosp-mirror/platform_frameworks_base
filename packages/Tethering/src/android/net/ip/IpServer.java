@@ -810,7 +810,7 @@ public class IpServer extends StateMachine {
                     rule.dstMac.toByteArray());
             mIpv6ForwardingRules.put(rule.address, rule);
         } catch (RemoteException | ServiceSpecificException e) {
-            Log.e(TAG, "Could not add IPv6 downstream rule: " + e);
+            mLog.e("Could not add IPv6 downstream rule: ", e);
         }
     }
 
@@ -821,8 +821,15 @@ public class IpServer extends StateMachine {
                 mIpv6ForwardingRules.remove(rule.address);
             }
         } catch (RemoteException | ServiceSpecificException e) {
-            Log.e(TAG, "Could not remove IPv6 downstream rule: " + e);
+            mLog.e("Could not remove IPv6 downstream rule: ", e);
         }
+    }
+
+    private void clearIpv6ForwardingRules() {
+        for (Ipv6ForwardingRule rule : mIpv6ForwardingRules.values()) {
+            removeIpv6ForwardingRule(rule, false /*removeFromMap*/);
+        }
+        mIpv6ForwardingRules.clear();
     }
 
     // Convenience method to replace a rule with the same rule on a new upstream interface.
@@ -837,6 +844,12 @@ public class IpServer extends StateMachine {
     // changes or if a neighbor event is received.
     private void updateIpv6ForwardingRules(int prevUpstreamIfindex, int upstreamIfindex,
             NeighborEvent e) {
+        // If we no longer have an upstream, clear forwarding rules and do nothing else.
+        if (upstreamIfindex == 0) {
+            clearIpv6ForwardingRules();
+            return;
+        }
+
         // If the upstream interface has changed, remove all rules and re-add them with the new
         // upstream interface.
         if (prevUpstreamIfindex != upstreamIfindex) {
@@ -846,13 +859,14 @@ public class IpServer extends StateMachine {
         }
 
         // If we're here to process a NeighborEvent, do so now.
+        // mInterfaceParams must be non-null or the event would not have arrived.
         if (e == null) return;
         if (!(e.ip instanceof Inet6Address) || e.ip.isMulticastAddress()
                 || e.ip.isLoopbackAddress() || e.ip.isLinkLocalAddress()) {
             return;
         }
 
-        Ipv6ForwardingRule rule = new Ipv6ForwardingRule(mLastIPv6UpstreamIfindex,
+        Ipv6ForwardingRule rule = new Ipv6ForwardingRule(upstreamIfindex,
                 mInterfaceParams.index, (Inet6Address) e.ip, mInterfaceParams.macAddr,
                 e.macAddr);
         if (e.isValid()) {
@@ -1095,6 +1109,7 @@ public class IpServer extends StateMachine {
 
             for (String ifname : mUpstreamIfaceSet.ifnames) cleanupUpstreamInterface(ifname);
             mUpstreamIfaceSet = null;
+            clearIpv6ForwardingRules();
         }
 
         private void cleanupUpstreamInterface(String upstreamIface) {

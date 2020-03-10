@@ -16,6 +16,7 @@
 package android.app.blob;
 
 import android.app.blob.BlobHandle;
+import android.app.blob.BlobInfo;
 import android.app.blob.IBlobStoreSession;
 import android.os.RemoteCallback;
 
@@ -31,4 +32,7 @@ interface IBlobStoreManager {
     void releaseLease(in BlobHandle handle, in String packageName);
 
     void waitForIdle(in RemoteCallback callback);
+
+    List<BlobInfo> queryBlobsForUser(int userId);
+    void deleteBlob(long blobId);
 }

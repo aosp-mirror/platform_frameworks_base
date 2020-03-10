@@ -558,6 +558,8 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> ले तपाईंको कार्य प्रोफाइलको व्यवस्थापन गर्छ। उक्त प्रोफाइल तपाईंका इमेल, अनुप्रयोग र वेवसाइटहरू लगायत तपाईंको नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> मा जडान छ। \n\nतपाईं आफ्नो व्यक्तिगत नेटवर्कको गतिविधिको अनुगमन गर्नसक्ने <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> मा पनि जडान हुनुहुन्छ।"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ले खुला राखेको"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"तपाईँले नखोले सम्म उपकरण बन्द रहनेछ"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked_plugged_in (2323452175329362855) -->
+    <skip />
     <string name="hidden_notifications_title" msgid="1782412844777612795">"छिटो सूचनाहरू प्राप्त गर्नुहोस्"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"तपाईँले अनलक गर्नअघि तिनीहरूलाई हेर्नुहोस्"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"धन्यवाद पर्दैन"</string>
@@ -979,12 +981,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"पुछारमा बायाँतिर सार्नुहोस्"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"पुछारमा दायाँतिर सार्नुहोस्"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"हटाउनुहोस्"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"कुराकानीलाई अग्रभूमिमा राख्नुहोस्"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"<xliff:g id="APP_NAME">%1$s</xliff:g> का नयाँ कुराकानीहरू बबलका रूपमा देखा पर्ने छन्। बबल खोल्न त्यसमा ट्याप गर्नुहोस्। बबल सार्न त्यसलाई घिसार्नुहोस्।\n\nबबलमा ट्याप गर्नुहोस्"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"यो अनुप्रयोगमा बबल निष्क्रिय पार्न व्यवस्थापन गर्नुहोस् नामक बटन ट्याप गर्नुहोस्"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>
@@ -994,12 +993,20 @@
     <string name="quick_controls_title" msgid="525285759614231333">"द्रुत नियन्त्रणहरू"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"नियन्त्रणहरू थप्नुहोस्"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"नियन्त्रणहरू जुन अनुप्रयोगबाट थप्ने हो त्यो अनुप्रयोग छनौट गर्नुहोस्"</string>
-    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> वटा नियन्त्र थपियो।</item>
+      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> नियन्त्र थपियो</item>
+    </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियन्त्रणहरू"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"द्रुत पहुँचका लागि नियन्त्रणहरू छनौट गर्नुहोस्"</string>
     <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"मन पर्ने कुराहरू"</string>
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"सबै"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सबै नियन्त्रणहरूको सूची लोड गर्न सकिएन।"</string>
-    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
     <skip />
 </resources>

@@ -558,6 +558,8 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"<xliff:g id="ORGANIZATION">%1$s</xliff:g> আপনার কর্মস্থলের প্রোফাইল পরিচালনা করে। প্রোফাইলটি <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> এর সাথে সংযুক্ত, যেটি ইমেল অ্যাপ, ও ওয়েবসাইট সহ আপনার কর্মস্থলের নেটওয়ার্ক অ্যাক্টিভিটির উপরে নজর রাখতে পারে।\n\n এ ছাড়াও আপনি <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> এর সাথে সংযুক্ত, যেটি আপনার ব্যক্তিগত নেটওয়ার্কে নজর রাখে।"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent দিয়ে আনলক করে রাখা হয়েছে"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"আপনি নিজে আনলক না করা পর্যন্ত ডিভাইসটি লক হয়ে থাকবে"</string>
+    <!-- no translation found for keyguard_indication_trust_unlocked_plugged_in (2323452175329362855) -->
+    <skip />
     <string name="hidden_notifications_title" msgid="1782412844777612795">"বিজ্ঞপ্তিগুলি আরও দ্রুত পান"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"আপনি আনলক করার আগে ওগুলো দেখুন"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"না থাক"</string>
@@ -979,12 +981,9 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"নিচে ডান দিকে সরান"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"খারিজ করুন"</string>
-    <!-- no translation found for bubbles_user_education_title (3385222165904578710) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_description (6663205638091146934) -->
-    <skip />
-    <!-- no translation found for bubbles_user_education_manage (1391639189507036423) -->
-    <skip />
+    <string name="bubbles_user_education_title" msgid="3385222165904578710">"চ্যাটগুলি সামনে রাখুন"</string>
+    <string name="bubbles_user_education_description" msgid="6663205638091146934">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর তরফ থেকে নতুন চ্যাট বাবল হিসেবে দেখানো হবে। এটি খোলার জন্য বাবল ট্যাপ করুন। এটি সরানোর জন্য টেনে আনুন।\n\nবাবল ট্যাপ করুন"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"এই অ্যাপ থেকে বাবল বন্ধ করতে ম্যানেজ করুন বিকল্প ট্যাপ করুন"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"সিস্টেম নেভিগেশন আপডেট হয়েছে। পরিবর্তন করার জন্য সেটিংসে যান।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"সিস্টেম নেভিগেশন আপডেট করতে সেটিংসে যান"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
@@ -994,12 +993,20 @@
     <string name="quick_controls_title" msgid="525285759614231333">"দ্রুত নিয়ন্ত্রণ"</string>
     <string name="controls_providers_title" msgid="8844124515157926071">"কন্ট্রোল যোগ করুন"</string>
     <string name="controls_providers_subtitle" msgid="8187768950110836569">"এমন একটি অ্যাপ বাছুন যেটি থেকে কন্ট্রোল যোগ করা যাবে"</string>
-    <!-- no translation found for controls_number_of_favorites (1057347832073807380) -->
+    <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
+      <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g>টি কন্ট্রোল যোগ করা হয়েছে।</item>
+      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g>টি কন্ট্রোল যোগ করা হয়েছে।</item>
+    </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"দ্রুত অ্যাক্সেস করার জন্য কন্ট্রোল বেছে নিন"</string>
     <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"পছন্দসই"</string>
     <string name="controls_favorite_header_all" msgid="7507855973418969992">"সব"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"সব কন্ট্রোলের তালিকা লোড করা যায়নি।"</string>
-    <!-- no translation found for controls_favorite_other_zone_header (9089613266575525252) -->
+    <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"অন্য"</string>
+    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
+    <skip />
+    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
+    <skip />
+    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
     <skip />
 </resources>

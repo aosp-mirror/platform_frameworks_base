@@ -66,7 +66,7 @@ class CredstoreResultData extends ResultData {
     }
 
     @Override
-    public @NonNull Collection<String> getNamespaceNames() {
+    public @NonNull Collection<String> getNamespaces() {
         return Collections.unmodifiableCollection(mData.keySet());
     }
 

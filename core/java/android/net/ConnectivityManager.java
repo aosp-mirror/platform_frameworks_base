@@ -53,7 +53,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -808,7 +807,7 @@ public class ConnectivityManager {
 
     private INetworkManagementService mNMService;
     private INetworkPolicyManager mNPManager;
-    private TetheringManager mTetheringManager;
+    private final TetheringManager mTetheringManager;
 
     /**
      * Tests if a given integer represents a valid network type.
@@ -2274,6 +2273,7 @@ public class ConnectivityManager {
     public ConnectivityManager(Context context, IConnectivityManager service) {
         mContext = Preconditions.checkNotNull(context, "missing context");
         mService = Preconditions.checkNotNull(service, "missing IConnectivityManager");
+        mTetheringManager = (TetheringManager) mContext.getSystemService(Context.TETHERING_SERVICE);
         sInstance = this;
     }
 
@@ -2347,28 +2347,6 @@ public class ConnectivityManager {
         return getInstanceOrNull();
     }
 
-    private static final int TETHERING_TIMEOUT_MS = 60_000;
-    private final Object mTetheringLock = new Object();
-
-    private TetheringManager getTetheringManager() {
-        synchronized (mTetheringLock) {
-            if (mTetheringManager != null) {
-                return mTetheringManager;
-            }
-            final long before = System.currentTimeMillis();
-            while ((mTetheringManager = (TetheringManager) mContext.getSystemService(
-                    Context.TETHERING_SERVICE)) == null) {
-                if (System.currentTimeMillis() - before > TETHERING_TIMEOUT_MS) {
-                    Log.e(TAG, "Timeout waiting tethering service not ready yet");
-                    throw new IllegalStateException("No tethering service yet");
-                }
-                SystemClock.sleep(100);
-            }
-
-            return mTetheringManager;
-        }
-    }
-
     /**
      * Get the set of tetherable, available interfaces.  This list is limited by
      * device configuration and current interface existence.
@@ -2382,7 +2360,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public String[] getTetherableIfaces() {
-        return getTetheringManager().getTetherableIfaces();
+        return mTetheringManager.getTetherableIfaces();
     }
 
     /**
@@ -2397,7 +2375,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public String[] getTetheredIfaces() {
-        return getTetheringManager().getTetheredIfaces();
+        return mTetheringManager.getTetheredIfaces();
     }
 
     /**
@@ -2418,7 +2396,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public String[] getTetheringErroredIfaces() {
-        return getTetheringManager().getTetheringErroredIfaces();
+        return mTetheringManager.getTetheringErroredIfaces();
     }
 
     /**
@@ -2462,7 +2440,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public int tether(String iface) {
-        return getTetheringManager().tether(iface);
+        return mTetheringManager.tether(iface);
     }
 
     /**
@@ -2486,7 +2464,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public int untether(String iface) {
-        return getTetheringManager().untether(iface);
+        return mTetheringManager.untether(iface);
     }
 
     /**
@@ -2512,7 +2490,7 @@ public class ConnectivityManager {
     @RequiresPermission(anyOf = {android.Manifest.permission.TETHER_PRIVILEGED,
             android.Manifest.permission.WRITE_SETTINGS})
     public boolean isTetheringSupported() {
-        return getTetheringManager().isTetheringSupported();
+        return mTetheringManager.isTetheringSupported();
     }
 
     /**
@@ -2605,7 +2583,7 @@ public class ConnectivityManager {
         final TetheringRequest request = new TetheringRequest.Builder(type)
                 .setSilentProvisioning(!showProvisioningUi).build();
 
-        getTetheringManager().startTethering(request, executor, tetheringCallback);
+        mTetheringManager.startTethering(request, executor, tetheringCallback);
     }
 
     /**
@@ -2624,7 +2602,7 @@ public class ConnectivityManager {
     @Deprecated
     @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED)
     public void stopTethering(int type) {
-        getTetheringManager().stopTethering(type);
+        mTetheringManager.stopTethering(type);
     }
 
     /**
@@ -2682,7 +2660,7 @@ public class ConnectivityManager {
 
         synchronized (mTetheringEventCallbacks) {
             mTetheringEventCallbacks.put(callback, tetherCallback);
-            getTetheringManager().registerTetheringEventCallback(executor, tetherCallback);
+            mTetheringManager.registerTetheringEventCallback(executor, tetherCallback);
         }
     }
 
@@ -2704,7 +2682,7 @@ public class ConnectivityManager {
         synchronized (mTetheringEventCallbacks) {
             final TetheringEventCallback tetherCallback =
                     mTetheringEventCallbacks.remove(callback);
-            getTetheringManager().unregisterTetheringEventCallback(tetherCallback);
+            mTetheringManager.unregisterTetheringEventCallback(tetherCallback);
         }
     }
 
@@ -2724,7 +2702,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public String[] getTetherableUsbRegexs() {
-        return getTetheringManager().getTetherableUsbRegexs();
+        return mTetheringManager.getTetherableUsbRegexs();
     }
 
     /**
@@ -2742,7 +2720,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public String[] getTetherableWifiRegexs() {
-        return getTetheringManager().getTetherableWifiRegexs();
+        return mTetheringManager.getTetherableWifiRegexs();
     }
 
     /**
@@ -2761,7 +2739,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public String[] getTetherableBluetoothRegexs() {
-        return getTetheringManager().getTetherableBluetoothRegexs();
+        return mTetheringManager.getTetherableBluetoothRegexs();
     }
 
     /**
@@ -2785,7 +2763,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public int setUsbTethering(boolean enable) {
-        return getTetheringManager().setUsbTethering(enable);
+        return mTetheringManager.setUsbTethering(enable);
     }
 
     /**
@@ -2902,7 +2880,7 @@ public class ConnectivityManager {
     @UnsupportedAppUsage
     @Deprecated
     public int getLastTetherError(String iface) {
-        return getTetheringManager().getLastTetherError(iface);
+        return mTetheringManager.getLastTetherError(iface);
     }
 
     /** @hide */
@@ -2973,7 +2951,7 @@ public class ConnectivityManager {
             }
         };
 
-        getTetheringManager().requestLatestTetheringEntitlementResult(type, wrappedListener,
+        mTetheringManager.requestLatestTetheringEntitlementResult(type, wrappedListener,
                     showEntitlementUi);
     }
 
@@ -4469,7 +4447,7 @@ public class ConnectivityManager {
     public void factoryReset() {
         try {
             mService.factoryReset();
-            getTetheringManager().stopAllTethering();
+            mTetheringManager.stopAllTethering();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

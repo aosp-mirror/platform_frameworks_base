@@ -116,9 +116,6 @@ public class DataLoaderManagerService extends SystemService {
                 return null;
             }
 
-            // TODO(b/136132412): better way to enable privileged data loaders in tests
-            boolean checkLoader =
-                    android.os.SystemProperties.getBoolean("incremental.check_loader", false);
             int numServices = services.size();
             for (int i = 0; i < numServices; i++) {
                 ResolveInfo ri = services.get(i);
@@ -128,7 +125,7 @@ public class DataLoaderManagerService extends SystemService {
                 // If there's more than one, return the first one found.
                 try {
                     ApplicationInfo ai = pm.getApplicationInfo(resolved.getPackageName(), 0);
-                    if (checkLoader && !ai.isPrivilegedApp()) {
+                    if (!ai.isPrivilegedApp()) {
                         Slog.w(TAG,
                                 "Data loader: " + resolved + " is not a privileged app, skipping.");
                         continue;

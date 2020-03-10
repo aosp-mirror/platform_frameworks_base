@@ -44,6 +44,9 @@ import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_SERVICE_UNAVAIL;
 import static android.net.TetheringManager.TETHER_ERROR_UNAVAIL_IFACE;
 import static android.net.TetheringManager.TETHER_ERROR_UNKNOWN_IFACE;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
+import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
 import static android.net.util.TetheringMessageBase.BASE_MASTER;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
@@ -220,6 +223,7 @@ public class Tethering {
     private final UserRestrictionActionListener mTetheringRestriction;
     private final ActiveDataSubIdListener mActiveDataSubIdListener;
     private final ConnectedClientsTracker mConnectedClientsTracker;
+    private final TetheringThreadExecutor mExecutor;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
     // All the usage of mTetheringEventCallback should run in the same thread.
     private ITetheringEventCallback mTetheringEventCallback = null;
@@ -236,6 +240,7 @@ public class Tethering {
     private TetherStatesParcel mTetherStatesParcel;
     private boolean mDataSaverEnabled = false;
     private String mWifiP2pTetherInterface = null;
+    private int mOffloadStatus = TETHER_HARDWARE_OFFLOAD_STOPPED;
 
     @GuardedBy("mPublicSync")
     private EthernetManager.TetheredInterfaceRequest mEthernetIfaceRequest;
@@ -296,8 +301,8 @@ public class Tethering {
         final UserManager userManager = (UserManager) mContext.getSystemService(
                 Context.USER_SERVICE);
         mTetheringRestriction = new UserRestrictionActionListener(userManager, this);
-        final TetheringThreadExecutor executor = new TetheringThreadExecutor(mHandler);
-        mActiveDataSubIdListener = new ActiveDataSubIdListener(executor);
+        mExecutor = new TetheringThreadExecutor(mHandler);
+        mActiveDataSubIdListener = new ActiveDataSubIdListener(mExecutor);
 
         // Load tethering configuration.
         updateConfiguration();
@@ -315,9 +320,7 @@ public class Tethering {
 
         final WifiManager wifiManager = getWifiManager();
         if (wifiManager != null) {
-            wifiManager.registerSoftApCallback(
-                  mHandler::post /* executor */,
-                  new TetheringSoftApCallback());
+            wifiManager.registerSoftApCallback(mExecutor, new TetheringSoftApCallback());
         }
     }
 
@@ -606,14 +609,17 @@ public class Tethering {
                 Context.ETHERNET_SERVICE);
         synchronized (mPublicSync) {
             if (enable) {
+                if (mEthernetCallback != null) return TETHER_ERROR_NO_ERROR;
+
                 mEthernetCallback = new EthernetCallback();
-                mEthernetIfaceRequest = em.requestTetheredInterface(mEthernetCallback);
+                mEthernetIfaceRequest = em.requestTetheredInterface(mExecutor, mEthernetCallback);
             } else {
-                if (mConfiguredEthernetIface != null) {
-                    stopEthernetTetheringLocked();
+                stopEthernetTetheringLocked();
+                if (mEthernetCallback != null) {
                     mEthernetIfaceRequest.release();
+                    mEthernetCallback = null;
+                    mEthernetIfaceRequest = null;
                 }
-                mEthernetCallback = null;
             }
         }
         return TETHER_ERROR_NO_ERROR;
@@ -1899,12 +1905,15 @@ public class Tethering {
         // OffloadController implementation.
         class OffloadWrapper {
             public void start() {
-                mOffloadController.start();
+                final int status = mOffloadController.start() ? TETHER_HARDWARE_OFFLOAD_STARTED
+                        : TETHER_HARDWARE_OFFLOAD_FAILED;
+                updateOffloadStatus(status);
                 sendOffloadExemptPrefixes();
             }
 
             public void stop() {
                 mOffloadController.stop();
+                updateOffloadStatus(TETHER_HARDWARE_OFFLOAD_STOPPED);
             }
 
             public void updateUpstreamNetworkState(UpstreamNetworkState ns) {
@@ -1965,6 +1974,13 @@ public class Tethering {
 
                 mOffloadController.setLocalPrefixes(localPrefixes);
             }
+
+            private void updateOffloadStatus(final int newStatus) {
+                if (newStatus == mOffloadStatus) return;
+
+                mOffloadStatus = newStatus;
+                reportOffloadStatusChanged(mOffloadStatus);
+            }
         }
     }
 
@@ -1999,6 +2015,7 @@ public class Tethering {
             parcel.tetheredClients = hasListPermission
                     ? mConnectedClientsTracker.getLastTetheredClients()
                     : Collections.emptyList();
+            parcel.offloadStatus = mOffloadStatus;
             try {
                 callback.onCallbackStarted(parcel);
             } catch (RemoteException e) {
@@ -2084,6 +2101,21 @@ public class Tethering {
                             (CallbackCookie) mTetheringEventCallbacks.getBroadcastCookie(i);
                     if (!cookie.hasListClientsPermission) continue;
                     mTetheringEventCallbacks.getBroadcastItem(i).onTetherClientsChanged(clients);
+                } catch (RemoteException e) {
+                    // Not really very much to do here.
+                }
+            }
+        } finally {
+            mTetheringEventCallbacks.finishBroadcast();
+        }
+    }
+
+    private void reportOffloadStatusChanged(final int status) {
+        final int length = mTetheringEventCallbacks.beginBroadcast();
+        try {
+            for (int i = 0; i < length; i++) {
+                try {
+                    mTetheringEventCallbacks.getBroadcastItem(i).onOffloadStatusChanged(status);
                 } catch (RemoteException e) {
                     // Not really very much to do here.
                 }

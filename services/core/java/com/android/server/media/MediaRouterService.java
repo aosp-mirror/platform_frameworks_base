@@ -480,9 +480,9 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void requestCreateSessionWithRouter2(IMediaRouter2 router, MediaRoute2Info route,
-            int requestId, Bundle sessionHints) {
-        mService2.requestCreateSessionWithRouter2(router, route, requestId, sessionHints);
+    public void requestCreateSessionWithRouter2(IMediaRouter2 router, int requestId,
+            MediaRoute2Info route, Bundle sessionHints) {
+        mService2.requestCreateSessionWithRouter2(router, requestId, route, sessionHints);
     }
 
     // Binder call
@@ -542,51 +542,51 @@ public final class MediaRouterService extends IMediaRouterService.Stub
 
     // Binder call
     @Override
-    public void setRouteVolumeWithManager(IMediaRouter2Manager manager,
-            MediaRoute2Info route, int volume, int requestId) {
-        mService2.setRouteVolumeWithManager(manager, route, volume, requestId);
+    public void setRouteVolumeWithManager(IMediaRouter2Manager manager, int requestId,
+            MediaRoute2Info route, int volume) {
+        mService2.setRouteVolumeWithManager(manager, requestId, route, volume);
     }
 
     // Binder call
     @Override
-    public void requestCreateSessionWithManager(IMediaRouter2Manager manager, String packageName,
-            MediaRoute2Info route, int requestId) {
-        mService2.requestCreateSessionWithManager(manager, packageName, route, requestId);
+    public void requestCreateSessionWithManager(IMediaRouter2Manager manager,
+            int requestId, String packageName, MediaRoute2Info route) {
+        mService2.requestCreateSessionWithManager(manager, requestId, packageName, route);
     }
 
     // Binder call
     @Override
-    public void selectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route, int requestId) {
-        mService2.selectRouteWithManager(manager, sessionId, route, requestId);
+    public void selectRouteWithManager(IMediaRouter2Manager manager, int requestId,
+            String sessionId, MediaRoute2Info route) {
+        mService2.selectRouteWithManager(manager, requestId, sessionId, route);
     }
 
     // Binder call
     @Override
-    public void deselectRouteWithManager(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route, int requestId) {
-        mService2.deselectRouteWithManager(manager, sessionId, route, requestId);
+    public void deselectRouteWithManager(IMediaRouter2Manager manager, int requestId,
+            String sessionId, MediaRoute2Info route) {
+        mService2.deselectRouteWithManager(manager, requestId, sessionId, route);
     }
 
     // Binder call
     @Override
-    public void transferToRouteWithManager(IMediaRouter2Manager manager, String sessionId,
-            MediaRoute2Info route, int requestId) {
-        mService2.transferToRouteWithManager(manager, sessionId, route, requestId);
+    public void transferToRouteWithManager(IMediaRouter2Manager manager, int requestId,
+            String sessionId, MediaRoute2Info route) {
+        mService2.transferToRouteWithManager(manager, requestId, sessionId, route);
     }
 
     // Binder call
     @Override
-    public void setSessionVolumeWithManager(IMediaRouter2Manager manager,
-            String sessionId, int volume, int requestId) {
-        mService2.setSessionVolumeWithManager(manager, sessionId, volume, requestId);
+    public void setSessionVolumeWithManager(IMediaRouter2Manager manager, int requestId,
+            String sessionId, int volume) {
+        mService2.setSessionVolumeWithManager(manager, requestId, sessionId, volume);
     }
 
     // Binder call
     @Override
-    public void releaseSessionWithManager(IMediaRouter2Manager manager, String sessionId,
-            int requestId) {
-        mService2.releaseSessionWithManager(manager, sessionId, requestId);
+    public void releaseSessionWithManager(IMediaRouter2Manager manager, int requestId,
+            String sessionId) {
+        mService2.releaseSessionWithManager(manager, requestId, sessionId);
     }
 
     void restoreBluetoothA2dp() {
