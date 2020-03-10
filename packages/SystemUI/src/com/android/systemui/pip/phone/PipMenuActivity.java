@@ -569,7 +569,7 @@ public class PipMenuActivity extends Activity {
 
     private void showSettings() {
         final Pair<ComponentName, Integer> topPipActivityInfo =
-                PipUtils.getTopPinnedActivity(this, ActivityManager.getService());
+                PipUtils.getTopPipActivity(this, ActivityManager.getService());
         if (topPipActivityInfo.first != null) {
             final UserHandle user = UserHandle.of(topPipActivityInfo.second);
             final Intent settingsIntent = new Intent(ACTION_PICTURE_IN_PICTURE_SETTINGS,
