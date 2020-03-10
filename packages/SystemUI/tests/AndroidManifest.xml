@@ -56,7 +56,8 @@
     <application android:debuggable="true" android:largeHeap="true">
         <uses-library android:name="android.test.runner" />
 
-        <receiver android:name="com.android.systemui.SliceBroadcastRelayHandlerTest$Receiver">
+        <receiver android:name="com.android.systemui.SliceBroadcastRelayHandlerTest$Receiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TEST_ACTION" />
             </intent-filter>

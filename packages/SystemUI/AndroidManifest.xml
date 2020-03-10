@@ -536,7 +536,8 @@
         <activity android:name=".SlicePermissionActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
-            android:excludeFromRecents="true">
+            android:excludeFromRecents="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.intent.action.REQUEST_SLICE_PERMISSION" />
             </intent-filter>
@@ -645,7 +646,8 @@
             android:process=":fgservices"
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
-            android:theme="@*android:style/Theme.DeviceDefault.Settings.Dialog">
+            android:theme="@*android:style/Theme.DeviceDefault.Settings.Dialog"
+            android:exported="true">
             <intent-filter android:priority="1">
                 <action android:name="android.settings.FOREGROUND_SERVICES_SETTINGS" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -660,7 +662,8 @@
                 android:relinquishTaskIdentity="true"
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:process=":ui"
-                android:visibleToInstantApps="true">
+                android:visibleToInstantApps="true"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
                 <category android:name="android.intent.category.VOICE" />
@@ -726,7 +729,8 @@
         </provider>
 
         <receiver
-            android:name=".statusbar.KeyboardShortcutsReceiver">
+            android:name=".statusbar.KeyboardShortcutsReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.android.intent.action.DISMISS_KEYBOARD_SHORTCUTS" />
                 <action android:name="com.android.intent.action.SHOW_KEYBOARD_SHORTCUTS" />
