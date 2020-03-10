@@ -638,7 +638,8 @@ public final class DisplayCutout {
                 return sCachedCutout;
             }
         }
-        spec = spec.trim();
+        final String specToCache = spec.trim();
+        spec = specToCache;
         final float offsetX;
         if (spec.endsWith(RIGHT_MARKER)) {
             offsetX = displayWidth;
@@ -709,7 +710,7 @@ public final class DisplayCutout {
 
         final Pair<Path, DisplayCutout> result = new Pair<>(p, cutout);
         synchronized (CACHE_LOCK) {
-            sCachedSpec = spec;
+            sCachedSpec = specToCache;
             sCachedDisplayWidth = displayWidth;
             sCachedDisplayHeight = displayHeight;
             sCachedDensity = density;
