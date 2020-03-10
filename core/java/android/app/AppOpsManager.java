@@ -1988,108 +1988,108 @@ public class AppOpsManager {
     };
 
     /**
-     * This specifies whether each option should allow the system
-     * (and system ui) to bypass the user restriction when active.
+     * In which cases should an app be allowed to bypass the {@link #setUserRestriction user
+     * restriction} for a certain app-op.
      */
-    private static boolean[] sOpAllowSystemRestrictionBypass = new boolean[] {
-            true, //COARSE_LOCATION
-            true, //FINE_LOCATION
-            false, //GPS
-            false, //VIBRATE
-            false, //READ_CONTACTS
-            false, //WRITE_CONTACTS
-            false, //READ_CALL_LOG
-            false, //WRITE_CALL_LOG
-            false, //READ_CALENDAR
-            false, //WRITE_CALENDAR
-            true, //WIFI_SCAN
-            false, //POST_NOTIFICATION
-            false, //NEIGHBORING_CELLS
-            false, //CALL_PHONE
-            false, //READ_SMS
-            false, //WRITE_SMS
-            false, //RECEIVE_SMS
-            false, //RECEIVE_EMERGECY_SMS
-            false, //RECEIVE_MMS
-            false, //RECEIVE_WAP_PUSH
-            false, //SEND_SMS
-            false, //READ_ICC_SMS
-            false, //WRITE_ICC_SMS
-            false, //WRITE_SETTINGS
-            true, //SYSTEM_ALERT_WINDOW
-            false, //ACCESS_NOTIFICATIONS
-            false, //CAMERA
-            false, //RECORD_AUDIO
-            false, //PLAY_AUDIO
-            false, //READ_CLIPBOARD
-            false, //WRITE_CLIPBOARD
-            false, //TAKE_MEDIA_BUTTONS
-            false, //TAKE_AUDIO_FOCUS
-            false, //AUDIO_MASTER_VOLUME
-            false, //AUDIO_VOICE_VOLUME
-            false, //AUDIO_RING_VOLUME
-            false, //AUDIO_MEDIA_VOLUME
-            false, //AUDIO_ALARM_VOLUME
-            false, //AUDIO_NOTIFICATION_VOLUME
-            false, //AUDIO_BLUETOOTH_VOLUME
-            false, //WAKE_LOCK
-            false, //MONITOR_LOCATION
-            false, //MONITOR_HIGH_POWER_LOCATION
-            false, //GET_USAGE_STATS
-            false, //MUTE_MICROPHONE
-            true, //TOAST_WINDOW
-            false, //PROJECT_MEDIA
-            false, //ACTIVATE_VPN
-            false, //WALLPAPER
-            false, //ASSIST_STRUCTURE
-            false, //ASSIST_SCREENSHOT
-            false, //READ_PHONE_STATE
-            false, //ADD_VOICEMAIL
-            false, // USE_SIP
-            false, // PROCESS_OUTGOING_CALLS
-            false, // USE_FINGERPRINT
-            false, // BODY_SENSORS
-            false, // READ_CELL_BROADCASTS
-            false, // MOCK_LOCATION
-            false, // READ_EXTERNAL_STORAGE
-            false, // WRITE_EXTERNAL_STORAGE
-            false, // TURN_ON_SCREEN
-            false, // GET_ACCOUNTS
-            false, // RUN_IN_BACKGROUND
-            false, // AUDIO_ACCESSIBILITY_VOLUME
-            false, // READ_PHONE_NUMBERS
-            false, // REQUEST_INSTALL_PACKAGES
-            false, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
-            false, // INSTANT_APP_START_FOREGROUND
-            false, // ANSWER_PHONE_CALLS
-            false, // OP_RUN_ANY_IN_BACKGROUND
-            false, // OP_CHANGE_WIFI_STATE
-            false, // OP_REQUEST_DELETE_PACKAGES
-            false, // OP_BIND_ACCESSIBILITY_SERVICE
-            false, // ACCEPT_HANDOVER
-            false, // MANAGE_IPSEC_HANDOVERS
-            false, // START_FOREGROUND
-            true, // BLUETOOTH_SCAN
-            false, // USE_BIOMETRIC
-            false, // ACTIVITY_RECOGNITION
-            false, // SMS_FINANCIAL_TRANSACTIONS
-            false, // READ_MEDIA_AUDIO
-            false, // WRITE_MEDIA_AUDIO
-            false, // READ_MEDIA_VIDEO
-            false, // WRITE_MEDIA_VIDEO
-            false, // READ_MEDIA_IMAGES
-            false, // WRITE_MEDIA_IMAGES
-            false, // LEGACY_STORAGE
-            false, // ACCESS_ACCESSIBILITY
-            false, // READ_DEVICE_IDENTIFIERS
-            false, // ACCESS_MEDIA_LOCATION
-            false, // QUERY_ALL_PACKAGES
-            false, // MANAGE_EXTERNAL_STORAGE
-            false, // INTERACT_ACROSS_PROFILES
-            false, // ACTIVATE_PLATFORM_VPN
-            false, // LOADER_USAGE_STATS
-            false, // ACCESS_CALL_AUDIO
-            false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+    private static RestrictionBypass[] sOpAllowSystemRestrictionBypass = new RestrictionBypass[] {
+            new RestrictionBypass(true, false), //COARSE_LOCATION
+            new RestrictionBypass(true, false), //FINE_LOCATION
+            null, //GPS
+            null, //VIBRATE
+            null, //READ_CONTACTS
+            null, //WRITE_CONTACTS
+            null, //READ_CALL_LOG
+            null, //WRITE_CALL_LOG
+            null, //READ_CALENDAR
+            null, //WRITE_CALENDAR
+            new RestrictionBypass(true, false), //WIFI_SCAN
+            null, //POST_NOTIFICATION
+            null, //NEIGHBORING_CELLS
+            null, //CALL_PHONE
+            null, //READ_SMS
+            null, //WRITE_SMS
+            null, //RECEIVE_SMS
+            null, //RECEIVE_EMERGECY_SMS
+            null, //RECEIVE_MMS
+            null, //RECEIVE_WAP_PUSH
+            null, //SEND_SMS
+            null, //READ_ICC_SMS
+            null, //WRITE_ICC_SMS
+            null, //WRITE_SETTINGS
+            new RestrictionBypass(true, false), //SYSTEM_ALERT_WINDOW
+            null, //ACCESS_NOTIFICATIONS
+            null, //CAMERA
+            new RestrictionBypass(false, true), //RECORD_AUDIO
+            null, //PLAY_AUDIO
+            null, //READ_CLIPBOARD
+            null, //WRITE_CLIPBOARD
+            null, //TAKE_MEDIA_BUTTONS
+            null, //TAKE_AUDIO_FOCUS
+            null, //AUDIO_MASTER_VOLUME
+            null, //AUDIO_VOICE_VOLUME
+            null, //AUDIO_RING_VOLUME
+            null, //AUDIO_MEDIA_VOLUME
+            null, //AUDIO_ALARM_VOLUME
+            null, //AUDIO_NOTIFICATION_VOLUME
+            null, //AUDIO_BLUETOOTH_VOLUME
+            null, //WAKE_LOCK
+            null, //MONITOR_LOCATION
+            null, //MONITOR_HIGH_POWER_LOCATION
+            null, //GET_USAGE_STATS
+            null, //MUTE_MICROPHONE
+            new RestrictionBypass(true, false), //TOAST_WINDOW
+            null, //PROJECT_MEDIA
+            null, //ACTIVATE_VPN
+            null, //WALLPAPER
+            null, //ASSIST_STRUCTURE
+            null, //ASSIST_SCREENSHOT
+            null, //READ_PHONE_STATE
+            null, //ADD_VOICEMAIL
+            null, // USE_SIP
+            null, // PROCESS_OUTGOING_CALLS
+            null, // USE_FINGERPRINT
+            null, // BODY_SENSORS
+            null, // READ_CELL_BROADCASTS
+            null, // MOCK_LOCATION
+            null, // READ_EXTERNAL_STORAGE
+            null, // WRITE_EXTERNAL_STORAGE
+            null, // TURN_ON_SCREEN
+            null, // GET_ACCOUNTS
+            null, // RUN_IN_BACKGROUND
+            null, // AUDIO_ACCESSIBILITY_VOLUME
+            null, // READ_PHONE_NUMBERS
+            null, // REQUEST_INSTALL_PACKAGES
+            null, // ENTER_PICTURE_IN_PICTURE_ON_HIDE
+            null, // INSTANT_APP_START_FOREGROUND
+            null, // ANSWER_PHONE_CALLS
+            null, // OP_RUN_ANY_IN_BACKGROUND
+            null, // OP_CHANGE_WIFI_STATE
+            null, // OP_REQUEST_DELETE_PACKAGES
+            null, // OP_BIND_ACCESSIBILITY_SERVICE
+            null, // ACCEPT_HANDOVER
+            null, // MANAGE_IPSEC_HANDOVERS
+            null, // START_FOREGROUND
+            new RestrictionBypass(true, false), // BLUETOOTH_SCAN
+            null, // USE_BIOMETRIC
+            null, // ACTIVITY_RECOGNITION
+            null, // SMS_FINANCIAL_TRANSACTIONS
+            null, // READ_MEDIA_AUDIO
+            null, // WRITE_MEDIA_AUDIO
+            null, // READ_MEDIA_VIDEO
+            null, // WRITE_MEDIA_VIDEO
+            null, // READ_MEDIA_IMAGES
+            null, // WRITE_MEDIA_IMAGES
+            null, // LEGACY_STORAGE
+            null, // ACCESS_ACCESSIBILITY
+            null, // READ_DEVICE_IDENTIFIERS
+            null, // ACCESS_MEDIA_LOCATION
+            null, // QUERY_ALL_PACKAGES
+            null, // MANAGE_EXTERNAL_STORAGE
+            null, // INTERACT_ACROSS_PROFILES
+            null, // ACTIVATE_PLATFORM_VPN
+            null, // LOADER_USAGE_STATS
+            null, // ACCESS_CALL_AUDIO
+            null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
     };
 
     /**
@@ -2485,11 +2485,11 @@ public class AppOpsManager {
     }
 
     /**
-     * Retrieve whether the op allows the system (and system ui) to
-     * bypass the user restriction.
+     * Retrieve whether the op allows to bypass the user restriction.
+     *
      * @hide
      */
-    public static boolean opAllowSystemBypassRestriction(int op) {
+    public static RestrictionBypass opAllowSystemBypassRestriction(int op) {
         return sOpAllowSystemRestrictionBypass[op];
     }
 
@@ -2533,6 +2533,29 @@ public class AppOpsManager {
      */
     public static boolean opAllowsReset(int op) {
         return !sOpDisableReset[op];
+    }
+
+    /**
+     * When to not enforce {@link #setUserRestriction restrictions}.
+     *
+     * @hide
+     */
+    public static class RestrictionBypass {
+        /** Does the app need to be privileged to bypass the restriction */
+        public boolean isPrivileged;
+
+        /**
+         * Does the app need to have the EXEMPT_FROM_AUDIO_RESTRICTIONS permission to bypass the
+         * restriction
+         */
+        public boolean isRecordAudioRestrictionExcept;
+
+        public RestrictionBypass(boolean isPrivileged, boolean isRecordAudioRestrictionExcept) {
+            this.isPrivileged = isPrivileged;
+            this.isRecordAudioRestrictionExcept = isRecordAudioRestrictionExcept;
+        }
+
+        public static RestrictionBypass UNRESTRICTED = new RestrictionBypass(true, true);
     }
 
     /**
