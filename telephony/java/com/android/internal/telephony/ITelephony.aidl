@@ -22,6 +22,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
+import android.os.ParcelFileDescriptor;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
 import android.net.NetworkStats;
@@ -2129,9 +2130,14 @@ interface ITelephony {
     void notifyOtaEmergencyNumberDbInstalled();
 
     /**
-     * Override the file partition name for testing OTA emergency number database.
+     * Override a customized file partition name for OTA emergency number database.
      */
-    void updateTestOtaEmergencyNumberDbFilePath(String otaFilePath);
+    void updateOtaEmergencyNumberDbFilePath(in ParcelFileDescriptor otaParcelFileDescriptor);
+
+    /**
+     * Reset file partition to default for OTA emergency number database.
+     */
+    void resetOtaEmergencyNumberDbFilePath();
 
     /**
      * Enable or disable a logical modem stack associated with the slotIndex.
