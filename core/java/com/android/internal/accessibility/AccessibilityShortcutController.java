@@ -56,6 +56,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -133,7 +134,7 @@ public class AccessibilityShortcutController {
         // Keep track of state of shortcut settings
         final ContentObserver co = new ContentObserver(handler) {
             @Override
-            public void onChange(boolean selfChange, Uri uri, int userId) {
+            public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
                 if (userId == mUserId) {
                     onSettingsChanged();
                 }
