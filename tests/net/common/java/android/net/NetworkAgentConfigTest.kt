@@ -16,16 +16,23 @@
 
 package android.net
 
+import android.os.Build
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
+import com.android.testutils.DevSdkIgnoreRule
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.assertParcelSane
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class NetworkAgentConfigTest {
-    @Test
+    @Rule @JvmField
+    val ignoreRule = DevSdkIgnoreRule()
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     fun testParcelNetworkAgentConfig() {
         val config = NetworkAgentConfig.Builder().apply {
             setExplicitlySelected(true)
