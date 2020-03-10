@@ -234,7 +234,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
             loaded = true
             assertEquals(1, controls.size)
             val controlStatus = controls[0]
-            assertEquals(ControlStatus(control, false), controlStatus)
+            assertEquals(ControlStatus(control, TEST_COMPONENT, false), controlStatus)
 
             assertTrue(favorites.isEmpty())
             assertFalse(data.errorOnLoad)
@@ -265,10 +265,10 @@ class ControlsControllerImplTest : SysuiTestCase() {
             loaded = true
             assertEquals(2, controls.size)
             val controlStatus = controls.first { it.control.controlId == TEST_CONTROL_ID }
-            assertEquals(ControlStatus(control, true), controlStatus)
+            assertEquals(ControlStatus(control, TEST_COMPONENT, true), controlStatus)
 
             val controlStatus2 = controls.first { it.control.controlId == TEST_CONTROL_ID_2 }
-            assertEquals(ControlStatus(control2, false), controlStatus2)
+            assertEquals(ControlStatus(control2, TEST_COMPONENT, false), controlStatus2)
 
             assertEquals(1, favorites.size)
             assertEquals(TEST_CONTROL_ID, favorites[0])
