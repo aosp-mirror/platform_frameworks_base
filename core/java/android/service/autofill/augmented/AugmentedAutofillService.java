@@ -40,7 +40,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillEventHistory;
-import android.service.autofill.InlinePresentation;
+import android.service.autofill.InlineAction;
 import android.service.autofill.augmented.PresentationParams.SystemPopupPresentationParams;
 import android.util.Log;
 import android.util.Pair;
@@ -559,7 +559,7 @@ public abstract class AugmentedAutofillService extends Service {
         }
 
         void reportResult(@Nullable List<Dataset> inlineSuggestionsData,
-                @Nullable List<InlinePresentation> inlineActions) {
+                @Nullable List<InlineAction> inlineActions) {
             try {
                 mCallback.onSuccess(inlineSuggestionsData, inlineActions);
             } catch (RemoteException e) {
