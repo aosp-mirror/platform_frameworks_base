@@ -1767,8 +1767,8 @@ package android.companion {
 
 package android.content {
 
-  public class ApexContext {
-    method @NonNull public static android.content.ApexContext getApexContext(@NonNull String);
+  public class ApexEnvironment {
+    method @NonNull public static android.content.ApexEnvironment getApexEnvironment(@NonNull String);
     method @NonNull public java.io.File getCredentialProtectedDataDirForUser(@NonNull android.os.UserHandle);
     method @NonNull public java.io.File getDeviceProtectedDataDir();
     method @NonNull public java.io.File getDeviceProtectedDataDirForUser(@NonNull android.os.UserHandle);
