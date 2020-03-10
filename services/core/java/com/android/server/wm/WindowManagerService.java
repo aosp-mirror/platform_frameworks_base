@@ -1287,7 +1287,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mConstants.start(new HandlerExecutor(mH));
 
         LocalServices.addService(WindowManagerInternal.class, new LocalService());
-        mEmbeddedWindowController = new EmbeddedWindowController(mGlobalLock);
+        mEmbeddedWindowController = new EmbeddedWindowController(mAtmService);
 
         mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
                 mContext.getResources());
@@ -1900,7 +1900,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (dc.mCurrentFocus == null) {
             dc.mWinRemovedSinceNullFocus.add(win);
         }
-        mEmbeddedWindowController.removeWindowsWithHost(win);
+        mEmbeddedWindowController.onWindowRemoved(win);
         mPendingRemove.remove(win);
         mResizingWindows.remove(win);
         updateNonSystemOverlayWindowsVisibilityIfNeeded(win, false /* surfaceShown */);
