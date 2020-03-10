@@ -18,7 +18,6 @@ package android.telephony.ims;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -718,11 +717,16 @@ public final class ImsCallProfile implements Parcelable {
      * @return A {@link Bundle} containing proprietary call extras that were not set by the
      * platform.
      */
-    public @Nullable Bundle getProprietaryCallExtras() {
+    public @NonNull Bundle getProprietaryCallExtras() {
         if (mCallExtras == null) {
-            return null;
+            return new Bundle();
         }
-        return mCallExtras.getBundle(EXTRA_OEM_EXTRAS);
+        Bundle proprietaryExtras = mCallExtras.getBundle(EXTRA_OEM_EXTRAS);
+        if (proprietaryExtras == null) {
+            return new Bundle();
+        }
+        // Make a copy so users do not accidentally change this copy of the extras.
+        return new Bundle(proprietaryExtras);
     }
 
     public ImsStreamMediaProfile getMediaProfile() {
