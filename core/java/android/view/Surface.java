@@ -32,6 +32,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
 import android.graphics.SurfaceTexture;
+import android.hardware.HardwareBuffer;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -749,6 +750,14 @@ public class Surface implements Parcelable {
                         + "native error: " + err);
             }
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void attachAndQueueBufferWithColorSpace(HardwareBuffer buffer, ColorSpace colorSpace) {
+        attachAndQueueBufferWithColorSpace(GraphicBuffer.createFromHardwareBuffer(buffer),
+                colorSpace);
     }
 
     /**

@@ -93,11 +93,11 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.GraphicBuffer;
 import android.graphics.Path;
 import android.graphics.Picture;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.hardware.HardwareBuffer;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.Handler;
@@ -374,7 +374,7 @@ public class AppTransition implements Dump {
         setAppTransitionState(APP_STATE_TIMEOUT);
     }
 
-    GraphicBuffer getAppTransitionThumbnailHeader(WindowContainer container) {
+    HardwareBuffer getAppTransitionThumbnailHeader(WindowContainer container) {
         AppTransitionAnimationSpec spec = mNextAppTransitionAnimationsSpecs.get(
                 container.hashCode());
         if (spec == null) {
@@ -813,7 +813,7 @@ public class AppTransition implements Dump {
     }
 
     private void putDefaultNextAppTransitionCoordinates(int left, int top, int width, int height,
-            GraphicBuffer buffer) {
+            HardwareBuffer buffer) {
         mDefaultNextAppTransitionAnimationSpec = new AppTransitionAnimationSpec(-1 /* taskId */,
                 buffer, new Rect(left, top, left + width, top + height));
     }
@@ -1039,7 +1039,7 @@ public class AppTransition implements Dump {
      * Creates an overlay with a background color and a thumbnail for the cross profile apps
      * animation.
      */
-    GraphicBuffer createCrossProfileAppsThumbnail(
+    HardwareBuffer createCrossProfileAppsThumbnail(
             @DrawableRes int thumbnailDrawableRes, Rect frame) {
         final int width = frame.width();
         final int height = frame.height();
@@ -1059,7 +1059,7 @@ public class AppTransition implements Dump {
         drawable.draw(canvas);
         picture.endRecording();
 
-        return Bitmap.createBitmap(picture).createGraphicBufferHandle();
+        return Bitmap.createBitmap(picture).getHardwareBuffer();
     }
 
     Animation createCrossProfileAppsThumbnailAnimationLocked(Rect appRect) {
@@ -1074,7 +1074,8 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the pending animation override.
      */
     Animation createThumbnailAspectScaleAnimationLocked(Rect appRect, @Nullable Rect contentInsets,
-            GraphicBuffer thumbnailHeader, WindowContainer container, int uiMode, int orientation) {
+            HardwareBuffer thumbnailHeader, WindowContainer container, int uiMode,
+            int orientation) {
         Animation a;
         final int thumbWidthI = thumbnailHeader.getWidth();
         final float thumbWidth = thumbWidthI > 0 ? thumbWidthI : 1;
@@ -1436,7 +1437,7 @@ public class AppTransition implements Dump {
      * when a thumbnail is specified with the pending animation override.
      */
     Animation createThumbnailScaleAnimationLocked(int appWidth, int appHeight, int transit,
-            GraphicBuffer thumbnailHeader) {
+            HardwareBuffer thumbnailHeader) {
         Animation a;
         getDefaultNextAppTransitionStartRect(mTmpRect);
         final int thumbWidthI = thumbnailHeader.getWidth();
@@ -1481,7 +1482,7 @@ public class AppTransition implements Dump {
             int transit, WindowContainer container) {
         final int appWidth = containingFrame.width();
         final int appHeight = containingFrame.height();
-        final GraphicBuffer thumbnailHeader = getAppTransitionThumbnailHeader(container);
+        final HardwareBuffer thumbnailHeader = getAppTransitionThumbnailHeader(container);
         Animation a;
         getDefaultNextAppTransitionStartRect(mTmpRect);
         final int thumbWidthI = thumbnailHeader != null ? thumbnailHeader.getWidth() : appWidth;
@@ -1865,7 +1866,7 @@ public class AppTransition implements Dump {
         }
     }
 
-    void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX, int startY,
+    void overridePendingAppTransitionThumb(HardwareBuffer srcThumb, int startX, int startY,
                                            IRemoteCallback startedCallback, boolean scaleUp) {
         if (canOverridePendingAppTransition()) {
             clear();
@@ -1878,8 +1879,9 @@ public class AppTransition implements Dump {
         }
     }
 
-    void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX, int startY,
-            int targetWidth, int targetHeight, IRemoteCallback startedCallback, boolean scaleUp) {
+    void overridePendingAppTransitionAspectScaledThumb(HardwareBuffer srcThumb, int startX,
+            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
+            boolean scaleUp) {
         if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionType = scaleUp ? NEXT_TRANSIT_TYPE_THUMBNAIL_ASPECT_SCALE_UP
