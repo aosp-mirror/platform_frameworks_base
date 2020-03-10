@@ -116,8 +116,10 @@ open class ControlsBindingControllerImpl @Inject constructor(
     override fun bindAndLoad(
         component: ComponentName,
         callback: ControlsBindingController.LoadCallback
-    ) {
-        retrieveLifecycleManager(component)?.maybeBindAndLoad(LoadSubscriber(callback))
+    ): Runnable {
+        val subscriber = LoadSubscriber(callback)
+        retrieveLifecycleManager(component)?.maybeBindAndLoad(subscriber)
+        return subscriber.loadCancel()
     }
 
     override fun subscribe(structureInfo: StructureInfo) {
@@ -208,7 +210,6 @@ open class ControlsBindingControllerImpl @Inject constructor(
     ) : CallbackRunnable(token) {
         override fun doRun() {
             callback.accept(list)
-            provider?.unbindService()
         }
     }
 
@@ -292,8 +293,14 @@ open class ControlsBindingControllerImpl @Inject constructor(
     ) : IControlsSubscriber.Stub() {
         val loadedControls = ArrayList<Control>()
         var hasError = false
+        private var _loadCancelInternal: (() -> Unit)? = null
+        fun loadCancel() = Runnable {
+                Log.d(TAG, "Cancel load requested")
+                _loadCancelInternal?.invoke()
+            }
 
         override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {
+            _loadCancelInternal = subs::cancel
             backgroundExecutor.execute(OnSubscribeRunnable(token, subs))
         }
 
@@ -302,10 +309,12 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
         override fun onError(token: IBinder, s: String) {
             hasError = true
+            _loadCancelInternal = {}
             backgroundExecutor.execute(OnLoadErrorRunnable(token, s, callback))
         }
 
         override fun onComplete(token: IBinder) {
+            _loadCancelInternal = {}
             if (!hasError) {
                 backgroundExecutor.execute(OnLoadRunnable(token, loadedControls, callback))
             }
