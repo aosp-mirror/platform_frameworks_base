@@ -17,9 +17,9 @@
 package com.android.server.people.data;
 
 import android.annotation.IntDef;
-import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.WorkerThread;
 import android.net.Uri;
 import android.util.ArrayMap;
 
@@ -90,20 +90,16 @@ class EventStore {
      * Loads existing {@link EventHistoryImpl}s from disk. This should be called when device powers
      * on and user is unlocked.
      */
-    @MainThread
-    void loadFromDisk() {
-        mScheduledExecutorService.execute(() -> {
-            synchronized (this) {
-                for (@EventCategory int category = 0; category < mEventsCategoryDirs.size();
-                        category++) {
-                    File categoryDir = mEventsCategoryDirs.get(category);
-                    Map<String, EventHistoryImpl> existingEventHistoriesImpl =
-                            EventHistoryImpl.eventHistoriesImplFromDisk(categoryDir,
-                                    mScheduledExecutorService);
-                    mEventHistoryMaps.get(category).putAll(existingEventHistoriesImpl);
-                }
-            }
-        });
+    @WorkerThread
+    synchronized void loadFromDisk() {
+        for (@EventCategory int category = 0; category < mEventsCategoryDirs.size();
+                category++) {
+            File categoryDir = mEventsCategoryDirs.get(category);
+            Map<String, EventHistoryImpl> existingEventHistoriesImpl =
+                    EventHistoryImpl.eventHistoriesImplFromDisk(categoryDir,
+                            mScheduledExecutorService);
+            mEventHistoryMaps.get(category).putAll(existingEventHistoriesImpl);
+        }
     }
 
     /**
