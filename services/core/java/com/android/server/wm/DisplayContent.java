@@ -4931,6 +4931,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 scheduleAnimation();
             }
         }
+
+        @Override
+        boolean shouldMagnify() {
+            // Omitted from Screen-Magnification
+            return false;
+        }
     }
 
     /**
