@@ -4587,7 +4587,8 @@ public class Editor {
         protected int mHorizontalGravity;
         // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
-        // Where the touch position should be on the handle to ensure a maximum cursor visibility
+        // Where the touch position should be on the handle to ensure a maximum cursor visibility.
+        // This is the distance in pixels from the top of the handle view.
         private float mIdealVerticalOffset;
         // Parent's (TextView) previous position in window
         private int mLastParentX, mLastParentY;
@@ -4612,6 +4613,11 @@ public class Editor {
         // when magnifier is used.
         private float mTextViewScaleX;
         private float mTextViewScaleY;
+        /**
+         * The vertical distance in pixels from finger to the cursor Y while dragging.
+         * See {@link Editor.InsertionPointCursorController#getLineDuringDrag}.
+         */
+        private final int mIdealFingerToCursorOffset;
 
         private HandleView(Drawable drawableLtr, Drawable drawableRtl, final int id) {
             super(mTextView.getContext());
@@ -4633,10 +4639,15 @@ public class Editor {
             final int handleHeight = getPreferredHeight();
             mTouchOffsetY = -0.3f * handleHeight;
             mIdealVerticalOffset = 0.7f * handleHeight;
+            mIdealFingerToCursorOffset = (int)(mIdealVerticalOffset - mTouchOffsetY);
         }
 
         public float getIdealVerticalOffset() {
             return mIdealVerticalOffset;
+        }
+
+        final int getIdealFingerToCursorOffset() {
+            return mIdealFingerToCursorOffset;
         }
 
         void setDrawables(final Drawable drawableLtr, final Drawable drawableRtl) {
@@ -6123,36 +6134,34 @@ public class Editor {
          */
         private int getLineDuringDrag(MotionEvent event) {
             final Layout layout = mTextView.getLayout();
-            if (mTouchState.isOnHandle()) {
-                // The drag was initiated from the handle, so no need to apply the snap logic. See
-                // InsertionHandleView.touchThrough().
+            if (mPrevLineDuringDrag == UNSET_LINE) {
                 return getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, event.getY());
             }
+            // In case of touch through on handle (when isOnHandle() returns true), event.getY()
+            // returns the midpoint of the cursor vertical bar, while event.getRawY() returns the
+            // finger location on the screen. See {@link InsertionHandleView#touchThrough}.
+            final float fingerY = mTouchState.isOnHandle()
+                    ? event.getRawY() - mTextView.getLocationOnScreen()[1]
+                    : event.getY();
+            final float cursorY = fingerY - getHandle().getIdealFingerToCursorOffset();
+            int line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
             if (mIsTouchSnappedToHandleDuringDrag) {
-                float cursorY = event.getY() - getHandle().getIdealVerticalOffset();
-                return getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
-            }
-            int line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, event.getY());
-            if (mPrevLineDuringDrag == UNSET_LINE || line <= mPrevLineDuringDrag) {
-                // User's finger is on the same line or moving up; continue positioning the cursor
-                // directly at the touch location.
+                // Just returns the line hit by cursor Y when already snapped.
                 return line;
             }
-            // User's finger is moving downwards; delay jumping to the lower line to allow the
-            // touch to move to the handle.
-            float cursorY = event.getY() - getHandle().getIdealVerticalOffset();
-            line = getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, cursorY);
             if (line < mPrevLineDuringDrag) {
-                return mPrevLineDuringDrag;
+                // The cursor Y aims too high & not yet snapped, check the finger Y.
+                // If finger Y is moving downwards, don't jump to lower line (until snap).
+                // If finger Y is moving upwards, can jump to upper line.
+                return Math.min(mPrevLineDuringDrag,
+                        getCurrentLineAdjustedForSlop(layout, mPrevLineDuringDrag, fingerY));
             }
-            // User's finger is now over the handle, at the ideal offset from the cursor. From now
-            // on, position the cursor higher up from the actual touch location so that the user's
-            // finger stays "snapped" to the handle. This provides better visibility of the text.
+            // The cursor Y aims not too high, so snap!
             mIsTouchSnappedToHandleDuringDrag = true;
             if (TextView.DEBUG_CURSOR) {
                 logCursor("InsertionPointCursorController",
-                        "snapped touch to handle: eventY=%d, cursorY=%d, mLastLine=%d, line=%d",
-                        (int) event.getY(), (int) cursorY, mPrevLineDuringDrag, line);
+                        "snapped touch to handle: fingerY=%d, cursorY=%d, mLastLine=%d, line=%d",
+                        (int) fingerY, (int) cursorY, mPrevLineDuringDrag, line);
             }
             return line;
         }
@@ -6252,7 +6261,7 @@ public class Editor {
             }
         }
 
-        private InsertionHandleView getHandle() {
+        public InsertionHandleView getHandle() {
             if (mHandle == null) {
                 loadHandleDrawables(false /* overwrite */);
                 mHandle = new InsertionHandleView(mSelectHandleCenter);

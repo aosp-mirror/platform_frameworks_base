@@ -497,7 +497,7 @@ public class TextViewActivityTest {
 
     @Test
     public void testInsertionHandle_multiLine() {
-        final String text = "abcd\n" + "efg\n" + "hijk\n";
+        final String text = "abcd\n" + "efg\n" + "hijk\n" + "lmn\n";
         onView(withId(R.id.textview)).perform(replaceText(text));
 
         onView(withId(R.id.textview)).perform(clickOnTextAtIndex(text.length()));
@@ -506,12 +506,12 @@ public class TextViewActivityTest {
         final TextView textView = mActivity.findViewById(R.id.textview);
 
         onHandleView(com.android.internal.R.id.insertion_handle)
-                .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('a')));
-        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("a")));
-
-        onHandleView(com.android.internal.R.id.insertion_handle)
                 .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('f')));
         onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("f")));
+
+        onHandleView(com.android.internal.R.id.insertion_handle)
+                .perform(dragHandle(textView, Handle.INSERTION, text.indexOf('i')));
+        onView(withId(R.id.textview)).check(hasInsertionPointerAtIndex(text.indexOf("i")));
     }
 
     private void enableFlagsForInsertionHandleGestures() {
