@@ -24,7 +24,8 @@
     <application>
         <service android:name="com.android.server.connectivity.tethering.TetheringService"
                  android:process="system"
-                 android:permission="android.permission.MAINLINE_NETWORK_STACK">
+                 android:permission="android.permission.MAINLINE_NETWORK_STACK"
+                 android:exported="true">
             <intent-filter>
                 <action android:name="android.net.ITetheringConnector.InProcess"/>
             </intent-filter>
