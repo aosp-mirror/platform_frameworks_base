@@ -9435,7 +9435,6 @@ package android.provider {
 
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
     field public static final String APN_SET_ID = "apn_set_id";
-    field @Deprecated public static final String BEARER_BITMASK = "bearer_bitmask";
     field public static final int CARRIER_EDITED = 4; // 0x4
     field @NonNull public static final android.net.Uri DPC_URI;
     field public static final String EDITED_STATUS = "edited";
@@ -9444,11 +9443,6 @@ package android.provider {
     field public static final String MODEM_PERSIST = "modem_cognitive";
     field public static final String MTU = "mtu";
     field public static final int NO_APN_SET_ID = 0; // 0x0
-    field public static final String PROFILE_ID = "profile_id";
-    field public static final String SKIP_464XLAT = "skip_464xlat";
-    field public static final int SKIP_464XLAT_DEFAULT = -1; // 0xffffffff
-    field public static final int SKIP_464XLAT_DISABLE = 0; // 0x0
-    field public static final int SKIP_464XLAT_ENABLE = 1; // 0x1
     field public static final String TIME_LIMIT_FOR_MAX_CONNECTIONS = "max_conns_time";
     field public static final int UNEDITED = 0; // 0x0
     field public static final int USER_DELETED = 2; // 0x2
