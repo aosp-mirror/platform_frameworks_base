@@ -34,7 +34,7 @@ class ToggleBehavior : Behavior {
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-        cvh.setEnabled(false)
+        cvh.applyRenderInfo(false)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
             ControlActionCoordinator.toggle(cvh, template.getTemplateId(), template.isChecked())
@@ -51,10 +51,7 @@ class ToggleBehavior : Behavior {
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
 
         val checked = template.isChecked()
-        val deviceType = control.getDeviceType()
-
         clipLayer.setLevel(if (checked) MAX_LEVEL else MIN_LEVEL)
-        cvh.setEnabled(checked)
-        cvh.applyRenderInfo(RenderInfo.lookup(deviceType, checked))
+        cvh.applyRenderInfo(checked)
     }
 }

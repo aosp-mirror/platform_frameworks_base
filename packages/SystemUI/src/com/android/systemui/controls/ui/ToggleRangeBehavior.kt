@@ -56,7 +56,7 @@ class ToggleRangeBehavior : Behavior {
         status = cvh.status
         context = status.getContext()
 
-        cvh.setEnabled(false)
+        cvh.applyRenderInfo(false)
 
         val gestureListener = ToggleRangeGestureListener(cvh.layout)
         val gestureDetector = GestureDetector(context, gestureListener)
@@ -89,14 +89,11 @@ class ToggleRangeBehavior : Behavior {
         rangeTemplate = template.getRange()
 
         val checked = template.isChecked()
-        val deviceType = control.getDeviceType()
-
         val currentRatio = rangeTemplate.getCurrentValue() /
                 (rangeTemplate.getMaxValue() - rangeTemplate.getMinValue())
         updateRange(currentRatio, checked)
 
-        cvh.setEnabled(checked)
-        cvh.applyRenderInfo(RenderInfo.lookup(deviceType, checked))
+        cvh.applyRenderInfo(checked)
     }
 
     fun beginUpdateRange() {
