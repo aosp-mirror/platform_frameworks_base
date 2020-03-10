@@ -16,7 +16,6 @@
 
 package android.media.tv.tuner.filter;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 
@@ -47,27 +46,5 @@ public abstract class FilterConfiguration {
     @Nullable
     public Settings getSettings() {
         return mSettings;
-    }
-
-    /**
-     * Builder for {@link FilterConfiguration}.
-     *
-     * @param <T> The subclass to be built.
-     */
-    public abstract static class Builder<T extends Builder<T>> {
-        /* package */ Settings mSettings;
-
-        /* package */ Builder() {
-        }
-
-        /**
-         * Sets filter settings.
-         */
-        @NonNull
-        public T setSettings(@Nullable Settings settings) {
-            mSettings = settings;
-            return self();
-        }
-        /* package */ abstract T self();
     }
 }
