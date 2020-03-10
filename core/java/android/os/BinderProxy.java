@@ -526,7 +526,7 @@ public final class BinderProxy implements IBinder {
         final AppOpsManager.PausedNotedAppOpsCollection prevCollection =
                 AppOpsManager.pauseNotedAppOpsCollection();
 
-        if ((flags & FLAG_ONEWAY) == 0 && AppOpsManager.isCollectingNotedAppOps()) {
+        if ((flags & FLAG_ONEWAY) == 0 && AppOpsManager.isListeningForOpNoted()) {
             flags |= FLAG_COLLECT_NOTED_APP_OPS;
         }
 
