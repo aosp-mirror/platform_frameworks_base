@@ -50,6 +50,7 @@ import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 
@@ -99,7 +100,8 @@ class WindowToken extends WindowContainer<WindowState> {
     private Configuration mLastReportedConfig;
     private int mLastReportedDisplay = INVALID_DISPLAY;
 
-    private final boolean mFromClientToken;
+    @VisibleForTesting
+    final boolean mFromClientToken;
 
     /**
      * Used to fix the transform of the token to be rotated to a rotation different than it's
@@ -180,13 +182,13 @@ class WindowToken extends WindowContainer<WindowState> {
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
             DisplayContent dc, boolean ownerCanManageAppTokens) {
         this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens,
-                false /* roundedCornersOverlay */);
+                false /* roundedCornerOverlay */);
     }
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
-            DisplayContent dc, boolean ownerCanManageAppTokens, boolean fromClientToken) {
+            DisplayContent dc, boolean ownerCanManageAppTokens, boolean roundedCornerOverlay) {
         this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens,
-                false /* roundedCornersOverlay */, fromClientToken);
+                roundedCornerOverlay, false /* fromClientToken */);
     }
 
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,

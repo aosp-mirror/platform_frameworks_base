@@ -2610,7 +2610,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (type == TYPE_WALLPAPER) {
                     new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens);
                 } else {
-                    new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens);
+                    new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens,
+                            false /* roundedCornerOverlay */, fromClientToken);
                 }
             }
         } finally {
