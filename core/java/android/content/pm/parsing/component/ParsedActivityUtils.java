@@ -179,12 +179,11 @@ public class ParsedActivityUtils {
 
             ParseResult<String> affinityNameResult = ComponentParseUtils.buildTaskAffinityName(
                     packageName, pkg.getTaskAffinity(), taskAffinity, input);
-            if (affinityNameResult.isSuccess()) {
-                activity.taskAffinity = affinityNameResult.getResult();
-            } else {
-                // Backwards-compat, ignore error
-                affinityNameResult.ignoreError();
+            if (affinityNameResult.isError()) {
+                return input.error(affinityNameResult);
             }
+
+            activity.taskAffinity = affinityNameResult.getResult();
 
             boolean visibleToEphemeral = sa.getBoolean(R.styleable.AndroidManifestActivity_visibleToInstantApps, false);
             if (visibleToEphemeral) {

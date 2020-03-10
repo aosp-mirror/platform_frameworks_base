@@ -47,8 +47,7 @@ open class AndroidPackageParsingTestBase {
 
     companion object {
 
-        // TODO(chiuwinson): Enable in separate change to fail all presubmit builds and fix errors
-        private const val VERIFY_ALL_APKS = false
+        private const val VERIFY_ALL_APKS = true
 
         /** For auditing memory usage differences */
         private const val DUMP_HPROF_TO_EXTERNAL = false
@@ -57,13 +56,10 @@ open class AndroidPackageParsingTestBase {
         protected val packageParser = PackageParser().apply {
             setOnlyCoreApps(false)
             setDisplayMetrics(context.resources.displayMetrics)
-            setCallback { true }
+            setCallback { false /* hasFeature */ }
         }
 
-        protected val packageParser2 = PackageParser2(null, false, context.resources.displayMetrics,
-                null, object : PackageParser2.Callback() {
-            override fun hasFeature(feature: String?) = true
-        })
+        protected val packageParser2 = TestPackageParser2()
 
         /**
          * It would be difficult to mock all possibilities, so just use the APKs on device.
