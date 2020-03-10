@@ -16084,6 +16084,22 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean updateMccMncConfiguration(String mcc, String mnc) {
+        int mccInt, mncInt;
+        try {
+            mccInt = Integer.parseInt(mcc);
+            mncInt = Integer.parseInt(mnc);
+        } catch (NumberFormatException | StringIndexOutOfBoundsException ex) {
+            Slog.e(TAG, "Error parsing mcc: " + mcc + " mnc: " + mnc + ". ex=" + ex);
+            return false;
+        }
+        Configuration config = new Configuration();
+        config.mcc = mccInt;
+        config.mnc = mncInt == 0 ? Configuration.MNC_ZERO : mncInt;
+        return mActivityTaskManager.updateConfiguration(config);
+    }
+
+    @Override
     public int getLaunchedFromUid(IBinder activityToken) {
         return mActivityTaskManager.getLaunchedFromUid(activityToken);
     }
