@@ -60,7 +60,6 @@ public class WindowContext extends ContextWrapper {
         mWms = WindowManagerGlobal.getWindowManagerService();
         mToken = new WindowTokenClient();
 
-
         final ContextImpl contextImpl = createBaseWindowContext(base, mToken);
         attachBaseContext(contextImpl);
         contextImpl.setOuterContext(this);
