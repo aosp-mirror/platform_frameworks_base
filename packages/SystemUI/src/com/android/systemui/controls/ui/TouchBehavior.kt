@@ -18,36 +18,41 @@ package com.android.systemui.controls.ui
 
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
+import android.view.View
 import android.service.controls.Control
-import android.service.controls.templates.TemperatureControlTemplate
+import android.service.controls.templates.StatelessTemplate
 
 import com.android.systemui.R
 import com.android.systemui.controls.ui.ControlActionCoordinator.MIN_LEVEL
-import com.android.systemui.controls.ui.ControlActionCoordinator.MAX_LEVEL
 
-class TemperatureControlBehavior : Behavior {
+/**
+ * Supports touch events, but has no notion of state as the {@link ToggleBehavior} does. Must be
+ * used with {@link StatelessTemplate}.
+ */
+class TouchBehavior : Behavior {
     lateinit var clipLayer: Drawable
+    lateinit var template: StatelessTemplate
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
-    lateinit var template: TemperatureControlTemplate
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
+        cvh.applyRenderInfo(false)
+
+        cvh.layout.setOnClickListener(View.OnClickListener() {
+            ControlActionCoordinator.touch(cvh, template.getTemplateId())
+        })
     }
 
     override fun bind(cws: ControlWithState) {
         this.control = cws.control!!
-
         cvh.status.setText(control.getStatusText())
+        template = control.getControlTemplate() as StatelessTemplate
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
+        clipLayer.setLevel(MIN_LEVEL)
 
-        template = control.getControlTemplate() as TemperatureControlTemplate
-
-        val activeMode = template.getCurrentActiveMode()
-        val enabled = activeMode != 0 && activeMode != TemperatureControlTemplate.MODE_OFF
-        clipLayer.setLevel(if (enabled) MAX_LEVEL else MIN_LEVEL)
-        cvh.applyRenderInfo(enabled, activeMode)
+        cvh.applyRenderInfo(false)
     }
 }
