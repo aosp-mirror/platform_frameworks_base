@@ -62,7 +62,8 @@
             android:name=".ui.PrintActivity"
             android:configChanges="mnc|mnc|touchscreen|navigation|screenLayout|screenSize|smallestScreenSize|orientation|locale|keyboard|keyboardHidden|fontScale|uiMode|layoutDirection|density"
             android:permission="android.permission.BIND_PRINT_SPOOLER_SERVICE"
-            android:theme="@style/Theme.PrintActivity">
+            android:theme="@style/Theme.PrintActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.print.PRINT_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
