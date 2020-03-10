@@ -1708,11 +1708,6 @@ public final class OomAdjuster {
                                     // TOP process passes all capabilities to the service.
                                     capability |= PROCESS_CAPABILITY_ALL;
                                 }
-                            } else if (clientProcState
-                                    <= PROCESS_STATE_FOREGROUND_SERVICE) {
-                                if (cr.notHasFlag(Context.BIND_INCLUDE_CAPABILITIES)) {
-                                    clientProcState = PROCESS_STATE_FOREGROUND_SERVICE;
-                                }
                             }
                         } else if ((cr.flags & Context.BIND_IMPORTANT_BACKGROUND) == 0) {
                             if (clientProcState <
@@ -2036,7 +2031,7 @@ public final class OomAdjuster {
             case PROCESS_STATE_TOP:
                 return PROCESS_CAPABILITY_ALL;
             case PROCESS_STATE_BOUND_TOP:
-                return PROCESS_CAPABILITY_ALL_IMPLICIT;
+                return PROCESS_CAPABILITY_NONE;
             case PROCESS_STATE_FOREGROUND_SERVICE:
                 if (app.hasForegroundServices()) {
                     // Capability from FGS are conditional depending on foreground service type in
@@ -2044,10 +2039,12 @@ public final class OomAdjuster {
                     return PROCESS_CAPABILITY_NONE;
                 } else {
                     // process has no FGS, the PROCESS_STATE_FOREGROUND_SERVICE is from client.
+                    // the implicit capability could be removed in the future, client should use
+                    // BIND_INCLUDE_CAPABILITY flag.
                     return PROCESS_CAPABILITY_ALL_IMPLICIT;
                 }
             case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                return PROCESS_CAPABILITY_ALL_IMPLICIT;
+                return PROCESS_CAPABILITY_NONE;
             default:
                 return PROCESS_CAPABILITY_NONE;
         }
