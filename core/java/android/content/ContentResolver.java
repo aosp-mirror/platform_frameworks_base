@@ -83,6 +83,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -2670,6 +2671,15 @@ public abstract class ContentResolver implements ContentInterface {
                 ContentProvider.getUserIdFromUri(uri, mContext.getUserId()));
     }
 
+    /** @removed */
+    @Deprecated
+    public void notifyChange(@NonNull Iterable<Uri> uris, @Nullable ContentObserver observer,
+            @NotifyFlags int flags) {
+        final Collection<Uri> asCollection = new ArrayList<>();
+        uris.forEach(asCollection::add);
+        notifyChange(asCollection, observer, flags);
+    }
+
     /**
      * Notify registered observers that several rows have been updated.
      * <p>
@@ -2694,7 +2704,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @param flags Flags such as {@link #NOTIFY_SYNC_TO_NETWORK} or
      *            {@link #NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS}.
      */
-    public void notifyChange(@NonNull Iterable<Uri> uris, @Nullable ContentObserver observer,
+    public void notifyChange(@NonNull Collection<Uri> uris, @Nullable ContentObserver observer,
             @NotifyFlags int flags) {
         Objects.requireNonNull(uris, "uris");
 
