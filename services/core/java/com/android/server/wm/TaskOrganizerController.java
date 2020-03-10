@@ -128,7 +128,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
 
         void removeTask(Task t) {
             try {
-                mOrganizer.taskVanished(t.getRemoteToken());
+                mOrganizer.taskVanished(t.getTaskInfo());
             } catch (Exception e) {
                 Slog.e(TAG, "Exception sending taskVanished callback" + e);
             }
