@@ -42,6 +42,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
 
     @Mock
     MirrorWindowControl mMirrorWindowControl;
+    @Mock
+    WindowMagnifierCallback mWindowMagnifierCallback;
     private WindowMagnificationController mWindowMagnificationController;
     private Instrumentation mInstrumentation;
 
@@ -50,7 +52,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mWindowMagnificationController = new WindowMagnificationController(getContext(),
-                mMirrorWindowControl);
+                mMirrorWindowControl, mWindowMagnifierCallback);
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
     }
@@ -66,7 +68,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Test
     public void createWindowMagnification_showControl() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.createWindowMagnification();
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
         });
         mInstrumentation.waitForIdleSync();
         verify(mMirrorWindowControl).showControl(any(IBinder.class));
@@ -75,7 +78,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Test
     public void deleteWindowMagnification_destroyControl() {
         mInstrumentation.runOnMainSync(() -> {
-            mWindowMagnificationController.createWindowMagnification();
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
         });
         mInstrumentation.waitForIdleSync();
 
