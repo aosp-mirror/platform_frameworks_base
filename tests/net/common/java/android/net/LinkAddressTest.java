@@ -28,8 +28,8 @@ import static android.system.OsConstants.RT_SCOPE_SITE;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 import static com.android.testutils.MiscAssertsKt.assertEqualBothWays;
+import static com.android.testutils.MiscAssertsKt.assertFieldCountEquals;
 import static com.android.testutils.MiscAssertsKt.assertNotEqualEitherWay;
-import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
 import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertEquals;
@@ -38,11 +38,17 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.os.Build;
 import android.os.SystemClock;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -57,6 +63,8 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LinkAddressTest {
+    @Rule
+    public final DevSdkIgnoreRule ignoreRule = new DevSdkIgnoreRule();
 
     private static final String V4 = "192.0.2.1";
     private static final String V6 = "2001:db8::1";
@@ -318,15 +326,29 @@ public class LinkAddressTest {
 
         l = new LinkAddress(V6_ADDRESS, 64, 123, 456);
         assertParcelingIsLossless(l);
-        l = new LinkAddress(V6_ADDRESS, 64, 123, 456,
-                1L, 3600000L);
-        assertParcelingIsLossless(l);
 
         l = new LinkAddress(V4 + "/28", IFA_F_PERMANENT, RT_SCOPE_LINK);
-        assertParcelSane(l, 6);
+        assertParcelingIsLossless(l);
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testLifetimeParceling() {
+        final LinkAddress l = new LinkAddress(V6_ADDRESS, 64, 123, 456, 1L, 3600000L);
+        assertParcelingIsLossless(l);
+    }
+
+    @Test @IgnoreAfter(Build.VERSION_CODES.Q)
+    public void testFieldCount_Q() {
+        assertFieldCountEquals(4, LinkAddress.class);
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testFieldCount() {
+        // Make sure any new field is covered by the above parceling tests when changing this number
+        assertFieldCountEquals(6, LinkAddress.class);
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testDeprecationTime() {
         try {
             new LinkAddress(V6_ADDRESS, 64, 0, 456,
@@ -347,7 +369,7 @@ public class LinkAddressTest {
         } catch (IllegalArgumentException expected) { }
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testExpirationTime() {
         try {
             new LinkAddress(V6_ADDRESS, 64, 0, 456,
@@ -366,10 +388,13 @@ public class LinkAddressTest {
     public void testGetFlags() {
         LinkAddress l = new LinkAddress(V6_ADDRESS, 64, 123, RT_SCOPE_HOST);
         assertEquals(123, l.getFlags());
+    }
 
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testGetFlags_Deprecation() {
         // Test if deprecated bit was added/remove automatically based on the provided deprecation
         // time
-        l = new LinkAddress(V6_ADDRESS, 64, 0, RT_SCOPE_HOST,
+        LinkAddress l = new LinkAddress(V6_ADDRESS, 64, 0, RT_SCOPE_HOST,
                 1L, LinkAddress.LIFETIME_PERMANENT);
         // Check if the flag is added automatically.
         assertTrue((l.getFlags() & IFA_F_DEPRECATED) != 0);
@@ -458,8 +483,11 @@ public class LinkAddressTest {
                             (IFA_F_TEMPORARY|IFA_F_TENTATIVE|IFA_F_OPTIMISTIC),
                             RT_SCOPE_UNIVERSE);
         assertGlobalPreferred(l, "v6,global,tempaddr+optimistic");
+    }
 
-        l = new LinkAddress(V6_ADDRESS, 64, IFA_F_DEPRECATED,
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testIsGlobalPreferred_DeprecatedInFuture() {
+        final LinkAddress l = new LinkAddress(V6_ADDRESS, 64, IFA_F_DEPRECATED,
                 RT_SCOPE_UNIVERSE, SystemClock.elapsedRealtime() + 100000,
                 SystemClock.elapsedRealtime() + 200000);
         // Although the deprecated bit is set, but the deprecation time is in the future, test
