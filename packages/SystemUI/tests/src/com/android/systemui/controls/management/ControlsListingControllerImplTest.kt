@@ -30,7 +30,6 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -38,6 +37,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
@@ -98,74 +98,18 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testInitialStateListening() {
+        verify(mockSL).setListening(true)
+        verify(mockSL).reload()
+    }
+
+    @Test
     fun testStartsOnUser() {
         assertEquals(user, controller.currentUserId)
     }
 
     @Test
-    fun testNoServices_notListening() {
-        assertTrue(controller.getCurrentServices().isEmpty())
-    }
-
-    @Test
-    fun testStartListening_onFirstCallback() {
-        controller.addCallback(mockCallback)
-        executor.runAllReady()
-
-        verify(mockSL).setListening(true)
-    }
-
-    @Test
-    fun testStartListening_onlyOnce() {
-        controller.addCallback(mockCallback)
-        controller.addCallback(mockCallbackOther)
-
-        executor.runAllReady()
-
-        verify(mockSL).setListening(true)
-    }
-
-    @Test
-    fun testStopListening_callbackRemoved() {
-        controller.addCallback(mockCallback)
-
-        executor.runAllReady()
-
-        controller.removeCallback(mockCallback)
-
-        executor.runAllReady()
-
-        verify(mockSL).setListening(false)
-    }
-
-    @Test
-    fun testStopListening_notWhileRemainingCallbacks() {
-        controller.addCallback(mockCallback)
-        controller.addCallback(mockCallbackOther)
-
-        executor.runAllReady()
-
-        controller.removeCallback(mockCallback)
-
-        executor.runAllReady()
-
-        verify(mockSL, never()).setListening(false)
-    }
-
-    @Test
-    fun testReloadOnFirstCallbackAdded() {
-        controller.addCallback(mockCallback)
-        executor.runAllReady()
-
-        verify(mockSL).reload()
-    }
-
-    @Test
     fun testCallbackCalledWhenAdded() {
-        `when`(mockSL.reload()).then {
-            serviceListingCallbackCaptor.value.onServicesReloaded(emptyList())
-        }
-
         controller.addCallback(mockCallback)
         executor.runAllReady()
         verify(mockCallback).onServicesUpdated(any())
@@ -209,5 +153,11 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         controller.changeUser(UserHandle.of(otherUser))
         executor.runAllReady()
         assertEquals(otherUser, controller.currentUserId)
+
+        val inOrder = inOrder(mockSL)
+        inOrder.verify(mockSL).setListening(false)
+        inOrder.verify(mockSL).addCallback(any()) // We add a callback because we replaced the SL
+        inOrder.verify(mockSL).setListening(true)
+        inOrder.verify(mockSL).reload()
     }
 }
