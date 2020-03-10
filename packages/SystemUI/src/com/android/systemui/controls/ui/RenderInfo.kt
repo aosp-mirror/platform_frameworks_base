@@ -16,8 +16,14 @@
 
 package com.android.systemui.controls.ui
 
+import android.annotation.MainThread
+import android.content.ComponentName
+import android.content.Context
+import android.graphics.drawable.Drawable
 import android.service.controls.DeviceTypes
 import android.service.controls.templates.TemperatureControlTemplate
+import android.util.ArrayMap
+import android.util.SparseArray
 
 import com.android.systemui.R
 
@@ -31,18 +37,54 @@ data class IconState(val disabledResourceId: Int, val enabledResourceId: Int) {
     }
 }
 
-data class RenderInfo(val iconResourceId: Int, val foreground: Int, val background: Int) {
+data class RenderInfo(val icon: Drawable, val foreground: Int, val background: Int) {
 
     companion object {
-        fun lookup(deviceType: Int, enabled: Boolean): RenderInfo {
-            val iconState = deviceIconMap.getValue(deviceType)
+        const val APP_ICON_ID = -1
+        private val iconMap = SparseArray<Drawable>()
+        private val appIconMap = ArrayMap<ComponentName, Drawable>()
+
+        @MainThread
+        fun lookup(
+            context: Context,
+            componentName: ComponentName,
+            deviceType: Int,
+            enabled: Boolean,
+            offset: Int = 0
+        ): RenderInfo {
             val (fg, bg) = deviceColorMap.getValue(deviceType)
-            return RenderInfo(iconState[enabled], fg, bg)
+
+            val iconKey = if (offset > 0) {
+                deviceType * BUCKET_SIZE + offset
+            } else deviceType
+
+            val iconState = deviceIconMap.getValue(iconKey)
+            val resourceId = iconState[enabled]
+            var icon: Drawable? = null
+            if (resourceId == APP_ICON_ID) {
+                icon = appIconMap.get(componentName)
+                if (icon == null) {
+                    icon = context.resources
+                        .getDrawable(R.drawable.ic_device_unknown_gm2_24px, null)
+                    appIconMap.put(componentName, icon)
+                }
+            } else {
+                icon = iconMap.get(resourceId)
+                if (icon == null) {
+                    icon = context.resources.getDrawable(resourceId, null)
+                    iconMap.put(resourceId, icon)
+                }
+            }
+            return RenderInfo(icon!!, fg, bg)
         }
 
-        fun lookup(deviceType: Int, offset: Int, enabled: Boolean): RenderInfo {
-            val key = deviceType * BUCKET_SIZE + offset
-            return lookup(key, enabled)
+        fun registerComponentIcon(componentName: ComponentName, icon: Drawable) {
+            appIconMap.put(componentName, icon)
+        }
+
+        fun clearCache() {
+            iconMap.clear()
+            appIconMap.clear()
         }
     }
 }
@@ -116,6 +158,10 @@ private val deviceIconMap = mapOf<Int, IconState>(
     DeviceTypes.TYPE_MOP to IconState(
         R.drawable.ic_vacuum_gm2_24px,
         R.drawable.ic_vacuum_gm2_24px
+    ),
+    DeviceTypes.TYPE_ROUTINE to IconState(
+        RenderInfo.APP_ICON_ID,
+        RenderInfo.APP_ICON_ID
     )
 ).withDefault {
     IconState(
