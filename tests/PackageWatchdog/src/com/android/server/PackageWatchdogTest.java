@@ -1063,6 +1063,52 @@ public class PackageWatchdogTest {
         assertThat(bootObserver2.mitigatedBootLoop()).isFalse();
     }
 
+    /**
+     * Test to verify that Package Watchdog syncs health check requests with the controller
+     * correctly, and that the requests are only synced when the set of observed packages
+     * changes.
+     */
+    @Test
+    public void testSyncHealthCheckRequests() {
+        TestController testController = spy(TestController.class);
+        testController.setSupportedPackages(List.of(APP_A, APP_B, APP_C));
+        PackageWatchdog watchdog = createWatchdog(testController, true);
+
+        TestObserver testObserver1 = new TestObserver(OBSERVER_NAME_1);
+        watchdog.registerHealthObserver(testObserver1);
+        watchdog.startObservingHealth(testObserver1, List.of(APP_A), LONG_DURATION);
+        mTestLooper.dispatchAll();
+
+        TestObserver testObserver2 = new TestObserver(OBSERVER_NAME_2);
+        watchdog.registerHealthObserver(testObserver2);
+        watchdog.startObservingHealth(testObserver2, List.of(APP_B), LONG_DURATION);
+        mTestLooper.dispatchAll();
+
+        TestObserver testObserver3 = new TestObserver(OBSERVER_NAME_3);
+        watchdog.registerHealthObserver(testObserver3);
+        watchdog.startObservingHealth(testObserver3, List.of(APP_C), LONG_DURATION);
+        mTestLooper.dispatchAll();
+
+        watchdog.unregisterHealthObserver(testObserver1);
+        mTestLooper.dispatchAll();
+
+        watchdog.unregisterHealthObserver(testObserver2);
+        mTestLooper.dispatchAll();
+
+        watchdog.unregisterHealthObserver(testObserver3);
+        mTestLooper.dispatchAll();
+
+        List<Set> expectedSyncRequests = List.of(
+                Set.of(APP_A),
+                Set.of(APP_A, APP_B),
+                Set.of(APP_A, APP_B, APP_C),
+                Set.of(APP_B, APP_C),
+                Set.of(APP_C),
+                Set.of()
+        );
+        assertThat(testController.getSyncRequests()).isEqualTo(expectedSyncRequests);
+    }
+
     private void adoptShellPermissions(String... permissions) {
         InstrumentationRegistry
                 .getInstrumentation()
@@ -1219,6 +1265,7 @@ public class PackageWatchdogTest {
         private Consumer<String> mPassedConsumer;
         private Consumer<List<PackageConfig>> mSupportedConsumer;
         private Runnable mNotifySyncRunnable;
+        private List<Set> mSyncRequests = new ArrayList<>();
 
         @Override
         public void setEnabled(boolean enabled) {
@@ -1238,6 +1285,7 @@ public class PackageWatchdogTest {
 
         @Override
         public void syncRequests(Set<String> packages) {
+            mSyncRequests.add(packages);
             mRequestedPackages.clear();
             if (mIsEnabled) {
                 packages.retainAll(mSupportedPackages);
@@ -1267,6 +1315,10 @@ public class PackageWatchdogTest {
             } else {
                 return Collections.emptyList();
             }
+        }
+
+        public List<Set> getSyncRequests() {
+            return mSyncRequests;
         }
     }
 
