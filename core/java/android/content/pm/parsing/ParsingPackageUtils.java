@@ -986,14 +986,6 @@ public class ParsingPackageUtils {
                     R.styleable.AndroidManifestUsesPermission_requiredNotFeature,
                     0);
 
-            final boolean dontAutoRevoke = sa.getBoolean(
-                    R.styleable.AndroidManifestUsesPermission_allowDontAutoRevokeWhenUnused,
-                    false);
-
-            final boolean dontAutoRevokeApproved = sa.getBoolean(
-                    R.styleable.AndroidManifestUsesPermission_dontAutoRevokeWhenUnused,
-                    false);
-
             XmlUtils.skipCurrentTag(parser);
 
             // Can only succeed from here on out
@@ -1001,14 +993,6 @@ public class ParsingPackageUtils {
 
             if (name == null) {
                 return success;
-            }
-
-            if (dontAutoRevoke) {
-                pkg.addAutoRevokeExemptionRequestedPermission(name);
-            }
-
-            if (dontAutoRevokeApproved) {
-                pkg.addAutoRevokeExemptionGrantedPermission(name);
             }
 
             if ((maxSdkVersion != 0) && (maxSdkVersion < Build.VERSION.RESOURCES_SDK_INT)) {

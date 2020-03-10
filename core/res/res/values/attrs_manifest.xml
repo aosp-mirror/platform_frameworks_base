@@ -1983,14 +1983,6 @@
         requested.  If it does support the feature, it will be as if the manifest didn't
         request it at all. -->
         <attr name="requiredNotFeature" format="string" />
-        <!-- Optional: Whether to allow requesting that this permission don't get automatically
-        revoked when the app is unused for an extended amount of time.
-        Defaults to false. -->
-        <attr name="allowDontAutoRevokeWhenUnused" format="boolean" />
-        <!-- Optional: Whether this permission shouldn't get automatically
-        revoked when the app is unused for an extended amount of time.
-        Defaults to false. -->
-        <attr name="dontAutoRevokeWhenUnused" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>uses-configuration</code> tag specifies
