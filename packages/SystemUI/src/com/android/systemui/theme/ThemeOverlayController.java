@@ -43,6 +43,7 @@ import com.google.android.collect.Sets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -101,7 +102,7 @@ public class ThemeOverlayController extends SystemUI {
                 new ContentObserver(mBgHandler) {
 
                     @Override
-                    public void onChange(boolean selfChange, Iterable<Uri> uris, int flags,
+                    public void onChange(boolean selfChange, Collection<Uri> uris, int flags,
                             int userId) {
                         if (DEBUG) Log.d(TAG, "Overlay changed for user: " + userId);
                         if (ActivityManager.getCurrentUser() == userId) {
