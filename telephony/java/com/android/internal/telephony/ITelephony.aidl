@@ -2205,7 +2205,7 @@ interface ITelephony {
 
     /**
      * Get the user manual network selection.
-     * Return empty string if in automatic selection.
+     * Return null if inactive or phone process is down.
      *
      * @param subId the id of the subscription
      * @return operatorinfo on success
