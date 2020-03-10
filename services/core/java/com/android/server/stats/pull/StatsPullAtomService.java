@@ -24,6 +24,8 @@ import static android.os.Debug.getIonHeapsSizeKb;
 import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
+import static android.util.MathUtils.abs;
+import static android.util.MathUtils.constrain;
 
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
@@ -146,12 +148,15 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -168,6 +173,9 @@ import java.util.concurrent.TimeoutException;
 public class StatsPullAtomService extends SystemService {
     private static final String TAG = "StatsPullAtomService";
     private static final boolean DEBUG = true;
+
+    // Random seed stable for StatsPullAtomService life cycle - can be used for stable sampling
+    private static final int RANDOM_SEED = new Random().nextInt();
 
     /**
      * Lowest available uid for apps.
@@ -255,6 +263,8 @@ public class StatsPullAtomService extends SystemService {
     private long mBatteryStatsHelperTimestampMs = -MAX_BATTERY_STATS_HELPER_FREQUENCY_MS;
 
     private StatsPullAtomCallbackImpl mStatsCallbackImpl;
+
+    private int mAppOpsSamplingRate = 0;
 
     public StatsPullAtomService(Context context) {
         super(context);
@@ -2877,44 +2887,7 @@ public class StatsPullAtomService extends SystemService {
 
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                     TimeUnit.MILLISECONDS);
-
-            for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
-                final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
-                final int uid = uidOps.getUid();
-                for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
-                    final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
-                    for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
-                        final AppOpsManager.HistoricalOp op = packageOps.getOpAt(opIdx);
-
-                        StatsEvent.Builder e = StatsEvent.newBuilder();
-                        e.setAtomId(atomTag);
-                        e.writeInt(uid);
-                        e.writeString(packageOps.getPackageName());
-                        e.writeInt(op.getOpCode());
-                        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
-                        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
-                        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
-
-                        String perm = AppOpsManager.opToPermission(op.getOpCode());
-                        if (perm == null) {
-                            e.writeBoolean(false);
-                        } else {
-                            PermissionInfo permInfo;
-                            try {
-                                permInfo = mContext.getPackageManager().getPermissionInfo(perm, 0);
-                                e.writeBoolean(permInfo.getProtection() == PROTECTION_DANGEROUS);
-                            } catch (PackageManager.NameNotFoundException exception) {
-                                e.writeBoolean(false);
-                            }
-                        }
-
-                        pulledData.add(e.build());
-                    }
-                }
-            }
+            processHistoricalOps(histOps, atomTag, pulledData);
         } catch (Throwable t) {
             // TODO: catch exceptions at a more granular level
             Slog.e(TAG, "Could not read appops", t);
@@ -2945,54 +2918,12 @@ public class StatsPullAtomService extends SystemService {
                     new HistoricalOpsRequest.Builder(0, Long.MAX_VALUE).setFlags(
                             OP_FLAGS_PULLED).build();
             appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
-
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                     TimeUnit.MILLISECONDS);
-
-            for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
-                final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
-                final int uid = uidOps.getUid();
-                for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
-                    final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
-                    for (int featureIdx = 0; featureIdx < packageOps.getFeatureCount();
-                            featureIdx++) {
-                        final AppOpsManager.HistoricalFeatureOps featureOps =
-                                packageOps.getFeatureOpsAt(featureIdx);
-                        for (int opIdx = 0; opIdx < featureOps.getOpCount(); opIdx++) {
-                            final AppOpsManager.HistoricalOp op = featureOps.getOpAt(opIdx);
-                            StatsEvent.Builder e = StatsEvent.newBuilder();
-                            e.setAtomId(atomTag);
-                            e.writeInt(uid);
-                            e.writeString(packageOps.getPackageName());
-                            e.writeString(featureOps.getFeatureId());
-                            e.writeString(op.getOpName());
-                            e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
-                            e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
-                            e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
-                            e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
-                            e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
-                            e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
-
-                            String perm = AppOpsManager.opToPermission(op.getOpCode());
-                            if (perm == null) {
-                                e.writeBoolean(false);
-                            } else {
-                                PermissionInfo permInfo;
-                                try {
-                                    permInfo = mContext.getPackageManager().getPermissionInfo(perm,
-                                            0);
-                                    e.writeBoolean(
-                                            permInfo.getProtection() == PROTECTION_DANGEROUS);
-                                } catch (PackageManager.NameNotFoundException exception) {
-                                    e.writeBoolean(false);
-                                }
-                            }
-                            pulledData.add(e.build());
-                        }
-
-                    }
-                }
+            if (mAppOpsSamplingRate == 0) {
+                mAppOpsSamplingRate = constrain((5000 * 100) / estimateAppOpsSize(), 1, 100);
             }
+            processHistoricalOps(histOps, atomTag, pulledData);
         } catch (Throwable t) {
             // TODO: catch exceptions at a more granular level
             Slog.e(TAG, "Could not read appops", t);
@@ -3001,6 +2932,111 @@ public class StatsPullAtomService extends SystemService {
             Binder.restoreCallingIdentity(token);
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    private int estimateAppOpsSize() throws Exception {
+        AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
+
+        CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
+        HistoricalOpsRequest histOpsRequest =
+                new HistoricalOpsRequest.Builder(
+                        Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli(),
+                        Long.MAX_VALUE).setFlags(
+                        OP_FLAGS_PULLED).build();
+        appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
+        HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
+                TimeUnit.MILLISECONDS);
+        return processHistoricalOps(histOps, FrameworkStatsLog.APP_FEATURES_OPS, null);
+    }
+
+    int processHistoricalOps(HistoricalOps histOps, int atomTag, List<StatsEvent> pulledData) {
+        int counter = 0;
+        for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
+            final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
+            final int uid = uidOps.getUid();
+            for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
+                final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
+                if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+                    for (int featureIdx = 0; featureIdx < packageOps.getFeatureCount();
+                            featureIdx++) {
+                        final AppOpsManager.HistoricalFeatureOps featureOps =
+                                packageOps.getFeatureOpsAt(featureIdx);
+                        for (int opIdx = 0; opIdx < featureOps.getOpCount(); opIdx++) {
+                            final AppOpsManager.HistoricalOp op = featureOps.getOpAt(opIdx);
+                            counter += processHistoricalOp(op, atomTag, pulledData, uid,
+                                    packageOps.getPackageName(), featureOps.getFeatureId());
+                        }
+                    }
+                } else if (atomTag == FrameworkStatsLog.APP_OPS) {
+                    for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
+                        final AppOpsManager.HistoricalOp op = packageOps.getOpAt(opIdx);
+                        counter += processHistoricalOp(op, atomTag, pulledData, uid,
+                                packageOps.getPackageName(), null);
+                    }
+                }
+            }
+        }
+        return counter;
+    }
+
+    private int processHistoricalOp(AppOpsManager.HistoricalOp op, int atomTag,
+            @Nullable List<StatsEvent> pulledData, int uid, String packageName,
+            @Nullable String feature) {
+        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+            if (pulledData == null) { // this is size estimation call
+                if (op.getForegroundAccessCount(OP_FLAGS_PULLED) + op.getBackgroundAccessCount(
+                        OP_FLAGS_PULLED) == 0) {
+                    return 0;
+                } else {
+                    return 32 + packageName.length() + (feature == null ? 1 : feature.length());
+                }
+            } else {
+                if (abs((op.getOpCode() + feature + packageName).hashCode() + RANDOM_SEED) % 100
+                        >= mAppOpsSamplingRate) {
+                    return 0;
+                }
+            }
+        }
+
+        StatsEvent.Builder e = StatsEvent.newBuilder();
+        e.setAtomId(atomTag);
+        e.writeInt(uid);
+        e.writeString(packageName);
+        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+            e.writeString(feature);
+        }
+        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+            e.writeString(op.getOpName());
+        } else {
+            e.writeInt(op.getOpCode());
+        }
+        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
+        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
+        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
+        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
+        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
+        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
+
+        String perm = AppOpsManager.opToPermission(op.getOpCode());
+        if (perm == null) {
+            e.writeBoolean(false);
+        } else {
+            PermissionInfo permInfo;
+            try {
+                permInfo = mContext.getPackageManager().getPermissionInfo(
+                        perm,
+                        0);
+                e.writeBoolean(
+                        permInfo.getProtection() == PROTECTION_DANGEROUS);
+            } catch (PackageManager.NameNotFoundException exception) {
+                e.writeBoolean(false);
+            }
+        }
+        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+            e.writeInt(mAppOpsSamplingRate);
+        }
+        pulledData.add(e.build());
+        return 0;
     }
 
     int pullRuntimeAppOpAccessMessage(int atomTag, List<StatsEvent> pulledData) {
