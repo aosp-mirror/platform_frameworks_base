@@ -642,9 +642,6 @@
     <!-- Used to get camera status. -->
     <protected-broadcast android:name="android.intent.action.CAMERA_STATUS_CHANGED" />
 
-    <!-- Used to launch a common app (FlipFlap) for devices with flip cover. -->
-    <protected-broadcast android:name="android.intent.action.LID_STATE_CHANGED" />
-
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
