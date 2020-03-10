@@ -50,7 +50,7 @@ public final class OverrideAllowedState implements Parcelable {
     public static final int DISABLED_NOT_DEBUGGABLE = 1;
     /**
      * Change cannot be overridden, due to the build being non-debuggable and the change being
-     * non-targetSdk.
+     * enabled regardless of targetSdk.
      */
     public static final int DISABLED_NON_TARGET_SDK = 2;
     /**
@@ -158,5 +158,29 @@ public final class OverrideAllowedState implements Parcelable {
         return state == otherState.state
                 && appTargetSdk == otherState.appTargetSdk
                 && changeIdTargetSdk == otherState.changeIdTargetSdk;
+    }
+
+    private String stateName() {
+        switch (state) {
+            case ALLOWED:
+                return "ALLOWED";
+            case DISABLED_NOT_DEBUGGABLE:
+                return "DISABLED_NOT_DEBUGGABLE";
+            case DISABLED_NON_TARGET_SDK:
+                return "DISABLED_NON_TARGET_SDK";
+            case DISABLED_TARGET_SDK_TOO_HIGH:
+                return "DISABLED_TARGET_SDK_TOO_HIGH";
+            case PACKAGE_DOES_NOT_EXIST:
+                return "PACKAGE_DOES_NOT_EXIST";
+            case LOGGING_ONLY_CHANGE:
+                return "LOGGING_ONLY_CHANGE";
+        }
+        return "UNKNOWN";
+    }
+
+    @Override
+    public String toString() {
+        return "OverrideAllowedState(state=" + stateName() + "; appTargetSdk=" + appTargetSdk
+                + "; changeIdTargetSdk=" + changeIdTargetSdk + ")";
     }
 }
