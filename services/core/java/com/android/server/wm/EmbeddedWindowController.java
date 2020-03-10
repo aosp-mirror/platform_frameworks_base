@@ -17,11 +17,15 @@
 package com.android.server.wm;
 
 
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.Slog;
 import android.view.IWindow;
 import android.view.InputApplicationHandle;
 
@@ -33,12 +37,15 @@ import android.view.InputApplicationHandle;
  * the host window to send pointerDownOutsideFocus.
  */
 class EmbeddedWindowController {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "EmbeddedWindowController" : TAG_WM;
     /* maps input token to an embedded window */
     private ArrayMap<IBinder /*input token */, EmbeddedWindow> mWindows = new ArrayMap<>();
-    private final Object mWmLock;
+    private final Object mGlobalLock;
+    private final ActivityTaskManagerService mAtmService;
 
-    EmbeddedWindowController(Object wmLock) {
-        mWmLock = wmLock;
+    EmbeddedWindowController(ActivityTaskManagerService atmService) {
+        mAtmService = atmService;
+        mGlobalLock = atmService.getGlobalLock();
     }
 
     /**
@@ -46,19 +53,37 @@ class EmbeddedWindowController {
      *
      * @param inputToken input channel token passed in by the embedding process when it requests
      *                   the server to add an input channel to the embedded surface.
-     * @param embeddedWindow An {@link EmbeddedWindow} object to add to this controller.
+     * @param window An {@link EmbeddedWindow} object to add to this controller.
      */
-    void add(IBinder inputToken, EmbeddedWindow embeddedWindow) {
+    void add(IBinder inputToken, EmbeddedWindow window) {
         try {
-            mWindows.put(inputToken, embeddedWindow);
-            embeddedWindow.mClient.asBinder().linkToDeath(()-> {
-                synchronized (mWmLock) {
+            mWindows.put(inputToken, window);
+            updateProcessController(window);
+            window.mClient.asBinder().linkToDeath(()-> {
+                synchronized (mGlobalLock) {
                     mWindows.remove(inputToken);
                 }
             }, 0);
         } catch (RemoteException e) {
             // The caller has died, remove from the map
             mWindows.remove(inputToken);
+        }
+    }
+
+    /**
+     * Track the host activity in the embedding process so we can determine if the
+     * process is currently showing any UI to the user.
+     */
+    private void updateProcessController(EmbeddedWindow window) {
+        if (window.mHostActivityRecord == null) {
+            return;
+        }
+        final WindowProcessController processController =
+                mAtmService.getProcessController(window.mOwnerPid, window.mOwnerUid);
+        if (processController == null) {
+            Slog.w(TAG, "Could not find the embedding process.");
+        } else {
+            processController.addHostActivity(window.mHostActivityRecord);
         }
     }
 
@@ -76,7 +101,7 @@ class EmbeddedWindowController {
         }
     }
 
-    void removeWindowsWithHost(WindowState host) {
+    void onWindowRemoved(WindowState host) {
         for (int i = mWindows.size() - 1; i >= 0; i--) {
             if (mWindows.valueAt(i).mHostWindowState == host) {
                 mWindows.removeAt(i);
@@ -88,9 +113,23 @@ class EmbeddedWindowController {
         return mWindows.get(inputToken);
     }
 
+    void onActivityRemoved(ActivityRecord activityRecord) {
+        for (int i = mWindows.size() - 1; i >= 0; i--) {
+            final EmbeddedWindow window = mWindows.valueAt(i);
+            if (window.mHostActivityRecord == activityRecord) {
+                final WindowProcessController processController =
+                        mAtmService.getProcessController(window.mOwnerPid, window.mOwnerUid);
+                if (processController != null) {
+                    processController.removeHostActivity(activityRecord);
+                }
+            }
+        }
+    }
+
     static class EmbeddedWindow {
         final IWindow mClient;
         @Nullable final WindowState mHostWindowState;
+        @Nullable final ActivityRecord mHostActivityRecord;
         final int mOwnerUid;
         final int mOwnerPid;
 
@@ -107,6 +146,8 @@ class EmbeddedWindowController {
                 int ownerPid) {
             mClient = clientToken;
             mHostWindowState = hostWindowState;
+            mHostActivityRecord = (mHostWindowState != null) ? mHostWindowState.mActivityRecord
+                    : null;
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
         }
