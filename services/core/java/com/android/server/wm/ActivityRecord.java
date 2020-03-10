@@ -3151,7 +3151,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Reset the last saved PiP snap fraction on removal.
         mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
-
+        mWmService.mEmbeddedWindowController.onActivityRemoved(this);
         mRemovingFromDisplay = false;
     }
 
