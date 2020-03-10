@@ -30,29 +30,29 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
-public class ApexContext {
+public class ApexEnvironment {
 
     private static final String APEX_DATA = "apexdata";
 
     /**
-     * Returns an ApexContext instance for the APEX with the provided {@code apexModuleName}.
+     * Returns an ApexEnvironment instance for the APEX with the provided {@code apexModuleName}.
      *
-     * <p>To preserve the safety and integrity of APEX modules, you must only obtain the ApexContext
-     * for your specific APEX, and you <em>must never</em> attempt to obtain an ApexContext for
-     * another APEX.  Any coordination between APEXs must be performed through well-defined
-     * interfaces; attempting to directly read or write raw files belonging to another APEX will
-     * violate the hermetic storage requirements placed upon each module.
+     * <p>To preserve the safety and integrity of APEX modules, you must only obtain the
+     * ApexEnvironment for your specific APEX, and you <em>must never</em> attempt to obtain an
+     * ApexEnvironment for another APEX.  Any coordination between APEXs must be performed through
+     * well-defined interfaces; attempting to directly read or write raw files belonging to another
+     * APEX will violate the hermetic storage requirements placed upon each module.
      */
     @NonNull
-    public static ApexContext getApexContext(@NonNull String apexModuleName) {
+    public static ApexEnvironment getApexEnvironment(@NonNull String apexModuleName) {
         Objects.requireNonNull(apexModuleName, "apexModuleName cannot be null");
         //TODO(b/141148175): Check that apexModuleName is an actual APEX name
-        return new ApexContext(apexModuleName);
+        return new ApexEnvironment(apexModuleName);
     }
 
     private final String mApexModuleName;
 
-    private ApexContext(String apexModuleName) {
+    private ApexEnvironment(String apexModuleName) {
         mApexModuleName = apexModuleName;
     }
 
