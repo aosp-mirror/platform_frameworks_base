@@ -267,6 +267,49 @@ public class CompatConfigTest {
     }
 
     @Test
+    public void testEnableTargetSdkChangesForPackage() throws Exception {
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addEnabledChangeWithId(1L)
+                .addDisabledChangeWithId(2L)
+                .addTargetSdkChangeWithId(3, 3L)
+                .addTargetSdkChangeWithId(4, 4L)
+                .build();
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("foo.bar")
+                .withTargetSdk(2)
+                .build();
+
+        assertThat(compatConfig.isChangeEnabled(3, applicationInfo)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(4, applicationInfo)).isFalse();
+
+        assertThat(compatConfig.enableTargetSdkChangesForPackage("foo.bar", 3)).isEqualTo(1);
+        assertThat(compatConfig.isChangeEnabled(3, applicationInfo)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(4, applicationInfo)).isFalse();
+    }
+
+    @Test
+    public void testDisableTargetSdkChangesForPackage() throws Exception {
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addEnabledChangeWithId(1L)
+                .addDisabledChangeWithId(2L)
+                .addTargetSdkChangeWithId(3, 3L)
+                .addTargetSdkChangeWithId(4, 4L)
+                .build();
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("foo.bar")
+                .withTargetSdk(2)
+                .build();
+
+        assertThat(compatConfig.enableTargetSdkChangesForPackage("foo.bar", 3)).isEqualTo(1);
+        assertThat(compatConfig.isChangeEnabled(3, applicationInfo)).isTrue();
+        assertThat(compatConfig.isChangeEnabled(4, applicationInfo)).isFalse();
+
+        assertThat(compatConfig.disableTargetSdkChangesForPackage("foo.bar", 3)).isEqualTo(1);
+        assertThat(compatConfig.isChangeEnabled(3, applicationInfo)).isFalse();
+        assertThat(compatConfig.isChangeEnabled(4, applicationInfo)).isFalse();
+    }
+
+    @Test
     public void testLookupChangeId() throws Exception {
         CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithIdAndName(1234L, "MY_CHANGE")
