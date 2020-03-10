@@ -18,6 +18,7 @@ package android.view.contentcapture;
 
 import android.annotation.NonNull;
 import android.os.ParcelFileDescriptor;
+import android.view.contentcapture.ContentCaptureManager.DataShareError;
 
 /** Adapter class used by apps to share data with the Content Capture service. */
 public interface DataShareWriteAdapter {
@@ -42,7 +43,7 @@ public interface DataShareWriteAdapter {
      *
      * @param errorCode the error code corresponding to an ERROR_* value.
      */
-    default void onError(int errorCode) {
+    default void onError(@DataShareError int errorCode) {
         /* do nothing - stub */
     }
 }
