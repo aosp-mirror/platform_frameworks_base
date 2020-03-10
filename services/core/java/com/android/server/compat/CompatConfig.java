@@ -314,6 +314,63 @@ final class CompatConfig {
         }
     }
 
+    private long[] getAllowedChangesAfterTargetSdkForPackage(String packageName,
+                                                             int targetSdkVersion)
+                    throws RemoteException {
+        LongArray allowed = new LongArray();
+        synchronized (mChanges) {
+            for (int i = 0; i < mChanges.size(); ++i) {
+                try {
+                    CompatChange change = mChanges.valueAt(i);
+                    if (change.getEnableAfterTargetSdk() != targetSdkVersion) {
+                        continue;
+                    }
+                    OverrideAllowedState allowedState =
+                            mOverrideValidator.getOverrideAllowedState(change.getId(),
+                                                                       packageName);
+                    if (allowedState.state == OverrideAllowedState.ALLOWED) {
+                        allowed.add(change.getId());
+                    }
+                } catch (RemoteException e) {
+                    // Should never occur, since validator is in the same process.
+                    throw new RuntimeException("Unable to call override validator!", e);
+                }
+            }
+        }
+        return allowed.toArray();
+    }
+
+    /**
+     * Enables all changes with enabledAfterTargetSdk == {@param targetSdkVersion} for
+     * {@param packageName}.
+     *
+     * @return The number of changes that were toggled.
+     */
+    int enableTargetSdkChangesForPackage(String packageName, int targetSdkVersion)
+            throws RemoteException {
+        long[] changes = getAllowedChangesAfterTargetSdkForPackage(packageName, targetSdkVersion);
+        for (long changeId : changes) {
+            addOverride(changeId, packageName, true);
+        }
+        return changes.length;
+    }
+
+
+    /**
+     * Disables all changes with enabledAfterTargetSdk == {@param targetSdkVersion} for
+     * {@param packageName}.
+     *
+     * @return The number of changes that were toggled.
+     */
+    int disableTargetSdkChangesForPackage(String packageName, int targetSdkVersion)
+            throws RemoteException {
+        long[] changes = getAllowedChangesAfterTargetSdkForPackage(packageName, targetSdkVersion);
+        for (long changeId : changes) {
+            addOverride(changeId, packageName, false);
+        }
+        return changes.length;
+    }
+
     boolean registerListener(long changeId, CompatChange.ChangeListener listener) {
         boolean alreadyKnown = true;
         synchronized (mChanges) {
