@@ -20,6 +20,7 @@
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <!-- Permissions required for reading and logging compat changes -->
         <permission name="android.permission.LOG_COMPAT_CHANGE"/>
+        <permission name="android.permission.MODIFY_QUIET_MODE"/>
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     </privapp-permissions>
 </permissions>
