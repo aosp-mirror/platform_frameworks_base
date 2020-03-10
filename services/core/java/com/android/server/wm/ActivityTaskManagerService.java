@@ -288,6 +288,7 @@ import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -680,7 +681,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void onChange(boolean selfChange, Iterable<Uri> uris, int flags,
+        public void onChange(boolean selfChange, Collection<Uri> uris, int flags,
                 @UserIdInt int userId) {
             for (Uri uri : uris) {
                 if (mFontScaleUri.equals(uri)) {
