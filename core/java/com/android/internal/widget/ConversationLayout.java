@@ -117,6 +117,8 @@ public class ConversationLayout extends FrameLayout
     private CachingIconView mIcon;
     private int mExpandedGroupTopMargin;
     private int mExpandButtonExpandedSize;
+    private View mConversationFacePile;
+    private int mNotificationBackgroundColor;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -175,6 +177,7 @@ public class ConversationLayout extends FrameLayout
                 R.dimen.conversation_icon_size_centered);
         mExpandedGroupTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_icon_margin_top_centered);
+        mConversationFacePile = findViewById(R.id.conversation_face_pile);
     }
 
     @RemotableViewMethod
@@ -297,6 +300,7 @@ public class ConversationLayout extends FrameLayout
             // Let's resolve the icon / text from the last sender
             mConversationIcon.setVisibility(VISIBLE);
             mHeaderText.setVisibility(VISIBLE);
+            mConversationFacePile.setVisibility(GONE);
             CharSequence userKey = getKey(mUser);
             for (int i = mGroups.size() - 1; i >= 0; i--) {
                 MessagingGroup messagingGroup = mGroups.get(i);
@@ -314,13 +318,19 @@ public class ConversationLayout extends FrameLayout
         } else {
             mHeaderText.setVisibility(GONE);
             if (mIsCollapsed) {
-                mConversationIcon.setVisibility(VISIBLE);
                 if (mLargeIcon != null) {
+                    mConversationIcon.setVisibility(VISIBLE);
+                    mConversationFacePile.setVisibility(GONE);
                     mConversationIcon.setImageIcon(mLargeIcon);
                 } else {
-                    // TODO: generate LargeIcon from Conversation
+                    mConversationIcon.setVisibility(GONE);
+                    // This will also inflate it!
+                    mConversationFacePile.setVisibility(VISIBLE);
+                    mConversationFacePile = findViewById(R.id.conversation_face_pile);
+                    bindFacePile();
                 }
             } else {
+                mConversationFacePile.setVisibility(GONE);
                 mConversationIcon.setVisibility(GONE);
             }
         }
@@ -334,6 +344,48 @@ public class ConversationLayout extends FrameLayout
             messagingGroup.setCanHideSenderIfFirst(canHide);
         }
         updateIconPositionAndSize();
+    }
+
+    private void bindFacePile() {
+        // Let's bind the face pile
+        View bottomBackground = mConversationFacePile.findViewById(
+                R.id.conversation_face_pile_bottom_background);
+        applyNotificationBackgroundColor(bottomBackground);
+        ImageView bottomView = mConversationFacePile.findViewById(
+                R.id.conversation_face_pile_bottom);
+        ImageView topView = mConversationFacePile.findViewById(
+                R.id.conversation_face_pile_top);
+        // Let's find the two last conversations:
+        Icon secondLastIcon = null;
+        CharSequence lastKey = null;
+        Icon lastIcon = null;
+        CharSequence userKey = getKey(mUser);
+        for (int i = mGroups.size() - 1; i >= 0; i--) {
+            MessagingGroup messagingGroup = mGroups.get(i);
+            Person messageSender = messagingGroup.getSender();
+            boolean notUser = messageSender != null
+                    && !TextUtils.equals(userKey, getKey(messageSender));
+            boolean notIncluded = messageSender != null
+                    && !TextUtils.equals(lastKey, getKey(messageSender));
+            if ((notUser && notIncluded)
+                    || (i == 0 && lastKey == null)) {
+                if (lastIcon == null) {
+                    lastIcon = messagingGroup.getAvatarIcon();
+                    lastKey = getKey(messageSender);
+                } else {
+                    secondLastIcon = messagingGroup.getAvatarIcon();
+                    break;
+                }
+            }
+        }
+        if (lastIcon == null) {
+            lastIcon = createAvatarSymbol(" ", "", mLayoutColor);
+        }
+        bottomView.setImageIcon(lastIcon);
+        if (secondLastIcon == null) {
+            secondLastIcon = createAvatarSymbol("", "", mLayoutColor);
+        }
+        topView.setImageIcon(secondLastIcon);
     }
 
     /**
@@ -532,7 +584,12 @@ public class ConversationLayout extends FrameLayout
      */
     @RemotableViewMethod
     public void setNotificationBackgroundColor(int color) {
-        mConversationIconBadge.setBackgroundTintList(ColorStateList.valueOf(color));
+        mNotificationBackgroundColor = color;
+        applyNotificationBackgroundColor(mConversationIconBadge);
+    }
+
+    private void applyNotificationBackgroundColor(View view) {
+        view.setBackgroundTintList(ColorStateList.valueOf(mNotificationBackgroundColor));
     }
 
     @RemotableViewMethod
