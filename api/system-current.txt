@@ -7465,9 +7465,9 @@ package android.net.wifi {
     method public void onWifiUsabilityStats(int, boolean, @NonNull android.net.wifi.WifiUsabilityStatsEntry);
   }
 
-  public static interface WifiManager.ScoreChangeCallback {
-    method public void onScoreChange(int, int);
-    method public void onTriggerUpdateOfWifiUsabilityStats(int);
+  public static interface WifiManager.ScoreUpdateObserver {
+    method public void notifyScoreUpdate(int, int);
+    method public void triggerUpdateOfWifiUsabilityStats(int);
   }
 
   public static interface WifiManager.SoftApCallback {
@@ -7487,9 +7487,9 @@ package android.net.wifi {
   }
 
   public static interface WifiManager.WifiConnectedNetworkScorer {
-    method public void setScoreChangeCallback(@NonNull android.net.wifi.WifiManager.ScoreChangeCallback);
-    method public void start(int);
-    method public void stop(int);
+    method public void onSetScoreUpdateObserver(@NonNull android.net.wifi.WifiManager.ScoreUpdateObserver);
+    method public void onStart(int);
+    method public void onStop(int);
   }
 
   public final class WifiMigration {
