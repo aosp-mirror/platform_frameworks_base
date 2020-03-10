@@ -591,6 +591,14 @@ package android.app.backup {
 
 }
 
+package android.app.blob {
+
+  public class BlobStoreManager {
+    method public void waitForIdle(long) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException;
+  }
+
+}
+
 package android.app.prediction {
 
   public final class AppPredictionContext implements android.os.Parcelable {
