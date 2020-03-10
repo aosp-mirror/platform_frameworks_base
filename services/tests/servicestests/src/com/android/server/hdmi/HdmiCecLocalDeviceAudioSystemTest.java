@@ -538,6 +538,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/151150320")
     public void handleSystemAudioModeRequest_fromNonTV_tVNotSupport() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildSystemAudioModeRequest(
@@ -587,6 +588,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    @Ignore("b/151150320")
     public void handleRoutingChange_currentActivePortIsHome() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildRoutingChange(ADDR_TV, 0x3000, SELF_PHYSICAL_ADDRESS);
