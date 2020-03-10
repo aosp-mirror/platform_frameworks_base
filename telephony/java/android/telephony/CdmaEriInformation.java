@@ -40,7 +40,6 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
-@SystemApi
 public final class CdmaEriInformation implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
