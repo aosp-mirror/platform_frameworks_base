@@ -33,10 +33,10 @@ import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.DisplayInfo;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
 import android.view.SurfaceControl;
@@ -47,7 +47,9 @@ import com.android.systemui.R;
 import com.android.systemui.pip.phone.PipUpdateThread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -76,9 +78,9 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipAnimationController mPipAnimationController;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
-    private final Rect mDisplayBounds = new Rect();
     private final Rect mLastReportedBounds = new Rect();
     private final int mCornerRadius;
+    private final Map<IBinder, Rect> mBoundsToRestore = new HashMap<>();
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -201,29 +203,6 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     /**
-     * Updates the display dimension with given {@link DisplayInfo}
-     */
-    @SuppressWarnings("unchecked")
-    public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-        final Rect newDisplayBounds = new Rect(0, 0,
-                displayInfo.logicalWidth, displayInfo.logicalHeight);
-        if (!mDisplayBounds.equals(newDisplayBounds)) {
-            // Updates the exiting PiP animation in case the screen rotation changes in the middle.
-            // It's a legit case that PiP window is in portrait mode on home screen and
-            // the application requests landscape once back to fullscreen mode.
-            final PipAnimationController.PipTransitionAnimator animator =
-                    mPipAnimationController.getCurrentAnimator();
-            if (animator != null
-                    && animator.getAnimationType() == ANIM_TYPE_BOUNDS
-                    && animator.getDestinationBounds().equals(mDisplayBounds)) {
-                animator.updateEndValue(newDisplayBounds);
-                animator.setDestinationBounds(newDisplayBounds);
-            }
-        }
-        mDisplayBounds.set(newDisplayBounds);
-    }
-
-    /**
      * Callback to issue the final {@link WindowContainerTransaction} on end of movements.
      * @param destinationBounds the final bounds.
      */
@@ -252,8 +231,9 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         } catch (RemoteException e) {
             throw new RuntimeException("Unable to get leash", e);
         }
+        final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
+        mBoundsToRestore.put(mToken.asBinder(), currentBounds);
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
-            final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
             scheduleAnimateResizePip(currentBounds, destinationBounds,
                     TRANSITION_DIRECTION_TO_PIP, DURATION_DEFAULT_MS, null);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
@@ -277,7 +257,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
-        scheduleAnimateResizePip(mLastReportedBounds, mDisplayBounds,
+        final Rect boundsToRestore = mBoundsToRestore.remove(mToken.asBinder());
+        scheduleAnimateResizePip(mLastReportedBounds, boundsToRestore,
                 TRANSITION_DIRECTION_TO_FULLSCREEN, DURATION_DEFAULT_MS, null);
         mInPip = false;
     }
