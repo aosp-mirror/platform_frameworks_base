@@ -21,9 +21,9 @@ package android.net.wifi;
  *
  * @hide
  */
-oneway interface IScoreChangeCallback
+oneway interface IScoreUpdateObserver
 {
-    void onScoreChange(int sessionId, int score);
+    void notifyScoreUpdate(int sessionId, int score);
 
-    void onTriggerUpdateOfWifiUsabilityStats(int sessionId);
+    void triggerUpdateOfWifiUsabilityStats(int sessionId);
 }
