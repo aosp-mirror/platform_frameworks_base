@@ -17,6 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.SystemApi;
@@ -29,7 +30,7 @@ import android.media.tv.tuner.TunerUtils;
  * @hide
  */
 @SystemApi
-public class IpFilterConfiguration extends FilterConfiguration {
+public final class IpFilterConfiguration extends FilterConfiguration {
     private final byte[] mSrcIpAddress;
     private final byte[] mDstIpAddress;
     private final int mSrcPort;
@@ -104,12 +105,13 @@ public class IpFilterConfiguration extends FilterConfiguration {
     /**
      * Builder for {@link IpFilterConfiguration}.
      */
-    public static class Builder extends FilterConfiguration.Builder<Builder> {
+    public static final class Builder {
         private byte[] mSrcIpAddress;
         private byte[] mDstIpAddress;
         private int mSrcPort;
         private int mDstPort;
         private boolean mPassthrough;
+        private Settings mSettings;
 
         private Builder() {
         }
@@ -156,6 +158,15 @@ public class IpFilterConfiguration extends FilterConfiguration {
         }
 
         /**
+         * Sets filter settings.
+         */
+        @NonNull
+        public Builder setSettings(@Nullable Settings settings) {
+            mSettings = settings;
+            return this;
+        }
+
+        /**
          * Builds a {@link IpFilterConfiguration} object.
          */
         @NonNull
@@ -168,11 +179,6 @@ public class IpFilterConfiguration extends FilterConfiguration {
             }
             return new IpFilterConfiguration(
                     mSettings, mSrcIpAddress, mDstIpAddress, mSrcPort, mDstPort, mPassthrough);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 }

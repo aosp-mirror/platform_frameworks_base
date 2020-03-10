@@ -17,6 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -28,7 +29,7 @@ import android.media.tv.tuner.TunerUtils;
  * @hide
  */
 @SystemApi
-public class TlvFilterConfiguration extends FilterConfiguration {
+public final class TlvFilterConfiguration extends FilterConfiguration {
     /**
      * IPv4 packet type.
      */
@@ -108,10 +109,11 @@ public class TlvFilterConfiguration extends FilterConfiguration {
     /**
      * Builder for {@link TlvFilterConfiguration}.
      */
-    public static class Builder extends FilterConfiguration.Builder<Builder> {
+    public static final class Builder {
         private int mPacketType;
         private boolean mIsCompressedIpPacket;
         private boolean mPassthrough;
+        private Settings mSettings;
 
         private Builder() {
         }
@@ -144,17 +146,21 @@ public class TlvFilterConfiguration extends FilterConfiguration {
         }
 
         /**
+         * Sets filter settings.
+         */
+        @NonNull
+        public Builder setSettings(@Nullable Settings settings) {
+            mSettings = settings;
+            return this;
+        }
+
+        /**
          * Builds a {@link TlvFilterConfiguration} object.
          */
         @NonNull
         public TlvFilterConfiguration build() {
             return new TlvFilterConfiguration(
                     mSettings, mPacketType, mIsCompressedIpPacket, mPassthrough);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 }
