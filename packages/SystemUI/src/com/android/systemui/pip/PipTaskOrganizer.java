@@ -271,7 +271,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     @Override
-    public void taskVanished(IWindowContainer token) {
+    public void taskVanished(ActivityManager.RunningTaskInfo info) {
+        IWindowContainer token = info.token;
         Objects.requireNonNull(token, "Requires valid IWindowContainer");
         if (token.asBinder() != mToken.asBinder()) {
             Log.wtf(TAG, "Unrecognized token: " + token);
