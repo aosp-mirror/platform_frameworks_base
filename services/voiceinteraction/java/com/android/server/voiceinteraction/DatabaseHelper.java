@@ -257,6 +257,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             int userHandle) {
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.rawQuery(selectQuery, null);
+        if (DBG) {
+            Slog.w(TAG, "querying database: " + selectQuery);
+        }
 
         try {
             if (c.moveToFirst()) {
@@ -334,7 +337,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     return model;
                 } while (c.moveToNext());
             }
-            Slog.w(TAG, "No SoundModel available for the given keyphrase");
+
+            if (DBG) {
+                Slog.w(TAG, "No SoundModel available for the given keyphrase");
+            }
         } finally {
             c.close();
             db.close();
