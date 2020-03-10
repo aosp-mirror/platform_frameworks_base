@@ -41,6 +41,7 @@ import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_T
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
@@ -185,6 +186,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // Registered display id as a listener to override config change
     private int mDisplayId;
     private ActivityRecord mConfigActivityRecord;
+    /**
+     * Activities that hosts some UI drawn by the current process. The activities live
+     * in another process. This is used to check if the process is currently showing anything
+     * visible to the user.
+     */
+    @Nullable
+    private final ArrayList<ActivityRecord> mHostActivities = new ArrayList<>();
 
     /** Whether our process is currently running a {@link RecentsAnimation} */
     private boolean mRunningRecentsAnimation;
@@ -672,6 +680,23 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     return true;
                 }
             }
+            if (isEmbedded()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if this process is rendering content on to a window shown by
+     * another process.
+     */
+    private boolean isEmbedded() {
+        for (int i = mHostActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord r = mHostActivities.get(i);
+            if (r.isInterestingToUserLocked()) {
+                return true;
+            }
         }
         return false;
     }
@@ -812,6 +837,19 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 }
             }
         }
+    }
+
+    /** Adds an activity that hosts UI drawn by the current process. */
+    void addHostActivity(ActivityRecord r) {
+        if (mHostActivities.contains(r)) {
+            return;
+        }
+        mHostActivities.add(r);
+    }
+
+    /** Removes an activity that hosts UI drawn by the current process. */
+    void removeHostActivity(ActivityRecord r) {
+        mHostActivities.remove(r);
     }
 
     public interface ComputeOomAdjCallback {
