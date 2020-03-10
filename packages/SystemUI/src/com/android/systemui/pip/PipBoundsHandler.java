@@ -67,7 +67,7 @@ public class PipBoundsHandler {
 
     private ComponentName mLastPipComponentName;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
-    private Size mReentrySize = null;
+    private Size mReentrySize;
 
     private float mDefaultAspectRatio;
     private float mMinAspectRatio;
@@ -77,6 +77,7 @@ public class PipBoundsHandler {
     private int mDefaultMinSize;
     private Point mScreenEdgeInsets;
     private int mCurrentMinSize;
+    private Size mOverrideMinimalSize;
 
     private boolean mIsImeShowing;
     private int mImeHeight;
@@ -226,11 +227,14 @@ public class PipBoundsHandler {
     /**
      * @return {@link Rect} of the destination PiP window bounds.
      */
-    Rect getDestinationBounds(float aspectRatio, Rect bounds) {
+    Rect getDestinationBounds(float aspectRatio, Rect bounds, Size minimalSize) {
         final Rect destinationBounds;
         final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
         if (bounds == null) {
             destinationBounds = new Rect(defaultBounds);
+            if (mReentrySnapFraction == INVALID_SNAP_FRACTION && mReentrySize == null) {
+                mOverrideMinimalSize = minimalSize;
+            }
         } else {
             destinationBounds = new Rect(bounds);
         }
@@ -335,7 +339,6 @@ public class PipBoundsHandler {
      */
     private void transformBoundsToAspectRatio(Rect stackBounds, float aspectRatio,
             boolean useCurrentMinEdgeSize) {
-
         // Save the snap fraction and adjust the size based on the new aspect ratio.
         final float snapFraction = mSnapAlgorithm.getSnapFraction(stackBounds,
                 getMovementBounds(stackBounds));
@@ -354,7 +357,35 @@ public class PipBoundsHandler {
         final int left = (int) (stackBounds.centerX() - size.getWidth() / 2f);
         final int top = (int) (stackBounds.centerY() - size.getHeight() / 2f);
         stackBounds.set(left, top, left + size.getWidth(), top + size.getHeight());
+        // apply the override minimal size if applicable, this minimal size is specified by app
+        if (mOverrideMinimalSize != null) {
+            transformBoundsToMinimalSize(stackBounds, aspectRatio, mOverrideMinimalSize);
+        }
         mSnapAlgorithm.applySnapFraction(stackBounds, getMovementBounds(stackBounds), snapFraction);
+    }
+
+    /**
+     * Transforms a given bounds to meet the minimal size constraints.
+     * This function assumes the given {@param stackBounds} qualifies {@param aspectRatio}.
+     */
+    private void transformBoundsToMinimalSize(Rect stackBounds, float aspectRatio,
+            Size minimalSize) {
+        if (minimalSize == null) return;
+        final Size adjustedMinimalSize;
+        final float minimalSizeAspectRatio =
+                minimalSize.getWidth() / (float) minimalSize.getHeight();
+        if (minimalSizeAspectRatio > aspectRatio) {
+            // minimal size is wider, fixed the width and increase the height
+            adjustedMinimalSize = new Size(
+                    minimalSize.getWidth(), (int) (minimalSize.getWidth() / aspectRatio));
+        } else {
+            adjustedMinimalSize = new Size(
+                    (int) (minimalSize.getHeight() * aspectRatio), minimalSize.getHeight());
+        }
+        final Rect containerBounds = new Rect(stackBounds);
+        Gravity.apply(mDefaultStackGravity,
+                adjustedMinimalSize.getWidth(), adjustedMinimalSize.getHeight(),
+                containerBounds, stackBounds);
     }
 
     /**
