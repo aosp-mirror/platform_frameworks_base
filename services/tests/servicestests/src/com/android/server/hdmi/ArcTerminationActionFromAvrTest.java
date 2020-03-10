@@ -23,6 +23,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Looper;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -35,6 +36,7 @@ import org.junit.runners.JUnit4;
 
 /** Tests for {@link ArcTerminationActionFromAvr} */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class ArcTerminationActionFromAvrTest {
 

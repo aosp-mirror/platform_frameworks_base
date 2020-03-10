@@ -17,6 +17,7 @@ package com.android.server.hdmi;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.platform.test.annotations.Presubmit;
 import android.util.Slog;
 
 import androidx.test.filters.SmallTest;
@@ -36,6 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiUtils} class. */
 public class HdmiUtilsTest {
