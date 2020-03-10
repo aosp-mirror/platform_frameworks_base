@@ -29,7 +29,7 @@ public interface RankingConfig {
     void setShowBadge(String packageName, int uid, boolean showBadge);
     boolean canShowBadge(String packageName, int uid);
     boolean badgingEnabled(UserHandle userHandle);
-    boolean areBubblesAllowed(String packageName, int uid);
+    int getBubblePreference(String packageName, int uid);
     boolean bubblesEnabled();
     boolean isGroupBlocked(String packageName, int uid, String groupId);
 

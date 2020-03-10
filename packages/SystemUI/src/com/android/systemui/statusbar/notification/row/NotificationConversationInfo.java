@@ -17,6 +17,8 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static android.app.Notification.EXTRA_IS_GROUP_CONVERSATION;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
+import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
@@ -598,6 +600,13 @@ public class NotificationConversationInfo extends LinearLayout implements
                                 !mChannelToUpdate.isImportantConversation());
                         if (mChannelToUpdate.isImportantConversation()) {
                             mChannelToUpdate.setAllowBubbles(true);
+                            int currentPref =
+                                    mINotificationManager.getBubblePreferenceForPackage(
+                                            mAppPkg, mAppUid);
+                            if (currentPref == BUBBLE_PREFERENCE_NONE) {
+                                mINotificationManager.setBubblesAllowed(mAppPkg, mAppUid,
+                                        BUBBLE_PREFERENCE_SELECTED);
+                            }
                         }
                         mChannelToUpdate.setImportance(Math.max(
                                 mChannelToUpdate.getOriginalImportance(), IMPORTANCE_DEFAULT));

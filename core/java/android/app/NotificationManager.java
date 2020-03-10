@@ -452,6 +452,19 @@ public class NotificationManager {
      */
     public static final int IMPORTANCE_MAX = 5;
 
+    /**
+     * @hide
+     */
+    public static final int BUBBLE_PREFERENCE_NONE = 0;
+    /**
+     * @hide
+     */
+    public static final int BUBBLE_PREFERENCE_ALL = 1;
+    /**
+     * @hide
+     */
+    public static final int BUBBLE_PREFERENCE_SELECTED = 2;
+
     @UnsupportedAppUsage
     private static INotificationManager sService;
 
@@ -1213,7 +1226,7 @@ public class NotificationManager {
 
 
     /**
-     * Sets whether notifications posted by this app can appear outside of the
+     * Gets whether all notifications posted by this app can appear outside of the
      * notification shade, floating over other apps' content.
      *
      * <p>This value will be ignored for notifications that are posted to channels that do not

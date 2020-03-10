@@ -102,7 +102,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_FG_SERVICE_SHOWN = "fgservice";
     private static final String ATT_GROUP = "group";
     private static final String ATT_BLOCKABLE_SYSTEM = "blockable_system";
-    private static final String ATT_ALLOW_BUBBLE = "can_bubble";
+    private static final String ATT_ALLOW_BUBBLE = "allow_bubble";
     private static final String ATT_ORIG_IMP = "orig_imp";
     private static final String ATT_PARENT_CHANNEL = "parent";
     private static final String ATT_CONVERSATION_ID = "conv_id";
@@ -168,7 +168,7 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
-    private static final boolean DEFAULT_ALLOW_BUBBLE = true;
+    private static final boolean DEFAULT_ALLOW_BUBBLE = false;
 
     @UnsupportedAppUsage
     private String mId;
@@ -545,15 +545,8 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Sets whether notifications posted to this channel can appear outside of the notification
-     * shade, floating over other apps' content as a bubble.
-     *
-     * <p>This value will be ignored for channels that aren't allowed to pop on screen (that is,
-     * channels whose {@link #getImportance() importance} is <
-     * {@link NotificationManager#IMPORTANCE_HIGH}.</p>
-     *
-     * <p>Only modifiable before the channel is submitted to
-     *      * {@link NotificationManager#createNotificationChannel(NotificationChannel)}.</p>
+     * As of Android 11 this value is no longer respected.
+     * @see #canBubble()
      * @see Notification#getBubbleMetadata()
      */
     public void setAllowBubbles(boolean allowBubbles) {
@@ -702,8 +695,10 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * Returns whether notifications posted to this channel can display outside of the notification
-     * shade, in a floating window on top of other apps.
+     * Returns whether notifications posted to this channel are allowed to display outside of the
+     * notification shade, in a floating window on top of other apps.
+     *
+     * @see Notification#getBubbleMetadata()
      */
     public boolean canBubble() {
         return mAllowBubbles;
