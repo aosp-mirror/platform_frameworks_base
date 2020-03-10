@@ -275,7 +275,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     RemoteToken mRemoteToken = null;
 
     BLASTSyncEngine mBLASTSyncEngine = new BLASTSyncEngine();
-    SurfaceControl.Transaction mBLASTSyncTransaction = new SurfaceControl.Transaction();
+    SurfaceControl.Transaction mBLASTSyncTransaction;
     boolean mUsingBLASTSyncTransaction = false;
     BLASTSyncEngine.TransactionReadyListener mWaitingListener;
     int mWaitingSyncId;
@@ -283,6 +283,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mPendingTransaction = wms.mTransactionFactory.get();
+        mBLASTSyncTransaction = wms.mTransactionFactory.get();
         mSurfaceAnimator = new SurfaceAnimator(this, this::onAnimationFinished, wms);
         mSurfaceFreezer = new SurfaceFreezer(this, wms);
     }
