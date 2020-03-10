@@ -185,10 +185,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         @Override
         public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-            mHandler.post(() -> {
-                mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
-                mPipTaskOrganizer.onDisplayInfoChanged(displayInfo);
-            });
+            mHandler.post(() -> mPipBoundsHandler.onDisplayInfoChanged(displayInfo));
         }
 
         @Override
@@ -352,7 +349,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 animatingBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
-        mPipTaskOrganizer.onDisplayInfoChanged(mTmpDisplayInfo);
     }
 
     public void dump(PrintWriter pw) {
