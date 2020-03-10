@@ -1019,7 +1019,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         public void taskAppeared(ActivityManager.RunningTaskInfo info) {
         }
         @Override
-        public void taskVanished(IWindowContainer wc) {
+        public void taskVanished(ActivityManager.RunningTaskInfo info) {
         }
         @Override
         public void transactionReady(int id, SurfaceControl.Transaction t) {

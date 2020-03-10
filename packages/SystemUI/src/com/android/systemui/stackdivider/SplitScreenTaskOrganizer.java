@@ -88,7 +88,7 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     @Override
-    public void taskVanished(IWindowContainer container) {
+    public void taskVanished(RunningTaskInfo taskInfo) {
     }
 
     @Override

@@ -139,7 +139,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
                 mTaskView2.reparentTask(ti.token);
             }
         }
-        public void taskVanished(IWindowContainer wc) {
+        public void taskVanished(ActivityManager.RunningTaskInfo ti) {
         }
         public void transactionReady(int id, SurfaceControl.Transaction t) {
             mergedTransaction.merge(t);
