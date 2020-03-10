@@ -167,8 +167,7 @@ public final class InlineSuggestionFactory {
 
             inlineSuggestions.add(inlineSuggestion);
         }
-        // We should only add inline actions if there is at least one suggestion.
-        if (!inlineSuggestions.isEmpty() && inlineActions != null) {
+        if (inlineActions != null) {
             for (InlineAction inlineAction : inlineActions) {
                 final InlineSuggestion inlineActionSuggestion = createInlineAction(isAugmented,
                         mergedInlinePresentation(request, 0, inlineAction.getInlinePresentation()),
