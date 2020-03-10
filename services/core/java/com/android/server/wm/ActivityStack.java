@@ -647,14 +647,6 @@ class ActivityStack extends Task {
 
         if (prevWindowingMode != getWindowingMode()) {
             mDisplayContent.onStackWindowingModeChanged(this);
-
-            if (inSplitScreenSecondaryWindowingMode()) {
-                // When the stack is resized due to entering split screen secondary, offset the
-                // windows to compensate for the new stack position.
-                forAllWindows(w -> {
-                    w.mWinAnimator.setOffsetPositionForStackResize(true);
-                }, true);
-            }
         }
 
         final DisplayContent display = getDisplay();
@@ -3883,9 +3875,10 @@ class ActivityStack extends Task {
             return;
         }
         if (mTile != null) {
-            reparentSurfaceControl(getPendingTransaction(), mTile.getSurfaceControl());
+            // don't use reparentSurfaceControl because we need to bypass taskorg check
+            mSurfaceAnimator.reparent(getPendingTransaction(), mTile.getSurfaceControl());
         } else if (mTile == null && origTile != null) {
-            reparentSurfaceControl(getPendingTransaction(), getParentSurfaceControl());
+            mSurfaceAnimator.reparent(getPendingTransaction(), getParentSurfaceControl());
         }
     }
 
