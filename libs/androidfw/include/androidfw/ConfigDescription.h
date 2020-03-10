@@ -151,8 +151,8 @@ inline ConfigDescription::ConfigDescription(const android::ResTable_config& o) {
   size = sizeof(android::ResTable_config);
 }
 
-inline ConfigDescription::ConfigDescription(const ConfigDescription& o) {
-  *static_cast<android::ResTable_config*>(this) = o;
+inline ConfigDescription::ConfigDescription(const ConfigDescription& o)
+  : android::ResTable_config(o) {
 }
 
 inline ConfigDescription::ConfigDescription(ConfigDescription&& o) noexcept {
