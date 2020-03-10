@@ -3403,29 +3403,12 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_ONE_TIME = 1 << 16;
 
     /**
-     * Permission flag: The permission is whitelisted to not be auto-revoked when app goes unused.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED = 1 << 17;
-
-    /**
-     * Permission flag: Whether {@link #FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED} state was set by
-     * user.
-     *
-     * @hide
-     */
-    @SystemApi
-    public static final int FLAG_PERMISSION_AUTO_REVOKE_USER_SET = 1 << 18;
-
-    /**
      * Permission flag: Whether permission was revoked by auto-revoke.
      *
      * @hide
      */
     @SystemApi
-    public static final int FLAG_PERMISSION_AUTO_REVOKED = 1 << 20;
+    public static final int FLAG_PERMISSION_AUTO_REVOKED = 1 << 17;
 
     /**
      * Permission flags: Reserved for use by the permission controller.
@@ -3479,8 +3462,6 @@ public abstract class PackageManager {
             | FLAG_PERMISSION_GRANTED_BY_ROLE
             | FLAG_PERMISSION_REVOKED_COMPAT
             | FLAG_PERMISSION_ONE_TIME
-            | FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED
-            | FLAG_PERMISSION_AUTO_REVOKE_USER_SET
             | FLAG_PERMISSION_AUTO_REVOKED;
 
     /**
@@ -4305,8 +4286,6 @@ public abstract class PackageManager {
             FLAG_PERMISSION_GRANTED_BY_ROLE,
             FLAG_PERMISSION_REVOKED_COMPAT,
             FLAG_PERMISSION_ONE_TIME,
-            FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED,
-            FLAG_PERMISSION_AUTO_REVOKE_USER_SET,
             FLAG_PERMISSION_AUTO_REVOKED
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -7474,8 +7453,6 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_GRANTED_BY_ROLE: return "GRANTED_BY_ROLE";
             case FLAG_PERMISSION_REVOKED_COMPAT: return "REVOKED_COMPAT";
             case FLAG_PERMISSION_ONE_TIME: return "ONE_TIME";
-            case FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED: return "AUTO_REVOKE_IF_UNUSED";
-            case FLAG_PERMISSION_AUTO_REVOKE_USER_SET: return "AUTO_REVOKE_USER_SET";
             case FLAG_PERMISSION_AUTO_REVOKED: return "AUTO_REVOKED";
             default: return Integer.toString(flag);
         }
