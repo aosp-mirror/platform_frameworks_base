@@ -61,6 +61,26 @@ public final class WifiAnnotations {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Bandwidth {}
 
+    @IntDef(prefix = { "CHANNEL_WIDTH_" }, value = {
+            ScanResult.CHANNEL_WIDTH_20MHZ,
+            ScanResult.CHANNEL_WIDTH_40MHZ,
+            ScanResult.CHANNEL_WIDTH_80MHZ,
+            ScanResult.CHANNEL_WIDTH_160MHZ,
+            ScanResult.CHANNEL_WIDTH_80MHZ_PLUS_MHZ,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ChannelWidth{}
+
+    @IntDef(prefix = { "WIFI_STANDARD_" }, value = {
+            ScanResult.WIFI_STANDARD_UNKNOWN,
+            ScanResult.WIFI_STANDARD_LEGACY,
+            ScanResult.WIFI_STANDARD_11N,
+            ScanResult.WIFI_STANDARD_11AC,
+            ScanResult.WIFI_STANDARD_11AX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WifiStandard{}
+
     @IntDef(prefix = { "PROTOCOL_" }, value = {
             ScanResult.PROTOCOL_NONE,
             ScanResult.PROTOCOL_WPA,
