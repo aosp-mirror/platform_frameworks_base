@@ -18,7 +18,7 @@ package com.android.permission.persistence;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ApexContext;
+import android.content.ApexEnvironment;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -258,8 +258,8 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
 
     @NonNull
     private static File getFile(@NonNull UserHandle user) {
-        ApexContext apexContext = ApexContext.getApexContext(APEX_MODULE_NAME);
-        File dataDirectory = apexContext.getDeviceProtectedDataDirForUser(user);
+        ApexEnvironment apexEnvironment = ApexEnvironment.getApexEnvironment(APEX_MODULE_NAME);
+        File dataDirectory = apexEnvironment.getDeviceProtectedDataDirForUser(user);
         return new File(dataDirectory, RUNTIME_PERMISSIONS_FILE_NAME);
     }
 }
