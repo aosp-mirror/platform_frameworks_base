@@ -498,7 +498,9 @@ public class WifiConfiguration implements Parcelable {
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 requirePmf = true;
                 break;
             case SECURITY_TYPE_EAP_SUITE_B:
@@ -517,7 +519,9 @@ public class WifiConfiguration implements Parcelable {
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 requirePmf = true;
                 break;
             case SECURITY_TYPE_WAPI_PSK:
