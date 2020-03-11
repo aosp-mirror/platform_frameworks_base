@@ -680,8 +680,6 @@ interface IPackageManager {
 
     String getWellbeingPackageName();
 
-    String[] getTelephonyPackageNames();
-
     String getAppPredictionServicePackageName();
 
     String getSystemCaptionsServicePackageName();

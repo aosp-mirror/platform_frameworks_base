@@ -3637,15 +3637,6 @@
      -->
     <string name="config_defaultWellbeingPackage" translatable="false"></string>
 
-    <!-- The package name for the system telephony apps.
-         This package must be trusted, as it will be granted with permissions with special telephony
-         protection level. Note, framework by default support multiple telephony apps, each package
-         name is separated by comma.
-         Example: "com.android.phone,com.android.stk,com.android.providers.telephony"
-         (Note: shell is included for testing purposes)
-     -->
-    <string name="config_telephonyPackages" translatable="false">"com.android.phone,com.android.stk,com.android.providers.telephony,com.android.ons"</string>
-
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          See android.attention.AttentionManagerService.

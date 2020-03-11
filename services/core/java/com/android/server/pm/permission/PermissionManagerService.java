@@ -3356,13 +3356,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // Special permissions for the system app predictor.
                 allowed = true;
             }
-            if (!allowed && bp.isTelephony()
-                    && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
-                        PackageManagerInternal.PACKAGE_TELEPHONY, UserHandle.USER_SYSTEM),
-                    pkg.getPackageName())) {
-                // Special permissions for the system telephony apps.
-                allowed = true;
-            }
             if (!allowed && bp.isCompanion()
                     && ArrayUtils.contains(mPackageManagerInt.getKnownPackageNames(
                         PackageManagerInternal.PACKAGE_COMPANION, UserHandle.USER_SYSTEM),

@@ -277,9 +277,6 @@ public final class BasePermission {
     public boolean isAppPredictor() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_APP_PREDICTOR) != 0;
     }
-    public boolean isTelephony() {
-        return (protectionLevel & PermissionInfo.PROTECTION_FLAG_TELEPHONY) != 0;
-    }
     public boolean isCompanion() {
         return (protectionLevel & PermissionInfo.PROTECTION_FLAG_COMPANION) != 0;
     }
