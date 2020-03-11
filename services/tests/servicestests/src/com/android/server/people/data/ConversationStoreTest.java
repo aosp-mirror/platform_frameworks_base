@@ -273,9 +273,8 @@ public final class ConversationStoreTest {
         // Ensure that futures were cancelled and the immediate flush occurred.
         assertEquals(0, mMockScheduledExecutorService.getFutures().size());
 
-        // Expect to see 2 executes: loadConversationFromDisk and saveConversationsToDisk.
-        // loadConversationFromDisk gets called each time we call #resetConversationStore().
-        assertEquals(2, mMockScheduledExecutorService.getExecutes().size());
+        // Expect to see 1 execute: saveConversationsToDisk.
+        assertEquals(1, mMockScheduledExecutorService.getExecutes().size());
 
         resetConversationStore();
         ConversationInfo out1 = mConversationStore.getConversation(SHORTCUT_ID);

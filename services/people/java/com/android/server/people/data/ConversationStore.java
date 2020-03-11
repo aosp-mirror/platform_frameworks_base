@@ -89,25 +89,21 @@ class ConversationStore {
      * Loads conversations from disk to memory in a background thread. This should be called
      * after the device powers on and the user has been unlocked.
      */
-    @MainThread
-    void loadConversationsFromDisk() {
-        mScheduledExecutorService.execute(() -> {
-            synchronized (this) {
-                ConversationInfosProtoDiskReadWriter conversationInfosProtoDiskReadWriter =
-                        getConversationInfosProtoDiskReadWriter();
-                if (conversationInfosProtoDiskReadWriter == null) {
-                    return;
-                }
-                List<ConversationInfo> conversationsOnDisk =
-                        conversationInfosProtoDiskReadWriter.read(CONVERSATIONS_FILE_NAME);
-                if (conversationsOnDisk == null) {
-                    return;
-                }
-                for (ConversationInfo conversationInfo : conversationsOnDisk) {
-                    updateConversationsInMemory(conversationInfo);
-                }
-            }
-        });
+    @WorkerThread
+    synchronized void loadConversationsFromDisk() {
+        ConversationInfosProtoDiskReadWriter conversationInfosProtoDiskReadWriter =
+                getConversationInfosProtoDiskReadWriter();
+        if (conversationInfosProtoDiskReadWriter == null) {
+            return;
+        }
+        List<ConversationInfo> conversationsOnDisk =
+                conversationInfosProtoDiskReadWriter.read(CONVERSATIONS_FILE_NAME);
+        if (conversationsOnDisk == null) {
+            return;
+        }
+        for (ConversationInfo conversationInfo : conversationsOnDisk) {
+            updateConversationsInMemory(conversationInfo);
+        }
     }
 
     /**
