@@ -11,6 +11,12 @@ package android.app {
 
   public class AppOpsManager {
     method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS) public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, @NonNull String, @Nullable int[]);
+    method @Deprecated public void setNotedAppOpsCollector(@Nullable android.app.AppOpsManager.AppOpsCollector);
+  }
+
+  @Deprecated public abstract static class AppOpsManager.AppOpsCollector extends android.app.AppOpsManager.OnOpNotedCallback {
+    ctor public AppOpsManager.AppOpsCollector();
+    method @NonNull public java.util.concurrent.Executor getAsyncNotedExecutor();
   }
 
   public class Notification implements android.os.Parcelable {

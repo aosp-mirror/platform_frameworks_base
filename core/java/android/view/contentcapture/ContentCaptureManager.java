@@ -217,6 +217,15 @@ public final class ContentCaptureManager {
     public static final int DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED = 3;
 
     /** @hide */
+    @IntDef(flag = false, value = {
+            DATA_SHARE_ERROR_UNKNOWN,
+            DATA_SHARE_ERROR_CONCURRENT_REQUEST,
+            DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DataShareError {}
+
+    /** @hide */
     public static final int RESULT_CODE_OK = 0;
     /** @hide */
     public static final int RESULT_CODE_TRUE = 1;

@@ -559,14 +559,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_PRESS_AND_HOLD_DURATION_MILLIS_INT =
             "android.view.accessibility.action.ARGUMENT_PRESS_AND_HOLD_DURATION_MILLIS_INT";
 
-    /**
-     * Argument to represent the IME action Id to press the returning key on a node.
-     * For use with R.id.accessibilityActionImeEnter
-     * @hide
-     */
-    public static final String ACTION_ARGUMENT_IME_ACTION_ID_INT =
-            "android.view.accessibility.action.ARGUMENT_IME_ACTION_ID_INT";
-
     // Focus types
 
     /**
@@ -649,7 +641,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * argument.
      * <p>
      * The data can be retrieved from the {@link ExtraRenderingInfo} returned by
-     * {@link #getExtraRenderingInfo()} using {@link ExtraRenderingInfo#getLayoutParams},
+     * {@link #getExtraRenderingInfo()} using {@link ExtraRenderingInfo#getLayoutSize},
      * {@link ExtraRenderingInfo#getTextSizeInPx()} and
      * {@link ExtraRenderingInfo#getTextSizeUnit()}. For layout params, it is supported by both
      * {@link TextView} and {@link ViewGroup}. For text size and unit, it is only supported by
@@ -657,7 +649,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @see #refreshWithExtraData(String, Bundle)
      */
-
     public static final String EXTRA_DATA_RENDERING_INFO_KEY =
             "android.view.accessibility.extra.DATA_RENDERING_INFO_KEY";
 
@@ -1038,8 +1029,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      *                     with this mechanism is generally expensive to retrieve, so should only be
      *                     requested when needed. See
      *                     {@link #EXTRA_DATA_RENDERING_INFO_KEY},
-     *                     {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY} and
-     *                     {@link #getAvailableExtraData()}.
+     *                     {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY},
+     *                     {@link #getAvailableExtraData()} and {@link #getExtraRenderingInfo()}.
      * @param args A bundle of arguments for the request. These depend on the particular request.
      *
      * @return {@code true} if the refresh succeeded. {@code false} if the {@link View} represented
@@ -2437,9 +2428,13 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets the conformance info if the node is meant to be refreshed with extra data.
+     * Gets the {@link ExtraRenderingInfo extra rendering info} if the node is meant to be
+     * refreshed with extra data to examine rendering related accessibility issues.
      *
-     * @return The conformance info.
+     * @return The {@link ExtraRenderingInfo extra rendering info}.
+     *
+     * @see #EXTRA_DATA_RENDERING_INFO_KEY
+     * @see #refreshWithExtraData(String, Bundle)
      */
     @Nullable
     public ExtraRenderingInfo getExtraRenderingInfo() {
@@ -2447,14 +2442,15 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Sets the conformance info if the node is meant to be refreshed with extra data.
+     * Sets the extra rendering info, <code>extraRenderingInfo<code/>, if the node is meant to be
+     * refreshed with extra data.
      * <p>
      *   <strong>Note:</strong> Cannot be called from an
      *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
-     * @param extraRenderingInfo The conformance info.
+     * @param extraRenderingInfo The {@link ExtraRenderingInfo extra rendering info}.
      * @hide
      */
     public void setExtraRenderingInfo(@NonNull ExtraRenderingInfo extraRenderingInfo) {
@@ -3925,7 +3921,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
-            parcel.writeValue(mExtraRenderingInfo.getLayoutParams());
+            parcel.writeValue(mExtraRenderingInfo.getLayoutSize());
             parcel.writeFloat(mExtraRenderingInfo.getTextSizeInPx());
             parcel.writeInt(mExtraRenderingInfo.getTextSizeUnit());
         }
@@ -4189,7 +4185,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
             if (mExtraRenderingInfo != null) mExtraRenderingInfo.recycle();
             mExtraRenderingInfo = ExtraRenderingInfo.obtain();
-            mExtraRenderingInfo.mLayoutParams = (Size) parcel.readValue(null);
+            mExtraRenderingInfo.mLayoutSize = (Size) parcel.readValue(null);
             mExtraRenderingInfo.mTextSizeInPx = parcel.readFloat();
             mExtraRenderingInfo.mTextSizeUnit = parcel.readInt();
         }
@@ -4969,10 +4965,11 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionPressAndHold);
 
         /**
-         * Action to send an ime action which is from
-         * {@link android.view.inputmethod.EditorInfo#actionId}. This action would be
+         * Action to send an ime actionId which is from
+         * {@link android.view.inputmethod.EditorInfo#actionId}. This ime actionId sets by
+         * {@link TextView#setImeActionLabel(CharSequence, int)}, or it would be
          * {@link android.view.inputmethod.EditorInfo#IME_ACTION_UNSPECIFIED} if no specific
-         * actionId defined. A node should expose this action only for views that are currently
+         * actionId has set. A node should expose this action only for views that are currently
          * with input focus and editable.
          */
         @NonNull public static final AccessibilityAction ACTION_IME_ENTER =
@@ -5808,7 +5805,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         private static final SynchronizedPool<ExtraRenderingInfo> sPool =
                 new SynchronizedPool<>(MAX_POOL_SIZE);
 
-        private Size mLayoutParams;
+        private Size mLayoutSize;
         private float mTextSizeInPx = UNDEFINED_VALUE;
         private int mTextSizeUnit = UNDEFINED_VALUE;
 
@@ -5828,32 +5825,36 @@ public class AccessibilityNodeInfo implements Parcelable {
         /** Obtains a pooled instance that is a clone of another one. */
         private static ExtraRenderingInfo obtain(ExtraRenderingInfo other) {
             ExtraRenderingInfo extraRenderingInfo = ExtraRenderingInfo.obtain();
-            extraRenderingInfo.mLayoutParams = other.mLayoutParams;
+            extraRenderingInfo.mLayoutSize = other.mLayoutSize;
             extraRenderingInfo.mTextSizeInPx = other.mTextSizeInPx;
             extraRenderingInfo.mTextSizeUnit = other.mTextSizeUnit;
             return extraRenderingInfo;
         }
 
         /**
-         * Creates a new conformance info of a view, and this new instance is initialized from
+         * Creates a new rendering info of a view, and this new instance is initialized from
          * the given <code>other</code>.
          *
          * @param other The instance to clone.
          */
         private ExtraRenderingInfo(@Nullable ExtraRenderingInfo other) {
             if (other != null) {
-                mLayoutParams = other.mLayoutParams;
+                mLayoutSize = other.mLayoutSize;
                 mTextSizeInPx = other.mTextSizeInPx;
                 mTextSizeUnit = other.mTextSizeUnit;
             }
         }
 
         /**
+         * Gets the size object containing the height and the width of layout params if the node is
+         * a {@link ViewGroup} or a {@link TextView}, or null otherwise. Useful for accessibility
+         * scanning tool to understand whether the text is scalable and fits the view or not.
+         *
          * @return a {@link Size} stores layout height and layout width of the view,
          *         or null otherwise.
          */
-        public @Nullable Size getLayoutParams() {
-            return mLayoutParams;
+        public @Nullable Size getLayoutSize() {
+            return mLayoutSize;
         }
 
         /**
@@ -5863,11 +5864,15 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param height The layout height.
          * @hide
          */
-        public void setLayoutParams(int width, int height) {
-            mLayoutParams = new Size(width, height);
+        public void setLayoutSize(int width, int height) {
+            mLayoutSize = new Size(width, height);
         }
 
         /**
+         * Gets the text size if the node is a {@link TextView}, or -1 otherwise.  Useful for
+         * accessibility scanning tool to understand whether the text is scalable and fits the view
+         * or not.
+         *
          * @return the text size of a {@code TextView}, or -1 otherwise.
          */
         public float getTextSizeInPx() {
@@ -5885,6 +5890,11 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
+         * Gets the text size unit if the node is a {@link TextView}, or -1 otherwise.
+         * Text size returned from {@link #getTextSizeInPx} in raw pixels may scale by factors and
+         * convert from other units. Useful for accessibility scanning tool to understand whether
+         * the text is scalable and fits the view or not.
+         *
          * @return the text size unit which type is {@link TypedValue#TYPE_DIMENSION} of a
          *         {@code TextView}, or -1 otherwise.
          *
@@ -5915,7 +5925,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         private void clear() {
-            mLayoutParams = null;
+            mLayoutSize = null;
             mTextSizeInPx = UNDEFINED_VALUE;
             mTextSizeUnit = UNDEFINED_VALUE;
         }

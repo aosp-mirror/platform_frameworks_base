@@ -40,6 +40,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITIO
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static com.android.server.wm.WindowContainerChildProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER;
 import static com.android.server.wm.WindowContainerProto.ORIENTATION;
 import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
@@ -1819,7 +1820,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mSurfaceAnimator.isAnimating()) {
             mSurfaceAnimator.dumpDebug(proto, SURFACE_ANIMATOR);
         }
+
+        // add children to proto
+        for (int i = 0; i < getChildCount(); i++) {
+            final long childToken = proto.start(WindowContainerProto.CHILDREN);
+            final E child = getChildAt(i);
+            child.dumpDebug(proto, child.getProtoFieldId(), logLevel);
+            proto.end(childToken);
+        }
         proto.end(token);
+    }
+
+    /**
+     * @return a proto field id to identify where to add the derived class to the generic window
+     * container proto.
+     */
+    long getProtoFieldId() {
+        return WINDOW_CONTAINER;
     }
 
     private ForAllWindowsConsumerWrapper obtainConsumerWrapper(Consumer<WindowState> consumer) {
@@ -2086,9 +2103,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         // Delaying animation start isn't compatible with remote animations at all.
         if (controller != null && !mSurfaceAnimator.isAnimationStartDelayed()) {
+            final Rect localBounds = new Rect(mTmpRect);
+            localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
             final RemoteAnimationController.RemoteAnimationRecord adapters =
-                    controller.createRemoteAnimationRecord(this, mTmpPoint, mTmpRect,
-                            (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+                    controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
+                            mTmpRect, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
             resultAdapters = new Pair<>(adapters.mAdapter, adapters.mThumbnailAdapter);
         } else if (isChanging) {
             final float durationScale = mWmService.getTransitionAnimationScaleLocked();

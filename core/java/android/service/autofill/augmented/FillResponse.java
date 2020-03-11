@@ -21,7 +21,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Bundle;
 import android.service.autofill.Dataset;
-import android.service.autofill.InlinePresentation;
+import android.service.autofill.InlineAction;
 
 import com.android.internal.util.DataClass;
 
@@ -53,11 +53,10 @@ public final class FillResponse {
     private @Nullable List<Dataset> mInlineSuggestions;
 
     /**
-     * The {@link InlinePresentation}s representing the inline actions. Defaults to null if no
-     * inline actions are provided.
+     * Defaults to null if no inline actions are provided.
      */
     @DataClass.PluralOf("inlineAction")
-    private @Nullable List<InlinePresentation> mInlineActions;
+    private @Nullable List<InlineAction> mInlineActions;
 
     /**
      * The client state that {@link AugmentedAutofillService} implementation can put anything in to
@@ -74,7 +73,7 @@ public final class FillResponse {
         return null;
     }
 
-    private static List<InlinePresentation> defaultInlineActions() {
+    private static List<InlineAction> defaultInlineActions() {
         return null;
     }
 
@@ -86,7 +85,7 @@ public final class FillResponse {
     /** @hide */
     abstract static class BaseBuilder {
         abstract FillResponse.Builder addInlineSuggestion(@NonNull Dataset value);
-        abstract FillResponse.Builder addInlineAction(@NonNull InlinePresentation value);
+        abstract FillResponse.Builder addInlineAction(@NonNull InlineAction value);
     }
 
 
@@ -108,7 +107,7 @@ public final class FillResponse {
     /* package-private */ FillResponse(
             @Nullable FillWindow fillWindow,
             @Nullable List<Dataset> inlineSuggestions,
-            @Nullable List<InlinePresentation> inlineActions,
+            @Nullable List<InlineAction> inlineActions,
             @Nullable Bundle clientState) {
         this.mFillWindow = fillWindow;
         this.mInlineSuggestions = inlineSuggestions;
@@ -140,13 +139,12 @@ public final class FillResponse {
     }
 
     /**
-     * The {@link InlinePresentation}s representing the inline actions. Defaults to null if no
-     * inline actions are provided.
+     * Defaults to null if no inline actions are provided.
      *
      * @hide
      */
     @DataClass.Generated.Member
-    public @Nullable List<InlinePresentation> getInlineActions() {
+    public @Nullable List<InlineAction> getInlineActions() {
         return mInlineActions;
     }
 
@@ -171,7 +169,7 @@ public final class FillResponse {
 
         private @Nullable FillWindow mFillWindow;
         private @Nullable List<Dataset> mInlineSuggestions;
-        private @Nullable List<InlinePresentation> mInlineActions;
+        private @Nullable List<InlineAction> mInlineActions;
         private @Nullable Bundle mClientState;
 
         private long mBuilderFieldsSet = 0L;
@@ -212,11 +210,10 @@ public final class FillResponse {
         }
 
         /**
-         * The {@link InlinePresentation}s representing the inline actions. Defaults to null if no
-         * inline actions are provided.
+         * Defaults to null if no inline actions are provided.
          */
         @DataClass.Generated.Member
-        public @NonNull Builder setInlineActions(@NonNull List<InlinePresentation> value) {
+        public @NonNull Builder setInlineActions(@NonNull List<InlineAction> value) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x4;
             mInlineActions = value;
@@ -226,7 +223,7 @@ public final class FillResponse {
         /** @see #setInlineActions */
         @DataClass.Generated.Member
         @Override
-        @NonNull FillResponse.Builder addInlineAction(@NonNull InlinePresentation value) {
+        @NonNull FillResponse.Builder addInlineAction(@NonNull InlineAction value) {
             if (mInlineActions == null) setInlineActions(new ArrayList<>());
             mInlineActions.add(value);
             return this;
@@ -279,10 +276,10 @@ public final class FillResponse {
     }
 
     @DataClass.Generated(
-            time = 1583780042587L,
+            time = 1583793032373L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/service/autofill/augmented/FillResponse.java",
-            inputSignatures = "private @android.annotation.Nullable android.service.autofill.augmented.FillWindow mFillWindow\nprivate @com.android.internal.util.DataClass.PluralOf(\"inlineSuggestion\") @android.annotation.Nullable java.util.List<android.service.autofill.Dataset> mInlineSuggestions\nprivate @com.android.internal.util.DataClass.PluralOf(\"inlineAction\") @android.annotation.Nullable java.util.List<android.service.autofill.InlinePresentation> mInlineActions\nprivate @android.annotation.Nullable android.os.Bundle mClientState\nprivate static  android.service.autofill.augmented.FillWindow defaultFillWindow()\nprivate static  java.util.List<android.service.autofill.Dataset> defaultInlineSuggestions()\nprivate static  java.util.List<android.service.autofill.InlinePresentation> defaultInlineActions()\nprivate static  android.os.Bundle defaultClientState()\nclass FillResponse extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genHiddenGetters=true)\nabstract  android.service.autofill.augmented.FillResponse.Builder addInlineSuggestion(android.service.autofill.Dataset)\nabstract  android.service.autofill.augmented.FillResponse.Builder addInlineAction(android.service.autofill.InlinePresentation)\nclass BaseBuilder extends java.lang.Object implements []")
+            inputSignatures = "private @android.annotation.Nullable android.service.autofill.augmented.FillWindow mFillWindow\nprivate @com.android.internal.util.DataClass.PluralOf(\"inlineSuggestion\") @android.annotation.Nullable java.util.List<android.service.autofill.Dataset> mInlineSuggestions\nprivate @com.android.internal.util.DataClass.PluralOf(\"inlineAction\") @android.annotation.Nullable java.util.List<android.service.autofill.InlineAction> mInlineActions\nprivate @android.annotation.Nullable android.os.Bundle mClientState\nprivate static  android.service.autofill.augmented.FillWindow defaultFillWindow()\nprivate static  java.util.List<android.service.autofill.Dataset> defaultInlineSuggestions()\nprivate static  java.util.List<android.service.autofill.InlineAction> defaultInlineActions()\nprivate static  android.os.Bundle defaultClientState()\nclass FillResponse extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genBuilder=true, genHiddenGetters=true)\nabstract  android.service.autofill.augmented.FillResponse.Builder addInlineSuggestion(android.service.autofill.Dataset)\nabstract  android.service.autofill.augmented.FillResponse.Builder addInlineAction(android.service.autofill.InlineAction)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
 

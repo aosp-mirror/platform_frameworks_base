@@ -85,6 +85,7 @@ import static com.android.server.wm.IdentifierProto.USER_ID;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static com.android.server.wm.WindowContainerChildProto.TASK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -3970,12 +3971,12 @@ class Task extends WindowContainer<WindowContainer> {
 
     boolean isControlledByTaskOrganizer() {
         final Task rootTask = getRootTask();
-        return rootTask == this && rootTask.mTaskOrganizer != null
-                // TODO(task-hierarchy): Figure out how to control nested tasks.
-                // For now, if this is in a tile let WM drive.
-                && !(rootTask instanceof TaskTile)
-                && !(rootTask instanceof ActivityStack
-                        && ((ActivityStack) rootTask).getTile() != null);
+        // if the rootTask is a "child" of a tile, then don't consider it a root task.
+        // TODO: remove this along with removing tile.
+        if (((ActivityStack) rootTask).getTile() != null) {
+            return false;
+        }
+        return rootTask == this && rootTask.mTaskOrganizer != null;
     }
 
     @Override
@@ -4120,5 +4121,10 @@ class Task extends WindowContainer<WindowContainer> {
 
     SurfaceControl.Transaction getMainWindowSizeChangeTransaction() {
         return mMainWindowSizeChangeTransaction;
+    }
+
+    @Override
+    long getProtoFieldId() {
+        return TASK;
     }
 }

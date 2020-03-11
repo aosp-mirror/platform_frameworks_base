@@ -43,6 +43,7 @@ import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.util.InjectionInflationController;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,8 +75,8 @@ public final class ClockManager {
     private final ContentObserver mContentObserver =
             new ContentObserver(mMainHandler) {
                 @Override
-                public void onChange(boolean selfChange, Uri uri, int userId) {
-                    super.onChange(selfChange, uri, userId);
+                public void onChange(boolean selfChange, Collection<Uri> uris,
+                        int flags, int userId) {
                     if (Objects.equals(userId,
                             mCurrentUserObservable.getCurrentUser().getValue())) {
                         reload();

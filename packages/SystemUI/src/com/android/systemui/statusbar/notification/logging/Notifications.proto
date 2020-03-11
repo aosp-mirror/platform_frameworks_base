@@ -1,0 +1,49 @@
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.statusbar.notification.logging;
+
+/**
+ * NotificationList proto from atoms.proto, duplicated here so that it's accessible in the build.
+ * Must be kept in sync with the version in atoms.proto.
+ */
+
+message Notification {
+    // The notifying app's uid and package.
+    optional int32 uid = 1;
+    optional string package_name = 2;
+    // A small system-assigned identifier for the notification.
+    optional int32 instance_id = 3;
+
+    // Grouping information.
+    optional int32 group_instance_id = 4;
+    optional bool is_group_summary = 5;
+
+    // The section of the shade that the notification is in.
+    // See NotificationSectionsManager.PriorityBucket.
+    enum NotificationSection {
+        SECTION_UNKNOWN = 0;
+        SECTION_HEADS_UP = 1;
+        SECTION_PEOPLE = 2;
+        SECTION_ALERTING = 3;
+        SECTION_SILENT = 4;
+    }
+    optional NotificationSection section = 6;
+}
+
+message NotificationList {
+    repeated Notification notifications = 1;  // An ordered sequence of notifications.
+}
