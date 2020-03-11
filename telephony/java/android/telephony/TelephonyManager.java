@@ -12242,12 +12242,14 @@ public class TelephonyManager {
 
     /**
      * It indicates whether modem is enabled or not per slot.
-     * It's the corresponding status of {@link #enableModemForSlot}.
+     * It's the corresponding status of TelephonyManager.enableModemForSlot.
      *
+     * <p>Requires Permission:
+     * READ_PRIVILEGED_PHONE_STATE or
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * @param slotIndex which slot it's checking.
-     * @hide
      */
-    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public boolean isModemEnabledForSlot(int slotIndex) {
         try {
             ITelephony telephony = getITelephony();
