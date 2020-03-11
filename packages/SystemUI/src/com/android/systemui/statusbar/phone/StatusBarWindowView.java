@@ -180,7 +180,8 @@ public class StatusBarWindowView extends FrameLayout {
             int targetLeft = Math.max(insets.left, leftCutout);
             int targetRight = Math.max(insets.right, rightCutout);
 
-            // Super-special right inset handling, because scrims and backdrop need to ignore it.
+            // Super-special right inset handling, because scrims, backdrop and status bar
+            // container need to ignore it.
             if (targetRight != mRightInset || targetLeft != mLeftInset) {
                 mRightInset = targetRight;
                 mLeftInset = targetLeft;
