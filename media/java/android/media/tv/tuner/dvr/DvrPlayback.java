@@ -69,7 +69,7 @@ public class DvrPlayback implements AutoCloseable {
      */
     public static final int PLAYBACK_STATUS_FULL = Constants.PlaybackStatus.SPACE_FULL;
 
-    long mNativeContext;
+    private long mNativeContext;
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
