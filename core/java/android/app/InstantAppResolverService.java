@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -225,11 +226,12 @@ public abstract class InstantAppResolverService extends Service {
      *
      * @see InstantAppResolveInfo
      */
+    @MainThread
     public void onGetInstantAppResolveInfo(@NonNull InstantAppRequestInfo request,
             @NonNull InstantAppResolutionCallback callback) {
         // If not overridden, forward to the old method.
-        onGetInstantAppResolveInfo(request.intent, request.hostDigestPrefix, request.userHandle,
-                request.token, callback);
+        onGetInstantAppResolveInfo(request.getIntent(), request.getHostDigestPrefix(),
+                request.getUserHandle(), request.getToken(), callback);
     }
 
     /**
@@ -241,11 +243,12 @@ public abstract class InstantAppResolverService extends Service {
      * @param request The parameters for this resolution request
      * @param callback The {@link InstantAppResolutionCallback} to provide results to.
      */
+    @MainThread
     public void onGetInstantAppIntentFilter(@NonNull InstantAppRequestInfo request,
             @NonNull InstantAppResolutionCallback callback) {
         // If not overridden, forward to the old method.
-        onGetInstantAppIntentFilter(request.intent, request.hostDigestPrefix, request.userHandle,
-                request.token, callback);
+        onGetInstantAppIntentFilter(request.getIntent(), request.getHostDigestPrefix(),
+                request.getUserHandle(), request.getToken(), callback);
     }
 
     /**
@@ -268,7 +271,7 @@ public abstract class InstantAppResolverService extends Service {
             public void getInstantAppResolveInfoList(InstantAppRequestInfo request, int sequence,
                     IRemoteCallback callback) {
                 if (DEBUG_INSTANT) {
-                    Slog.v(TAG, "[" + request.token + "] Phase1 called; posting");
+                    Slog.v(TAG, "[" + request.getToken() + "] Phase1 called; posting");
                 }
                 final SomeArgs args = SomeArgs.obtain();
                 args.arg1 = request;
@@ -281,7 +284,7 @@ public abstract class InstantAppResolverService extends Service {
             public void getInstantAppIntentFilterList(InstantAppRequestInfo request,
                     IRemoteCallback callback) {
                 if (DEBUG_INSTANT) {
-                    Slog.v(TAG, "[" + request.token + "] Phase2 called; posting");
+                    Slog.v(TAG, "[" + request.getToken() + "] Phase2 called; posting");
                 }
                 final SomeArgs args = SomeArgs.obtain();
                 args.arg1 = request;
@@ -336,9 +339,9 @@ public abstract class InstantAppResolverService extends Service {
                     args.recycle();
                     final int sequence = message.arg1;
                     if (DEBUG_INSTANT) {
-                        Slog.d(TAG, "[" + request.token + "] Phase1 request;"
-                                + " prefix: " + Arrays.toString(request.hostDigestPrefix)
-                                + ", userId: " + request.userHandle.getIdentifier());
+                        Slog.d(TAG, "[" + request.getToken() + "] Phase1 request;"
+                                + " prefix: " + Arrays.toString(request.getHostDigestPrefix())
+                                + ", userId: " + request.getUserHandle().getIdentifier());
                     }
                     onGetInstantAppResolveInfo(request,
                             new InstantAppResolutionCallback(sequence, callback));
@@ -350,9 +353,9 @@ public abstract class InstantAppResolverService extends Service {
                     final IRemoteCallback callback = (IRemoteCallback) args.arg2;
                     args.recycle();
                     if (DEBUG_INSTANT) {
-                        Slog.d(TAG, "[" + request.token + "] Phase2 request;"
-                                + " prefix: " + Arrays.toString(request.hostDigestPrefix)
-                                + ", userId: " + request.userHandle.getIdentifier());
+                        Slog.d(TAG, "[" + request.getToken() + "] Phase2 request;"
+                                + " prefix: " + Arrays.toString(request.getHostDigestPrefix())
+                                + ", userId: " + request.getUserHandle().getIdentifier());
                     }
                     onGetInstantAppIntentFilter(request,
                             new InstantAppResolutionCallback(-1 /*sequence*/, callback));
