@@ -23,6 +23,7 @@ import android.annotation.SystemApi.Client;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * State of all runtime permissions.
@@ -61,6 +62,14 @@ public final class RuntimePermissionsState {
     @NonNull
     private final Map<String, List<PermissionState>> mSharedUserPermissions;
 
+    /**
+     * Create a new instance of this class.
+     *
+     * @param version the version of the runtime permissions
+     * @param fingerprint the fingerprint of the runtime permissions
+     * @param packagePermissions the runtime permissions by packages
+     * @param sharedUserPermissions the runtime permissions by shared users
+     */
     public RuntimePermissionsState(int version, @Nullable String fingerprint,
             @NonNull Map<String, List<PermissionState>> packagePermissions,
             @NonNull Map<String, List<PermissionState>> sharedUserPermissions) {
@@ -70,32 +79,72 @@ public final class RuntimePermissionsState {
         mSharedUserPermissions = sharedUserPermissions;
     }
 
+    /**
+     * Get the version of the runtime permissions.
+     *
+     * @return the version of the runtime permissions
+     */
     public int getVersion() {
         return mVersion;
     }
 
+    /**
+     * Get the fingerprint of the runtime permissions.
+     *
+     * @return the fingerprint of the runtime permissions
+     */
     @Nullable
     public String getFingerprint() {
         return mFingerprint;
     }
 
+    /**
+     * Get the runtime permissions by packages.
+     *
+     * @return the runtime permissions by packages
+     */
     @NonNull
     public Map<String, List<PermissionState>> getPackagePermissions() {
         return mPackagePermissions;
     }
 
+    /**
+     * Get the runtime permissions by shared users.
+     *
+     * @return the runtime permissions by shared users
+     */
     @NonNull
     public Map<String, List<PermissionState>> getSharedUserPermissions() {
         return mSharedUserPermissions;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        RuntimePermissionsState that = (RuntimePermissionsState) object;
+        return mVersion == that.mVersion
+                && Objects.equals(mFingerprint, that.mFingerprint)
+                && Objects.equals(mPackagePermissions, that.mPackagePermissions)
+                && Objects.equals(mSharedUserPermissions, that.mSharedUserPermissions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mVersion, mFingerprint, mPackagePermissions, mSharedUserPermissions);
+    }
+
     /**
      * State of a single permission.
      */
-    public static class PermissionState {
+    public static final class PermissionState {
 
         /**
-         * Name of the permission.
+         * The name of the permission.
          */
         @NonNull
         private final String mName;
@@ -106,27 +155,68 @@ public final class RuntimePermissionsState {
         private final boolean mGranted;
 
         /**
-         * Flags of the permission.
+         * The flags of the permission.
          */
         private final int mFlags;
 
+        /**
+         * Create a new instance of this class.
+         *
+         * @param name the name of the permission
+         * @param granted whether the permission is granted
+         * @param flags the flags of the permission
+         */
         public PermissionState(@NonNull String name, boolean granted, int flags) {
             mName = name;
             mGranted = granted;
             mFlags = flags;
         }
 
+        /**
+         * Get the name of the permission.
+         *
+         * @return the name of the permission
+         */
         @NonNull
         public String getName() {
             return mName;
         }
 
+        /**
+         * Get whether the permission is granted.
+         *
+         * @return whether the permission is granted
+         */
         public boolean isGranted() {
             return mGranted;
         }
 
+        /**
+         * Get the flags of the permission.
+         *
+         * @return the flags of the permission
+         */
         public int getFlags() {
             return mFlags;
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            PermissionState that = (PermissionState) object;
+            return mGranted == that.mGranted
+                    && mFlags == that.mFlags
+                    && Objects.equals(mName, that.mName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mName, mGranted, mFlags);
         }
     }
 }
