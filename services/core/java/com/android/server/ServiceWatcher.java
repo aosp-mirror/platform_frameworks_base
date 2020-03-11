@@ -86,7 +86,7 @@ public class ServiceWatcher implements ServiceConnection {
         @Nullable public final ComponentName component;
         @UserIdInt public final int userId;
 
-        private ServiceInfo(ResolveInfo resolveInfo, int currentUserId) {
+        ServiceInfo(ResolveInfo resolveInfo, int currentUserId) {
             Preconditions.checkArgument(resolveInfo.serviceInfo.getComponentName() != null);
 
             Bundle metadata = resolveInfo.serviceInfo.metaData;
@@ -302,6 +302,7 @@ public class ServiceWatcher implements ServiceConnection {
             }
 
             mContext.unbindService(this);
+            onServiceDisconnected(mServiceInfo.component);
             mServiceInfo = ServiceInfo.NONE;
         }
 
@@ -325,15 +326,13 @@ public class ServiceWatcher implements ServiceConnection {
     @Override
     public final void onServiceConnected(ComponentName component, IBinder binder) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
+        Preconditions.checkState(mBinder == null);
 
         if (D) {
             Log.i(TAG, getLogPrefix() + " connected to " + component.toShortString());
         }
 
         mBinder = binder;
-
-        // we always run the on bind callback even if we know that the binder is dead already so
-        // that there are always balance pairs of bind/unbind callbacks
         if (mOnBind != null) {
             try {
                 mOnBind.run(binder);
@@ -343,18 +342,15 @@ public class ServiceWatcher implements ServiceConnection {
                 Log.e(TAG, getLogPrefix() + " exception running on " + mServiceInfo, e);
             }
         }
-
-        try {
-            // setting the binder to null lets us skip queued transactions
-            binder.linkToDeath(() -> mBinder = null, 0);
-        } catch (RemoteException e) {
-            mBinder = null;
-        }
     }
 
     @Override
     public final void onServiceDisconnected(ComponentName component) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
+
+        if (mBinder == null) {
+            return;
+        }
 
         if (D) {
             Log.i(TAG, getLogPrefix() + " disconnected from " + component.toShortString());
@@ -377,18 +373,18 @@ public class ServiceWatcher implements ServiceConnection {
         onBestServiceChanged(true);
     }
 
-    private void onUserSwitched(@UserIdInt int userId) {
+    void onUserSwitched(@UserIdInt int userId) {
         mCurrentUserId = userId;
         onBestServiceChanged(false);
     }
 
-    private void onUserUnlocked(@UserIdInt int userId) {
+    void onUserUnlocked(@UserIdInt int userId) {
         if (userId == mCurrentUserId) {
             onBestServiceChanged(false);
         }
     }
 
-    private void onPackageChanged(String packageName) {
+    void onPackageChanged(String packageName) {
         // force a rebind if the changed package was the currently connected package
         String currentPackageName =
                 mServiceInfo.component != null ? mServiceInfo.component.getPackageName() : null;
