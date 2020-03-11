@@ -11864,23 +11864,6 @@ package android.telephony.cdma {
 
 package android.telephony.data {
 
-  public class ApnSetting implements android.os.Parcelable {
-    method @NonNull public static String getApnTypesStringFromBitmask(int);
-    field public static final String TYPE_ALL_STRING = "*";
-    field public static final String TYPE_CBS_STRING = "cbs";
-    field public static final String TYPE_DEFAULT_STRING = "default";
-    field public static final String TYPE_DUN_STRING = "dun";
-    field public static final String TYPE_EMERGENCY_STRING = "emergency";
-    field public static final String TYPE_FOTA_STRING = "fota";
-    field public static final String TYPE_HIPRI_STRING = "hipri";
-    field public static final String TYPE_IA_STRING = "ia";
-    field public static final String TYPE_IMS_STRING = "ims";
-    field public static final String TYPE_MCX_STRING = "mcx";
-    field public static final String TYPE_MMS_STRING = "mms";
-    field public static final String TYPE_SUPL_STRING = "supl";
-    field public static final String TYPE_XCAP_STRING = "xcap";
-  }
-
   public final class DataCallResponse implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.net.LinkAddress> getAddresses();
