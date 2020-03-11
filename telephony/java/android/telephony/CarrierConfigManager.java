@@ -3530,6 +3530,15 @@ public class CarrierConfigManager {
             "support_wps_over_ims_bool";
 
     /**
+     * The two digital number pattern of MMI code which is defined by carrier.
+     * If the dial number matches this pattern, it will be dialed out normally not USSD.
+     *
+     * @hide
+     */
+    public static final String KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY =
+            "mmi_two_digit_number_pattern_string_array";
+
+    /**
      * Holds the list of carrier certificate hashes.
      * Note that each carrier has its own certificates.
      */
@@ -4086,6 +4095,7 @@ public class CarrierConfigManager {
                 new int[] {4 /* BUSY */});
         sDefaults.putBoolean(KEY_PREVENT_CLIR_ACTIVATION_AND_DEACTIVATION_CODE_BOOL, false);
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_TIMEOUT_LONG, 2000);
+        sDefaults.putStringArray(KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         // Default wifi configurations.
