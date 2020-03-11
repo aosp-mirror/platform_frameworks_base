@@ -22,7 +22,9 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.assertFalse;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -137,6 +139,8 @@ public class QSTileHostTest extends SysuiTestCase {
                         return new TestTile1(mQSTileHost);
                     } else if ("spec2".equals(spec)) {
                         return new TestTile2(mQSTileHost);
+                    } else if ("na".equals(spec)) {
+                        return new NotAvailableTile(mQSTileHost);
                     } else if (CUSTOM_TILE_SPEC.equals(spec)) {
                         return mCustomTile;
                     } else {
@@ -283,6 +287,12 @@ public class QSTileHostTest extends SysuiTestCase {
         assertEquals(1, specs.size());
     }
 
+    @Test
+    public void testNotAvailableTile_specNotNull() {
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "na");
+        verify(mQSLogger, never()).logTileDestroyed(isNull(), anyString());
+    }
+
     private static class TestQSTileHost extends QSTileHost {
         TestQSTileHost(Context context, StatusBarIconController iconController,
                 QSFactoryImpl defaultFactory, Handler mainHandler, Looper bgLooper,
@@ -367,6 +377,18 @@ public class QSTileHostTest extends SysuiTestCase {
 
         protected TestTile2(QSHost host) {
             super(host);
+        }
+    }
+
+    private class NotAvailableTile extends TestTile {
+
+        protected NotAvailableTile(QSHost host) {
+            super(host);
+        }
+
+        @Override
+        public boolean isAvailable() {
+            return false;
         }
     }
 }
