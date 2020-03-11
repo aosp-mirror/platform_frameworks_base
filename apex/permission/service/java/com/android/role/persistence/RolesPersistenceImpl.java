@@ -65,7 +65,7 @@ public class RolesPersistenceImpl implements RolesPersistence {
 
     @Nullable
     @Override
-    public RolesState readAsUser(@NonNull UserHandle user) {
+    public RolesState readForUser(@NonNull UserHandle user) {
         File file = getFile(user);
         try (FileInputStream inputStream = new AtomicFile(file).openRead()) {
             XmlPullParser parser = Xml.newPullParser();
@@ -146,7 +146,7 @@ public class RolesPersistenceImpl implements RolesPersistence {
     }
 
     @Override
-    public void writeAsUser(@NonNull RolesState roles, @NonNull UserHandle user) {
+    public void writeForUser(@NonNull RolesState roles, @NonNull UserHandle user) {
         File file = getFile(user);
         AtomicFile atomicFile = new AtomicFile(file);
         FileOutputStream outputStream = null;
@@ -205,7 +205,7 @@ public class RolesPersistenceImpl implements RolesPersistence {
     }
 
     @Override
-    public void deleteAsUser(@NonNull UserHandle user) {
+    public void deleteForUser(@NonNull UserHandle user) {
         getFile(user).delete();
     }
 
