@@ -12624,7 +12624,6 @@ public class TelephonyManager {
     }
 
     /**
-<<<<<<< HEAD
      * Gets the voice call forwarding info {@link CallForwardingInfo}, given the call forward
      * reason.
      *
@@ -12824,7 +12823,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setDataAllowedDuringVoiceCall(boolean allow) {
         try {
@@ -12853,7 +12851,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isDataAllowedInVoiceCall() {
         try {
