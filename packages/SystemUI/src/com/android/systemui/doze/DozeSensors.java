@@ -49,6 +49,7 @@ import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -261,7 +262,7 @@ public class DozeSensors {
 
     private final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
-        public void onChange(boolean selfChange, Iterable<Uri> uris, int flags, int userId) {
+        public void onChange(boolean selfChange, Collection<Uri> uris, int flags, int userId) {
             if (userId != ActivityManager.getCurrentUser()) {
                 return;
             }
