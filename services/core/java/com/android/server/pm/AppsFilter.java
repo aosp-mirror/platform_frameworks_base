@@ -388,7 +388,7 @@ public class AppsFilter {
         for (int i = ArrayUtils.size(intents) - 1; i >= 0; i--) {
             IntentFilter intentFilter = intents.get(i);
             if (intentFilter.match(intent.getAction(), intent.getType(), intent.getScheme(),
-                    intent.getData(), intent.getCategories(), "AppsFilter") > 0) {
+                    intent.getData(), intent.getCategories(), "AppsFilter", true) > 0) {
                 return true;
             }
         }
