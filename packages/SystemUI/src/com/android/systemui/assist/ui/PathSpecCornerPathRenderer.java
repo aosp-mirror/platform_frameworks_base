@@ -45,8 +45,8 @@ public final class PathSpecCornerPathRenderer extends CornerPathRenderer {
         mWidth = DisplayUtils.getWidth(context);
         mHeight = DisplayUtils.getHeight(context);
 
-        mBottomCornerRadius = DisplayUtils.getCornerRadiusBottom(context);
-        mTopCornerRadius = DisplayUtils.getCornerRadiusTop(context);
+        mBottomCornerRadius =  DisplayUtils.getCornerRadiusBottom(context);
+        mTopCornerRadius =  DisplayUtils.getCornerRadiusTop(context);
 
         String pathData = context.getResources().getString(R.string.config_rounded_mask);
         Path path = PathParser.createPathFromPathData(pathData);
