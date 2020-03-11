@@ -516,7 +516,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         List<SubscriptionInfo> list = new ArrayList<>();
         list.add(TEST_SUBSCRIPTION);
         list.add(TEST_SUBSCRIPTION_2);
-        when(mSubscriptionManager.getActiveAndHiddenSubscriptionInfoList()).thenReturn(list);
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(list);
         mKeyguardUpdateMonitor.mPhoneStateListener.onActiveDataSubscriptionIdChanged(
                 TEST_SUBSCRIPTION_2.getSubscriptionId());
         mTestableLooper.processAllMessages();
