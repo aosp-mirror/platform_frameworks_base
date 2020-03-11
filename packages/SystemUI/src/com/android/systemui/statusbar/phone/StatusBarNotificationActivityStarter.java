@@ -68,12 +68,12 @@ import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
@@ -108,7 +108,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     private final NotifCollection mNotifCollection;
     private final FeatureFlags mFeatureFlags;
     private final StatusBarStateController mStatusBarStateController;
-    private final NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final MetricsLogger mMetricsLogger;
     private final Context mContext;
     private final NotificationPanelViewController mNotificationPanel;
@@ -142,7 +142,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             NotificationLockscreenUserManager lockscreenUserManager,
             ShadeController shadeController, StatusBar statusBar,
             KeyguardStateController keyguardStateController,
-            NotificationInterruptionStateProvider notificationInterruptionStateProvider,
+            NotificationInterruptStateProvider notificationInterruptStateProvider,
             MetricsLogger metricsLogger, LockPatternUtils lockPatternUtils,
             Handler mainThreadHandler, Handler backgroundHandler, Executor uiBgExecutor,
             ActivityIntentHelper activityIntentHelper, BubbleController bubbleController,
@@ -167,7 +167,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mActivityStarter = activityStarter;
         mEntryManager = entryManager;
         mStatusBarStateController = statusBarStateController;
-        mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
+        mNotificationInterruptStateProvider = notificationInterruptStateProvider;
         mMetricsLogger = metricsLogger;
         mAssistManagerLazy = assistManagerLazy;
         mGroupManager = groupManager;
@@ -436,7 +436,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
     }
 
     private void handleFullScreenIntent(NotificationEntry entry) {
-        if (mNotificationInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
+        if (mNotificationInterruptStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry)) {
             if (shouldSuppressFullScreenIntent(entry)) {
                 if (DEBUG) {
                     Log.d(TAG, "No Fullscreen intent: suppressed by DND: " + entry.getKey());
@@ -603,7 +603,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         private final ActivityIntentHelper mActivityIntentHelper;
         private final BubbleController mBubbleController;
         private NotificationPanelViewController mNotificationPanelViewController;
-        private NotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+        private NotificationInterruptStateProvider mNotificationInterruptStateProvider;
         private final ShadeController mShadeController;
         private NotificationPresenter mNotificationPresenter;
         private ActivityLaunchAnimator mActivityLaunchAnimator;
@@ -626,7 +626,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 NotificationGroupManager groupManager,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 KeyguardStateController keyguardStateController,
-                NotificationInterruptionStateProvider notificationInterruptionStateProvider,
+                NotificationInterruptStateProvider notificationInterruptStateProvider,
                 MetricsLogger metricsLogger,
                 LockPatternUtils lockPatternUtils,
                 @Main Handler mainThreadHandler,
@@ -654,7 +654,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             mGroupManager = groupManager;
             mLockscreenUserManager = lockscreenUserManager;
             mKeyguardStateController = keyguardStateController;
-            mNotificationInterruptionStateProvider = notificationInterruptionStateProvider;
+            mNotificationInterruptStateProvider = notificationInterruptStateProvider;
             mMetricsLogger = metricsLogger;
             mLockPatternUtils = lockPatternUtils;
             mMainThreadHandler = mainThreadHandler;
@@ -712,7 +712,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                     mShadeController,
                     mStatusBar,
                     mKeyguardStateController,
-                    mNotificationInterruptionStateProvider,
+                    mNotificationInterruptStateProvider,
                     mMetricsLogger,
                     mLockPatternUtils,
                     mMainThreadHandler,
