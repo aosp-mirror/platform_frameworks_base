@@ -19,6 +19,7 @@ package android.text.util;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.telephony.PhoneNumberUtils;
@@ -663,9 +664,11 @@ public class Linkify {
     private static void gatherTelLinks(ArrayList<LinkSpec> links, Spannable s,
             @Nullable Context context) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        final Context ctx = (context != null) ? context : ActivityThread.currentApplication();
+        final String regionCode = (ctx != null) ? ctx.getSystemService(TelephonyManager.class).
+                getSimCountryIso().toUpperCase(Locale.US) : Locale.getDefault().getCountry();
         Iterable<PhoneNumberMatch> matches = phoneUtil.findNumbers(s.toString(),
-                TelephonyManager.getDefaultSimCountryIso().toUpperCase(Locale.US),
-                Leniency.POSSIBLE, Long.MAX_VALUE);
+                regionCode, Leniency.POSSIBLE, Long.MAX_VALUE);
         for (PhoneNumberMatch match : matches) {
             LinkSpec spec = new LinkSpec();
             spec.url = "tel:" + PhoneNumberUtils.normalizeNumber(match.rawString());
