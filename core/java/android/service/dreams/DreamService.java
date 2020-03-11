@@ -609,9 +609,7 @@ public class DreamService extends Service implements Window.Callback {
      *
      * @hide
      *
-     * TODO: Remove @UnsupportedAppUsage.
      */
-    @UnsupportedAppUsage
     public void setWindowless(boolean windowless) {
         mWindowless = windowless;
     }
