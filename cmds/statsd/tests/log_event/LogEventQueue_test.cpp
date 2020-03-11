@@ -42,7 +42,7 @@ std::unique_ptr<LogEvent> makeLogEvent(uint64_t timestampNs) {
     size_t size;
     uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
 
-    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/-1, /*pid=*/-1);
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
     logEvent->parseBuffer(buf, size);
     AStatsEvent_release(statsEvent);
     return logEvent;
