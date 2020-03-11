@@ -274,6 +274,9 @@ public class IntentFilter implements Parcelable {
      */
     public static final String SCHEME_HTTPS = "https";
 
+    /** The value to indicate a wildcard for incoming match arguments. */
+    private static final String WILDCARD = "*";
+
     private int mPriority;
     @UnsupportedAppUsage
     private int mOrder;
@@ -758,6 +761,17 @@ public class IntentFilter implements Parcelable {
      * @return True if the action is listed in the filter.
      */
     public final boolean matchAction(String action) {
+        return matchAction(action, false);
+    }
+
+    /**
+     * Variant of {@link #matchAction(String)} that allows a wildcard for the provided action.
+     * @param wildcardSupported if true, will allow action to use wildcards
+     */
+    private boolean matchAction(String action, boolean wildcardSupported) {
+        if (wildcardSupported && !mActions.isEmpty() && WILDCARD.equals(action)) {
+            return true;
+        }
         return hasAction(action);
     }
 
@@ -1120,20 +1134,33 @@ public class IntentFilter implements Parcelable {
          * {@link IntentFilter#MATCH_CATEGORY_HOST}.
          */
         public int match(Uri data) {
+            return match(data, false);
+        }
+
+        /**
+         * Variant of {@link #match(Uri)} that supports wildcards on the scheme, host and
+         * path of the provided {@link Uri}
+         *
+         * @param wildcardSupported if true, will allow parameters to use wildcards
+         * @hide
+         */
+        public int match(Uri data, boolean wildcardSupported) {
             String host = data.getHost();
             if (host == null) {
                 return NO_MATCH_DATA;
             }
             if (false) Log.v("IntentFilter",
                     "Match host " + host + ": " + mHost);
-            if (mWild) {
-                if (host.length() < mHost.length()) {
+            if (!wildcardSupported || !WILDCARD.equals(host)) {
+                if (mWild) {
+                    if (host.length() < mHost.length()) {
+                        return NO_MATCH_DATA;
+                    }
+                    host = host.substring(host.length() - mHost.length());
+                }
+                if (host.compareToIgnoreCase(mHost) != 0) {
                     return NO_MATCH_DATA;
                 }
-                host = host.substring(host.length()-mHost.length());
-            }
-            if (host.compareToIgnoreCase(mHost) != 0) {
-                return NO_MATCH_DATA;
             }
             if (mPort >= 0) {
                 if (mPort != data.getPort()) {
@@ -1207,8 +1234,20 @@ public class IntentFilter implements Parcelable {
      *         filter.
      */
     public final boolean hasDataSchemeSpecificPart(String data) {
+        return hasDataSchemeSpecificPart(data, false);
+    }
+
+    /**
+     * Variant of {@link #hasDataSchemeSpecificPart(String)} that supports wildcards on the provided
+     * ssp.
+     * @param supportWildcards if true, will allow parameters to use wildcards
+     */
+    private boolean hasDataSchemeSpecificPart(String data, boolean supportWildcards) {
         if (mDataSchemeSpecificParts == null) {
             return false;
+        }
+        if (supportWildcards && WILDCARD.equals(data) && mDataSchemeSpecificParts.size() > 0) {
+            return true;
         }
         final int numDataSchemeSpecificParts = mDataSchemeSpecificParts.size();
         for (int i = 0; i < numDataSchemeSpecificParts; i++) {
@@ -1388,8 +1427,20 @@ public class IntentFilter implements Parcelable {
      *         filter.
      */
     public final boolean hasDataPath(String data) {
+        return hasDataPath(data, false);
+    }
+
+    /**
+     * Variant of {@link #hasDataPath(String)} that supports wildcards on the provided scheme, host,
+     * and path.
+     * @param wildcardSupported if true, will allow parameters to use wildcards
+     */
+    private boolean hasDataPath(String data, boolean wildcardSupported) {
         if (mDataPaths == null) {
             return false;
+        }
+        if (wildcardSupported && WILDCARD.equals(data)) {
+            return true;
         }
         final int numDataPaths = mDataPaths.size();
         for (int i = 0; i < numDataPaths; i++) {
@@ -1435,13 +1486,24 @@ public class IntentFilter implements Parcelable {
      * {@link #MATCH_CATEGORY_PORT}, {@link #NO_MATCH_DATA}.
      */
     public final int matchDataAuthority(Uri data) {
-        if (mDataAuthorities == null || data == null) {
+        return matchDataAuthority(data, false);
+    }
+
+    /**
+     * Variant of {@link #matchDataAuthority(Uri)} that allows wildcard matching of the provided
+     * authority.
+     *
+     * @param wildcardSupported if true, will allow parameters to use wildcards
+     * @hide
+     */
+    public final int matchDataAuthority(Uri data, boolean wildcardSupported) {
+        if (data == null || mDataAuthorities == null) {
             return NO_MATCH_DATA;
         }
         final int numDataAuthorities = mDataAuthorities.size();
         for (int i = 0; i < numDataAuthorities; i++) {
             final AuthorityEntry ae = mDataAuthorities.get(i);
-            int match = ae.match(data);
+            int match = ae.match(data, wildcardSupported);
             if (match >= 0) {
                 return match;
             }
@@ -1488,6 +1550,15 @@ public class IntentFilter implements Parcelable {
      * @see #match
      */
     public final int matchData(String type, String scheme, Uri data) {
+        return matchData(type, scheme, data, false);
+    }
+
+    /**
+     * Variant of {@link #matchData(String, String, Uri)} that allows wildcard matching
+     * of the provided type, scheme, host and path parameters.
+     * @param wildcardSupported if true, will allow parameters to use wildcards
+     */
+    private int matchData(String type, String scheme, Uri data, boolean wildcardSupported) {
         final ArrayList<String> types = mDataTypes;
         final ArrayList<String> schemes = mDataSchemes;
 
@@ -1499,7 +1570,8 @@ public class IntentFilter implements Parcelable {
         }
 
         if (schemes != null) {
-            if (schemes.contains(scheme != null ? scheme : "")) {
+            if (schemes.contains(scheme != null ? scheme : "")
+                    || wildcardSupported && WILDCARD.equals(scheme)) {
                 match = MATCH_CATEGORY_SCHEME;
             } else {
                 return NO_MATCH_DATA;
@@ -1507,19 +1579,19 @@ public class IntentFilter implements Parcelable {
 
             final ArrayList<PatternMatcher> schemeSpecificParts = mDataSchemeSpecificParts;
             if (schemeSpecificParts != null && data != null) {
-                match = hasDataSchemeSpecificPart(data.getSchemeSpecificPart())
+                match = hasDataSchemeSpecificPart(data.getSchemeSpecificPart(), wildcardSupported)
                         ? MATCH_CATEGORY_SCHEME_SPECIFIC_PART : NO_MATCH_DATA;
             }
             if (match != MATCH_CATEGORY_SCHEME_SPECIFIC_PART) {
                 // If there isn't any matching ssp, we need to match an authority.
                 final ArrayList<AuthorityEntry> authorities = mDataAuthorities;
                 if (authorities != null) {
-                    int authMatch = matchDataAuthority(data);
+                    int authMatch = matchDataAuthority(data, wildcardSupported);
                     if (authMatch >= 0) {
                         final ArrayList<PatternMatcher> paths = mDataPaths;
                         if (paths == null) {
                             match = authMatch;
-                        } else if (hasDataPath(data.getPath())) {
+                        } else if (hasDataPath(data.getPath(), wildcardSupported)) {
                             match = MATCH_CATEGORY_PATH;
                         } else {
                             return NO_MATCH_DATA;
@@ -1541,7 +1613,8 @@ public class IntentFilter implements Parcelable {
             // to force everyone to say they handle content: or file: URIs.
             if (scheme != null && !"".equals(scheme)
                     && !"content".equals(scheme)
-                    && !"file".equals(scheme)) {
+                    && !"file".equals(scheme)
+                    && !(wildcardSupported && WILDCARD.equals(scheme))) {
                 return NO_MATCH_DATA;
             }
         }
@@ -1701,13 +1774,23 @@ public class IntentFilter implements Parcelable {
      */
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag) {
-        if (action != null && !matchAction(action)) {
+        return match(action, type, scheme, data, categories, logTag, false /*supportWildcards*/);
+    }
+
+    /**
+     * Variant of {@link #match(ContentResolver, Intent, boolean, String)} that supports wildcards
+     * in the action, type, scheme, host and path.
+     * @hide if true, will allow supported parameters to use wildcards to match this filter
+     */
+    public final int match(String action, String type, String scheme,
+            Uri data, Set<String> categories, String logTag, boolean supportWildcards) {
+        if (action != null && !matchAction(action, supportWildcards)) {
             if (false) Log.v(
                 logTag, "No matching action " + action + " for " + this);
             return NO_MATCH_ACTION;
         }
 
-        int dataMatch = matchData(type, scheme, data);
+        int dataMatch = matchData(type, scheme, data, supportWildcards);
         if (dataMatch < 0) {
             if (false) {
                 if (dataMatch == NO_MATCH_TYPE) {
