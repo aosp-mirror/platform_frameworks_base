@@ -98,7 +98,8 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
         mDevice = getDevice();
 
         String apkVerityMode = mDevice.getProperty("ro.apk_verity.mode");
-        assumeTrue(APK_VERITY_STANDARD_MODE.equals(apkVerityMode));
+        assumeTrue(mDevice.getLaunchApiLevel() >= 30
+                || APK_VERITY_STANDARD_MODE.equals(apkVerityMode));
 
         mKeyId = expectRemoteCommandToSucceed(
                 "mini-keyctl padd asymmetric fsv_test .fs-verity < " + CERT_PATH).trim();
