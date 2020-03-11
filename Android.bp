@@ -472,7 +472,7 @@ java_library {
         "framework-statsd-stubs-module_libs_api",
         "framework-permission-stubs-systemapi",
         "framework-wifi-stubs-systemapi",
-        "framework-tethering-stubs",
+        "framework-tethering-stubs-module_libs_api",
     ],
     installable: true,
     javac_shard_size: 150,
@@ -522,7 +522,7 @@ java_library {
         "framework-sdkextensions-stubs-systemapi",
         "framework-statsd-stubs-module_libs_api",
         "framework-wifi-stubs-systemapi",
-        "framework-tethering-stubs",
+        "framework-tethering-stubs-module_libs_api",
         // TODO (b/147688669) should be framework-telephony-stubs
         "framework-telephony",
         // TODO(jiyong): add stubs for APEXes here
@@ -545,7 +545,6 @@ java_library {
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
-        "//frameworks/base/packages/Tethering/common/TetheringLib:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
         "//frameworks/opt/net/ike:__subpackages__",
     ],
