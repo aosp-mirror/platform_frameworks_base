@@ -318,13 +318,13 @@ public class TelecomManager {
      * the remote handle of the new call.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_UNKNOWN_CALL_HANDLE =
             "android.telecom.extra.UNKNOWN_CALL_HANDLE";
 
     /**
      * Optional extra for incoming and outgoing calls containing a long which specifies the time the
      * call was created. This value is in milliseconds since boot.
+     * @hide
      */
     public static final String EXTRA_CALL_CREATED_TIME_MILLIS =
             "android.telecom.extra.CALL_CREATED_TIME_MILLIS";
@@ -388,7 +388,6 @@ public class TelecomManager {
      * </ul>
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_CALL_TECHNOLOGY_TYPE =
             "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
 
@@ -731,7 +730,6 @@ public class TelecomManager {
      * @see #EXTRA_CURRENT_TTY_MODE
      * @hide
      */
-    @SystemApi
     public static final String ACTION_CURRENT_TTY_MODE_CHANGED =
             "android.telecom.action.CURRENT_TTY_MODE_CHANGED";
 
@@ -746,7 +744,6 @@ public class TelecomManager {
      * </ul>
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_CURRENT_TTY_MODE =
             "android.telecom.extra.CURRENT_TTY_MODE";
 
@@ -757,7 +754,6 @@ public class TelecomManager {
      * @see #EXTRA_TTY_PREFERRED_MODE
      * @hide
      */
-    @SystemApi
     public static final String ACTION_TTY_PREFERRED_MODE_CHANGED =
             "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
 
@@ -768,7 +764,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_TTY_PREFERRED_MODE =
             "android.telecom.extra.TTY_PREFERRED_MODE";
 
@@ -846,7 +841,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
 
     /**
