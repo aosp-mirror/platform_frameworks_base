@@ -215,9 +215,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 .onDismissRunnable(any()))
                 .thenReturn(mExpandableNotificationRowComponentBuilder);
         when(mExpandableNotificationRowComponentBuilder
-                .inflationCallback(any()))
-                .thenReturn(mExpandableNotificationRowComponentBuilder);
-        when(mExpandableNotificationRowComponentBuilder
                 .rowContentBindStage(any()))
                 .thenReturn(mExpandableNotificationRowComponentBuilder);
         when(mExpandableNotificationRowComponentBuilder
@@ -273,7 +270,6 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
         mEntryManager.addNotificationEntryListener(mEntryListener);
 
         mRowBinder.setUpWithPresenter(mPresenter, mListContainer, mBindCallback);
-        mRowBinder.setInflationCallback(mEntryManager);
         mRowBinder.setNotificationClicker(mock(NotificationClicker.class));
 
         Ranking ranking = new Ranking();
