@@ -25,13 +25,40 @@
     android:paddingStart="@dimen/controls_management_side_padding"
     android:paddingEnd="@dimen/controls_management_side_padding" >
 
-    <TextView
-        android:id="@+id/title"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textSize="@dimen/controls_title_size"
-        android:textAlignment="center" />
+        android:gravity="center_vertical">
+
+        <FrameLayout
+            android:id="@+id/icon_frame"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:minWidth="56dp"
+            android:visibility="gone"
+            android:paddingTop="@dimen/controls_app_icon_frame_top_padding"
+            android:paddingBottom="@dimen/controls_app_icon_frame_bottom_padding"
+            android:paddingEnd="@dimen/controls_app_icon_frame_side_padding"
+            android:paddingStart="@dimen/controls_app_icon_frame_side_padding" >
+
+            <ImageView
+                android:id="@android:id/icon"
+                android:layout_width="@dimen/controls_app_icon_size"
+                android:layout_height="@dimen/controls_app_icon_size" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textSize="@dimen/controls_title_size"
+            android:textAlignment="center" />
+
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/subtitle"
@@ -41,19 +68,11 @@
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textAlignment="center" />
 
-    <androidx.core.widget.NestedScrollView
+    <ViewStub
+        android:id="@+id/stub"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:layout_marginTop="@dimen/controls_management_list_margin">
-
-        <ViewStub
-            android:id="@+id/stub"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    </androidx.core.widget.NestedScrollView>
+        android:layout_weight="1"/>
 
     <FrameLayout
         android:layout_width="match_parent"

@@ -68,9 +68,10 @@ public class StackAnimationController extends
     /**
      * Values to use for the default {@link SpringForce} provided to the physics animation layout.
      */
-    private static final int DEFAULT_STIFFNESS = 12000;
+    public static final int DEFAULT_STIFFNESS = 12000;
+    public static final float IME_ANIMATION_STIFFNESS = SpringForce.STIFFNESS_LOW;
     private static final int FLING_FOLLOW_STIFFNESS = 20000;
-    private static final float DEFAULT_BOUNCINESS = 0.9f;
+    public static final float DEFAULT_BOUNCINESS = 0.9f;
 
     /**
      * Friction applied to fling animations. Since the stack must land on one of the sides of the
@@ -118,8 +119,11 @@ public class StackAnimationController extends
     /** Whether or not the stack's start position has been set. */
     private boolean mStackMovedToStartPosition = false;
 
-    /** The most recent position in which the stack was resting on the edge of the screen. */
-    @Nullable private PointF mRestingStackPosition;
+    /**
+     * The stack's most recent position along the edge of the screen. This is saved when the last
+     * bubble is removed, so that the stack can be restored in its previous position.
+     */
+    private PointF mRestingStackPosition;
 
     /** The height of the most recently visible IME. */
     private float mImeHeight = 0f;
@@ -465,7 +469,6 @@ public class StackAnimationController extends
 
                 .addEndListener((animation, canceled, endValue, endVelocity) -> {
                     if (!canceled) {
-                        mRestingStackPosition = new PointF();
                         mRestingStackPosition.set(mStackPosition);
 
                         springFirstBubbleWithStackFollowing(property, spring, endVelocity,
@@ -501,8 +504,10 @@ public class StackAnimationController extends
     /**
      * Animates the stack either away from the newly visible IME, or back to its original position
      * due to the IME going away.
+     *
+     * @return The destination Y value of the stack due to the IME movement.
      */
-    public void animateForImeVisibility(boolean imeVisible) {
+    public float animateForImeVisibility(boolean imeVisible) {
         final float maxBubbleY = getAllowableStackPositionRegion().bottom;
         float destinationY = Float.MIN_VALUE;
 
@@ -523,12 +528,14 @@ public class StackAnimationController extends
             springFirstBubbleWithStackFollowing(
                     DynamicAnimation.TRANSLATION_Y,
                     getSpringForce(DynamicAnimation.TRANSLATION_Y, /* view */ null)
-                            .setStiffness(SpringForce.STIFFNESS_LOW),
+                            .setStiffness(IME_ANIMATION_STIFFNESS),
                     /* startVel */ 0f,
                     destinationY);
 
             notifyFloatingCoordinatorStackAnimatingTo(mStackPosition.x, destinationY);
         }
+
+        return destinationY;
     }
 
     /**
@@ -583,7 +590,7 @@ public class StackAnimationController extends
                             - mBubblePaddingTop
                             - (mImeHeight > Float.MIN_VALUE ? mImeHeight + mBubblePaddingTop : 0f)
                             - Math.max(
-                            insets.getSystemWindowInsetBottom(),
+                            insets.getStableInsetBottom(),
                             insets.getDisplayCutout() != null
                                     ? insets.getDisplayCutout().getSafeInsetBottom()
                                     : 0);
@@ -853,7 +860,12 @@ public class StackAnimationController extends
     public void setStackPosition(PointF pos) {
         Log.d(TAG, String.format("Setting position to (%f, %f).", pos.x, pos.y));
         mStackPosition.set(pos.x, pos.y);
-        mRestingStackPosition = mStackPosition;
+
+        if (mRestingStackPosition == null) {
+            mRestingStackPosition = new PointF();
+        }
+
+        mRestingStackPosition.set(mStackPosition);
 
         // If we're not the active controller, we don't want to physically move the bubble views.
         if (isActiveController()) {

@@ -24,12 +24,10 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
-import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.provider.Telephony;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
@@ -138,7 +136,7 @@ public class RcsUceAdapter {
      * UCE.
      * @hide
      */
-    public static final int PUBLISH_STATE_200_OK = 1;
+    public static final int PUBLISH_STATE_OK = 1;
 
     /**
      * The hasn't published its capabilities since boot or hasn't gotten any publish response yet.
@@ -178,7 +176,7 @@ public class RcsUceAdapter {
     /**@hide*/
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "PUBLISH_STATE_", value = {
-            PUBLISH_STATE_200_OK,
+            PUBLISH_STATE_OK,
             PUBLISH_STATE_NOT_PUBLISHED,
             PUBLISH_STATE_VOLTE_PROVISION_ERROR,
             PUBLISH_STATE_RCS_PROVISION_ERROR,
@@ -305,7 +303,7 @@ public class RcsUceAdapter {
      * Gets the last publish result from the UCE service if the device is using an RCS presence
      * server.
      * @return The last publish result from the UCE service. If the device is using SIP OPTIONS,
-     * this method will return {@link #PUBLISH_STATE_200_OK} as well.
+     * this method will return {@link #PUBLISH_STATE_OK} as well.
      * @throws ImsException if the subscription associated with this instance of
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription

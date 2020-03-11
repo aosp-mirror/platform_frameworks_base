@@ -39,33 +39,47 @@ struct BroadcastSubscriberDeathCookie {
     shared_ptr<IPendingIntentRef> mPir;
 };
 
-static void broadcastSubscriberDied(void* cookie) {
-    BroadcastSubscriberDeathCookie* cookie_ = (BroadcastSubscriberDeathCookie*)cookie;
-    ConfigKey configKey = cookie_->mConfigKey;
+void SubscriberReporter::broadcastSubscriberDied(void* cookie) {
+    auto cookie_ = static_cast<BroadcastSubscriberDeathCookie*>(cookie);
+    ConfigKey& configKey = cookie_->mConfigKey;
     int64_t subscriberId = cookie_->mSubscriberId;
-    shared_ptr<IPendingIntentRef> pir = cookie_->mPir;
+    shared_ptr<IPendingIntentRef>& pir = cookie_->mPir;
 
-    // TODO(b/149254662): Fix threading. This currently fails if a new pir gets
-    // set between the get and the unset.
-    if (SubscriberReporter::getInstance().getBroadcastSubscriber(configKey, subscriberId) == pir) {
-        SubscriberReporter::getInstance().unsetBroadcastSubscriber(configKey, subscriberId);
+    SubscriberReporter& thiz = getInstance();
+
+    // Erase the mapping from a (config_key, subscriberId) to a pir if the
+    // mapping exists.
+    lock_guard<mutex> lock(thiz.mLock);
+    auto subscriberMapIt = thiz.mIntentMap.find(configKey);
+    if (subscriberMapIt != thiz.mIntentMap.end()) {
+        auto subscriberMap = subscriberMapIt->second;
+        auto pirIt = subscriberMap.find(subscriberId);
+        if (pirIt != subscriberMap.end() && pirIt->second == pir) {
+            subscriberMap.erase(subscriberId);
+            if (subscriberMap.empty()) {
+                thiz.mIntentMap.erase(configKey);
+            }
+        }
     }
+
     // The death recipient corresponding to this specific pir can never be
     // triggered again, so free up resources.
     delete cookie_;
 }
 
-static ::ndk::ScopedAIBinder_DeathRecipient sBroadcastSubscriberDeathRecipient(
-        AIBinder_DeathRecipient_new(broadcastSubscriberDied));
+SubscriberReporter::SubscriberReporter() :
+    mBroadcastSubscriberDeathRecipient(AIBinder_DeathRecipient_new(broadcastSubscriberDied)) {
+}
 
 void SubscriberReporter::setBroadcastSubscriber(const ConfigKey& configKey,
                                                 int64_t subscriberId,
                                                 const shared_ptr<IPendingIntentRef>& pir) {
     VLOG("SubscriberReporter::setBroadcastSubscriber called.");
-    lock_guard<mutex> lock(mLock);
-    mIntentMap[configKey][subscriberId] = pir;
-    // TODO(b/149254662): Is it ok to call linkToDeath while holding a lock?
-    AIBinder_linkToDeath(pir->asBinder().get(), sBroadcastSubscriberDeathRecipient.get(),
+    {
+        lock_guard<mutex> lock(mLock);
+        mIntentMap[configKey][subscriberId] = pir;
+    }
+    AIBinder_linkToDeath(pir->asBinder().get(), mBroadcastSubscriberDeathRecipient.get(),
                          new BroadcastSubscriberDeathCookie(configKey, subscriberId, pir));
 }
 
@@ -103,8 +117,6 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
     }
     int64_t subscriberId = subscription.broadcast_subscriber_details().subscriber_id();
 
-    // TODO(b/149254662): Is there a way to convert a RepeatedPtrField into a
-    // vector without copying?
     vector<string> cookies;
     cookies.reserve(subscription.broadcast_subscriber_details().cookie_size());
     for (auto& cookie : subscription.broadcast_subscriber_details().cookie()) {

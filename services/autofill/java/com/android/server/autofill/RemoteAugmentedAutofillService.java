@@ -37,7 +37,7 @@ import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.Dataset;
-import android.service.autofill.InlinePresentation;
+import android.service.autofill.InlineAction;
 import android.service.autofill.augmented.AugmentedAutofillService;
 import android.service.autofill.augmented.IAugmentedAutofillService;
 import android.service.autofill.augmented.IFillCallback;
@@ -167,7 +167,7 @@ final class RemoteAugmentedAutofillService
                             new IFillCallback.Stub() {
                                 @Override
                                 public void onSuccess(@Nullable List<Dataset> inlineSuggestionsData,
-                                        @Nullable List<InlinePresentation> inlineActions) {
+                                        @Nullable List<InlineAction> inlineActions) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
@@ -237,7 +237,7 @@ final class RemoteAugmentedAutofillService
     private void maybeRequestShowInlineSuggestions(int sessionId,
             @Nullable InlineSuggestionsRequest request,
             @Nullable List<Dataset> inlineSuggestionsData,
-            @Nullable List<InlinePresentation> inlineActions, @NonNull AutofillId focusedId,
+            @Nullable List<InlineAction> inlineActions, @NonNull AutofillId focusedId,
             @Nullable Function<InlineSuggestionsResponse, Boolean> inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
@@ -250,7 +250,7 @@ final class RemoteAugmentedAutofillService
 
         final InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
-                        request, inlineSuggestionsData, inlineActions, focusedId, mContext,
+                        request, inlineSuggestionsData, inlineActions, focusedId,
                         dataset -> {
                             mCallbacks.logAugmentedAutofillSelected(sessionId,
                                     dataset.getId());

@@ -128,7 +128,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt(boolean clearedTask) {
+        public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                boolean homeTaskVisible, boolean clearedTask) {
+            if (task.configuration.windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_PINNED) {
+                return;
+            }
             mTouchHandler.getMotionHelper().expandPip(clearedTask /* skipAnimation */);
         }
     };
@@ -185,10 +190,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         @Override
         public void onDisplayInfoChanged(DisplayInfo displayInfo) {
-            mHandler.post(() -> {
-                mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
-                mPipTaskOrganizer.onDisplayInfoChanged(displayInfo);
-            });
+            mHandler.post(() -> mPipBoundsHandler.onDisplayInfoChanged(displayInfo));
         }
 
         @Override
@@ -352,7 +354,6 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mTmpNormalBounds,
                 animatingBounds, fromImeAdjustment, fromShelfAdjustment,
                 mTmpDisplayInfo.rotation);
-        mPipTaskOrganizer.onDisplayInfoChanged(mTmpDisplayInfo);
     }
 
     public void dump(PrintWriter pw) {

@@ -137,7 +137,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final Handler mHandler;
     private final Object mLock;
     private final AutoFillUI mUi;
-    private final Context mContext;
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
@@ -695,7 +694,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mLock = lock;
         mUi = ui;
         mHandler = handler;
-        mContext = context;
         mRemoteFillService = serviceComponentName == null ? null
                 : new RemoteFillService(context, serviceComponentName, userId, this,
                         bindInstantServiceAllowed);
@@ -2680,10 +2678,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(
                         inlineSuggestionsRequest.get(),
-                        response, filterText, response.getInlineActions(), mCurrentViewId, mContext,
+                        response, filterText, response.getInlineActions(), mCurrentViewId,
                         this, () -> {
                             synchronized (mLock) {
-                                requestHideFillUi(mCurrentViewId);
+                                mInlineSuggestionSession.hideInlineSuggestionsUi(mCurrentViewId);
                             }
                         }, remoteRenderService);
         if (inlineSuggestionsResponse == null) {

@@ -43,7 +43,11 @@ import android.media.tv.tuner.frontend.FrontendStatus;
 import android.media.tv.tuner.frontend.FrontendStatus.FrontendStatusType;
 import android.media.tv.tuner.frontend.OnTuneEventListener;
 import android.media.tv.tuner.frontend.ScanCallback;
+import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerLnbRequest;
+import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
 
@@ -67,6 +71,7 @@ public class Tuner implements AutoCloseable  {
     private static final String TAG = "MediaTvTuner";
     private static final boolean DEBUG = false;
 
+    private static final int MSG_RESOURCE_LOST = 1;
     private static final int MSG_ON_FILTER_EVENT = 2;
     private static final int MSG_ON_FILTER_STATUS = 3;
     private static final int MSG_ON_LNB_EVENT = 4;
@@ -93,6 +98,8 @@ public class Tuner implements AutoCloseable  {
     }
 
     private final Context mContext;
+    private final TunerResourceManager mTunerResourceManager;
+    private final int mClientId;
 
     private List<Integer> mFrontendIds;
     private Frontend mFrontend;
@@ -102,6 +109,7 @@ public class Tuner implements AutoCloseable  {
 
     private List<Integer> mLnbIds;
     private Lnb mLnb;
+    private Integer mLnbId;
     @Nullable
     private OnTuneEventListener mOnTuneEventListener;
     @Nullable
@@ -115,6 +123,15 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     private Executor mOnResourceLostListenerExecutor;
 
+
+    private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
+            new TunerResourceManager.ResourcesReclaimListener() {
+                @Override
+                public void onReclaimResources() {
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_RESOURCE_LOST));
+                }
+            };
+
     /**
      * Constructs a Tuner instance.
      *
@@ -127,6 +144,14 @@ public class Tuner implements AutoCloseable  {
             @TvInputService.PriorityHintUseCaseType int useCase) {
         nativeSetup();
         mContext = context;
+        mTunerResourceManager = (TunerResourceManager)
+                context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+
+        int[] clientId = new int[1];
+        ResourceClientProfile profile = new ResourceClientProfile(tvInputSessionId, useCase);
+        mTunerResourceManager.registerClientProfile(
+                profile, new HandlerExecutor(mHandler), mResourceListener, clientId);
+        mClientId = clientId[0];
     }
 
     /**
@@ -226,6 +251,7 @@ public class Tuner implements AutoCloseable  {
 
     private native List<Integer> nativeGetLnbIds();
     private native Lnb nativeOpenLnbById(int id);
+    private native Lnb nativeOpenLnbByName(String name);
 
     private native Descrambler nativeOpenDescrambler();
 
@@ -272,6 +298,14 @@ public class Tuner implements AutoCloseable  {
                     Filter filter = (Filter) msg.obj;
                     if (filter.getCallback() != null) {
                         filter.getCallback().onFilterStatusChanged(filter, msg.arg1);
+                    }
+                    break;
+                }
+                case MSG_RESOURCE_LOST: {
+                    if (mOnResourceLostListener != null
+                                && mOnResourceLostListenerExecutor != null) {
+                        mOnResourceLostListenerExecutor.execute(
+                                () -> mOnResourceLostListener.onResourceLost(Tuner.this));
                     }
                     break;
                 }
@@ -698,7 +732,10 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         TunerUtils.checkTunerPermission(mContext);
-        return openLnbByName(null, executor, cb);
+        if (mLnbId == null && !requestLnb()) {
+            return null;
+        }
+        return nativeOpenLnbById(mLnbId);
     }
 
     /**
@@ -714,11 +751,21 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     public Lnb openLnbByName(@NonNull String name, @CallbackExecutor @NonNull Executor executor,
             @NonNull LnbCallback cb) {
+        Objects.requireNonNull(name, "LNB name must not be null");
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         TunerUtils.checkTunerPermission(mContext);
-        // TODO: use resource manager to get LNB ID.
-        return new Lnb(0);
+        return nativeOpenLnbByName(name);
+    }
+
+    private boolean requestLnb() {
+        int[] lnbId = new int[1];
+        TunerLnbRequest request = new TunerLnbRequest(mClientId);
+        boolean granted = mTunerResourceManager.requestLnb(request, lnbId);
+        if (granted) {
+            mLnbId = lnbId[0];
+        }
+        return granted;
     }
 
     /**

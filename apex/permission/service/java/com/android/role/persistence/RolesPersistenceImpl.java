@@ -18,7 +18,7 @@ package com.android.role.persistence;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ApexContext;
+import android.content.ApexEnvironment;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -65,7 +65,7 @@ public class RolesPersistenceImpl implements RolesPersistence {
 
     @Nullable
     @Override
-    public RolesState readAsUser(@NonNull UserHandle user) {
+    public RolesState readForUser(@NonNull UserHandle user) {
         File file = getFile(user);
         try (FileInputStream inputStream = new AtomicFile(file).openRead()) {
             XmlPullParser parser = Xml.newPullParser();
@@ -146,7 +146,7 @@ public class RolesPersistenceImpl implements RolesPersistence {
     }
 
     @Override
-    public void writeAsUser(@NonNull RolesState roles, @NonNull UserHandle user) {
+    public void writeForUser(@NonNull RolesState roles, @NonNull UserHandle user) {
         File file = getFile(user);
         AtomicFile atomicFile = new AtomicFile(file);
         FileOutputStream outputStream = null;
@@ -205,14 +205,14 @@ public class RolesPersistenceImpl implements RolesPersistence {
     }
 
     @Override
-    public void deleteAsUser(@NonNull UserHandle user) {
+    public void deleteForUser(@NonNull UserHandle user) {
         getFile(user).delete();
     }
 
     @NonNull
     private static File getFile(@NonNull UserHandle user) {
-        ApexContext apexContext = ApexContext.getApexContext(APEX_MODULE_NAME);
-        File dataDirectory = apexContext.getDeviceProtectedDataDirForUser(user);
+        ApexEnvironment apexEnvironment = ApexEnvironment.getApexEnvironment(APEX_MODULE_NAME);
+        File dataDirectory = apexEnvironment.getDeviceProtectedDataDirForUser(user);
         return new File(dataDirectory, ROLES_FILE_NAME);
     }
 }

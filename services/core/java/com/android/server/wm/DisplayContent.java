@@ -94,6 +94,7 @@ import static com.android.server.wm.DisplayContentProto.APP_TRANSITION;
 import static com.android.server.wm.DisplayContentProto.CLOSING_APPS;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
+import static com.android.server.wm.DisplayContentProto.DISPLAY_READY;
 import static com.android.server.wm.DisplayContentProto.DPI;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
@@ -105,7 +106,6 @@ import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
-import static com.android.server.wm.DisplayContentProto.TASKS;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -117,6 +117,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.wm.RootWindowContainer.TAG_STATES;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
+import static com.android.server.wm.WindowContainerChildProto.DISPLAY_CONTENT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_INPUT_METHOD;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
@@ -2837,10 +2838,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         proto.write(ID, mDisplayId);
         mRootDisplayArea.dumpDebug(proto, ROOT_DISPLAY_AREA, logLevel);
-        for (int i = mTaskContainers.getChildCount() - 1; i >= 0; --i) {
-            final ActivityStack stack = mTaskContainers.getChildAt(i);
-            stack.dumpDebug(proto, TASKS, logLevel);
-        }
         for (int i = mOverlayContainers.getChildCount() - 1; i >= 0; --i) {
             final WindowToken windowToken = mOverlayContainers.getChildAt(i);
             windowToken.dumpDebug(proto, OVERLAY_WINDOWS, logLevel);
@@ -2875,8 +2872,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         } else {
             proto.write(FOCUSED_ROOT_TASK_ID, INVALID_TASK_ID);
         }
+        proto.write(DISPLAY_READY, isReady());
 
         proto.end(token);
+    }
+
+    @Override
+    long getProtoFieldId() {
+        return DISPLAY_CONTENT;
     }
 
     @Override
@@ -4930,6 +4933,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
                 scheduleAnimation();
             }
+        }
+
+        @Override
+        boolean shouldMagnify() {
+            // Omitted from Screen-Magnification
+            return false;
         }
     }
 

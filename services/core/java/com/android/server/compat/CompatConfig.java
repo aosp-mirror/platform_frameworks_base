@@ -219,6 +219,19 @@ final class CompatConfig {
     }
 
     /**
+     * Returns whether the change is marked as disabled.
+     */
+    boolean isDisabled(long changeId) {
+        synchronized (mChanges) {
+            CompatChange c = mChanges.get(changeId);
+            if (c == null) {
+                return false;
+            }
+            return c.getDisabled();
+        }
+    }
+
+    /**
      * Removes an override previously added via {@link #addOverride(long, String, boolean)}. This
      * restores the default behaviour for the given change and app, once any app processes have been
      * restarted.

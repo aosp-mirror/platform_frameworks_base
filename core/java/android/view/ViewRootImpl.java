@@ -1735,7 +1735,7 @@ public final class ViewRootImpl implements ViewParent,
             mBoundsLayer = new SurfaceControl.Builder(mSurfaceSession)
                     .setContainerLayer()
                     .setName("Bounds for - " + getTitle().toString())
-                    .setParent(mSurfaceControl)
+                    .setParent(getRenderSurfaceControl())
                     .build();
             setBoundsLayerCrop();
             mTransaction.show(mBoundsLayer).apply();

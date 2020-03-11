@@ -29,7 +29,6 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WaitResult.LAUNCH_STATE_COLD;
 import static android.app.WaitResult.LAUNCH_STATE_HOT;
-import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -178,6 +177,9 @@ class ActivityStarter {
     private Intent mNewTaskIntent;
     private ActivityStack mSourceStack;
     private ActivityStack mTargetStack;
+    // The task that the last activity was started into. We currently reset the actual start
+    // activity's task and as a result may not have a reference to the task in all cases
+    private Task mTargetTask;
     private boolean mMovedToFront;
     private boolean mNoAnimation;
     private boolean mKeepCurTransition;
@@ -545,6 +547,7 @@ class ActivityStarter {
         mNewTaskIntent = starter.mNewTaskIntent;
         mSourceStack = starter.mSourceStack;
 
+        mTargetTask = starter.mTargetTask;
         mTargetStack = starter.mTargetStack;
         mMovedToFront = starter.mMovedToFront;
         mNoAnimation = starter.mNoAnimation;
@@ -1368,7 +1371,10 @@ class ActivityStarter {
         // it waits for the new activity to become visible instead, {@link #waitResultIfNeeded}.
         mSupervisor.reportWaitingActivityLaunchedIfNeeded(r, result);
 
-        if (startedActivityStack == null) {
+        final Task targetTask = r.getTask() != null
+                ? r.getTask()
+                : mTargetTask;
+        if (startedActivityStack == null || targetTask == null) {
             return;
         }
 
@@ -1379,19 +1385,10 @@ class ActivityStarter {
             // The activity was already running so it wasn't started, but either brought to the
             // front or the new intent was delivered to it since it was already in front. Notify
             // anyone interested in this piece of information.
-            switch (startedActivityStack.getWindowingMode()) {
-                case WINDOWING_MODE_PINNED:
-                    mService.getTaskChangeNotificationController().notifyPinnedActivityRestartAttempt(
-                            clearedTask);
-                    break;
-                case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                    final ActivityStack homeStack =
-                            startedActivityStack.getDisplay().getOrCreateRootHomeTask();
-                    if (homeStack != null && homeStack.shouldBeVisible(null /* starting */)) {
-                        mService.mWindowManager.showRecentApps();
-                    }
-                    break;
-            }
+            final ActivityStack homeStack = targetTask.getDisplayContent().getRootHomeTask();
+            final boolean homeTaskVisible = homeStack != null && homeStack.shouldBeVisible(null);
+            mService.getTaskChangeNotificationController().notifyActivityRestartAttempt(
+                    targetTask.getTaskInfo(), homeTaskVisible, clearedTask);
         }
     }
 
@@ -1517,6 +1514,7 @@ class ActivityStarter {
         // Compute if there is an existing task that should be used for.
         final Task targetTask = reusedTask != null ? reusedTask : computeTargetTask();
         final boolean newTask = targetTask == null;
+        mTargetTask = targetTask;
 
         computeLaunchParams(r, sourceRecord, targetTask);
 
@@ -1570,10 +1568,16 @@ class ActivityStarter {
 
         mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
-        mService.getPackageManagerInternalLocked().grantImplicitAccess(
-                mStartActivity.mUserId, mIntent,
-                UserHandle.getAppId(mStartActivity.info.applicationInfo.uid), mCallingUid,
-                true /*direct*/);
+        if (mStartActivity.resultTo != null && mStartActivity.resultTo.info != null) {
+            // we need to resolve resultTo to a uid as grantImplicitAccess deals explicitly in UIDs
+            final PackageManagerInternal pmInternal =
+                    mService.getPackageManagerInternalLocked();
+            final int resultToUid = pmInternal.getPackageUidInternal(
+                            mStartActivity.resultTo.info.packageName, 0, mStartActivity.mUserId);
+            pmInternal.grantImplicitAccess(mStartActivity.mUserId, mIntent,
+                    UserHandle.getAppId(mStartActivity.info.applicationInfo.uid) /*recipient*/,
+                    resultToUid /*visible*/, true /*direct*/);
+        }
         if (newTask) {
             EventLogTags.writeWmCreateTask(mStartActivity.mUserId,
                     mStartActivity.getTask().mTaskId);
@@ -2012,6 +2016,7 @@ class ActivityStarter {
         mSourceStack = null;
 
         mTargetStack = null;
+        mTargetTask = null;
         mMovedToFront = false;
         mNoAnimation = false;
         mKeepCurTransition = false;

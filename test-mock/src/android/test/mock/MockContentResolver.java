@@ -25,6 +25,7 @@ import android.content.IContentProvider;
 import android.database.ContentObserver;
 import android.net.Uri;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -172,7 +173,7 @@ public class MockContentResolver extends ContentResolver {
      * from observers elsewhere in the system.
      */
     @Override
-    public void notifyChange(@NonNull Iterable<Uri> uris, @Nullable ContentObserver observer,
+    public void notifyChange(@NonNull Collection<Uri> uris, @Nullable ContentObserver observer,
             @NotifyFlags int flags) {
     }
 }

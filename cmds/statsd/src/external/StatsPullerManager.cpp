@@ -32,7 +32,7 @@
 #include "../statscompanion_util.h"
 #include "StatsCallbackPuller.h"
 #include "TrainInfoPuller.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 
 using std::shared_ptr;
 using std::vector;
@@ -47,7 +47,7 @@ const int64_t NO_ALARM_UPDATE = INT64_MAX;
 StatsPullerManager::StatsPullerManager()
     : kAllPullAtomInfo({
               // TrainInfo.
-              {{.atomTag = android::util::TRAIN_INFO}, new TrainInfoPuller()},
+              {{.atomTag = util::TRAIN_INFO}, new TrainInfoPuller()},
       }),
       mNextPullTimeNs(NO_ALARM_UPDATE) {
 }
@@ -85,12 +85,9 @@ void StatsPullerManager::updateAlarmLocked() {
         return;
     }
 
-    // TODO(b/149254662): Why are we creating a copy here? This is different
-    // from the other places where we create a copy because we don't reassign
-    // mStatsCompanionService so a destructor can't implicitly be called...
-    shared_ptr<IStatsCompanionService> statsCompanionServiceCopy = mStatsCompanionService;
-    if (statsCompanionServiceCopy != nullptr) {
-        statsCompanionServiceCopy->setPullingAlarm(mNextPullTimeNs / 1000000);
+    // TODO(b/151045771): do not hold a lock while making a binder call
+    if (mStatsCompanionService != nullptr) {
+        mStatsCompanionService->setPullingAlarm(mNextPullTimeNs / 1000000);
     } else {
         VLOG("StatsCompanionService not available. Alarm not set.");
     }
@@ -99,8 +96,6 @@ void StatsPullerManager::updateAlarmLocked() {
 
 void StatsPullerManager::SetStatsCompanionService(
         shared_ptr<IStatsCompanionService> statsCompanionService) {
-    // TODO(b/149254662): Why are we using AutoMutex instead of lock_guard?
-    // Additionally, do we need the temporary shared_ptr to prevent deadlocks?
     AutoMutex _l(mLock);
     shared_ptr<IStatsCompanionService> tmpForLock = mStatsCompanionService;
     mStatsCompanionService = statsCompanionService;

@@ -42,7 +42,7 @@ public class ScanResultTest {
     public static final int TEST_LEVEL = -56;
     public static final int TEST_FREQUENCY = 2412;
     public static final long TEST_TSF = 04660l;
-    public static final @ScanResult.WifiStandard int TEST_WIFI_STANDARD =
+    public static final @WifiAnnotations.WifiStandard int TEST_WIFI_STANDARD =
             ScanResult.WIFI_STANDARD_11AC;
 
     /**

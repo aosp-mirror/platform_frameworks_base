@@ -479,16 +479,21 @@ public final class BinderProxy implements IBinder {
     public boolean transact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
         Binder.checkParcel(this, code, data, "Unreasonably large binder buffer");
 
-        if (mWarnOnBlocking && ((flags & FLAG_ONEWAY) == 0)) {
+        if (mWarnOnBlocking && ((flags & FLAG_ONEWAY) == 0)
+                && Binder.sWarnOnBlockingOnCurrentThread.get()) {
+
             // For now, avoid spamming the log by disabling after we've logged
             // about this interface at least once
             mWarnOnBlocking = false;
+
             if (Build.IS_USERDEBUG) {
                 // Log this as a WTF on userdebug builds.
-                Log.wtf(Binder.TAG, "Outgoing transactions from this process must be FLAG_ONEWAY",
+                Log.wtf(Binder.TAG,
+                        "Outgoing transactions from this process must be FLAG_ONEWAY",
                         new Throwable());
             } else {
-                Log.w(Binder.TAG, "Outgoing transactions from this process must be FLAG_ONEWAY",
+                Log.w(Binder.TAG,
+                        "Outgoing transactions from this process must be FLAG_ONEWAY",
                         new Throwable());
             }
         }
@@ -521,7 +526,7 @@ public final class BinderProxy implements IBinder {
         final AppOpsManager.PausedNotedAppOpsCollection prevCollection =
                 AppOpsManager.pauseNotedAppOpsCollection();
 
-        if ((flags & FLAG_ONEWAY) == 0 && AppOpsManager.isCollectingNotedAppOps()) {
+        if ((flags & FLAG_ONEWAY) == 0 && AppOpsManager.isListeningForOpNoted()) {
             flags |= FLAG_COLLECT_NOTED_APP_OPS;
         }
 

@@ -24,6 +24,7 @@ import android.content.Context;
 import com.android.keyguard.KeyguardViewController;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.CarDeviceProvisionedControllerImpl;
+import com.android.systemui.car.CarNotificationInterruptionStateProvider;
 import com.android.systemui.dagger.SystemUIRootComponent;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerImpl;
@@ -40,6 +41,7 @@ import com.android.systemui.statusbar.car.CarShadeControllerImpl;
 import com.android.systemui.statusbar.car.CarStatusBar;
 import com.android.systemui.statusbar.car.CarStatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
@@ -47,6 +49,8 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.BatteryControllerImpl;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -62,6 +66,10 @@ import dagger.Provides;
 
 @Module(includes = {DividerModule.class})
 abstract class CarSystemUIModule {
+
+    @Binds
+    abstract NotificationInterruptionStateProvider bindNotificationInterruptionStateProvider(
+            CarNotificationInterruptionStateProvider notificationInterruptionStateProvider);
 
     @Singleton
     @Provides
@@ -98,6 +106,11 @@ abstract class CarSystemUIModule {
     @Binds
     abstract NotificationLockscreenUserManager bindNotificationLockscreenUserManager(
             NotificationLockscreenUserManagerImpl notificationLockscreenUserManager);
+
+    @Binds
+    @Singleton
+    public abstract BatteryController provideBatteryController(
+            BatteryControllerImpl controllerImpl);
 
     @Binds
     abstract DockManager bindDockManager(DockManagerImpl dockManager);

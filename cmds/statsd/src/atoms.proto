@@ -122,10 +122,10 @@ message Atom {
         SettingChanged setting_changed = 41 [(module) = "framework"];
         ActivityForegroundStateChanged activity_foreground_state_changed =
                 42 [(module) = "framework"];
-        IsolatedUidChanged isolated_uid_changed = 43 [(module) = "framework"];
+        IsolatedUidChanged isolated_uid_changed = 43 [(module) = "framework", (module) = "statsd"];
         PacketWakeupOccurred packet_wakeup_occurred = 44 [(module) = "framework"];
         WallClockTimeShifted wall_clock_time_shifted = 45 [(module) = "framework"];
-        AnomalyDetected anomaly_detected = 46;
+        AnomalyDetected anomaly_detected = 46 [(module) = "statsd"];
         AppBreadcrumbReported app_breadcrumb_reported =
                 47 [(allow_from_any_uid) = true, (module) = "statsd"];
         AppStartOccurred app_start_occurred = 48 [(module) = "framework"];
@@ -138,7 +138,7 @@ message Atom {
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55 [(module) = "framework"];
         ShutdownSequenceReported shutdown_sequence_reported = 56 [(module) = "framework"];
         BootSequenceReported boot_sequence_reported = 57;
-        DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true];
+        DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true, (module) = "statsd"];
         OverlayStateChanged overlay_state_changed = 59 [(module) = "framework"];
         ForegroundServiceStateChanged foreground_service_state_changed
                 = 60 [(module) = "framework"];
@@ -166,7 +166,7 @@ message Atom {
         LowMemReported low_mem_reported = 81 [(module) = "framework"];
         GenericAtom generic_atom = 82;
         KeyValuePairsAtom key_value_pairs_atom =
-                83 [(allow_from_any_uid) = true, (module) = "framework"];
+                83 [(allow_from_any_uid) = true, (module) = "framework", (module) = "statsd"];
         VibratorStateChanged vibrator_state_changed = 84 [(module) = "framework"];
         DeferredJobStatsReported deferred_job_stats_reported = 85 [(module) = "framework"];
         ThermalThrottlingStateChanged thermal_throttling = 86 [deprecated=true];
@@ -242,7 +242,8 @@ message Atom {
         AdbConnectionChanged adb_connection_changed = 144 [(module) = "framework"];
         SpeechDspStatReported speech_dsp_stat_reported = 145;
         UsbContaminantReported usb_contaminant_reported = 146 [(module) = "framework"];
-        WatchdogRollbackOccurred watchdog_rollback_occurred = 147 [(module) = "framework"];
+        WatchdogRollbackOccurred watchdog_rollback_occurred =
+                147 [(module) = "framework", (module) = "statsd"];
         BiometricSystemHealthIssueDetected biometric_system_health_issue_detected =
                 148 [(module) = "framework"];
         BubbleUIChanged bubble_ui_changed = 149 [(module) = "sysui"];
@@ -412,7 +413,8 @@ message Atom {
         SubsystemSleepState subsystem_sleep_state = 10005;
         CpuTimePerFreq cpu_time_per_freq = 10008 [(module) = "framework"];
         CpuTimePerUid cpu_time_per_uid = 10009 [(module) = "framework"];
-        CpuTimePerUidFreq cpu_time_per_uid_freq = 10010 [(module) = "framework"];
+        CpuTimePerUidFreq cpu_time_per_uid_freq =
+                10010 [(module) = "framework", (module) = "statsd"];
         WifiActivityInfo wifi_activity_info = 10011 [(module) = "framework"];
         ModemActivityInfo modem_activity_info = 10012 [(module) = "framework"];
         BluetoothActivityInfo bluetooth_activity_info = 10007 [(module) = "framework"];
@@ -425,9 +427,9 @@ message Atom {
         RemainingBatteryCapacity remaining_battery_capacity = 10019 [(module) = "framework"];
         FullBatteryCapacity full_battery_capacity = 10020 [(module) = "framework"];
         Temperature temperature = 10021 [(module) = "framework"];
-        BinderCalls binder_calls = 10022 [(module) = "framework"];
+        BinderCalls binder_calls = 10022 [(module) = "framework", (module) = "statsd"];
         BinderCallsExceptions binder_calls_exceptions = 10023 [(module) = "framework"];
-        LooperStats looper_stats = 10024 [(module) = "framework"];
+        LooperStats looper_stats = 10024 [(module) = "framework", (module) = "statsd"];
         DiskStats disk_stats = 10025 [(module) = "framework"];
         DirectoryUsage directory_usage = 10026 [(module) = "framework"];
         AppSize app_size = 10027 [(module) = "framework"];
@@ -455,7 +457,7 @@ message Atom {
         NumFacesEnrolled num_faces_enrolled = 10048 [(module) = "framework"];
         RoleHolder role_holder = 10049 [(module) = "framework"];
         DangerousPermissionState dangerous_permission_state = 10050 [(module) = "framework"];
-        TrainInfo train_info = 10051;
+        TrainInfo train_info = 10051 [(module) = "statsd"];
         TimeZoneDataInfo time_zone_data_info = 10052 [(module) = "framework"];
         ExternalStorageInfo external_storage_info = 10053 [(module) = "framework"];
         GpuStatsGlobalInfo gpu_stats_global_info = 10054;
@@ -7640,6 +7642,9 @@ message AppFeaturesOps {
 
     // Whether AppOps is guarded by Runtime permission
     optional bool is_runtime_permission = 11;
+
+    // Sampling rate used on device, from 0 to 100
+    optional int32 sampling_rate = 12;
 }
 
 /**

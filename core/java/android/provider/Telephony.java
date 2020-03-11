@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -3734,7 +3735,6 @@ public final class Telephony {
          * @deprecated this column is no longer supported, use {@link #NETWORK_TYPE_BITMASK} instead
          */
         @Deprecated
-        @SystemApi
         public static final String BEARER_BITMASK = "bearer_bitmask";
 
         /**
@@ -3784,7 +3784,6 @@ public final class Telephony {
          * <p>Type: INTEGER</p>
          *@hide
          */
-        @SystemApi
         public static final String PROFILE_ID = "profile_id";
 
         /**
@@ -3985,7 +3984,6 @@ public final class Telephony {
          *
          * @hide
          */
-        @SystemApi
         public static final String SKIP_464XLAT = "skip_464xlat";
 
         /**
@@ -3994,7 +3992,6 @@ public final class Telephony {
          *
          * @hide
          */
-        @SystemApi
         public static final int SKIP_464XLAT_DEFAULT = -1;
 
         /**
@@ -4003,7 +4000,6 @@ public final class Telephony {
          *
          * @hide
          */
-        @SystemApi
         public static final int SKIP_464XLAT_DISABLE = 0;
 
         /**
@@ -4012,7 +4008,6 @@ public final class Telephony {
          *
          * @hide
          */
-        @SystemApi
         public static final int SKIP_464XLAT_ENABLE = 1;
 
 
@@ -4036,6 +4031,7 @@ public final class Telephony {
          * @hide
          */
         @ChangeId
+        @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.Q)
         public static final long APN_READING_PERMISSION_CHANGE_ID = 124107808L;
     }
 
@@ -4390,6 +4386,7 @@ public final class Telephony {
          * Indicates that whether the message has been broadcasted to the application.
          * <P>Type: BOOLEAN</P>
          */
+        // TODO: deprecate this in S.
         public static final String MESSAGE_BROADCASTED = "message_broadcasted";
 
         /**

@@ -53,10 +53,10 @@ message RootWindowContainerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional WindowContainerProto window_container = 1;
-    repeated DisplayContentProto displays = 2;
+    repeated DisplayContentProto displays = 2 [deprecated=true];
     reserved 3; // IdentifierProto windows
     /* window references in top down z order */
-    repeated WindowStateProto windows = 4;
+    repeated WindowStateProto windows = 4 [deprecated=true];
     optional KeyguardControllerProto keyguard_controller = 5;
     // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
     // know what activity types to check for when invoking splitscreen multi-window.
@@ -192,7 +192,8 @@ message DisplayContentProto {
     optional bool single_task_instance = 22;
     optional int32 focused_root_task_id = 23;
     optional .com.android.server.wm.IdentifierProto resumed_activity = 24;
-    repeated TaskProto tasks = 25;
+    repeated TaskProto tasks = 25 [deprecated=true];
+    optional bool display_ready = 26;
 }
 
 /* represents DisplayArea object */
@@ -201,7 +202,7 @@ message DisplayAreaProto {
 
     optional WindowContainerProto window_container = 1;
     optional string name = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
-    repeated DisplayAreaChildProto children = 3;
+    repeated DisplayAreaChildProto children = 3 [deprecated=true];
 }
 
 /* represents a generic child of a DisplayArea */
@@ -254,8 +255,8 @@ message TaskProto {
     optional int32 surface_width = 8;
     optional int32 surface_height = 9;
 
-    repeated TaskProto tasks = 10;
-    repeated ActivityRecordProto activities = 11;
+    repeated TaskProto tasks = 10 [deprecated=true];
+    repeated ActivityRecordProto activities = 11 [deprecated=true];
 
     optional .com.android.server.wm.IdentifierProto resumed_activity = 12;
     optional string real_activity = 13;
@@ -321,7 +322,7 @@ message WindowTokenProto {
 
     optional WindowContainerProto window_container = 1;
     optional int32 hash_code = 2;
-    repeated WindowStateProto windows = 3;
+    repeated WindowStateProto windows = 3 [deprecated=true];
     optional bool waiting_to_show = 5;
     optional bool paused = 6;
 }
@@ -346,7 +347,7 @@ message WindowStateProto {
     optional .android.graphics.RectProto surface_insets = 12;
     optional WindowStateAnimatorProto animator = 13;
     optional bool animating_exit = 14;
-    repeated WindowStateProto child_windows = 15;
+    repeated WindowStateProto child_windows = 15 [deprecated=true];
     optional .android.graphics.RectProto surface_position = 16;
     optional int32 requested_width = 18;
     optional int32 requested_height = 19;
@@ -426,6 +427,32 @@ message WindowContainerProto {
     optional int32 orientation = 2;
     optional bool visible = 3;
     optional SurfaceAnimatorProto surface_animator = 4;
+    repeated WindowContainerChildProto children = 5;
+}
+
+/* represents a generic child of a WindowContainer */
+message WindowContainerChildProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    /* A window container can have multiple children of different types stored as
+     * a WindowContainerChildProto but each instance of WindowContainerChildProto
+     * can only contain a single type.
+     */
+    /* We do not know the derived typ and the class is dumped
+     * as a WindowContainer */
+    optional WindowContainerProto window_container = 2;
+    /* represents a DisplayContent child */
+    optional DisplayContentProto display_content = 3;
+    /* represents a DisplayArea child */
+    optional DisplayAreaProto display_area = 4;
+    /* represents a Task child */
+    optional TaskProto task = 5;
+    /* represents an ActivityRecord child */
+    optional ActivityRecordProto activity = 6;
+    /* represents a WindowToken child */
+    optional WindowTokenProto window_token = 7;
+    /* represents a WindowState child */
+    optional WindowStateProto window = 8;
 }
 
 /* represents ConfigurationContainer */

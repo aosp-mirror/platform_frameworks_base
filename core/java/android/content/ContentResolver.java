@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -82,6 +83,7 @@ import java.io.OutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -2669,6 +2671,15 @@ public abstract class ContentResolver implements ContentInterface {
                 ContentProvider.getUserIdFromUri(uri, mContext.getUserId()));
     }
 
+    /** @removed */
+    @Deprecated
+    public void notifyChange(@NonNull Iterable<Uri> uris, @Nullable ContentObserver observer,
+            @NotifyFlags int flags) {
+        final Collection<Uri> asCollection = new ArrayList<>();
+        uris.forEach(asCollection::add);
+        notifyChange(asCollection, observer, flags);
+    }
+
     /**
      * Notify registered observers that several rows have been updated.
      * <p>
@@ -2693,7 +2704,7 @@ public abstract class ContentResolver implements ContentInterface {
      * @param flags Flags such as {@link #NOTIFY_SYNC_TO_NETWORK} or
      *            {@link #NOTIFY_SKIP_NOTIFY_FOR_DESCENDANTS}.
      */
-    public void notifyChange(@NonNull Iterable<Uri> uris, @Nullable ContentObserver observer,
+    public void notifyChange(@NonNull Collection<Uri> uris, @Nullable ContentObserver observer,
             @NotifyFlags int flags) {
         Objects.requireNonNull(uris, "uris");
 
@@ -4014,6 +4025,10 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
+    @TestApi
+    // We can't accept an already-opened FD here, since these methods are
+    // rewriting actual filesystem paths
+    @SuppressLint("StreamFiles")
     public static @NonNull Uri decodeFromFile(@NonNull File file) {
         return translateDeprecatedDataPath(file.getAbsolutePath());
     }
@@ -4030,6 +4045,10 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
+    @TestApi
+    // We can't accept an already-opened FD here, since these methods are
+    // rewriting actual filesystem paths
+    @SuppressLint("StreamFiles")
     public static @NonNull File encodeToFile(@NonNull Uri uri) {
         return new File(translateDeprecatedDataPath(uri));
     }

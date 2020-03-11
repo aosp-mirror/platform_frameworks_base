@@ -305,13 +305,13 @@ public class ProvisioningManager {
 
     /**
      * An integer key associated with the carrier configured expiration time in seconds for
-     * RCS presence published offline availability in RCS presence.
+     * published offline availability in RCS presence provided, which is provided to the network.
      * <p>
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
      */
-    public static final int KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC = 16;
+    public static final int KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC = 16;
 
     /**
      * An integer key associated with whether or not capability discovery is provisioned for this
@@ -326,8 +326,10 @@ public class ProvisioningManager {
     public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17;
 
     /**
-     * An integer key associated with the period of time the capability information of each contact
-     * is cached on the device.
+     * An integer key associated with the period of time in seconds the capability information of
+     * each contact is cached on the device.
+     * <p>
+     * Seconds are used because this is usually measured in the span of days.
      * <p>
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
@@ -337,7 +339,8 @@ public class ProvisioningManager {
 
     /**
      * An integer key associated with the period of time in seconds that the availability
-     * information of a contact is cached on the device.
+     * information of a contact is cached on the device, which is based on the carrier provisioning
+     * configuration from the network.
      * <p>
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
@@ -347,7 +350,8 @@ public class ProvisioningManager {
 
     /**
      * An integer key associated with the carrier configured interval in seconds expected between
-     * successive capability polling attempts.
+     * successive capability polling attempts, which is based on the carrier provisioning
+     * configuration from the network.
      * <p>
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
@@ -357,7 +361,7 @@ public class ProvisioningManager {
 
     /**
      * An integer key representing the minimum time allowed between two consecutive presence publish
-     * messages from the device.
+     * messages from the device in milliseconds.
      * <p>
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
@@ -378,7 +382,7 @@ public class ProvisioningManager {
     /**
      * An integer associated with the expiration timer used during the SIP subscription of a
      * Request Contained List (RCL), which is used to retrieve the RCS capabilities of the contact
-     * book.
+     * book. This timer value is sent in seconds to the network.
      * <p>
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
@@ -470,7 +474,8 @@ public class ProvisioningManager {
     public static final int KEY_SIP_KEEP_ALIVE_ENABLED = 32;
 
     /**
-     * Registration retry Base Time value in seconds.
+     * Registration retry Base Time value in seconds, which is based off of the carrier
+     * configuration.
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
@@ -478,7 +483,8 @@ public class ProvisioningManager {
     public static final int KEY_REGISTRATION_RETRY_BASE_TIME_SEC = 33;
 
     /**
-     * Registration retry Max Time value in seconds.
+     * Registration retry Max Time value in seconds, which is based off of the carrier
+     * configuration.
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)

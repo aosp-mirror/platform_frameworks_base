@@ -1305,7 +1305,7 @@
         android:description="@string/permdesc_camera"
         android:protectionLevel="dangerous|instant" />
 
-      <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
+    <!-- @SystemApi Required in addition to android.permission.CAMERA to be able to access
            system only camera devices.
            <p>Protection level: system|signature
            @hide -->
@@ -1314,6 +1314,15 @@
         android:label="@string/permlab_systemCamera"
         android:description="@string/permdesc_systemCamera"
         android:protectionLevel="system|signature" />
+
+    <!-- Allows receiving the camera service notifications when a camera is opened
+            (by a certain application package) or closed.
+        @hide -->
+    <permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_cameraOpenCloseListener"
+        android:description="@string/permdesc_cameraOpenCloseListener"
+        android:protectionLevel="signature" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device sensors                           -->
@@ -3726,7 +3735,8 @@
     <permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY"
                 android:protectionLevel="signature|installer" />
 
-    <!-- @hide Allows an application to upgrade runtime permissions. -->
+    <!-- @SystemApi @TestApi Allows an application to upgrade runtime permissions.
+    @hide -->
     <permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
 

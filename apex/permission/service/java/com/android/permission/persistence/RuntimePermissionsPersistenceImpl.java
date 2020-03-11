@@ -18,7 +18,7 @@ package com.android.permission.persistence;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ApexContext;
+import android.content.ApexEnvironment;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -67,7 +67,7 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
 
     @Nullable
     @Override
-    public RuntimePermissionsState readAsUser(@NonNull UserHandle user) {
+    public RuntimePermissionsState readForUser(@NonNull UserHandle user) {
         File file = getFile(user);
         try (FileInputStream inputStream = new AtomicFile(file).openRead()) {
             XmlPullParser parser = Xml.newPullParser();
@@ -172,7 +172,7 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
     }
 
     @Override
-    public void writeAsUser(@NonNull RuntimePermissionsState runtimePermissions,
+    public void writeForUser(@NonNull RuntimePermissionsState runtimePermissions,
             @NonNull UserHandle user) {
         File file = getFile(user);
         AtomicFile atomicFile = new AtomicFile(file);
@@ -252,14 +252,14 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
     }
 
     @Override
-    public void deleteAsUser(@NonNull UserHandle user) {
+    public void deleteForUser(@NonNull UserHandle user) {
         getFile(user).delete();
     }
 
     @NonNull
     private static File getFile(@NonNull UserHandle user) {
-        ApexContext apexContext = ApexContext.getApexContext(APEX_MODULE_NAME);
-        File dataDirectory = apexContext.getDeviceProtectedDataDirForUser(user);
+        ApexEnvironment apexEnvironment = ApexEnvironment.getApexEnvironment(APEX_MODULE_NAME);
+        File dataDirectory = apexEnvironment.getDeviceProtectedDataDirForUser(user);
         return new File(dataDirectory, RUNTIME_PERMISSIONS_FILE_NAME);
     }
 }
