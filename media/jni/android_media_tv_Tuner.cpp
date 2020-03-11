@@ -1072,6 +1072,37 @@ jobject JTuner::openLnbById(int id) {
     return lnbObj;
 }
 
+jobject JTuner::openLnbByName(jstring name) {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    std::string lnbName(env->GetStringUTFChars(name, nullptr));
+    sp<ILnb> iLnbSp;
+    Result res;
+    LnbId id;
+    mTuner->openLnbByName(lnbName, [&](Result r, LnbId lnbId, const sp<ILnb>& lnb) {
+        res = r;
+        iLnbSp = lnb;
+        id = lnbId;
+    });
+    if (res != Result::SUCCESS || iLnbSp == nullptr) {
+        ALOGE("Failed to open lnb");
+        return NULL;
+    }
+    mLnb = iLnbSp;
+    sp<LnbCallback> lnbCb = new LnbCallback(mObject, id);
+    mLnb->setCallback(lnbCb);
+
+    jobject lnbObj = env->NewObject(
+            env->FindClass("android/media/tv/tuner/Lnb"),
+            gFields.lnbInitID,
+            id);
+
+    sp<Lnb> lnbSp = new Lnb(iLnbSp, lnbObj);
+    lnbSp->incStrong(lnbObj);
+    env->SetLongField(lnbObj, gFields.lnbContext, (jlong) lnbSp.get());
+
+    return lnbObj;
+}
+
 int JTuner::tune(const FrontendSettings& settings) {
     if (mFe == NULL) {
         ALOGE("frontend is not initialized");
@@ -1872,8 +1903,7 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
 
     jclass lnbClazz = env->FindClass("android/media/tv/tuner/Lnb");
     gFields.lnbContext = env->GetFieldID(lnbClazz, "mNativeContext", "J");
-    gFields.lnbInitID =
-            env->GetMethodID(lnbClazz, "<init>", "(I)V");
+    gFields.lnbInitID = env->GetMethodID(lnbClazz, "<init>", "(I)V");
 
     jclass filterClazz = env->FindClass("android/media/tv/tuner/filter/Filter");
     gFields.filterContext = env->GetFieldID(filterClazz, "mNativeContext", "J");
@@ -1995,6 +2025,12 @@ static jobject android_media_tv_Tuner_open_lnb_by_id(JNIEnv *env, jobject thiz, 
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openLnbById(id);
 }
+
+static jobject android_media_tv_Tuner_open_lnb_by_name(JNIEnv *env, jobject thiz, jstring name) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->openLnbByName(name);
+}
+
 
 static jobject android_media_tv_Tuner_open_filter(
         JNIEnv *env, jobject thiz, jint type, jint subType, jlong bufferSize) {
@@ -2888,6 +2924,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_get_lnb_ids },
     { "nativeOpenLnbById", "(I)Landroid/media/tv/tuner/Lnb;",
             (void *)android_media_tv_Tuner_open_lnb_by_id },
+    { "nativeOpenLnbByName", "(Ljava/lang/String;)Landroid/media/tv/tuner/Lnb;",
+            (void *)android_media_tv_Tuner_open_lnb_by_name },
     { "nativeOpenDescrambler", "()Landroid/media/tv/tuner/Descrambler;",
             (void *)android_media_tv_Tuner_open_descrambler },
     { "nativeOpenDvrRecorder", "(J)Landroid/media/tv/tuner/dvr/DvrRecorder;",
