@@ -45,6 +45,11 @@ import java.util.List;
  *
  * <p>Providers retrieved with {@link #getProviders()} are listed in increasing precedence order. A
  * provider will override the resources and assets of providers listed before itself.
+ *
+ * <p>Modifying the list of providers a loader contains or the list of loaders a Resources object
+ * contains can cause lock contention with the UI thread. APIs that modify the lists of loaders or
+ * providers should only be used on the UI thread. Providers can be instantiated on any thread
+ * without causing lock contention.
  */
 public class ResourcesLoader {
     private final Object mLock = new Object();
@@ -88,6 +93,9 @@ public class ResourcesLoader {
      * Appends a provider to the end of the provider list. If the provider is already present in the
      * loader list, the list will not be modified.
      *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * provider changes.
+     *
      * @param resourcesProvider the provider to add
      */
     public void addProvider(@NonNull ResourcesProvider resourcesProvider) {
@@ -102,6 +110,9 @@ public class ResourcesLoader {
      * Removes a provider from the provider list. If the provider is not present in the provider
      * list, the list will not be modified.
      *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * provider changes.
+     *
      * @param resourcesProvider the provider to remove
      */
     public void removeProvider(@NonNull ResourcesProvider resourcesProvider) {
@@ -115,6 +126,9 @@ public class ResourcesLoader {
     /**
      * Sets the list of providers.
      *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * provider changes.
+     *
      * @param resourcesProviders the new providers
      */
     public void setProviders(@NonNull List<ResourcesProvider> resourcesProviders) {
@@ -124,7 +138,12 @@ public class ResourcesLoader {
         }
     }
 
-    /** Removes all {@link ResourcesProvider ResourcesProvider(s)}. */
+    /**
+     * Removes all {@link ResourcesProvider ResourcesProvider(s)}.
+     *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * provider changes.
+     */
     public void clearProviders() {
         synchronized (mLock) {
             mProviders = null;
@@ -205,7 +224,6 @@ public class ResourcesLoader {
 
         return true;
     }
-
 
     /**
      * Invokes registered callbacks when the list of {@link ResourcesProvider} instances this loader

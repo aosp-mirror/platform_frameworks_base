@@ -749,7 +749,7 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
 
 std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const StringPiece& data,
                                                    const LoadedIdmap* loaded_idmap,
-                                                   package_property_t property_flags) {
+                                                   const package_property_t property_flags) {
   ATRACE_NAME("LoadedArsc::Load");
 
   // Not using make_unique because the constructor is private.

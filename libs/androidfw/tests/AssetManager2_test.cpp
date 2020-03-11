@@ -63,10 +63,12 @@ class AssetManager2Test : public ::testing::Test {
     libclient_assets_ = ApkAssets::Load(GetTestDataPath() + "/libclient/libclient.apk");
     ASSERT_NE(nullptr, libclient_assets_);
 
-    appaslib_assets_ = ApkAssets::LoadAsSharedLibrary(GetTestDataPath() + "/appaslib/appaslib.apk");
+    appaslib_assets_ = ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk",
+                                       PROPERTY_DYNAMIC);
     ASSERT_NE(nullptr, appaslib_assets_);
 
-    system_assets_ = ApkAssets::Load(GetTestDataPath() + "/system/system.apk", true /*system*/);
+    system_assets_ = ApkAssets::Load(GetTestDataPath() + "/system/system.apk",
+                                     PROPERTY_SYSTEM);
     ASSERT_NE(nullptr, system_assets_);
 
     app_assets_ = ApkAssets::Load(GetTestDataPath() + "/app/app.apk");

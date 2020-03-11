@@ -221,8 +221,8 @@ TEST_F(IdmapTest, OverlaidResourceHasSameName) {
 
 TEST_F(IdmapTest, OverlayLoaderInterop) {
   std::string contents;
-  auto loader_assets = ApkAssets::LoadArsc(GetTestDataPath() + "/loader/resources.arsc",
-                                           /* for_loader */ true);
+  auto loader_assets = ApkAssets::LoadTable(GetTestDataPath() + "/loader/resources.arsc",
+                                            PROPERTY_LOADER);
 
   AssetManager2 asset_manager;
   asset_manager.SetApkAssets({overlayable_assets_.get(), loader_assets.get(),

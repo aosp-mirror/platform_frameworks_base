@@ -55,7 +55,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.permission.SplitPermissionInfoParcelable;
 import android.content.pm.split.DefaultSplitAssetLoader;
 import android.content.pm.split.SplitAssetDependencyLoader;
@@ -1442,7 +1441,7 @@ public class PackageParser {
         try {
             try {
                 apkAssets = fd != null
-                        ? ApkAssets.loadFromFd(fd, debugPathName, false, false)
+                        ? ApkAssets.loadFromFd(fd, debugPathName, 0 /* flags */)
                         : ApkAssets.loadFromPath(apkPath);
             } catch (IOException e) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,

@@ -70,7 +70,7 @@ TEST(ApkAssetsTest, LoadApkAsSharedLibrary) {
   ASSERT_THAT(loaded_arsc->GetPackages(), SizeIs(1u));
   EXPECT_FALSE(loaded_arsc->GetPackages()[0]->IsDynamic());
 
-  loaded_apk = ApkAssets::LoadAsSharedLibrary(GetTestDataPath() + "/appaslib/appaslib.apk");
+  loaded_apk = ApkAssets::Load(GetTestDataPath() + "/appaslib/appaslib.apk", PROPERTY_DYNAMIC);
   ASSERT_THAT(loaded_apk, NotNull());
 
   loaded_arsc = loaded_apk->GetLoadedArsc();

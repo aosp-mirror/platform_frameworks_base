@@ -220,7 +220,7 @@ public class ApkLiteParseUtils {
         try {
             try {
                 apkAssets = fd != null
-                        ? ApkAssets.loadFromFd(fd, debugPathName, false, false)
+                        ? ApkAssets.loadFromFd(fd, debugPathName, 0 /* flags */)
                         : ApkAssets.loadFromPath(apkPath);
             } catch (IOException e) {
                 throw new PackageParser.PackageParserException(

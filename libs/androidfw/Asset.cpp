@@ -298,14 +298,13 @@ Asset::Asset(void)
 /*
  * Create a new Asset from a memory mapping.
  */
-/*static*/ Asset* Asset::createFromUncompressedMap(FileMap* dataMap,
-    AccessMode mode)
+/*static*/ Asset* Asset::createFromUncompressedMap(FileMap* dataMap, AccessMode mode)
 {
     _FileAsset* pAsset;
     status_t result;
 
     pAsset = new _FileAsset;
-    result = pAsset->openChunk(dataMap);
+    result = pAsset->openChunk(dataMap, base::unique_fd(-1));
     if (result != NO_ERROR) {
         delete pAsset;
         return NULL;
@@ -316,11 +315,11 @@ Asset::Asset(void)
 }
 
 /*static*/ std::unique_ptr<Asset> Asset::createFromUncompressedMap(std::unique_ptr<FileMap> dataMap,
-    AccessMode mode)
+    base::unique_fd fd, AccessMode mode)
 {
     std::unique_ptr<_FileAsset> pAsset = util::make_unique<_FileAsset>();
 
-    status_t result = pAsset->openChunk(dataMap.get());
+    status_t result = pAsset->openChunk(dataMap.get(), std::move(fd));
     if (result != NO_ERROR) {
         return NULL;
     }
@@ -415,7 +414,7 @@ off64_t Asset::handleSeek(off64_t offset, int whence, off64_t curPosn, off64_t m
  * Constructor.
  */
 _FileAsset::_FileAsset(void)
-    : mStart(0), mLength(0), mOffset(0), mFp(NULL), mFileName(NULL), mMap(NULL), mBuf(NULL)
+    : mStart(0), mLength(0), mOffset(0), mFp(NULL), mFileName(NULL), mFd(-1), mMap(NULL), mBuf(NULL)
 {
     // Register the Asset with the global list here after it is fully constructed and its
     // vtable pointer points to this concrete type. b/31113965
@@ -485,7 +484,7 @@ status_t _FileAsset::openChunk(const char* fileName, int fd, off64_t offset, siz
 /*
  * Create the chunk from the map.
  */
-status_t _FileAsset::openChunk(FileMap* dataMap)
+status_t _FileAsset::openChunk(FileMap* dataMap, base::unique_fd fd)
 {
     assert(mFp == NULL);    // no reopen
     assert(mMap == NULL);
@@ -494,6 +493,7 @@ status_t _FileAsset::openChunk(FileMap* dataMap)
     mMap = dataMap;
     mStart = -1;            // not used
     mLength = dataMap->getDataLength();
+    mFd = std::move(fd);
     assert(mOffset == 0);
 
     return NO_ERROR;
@@ -692,6 +692,17 @@ const void* _FileAsset::getBuffer(bool wordAligned)
 int _FileAsset::openFileDescriptor(off64_t* outStart, off64_t* outLength) const
 {
     if (mMap != NULL) {
+        if (mFd.ok()) {
+          *outStart = mMap->getDataOffset();
+          *outLength = mMap->getDataLength();
+          const int fd = dup(mFd);
+          if (fd < 0) {
+            ALOGE("Unable to dup fd (%d).", mFd.get());
+            return -1;
+          }
+          lseek64(fd, 0, SEEK_SET);
+          return fd;
+        }
         const char* fname = mMap->getFileName();
         if (fname == NULL) {
             fname = mFileName;

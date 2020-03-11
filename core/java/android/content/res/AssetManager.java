@@ -242,12 +242,12 @@ public final class AssetManager implements AutoCloseable {
 
         try {
             final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
-            apkAssets.add(ApkAssets.loadFromPath(frameworkPath, true /*system*/));
+            apkAssets.add(ApkAssets.loadFromPath(frameworkPath, ApkAssets.PROPERTY_SYSTEM));
 
             final String[] systemIdmapPaths =
                     OverlayConfig.getZygoteInstance().createImmutableFrameworkIdmapsInZygote();
             for (String idmapPath : systemIdmapPaths) {
-                apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, true /*system*/));
+                apkAssets.add(ApkAssets.loadOverlayFromPath(idmapPath, ApkAssets.PROPERTY_SYSTEM));
             }
 
             sSystemApkAssetsSet = new ArraySet<>(apkAssets);
@@ -443,9 +443,10 @@ public final class AssetManager implements AutoCloseable {
                     final String idmapPath = "/data/resource-cache/"
                             + path.substring(1).replace('/', '@')
                             + "@idmap";
-                    assets = ApkAssets.loadOverlayFromPath(idmapPath, false /*system*/);
+                    assets = ApkAssets.loadOverlayFromPath(idmapPath, 0 /* flags */);
                 } else {
-                    assets = ApkAssets.loadFromPath(path, false /*system*/, appAsLib);
+                    assets = ApkAssets.loadFromPath(path,
+                            appAsLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
                 }
             } catch (IOException e) {
                 return 0;
