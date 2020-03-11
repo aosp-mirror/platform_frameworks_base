@@ -2024,7 +2024,10 @@
          a keyboard is present. -->
     <bool name="config_showMenuShortcutsWhenKeyboardPresent">false</bool>
 
-    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD -->
+    <!-- Do not translate. Defines the slots is Two Digit Number for dialing normally not USSD.
+
+         Note: This config is deprecated, please use carrier config which is
+               CarrierConfigManager.KEY_MMI_TWO_DIGIT_NUMBER_PATTERN_STRING_ARRAY instead. -->
     <string-array name="config_twoDigitNumberPattern" translatable="false">
     </string-array>
 
