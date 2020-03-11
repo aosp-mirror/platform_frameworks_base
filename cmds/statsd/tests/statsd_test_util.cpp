@@ -410,40 +410,75 @@ FieldMatcher CreateDimensions(const int atomId, const std::vector<int>& fields) 
     return dimensions;
 }
 
-// TODO(b/149590301): Update these helpers to use new socket schema.
-//std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
-//    const android::view::DisplayStateEnum state, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(android::util::SCREEN_STATE_CHANGED, timestampNs);
-//    EXPECT_TRUE(event->write(state));
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(
-//        android::util::BATTERY_SAVER_MODE_STATE_CHANGED, timestampNs);
-//    EXPECT_TRUE(event->write(BatterySaverModeStateChanged::ON));
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(
-//        android::util::BATTERY_SAVER_MODE_STATE_CHANGED, timestampNs);
-//    EXPECT_TRUE(event->write(BatterySaverModeStateChanged::OFF));
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
-//    int level, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(android::util::SCREEN_BRIGHTNESS_CHANGED, timestampNs);
-//    EXPECT_TRUE(event->write(level));
-//    event->init();
-//    return event;
-//
-//}
-//
+std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
+        uint64_t timestampNs, const android::view::DisplayStateEnum state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::SCREEN_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::BATTERY_SAVER_MODE_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, BatterySaverModeStateChanged::ON);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::BATTERY_SAVER_MODE_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, BatterySaverModeStateChanged::OFF);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(uint64_t timestampNs, int level) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::SCREEN_BRIGHTNESS_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, level);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
 //std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
 //        const std::vector<AttributionNodeInternal>& attributions, const string& jobName,
 //        const ScheduledJobStateChanged::State state, uint64_t timestampNs) {
@@ -470,121 +505,212 @@ FieldMatcher CreateDimensions(const int atomId, const std::vector<int>& fields) 
 //            attributions, name, ScheduledJobStateChanged::FINISHED, timestampNs);
 //}
 //
-//std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(
-//        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-//        const WakelockStateChanged::State state, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(android::util::WAKELOCK_STATE_CHANGED, timestampNs);
-//    event->write(attributions);
-//    event->write(android::os::WakeLockLevelEnum::PARTIAL_WAKE_LOCK);
-//    event->write(wakelockName);
-//    event->write(state);
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateAcquireWakelockEvent(
-//        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-//        uint64_t timestampNs) {
-//    return CreateWakelockStateChangedEvent(
-//        attributions, wakelockName, WakelockStateChanged::ACQUIRE, timestampNs);
-//}
-//
-//std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(
-//        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-//        uint64_t timestampNs) {
-//    return CreateWakelockStateChangedEvent(
-//        attributions, wakelockName, WakelockStateChanged::RELEASE, timestampNs);
-//}
-//
-//std::unique_ptr<LogEvent> CreateActivityForegroundStateChangedEvent(
-//    const int uid, const ActivityForegroundStateChanged::State state, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(
-//        android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, timestampNs);
-//    event->write(uid);
-//    event->write("pkg_name");
-//    event->write("class_name");
-//    event->write(state);
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(const int uid, uint64_t timestampNs) {
-//    return CreateActivityForegroundStateChangedEvent(
-//        uid, ActivityForegroundStateChanged::BACKGROUND, timestampNs);
-//}
-//
-//std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(const int uid, uint64_t timestampNs) {
-//    return CreateActivityForegroundStateChangedEvent(
-//        uid, ActivityForegroundStateChanged::FOREGROUND, timestampNs);
-//}
-//
-//std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(
-//        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-//        const SyncStateChanged::State state, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(android::util::SYNC_STATE_CHANGED, timestampNs);
-//    event->write(attributions);
-//    event->write(name);
-//    event->write(state);
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateSyncStartEvent(
-//        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-//        uint64_t timestampNs) {
-//    return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::ON, timestampNs);
-//}
-//
-//std::unique_ptr<LogEvent> CreateSyncEndEvent(
-//        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-//        uint64_t timestampNs) {
-//    return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::OFF, timestampNs);
-//}
-//
-//std::unique_ptr<LogEvent> CreateProcessLifeCycleStateChangedEvent(
-//    const int uid, const ProcessLifeCycleStateChanged::State state, uint64_t timestampNs) {
-//    auto logEvent = std::make_unique<LogEvent>(
-//        android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, timestampNs);
-//    logEvent->write(uid);
-//    logEvent->write("");
-//    logEvent->write(state);
-//    logEvent->init();
-//    return logEvent;
-//}
-//
-//std::unique_ptr<LogEvent> CreateAppCrashEvent(const int uid, uint64_t timestampNs) {
-//    return CreateProcessLifeCycleStateChangedEvent(
-//        uid, ProcessLifeCycleStateChanged::CRASHED, timestampNs);
-//}
-//
-//std::unique_ptr<LogEvent> CreateAppCrashOccurredEvent(const int uid, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(android::util::APP_CRASH_OCCURRED, timestampNs);
-//    event->write(uid);
-//    event->write("eventType");
-//    event->write("processName");
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
-//    int isolatedUid, int hostUid, bool is_create, uint64_t timestampNs) {
-//    auto logEvent = std::make_unique<LogEvent>(
-//        android::util::ISOLATED_UID_CHANGED, timestampNs);
-//    logEvent->write(hostUid);
-//    logEvent->write(isolatedUid);
-//    logEvent->write(is_create);
-//    logEvent->init();
-//    return logEvent;
-//}
-//
-//std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
-//        int uid, const android::app::ProcessStateEnum state, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(android::util::UID_PROCESS_STATE_CHANGED, timestampNs);
-//    event->write(uid);
-//    event->write(state);
-//    event->init();
-//    return event;
-//}
+std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(uint64_t timestampNs,
+                                                          const vector<int>& attributionUids,
+                                                          const vector<string>& attributionTags,
+                                                          const string& wakelockName,
+                                                          const WakelockStateChanged::State state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::WAKELOCK_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+    AStatsEvent_writeInt32(statsEvent, android::os::WakeLockLevelEnum::PARTIAL_WAKE_LOCK);
+    AStatsEvent_writeString(statsEvent, wakelockName.c_str());
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateAcquireWakelockEvent(uint64_t timestampNs,
+                                                     const vector<int>& attributionUids,
+                                                     const vector<string>& attributionTags,
+                                                     const string& wakelockName) {
+    return CreateWakelockStateChangedEvent(timestampNs, attributionUids, attributionTags,
+                                           wakelockName, WakelockStateChanged::ACQUIRE);
+}
+
+std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(uint64_t timestampNs,
+                                                     const vector<int>& attributionUids,
+                                                     const vector<string>& attributionTags,
+                                                     const string& wakelockName) {
+    return CreateWakelockStateChangedEvent(timestampNs, attributionUids, attributionTags,
+                                           wakelockName, WakelockStateChanged::RELEASE);
+}
+
+std::unique_ptr<LogEvent> CreateActivityForegroundStateChangedEvent(
+        uint64_t timestampNs, const int uid, const ActivityForegroundStateChanged::State state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeString(statsEvent, "pkg_name");
+    AStatsEvent_writeString(statsEvent, "class_name");
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(uint64_t timestampNs, const int uid) {
+    return CreateActivityForegroundStateChangedEvent(timestampNs, uid,
+                                                     ActivityForegroundStateChanged::BACKGROUND);
+}
+
+std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(uint64_t timestampNs, const int uid) {
+    return CreateActivityForegroundStateChangedEvent(timestampNs, uid,
+                                                     ActivityForegroundStateChanged::FOREGROUND);
+}
+
+std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(uint64_t timestampNs,
+                                                      const vector<int>& attributionUids,
+                                                      const vector<string>& attributionTags,
+                                                      const string& name,
+                                                      const SyncStateChanged::State state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::SYNC_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+    AStatsEvent_writeString(statsEvent, name.c_str());
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateSyncStartEvent(uint64_t timestampNs,
+                                               const vector<int>& attributionUids,
+                                               const vector<string>& attributionTags,
+                                               const string& name) {
+    return CreateSyncStateChangedEvent(timestampNs, attributionUids, attributionTags, name,
+                                       SyncStateChanged::ON);
+}
+
+std::unique_ptr<LogEvent> CreateSyncEndEvent(uint64_t timestampNs,
+                                             const vector<int>& attributionUids,
+                                             const vector<string>& attributionTags,
+                                             const string& name) {
+    return CreateSyncStateChangedEvent(timestampNs, attributionUids, attributionTags, name,
+                                       SyncStateChanged::OFF);
+}
+
+std::unique_ptr<LogEvent> CreateProcessLifeCycleStateChangedEvent(
+        uint64_t timestampNs, const int uid, const ProcessLifeCycleStateChanged::State state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeString(statsEvent, "");
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateAppCrashEvent(uint64_t timestampNs, const int uid) {
+    return CreateProcessLifeCycleStateChangedEvent(timestampNs, uid,
+                                                   ProcessLifeCycleStateChanged::CRASHED);
+}
+
+std::unique_ptr<LogEvent> CreateAppCrashOccurredEvent(uint64_t timestampNs, const int uid) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::APP_CRASH_OCCURRED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeString(statsEvent, "eventType");
+    AStatsEvent_writeString(statsEvent, "processName");
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(uint64_t timestampNs, int hostUid,
+                                                        int isolatedUid, bool is_create) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::ISOLATED_UID_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, hostUid);
+    AStatsEvent_writeInt32(statsEvent, isolatedUid);
+    AStatsEvent_writeInt32(statsEvent, is_create);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
+        uint64_t timestampNs, int uid, const android::app::ProcessStateEnum state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, android::util::UID_PROCESS_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
 
 sp<StatsLogProcessor> CreateStatsLogProcessor(const int64_t timeBaseNs, const int64_t currentTimeNs,
                                               const StatsdConfig& config, const ConfigKey& key,
