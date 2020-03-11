@@ -17,6 +17,7 @@
 package android.view.autofill;
 
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
+import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 import static android.view.autofill.Helper.toList;
@@ -63,6 +64,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -983,6 +985,10 @@ public final class AutofillManager {
             if (!isClientDisablingEnterExitEvent()) {
                 final AutofillValue value = view.getAutofillValue();
 
+                if (view instanceof TextView && ((TextView) view).isAnyPasswordInputType()) {
+                    flags |= FLAG_PASSWORD_INPUT_TYPE;
+                }
+
                 if (!isActiveLocked()) {
                     // Starts new session.
                     startSessionLocked(id, null, value, flags);
@@ -1149,6 +1155,10 @@ public final class AutofillManager {
         } else {
             // don't notify entered when Activity is already in background
             if (!isClientDisablingEnterExitEvent()) {
+                if (view instanceof TextView && ((TextView) view).isAnyPasswordInputType()) {
+                    flags |= FLAG_PASSWORD_INPUT_TYPE;
+                }
+
                 if (!isActiveLocked()) {
                     // Starts new session.
                     startSessionLocked(id, bounds, null, flags);
