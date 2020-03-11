@@ -40,7 +40,7 @@ public interface RuntimePermissionsPersistence {
      * @return the runtime permissions read
      */
     @Nullable
-    RuntimePermissionsState readAsUser(@NonNull UserHandle user);
+    RuntimePermissionsState readForUser(@NonNull UserHandle user);
 
     /**
      * Write the runtime permissions to persistence.
@@ -50,7 +50,8 @@ public interface RuntimePermissionsPersistence {
      * @param runtimePermissions the runtime permissions to write
      * @param user the user to write for
      */
-    void writeAsUser(@NonNull RuntimePermissionsState runtimePermissions, @NonNull UserHandle user);
+    void writeForUser(@NonNull RuntimePermissionsState runtimePermissions,
+            @NonNull UserHandle user);
 
     /**
      * Delete the runtime permissions from persistence.
@@ -59,7 +60,7 @@ public interface RuntimePermissionsPersistence {
      *
      * @param user the user to delete for
      */
-    void deleteAsUser(@NonNull UserHandle user);
+    void deleteForUser(@NonNull UserHandle user);
 
     /**
      * Create a new instance of {@link RuntimePermissionsPersistence} implementation.

@@ -3735,7 +3735,8 @@
     <permission android:name="android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY"
                 android:protectionLevel="signature|installer" />
 
-    <!-- @hide Allows an application to upgrade runtime permissions. -->
+    <!-- @SystemApi @TestApi Allows an application to upgrade runtime permissions.
+    @hide -->
     <permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS"
                 android:protectionLevel="signature" />
 
