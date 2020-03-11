@@ -4471,8 +4471,7 @@ message BootTimeEventErrorCode {
  * after an OTA.
  *
  * Logged from:
- *  - system/core/fs_mgr/libsnapshot/snapshot.cpp
- *  - system/core/fs_mgr/libsnapshot/snapshotctl.cpp
+ *  - system/update_engine/cleanup_previous_update_action.cc
  */
 message SnapshotMergeReported {
     // Keep in sync with
