@@ -2653,4 +2653,7 @@
     <string name="controls_pin_verify">Verify device PIN</string>
     <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
     <string name="controls_pin_instructions">Enter PIN</string>
+
+    <!-- Tooltip to show in management screen when there are multiple structures [CHAR_LIMIT=50] -->
+    <string name="controls_structure_tooltip">Swipe to see other structures</string>
 </resources>
