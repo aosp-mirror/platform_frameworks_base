@@ -16,11 +16,15 @@
 
 package com.google.android.test.windowinsetstests;
 
+import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsetsAnimation.Callback.DISPATCH_MODE_STOP;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -37,6 +41,8 @@ import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Callback;
 import android.view.WindowInsetsAnimationControlListener;
 import android.view.WindowInsetsAnimationController;
+import android.view.WindowInsetsController;
+import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 
@@ -82,8 +88,8 @@ public class WindowInsetsActivity extends AppCompatActivity {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         mDown = event.getY();
-                        mDownInsets = v.getRootWindowInsets().getInsets(Type.ime());
-                        mShownAtDown = v.getRootWindowInsets().isVisible(Type.ime());
+                        mDownInsets = v.getRootWindowInsets().getInsets(ime());
+                        mShownAtDown = v.getRootWindowInsets().isVisible(ime());
                         mRequestedController = false;
                         mCurrentRequest = null;
                         break;
@@ -94,7 +100,7 @@ public class WindowInsetsActivity extends AppCompatActivity {
                                 > mViewConfiguration.getScaledTouchSlop()
                                 && !mRequestedController) {
                             mRequestedController = true;
-                            v.getWindowInsetsController().controlWindowInsetsAnimation(Type.ime(),
+                            v.getWindowInsetsController().controlWindowInsetsAnimation(ime(),
                                     1000, new LinearInterpolator(),
                                     mCurrentRequest = new WindowInsetsAnimationControlListener() {
                                         @Override
@@ -189,6 +195,51 @@ public class WindowInsetsActivity extends AppCompatActivity {
         getWindow().getDecorView().post(() -> getWindow().setDecorFitsSystemWindows(false));
     }
 
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        getWindow().getInsetsController().addOnControllableInsetsChangedListener(
+                new OnControllableInsetsChangedListener() {
+
+                    boolean hasControl = false;
+                    @Override
+                    public void onControllableInsetsChanged(WindowInsetsController controller,
+                            int types) {
+                        if ((types & ime()) != 0 && !hasControl) {
+                            hasControl = true;
+                            controller.controlWindowInsetsAnimation(ime(), -1,
+                                    new LinearInterpolator(),
+                                    new WindowInsetsAnimationControlListener() {
+                                        @Override
+                                        public void onReady(
+                                                WindowInsetsAnimationController controller,
+                                                int types) {
+                                            ValueAnimator anim = ValueAnimator.ofFloat(0f, 1f);
+                                            anim.setDuration(1500);
+                                            anim.addUpdateListener(animation
+                                                    -> controller.setInsetsAndAlpha(
+                                                    controller.getShownStateInsets(),
+                                                    (float) animation.getAnimatedValue(),
+                                                    anim.getAnimatedFraction()));
+                                            anim.addListener(new AnimatorListenerAdapter() {
+                                                @Override
+                                                public void onAnimationEnd(Animator animation) {
+                                                    super.onAnimationEnd(animation);
+                                                    controller.finish(true);
+                                                }
+                                            });
+                                            anim.start();
+                                        }
+
+                                        @Override
+                                        public void onCancelled() {
+                                        }
+                                    });
+                        }
+                    }
+                });
+    }
+
     static class Transition {
         private int mEndBottom;
         private int mStartBottom;
@@ -200,7 +251,7 @@ public class WindowInsetsActivity extends AppCompatActivity {
         }
 
         void onPrepare(WindowInsetsAnimation animation) {
-            if ((animation.getTypeMask() & Type.ime()) != 0) {
+            if ((animation.getTypeMask() & ime()) != 0) {
                 mInsetsAnimation = animation;
             }
             mStartBottom = mView.getBottom();
