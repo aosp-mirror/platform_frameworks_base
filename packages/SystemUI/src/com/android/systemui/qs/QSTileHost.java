@@ -274,8 +274,8 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 try {
                     tile = createTile(tileSpec);
                     if (tile != null) {
+                        tile.setTileSpec(tileSpec);
                         if (tile.isAvailable()) {
-                            tile.setTileSpec(tileSpec);
                             newTiles.put(tileSpec, tile);
                             mQSLogger.logTileAdded(tileSpec);
                         } else {
