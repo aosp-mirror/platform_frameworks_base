@@ -635,13 +635,6 @@ public class WifiConfiguration implements Parcelable {
     public String preSharedKey;
 
     /**
-     * Optional SAE Password Id for use with WPA3-SAE. It is an ASCII string.
-     * @hide
-     */
-    @SystemApi
-    public @Nullable String saePasswordId;
-
-    /**
      * Four WEP keys. For each of the four values, provide either an ASCII
      * string enclosed in double quotation marks (e.g., {@code "abcdef"}),
      * a string of hex digits (e.g., {@code 0102030405}), or an empty string
@@ -2334,9 +2327,6 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append('*');
         }
 
-        sbuf.append('\n').append(" SAE Password Id: ");
-        sbuf.append(this.saePasswordId);
-
         sbuf.append("\nEnterprise config:\n");
         sbuf.append(enterpriseConfig);
 
@@ -2731,7 +2721,6 @@ public class WifiConfiguration implements Parcelable {
             providerFriendlyName = source.providerFriendlyName;
             isHomeProviderNetwork = source.isHomeProviderNetwork;
             preSharedKey = source.preSharedKey;
-            saePasswordId = source.saePasswordId;
 
             mNetworkSelectionStatus.copy(source.getNetworkSelectionStatus());
             apBand = source.apBand;
@@ -2819,7 +2808,6 @@ public class WifiConfiguration implements Parcelable {
             dest.writeLong(roamingConsortiumId);
         }
         dest.writeString(preSharedKey);
-        dest.writeString(saePasswordId);
         for (String wepKey : wepKeys) {
             dest.writeString(wepKey);
         }
@@ -2895,7 +2883,6 @@ public class WifiConfiguration implements Parcelable {
                     config.roamingConsortiumIds[i] = in.readLong();
                 }
                 config.preSharedKey = in.readString();
-                config.saePasswordId = in.readString();
                 for (int i = 0; i < config.wepKeys.length; i++) {
                     config.wepKeys[i] = in.readString();
                 }
