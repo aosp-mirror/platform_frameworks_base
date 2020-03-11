@@ -1525,6 +1525,18 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "838570988": {
+      "message": "Could not report token removal to the window token client.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowToken.java"
+    },
+    "845234215": {
+      "message": "App is requesting an orientation, return %d for display id=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "853091290": {
       "message": "Moved stack=%s behind stack=%s",
       "level": "DEBUG",

@@ -32,6 +32,7 @@ import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PC;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.INVALID_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
@@ -2558,6 +2559,8 @@ public class WindowManagerService extends IWindowManager.Stub
             String packageName, boolean fromClientToken) {
         final boolean callerCanManageAppTokens =
                 checkCallingPermission(MANAGE_APP_TOKENS, "addWindowToken()");
+        // WindowContext users usually don't hold MANAGE_APP_TOKEN permission. Check permissions
+        // by checkAddPermission.
         if (!callerCanManageAppTokens) {
             final int res = mPolicy.checkAddPermission(type, false /* isRoundedCornerOverlay */,
                     packageName, new int[1]);
@@ -2572,7 +2575,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 if (!callerCanManageAppTokens) {
                     if (packageName == null || !unprivilegedAppCanCreateTokenWith(
-                            null /* parentWindow */, callingUid, type, type, null /* tokenForLog */,
+                            null /* parentWindow */, callingUid, type, type, binder,
                             packageName)) {
                         throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
                     }
@@ -2597,7 +2600,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     new WallpaperWindowToken(this, binder, true, dc, callerCanManageAppTokens);
                 } else {
                     new WindowToken(this, binder, type, true, dc, callerCanManageAppTokens,
-                            false /* roundedCornerOverlay */, fromClientToken);
+                            callingUid, false /* roundedCornerOverlay */, fromClientToken);
                 }
             }
         } finally {
@@ -2620,8 +2623,25 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void removeWindowToken(IBinder binder, int displayId) {
-        if (!checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()")) {
-            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+        final boolean callerCanManageAppTokens =
+                checkCallingPermission(MANAGE_APP_TOKENS, "removeWindowToken()");
+        final WindowToken windowToken;
+        synchronized (mGlobalLock) {
+            windowToken = mRoot.getWindowToken(binder);
+        }
+        if (windowToken == null) {
+            ProtoLog.w(WM_ERROR,
+                    "removeWindowToken: Attempted to remove non-existing token: %s", binder);
+            return;
+        }
+        final int callingUid = Binder.getCallingUid();
+
+        // If MANAGE_APP_TOKEN permission is not held(usually from WindowContext), callers can only
+        // remove the window tokens which they added themselves.
+        if (!callerCanManageAppTokens && (windowToken.getOwnerUid() == INVALID_UID
+                || callingUid != windowToken.getOwnerUid())) {
+            throw new SecurityException("removeWindowToken: Requires MANAGE_APP_TOKENS permission"
+                    + " to remove token owned by another uid");
         }
 
         final long origId = Binder.clearCallingIdentity();
@@ -2634,14 +2654,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return;
                 }
 
-                final WindowToken token = dc.removeWindowToken(binder);
-                if (token == null) {
-                    ProtoLog.w(WM_ERROR,
-                            "removeWindowToken: Attempted to remove non-existing token: %s",
-                            binder);
-                    return;
-                }
-
+                dc.removeWindowToken(binder);
                 dc.getInputMonitor().updateInputWindowsLw(true /*force*/);
             }
         } finally {
