@@ -40,4 +40,13 @@ class ManagementPageIndicator(
             super.setLocation(location)
         }
     }
+
+    var visibilityListener: (Int) -> Unit = {}
+
+    override fun onVisibilityChanged(changedView: View, visibility: Int) {
+        super.onVisibilityChanged(changedView, visibility)
+        if (changedView == this) {
+            visibilityListener(visibility)
+        }
+    }
 }
