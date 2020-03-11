@@ -98,7 +98,8 @@ import java.util.Set;
  * The Settings provider contains global system-level device preferences.
  */
 public final class Settings {
-    private static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
+    /** @hide */
+    public static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
 
     // Intent actions for Settings
 
