@@ -49,6 +49,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
@@ -92,6 +93,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -8919,7 +8921,6 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_ACCESSIBILITY_SERVICES);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
-            CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
         }
 
@@ -8972,9 +8973,13 @@ public final class Settings {
          */
         @Deprecated
         public static boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
-            String allowedProviders = Settings.Secure.getStringForUser(cr,
-                    LOCATION_PROVIDERS_ALLOWED, cr.getUserId());
-            return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
+            IBinder binder = ServiceManager.getService(Context.LOCATION_SERVICE);
+            ILocationManager lm = Objects.requireNonNull(ILocationManager.Stub.asInterface(binder));
+            try {
+                return lm.isProviderEnabledForUser(provider, cr.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**

@@ -16,8 +16,6 @@
 
 package com.android.server.location;
 
-import static android.location.LocationManager.FUSED_PROVIDER;
-import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static android.provider.Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS;
 import static android.provider.Settings.Global.LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST;
@@ -321,29 +319,6 @@ public class SettingsHelper {
                     mContext.getContentResolver(),
                     LOCATION_COARSE_ACCURACY_M,
                     DEFAULT_COARSE_LOCATION_ACCURACY_M);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Set a value for the deprecated LOCATION_PROVIDERS_ALLOWED setting. This is used purely for
-     * backwards compatibility for old clients, and may be removed in the future.
-     */
-    public void setLocationProviderAllowed(String provider, boolean enabled, int userId) {
-        // fused and passive provider never get public updates for legacy reasons
-        if (FUSED_PROVIDER.equals(provider) || PASSIVE_PROVIDER.equals(provider)) {
-            return;
-        }
-
-        long identity = Binder.clearCallingIdentity();
-        try {
-            // update LOCATION_PROVIDERS_ALLOWED for best effort backwards compatibility
-            Settings.Secure.putStringForUser(
-                    mContext.getContentResolver(),
-                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                    (enabled ? "+" : "-") + provider,
-                    userId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
