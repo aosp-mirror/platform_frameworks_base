@@ -1226,7 +1226,7 @@ public final class AutofillManager {
             // If the session is gone some fields might still be highlighted, hence we have to
             // remove the isAutofilled property even if no sessions are active.
             if (mLastAutofilledData == null) {
-                view.setAutofilled(false);
+                view.setAutofilled(false, false);
             } else {
                 id = view.getAutofillId();
                 if (mLastAutofilledData.containsKey(id)) {
@@ -1234,13 +1234,13 @@ public final class AutofillManager {
                     valueWasRead = true;
 
                     if (Objects.equals(mLastAutofilledData.get(id), value)) {
-                        view.setAutofilled(true);
+                        view.setAutofilled(true, false);
                     } else {
-                        view.setAutofilled(false);
+                        view.setAutofilled(false, false);
                         mLastAutofilledData.remove(id);
                     }
                 } else {
-                    view.setAutofilled(false);
+                    view.setAutofilled(false, false);
                 }
             }
 
@@ -2156,7 +2156,8 @@ public final class AutofillManager {
      * @param view The view that is to be autofilled
      * @param targetValue The value we want to fill into view
      */
-    private void setAutofilledIfValuesIs(@NonNull View view, @Nullable AutofillValue targetValue) {
+    private void setAutofilledIfValuesIs(@NonNull View view, @Nullable AutofillValue targetValue,
+            boolean hideHighlight) {
         AutofillValue currentValue = view.getAutofillValue();
         if (Objects.equals(currentValue, targetValue)) {
             synchronized (mLock) {
@@ -2165,11 +2166,12 @@ public final class AutofillManager {
                 }
                 mLastAutofilledData.put(view.getAutofillId(), targetValue);
             }
-            view.setAutofilled(true);
+            view.setAutofilled(true, hideHighlight);
         }
     }
 
-    private void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values) {
+    private void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values,
+            boolean hideHighlight) {
         synchronized (mLock) {
             if (sessionId != mSessionId) {
                 return;
@@ -2228,7 +2230,7 @@ public final class AutofillManager {
                     // synchronously.
                     // If autofill happens async, the view is set to autofilled in
                     // notifyValueChanged.
-                    setAutofilledIfValuesIs(view, value);
+                    setAutofilledIfValuesIs(view, value, hideHighlight);
 
                     numApplied++;
                 }
@@ -3246,10 +3248,11 @@ public final class AutofillManager {
         }
 
         @Override
-        public void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values) {
+        public void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values,
+                boolean hideHighlight) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.autofill(sessionId, ids, values));
+                afm.post(() -> afm.autofill(sessionId, ids, values, hideHighlight));
             }
         }
 
@@ -3387,10 +3390,11 @@ public final class AutofillManager {
         }
 
         @Override
-        public void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values) {
+        public void autofill(int sessionId, List<AutofillId> ids, List<AutofillValue> values,
+                boolean hideHighlight) {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
-                afm.post(() -> afm.autofill(sessionId, ids, values));
+                afm.post(() -> afm.autofill(sessionId, ids, values, hideHighlight));
             }
         }
 

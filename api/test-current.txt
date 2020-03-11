@@ -4970,7 +4970,7 @@ package android.view {
     method public void resetRtlProperties();
     method public boolean restoreFocusInCluster(int);
     method public boolean restoreFocusNotInCluster();
-    method public void setAutofilled(boolean);
+    method public void setAutofilled(boolean, boolean);
     method public final void setFocusedInCluster();
     method public void setIsRootNamespace(boolean);
     method public final void setShowingLayoutBounds(boolean);

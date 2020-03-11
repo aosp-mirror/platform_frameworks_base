@@ -44,7 +44,8 @@ oneway interface IAutoFillManagerClient {
     /**
       * Autofills the activity with the contents of a dataset.
       */
-    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values);
+    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values,
+            boolean hideHighlight);
 
     /**
       * Authenticates a fill response or a data set.
