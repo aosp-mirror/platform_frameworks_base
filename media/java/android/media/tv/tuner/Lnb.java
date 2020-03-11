@@ -156,7 +156,7 @@ public class Lnb implements AutoCloseable {
 
     private long mNativeContext;
 
-    Lnb(int id) {
+    private Lnb(int id) {
         mId = id;
     }
 
