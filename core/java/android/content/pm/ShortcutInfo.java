@@ -1558,11 +1558,6 @@ public final class ShortcutInfo implements Parcelable {
      * "Rank" of a shortcut, which is a non-negative, sequential value that's unique for each
      * {@link #getActivity} for each of the two types of shortcuts (static and dynamic).
      *
-     * <p>Because static shortcuts and dynamic shortcuts have overlapping ranks,
-     * when a launcher app shows shortcuts for an activity, it should first show
-     * the static shortcuts, followed by the dynamic shortcuts.  Within each of those categories,
-     * shortcuts should be sorted by rank in ascending order.
-     *
      * <p><em>Floating shortcuts</em>, or shortcuts that are neither static nor dynamic, will all
      * have rank 0, because they aren't sorted.
      *
