@@ -192,6 +192,8 @@ public class ActivityTestsBase {
             aInfo.applicationInfo = new ApplicationInfo();
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
+            aInfo.packageName = mComponent.getPackageName();
+            aInfo.name = mComponent.getClassName();
             aInfo.flags |= mActivityFlags;
 
             final ActivityRecord activity = new ActivityRecord(mService, null /* caller */,

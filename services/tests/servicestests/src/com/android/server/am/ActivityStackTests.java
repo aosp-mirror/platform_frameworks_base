@@ -606,6 +606,19 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertTrue(listener.changed);
     }
 
+    @Test
+    public void testNavigateUpTo() {
+        final ActivityRecord firstActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        final ActivityRecord secondActivity = new ActivityBuilder(mService).setTask(mTask)
+                .setUid(firstActivity.getUid() + 1).build();
+        secondActivity.app.thread = null;
+        // This should do nothing from a non-attached caller (app.thread == null).
+        assertFalse(mStack.navigateUpToLocked(secondActivity /* source record */,
+                firstActivity.intent /* destIntent */, 0 /* resultCode */, null /* resultData */));
+        assertFalse(secondActivity.finishing);
+        assertFalse(firstActivity.finishing);
+    }
+
     private void verifyShouldSleepActivities(boolean focusedStack,
             boolean keyguardGoingAway, boolean displaySleeping, boolean expected) {
         mSupervisor.mFocusedStack = focusedStack ? mStack : null;
