@@ -62,26 +62,14 @@ java_library {
     apex_available: ["com.android.tethering"],
 }
 
-droidstubs {
-    name: "framework-tethering-stubs-sources",
-    defaults: ["framework-module-stubs-defaults-module_libs_api"],
+stubs_defaults {
+    name: "framework-tethering-stubs-defaults",
     srcs: [
         "src/android/net/TetheredClient.java",
         "src/android/net/TetheringManager.java",
         "src/android/net/TetheringConstants.java",
     ],
-    libs: [
-        "tethering-aidl-interfaces-java",
-        "framework-all",
-    ],
-    sdk_version: "core_platform",
-}
-
-java_library {
-    name: "framework-tethering-stubs",
-    srcs: [":framework-tethering-stubs-sources"],
-    libs: ["framework-all"],
-    sdk_version: "core_platform",
+    libs: ["tethering-aidl-interfaces-java"],
 }
 
 filegroup {
@@ -100,4 +88,54 @@ filegroup {
         "src/android/net/TetherStatesParcel.aidl",
     ],
     path: "src"
+}
+
+droidstubs {
+    name: "framework-tethering-stubs-srcs-publicapi",
+    defaults: [
+        "framework-module-stubs-defaults-publicapi",
+        "framework-tethering-stubs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-tethering-stubs-srcs-systemapi",
+    defaults: [
+        "framework-module-stubs-defaults-systemapi",
+        "framework-tethering-stubs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-tethering-api-module_libs_api",
+    defaults: [
+        "framework-module-api-defaults-module_libs_api",
+        "framework-tethering-stubs-defaults",
+    ],
+}
+
+droidstubs {
+    name: "framework-tethering-stubs-srcs-module_libs_api",
+    defaults: [
+        "framework-module-stubs-defaults-module_libs_api",
+        "framework-tethering-stubs-defaults",
+    ],
+}
+
+java_library {
+    name: "framework-tethering-stubs-publicapi",
+    srcs: [":framework-tethering-stubs-srcs-publicapi"],
+    sdk_version: "current",
+}
+
+java_library {
+    name: "framework-tethering-stubs-systemapi",
+    srcs: [":framework-tethering-stubs-srcs-systemapi"],
+    sdk_version: "system_current",
+}
+
+java_library {
+    name: "framework-tethering-stubs-module_libs_api",
+    srcs: [":framework-tethering-stubs-srcs-module_libs_api"],
+    sdk_version: "module_current",
 }
