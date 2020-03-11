@@ -467,7 +467,7 @@ public final class Icon implements Parcelable {
         if ((mType == TYPE_BITMAP || mType == TYPE_ADAPTIVE_BITMAP) &&
             getBitmap().isMutable() &&
             getBitmap().getAllocationByteCount() >= MIN_ASHMEM_ICON_SIZE) {
-            setBitmap(getBitmap().createAshmemBitmap());
+            setBitmap(getBitmap().asShared());
         }
     }
 

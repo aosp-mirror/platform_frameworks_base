@@ -126,7 +126,7 @@ public class ScreenshotNotificationsController {
         Bitmap picture = generateAdjustedHwBitmap(
                 image, mPreviewWidth, mPreviewHeight, matrix, paint, overlayColor);
 
-        mNotificationStyle.bigPicture(picture.createAshmemBitmap());
+        mNotificationStyle.bigPicture(picture.asShared());
 
         // Note, we can't use the preview for the small icon, since it is non-square
         float scale = (float) mIconSize / Math.min(imageWidth, imageHeight);
@@ -145,7 +145,7 @@ public class ScreenshotNotificationsController {
         // On the tablet, the large icon makes the notification appear as if it is clickable
         // (and on small devices, the large icon is not shown) so defer showing the large icon
         // until we compose the final post-save notification below.
-        mNotificationBuilder.setLargeIcon(icon.createAshmemBitmap());
+        mNotificationBuilder.setLargeIcon(icon.asShared());
         // But we still don't set it for the expanded view, allowing the smallIcon to show here.
         mNotificationStyle.bigLargeIcon((Bitmap) null);
     }

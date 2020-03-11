@@ -3588,7 +3588,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 bm = null;
             } else {
-                bm = displayContent.screenshotDisplayLocked(Bitmap.Config.ARGB_8888);
+                bm = displayContent.screenshotDisplayLocked();
             }
         }
 

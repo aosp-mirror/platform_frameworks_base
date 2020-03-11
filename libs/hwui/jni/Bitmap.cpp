@@ -1216,6 +1216,14 @@ static jboolean Bitmap_isImmutable(CRITICAL_JNI_PARAMS_COMMA jlong bitmapHandle)
     return bitmapHolder->bitmap().isImmutable() ? JNI_TRUE : JNI_FALSE;
 }
 
+static jboolean Bitmap_isBackedByAshmem(CRITICAL_JNI_PARAMS_COMMA jlong bitmapHandle) {
+    LocalScopedBitmap bitmapHolder(bitmapHandle);
+    if (!bitmapHolder.valid()) return JNI_FALSE;
+
+    return bitmapHolder->bitmap().pixelStorageType() == PixelStorageType::Ashmem ? JNI_TRUE
+                                                                                 : JNI_FALSE;
+}
+
 static void Bitmap_setImmutable(JNIEnv* env, jobject, jlong bitmapHandle) {
     LocalScopedBitmap bitmapHolder(bitmapHandle);
     if (!bitmapHolder.valid()) return;
@@ -1282,7 +1290,8 @@ static const JNINativeMethod gBitmapMethods[] = {
     {   "nativeSetImmutable",       "(J)V", (void*)Bitmap_setImmutable},
 
     // ------------ @CriticalNative ----------------
-    {   "nativeIsImmutable",        "(J)Z", (void*)Bitmap_isImmutable}
+    {   "nativeIsImmutable",        "(J)Z", (void*)Bitmap_isImmutable},
+    {   "nativeIsBackedByAshmem",   "(J)Z", (void*)Bitmap_isBackedByAshmem}
 
 };
 
