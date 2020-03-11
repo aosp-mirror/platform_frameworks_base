@@ -7640,6 +7640,9 @@ message AppFeaturesOps {
 
     // Whether AppOps is guarded by Runtime permission
     optional bool is_runtime_permission = 11;
+
+    // Sampling rate used on device, from 0 to 100
+    optional int32 sampling_rate = 12;
 }
 
 /**

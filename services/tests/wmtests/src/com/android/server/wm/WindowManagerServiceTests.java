@@ -16,9 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+
 import android.content.pm.PackageManager;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -56,5 +63,26 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     private boolean isAutomotive() {
         return getInstrumentation().getTargetContext().getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
+    @Test
+    public void testAddWindowToken() {
+        IBinder token = mock(IBinder.class);
+        mWm.addWindowToken(token, TYPE_TOAST, mDisplayContent.getDisplayId());
+
+        WindowToken windowToken = mWm.mRoot.getWindowToken(token);
+        assertFalse(windowToken.mRoundedCornerOverlay);
+        assertFalse(windowToken.mFromClientToken);
+    }
+
+    @Test
+    public void testAddWindowTokenWithOptions() {
+        IBinder token = mock(IBinder.class);
+        mWm.addWindowTokenWithOptions(token, TYPE_TOAST, mDisplayContent.getDisplayId(),
+                null /* options */, null /* options */);
+
+        WindowToken windowToken = mWm.mRoot.getWindowToken(token);
+        assertFalse(windowToken.mRoundedCornerOverlay);
+        assertTrue(windowToken.mFromClientToken);
     }
 }

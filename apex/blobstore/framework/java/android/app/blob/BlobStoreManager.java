@@ -22,6 +22,7 @@ import android.annotation.IdRes;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
@@ -214,7 +215,7 @@ public class BlobStoreManager {
     }
 
     /**
-     * Delete an existing session and any data that was written to that session so far.
+     * Abandons an existing session and deletes any data that was written to that session so far.
      *
      * @param sessionId a unique id obtained via {@link #createSession(BlobHandle)} that
      *                  represents a particular session.
@@ -223,9 +224,9 @@ public class BlobStoreManager {
      * @throws SecurityException when the caller does not own the session, or
      *                           the session does not exist or is invalid.
      */
-    public void deleteSession(@IntRange(from = 1) long sessionId) throws IOException {
+    public void abandonSession(@IntRange(from = 1) long sessionId) throws IOException {
         try {
-            mService.deleteSession(sessionId, mContext.getOpPackageName());
+            mService.abandonSession(sessionId, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
@@ -453,13 +454,13 @@ public class BlobStoreManager {
     }
 
     /**
-     * Release all active leases to the blob represented by {@code blobHandle} which are
+     * Release any active lease to the blob represented by {@code blobHandle} which is
      * currently held by the caller.
      *
      * @param blobHandle the {@link BlobHandle} representing the blob that the caller wants to
-     *                   release the leases for.
+     *                   release the lease for.
      *
-     * @throws IOException when there is an I/O error while releasing the releases to the blob.
+     * @throws IOException when there is an I/O error while releasing the release to the blob.
      * @throws SecurityException when the blob represented by the {@code blobHandle} does not
      *                           exist or the caller does not have access to it.
      * @throws IllegalArgumentException when {@code blobHandle} is invalid.
@@ -480,6 +481,7 @@ public class BlobStoreManager {
      *
      * @hide
      */
+    @TestApi
     public void waitForIdle(long timeoutMillis) throws InterruptedException, TimeoutException {
         try {
             final CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -623,7 +625,7 @@ public class BlobStoreManager {
 
         /**
          * Close this session. It can be re-opened for writing/reading if it has not been
-         * abandoned (using {@link #abandon}) or closed (using {@link #commit}).
+         * abandoned (using {@link #abandon}) or committed (using {@link #commit}).
          *
          * @throws IOException when there is an I/O error while closing the session.
          * @throws SecurityException when the caller is not the owner of the session.

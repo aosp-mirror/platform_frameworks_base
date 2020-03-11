@@ -16,16 +16,15 @@
 
 package android.net.wifi;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.net.wifi.WifiAnnotations.ChannelWidth;
+import android.net.wifi.WifiAnnotations.WifiStandard;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -313,17 +312,6 @@ public class ScanResult implements Parcelable {
      */
     public static final int WIFI_STANDARD_11AX = 6;
 
-    /** @hide */
-    @IntDef(prefix = { "WIFI_STANDARD_" }, value = {
-            WIFI_STANDARD_UNKNOWN,
-            WIFI_STANDARD_LEGACY,
-            WIFI_STANDARD_11N,
-            WIFI_STANDARD_11AC,
-            WIFI_STANDARD_11AX
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface WifiStandard{}
-
     /**
      * AP wifi standard.
      */
@@ -368,7 +356,7 @@ public class ScanResult implements Parcelable {
      * {@link #CHANNEL_WIDTH_80MHZ}, {@link #CHANNEL_WIDTH_160MHZ}
      * or {@link #CHANNEL_WIDTH_80MHZ_PLUS_MHZ}.
      */
-    public int channelWidth;
+    public @ChannelWidth int channelWidth;
 
     /**
      * Not used if the AP bandwidth is 20 MHz

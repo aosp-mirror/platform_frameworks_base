@@ -148,10 +148,6 @@ import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
-import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.TimeDetector;
-import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.TimeZoneDetector;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
@@ -2116,14 +2112,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         AlarmManager getAlarmManager() {
             return mContext.getSystemService(AlarmManager.class);
-        }
-
-        TimeDetector getTimeDetector() {
-            return mContext.getSystemService(TimeDetector.class);
-        }
-
-        TimeZoneDetector getTimeZoneDetector() {
-            return mContext.getSystemService(TimeZoneDetector.class);
         }
 
         ConnectivityManager getConnectivityManager() {
@@ -11730,15 +11718,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
             return false;
         }
-        ManualTimeSuggestion manualTimeSuggestion = TimeDetector.createManualTimeSuggestion(
-                millis, "DevicePolicyManagerService: setTime");
-        mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getTimeDetector().suggestManualTime(manualTimeSuggestion));
-
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_TIME)
                 .setAdmin(who)
                 .write();
+        mInjector.binderWithCleanCallingIdentity(() -> mInjector.getAlarmManager().setTime(millis));
         return true;
     }
 
@@ -11750,11 +11734,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
         }
-        ManualTimeZoneSuggestion manualTimeZoneSuggestion =
-                TimeZoneDetector.createManualTimeZoneSuggestion(
-                        timeZone, "DevicePolicyManagerService: setTimeZone");
         mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.getTimeZoneDetector().suggestManualTimeZone(manualTimeZoneSuggestion));
+                mInjector.getAlarmManager().setTimeZone(timeZone));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_TIME_ZONE)

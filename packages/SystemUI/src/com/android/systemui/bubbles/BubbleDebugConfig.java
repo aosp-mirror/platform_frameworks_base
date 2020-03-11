@@ -59,13 +59,15 @@ public class BubbleDebugConfig {
         return FORCE_SHOW_USER_EDUCATION || forceShow;
     }
 
-    static String formatBubblesString(List<Bubble> bubbles, Bubble selected) {
+    static String formatBubblesString(List<Bubble> bubbles, BubbleViewProvider selected) {
         StringBuilder sb = new StringBuilder();
         for (Bubble bubble : bubbles) {
             if (bubble == null) {
                 sb.append("   <null> !!!!!\n");
             } else {
-                boolean isSelected = (selected != null && bubble == selected);
+                boolean isSelected = (selected != null
+                        && selected.getKey() != BubbleOverflow.KEY
+                        && bubble == selected);
                 String arrow = isSelected ? "=>" : "  ";
                 sb.append(String.format("%s Bubble{act=%12d, ongoing=%d, key=%s}\n",
                         arrow,

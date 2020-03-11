@@ -28,20 +28,21 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class ApexContextTest {
+public class ApexEnvironmentTest {
 
     @Test
     public void dataDirectoryPathsAreAsExpected() {
-        ApexContext apexContext = ApexContext.getApexContext("my.apex");
+        ApexEnvironment apexEnvironment = ApexEnvironment.getApexEnvironment("my.apex");
 
         assertEquals("/data/misc/apexdata/my.apex",
-                apexContext.getDeviceProtectedDataDir().getAbsolutePath());
+                apexEnvironment.getDeviceProtectedDataDir().getAbsolutePath());
 
         assertEquals("/data/misc_de/5/apexdata/my.apex",
-                apexContext.getDeviceProtectedDataDirForUser(UserHandle.of(5)).getAbsolutePath());
+                apexEnvironment
+                        .getDeviceProtectedDataDirForUser(UserHandle.of(5)).getAbsolutePath());
 
         assertEquals("/data/misc_ce/16/apexdata/my.apex",
-                apexContext.getCredentialProtectedDataDirForUser(
+                apexEnvironment.getCredentialProtectedDataDirForUser(
                         UserHandle.of(16)).getAbsolutePath());
     }
 }
