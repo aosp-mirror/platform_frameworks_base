@@ -28,7 +28,6 @@ import android.content.res.XmlResourceParser;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Slog;
 import android.util.Xml;
 
@@ -231,15 +230,7 @@ public class KeyphraseEnrollmentInfo {
                     com.android.internal.R.styleable.VoiceEnrollmentApplication);
             keyphraseMetadata = getKeyphraseFromTypedArray(array, packageName, parseErrors);
             array.recycle();
-        } catch (XmlPullParserException e) {
-            String error = "Error parsing keyphrase enrollment meta-data for " + packageName;
-            parseErrors.add(error + ": " + e);
-            Slog.w(TAG, error, e);
-        } catch (IOException e) {
-            String error = "Error parsing keyphrase enrollment meta-data for " + packageName;
-            parseErrors.add(error + ": " + e);
-            Slog.w(TAG, error, e);
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (XmlPullParserException | PackageManager.NameNotFoundException | IOException e) {
             String error = "Error parsing keyphrase enrollment meta-data for " + packageName;
             parseErrors.add(error + ": " + e);
             Slog.w(TAG, error, e);
@@ -390,7 +381,6 @@ public class KeyphraseEnrollmentInfo {
      *         False if not.
      */
     public boolean isUidSupportedEnrollmentApplication(int uid) {
-        Log.d(TAG, "isUidSupportedEnrollmentApplication: " + toString());
         return mEnrollmentApplicationUids.contains(uid);
     }
 
