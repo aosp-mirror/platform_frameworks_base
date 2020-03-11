@@ -38,8 +38,9 @@ interface ControlsBindingController : UserAwareController {
      *
      * @param component The [ComponentName] of the service to bind
      * @param callback a callback to return the loaded controls to (or an error).
+     * @return a runnable to cancel the load
      */
-    fun bindAndLoad(component: ComponentName, callback: LoadCallback)
+    fun bindAndLoad(component: ComponentName, callback: LoadCallback): Runnable
 
     /**
      * Request to bind to the given service.
