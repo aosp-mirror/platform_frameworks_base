@@ -577,7 +577,7 @@ public class MobileSignalController extends SignalController<
     }
 
     boolean isDataDisabled() {
-        return !mPhone.isDataConnectionEnabled();
+        return !mPhone.isDataConnectionAllowed();
     }
 
     @VisibleForTesting
