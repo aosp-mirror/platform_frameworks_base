@@ -29,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import android.app.IApplicationThread;
+import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
@@ -55,8 +56,11 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
     @Before
     public void setUp() {
         mMockListener = mock(WindowProcessListener.class);
+
+        ApplicationInfo info = mock(ApplicationInfo.class);
+        info.packageName = "test.package.name";
         mWpc = new WindowProcessController(
-                mService, mock(ApplicationInfo.class), null, 0, -1, null, mMockListener);
+                mService, info, null, 0, -1, null, mMockListener);
         mWpc.setThread(mock(IApplicationThread.class));
     }
 
@@ -174,6 +178,26 @@ public class WindowProcessControllerTests extends ActivityTestsBase {
 
         mWpc.onProcCachedStateChanged(false);
         assertEquals(mWpc.getLastReportedConfiguration(), newConfig);
+    }
+
+    @Test
+    public void testActivityNotOverridingSystemUiProcessConfig() {
+        final ComponentName systemUiServiceComponent = mService.getSysUiServiceComponentLocked();
+        ApplicationInfo applicationInfo = mock(ApplicationInfo.class);
+        applicationInfo.packageName = systemUiServiceComponent.getPackageName();
+
+        WindowProcessController wpc = new WindowProcessController(
+                mService, applicationInfo, null, 0, -1, null, mMockListener);
+        wpc.setThread(mock(IApplicationThread.class));
+
+        final ActivityRecord activity = new ActivityBuilder(mService)
+                .setCreateTask(true)
+                .setUseProcess(wpc)
+                .build();
+
+        wpc.addActivityIfNeeded(activity);
+        // System UI owned processes should not be registered for activity config changes.
+        assertFalse(wpc.registeredForActivityConfigChanges());
     }
 
     private TestDisplayContent createTestDisplayContentInContainer() {
