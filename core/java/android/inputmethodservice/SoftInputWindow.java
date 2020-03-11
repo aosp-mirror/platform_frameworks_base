@@ -28,6 +28,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 
 import java.lang.annotation.Retention;
@@ -94,6 +95,13 @@ public class SoftInputWindow extends Dialog {
                 lp.token = token;
                 getWindow().setAttributes(lp);
                 updateWindowState(SoftInputWindowState.TOKEN_SET);
+
+                // As soon as we have a token, make sure the window is added (but not shown) by
+                // setting visibility to INVISIBLE and calling show() on Dialog. Note that
+                // WindowInsetsController.OnControllableInsetsChangedListener relies on the window
+                // being added to function.
+                getWindow().getDecorView().setVisibility(View.INVISIBLE);
+                show();
                 return;
             case SoftInputWindowState.TOKEN_SET:
             case SoftInputWindowState.SHOWN_AT_LEAST_ONCE:
