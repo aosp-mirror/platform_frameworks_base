@@ -25,7 +25,7 @@
 #include "subscriber/SubscriberReporter.h"
 
 #include <inttypes.h>
-#include <statslog.h>
+#include <statslog_statsd.h>
 #include <time.h>
 
 namespace android {
@@ -235,8 +235,8 @@ void AnomalyTracker::declareAnomaly(const int64_t& timestampNs, int64_t metricId
     StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.id());
 
     // TODO(b/110564268): This should also take in the const MetricDimensionKey& key?
-    android::util::stats_write(android::util::ANOMALY_DETECTED, mConfigKey.GetUid(),
-                               mConfigKey.GetId(), mAlert.id());
+    util::stats_write(util::ANOMALY_DETECTED, mConfigKey.GetUid(),
+                      mConfigKey.GetId(), mAlert.id());
 }
 
 void AnomalyTracker::detectAndDeclareAnomaly(const int64_t& timestampNs,
