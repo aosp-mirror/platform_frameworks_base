@@ -2362,17 +2362,16 @@ public class CarrierConfigManager {
      * <p> If a measure is not set, signal criteria reporting from modem will not be triggered and
      * not be used for calculating signal level. If multiple measures are set bit, the parameter
      * whose value is smallest is used to indicate the signal level.
+     * <UL>
+     *  <LI>RSRP = 1 << 0</LI>
+     *  <LI>RSRQ = 1 << 1</LI>
+     *  <LI>RSSNR = 1 << 2</LI>
+     * </UL>
+     * <p> The value of this key must be bitwise OR of {@link CellSignalStrengthLte#USE_RSRP},
+     * {@link CellSignalStrengthLte#USE_RSRQ}, {@link CellSignalStrengthLte#USE_RSSNR}.
      *
-     *  RSRP = 1 << 0,
-     *  RSRQ = 1 << 1,
-     *  RSSNR = 1 << 2,
-     *
-     *  The value of this key must be bitwise OR of {@link CellSignalStrengthLte#USE_RSRP},
-     *  {@link CellSignalStrengthLte#USE_RSRQ}, {@link CellSignalStrengthLte#USE_RSSNR}.
-     *
-     * For example, if both RSRP and RSRQ are used, the value of key is 3 (1 << 0 | 1 << 1).
-     * If the key is invalid or not configured, a default value (RSRP = 1 << 0)
-     * will apply.
+     * <p> For example, if both RSRP and RSRQ are used, the value of key is 3 (1 << 0 | 1 << 1).
+     * If the key is invalid or not configured, a default value (RSRP = 1 << 0) will apply.
      *
      * @hide
      */
@@ -2381,16 +2380,18 @@ public class CarrierConfigManager {
 
     /**
      * List of 4 customized 5G SS reference signal received power (SSRSRP) thresholds.
-     *
+     * <p>
      * Reference: 3GPP TS 38.215
-     *
+     * <p>
      * 4 threshold integers must be within the boundaries [-140 dB, -44 dB], and the levels are:
-     *     "NONE: [-140, threshold1]"
-     *     "POOR: (threshold1, threshold2]"
-     *     "MODERATE: (threshold2, threshold3]"
-     *     "GOOD:  (threshold3, threshold4]"
-     *     "EXCELLENT:  (threshold4, -44]"
-     *
+     * <UL>
+     *     <LI>"NONE: [-140, threshold1]"</LI>
+     *     <LI>"POOR: (threshold1, threshold2]"</LI>
+     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
+     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
+     *     <LI>"EXCELLENT:  (threshold4, -44]"</LI>
+     * </UL>
+     * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
      * not configured, a default value set will apply.
      */
@@ -2399,16 +2400,18 @@ public class CarrierConfigManager {
 
     /**
      * List of 4 customized 5G SS reference signal received quality (SSRSRQ) thresholds.
-     *
+     * <p>
      * Reference: 3GPP TS 38.215
-     *
+     * <p>
      * 4 threshold integers must be within the boundaries [-20 dB, -3 dB], and the levels are:
-     *     "NONE: [-20, threshold1]"
-     *     "POOR: (threshold1, threshold2]"
-     *     "MODERATE: (threshold2, threshold3]"
-     *     "GOOD:  (threshold3, threshold4]"
-     *     "EXCELLENT:  (threshold4, -3]"
-     *
+     * <UL>
+     *     <LI>"NONE: [-20, threshold1]"</LI>
+     *     <LI>"POOR: (threshold1, threshold2]"</LI>
+     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
+     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
+     *     <LI>"EXCELLENT:  (threshold4, -3]"</LI>
+     * </UL>
+     * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
      * not configured, a default value set will apply.
      */
@@ -2417,17 +2420,19 @@ public class CarrierConfigManager {
 
     /**
      * List of 4 customized 5G SS signal-to-noise and interference ratio (SSSINR) thresholds.
-     *
+     * <p>
      * Reference: 3GPP TS 38.215,
      *            3GPP TS 38.133 10.1.16.1
-     *
+     * <p>
      * 4 threshold integers must be within the boundaries [-23 dB, 40 dB], and the levels are:
-     *     "NONE: [-23, threshold1]"
-     *     "POOR: (threshold1, threshold2]"
-     *     "MODERATE: (threshold2, threshold3]"
-     *     "GOOD:  (threshold3, threshold4]"
-     *     "EXCELLENT:  (threshold4, 40]"
-     *
+     * <UL>
+     *     <LI>"NONE: [-23, threshold1]"</LI>
+     *     <LI>"POOR: (threshold1, threshold2]"</LI>
+     *     <LI>"MODERATE: (threshold2, threshold3]"</LI>
+     *     <LI>"GOOD:  (threshold3, threshold4]"</LI>
+     *     <LI>"EXCELLENT:  (threshold4, 40]"</LI>
+     * </UL>
+     * <p>
      * This key is considered invalid if the format is violated. If the key is invalid or
      * not configured, a default value set will apply.
      */
@@ -2442,19 +2447,19 @@ public class CarrierConfigManager {
      * <p> If a measure is not set, signal criteria reporting from modem will not be triggered and
      * not be used for calculating signal level. If multiple measures are set bit, the parameter
      * whose value is smallest is used to indicate the signal level.
-     *
-     *  SSRSRP = 1 << 0,
-     *  SSRSRQ = 1 << 1,
-     *  SSSINR = 1 << 2,
-     *
+     * <UL>
+     *  <LI>SSRSRP = 1 << 0</LI>
+     *  <LI>SSRSRQ = 1 << 1</LI>
+     *  <LI>SSSINR = 1 << 2</LI>
+     * </UL>
      *  The value of this key must be bitwise OR of {@link CellSignalStrengthNr#USE_SSRSRP},
      *  {@link CellSignalStrengthNr#USE_SSRSRQ}, {@link CellSignalStrengthNr#USE_SSSINR}.
      *
-     * For example, if both SSRSRP and SSSINR are used, the value of key is 5 (1 << 0 | 1 << 2).
+     * <p> For example, if both SSRSRP and SSSINR are used, the value of key is 5 (1 << 0 | 1 << 2).
      * If the key is invalid or not configured, a default value (SSRSRP = 1 << 0) will apply.
      *
-     *  Reference: 3GPP TS 38.215,
-     *             3GPP TS 38.133 10.1.16.1
+     * <p> Reference: 3GPP TS 38.215,
+     *                3GPP TS 38.133 10.1.16.1
      *
      * @hide
      */
