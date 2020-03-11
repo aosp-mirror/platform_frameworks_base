@@ -917,19 +917,23 @@ std::vector<std::string> IncrementalService::listFiles(StorageId storage) const 
 }
 
 bool IncrementalService::startLoading(StorageId storage) const {
-    const auto ifs = getIfs(storage);
-    if (!ifs) {
-        return false;
-    }
-    std::unique_lock l(ifs->lock);
-    if (ifs->dataLoaderStatus != IDataLoaderStatusListener::DATA_LOADER_CREATED) {
-        if (ifs->dataLoaderReady.wait_for(l, Seconds(5)) == std::cv_status::timeout) {
-            LOG(ERROR) << "Timeout waiting for data loader to be ready";
+    {
+        std::unique_lock l(mLock);
+        const auto& ifs = getIfsLocked(storage);
+        if (!ifs) {
             return false;
         }
+        if (ifs->dataLoaderStatus != IDataLoaderStatusListener::DATA_LOADER_CREATED) {
+            ifs->dataLoaderStartRequested = true;
+            return true;
+        }
     }
+    return startDataLoader(storage);
+}
+
+bool IncrementalService::startDataLoader(MountId mountId) const {
     sp<IDataLoader> dataloader;
-    auto status = mDataLoaderManager->getDataLoader(ifs->mountId, &dataloader);
+    auto status = mDataLoaderManager->getDataLoader(mountId, &dataloader);
     if (!status.isOk()) {
         return false;
     }
@@ -1065,15 +1069,9 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
         }
         return true; // eventually...
     }
-    if (base::GetBoolProperty("incremental.skip_loader", false)) {
-        LOG(INFO) << "Skipped data loader because of incremental.skip_loader property";
-        std::unique_lock l(ifs.lock);
-        ifs.savedDataLoaderParams.reset();
-        return true;
-    }
 
     std::unique_lock l(ifs.lock);
-    if (ifs.dataLoaderStatus == IDataLoaderStatusListener::DATA_LOADER_CREATED) {
+    if (ifs.dataLoaderStatus != -1) {
         LOG(INFO) << "Skipped data loader preparation because it already exists";
         return true;
     }
@@ -1226,30 +1224,42 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
         externalListener->onStatusChanged(mountId, newStatus);
     }
 
-    std::unique_lock l(incrementalService.mLock);
-    const auto& ifs = incrementalService.getIfsLocked(mountId);
-    if (!ifs) {
-        LOG(WARNING) << "Received data loader status " << int(newStatus) << " for unknown mount "
-                     << mountId;
-        return binder::Status::ok();
+    bool startRequested = false;
+    {
+        std::unique_lock l(incrementalService.mLock);
+        const auto& ifs = incrementalService.getIfsLocked(mountId);
+        if (!ifs) {
+            LOG(WARNING) << "Received data loader status " << int(newStatus) << " for unknown mount "
+                         << mountId;
+            return binder::Status::ok();
+        }
+        ifs->dataLoaderStatus = newStatus;
+
+        if (newStatus == IDataLoaderStatusListener::DATA_LOADER_DESTROYED) {
+            ifs->dataLoaderStatus = IDataLoaderStatusListener::DATA_LOADER_STOPPED;
+            incrementalService.deleteStorageLocked(*ifs, std::move(l));
+            return binder::Status::ok();
+        }
+
+        startRequested = ifs->dataLoaderStartRequested;
     }
-    ifs->dataLoaderStatus = newStatus;
+
     switch (newStatus) {
         case IDataLoaderStatusListener::DATA_LOADER_NO_CONNECTION: {
             // TODO(b/150411019): handle data loader connection loss
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_CONNECTION_OK: {
-            ifs->dataLoaderStatus = IDataLoaderStatusListener::DATA_LOADER_STARTED;
+            // TODO(b/150411019): handle data loader connection loss
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_CREATED: {
-            ifs->dataLoaderReady.notify_one();
+            if (startRequested) {
+                incrementalService.startDataLoader(mountId);
+            }
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_DESTROYED: {
-            ifs->dataLoaderStatus = IDataLoaderStatusListener::DATA_LOADER_STOPPED;
-            incrementalService.deleteStorageLocked(*ifs, std::move(l));
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_STARTED: {

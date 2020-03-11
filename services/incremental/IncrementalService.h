@@ -170,7 +170,7 @@ private:
         std::optional<DataLoaderParamsParcel> savedDataLoaderParams;
         std::atomic<int> nextStorageDirNo{0};
         std::atomic<int> dataLoaderStatus = -1;
-        std::condition_variable dataLoaderReady;
+        bool dataLoaderStartRequested = false;
         TimePoint connectionLostTime = TimePoint();
         const IncrementalService& incrementalService;
 
@@ -208,6 +208,8 @@ private:
 
     bool prepareDataLoader(IncFsMount& ifs, DataLoaderParamsParcel* params = nullptr,
                            const DataLoaderStatusListener* externalListener = nullptr);
+    bool startDataLoader(MountId mountId) const;
+
     BindPathMap::const_iterator findStorageLocked(std::string_view path) const;
     StorageId findStorageId(std::string_view path) const;
 
