@@ -177,14 +177,14 @@ droidstubs {
 java_library {
     name: "framework-wifi-stubs-publicapi",
     srcs: [":framework-wifi-stubs-srcs-publicapi"],
-    sdk_version: "module_current",
+    sdk_version: "current",
     installable: false,
 }
 
 java_library {
     name: "framework-wifi-stubs-systemapi",
     srcs: [":framework-wifi-stubs-srcs-systemapi"],
-    sdk_version: "module_current",
+    sdk_version: "system_current",
     libs: ["framework-annotations-lib"],
     installable: false,
 }
