@@ -125,12 +125,6 @@ public class ZygoteInit {
 
     private static boolean sPreloadComplete;
 
-    /**
-     * Cached classloader to use for the system server. Will only be populated in the system
-     * server process.
-     */
-    private static ClassLoader sCachedSystemServerClassLoader = null;
-
     static void preload(TimingsTraceLog bootTimingsTraceLog) {
         Log.d(TAG, "begin preload");
         bootTimingsTraceLog.traceBegin("BeginPreload");
@@ -508,13 +502,7 @@ public class ZygoteInit {
 
         final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
         if (systemServerClasspath != null) {
-            if (performSystemServerDexOpt(systemServerClasspath)) {
-                // Throw away the cached classloader. If we compiled here, the classloader would
-                // not have had AoT-ed artifacts.
-                // Note: This only works in a very special environment where selinux enforcement is
-                // disabled, e.g., Mac builds.
-                sCachedSystemServerClassLoader = null;
-            }
+            performSystemServerDexOpt(systemServerClasspath);
             // Capturing profiles is only supported for debug or eng builds since selinux normally
             // prevents it.
             if (shouldProfileSystemServer() && (Build.IS_USERDEBUG || Build.IS_ENG)) {
@@ -546,9 +534,10 @@ public class ZygoteInit {
 
             throw new IllegalStateException("Unexpected return from WrapperInit.execApplication");
         } else {
-            createSystemServerClassLoader();
-            ClassLoader cl = sCachedSystemServerClassLoader;
-            if (cl != null) {
+            ClassLoader cl = null;
+            if (systemServerClasspath != null) {
+                cl = createPathClassLoader(systemServerClasspath, parsedArgs.mTargetSdkVersion);
+
                 Thread.currentThread().setContextClassLoader(cl);
             }
 
@@ -561,24 +550,6 @@ public class ZygoteInit {
         }
 
         /* should never reach here */
-    }
-
-    /**
-     * Create the classloader for the system server and store it in
-     * {@link sCachedSystemServerClassLoader}. This function may be called through JNI in
-     * system server startup, when the runtime is in a critically low state. Do not do
-     * extended computation etc here.
-     */
-    private static void createSystemServerClassLoader() {
-        if (sCachedSystemServerClassLoader != null) {
-            return;
-        }
-        final String systemServerClasspath = Os.getenv("SYSTEMSERVERCLASSPATH");
-        // TODO: Should we run optimization here?
-        if (systemServerClasspath != null) {
-            sCachedSystemServerClassLoader = createPathClassLoader(systemServerClasspath,
-                    VMRuntime.SDK_VERSION_CUR_DEVELOPMENT);
-        }
     }
 
     /**
@@ -645,16 +616,15 @@ public class ZygoteInit {
 
     /**
      * Performs dex-opt on the elements of {@code classPath}, if needed. We choose the instruction
-     * set of the current runtime. If something was compiled, return true.
+     * set of the current runtime.
      */
-    private static boolean performSystemServerDexOpt(String classPath) {
+    private static void performSystemServerDexOpt(String classPath) {
         final String[] classPathElements = classPath.split(":");
         final IInstalld installd = IInstalld.Stub
                 .asInterface(ServiceManager.getService("installd"));
         final String instructionSet = VMRuntime.getRuntime().vmInstructionSet();
 
         String classPathForElement = "";
-        boolean compiledSomething = false;
         for (String classPathElement : classPathElements) {
             // We default to the verify filter because the compilation will happen on /data and
             // system server cannot load executable code outside /system.
@@ -695,7 +665,6 @@ public class ZygoteInit {
                             uuid, classLoaderContext, seInfo, false /* downgrade */,
                             targetSdkVersion, /*profileName*/ null, /*dexMetadataPath*/ null,
                             "server-dexopt");
-                    compiledSomething = true;
                 } catch (RemoteException | ServiceSpecificException e) {
                     // Ignore (but log), we need this on the classpath for fallback mode.
                     Log.w(TAG, "Failed compiling classpath element for system server: "
@@ -706,8 +675,6 @@ public class ZygoteInit {
             classPathForElement = encodeSystemServerClassPath(
                     classPathForElement, classPathElement);
         }
-
-        return compiledSomething;
     }
 
     /**
