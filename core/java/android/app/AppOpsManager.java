@@ -27,6 +27,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.usage.UsageStatsManager;
+import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -385,6 +386,13 @@ public class AppOpsManager {
      */
     public static final int WATCH_FOREGROUND_CHANGES = 1 << 0;
 
+    /**
+     * Flag for {@link #startWatchingMode} that causes the callback to happen on the switch-op
+     * instead the op the callback was registered. (This simulates pre-R behavior).
+     *
+     * @hide
+     */
+    public static final int CALL_BACK_ON_SWITCHED_OP = 1 << 1;
 
     /**
      * Flag to determine whether we should log noteOp/startOp calls to make sure they
@@ -6712,6 +6720,13 @@ public class AppOpsManager {
                 };
                 mModeWatchers.put(callback, cb);
             }
+
+            // See CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE
+            if (!Compatibility.isChangeEnabled(
+                    CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE)) {
+                flags |= CALL_BACK_ON_SWITCHED_OP;
+            }
+
             try {
                 mService.startWatchingModeWithFlags(op, packageName, flags, cb);
             } catch (RemoteException e) {
