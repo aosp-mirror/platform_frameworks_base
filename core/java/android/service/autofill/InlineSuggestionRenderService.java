@@ -97,10 +97,19 @@ public abstract class InlineSuggestionRenderService extends Service {
             host.addView(suggestionRoot, lp);
             suggestionRoot.setOnClickListener((v) -> {
                 try {
-                    callback.onAutofill();
+                    callback.onClick();
                 } catch (RemoteException e) {
-                    Log.w(TAG, "RemoteException calling onAutofill()");
+                    Log.w(TAG, "RemoteException calling onClick()");
                 }
+            });
+
+            suggestionRoot.setOnLongClickListener((v) -> {
+                try {
+                    callback.onLongClick();
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException calling onLongClick()");
+                }
+                return true;
             });
 
             sendResult(callback, host.getSurfacePackage());
