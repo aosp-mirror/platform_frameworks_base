@@ -925,9 +925,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 mLastCoarseLocation.put(userId, null);
             }
 
-            // update LOCATION_PROVIDERS_ALLOWED for best effort backwards compatibility
-            mSettingsHelper.setLocationProviderAllowed(mName, enabled, userId);
-
             // do not send change notifications if we just saw this user for the first time
             if (wasEnabled != null) {
                 // fused and passive provider never get public updates for legacy reasons

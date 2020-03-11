@@ -714,19 +714,6 @@ public class UserRestrictionsUtils {
                 restriction = UserManager.DISALLOW_SHARE_LOCATION;
                 break;
 
-            case android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED:
-                if (mUserManager.hasUserRestriction(
-                        UserManager.DISALLOW_CONFIG_LOCATION, UserHandle.of(userId))
-                        && callingUid != Process.SYSTEM_UID) {
-                    return true;
-                } else if (value != null && value.startsWith("-")) {
-                    // See SettingsProvider.updateLocationProvidersAllowedLocked.  "-" is to disable
-                    // a provider, which should be allowed even if the user restriction is set.
-                    return false;
-                }
-                restriction = UserManager.DISALLOW_SHARE_LOCATION;
-                break;
-
             case android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS:
                 if ("0".equals(value)) {
                     return false;

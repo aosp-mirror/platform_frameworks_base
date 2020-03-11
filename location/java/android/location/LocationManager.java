@@ -56,7 +56,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
@@ -589,12 +588,7 @@ public class LocationManager {
     public boolean setProviderEnabledForUser(
             @NonNull String provider, boolean enabled, @NonNull UserHandle userHandle) {
         Preconditions.checkArgument(provider != null, "invalid null provider");
-
-        return Settings.Secure.putStringForUser(
-                mContext.getContentResolver(),
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                (enabled ? "+" : "-") + provider,
-                userHandle.getIdentifier());
+        return false;
     }
 
     /**
