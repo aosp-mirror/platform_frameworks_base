@@ -1227,6 +1227,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
 
         @Override
+        public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
+                boolean clearedTask) {
+            for (Bubble b : mBubbleData.getBubbles()) {
+                if (b.getDisplayId() == task.displayId) {
+                    expandStackAndSelectBubble(b.getKey());
+                    return;
+                }
+            }
+        }
+
+        @Override
         public void onActivityLaunchOnSecondaryDisplayRerouted() {
             if (mStackView != null) {
                 mBubbleData.setExpanded(false);

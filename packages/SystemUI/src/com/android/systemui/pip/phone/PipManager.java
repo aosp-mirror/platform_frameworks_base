@@ -128,7 +128,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt(boolean clearedTask) {
+        public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                boolean homeTaskVisible, boolean clearedTask) {
+            if (task.configuration.windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_PINNED) {
+                return;
+            }
             mTouchHandler.getMotionHelper().expandPip(clearedTask /* skipAnimation */);
         }
     };
