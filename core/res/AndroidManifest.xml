@@ -1187,6 +1187,16 @@
                 android:description="@string/permdesc_callCompanionApp"
                 android:protectionLevel="normal" />
 
+    <!-- Exempt this uid from restrictions to background audio recoding
+     <p>Protection level: signature|privileged
+     @hide
+     @SystemApi
+    -->
+    <permission android:name="android.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS"
+                android:label="@string/permlab_exemptFromAudioRecordRestrictions"
+                android:description="@string/permdesc_exemptFromAudioRecordRestrictions"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Allows a calling app to continue a call which was started in another app.  An example is a
          video calling app that wants to continue a voice call on the user's mobile network.<p>
          When the handover of a call from one app to another takes place, there are two devices
