@@ -428,6 +428,7 @@ package android.app {
     method public boolean isBlockableSystem();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
     method public boolean isImportanceLockedByOEM();
+    method public void lockFields(int);
     method public void setBlockableSystem(boolean);
     method public void setDeleted(boolean);
     method public void setFgServiceShown(boolean);
@@ -435,6 +436,7 @@ package android.app {
     method public void setImportanceLockedByOEM(boolean);
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
+    field public static final int USER_LOCKED_SOUND = 32; // 0x20
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
