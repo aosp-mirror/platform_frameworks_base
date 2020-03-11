@@ -86,7 +86,7 @@ public final class LightsRequest {
          * Create a LightsRequest object used to override lights on the device.
          *
          * <p>The generated {@link LightsRequest} should be used in
-         * {@link LightsManager.Session#setLights(LightsLightsRequest).
+         * {@link LightsManager.Session#requestLights(LightsLightsRequest).
          */
         public @NonNull LightsRequest build() {
             return new LightsRequest(mChanges);
