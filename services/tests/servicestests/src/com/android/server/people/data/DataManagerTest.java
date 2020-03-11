@@ -183,6 +183,11 @@ public final class DataManagerTest {
 
         when(mExecutorService.scheduleAtFixedRate(any(Runnable.class), anyLong(), anyLong(), any(
                 TimeUnit.class))).thenReturn(mScheduledFuture);
+        doAnswer(ans -> {
+            Runnable runnable = (Runnable) ans.getArguments()[0];
+            runnable.run();
+            return null;
+        }).when(mExecutorService).execute(any(Runnable.class));
 
         when(mUserManager.getEnabledProfiles(USER_ID_PRIMARY))
                 .thenReturn(Arrays.asList(
