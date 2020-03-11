@@ -25,6 +25,7 @@ import static com.android.server.people.data.EventStore.CATEGORY_SMS;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.content.LocusId;
 import android.os.FileUtils;
 import android.text.TextUtils;
@@ -77,6 +78,7 @@ public class PackageData {
      * Returns a map of package directory names as keys and their associated {@link PackageData}.
      * This should be called when device is powered on and unlocked.
      */
+    @WorkerThread
     @NonNull
     static Map<String, PackageData> packagesDataFromDisk(@UserIdInt int userId,
             @NonNull Predicate<String> isDefaultDialerPredicate,
