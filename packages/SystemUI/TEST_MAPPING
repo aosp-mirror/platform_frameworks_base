@@ -12,6 +12,9 @@
             "include-annotation": "android.platform.test.scenario.annotation.Scenario"
         },
         {
+            "exclude-annotation": "org.junit.Ignore"
+        },
+        {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
@@ -26,6 +29,9 @@
         },
         {
             "include-annotation": "android.platform.test.scenario.annotation.Scenario"
+        },
+        {
+            "exclude-annotation": "org.junit.Ignore"
         },
         {
             "exclude-annotation": "androidx.test.filters.FlakyTest"
