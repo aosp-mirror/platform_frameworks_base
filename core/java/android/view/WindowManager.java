@@ -805,6 +805,7 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.IntToString(from = TYPE_APPLICATION_OVERLAY,
                         to = "APPLICATION_OVERLAY")
         })
+        @WindowType
         public int type;
 
         /**
@@ -1242,13 +1243,47 @@ public interface WindowManager extends ViewManager {
         public static final int INVALID_WINDOW_TYPE = -1;
 
         /**
+         * @hide
+         */
+        @IntDef(prefix = "TYPE_", value = {
+                TYPE_ACCESSIBILITY_OVERLAY,
+                TYPE_APPLICATION,
+                TYPE_APPLICATION_ATTACHED_DIALOG,
+                TYPE_APPLICATION_MEDIA,
+                TYPE_APPLICATION_OVERLAY,
+                TYPE_APPLICATION_PANEL,
+                TYPE_APPLICATION_STARTING,
+                TYPE_APPLICATION_SUB_PANEL,
+                TYPE_BASE_APPLICATION,
+                TYPE_DRAWN_APPLICATION,
+                TYPE_INPUT_METHOD,
+                TYPE_INPUT_METHOD_DIALOG,
+                TYPE_KEYGUARD,
+                TYPE_KEYGUARD_DIALOG,
+                TYPE_PHONE,
+                TYPE_PRIORITY_PHONE,
+                TYPE_PRIVATE_PRESENTATION,
+                TYPE_SEARCH_BAR,
+                TYPE_STATUS_BAR,
+                TYPE_STATUS_BAR_PANEL,
+                TYPE_SYSTEM_ALERT,
+                TYPE_SYSTEM_DIALOG,
+                TYPE_SYSTEM_ERROR,
+                TYPE_SYSTEM_OVERLAY,
+                TYPE_TOAST,
+                TYPE_WALLPAPER,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface WindowType {}
+
+        /**
          * Return true if the window type is an alert window.
          *
          * @param type The window type.
          * @return If the window type is an alert window.
          * @hide
          */
-        public static boolean isSystemAlertWindowType(int type) {
+        public static boolean isSystemAlertWindowType(@WindowType int type) {
             switch (type) {
                 case TYPE_PHONE:
                 case TYPE_PRIORITY_PHONE:
