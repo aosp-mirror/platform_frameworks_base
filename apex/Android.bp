@@ -43,6 +43,7 @@ stubs_defaults {
     name: "framework-module-stubs-defaults-publicapi",
     args: mainline_stubs_args,
     installable: false,
+    sdk_version: "current",
 }
 
 stubs_defaults {
@@ -50,6 +51,7 @@ stubs_defaults {
     args: mainline_stubs_args + priv_apps,
     srcs: [":framework-annotations"],
     installable: false,
+    sdk_version: "system_current",
 }
 
 // The defaults for module_libs comes in two parts - defaults for API checks
@@ -62,6 +64,7 @@ stubs_defaults {
     args: mainline_stubs_args + module_libs,
     srcs: [":framework-annotations"],
     installable: false,
+    sdk_version: "module_current",
 }
 
 stubs_defaults {
@@ -69,4 +72,5 @@ stubs_defaults {
     args: mainline_stubs_args + module_libs + priv_apps,
     srcs: [":framework-annotations"],
     installable: false,
+    sdk_version: "module_current",
 }
