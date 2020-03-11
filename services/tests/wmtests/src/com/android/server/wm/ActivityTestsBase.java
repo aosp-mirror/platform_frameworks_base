@@ -265,6 +265,7 @@ class ActivityTestsBase {
             aInfo.applicationInfo.packageName = mComponent.getPackageName();
             aInfo.applicationInfo.uid = mUid;
             aInfo.packageName = mComponent.getPackageName();
+            aInfo.name = mComponent.getClassName();
             if (mTargetActivity != null) {
                 aInfo.targetActivity = mTargetActivity;
             }
