@@ -27,7 +27,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
-import android.telephony.Annotation;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.ServiceState;
@@ -125,6 +124,15 @@ public class ApnSetting implements Parcelable {
     public static final int AUTH_TYPE_CHAP = 2;
     /** Authentication type for PAP or CHAP. */
     public static final int AUTH_TYPE_PAP_OR_CHAP = 3;
+
+    /** @hide */
+    @IntDef({
+            Telephony.Carriers.SKIP_464XLAT_DEFAULT,
+            Telephony.Carriers.SKIP_464XLAT_DISABLE,
+            Telephony.Carriers.SKIP_464XLAT_ENABLE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Skip464XlatStatus {}
 
     /**
      * APN types for data connections.  These are usage categories for an APN
@@ -745,7 +753,7 @@ public class ApnSetting implements Parcelable {
      * @return SKIP_464XLAT_DEFAULT, SKIP_464XLAT_DISABLE or SKIP_464XLAT_ENABLE
      * @hide
      */
-    @Annotation.Skip464XlatStatus
+    @Skip464XlatStatus
     public int getSkip464Xlat() {
         return mSkip464Xlat;
     }
@@ -2065,7 +2073,7 @@ public class ApnSetting implements Parcelable {
          * @param skip464xlat skip464xlat for this APN.
          * @hide
          */
-        public Builder setSkip464Xlat(@Annotation.Skip464XlatStatus int skip464xlat) {
+        public Builder setSkip464Xlat(@Skip464XlatStatus int skip464xlat) {
             this.mSkip464Xlat = skip464xlat;
             return this;
         }
