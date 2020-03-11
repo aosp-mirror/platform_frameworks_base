@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManager.START_ABORTED;
+import static android.app.ActivityManager.START_CANCELED;
 import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_FORWARD_AND_REQUEST_CONFLICT;
@@ -892,7 +893,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .execute();
 
         // Simulate a failed start
-        starter.postStartActivityProcessing(null, START_ABORTED, null);
+        starter.postStartActivityProcessing(null, START_CANCELED, null);
 
         verify(recentTasks, times(1)).setFreezeTaskListReordering();
         verify(recentTasks, times(1)).resetFreezeTaskListReorderingOnTimeout();
