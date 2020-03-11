@@ -238,7 +238,11 @@ class ControlsControllerImpl @Inject constructor (
                             }
                             val removed = findRemoved(favoritesForComponentKeys.toSet(), controls)
                             val controlsWithFavorite = controls.map {
-                                ControlStatus(it, it.controlId in favoritesForComponentKeys)
+                                ControlStatus(
+                                    it,
+                                    componentName,
+                                    it.controlId in favoritesForComponentKeys
+                                )
                             }
                             val loadData = createLoadDataObject(
                                 Favorites.getControlsForComponent(componentName)
@@ -290,7 +294,7 @@ class ControlsControllerImpl @Inject constructor (
                 .setTitle(controlInfo.controlTitle)
                 .setDeviceType(controlInfo.deviceType)
                 .build()
-        return ControlStatus(control, true, setRemoved)
+        return ControlStatus(control, componentName, true, setRemoved)
     }
 
     private fun findRemoved(favoriteKeys: Set<String>, list: List<Control>): Set<String> {
@@ -489,10 +493,12 @@ private object Favorites {
                 updatedStructure
             } else { s }
 
-            structures.add(newStructure)
+            if (!newStructure.controls.isEmpty()) {
+                structures.add(newStructure)
+            }
         }
 
-        if (!replaced) {
+        if (!replaced && !updatedStructure.controls.isEmpty()) {
             structures.add(updatedStructure)
         }
 

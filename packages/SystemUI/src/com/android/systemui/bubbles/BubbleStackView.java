@@ -126,6 +126,11 @@ public class BubbleStackView extends FrameLayout {
     @VisibleForTesting
     static final int FLYOUT_HIDE_AFTER = 5000;
 
+    private static final PhysicsAnimator.SpringConfig FLYOUT_IME_ANIMATION_SPRING_CONFIG =
+            new PhysicsAnimator.SpringConfig(
+                    StackAnimationController.IME_ANIMATION_STIFFNESS,
+                    StackAnimationController.DEFAULT_BOUNCINESS);
+
     /**
      * Interface to synchronize {@link View} state and the screen.
      *
@@ -903,14 +908,8 @@ public class BubbleStackView extends FrameLayout {
      * The {@link Bubble} that is expanded, null if one does not exist.
      */
     @Nullable
-    Bubble getExpandedBubble() {
-        if (mExpandedBubble == null
-                || (BubbleExperimentConfig.allowBubbleOverflow(mContext)
-                    && mExpandedBubble.getIconView() == mBubbleOverflow.getBtn()
-                    && BubbleOverflow.KEY.equals(mExpandedBubble.getKey()))) {
-            return null;
-        }
-        return (Bubble) mExpandedBubble;
+    BubbleViewProvider getExpandedBubble() {
+        return mExpandedBubble;
     }
 
     // via BubbleData.Listener
@@ -1240,7 +1239,8 @@ public class BubbleStackView extends FrameLayout {
     }
 
     /**
-     * @deprecated use {@link #setExpanded(boolean)} and {@link #setSelectedBubble(Bubble)}
+     * @deprecated use {@link #setExpanded(boolean)} and
+     * {@link BubbleData#setSelectedBubble(Bubble)}
      */
     @Deprecated
     @MainThread
@@ -1282,7 +1282,7 @@ public class BubbleStackView extends FrameLayout {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "animateCollapse");
             Log.d(TAG, BubbleDebugConfig.formatBubblesString(getBubblesOnScreen(),
-                    getExpandedBubble()));
+                    mExpandedBubble));
         }
         updateOverflowBtnVisibility(/* apply */ false);
         mBubbleContainer.cancelAllAnimations();
@@ -1354,8 +1354,23 @@ public class BubbleStackView extends FrameLayout {
     public void onImeVisibilityChanged(boolean visible, int height) {
         mStackAnimationController.setImeHeight(visible ? height + mImeOffset : 0);
 
-        if (!mIsExpanded) {
-            mStackAnimationController.animateForImeVisibility(visible);
+        if (!mIsExpanded && getBubbleCount() > 0) {
+            final float stackDestinationY =
+                    mStackAnimationController.animateForImeVisibility(visible);
+
+            // How far the stack is animating due to IME, we'll just animate the flyout by that
+            // much too.
+            final float stackDy =
+                    stackDestinationY - mStackAnimationController.getStackPosition().y;
+
+            // If the flyout is visible, translate it along with the bubble stack.
+            if (mFlyout.getVisibility() == VISIBLE) {
+                PhysicsAnimator.getInstance(mFlyout)
+                        .spring(DynamicAnimation.TRANSLATION_Y,
+                                mFlyout.getTranslationY() + stackDy,
+                                FLYOUT_IME_ANIMATION_SPRING_CONFIG)
+                        .start();
+            }
         }
     }
 
@@ -1842,17 +1857,16 @@ public class BubbleStackView extends FrameLayout {
     }
 
     private void updatePointerPosition() {
-        Bubble expandedBubble = getExpandedBubble();
-        if (expandedBubble == null) {
+        if (mExpandedBubble == null) {
             return;
         }
-        int index = getBubbleIndex(expandedBubble);
+        int index = getBubbleIndex(mExpandedBubble);
         float bubbleLeftFromScreenLeft = mExpandedAnimationController.getBubbleLeft(index);
         float halfBubble = mBubbleSize / 2f;
         float bubbleCenter = bubbleLeftFromScreenLeft + halfBubble;
         // Padding might be adjusted for insets, so get it directly from the view
         bubbleCenter -= mExpandedViewContainer.getPaddingLeft();
-        expandedBubble.getExpandedView().setPointerPosition(bubbleCenter);
+        mExpandedBubble.getExpandedView().setPointerPosition(bubbleCenter);
     }
 
     /**
@@ -1874,11 +1888,10 @@ public class BubbleStackView extends FrameLayout {
      * is between 0 and the bubble count minus 1.
      */
     int getBubbleIndex(@Nullable BubbleViewProvider provider) {
-        if (provider == null || provider.getKey() == BubbleOverflow.KEY) {
+        if (provider == null) {
             return 0;
         }
-        Bubble b = (Bubble) provider;
-        return mBubbleContainer.indexOfChild(b.getIconView());
+        return mBubbleContainer.indexOfChild(provider.getIconView());
     }
 
     /**

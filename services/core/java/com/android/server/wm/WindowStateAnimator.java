@@ -383,8 +383,9 @@ class WindowStateAnimator {
             // Make sure to reparent any children of the new surface back to the preserved
             // surface before destroying it.
             if (mSurfaceController != null && mPendingDestroySurface != null) {
-                mPostDrawTransaction.reparentChildren(mSurfaceController.mSurfaceControl,
-                        mPendingDestroySurface.mSurfaceControl).apply();
+                mPostDrawTransaction.reparentChildren(
+                    mSurfaceController.getClientViewRootSurface(),
+                    mPendingDestroySurface.mSurfaceControl).apply();
             }
             destroySurfaceLocked();
             mSurfaceDestroyDeferred = true;
@@ -413,9 +414,9 @@ class WindowStateAnimator {
                 // child layers need to be reparented to the new surface to make this
                 // transparent to the app.
                 if (mWin.mActivityRecord == null || mWin.mActivityRecord.isRelaunching() == false) {
-                    mPostDrawTransaction.reparentChildren(mPendingDestroySurface.mSurfaceControl,
-                            mSurfaceController.mSurfaceControl)
-                            .apply();
+                    mPostDrawTransaction.reparentChildren(
+                        mPendingDestroySurface.getClientViewRootSurface(),
+                        mSurfaceController.mSurfaceControl).apply();
                 }
             }
         }
@@ -875,7 +876,7 @@ class WindowStateAnimator {
 
         if (mSurfaceResized && (mAttrType == TYPE_BASE_APPLICATION) &&
             (task != null) && (task.getMainWindowSizeChangeTransaction() != null)) {
-            mSurfaceController.deferTransactionUntil(mWin.getDeferTransactionBarrier(),
+            mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
                     mWin.getFrameNumber());
             SurfaceControl.mergeToGlobalTransaction(task.getMainWindowSizeChangeTransaction());
             task.setMainWindowSizeChangeTransaction(null);
@@ -1012,7 +1013,7 @@ class WindowStateAnimator {
                         // the WS position is reset (so the stack position is shown) at the same
                         // time that the buffer size changes.
                         setOffsetPositionForStackResize(false);
-                        mSurfaceController.deferTransactionUntil(mWin.getDeferTransactionBarrier(),
+                        mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
                                 mWin.getFrameNumber());
                     } else {
                         final ActivityStack stack = mWin.getRootTask();
@@ -1043,7 +1044,7 @@ class WindowStateAnimator {
         // comes in at the new size (normally position and crop are unfrozen).
         // deferTransactionUntil accomplishes this for us.
         if (wasForceScaled && !mForceScaleUntilResize) {
-            mSurfaceController.deferTransactionUntil(mWin.getDeferTransactionBarrier(),
+            mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
                     mWin.getFrameNumber());
             mSurfaceController.forceScaleableInTransaction(false);
         }
@@ -1288,8 +1289,9 @@ class WindowStateAnimator {
         if (mPendingDestroySurface != null && mDestroyPreservedSurfaceUponRedraw) {
             final SurfaceControl pendingSurfaceControl = mPendingDestroySurface.mSurfaceControl;
             mPostDrawTransaction.reparent(pendingSurfaceControl, null);
-            mPostDrawTransaction.reparentChildren(pendingSurfaceControl,
-                    mSurfaceController.mSurfaceControl);
+            mPostDrawTransaction.reparentChildren(
+                mPendingDestroySurface.getClientViewRootSurface(),
+                mSurfaceController.mSurfaceControl);
         }
 
         SurfaceControl.mergeToGlobalTransaction(mPostDrawTransaction);
@@ -1521,10 +1523,10 @@ class WindowStateAnimator {
         mOffsetPositionForStackResize = offsetPositionForStackResize;
     }
 
-    SurfaceControl getDeferTransactionBarrier() {
+    SurfaceControl getClientViewRootSurface() {
         if (!hasSurface()) {
             return null;
         }
-        return mSurfaceController.getDeferTransactionBarrier();
+        return mSurfaceController.getClientViewRootSurface();
     }
 }

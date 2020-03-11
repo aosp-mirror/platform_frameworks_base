@@ -647,14 +647,6 @@ class ActivityStack extends Task {
 
         if (prevWindowingMode != getWindowingMode()) {
             mDisplayContent.onStackWindowingModeChanged(this);
-
-            if (inSplitScreenSecondaryWindowingMode()) {
-                // When the stack is resized due to entering split screen secondary, offset the
-                // windows to compensate for the new stack position.
-                forAllWindows(w -> {
-                    w.mWinAnimator.setOffsetPositionForStackResize(true);
-                }, true);
-            }
         }
 
         final DisplayContent display = getDisplay();
@@ -2393,8 +2385,10 @@ class ActivityStack extends Task {
         }
         Task task = null;
         if (!newTask && isOrhasTask) {
+            // Starting activity cannot be occluding activity, otherwise starting window could be
+            // remove immediately without transferring to starting activity.
             final ActivityRecord occludingActivity = getActivity(
-                    (ar) -> !ar.finishing && ar.occludesParent(), true, rTask);
+                    (ar) -> !ar.finishing && ar.occludesParent(), true, r);
             if (occludingActivity != null) {
                 // Here it is!  Now, if this is not yet visible (occluded by another task) to the
                 // user, then just add it without starting; it will get started when the user
@@ -3881,9 +3875,10 @@ class ActivityStack extends Task {
             return;
         }
         if (mTile != null) {
-            reparentSurfaceControl(getPendingTransaction(), mTile.getSurfaceControl());
+            // don't use reparentSurfaceControl because we need to bypass taskorg check
+            mSurfaceAnimator.reparent(getPendingTransaction(), mTile.getSurfaceControl());
         } else if (mTile == null && origTile != null) {
-            reparentSurfaceControl(getPendingTransaction(), getParentSurfaceControl());
+            mSurfaceAnimator.reparent(getPendingTransaction(), getParentSurfaceControl());
         }
     }
 

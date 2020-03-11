@@ -847,8 +847,8 @@ public class ApplicationExitInfoTest {
         app.connectionGroup = connectionGroup;
         app.setProcState = procState;
         app.lastMemInfo = spy(new Debug.MemoryInfo());
-        doReturn((int) pss).when(app.lastMemInfo).getTotalPss();
-        doReturn((int) rss).when(app.lastMemInfo).getTotalRss();
+        app.lastPss = pss;
+        app.mLastRss = rss;
         return app;
     }
 

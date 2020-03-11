@@ -72,4 +72,12 @@ interface IAppSearchManager {
     void query(
         in byte[] searchSpecBytes, in byte[] resultSpecBytes, in byte[] scoringSpecBytes,
         in AndroidFuture<AppSearchResult> callback);
+
+    /**
+     * Deletes all documents belonging to the calling app.
+     *
+     * @param callback {@link AndroidFuture}&lt;{@link AppSearchResult}&lt;{@link Void}&gt;&gt;.
+     *     Will be completed with the result of the call.
+     */
+    void deleteAll(in AndroidFuture<AppSearchResult> callback);
 }

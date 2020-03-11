@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Provides access to environment variables.
@@ -1309,6 +1311,49 @@ public class Environment {
         return !defaultScopedStorage && !forceEnableScopedStorage;
     }
 
+    /**
+     * Returns whether the calling app has All Files Access on the primary shared/external storage
+     * media.
+     * <p>Declaring the permission {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} isn't
+     * enough to gain the access.
+     * <p>To request access, use
+     * {@link android.provider.Settings#ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION}.
+     */
+    public static boolean isExternalStorageManager() {
+        final File externalDir = sCurrentUser.getExternalDirs()[0];
+        return isExternalStorageManager(externalDir);
+    }
+
+    /**
+     * Returns whether the calling app has All Files Access at the given {@code path}
+     * <p>Declaring the permission {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE} isn't
+     * enough to gain the access.
+     * <p>To request access, use
+     * {@link android.provider.Settings#ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION}.
+     */
+    public static boolean isExternalStorageManager(@NonNull File path) {
+        final Context context = Objects.requireNonNull(AppGlobals.getInitialApplication());
+        String packageName = Objects.requireNonNull(context.getPackageName());
+        int uid = context.getApplicationInfo().uid;
+
+        final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
+        final int opMode =
+                appOps.checkOpNoThrow(AppOpsManager.OP_MANAGE_EXTERNAL_STORAGE, uid, packageName);
+
+        switch (opMode) {
+            case AppOpsManager.MODE_DEFAULT:
+                return PackageManager.PERMISSION_GRANTED
+                        == context.checkPermission(
+                                Manifest.permission.MANAGE_EXTERNAL_STORAGE, Process.myPid(), uid);
+            case AppOpsManager.MODE_ALLOWED:
+                return true;
+            case AppOpsManager.MODE_ERRORED:
+            case AppOpsManager.MODE_IGNORED:
+                return false;
+            default:
+                throw new IllegalStateException("Unknown AppOpsManager mode " + opMode);
+        }
+    }
 
     static File getDirectory(String variableName, String defaultPath) {
         String path = System.getenv(variableName);

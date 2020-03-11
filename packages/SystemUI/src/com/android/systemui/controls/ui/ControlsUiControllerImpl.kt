@@ -16,19 +16,14 @@
 
 package com.android.systemui.controls.ui
 
-import android.accounts.Account
-import android.accounts.AccountManager
 import android.app.Dialog
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.content.SharedPreferences
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
-import android.os.IBinder
 import android.service.controls.Control
-import android.service.controls.TokenProvider
 import android.service.controls.actions.ControlAction
 import android.util.Log
 import android.view.ContextThemeWrapper
@@ -60,68 +55,6 @@ import java.text.Collator
 
 import javax.inject.Inject
 import javax.inject.Singleton
-
-// TEMP CODE for MOCK
-private const val TOKEN = "https://www.googleapis.com/auth/assistant"
-private const val SCOPE = "oauth2:" + TOKEN
-private var tokenProviderConnection: TokenProviderConnection? = null
-class TokenProviderConnection(
-    val cc: ControlsController,
-    val context: Context,
-    val structure: StructureInfo?
-) : ServiceConnection {
-    private var mTokenProvider: TokenProvider? = null
-
-    override fun onServiceConnected(cName: ComponentName, binder: IBinder) {
-        Thread({
-            Log.i(ControlsUiController.TAG, "TokenProviderConnection connected")
-            mTokenProvider = TokenProvider.Stub.asInterface(binder)
-
-            val mLastAccountName = mTokenProvider?.getAccountName()
-
-            if (mLastAccountName == null || mLastAccountName.isEmpty()) {
-                Log.e(ControlsUiController.TAG, "NO ACCOUNT IS SET. Open HomeMock app")
-            } else {
-                mTokenProvider?.setAuthToken(getAuthToken(mLastAccountName))
-                structure?.let {
-                    cc.subscribeToFavorites(it)
-                }
-            }
-        }, "TokenProviderThread").start()
-    }
-
-    override fun onServiceDisconnected(cName: ComponentName) {
-        mTokenProvider = null
-    }
-
-    fun getAuthToken(accountName: String): String? {
-        val am = AccountManager.get(context)
-        val accounts = am.getAccountsByType("com.google")
-        if (accounts == null || accounts.size == 0) {
-            Log.w(ControlsUiController.TAG, "No com.google accounts found")
-            return null
-        }
-
-        var account: Account? = null
-        for (a in accounts) {
-            if (a.name.equals(accountName)) {
-                account = a
-                break
-            }
-        }
-
-        if (account == null) {
-            account = accounts[0]
-        }
-
-        try {
-            return am.blockingGetAuthToken(account!!, SCOPE, true)
-        } catch (e: Throwable) {
-            Log.e(ControlsUiController.TAG, "Error getting auth token", e)
-            return null
-        }
-    }
-}
 
 private data class ControlKey(val componentName: ComponentName, val controlId: String)
 
@@ -215,21 +148,10 @@ class ControlsUiControllerImpl @Inject constructor (
                 ControlKey(selectedStructure.componentName, it.ci.controlId)
             }
             listingCallback = createCallback(::showControlsView)
+            controlsController.get().subscribeToFavorites(selectedStructure)
         }
 
         controlsListingController.get().addCallback(listingCallback)
-
-        // Temp code to pass auth
-        tokenProviderConnection = TokenProviderConnection(controlsController.get(), context,
-                selectedStructure)
-
-        val serviceIntent = Intent()
-        serviceIntent.setComponent(ComponentName("com.android.systemui.home.mock",
-                "com.android.systemui.home.mock.AuthService"))
-        if (!context.bindService(serviceIntent, tokenProviderConnection!!,
-                Context.BIND_AUTO_CREATE)) {
-            controlsController.get().subscribeToFavorites(selectedStructure)
-        }
     }
 
     private fun showInitialSetupView(items: List<SelectionItem>) {
@@ -266,36 +188,23 @@ class ControlsUiControllerImpl @Inject constructor (
         parent.removeAllViews()
         controlViewsById.clear()
 
-        val inflater = LayoutInflater.from(context)
-        inflater.inflate(R.layout.controls_with_favorites, parent, true)
+        createListView()
+        createDropDown(items)
+    }
 
-        val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
-        var lastRow: ViewGroup = createRow(inflater, listView)
-        selectedStructure.controls.forEach {
-            if (lastRow.getChildCount() == 2) {
-                lastRow = createRow(inflater, listView)
-            }
-            val item = inflater.inflate(
-                R.layout.controls_base_item, lastRow, false) as ViewGroup
-            lastRow.addView(item)
-            val cvh = ControlViewHolder(item, controlsController.get(), uiExecutor, bgExecutor)
-            val key = ControlKey(selectedStructure.componentName, it.controlId)
-            cvh.bindData(controlsById.getValue(key))
-            controlViewsById.put(key, cvh)
-        }
-
-        // add spacer if necessary to keep control size consistent
-        if ((selectedStructure.controls.size % 2) == 1) {
-            lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
+    private fun createDropDown(items: List<SelectionItem>) {
+        items.forEach {
+            RenderInfo.registerComponentIcon(it.componentName, it.icon)
         }
 
         val itemsByComponent = items.associateBy { it.componentName }
-        var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
-            val listItems = allStructures.mapNotNull {
-                itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
-            }
+        val itemsWithStructure = allStructures.mapNotNull {
+            itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
+        }
+        val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
 
-            addAll(listItems + addControlsItem)
+        var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
+            addAll(itemsWithStructure + addControlsItem)
         }
 
         /*
@@ -303,16 +212,15 @@ class ControlsUiControllerImpl @Inject constructor (
          * for this dialog. Use a textView with the ListPopupWindow to achieve
          * a similar effect
          */
-        val item = adapter.findSelectionItem(selectedStructure) ?: adapter.getItem(0)
         parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
-            setText(item.getTitle())
+            setText(selectionItem.getTitle())
             // override the default color on the dropdown drawable
             (getBackground() as LayerDrawable).getDrawable(1)
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
         parent.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription(item.getTitle())
-            setImageDrawable(item.icon)
+            setContentDescription(selectionItem.getTitle())
+            setImageDrawable(selectionItem.icon)
         }
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
         anchor.setOnClickListener(object : View.OnClickListener {
@@ -348,6 +256,36 @@ class ControlsUiControllerImpl @Inject constructor (
                 }
             }
         })
+    }
+
+    private fun createListView() {
+        val inflater = LayoutInflater.from(context)
+        inflater.inflate(R.layout.controls_with_favorites, parent, true)
+
+        val listView = parent.requireViewById(R.id.global_actions_controls_list) as ViewGroup
+        var lastRow: ViewGroup = createRow(inflater, listView)
+        selectedStructure.controls.forEach {
+            if (lastRow.getChildCount() == 2) {
+                lastRow = createRow(inflater, listView)
+            }
+            val baseLayout = inflater.inflate(
+                R.layout.controls_base_item, lastRow, false) as ViewGroup
+            lastRow.addView(baseLayout)
+            val cvh = ControlViewHolder(
+                baseLayout,
+                controlsController.get(),
+                uiExecutor,
+                bgExecutor
+            )
+            val key = ControlKey(selectedStructure.componentName, it.controlId)
+            cvh.bindData(controlsById.getValue(key))
+            controlViewsById.put(key, cvh)
+        }
+
+        // add spacer if necessary to keep control size consistent
+        if ((selectedStructure.controls.size % 2) == 1) {
+            lastRow.addView(Space(context), LinearLayout.LayoutParams(0, 0, 1f))
+        }
     }
 
     private fun loadPreference(structures: List<StructureInfo>): StructureInfo {
@@ -393,13 +331,13 @@ class ControlsUiControllerImpl @Inject constructor (
         activeDialog?.dismiss()
 
         controlsController.get().unsubscribe()
-        context.unbindService(tokenProviderConnection)
-        tokenProviderConnection = null
 
         parent.removeAllViews()
         controlsById.clear()
         controlViewsById.clear()
         controlsListingController.get().removeCallback(listingCallback)
+
+        RenderInfo.clearCache()
     }
 
     override fun onRefreshState(componentName: ComponentName, controls: List<Control>) {
@@ -438,6 +376,11 @@ class ControlsUiControllerImpl @Inject constructor (
         listView.addView(row)
         return row
     }
+
+    private fun findSelectionItem(si: StructureInfo, items: List<SelectionItem>): SelectionItem? =
+        items.firstOrNull {
+            it.componentName == si.componentName && it.structure == si.structure
+        }
 }
 
 private data class SelectionItem(
@@ -467,18 +410,5 @@ private class ItemAdapter(
             setImageDrawable(item.icon)
         }
         return view
-    }
-
-    fun findSelectionItem(si: StructureInfo): SelectionItem? {
-        var i = 0
-        while (i < getCount()) {
-            val item = getItem(i)
-            if (item.componentName == si.componentName &&
-                item.structure == si.structure) {
-                return item
-            }
-            i++
-        }
-        return null
     }
 }

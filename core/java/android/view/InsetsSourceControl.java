@@ -94,9 +94,9 @@ public class InsetsSourceControl implements Parcelable {
         dest.writeParcelable(mSurfacePosition, 0 /* flags*/);
     }
 
-    public void release() {
+    public void release(InsetsController controller) {
         if (mLeash != null) {
-            mLeash.release();
+            controller.releaseSurfaceControlFromRt(mLeash);
         }
     }
 

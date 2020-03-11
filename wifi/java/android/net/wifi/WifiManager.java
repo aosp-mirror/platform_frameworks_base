@@ -2563,7 +2563,7 @@ public class WifiManager {
      *        valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
      * @return {@code true} if supported, {@code false} otherwise.
      */
-    public boolean isWifiStandardSupported(@ScanResult.WifiStandard int standard) {
+    public boolean isWifiStandardSupported(@WifiAnnotations.WifiStandard int standard) {
         try {
             return mService.isWifiStandardSupported(standard);
         } catch (RemoteException e) {
@@ -2826,7 +2826,7 @@ public class WifiManager {
      */
     @Nullable
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public String getCountryCode() {
         try {
             return mService.getCountryCode();
@@ -5986,22 +5986,22 @@ public class WifiManager {
     }
 
     /**
-     * Callback interface for framework to receive network status changes and trigger of updating
+     * Callback interface for framework to receive network status updates and trigger of updating
      * {@link WifiUsabilityStatsEntry}.
      *
      * @hide
      */
     @SystemApi
-    public interface ScoreChangeCallback {
+    public interface ScoreUpdateObserver {
         /**
          * Called by applications to indicate network status.
          *
          * @param sessionId The ID to indicate current Wi-Fi network connection obtained from
-         *                  {@link WifiConnectedNetworkScorer#start(int)}.
+         *                  {@link WifiConnectedNetworkScorer#onStart(int)}.
          * @param score The score representing link quality of current Wi-Fi network connection.
          *              Populated by connected network scorer in applications..
          */
-        void onScoreChange(int sessionId, int score);
+        void notifyScoreUpdate(int sessionId, int score);
 
         /**
          * Called by applications to trigger an update of {@link WifiUsabilityStatsEntry}.
@@ -6009,36 +6009,36 @@ public class WifiManager {
          * {@link addOnWifiUsabilityStatsListener(Executor, OnWifiUsabilityStatsListener)}.
          *
          * @param sessionId The ID to indicate current Wi-Fi network connection obtained from
-         *                  {@link WifiConnectedNetworkScorer#start(int)}.
+         *                  {@link WifiConnectedNetworkScorer#onStart(int)}.
          */
-        void onTriggerUpdateOfWifiUsabilityStats(int sessionId);
+        void triggerUpdateOfWifiUsabilityStats(int sessionId);
     }
 
     /**
-     * Callback proxy for {@link ScoreChangeCallback} objects.
+     * Callback proxy for {@link ScoreUpdateObserver} objects.
      *
      * @hide
      */
-    private class ScoreChangeCallbackProxy implements ScoreChangeCallback {
-        private final IScoreChangeCallback mScoreChangeCallback;
+    private class ScoreUpdateObserverProxy implements ScoreUpdateObserver {
+        private final IScoreUpdateObserver mScoreUpdateObserver;
 
-        private ScoreChangeCallbackProxy(IScoreChangeCallback callback) {
-            mScoreChangeCallback = callback;
+        private ScoreUpdateObserverProxy(IScoreUpdateObserver observer) {
+            mScoreUpdateObserver = observer;
         }
 
         @Override
-        public void onScoreChange(int sessionId, int score) {
+        public void notifyScoreUpdate(int sessionId, int score) {
             try {
-                mScoreChangeCallback.onScoreChange(sessionId, score);
+                mScoreUpdateObserver.notifyScoreUpdate(sessionId, score);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
         }
 
         @Override
-        public void onTriggerUpdateOfWifiUsabilityStats(int sessionId) {
+        public void triggerUpdateOfWifiUsabilityStats(int sessionId) {
             try {
-                mScoreChangeCallback.onTriggerUpdateOfWifiUsabilityStats(sessionId);
+                mScoreUpdateObserver.triggerUpdateOfWifiUsabilityStats(sessionId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -6058,21 +6058,21 @@ public class WifiManager {
          * Called by framework to indicate the start of a network connection.
          * @param sessionId The ID to indicate current Wi-Fi network connection.
          */
-        void start(int sessionId);
+        void onStart(int sessionId);
 
         /**
          * Called by framework to indicate the end of a network connection.
          * @param sessionId The ID to indicate current Wi-Fi network connection obtained from
-         *                  {@link WifiConnectedNetworkScorer#start(int)}.
+         *                  {@link WifiConnectedNetworkScorer#onStart(int)}.
          */
-        void stop(int sessionId);
+        void onStop(int sessionId);
 
         /**
          * Framework sets callback for score change events after application sets its scorer.
-         * @param cbImpl The instance for {@link WifiManager#ScoreChangeCallback}. Should be
+         * @param observerImpl The instance for {@link WifiManager#ScoreUpdateObserver}. Should be
          * implemented and instantiated by framework.
          */
-        void setScoreChangeCallback(@NonNull ScoreChangeCallback cbImpl);
+        void onSetScoreUpdateObserver(@NonNull ScoreUpdateObserver observerImpl);
     }
 
     /**
@@ -6090,32 +6090,32 @@ public class WifiManager {
         }
 
         @Override
-        public void start(int sessionId) {
+        public void onStart(int sessionId) {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "WifiConnectedNetworkScorer: " + "start: sessionId=" + sessionId);
+                Log.v(TAG, "WifiConnectedNetworkScorer: " + "onStart: sessionId=" + sessionId);
             }
             Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mScorer.start(sessionId));
+            mExecutor.execute(() -> mScorer.onStart(sessionId));
         }
 
         @Override
-        public void stop(int sessionId) {
+        public void onStop(int sessionId) {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "WifiConnectedNetworkScorer: " + "stop: sessionId=" + sessionId);
+                Log.v(TAG, "WifiConnectedNetworkScorer: " + "onStop: sessionId=" + sessionId);
             }
             Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mScorer.stop(sessionId));
+            mExecutor.execute(() -> mScorer.onStop(sessionId));
         }
 
         @Override
-        public void setScoreChangeCallback(IScoreChangeCallback cbImpl) {
+        public void onSetScoreUpdateObserver(IScoreUpdateObserver observerImpl) {
             if (mVerboseLoggingEnabled) {
                 Log.v(TAG, "WifiConnectedNetworkScorer: "
-                        + "setScoreChangeCallback: cbImpl=" + cbImpl);
+                        + "onSetScoreUpdateObserver: observerImpl=" + observerImpl);
             }
             Binder.clearCallingIdentity();
-            mExecutor.execute(() -> mScorer.setScoreChangeCallback(
-                    new ScoreChangeCallbackProxy(cbImpl)));
+            mExecutor.execute(() -> mScorer.onSetScoreUpdateObserver(
+                    new ScoreUpdateObserverProxy(observerImpl)));
         }
     }
 

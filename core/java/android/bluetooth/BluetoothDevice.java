@@ -231,6 +231,13 @@ public final class BluetoothDevice implements Parcelable {
     public static final int BATTERY_LEVEL_UNKNOWN = -1;
 
     /**
+     * Used as an error value for {@link #getBatteryLevel()} to represent bluetooth is off
+     *
+     * @hide
+     */
+    public static final int BATTERY_LEVEL_BLUETOOTH_OFF = -100;
+
+    /**
      * Used as a Parcelable {@link BluetoothDevice} extra field in every intent
      * broadcast by this class. It contains the {@link BluetoothDevice} that
      * the intent applies to.
@@ -1116,9 +1123,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Get the most recent identified battery level of this Bluetooth device
      *
-     * @return Battery level in percents from 0 to 100, or {@link #BATTERY_LEVEL_UNKNOWN} if
-     * Bluetooth is disabled, or device is disconnected, or does not have any battery reporting
-     * service, or return value is invalid
+     * @return Battery level in percents from 0 to 100, {@link #BATTERY_LEVEL_BLUETOOTH_OFF} if
+     * Bluetooth is disabled or {@link #BATTERY_LEVEL_UNKNOWN} if device is disconnected, or does
+     * not have any battery reporting service, or return value is invalid
      * @hide
      */
     @SystemApi
@@ -1127,7 +1134,7 @@ public final class BluetoothDevice implements Parcelable {
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "Bluetooth disabled. Cannot get remote device battery level");
-            return BATTERY_LEVEL_UNKNOWN;
+            return BATTERY_LEVEL_BLUETOOTH_OFF;
         }
         try {
             return service.getBatteryLevel(this);
@@ -1731,7 +1738,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Sets whether the message access is allowed to this device.
      *
-     * @param value is the value we are setting the message access permission to
+     * @param value Can be {@link #ACCESS_UNKNOWN} if the device is unbonded,
+     * {@link #ACCESS_ALLOWED} if the permission is being granted, or {@link #ACCESS_REJECTED} if
+     * the permission is not being granted.
      * @return Whether the value has been successfully set.
      * @hide
      */
@@ -1778,8 +1787,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Sets whether the Sim access is allowed to this device.
      *
-     * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link
-     * #ACCESS_REJECTED}.
+     * @param value Can be {@link #ACCESS_UNKNOWN} if the device is unbonded,
+     * {@link #ACCESS_ALLOWED} if the permission is being granted, or {@link #ACCESS_REJECTED} if
+     * the permission is not being granted.
      * @return Whether the value has been successfully set.
      * @hide
      */

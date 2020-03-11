@@ -1,8 +1,8 @@
 package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
-import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -16,11 +16,11 @@ import android.os.Parcelable;
  */
 public class AppTransitionAnimationSpec implements Parcelable {
     public final int taskId;
-    public final GraphicBuffer buffer;
+    public final HardwareBuffer buffer;
     public final Rect rect;
 
     @UnsupportedAppUsage
-    public AppTransitionAnimationSpec(int taskId, GraphicBuffer buffer, Rect rect) {
+    public AppTransitionAnimationSpec(int taskId, HardwareBuffer buffer, Rect rect) {
         this.taskId = taskId;
         this.rect = rect;
         this.buffer = buffer;

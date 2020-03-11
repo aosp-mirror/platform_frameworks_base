@@ -25,7 +25,6 @@ class DefaultBehavior : Behavior {
 
     override fun bind(cws: ControlWithState) {
         cvh.status.setText(cws.control?.getStatusText() ?: "")
-        cvh.setEnabled(false)
-        cvh.applyRenderInfo(RenderInfo.lookup(cws.ci.deviceType, false))
+        cvh.applyRenderInfo(false)
     }
 }

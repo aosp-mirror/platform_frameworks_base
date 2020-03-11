@@ -252,10 +252,10 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -3151,7 +3151,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Reset the last saved PiP snap fraction on removal.
         mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
-
+        mWmService.mEmbeddedWindowController.onActivityRemoved(this);
         mRemovingFromDisplay = false;
     }
 
@@ -3723,7 +3723,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             case ANIM_THUMBNAIL_SCALE_UP:
             case ANIM_THUMBNAIL_SCALE_DOWN:
                 final boolean scaleUp = (animationType == ANIM_THUMBNAIL_SCALE_UP);
-                final GraphicBuffer buffer = pendingOptions.getThumbnail();
+                final HardwareBuffer buffer = pendingOptions.getThumbnail();
                 displayContent.mAppTransition.overridePendingAppTransitionThumb(buffer,
                         pendingOptions.getStartX(), pendingOptions.getStartY(),
                         pendingOptions.getOnAnimationStartListener(),
@@ -5899,7 +5899,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (!isAnimating(PARENTS)) {
             return;
         }
-        final GraphicBuffer thumbnailHeader =
+        final HardwareBuffer thumbnailHeader =
                 getDisplayContent().mAppTransition.getAppTransitionThumbnailHeader(task);
         if (thumbnailHeader == null) {
             ProtoLog.d(WM_DEBUG_APP_TRANSITIONS, "No thumbnail header bitmap for: %s", task);
@@ -5930,7 +5930,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final int thumbnailDrawableRes = task.mUserId == mWmService.mCurrentUserId
                 ? R.drawable.ic_account_circle
                 : R.drawable.ic_corp_badge;
-        final GraphicBuffer thumbnail =
+        final HardwareBuffer thumbnail =
                 getDisplayContent().mAppTransition
                         .createCrossProfileAppsThumbnail(thumbnailDrawableRes, frame);
         if (thumbnail == null) {
@@ -5945,7 +5945,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mThumbnail.startAnimation(transaction, animation, new Point(frame.left, frame.top));
     }
 
-    private Animation loadThumbnailAnimation(GraphicBuffer thumbnailHeader) {
+    private Animation loadThumbnailAnimation(HardwareBuffer thumbnailHeader) {
         final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
 
         // If this is a multi-window scenario, we use the windows frame as
@@ -7626,7 +7626,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return new RemoteAnimationTarget(task.mTaskId, record.getMode(),
                 record.mAdapter.mCapturedLeash, !fillsParent(),
                 mainWindow.mWinAnimator.mLastClipRect, insets,
-                getPrefixOrderIndex(), record.mAdapter.mPosition,
+                getPrefixOrderIndex(), record.mAdapter.mPosition, record.mAdapter.mLocalBounds,
                 record.mAdapter.mStackBounds, task.getWindowConfiguration(),
                 false /*isNotInRecents*/,
                 record.mThumbnailAdapter != null ? record.mThumbnailAdapter.mCapturedLeash : null,

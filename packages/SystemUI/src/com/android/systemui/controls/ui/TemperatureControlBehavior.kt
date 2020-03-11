@@ -47,10 +47,7 @@ class TemperatureControlBehavior : Behavior {
 
         val activeMode = template.getCurrentActiveMode()
         val enabled = activeMode != 0 && activeMode != TemperatureControlTemplate.MODE_OFF
-        val deviceType = control.getDeviceType()
-
         clipLayer.setLevel(if (enabled) MAX_LEVEL else MIN_LEVEL)
-        cvh.setEnabled(enabled)
-        cvh.applyRenderInfo(RenderInfo.lookup(deviceType, activeMode, enabled))
+        cvh.applyRenderInfo(enabled, activeMode)
     }
 }

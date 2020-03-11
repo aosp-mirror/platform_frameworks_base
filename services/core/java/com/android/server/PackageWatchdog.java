@@ -161,6 +161,9 @@ public class PackageWatchdog {
     private final Runnable mSaveToFile = this::saveToFile;
     private final SystemClock mSystemClock;
     private final BootThreshold mBootThreshold;
+    // The set of packages that have been synced with the ExplicitHealthCheckController
+    @GuardedBy("mLock")
+    private Set<String> mRequestedHealthCheckPackages = new ArraySet<>();
     @GuardedBy("mLock")
     private boolean mIsPackagesReady;
     // Flag to control whether explicit health checks are supported or not
@@ -624,17 +627,22 @@ public class PackageWatchdog {
      * @see #syncRequestsAsync
      */
     private void syncRequests() {
-        Set<String> packages = null;
+        boolean syncRequired = false;
         synchronized (mLock) {
             if (mIsPackagesReady) {
-                packages = getPackagesPendingHealthChecksLocked();
+                Set<String> packages = getPackagesPendingHealthChecksLocked();
+                if (!packages.equals(mRequestedHealthCheckPackages)) {
+                    syncRequired = true;
+                    mRequestedHealthCheckPackages = packages;
+                }
             } // else, we will sync requests when packages become ready
         }
 
         // Call outside lock to avoid holding lock when calling into the controller.
-        if (packages != null) {
-            Slog.i(TAG, "Syncing health check requests for packages: " + packages);
-            mHealthCheckController.syncRequests(packages);
+        if (syncRequired) {
+            Slog.i(TAG, "Syncing health check requests for packages: "
+                    + mRequestedHealthCheckPackages);
+            mHealthCheckController.syncRequests(mRequestedHealthCheckPackages);
         }
     }
 

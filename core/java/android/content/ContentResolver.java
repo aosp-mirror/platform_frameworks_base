@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -4014,6 +4015,10 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
+    @TestApi
+    // We can't accept an already-opened FD here, since these methods are
+    // rewriting actual filesystem paths
+    @SuppressLint("StreamFiles")
     public static @NonNull Uri decodeFromFile(@NonNull File file) {
         return translateDeprecatedDataPath(file.getAbsolutePath());
     }
@@ -4030,6 +4035,10 @@ public abstract class ContentResolver implements ContentInterface {
      * @hide
      */
     @SystemApi
+    @TestApi
+    // We can't accept an already-opened FD here, since these methods are
+    // rewriting actual filesystem paths
+    @SuppressLint("StreamFiles")
     public static @NonNull File encodeToFile(@NonNull Uri uri) {
         return new File(translateDeprecatedDataPath(uri));
     }

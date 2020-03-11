@@ -388,6 +388,7 @@ package android.app {
     field public static final String OPSTR_AUDIO_NOTIFICATION_VOLUME = "android:audio_notification_volume";
     field public static final String OPSTR_AUDIO_RING_VOLUME = "android:audio_ring_volume";
     field public static final String OPSTR_AUDIO_VOICE_VOLUME = "android:audio_voice_volume";
+    field public static final String OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED = "android:auto_revoke_permissions_if_unused";
     field public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE = "android:bind_accessibility_service";
     field public static final String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
     field public static final String OPSTR_GET_ACCOUNTS = "android:get_accounts";
@@ -1653,13 +1654,11 @@ package android.bluetooth {
   }
 
   public final class BluetoothPan implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public void close();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) protected void finalize();
-    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isTetheringOn();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public void setBluetoothTethering(boolean);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isTetheringOn();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setBluetoothTethering(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
     field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
     field public static final int LOCAL_NAP_ROLE = 1; // 0x1
@@ -1766,8 +1765,8 @@ package android.companion {
 
 package android.content {
 
-  public class ApexContext {
-    method @NonNull public static android.content.ApexContext getApexContext(@NonNull String);
+  public class ApexEnvironment {
+    method @NonNull public static android.content.ApexEnvironment getApexEnvironment(@NonNull String);
     method @NonNull public java.io.File getCredentialProtectedDataDirForUser(@NonNull android.os.UserHandle);
     method @NonNull public java.io.File getDeviceProtectedDataDir();
     method @NonNull public java.io.File getDeviceProtectedDataDirForUser(@NonNull android.os.UserHandle);
@@ -2022,7 +2021,6 @@ package android.content.pm {
   }
 
   public final class InstallationFile {
-    ctor public InstallationFile(int, @NonNull String, long, @Nullable byte[], @Nullable byte[]);
     method public long getLengthBytes();
     method public int getLocation();
     method @Nullable public byte[] getMetadata();
@@ -2224,9 +2222,7 @@ package android.content.pm {
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
     field public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = -268435456; // 0xf0000000
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
-    field public static final int FLAG_PERMISSION_AUTO_REVOKED = 1048576; // 0x100000
-    field public static final int FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED = 131072; // 0x20000
-    field public static final int FLAG_PERMISSION_AUTO_REVOKE_USER_SET = 262144; // 0x40000
+    field public static final int FLAG_PERMISSION_AUTO_REVOKED = 131072; // 0x20000
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
     field public static final int FLAG_PERMISSION_GRANTED_BY_ROLE = 32768; // 0x8000
     field public static final int FLAG_PERMISSION_ONE_TIME = 65536; // 0x10000
@@ -2310,7 +2306,7 @@ package android.content.pm {
     method public void onPermissionsChanged(int);
   }
 
-  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKE_IF_UNUSED, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKE_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
   }
 
   public class PermissionGroupInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -7341,7 +7337,7 @@ package android.net.wifi {
     method @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public void factoryReset();
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void forget(int, @Nullable android.net.wifi.WifiManager.ActionListener);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.List<android.util.Pair<android.net.wifi.WifiConfiguration,java.util.Map<java.lang.Integer,java.util.List<android.net.wifi.ScanResult>>>> getAllMatchingWifiConfigs(@NonNull java.util.List<android.net.wifi.ScanResult>);
-    method @Nullable @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public String getCountryCode();
+    method @Nullable @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String getCountryCode();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public android.net.Network getCurrentNetwork();
     method @NonNull @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String[] getFactoryMacAddresses();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD}) public java.util.Map<android.net.wifi.hotspot2.OsuProvider,java.util.List<android.net.wifi.ScanResult>> getMatchingOsuProviders(@Nullable java.util.List<android.net.wifi.ScanResult>);
@@ -7469,9 +7465,9 @@ package android.net.wifi {
     method public void onWifiUsabilityStats(int, boolean, @NonNull android.net.wifi.WifiUsabilityStatsEntry);
   }
 
-  public static interface WifiManager.ScoreChangeCallback {
-    method public void onScoreChange(int, int);
-    method public void onTriggerUpdateOfWifiUsabilityStats(int);
+  public static interface WifiManager.ScoreUpdateObserver {
+    method public void notifyScoreUpdate(int, int);
+    method public void triggerUpdateOfWifiUsabilityStats(int);
   }
 
   public static interface WifiManager.SoftApCallback {
@@ -7491,9 +7487,9 @@ package android.net.wifi {
   }
 
   public static interface WifiManager.WifiConnectedNetworkScorer {
-    method public void setScoreChangeCallback(@NonNull android.net.wifi.WifiManager.ScoreChangeCallback);
-    method public void start(int);
-    method public void stop(int);
+    method public void onSetScoreUpdateObserver(@NonNull android.net.wifi.WifiManager.ScoreUpdateObserver);
+    method public void onStart(int);
+    method public void onStop(int);
   }
 
   public final class WifiMigration {
@@ -7825,9 +7821,6 @@ package android.net.wifi.nl80211 {
     method public int getMaxNumberTxSpatialStreams();
     method public boolean isChannelWidthSupported(int);
     method public boolean isWifiStandardSupported(int);
-    method public void setChannelWidthSupported(int, boolean);
-    method public void setMaxNumberRxSpatialStreams(int);
-    method public void setMaxNumberTxSpatialStreams(int);
     method public void setWifiStandardSupport(int, boolean);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.nl80211.DeviceWiphyCapabilities> CREATOR;
@@ -9880,10 +9873,10 @@ package android.service.autofill.augmented {
   public static final class FillResponse.Builder {
     ctor public FillResponse.Builder();
     method @NonNull public android.service.autofill.augmented.FillResponse build();
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setClientState(@Nullable android.os.Bundle);
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@Nullable android.service.autofill.augmented.FillWindow);
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineActions(@Nullable java.util.List<android.service.autofill.InlinePresentation>);
-    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineSuggestions(@Nullable java.util.List<android.service.autofill.Dataset>);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setClientState(@NonNull android.os.Bundle);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setFillWindow(@NonNull android.service.autofill.augmented.FillWindow);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineActions(@NonNull java.util.List<android.service.autofill.InlineAction>);
+    method @NonNull public android.service.autofill.augmented.FillResponse.Builder setInlineSuggestions(@NonNull java.util.List<android.service.autofill.Dataset>);
   }
 
   public final class FillWindow implements java.lang.AutoCloseable {
@@ -10929,19 +10922,6 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.CbGeoUtils.LatLng> getVertices();
   }
 
-  public final class CdmaEriInformation implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getEriIconIndex();
-    method public int getEriIconMode();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CdmaEriInformation> CREATOR;
-    field public static final int ERI_FLASH = 2; // 0x2
-    field public static final int ERI_ICON_MODE_FLASH = 1; // 0x1
-    field public static final int ERI_ICON_MODE_NORMAL = 0; // 0x0
-    field public static final int ERI_OFF = 1; // 0x1
-    field public static final int ERI_ON = 0; // 0x0
-  }
-
   public class CellBroadcastIntents {
     method public static void sendSmsCbReceivedBroadcast(@NonNull android.content.Context, @Nullable android.os.UserHandle, @NonNull android.telephony.SmsCbMessage, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, int);
     field public static final String ACTION_AREA_INFO_UPDATED = "android.telephony.action.AREA_INFO_UPDATED";
@@ -11636,7 +11616,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCarrierPrivilegeStatus(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<java.lang.String> getCarrierPrivilegedPackagesForAllActiveSubscriptions();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.CarrierRestrictionRules getCarrierRestrictionRules();
-    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.CdmaEriInformation getCdmaEriInformation();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMdn(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin();
@@ -12262,7 +12241,7 @@ package android.telephony.ims {
     method public int getEmergencyServiceCategories();
     method @NonNull public java.util.List<java.lang.String> getEmergencyUrns();
     method public android.telephony.ims.ImsStreamMediaProfile getMediaProfile();
-    method @Nullable public android.os.Bundle getProprietaryCallExtras();
+    method @NonNull public android.os.Bundle getProprietaryCallExtras();
     method public int getRestrictCause();
     method public int getServiceType();
     method public static int getVideoStateFromCallType(int);
@@ -12720,8 +12699,8 @@ package android.telephony.ims {
     field public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17; // 0x11
     field public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23; // 0x17
     field public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22; // 0x16
+    field public static final int KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC = 16; // 0x10
     field public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21; // 0x15
-    field public static final int KEY_RCS_PUBLISH_TIMER_EXTENDED_SEC = 16; // 0x10
     field public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15; // 0xf
     field public static final int KEY_REGISTRATION_DOMAIN_NAME = 12; // 0xc
     field public static final int KEY_REGISTRATION_RETRY_BASE_TIME_SEC = 33; // 0x21

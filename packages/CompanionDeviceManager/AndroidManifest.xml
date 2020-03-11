@@ -48,7 +48,8 @@
         <activity
             android:name=".DeviceChooserActivity"
             android:theme="@style/ChooserActivity"
-            android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE">
+            android:permission="android.permission.BIND_COMPANION_DEVICE_MANAGER_SERVICE"
+            android:exported="true">
             <!--TODO include url scheme filter similar to PrintSpooler -->
             <intent-filter>
                 <action android:name="android.companiondevice.START_DISCOVERY" />

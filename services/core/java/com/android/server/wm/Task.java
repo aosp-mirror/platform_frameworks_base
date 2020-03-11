@@ -3971,12 +3971,12 @@ class Task extends WindowContainer<WindowContainer> {
 
     boolean isControlledByTaskOrganizer() {
         final Task rootTask = getRootTask();
-        return rootTask == this && rootTask.mTaskOrganizer != null
-                // TODO(task-hierarchy): Figure out how to control nested tasks.
-                // For now, if this is in a tile let WM drive.
-                && !(rootTask instanceof TaskTile)
-                && !(rootTask instanceof ActivityStack
-                        && ((ActivityStack) rootTask).getTile() != null);
+        // if the rootTask is a "child" of a tile, then don't consider it a root task.
+        // TODO: remove this along with removing tile.
+        if (((ActivityStack) rootTask).getTile() != null) {
+            return false;
+        }
+        return rootTask == this && rootTask.mTaskOrganizer != null;
     }
 
     @Override

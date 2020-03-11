@@ -16,6 +16,9 @@
 
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2ProviderService.REASON_NETWORK_ERROR;
+import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
@@ -54,6 +57,8 @@ public class InfoMediaManagerTest {
     private MediaRouter2Manager mRouterManager;
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
+    @Mock
+    private MediaManager.MediaDeviceCallback mCallback;
 
     private InfoMediaManager mInfoMediaManager;
     private Context mContext;
@@ -144,6 +149,8 @@ public class InfoMediaManagerTest {
     @Test
     public void onRoutesChanged_getAvailableRoutes_shouldAddMediaDevice() {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        mInfoMediaManager.registerCallback(mCallback);
+
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
 
@@ -160,11 +167,14 @@ public class InfoMediaManagerTest {
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
         assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice);
         assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
+        verify(mCallback).onConnectedDeviceChanged(TEST_ID);
     }
 
     @Test
     public void onRoutesChanged_buildAllRoutes_shouldAddMediaDevice() {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        mInfoMediaManager.registerCallback(mCallback);
+
         when(info.getId()).thenReturn(TEST_ID);
         when(info.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
         when(info.isSystemRoute()).thenReturn(true);
@@ -182,6 +192,7 @@ public class InfoMediaManagerTest {
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
         assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
+        verify(mCallback).onConnectedDeviceChanged(null);
     }
 
     @Test
@@ -492,5 +503,23 @@ public class InfoMediaManagerTest {
         when(info.getName()).thenReturn(TEST_NAME);
 
         assertThat(mInfoMediaManager.getSessionName()).isEqualTo(TEST_NAME);
+    }
+
+    @Test
+    public void onTransferFailed_shouldDispatchOnRequestFailed() {
+        mInfoMediaManager.registerCallback(mCallback);
+
+        mInfoMediaManager.mMediaRouterCallback.onTransferFailed(null, null);
+
+        verify(mCallback).onRequestFailed(REASON_UNKNOWN_ERROR);
+    }
+
+    @Test
+    public void onRequestFailed_shouldDispatchOnRequestFailed() {
+        mInfoMediaManager.registerCallback(mCallback);
+
+        mInfoMediaManager.mMediaRouterCallback.onRequestFailed(REASON_NETWORK_ERROR);
+
+        verify(mCallback).onRequestFailed(REASON_NETWORK_ERROR);
     }
 }

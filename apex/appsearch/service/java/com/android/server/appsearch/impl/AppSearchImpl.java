@@ -209,6 +209,16 @@ public final class AppSearchImpl {
     }
 
     /**
+     * Deletes all documents owned by the calling app.
+     *
+     * @param callingUid The uid of the app calling AppSearch.
+     */
+    public void deleteAll(int callingUid) {
+        String namespace = getTypePrefix(callingUid);
+        mFakeIcing.deleteByNamespace(namespace);
+    }
+
+    /**
      * Rewrites all types mentioned anywhere in {@code documentBuilder} to prepend or remove
      * {@code typePrefix}.
      *

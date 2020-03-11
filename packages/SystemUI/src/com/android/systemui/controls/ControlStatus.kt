@@ -16,10 +16,12 @@
 
 package com.android.systemui.controls
 
+import android.content.ComponentName
 import android.service.controls.Control
 
 data class ControlStatus(
     val control: Control,
+    val component: ComponentName,
     var favorite: Boolean,
     val removed: Boolean = false
 )

@@ -724,12 +724,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
         if (mViewRoot.mView.isHardwareAccelerated()) {
-            mApplier.scheduleApply(params);
+            mApplier.scheduleApply(false /* earlyWakeup */, params);
         } else {
             // Window doesn't support hardware acceleration, no synchronization for now.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
-            mApplier.applyParams(new Transaction(), -1 /* frame */, params);
+            mApplier.applyParams(new Transaction(), -1 /* frame */, false /* earlyWakeup */,
+                    params);
         }
     }
 
@@ -991,5 +992,24 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return 0;
         }
         return mViewRoot.mWindowAttributes.insetsFlags.behavior;
+    }
+
+    /**
+     * At the time we receive new leashes (e.g. InsetsSourceConsumer is processing
+     * setControl) we need to release the old leash. But we may have already scheduled
+     * a SyncRtSurfaceTransaction applier to use it from the RenderThread. To avoid
+     * synchronization issues we also release from the RenderThread so this release
+     * happens after any existing items on the work queue.
+     */
+    public void releaseSurfaceControlFromRt(SurfaceControl sc) {
+        if (mViewRoot.mView != null && mViewRoot.mView.isHardwareAccelerated()) {
+            mViewRoot.registerRtFrameCallback(frame -> {
+                  sc.release();
+            });
+            // Make sure a frame gets scheduled.
+            mViewRoot.mView.invalidate();
+        } else {
+              sc.release();
+        }
     }
 }

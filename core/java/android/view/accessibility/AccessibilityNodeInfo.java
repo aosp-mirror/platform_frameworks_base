@@ -559,14 +559,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_PRESS_AND_HOLD_DURATION_MILLIS_INT =
             "android.view.accessibility.action.ARGUMENT_PRESS_AND_HOLD_DURATION_MILLIS_INT";
 
-    /**
-     * Argument to represent the IME action Id to press the returning key on a node.
-     * For use with R.id.accessibilityActionImeEnter
-     * @hide
-     */
-    public static final String ACTION_ARGUMENT_IME_ACTION_ID_INT =
-            "android.view.accessibility.action.ARGUMENT_IME_ACTION_ID_INT";
-
     // Focus types
 
     /**
@@ -4973,10 +4965,11 @@ public class AccessibilityNodeInfo implements Parcelable {
                 new AccessibilityAction(R.id.accessibilityActionPressAndHold);
 
         /**
-         * Action to send an ime action which is from
-         * {@link android.view.inputmethod.EditorInfo#actionId}. This action would be
+         * Action to send an ime actionId which is from
+         * {@link android.view.inputmethod.EditorInfo#actionId}. This ime actionId sets by
+         * {@link TextView#setImeActionLabel(CharSequence, int)}, or it would be
          * {@link android.view.inputmethod.EditorInfo#IME_ACTION_UNSPECIFIED} if no specific
-         * actionId defined. A node should expose this action only for views that are currently
+         * actionId has set. A node should expose this action only for views that are currently
          * with input focus and editable.
          */
         @NonNull public static final AccessibilityAction ACTION_IME_ENTER =

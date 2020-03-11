@@ -26,6 +26,7 @@ import android.os.UserHandle;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 
+import com.android.internal.logging.InstanceId;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SbnBuilder;
 
@@ -138,6 +139,11 @@ public class NotificationEntryBuilder {
 
     public NotificationEntryBuilder setPostTime(long postTime) {
         mSbnBuilder.setPostTime(postTime);
+        return this;
+    }
+
+    public NotificationEntryBuilder setInstanceId(InstanceId instanceId) {
+        mSbnBuilder.setInstanceId(instanceId);
         return this;
     }
 

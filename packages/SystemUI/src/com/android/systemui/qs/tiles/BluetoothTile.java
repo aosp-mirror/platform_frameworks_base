@@ -194,7 +194,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             CachedBluetoothDevice lastDevice = connectedDevices.get(0);
             final int batteryLevel = lastDevice.getBatteryLevel();
 
-            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+            if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
                 return mContext.getString(
                         R.string.quick_settings_bluetooth_secondary_label_battery_level,
                         Utils.formatPercentage(batteryLevel));
@@ -387,7 +387,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                     if (state == BluetoothProfile.STATE_CONNECTED) {
                         item.iconResId = R.drawable.ic_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
-                        if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+                        if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
                             item.icon = new BluetoothBatteryTileIcon(batteryLevel,1 /* iconScale */);
                             item.line2 = mContext.getString(
                                     R.string.quick_settings_connected_battery_level,

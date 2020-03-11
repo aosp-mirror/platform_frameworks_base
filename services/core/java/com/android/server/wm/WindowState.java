@@ -139,6 +139,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
+import static com.android.server.wm.WindowManagerService.H.WINDOW_STATE_BLAST_SYNC_TIMEOUT;
 import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
@@ -669,6 +670,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * default. The variable is cached, so we do not send too many updates to SF.
      */
     int mFrameRateSelectionPriority = RefreshRatePolicy.LAYER_PRIORITY_UNSET;
+
+    static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
     /**
      * @return The insets state as requested by the client, i.e. the dispatched insets state
@@ -5665,8 +5668,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mSession.mPid == pid && isNonToastOrStarting() && isVisibleNow();
     }
 
-    SurfaceControl getDeferTransactionBarrier() {
-        return mWinAnimator.getDeferTransactionBarrier();
+    SurfaceControl getClientViewRootSurface() {
+        return mWinAnimator.getClientViewRootSurface();
     }
 
     @Override
@@ -5676,6 +5679,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWaitingListener = waitingListener;
         mWaitingSyncId = waitingId;
         mUsingBLASTSyncTransaction = true;
+
+        mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
+        mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
+            BLAST_TIMEOUT_DURATION);
+
         return true;
     }
 
@@ -5683,6 +5691,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mUsingBLASTSyncTransaction) {
             return mWinAnimator.finishDrawingLocked(postDrawTransaction);
         }
+
+        mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         if (postDrawTransaction == null) {
             postDrawTransaction = new SurfaceControl.Transaction();
         }

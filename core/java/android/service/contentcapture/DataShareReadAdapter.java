@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.ParcelFileDescriptor;
+import android.view.contentcapture.ContentCaptureManager.DataShareError;
 
 /**
  * Adapter class to be used for the Content Capture Service app to propagate the status of the
@@ -46,5 +47,5 @@ public interface DataShareReadAdapter {
      * these 2 events is not defined, and it's important that the service treats end of stream
      * correctly in this situation.
      **/
-    void onError(int errorCode);
+    void onError(@DataShareError int errorCode);
 }
