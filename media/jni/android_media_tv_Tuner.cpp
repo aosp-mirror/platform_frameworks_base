@@ -138,11 +138,13 @@ struct fields_t {
     jfieldID filterContext;
     jfieldID timeFilterContext;
     jfieldID descramblerContext;
-    jfieldID dvrContext;
+    jfieldID dvrRecorderContext;
+    jfieldID dvrPlaybackContext;
     jmethodID frontendInitID;
     jmethodID filterInitID;
     jmethodID timeFilterInitID;
-    jmethodID dvrInitID;
+    jmethodID dvrRecorderInitID;
+    jmethodID dvrPlaybackInitID;
     jmethodID onFrontendEventID;
     jmethodID onFilterStatusID;
     jmethodID onFilterEventID;
@@ -1333,7 +1335,7 @@ jobject JTuner::openTimeFilter() {
     return timeFilterObj;
 }
 
-jobject JTuner::openDvr(DvrType type, int bufferSize) {
+jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
     ALOGD("JTuner::openDvr");
     if (mDemux == NULL) {
         if (openDemux() != Result::SUCCESS) {
@@ -1342,24 +1344,38 @@ jobject JTuner::openDvr(DvrType type, int bufferSize) {
     }
     sp<IDvr> iDvrSp;
     sp<DvrCallback> callback = new DvrCallback();
-    mDemux->openDvr(type, bufferSize, callback,
-            [&](Result, const sp<IDvr>& dvr) {
+    Result res;
+    mDemux->openDvr(type, (uint32_t) bufferSize, callback,
+            [&](Result r, const sp<IDvr>& dvr) {
+                res = r;
                 iDvrSp = dvr;
             });
 
-    if (iDvrSp == NULL) {
+    if (res != Result::SUCCESS || iDvrSp == NULL) {
         return NULL;
     }
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    jobject dvrObj =
-            env->NewObject(
-                    env->FindClass("android/media/tv/tuner/dvr/Dvr"),
-                    gFields.dvrInitID,
-                    mObject);
-    sp<Dvr> dvrSp = new Dvr(iDvrSp, dvrObj);
-    dvrSp->incStrong(dvrObj);
-    env->SetLongField(dvrObj, gFields.dvrContext, (jlong)dvrSp.get());
+    jobject dvrObj;
+    if (type == DvrType::RECORD) {
+        dvrObj =
+                env->NewObject(
+                        env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"),
+                        gFields.dvrRecorderInitID,
+                        mObject);
+        sp<Dvr> dvrSp = new Dvr(iDvrSp, dvrObj);
+        dvrSp->incStrong(dvrObj);
+        env->SetLongField(dvrObj, gFields.dvrRecorderContext, (jlong)dvrSp.get());
+    } else {
+        dvrObj =
+                env->NewObject(
+                        env->FindClass("android/media/tv/tuner/dvr/DvrPlayback"),
+                        gFields.dvrPlaybackInitID,
+                        mObject);
+        sp<Dvr> dvrSp = new Dvr(iDvrSp, dvrObj);
+        dvrSp->incStrong(dvrObj);
+        env->SetLongField(dvrObj, gFields.dvrPlaybackContext, (jlong)dvrSp.get());
+    }
 
     callback->setDvr(dvrObj);
 
@@ -1883,7 +1899,11 @@ static DvrSettings getDvrSettings(JNIEnv *env, jobject settings) {
 }
 
 static sp<Dvr> getDvr(JNIEnv *env, jobject dvr) {
-    return (Dvr *)env->GetLongField(dvr, gFields.dvrContext);
+    bool isRecorder =
+            env->IsInstanceOf(dvr, env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"));
+    jfieldID fieldId =
+            isRecorder ? gFields.dvrRecorderContext : gFields.dvrPlaybackContext;
+    return (Dvr *)env->GetLongField(dvr, fieldId);
 }
 
 static void android_media_tv_Tuner_native_init(JNIEnv *env) {
@@ -1924,9 +1944,13 @@ static void android_media_tv_Tuner_native_init(JNIEnv *env) {
     gFields.descramblerInitID =
             env->GetMethodID(descramblerClazz, "<init>", "()V");
 
-    jclass dvrClazz = env->FindClass("android/media/tv/tuner/dvr/Dvr");
-    gFields.dvrContext = env->GetFieldID(dvrClazz, "mNativeContext", "J");
-    gFields.dvrInitID = env->GetMethodID(dvrClazz, "<init>", "()V");
+    jclass dvrRecorderClazz = env->FindClass("android/media/tv/tuner/dvr/DvrRecorder");
+    gFields.dvrRecorderContext = env->GetFieldID(dvrRecorderClazz, "mNativeContext", "J");
+    gFields.dvrRecorderInitID = env->GetMethodID(dvrRecorderClazz, "<init>", "()V");
+
+    jclass dvrPlaybackClazz = env->FindClass("android/media/tv/tuner/dvr/DvrPlayback");
+    gFields.dvrPlaybackContext = env->GetFieldID(dvrPlaybackClazz, "mNativeContext", "J");
+    gFields.dvrPlaybackInitID = env->GetMethodID(dvrPlaybackClazz, "<init>", "()V");
 
     jclass linearBlockClazz = env->FindClass("android/media/MediaCodec$LinearBlock");
     gFields.linearBlockInitID = env->GetMethodID(linearBlockClazz, "<init>", "()V");
@@ -2654,13 +2678,15 @@ static int android_media_tv_Tuner_close_descrambler(JNIEnv, jobject) {
 }
 
 static jobject android_media_tv_Tuner_open_dvr_recorder(
-        JNIEnv* /* env */, jobject /* thiz */, jlong /* bufferSize */) {
-    return NULL;
+        JNIEnv* env, jobject thiz, jlong bufferSize) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->openDvr(DvrType::RECORD, bufferSize);
 }
 
 static jobject android_media_tv_Tuner_open_dvr_playback(
-        JNIEnv* /* env */, jobject /* thiz */, jlong /* bufferSize */) {
-    return NULL;
+        JNIEnv* env, jobject thiz, jlong bufferSize) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->openDvr(DvrType::PLAYBACK, bufferSize);
 }
 
 static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv*, jobject) {
@@ -2714,11 +2740,13 @@ static int android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobjec
 }
 
 static int android_media_tv_Tuner_start_dvr(JNIEnv *env, jobject dvr) {
+
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
     if (dvrSp == NULL) {
         ALOGD("Failed to start dvr: dvr not found");
         return false;
     }
+
     Result result = dvrSp->start();
     return (int) result;
 }
@@ -2968,7 +2996,7 @@ static const JNINativeMethod gDescramblerMethods[] = {
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_descrambler },
 };
 
-static const JNINativeMethod gDvrMethods[] = {
+static const JNINativeMethod gDvrRecorderMethods[] = {
     { "nativeAttachFilter", "(Landroid/media/tv/tuner/filter/Filter;)I",
             (void *)android_media_tv_Tuner_attach_filter },
     { "nativeDetachFilter", "(Landroid/media/tv/tuner/filter/Filter;)I",
@@ -2980,14 +3008,22 @@ static const JNINativeMethod gDvrMethods[] = {
     { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr },
     { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_dvr },
     { "nativeSetFileDescriptor", "(I)V", (void *)android_media_tv_Tuner_dvr_set_fd },
-};
-
-static const JNINativeMethod gDvrRecorderMethods[] = {
     { "nativeWrite", "(J)J", (void *)android_media_tv_Tuner_write_dvr },
     { "nativeWrite", "([BJJ)J", (void *)android_media_tv_Tuner_write_dvr_to_array },
 };
 
 static const JNINativeMethod gDvrPlaybackMethods[] = {
+    { "nativeAttachFilter", "(Landroid/media/tv/tuner/filter/Filter;)I",
+            (void *)android_media_tv_Tuner_attach_filter },
+    { "nativeDetachFilter", "(Landroid/media/tv/tuner/filter/Filter;)I",
+            (void *)android_media_tv_Tuner_detach_filter },
+    { "nativeConfigureDvr", "(Landroid/media/tv/tuner/dvr/DvrSettings;)I",
+            (void *)android_media_tv_Tuner_configure_dvr },
+    { "nativeStartDvr", "()I", (void *)android_media_tv_Tuner_start_dvr },
+    { "nativeStopDvr", "()I", (void *)android_media_tv_Tuner_stop_dvr },
+    { "nativeFlushDvr", "()I", (void *)android_media_tv_Tuner_flush_dvr },
+    { "nativeClose", "()I", (void *)android_media_tv_Tuner_close_dvr },
+    { "nativeSetFileDescriptor", "(I)V", (void *)android_media_tv_Tuner_dvr_set_fd },
     { "nativeRead", "(J)J", (void *)android_media_tv_Tuner_read_dvr },
     { "nativeRead", "([BJJ)J", (void *)android_media_tv_Tuner_read_dvr_from_array },
 };
@@ -3025,13 +3061,6 @@ static bool register_android_media_tv_Tuner(JNIEnv *env) {
             gDescramblerMethods,
             NELEM(gDescramblerMethods)) != JNI_OK) {
         ALOGE("Failed to register descrambler native methods");
-        return false;
-    }
-    if (AndroidRuntime::registerNativeMethods(
-            env, "android/media/tv/tuner/dvr/Dvr",
-            gDvrMethods,
-            NELEM(gDvrMethods)) != JNI_OK) {
-        ALOGE("Failed to register dvr native methods");
         return false;
     }
     if (AndroidRuntime::registerNativeMethods(

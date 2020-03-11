@@ -30,7 +30,7 @@ import android.os.ParcelFileDescriptor;
  */
 @SystemApi
 public class DvrRecorder implements AutoCloseable {
-    long mNativeContext;
+    private long mNativeContext;
 
     private native int nativeAttachFilter(Filter filter);
     private native int nativeDetachFilter(Filter filter);
