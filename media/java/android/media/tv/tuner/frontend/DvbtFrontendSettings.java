@@ -125,9 +125,9 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /** @hide */
     @IntDef(flag = true,
             prefix = "CONSTELLATION_",
-            value = {CONSTELLATION_UNDEFINED, CONSTELLATION_AUTO, CONSTELLATION_CONSTELLATION_QPSK,
-                    CONSTELLATION_CONSTELLATION_16QAM, CONSTELLATION_CONSTELLATION_64QAM,
-                    CONSTELLATION_CONSTELLATION_256QAM})
+            value = {CONSTELLATION_UNDEFINED, CONSTELLATION_AUTO, CONSTELLATION_QPSK,
+                    CONSTELLATION_16QAM, CONSTELLATION_64QAM,
+                    CONSTELLATION_256QAM})
     @Retention(RetentionPolicy.SOURCE)
     public @interface Constellation {}
 
@@ -142,22 +142,22 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * QPSK Constellation.
      */
-    public static final int CONSTELLATION_CONSTELLATION_QPSK =
+    public static final int CONSTELLATION_QPSK =
             Constants.FrontendDvbtConstellation.CONSTELLATION_QPSK;
     /**
      * 16QAM Constellation.
      */
-    public static final int CONSTELLATION_CONSTELLATION_16QAM =
+    public static final int CONSTELLATION_16QAM =
             Constants.FrontendDvbtConstellation.CONSTELLATION_16QAM;
     /**
      * 64QAM Constellation.
      */
-    public static final int CONSTELLATION_CONSTELLATION_64QAM =
+    public static final int CONSTELLATION_64QAM =
             Constants.FrontendDvbtConstellation.CONSTELLATION_64QAM;
     /**
      * 256QAM Constellation.
      */
-    public static final int CONSTELLATION_CONSTELLATION_256QAM =
+    public static final int CONSTELLATION_256QAM =
             Constants.FrontendDvbtConstellation.CONSTELLATION_256QAM;
 
 
@@ -275,11 +275,11 @@ public class DvbtFrontendSettings extends FrontendSettings {
     @IntDef(flag = true,
             prefix = "GUARD_INTERVAL_",
             value = {GUARD_INTERVAL_UNDEFINED, GUARD_INTERVAL_AUTO,
-            GUARD_INTERVAL_INTERVAL_1_32, GUARD_INTERVAL_INTERVAL_1_16,
-            GUARD_INTERVAL_INTERVAL_1_8, GUARD_INTERVAL_INTERVAL_1_4,
-            GUARD_INTERVAL_INTERVAL_1_128,
-            GUARD_INTERVAL_INTERVAL_19_128,
-            GUARD_INTERVAL_INTERVAL_19_256})
+            GUARD_INTERVAL_1_32, GUARD_INTERVAL_1_16,
+            GUARD_INTERVAL_1_8, GUARD_INTERVAL_1_4,
+            GUARD_INTERVAL_1_128,
+            GUARD_INTERVAL_19_128,
+            GUARD_INTERVAL_19_256})
     @Retention(RetentionPolicy.SOURCE)
     public @interface GuardInterval {}
 
@@ -295,37 +295,37 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * 1/32 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_INTERVAL_1_32 =
+    public static final int GUARD_INTERVAL_1_32 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_1_32;
     /**
      * 1/16 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_INTERVAL_1_16 =
+    public static final int GUARD_INTERVAL_1_16 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_1_16;
     /**
      * 1/8 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_INTERVAL_1_8 =
+    public static final int GUARD_INTERVAL_1_8 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_1_8;
     /**
      * 1/4 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_INTERVAL_1_4 =
+    public static final int GUARD_INTERVAL_1_4 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_1_4;
     /**
      * 1/128 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_INTERVAL_1_128 =
+    public static final int GUARD_INTERVAL_1_128 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_1_128;
     /**
      * 19/128 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_INTERVAL_19_128 =
+    public static final int GUARD_INTERVAL_19_128 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_19_128;
     /**
      * 19/256 Guard Interval.
      */
-    public static final int GUARD_INTERVAL_INTERVAL_19_256 =
+    public static final int GUARD_INTERVAL_19_256 =
             Constants.FrontendDvbtGuardInterval.INTERVAL_19_256;
 
     /** @hide */
@@ -435,14 +435,14 @@ public class DvbtFrontendSettings extends FrontendSettings {
      * Gets Code Rate for High Priority level.
      */
     @CodeRate
-    public int getHpCodeRate() {
+    public int getHighPriorityCodeRate() {
         return mHpCodeRate;
     }
     /**
      * Gets Code Rate for Low Priority level.
      */
     @CodeRate
-    public int getLpCodeRate() {
+    public int getLowPriorityCodeRate() {
         return mLpCodeRate;
     }
     /**
@@ -560,7 +560,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
          * Sets Code Rate for High Priority level.
          */
         @NonNull
-        public Builder setHpCodeRate(@CodeRate int hpCodeRate) {
+        public Builder setHighPriorityCodeRate(@CodeRate int hpCodeRate) {
             mHpCodeRate = hpCodeRate;
             return this;
         }
@@ -568,7 +568,7 @@ public class DvbtFrontendSettings extends FrontendSettings {
          * Sets Code Rate for Low Priority level.
          */
         @NonNull
-        public Builder setLpCodeRate(@CodeRate int lpCodeRate) {
+        public Builder setLowPriorityCodeRate(@CodeRate int lpCodeRate) {
             mLpCodeRate = lpCodeRate;
             return this;
         }
