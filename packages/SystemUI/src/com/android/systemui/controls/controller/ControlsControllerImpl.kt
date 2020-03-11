@@ -18,6 +18,7 @@ package com.android.systemui.controls.controller
 
 import android.app.ActivityManager
 import android.app.PendingIntent
+import android.app.backup.BackupManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.ContentResolver
@@ -35,6 +36,7 @@ import android.util.ArrayMap
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
+import com.android.systemui.backup.BackupHelper
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.ControlsServiceInfo
@@ -69,6 +71,7 @@ class ControlsControllerImpl @Inject constructor (
         internal val URI = Settings.Secure.getUriFor(CONTROLS_AVAILABLE)
         private const val USER_CHANGE_RETRY_DELAY = 500L // ms
         private const val DEFAULT_ENABLED = 1
+        private const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
     }
 
     private var userChanging: Boolean = true
@@ -88,23 +91,35 @@ class ControlsControllerImpl @Inject constructor (
             contentResolver, CONTROLS_AVAILABLE, DEFAULT_ENABLED, currentUserId) != 0
         private set
 
+    private var file = Environment.buildPath(
+        context.filesDir,
+        ControlsFavoritePersistenceWrapper.FILE_NAME
+    )
+    private var auxiliaryFile = Environment.buildPath(
+        context.filesDir,
+        AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME
+    )
     private val persistenceWrapper = optionalWrapper.orElseGet {
         ControlsFavoritePersistenceWrapper(
-                Environment.buildPath(
-                    context.filesDir,
-                    ControlsFavoritePersistenceWrapper.FILE_NAME
-                ),
-                executor
+            file,
+            executor,
+            BackupManager(context)
         )
     }
+
+    @VisibleForTesting
+    internal var auxiliaryPersistenceWrapper = AuxiliaryPersistenceWrapper(auxiliaryFile, executor)
 
     private fun setValuesForUser(newUser: UserHandle) {
         Log.d(TAG, "Changing to user: $newUser")
         currentUser = newUser
         val userContext = context.createContextAsUser(currentUser, 0)
-        val fileName = Environment.buildPath(
+        file = Environment.buildPath(
                 userContext.filesDir, ControlsFavoritePersistenceWrapper.FILE_NAME)
-        persistenceWrapper.changeFile(fileName)
+        auxiliaryFile = Environment.buildPath(
+            userContext.filesDir, AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME)
+        persistenceWrapper.changeFileAndBackupManager(file, BackupManager(userContext))
+        auxiliaryPersistenceWrapper.changeFile(auxiliaryFile)
         available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
                 DEFAULT_ENABLED, newUser.identifier) != 0
         resetFavorites(available)
@@ -125,6 +140,21 @@ class ControlsControllerImpl @Inject constructor (
                     return
                 }
                 setValuesForUser(newUser)
+            }
+        }
+    }
+
+    @VisibleForTesting
+    internal val restoreFinishedReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            val user = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL)
+            if (user == currentUserId) {
+                executor.execute {
+                    auxiliaryPersistenceWrapper.initialize()
+                    listingController.removeCallback(listingCallback)
+                    persistenceWrapper.storeFavorites(auxiliaryPersistenceWrapper.favorites)
+                    resetFavorites(available)
+                }
             }
         }
     }
@@ -170,7 +200,25 @@ class ControlsControllerImpl @Inject constructor (
                     bindingController.onComponentRemoved(it)
                 }
 
-                // Check if something has been removed, if so, store the new list
+                if (auxiliaryPersistenceWrapper.favorites.isNotEmpty()) {
+                    serviceInfoSet.subtract(favoriteComponentSet).forEach {
+                        val toAdd = auxiliaryPersistenceWrapper.getCachedFavoritesAndRemoveFor(it)
+                        if (toAdd.isNotEmpty()) {
+                            changed = true
+                            toAdd.forEach {
+                                Favorites.replaceControls(it)
+                            }
+                        }
+                    }
+                    // Need to clear the ones that were restored immediately. This will delete
+                    // them from the auxiliary file if they were not deleted. Should only do any
+                    // work the first time after a restore.
+                    serviceInfoSet.intersect(favoriteComponentSet).forEach {
+                        auxiliaryPersistenceWrapper.getCachedFavoritesAndRemoveFor(it)
+                    }
+                }
+
+                // Check if something has been added or removed, if so, store the new list
                 if (changed) {
                     persistenceWrapper.storeFavorites(Favorites.getAllStructures())
                 }
@@ -188,7 +236,20 @@ class ControlsControllerImpl @Inject constructor (
                 executor,
                 UserHandle.ALL
         )
+        context.registerReceiver(
+            restoreFinishedReceiver,
+            IntentFilter(BackupHelper.ACTION_RESTORE_FINISHED),
+            PERMISSION_SELF,
+            null
+        )
         contentResolver.registerContentObserver(URI, false, settingObserver, UserHandle.USER_ALL)
+    }
+
+    fun destroy() {
+        broadcastDispatcher.unregisterReceiver(userSwitchReceiver)
+        context.unregisterReceiver(restoreFinishedReceiver)
+        contentResolver.unregisterContentObserver(settingObserver)
+        listingController.removeCallback(listingCallback)
     }
 
     private fun resetFavorites(shouldLoad: Boolean) {

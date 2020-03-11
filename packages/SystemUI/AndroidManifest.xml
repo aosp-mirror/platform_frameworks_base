@@ -263,7 +263,8 @@
         android:name=".SystemUIApplication"
         android:persistent="true"
         android:allowClearUserData="false"
-        android:allowBackup="false"
+        android:backupAgent=".backup.BackupHelper"
+        android:killAfterRestore="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
         android:icon="@drawable/icon"
@@ -277,7 +278,7 @@
         <!-- Keep theme in sync with SystemUIApplication.onCreate().
              Setting the theme on the application does not affect views inflated by services.
              The application theme is set again from onCreate to take effect for those views. -->
-
+        <meta-data android:name="com.google.android.backup.api_key" android:value="AEdPqrEAAAAIWTZsUG100coeb3xbEoTWKd3ZL3R79JshRDZfYQ" />
         <!-- Broadcast receiver that gets the broadcast at boot time and starts
              up everything else.
              TODO: Should have an android:permission attribute
@@ -689,6 +690,9 @@
                 <action android:name="android.service.controls.action.ADD_CONTROL" />
             </intent-filter>
         </receiver>
+
+        <service android:name=".controls.controller.AuxiliaryPersistenceWrapper$DeletionJobService"
+                 android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <!-- started from ControlsFavoritingActivity -->
         <activity
