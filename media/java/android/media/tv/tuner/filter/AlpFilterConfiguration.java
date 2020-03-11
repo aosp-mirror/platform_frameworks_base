@@ -18,6 +18,7 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
@@ -33,7 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class AlpFilterConfiguration extends FilterConfiguration {
+public final class AlpFilterConfiguration extends FilterConfiguration {
     /**
      * IPv4 packet type.
      */
@@ -123,9 +124,10 @@ public class AlpFilterConfiguration extends FilterConfiguration {
     /**
      * Builder for {@link AlpFilterConfiguration}.
      */
-    public static class Builder extends FilterConfiguration.Builder<Builder> {
+    public static final class Builder {
         private int mPacketType;
         private int mLengthType;
+        private Settings mSettings;
 
         private Builder() {
         }
@@ -150,16 +152,20 @@ public class AlpFilterConfiguration extends FilterConfiguration {
         }
 
         /**
+         * Sets filter settings.
+         */
+        @NonNull
+        public Builder setSettings(@Nullable Settings settings) {
+            mSettings = settings;
+            return this;
+        }
+
+        /**
          * Builds a {@link AlpFilterConfiguration} object.
          */
         @NonNull
         public AlpFilterConfiguration build() {
             return new AlpFilterConfiguration(mSettings, mPacketType, mLengthType);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 }

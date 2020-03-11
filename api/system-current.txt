@@ -4992,7 +4992,7 @@ package android.media.tv.tuner.dvr {
 
 package android.media.tv.tuner.filter {
 
-  public class AlpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
+  public final class AlpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.AlpFilterConfiguration.Builder builder(@NonNull android.content.Context);
     method public int getLengthType();
     method public int getPacketType();
@@ -5007,10 +5007,11 @@ package android.media.tv.tuner.filter {
     field public static final int PACKET_TYPE_SIGNALING = 4; // 0x4
   }
 
-  public static class AlpFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.AlpFilterConfiguration.Builder> {
+  public static final class AlpFilterConfiguration.Builder {
     method @NonNull public android.media.tv.tuner.filter.AlpFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.AlpFilterConfiguration.Builder setLengthType(int);
     method @NonNull public android.media.tv.tuner.filter.AlpFilterConfiguration.Builder setPacketType(int);
+    method @NonNull public android.media.tv.tuner.filter.AlpFilterConfiguration.Builder setSettings(@Nullable android.media.tv.tuner.filter.Settings);
   }
 
   public class AudioDescriptor {
@@ -5098,15 +5099,11 @@ package android.media.tv.tuner.filter {
     method public abstract int getType();
   }
 
-  public abstract static class FilterConfiguration.Builder<T extends android.media.tv.tuner.filter.FilterConfiguration.Builder<T>> {
-    method @NonNull public T setSettings(@Nullable android.media.tv.tuner.filter.Settings);
-  }
-
   public abstract class FilterEvent {
     ctor public FilterEvent();
   }
 
-  public class IpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
+  public final class IpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.IpFilterConfiguration.Builder builder(@NonNull android.content.Context);
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
     method public int getDstPort();
@@ -5116,11 +5113,12 @@ package android.media.tv.tuner.filter {
     method public boolean isPassthrough();
   }
 
-  public static class IpFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.IpFilterConfiguration.Builder> {
+  public static final class IpFilterConfiguration.Builder {
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setDstIpAddress(@NonNull byte[]);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setDstPort(int);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setPassthrough(boolean);
+    method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setSettings(@Nullable android.media.tv.tuner.filter.Settings);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setSrcIpAddress(@NonNull byte[]);
     method @NonNull public android.media.tv.tuner.filter.IpFilterConfiguration.Builder setSrcPort(int);
   }
@@ -5144,15 +5142,16 @@ package android.media.tv.tuner.filter {
     method public boolean isSecureMemory();
   }
 
-  public class MmtpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
+  public final class MmtpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.MmtpFilterConfiguration.Builder builder(@NonNull android.content.Context);
     method public int getMmtpPacketId();
     method public int getType();
   }
 
-  public static class MmtpFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.MmtpFilterConfiguration.Builder> {
+  public static final class MmtpFilterConfiguration.Builder {
     method @NonNull public android.media.tv.tuner.filter.MmtpFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.MmtpFilterConfiguration.Builder setMmtpPacketId(int);
+    method @NonNull public android.media.tv.tuner.filter.MmtpFilterConfiguration.Builder setSettings(@Nullable android.media.tv.tuner.filter.Settings);
   }
 
   public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
@@ -5287,7 +5286,7 @@ package android.media.tv.tuner.filter {
     field public static final long TIMESTAMP_UNAVAILABLE = -1L; // 0xffffffffffffffffL
   }
 
-  public class TlvFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
+  public final class TlvFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.TlvFilterConfiguration.Builder builder(@NonNull android.content.Context);
     method public int getPacketType();
     method public int getType();
@@ -5300,21 +5299,23 @@ package android.media.tv.tuner.filter {
     field public static final int PACKET_TYPE_SIGNALING = 254; // 0xfe
   }
 
-  public static class TlvFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.TlvFilterConfiguration.Builder> {
+  public static final class TlvFilterConfiguration.Builder {
     method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration build();
     method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setCompressedIpPacket(boolean);
     method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setPacketType(int);
     method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setPassthrough(boolean);
+    method @NonNull public android.media.tv.tuner.filter.TlvFilterConfiguration.Builder setSettings(@Nullable android.media.tv.tuner.filter.Settings);
   }
 
-  public class TsFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
+  public final class TsFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.TsFilterConfiguration.Builder builder(@NonNull android.content.Context);
     method public int getTpid();
     method public int getType();
   }
 
-  public static class TsFilterConfiguration.Builder extends android.media.tv.tuner.filter.FilterConfiguration.Builder<android.media.tv.tuner.filter.TsFilterConfiguration.Builder> {
+  public static final class TsFilterConfiguration.Builder {
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration build();
+    method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setSettings(@Nullable android.media.tv.tuner.filter.Settings);
     method @NonNull public android.media.tv.tuner.filter.TsFilterConfiguration.Builder setTpid(int);
   }
 
