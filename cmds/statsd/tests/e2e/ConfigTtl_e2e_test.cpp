@@ -56,54 +56,54 @@ StatsdConfig CreateStatsdConfig(int num_buckets, int threshold) {
 
 }  // namespace
 
-// TODO(b/149590301): Update this test to use new socket schema.
-//TEST(ConfigTtlE2eTest, TestCountMetric) {
-//    const int num_buckets = 1;
-//    const int threshold = 3;
-//    auto config = CreateStatsdConfig(num_buckets, threshold);
-//    const uint64_t alert_id = config.alert(0).id();
-//    const uint32_t refractory_period_sec = config.alert(0).refractory_period_secs();
-//
-//    int64_t bucketStartTimeNs = 10000000000;
-//    int64_t bucketSizeNs =
-//        TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000;
-//
-//    ConfigKey cfgKey;
-//    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
-//    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
-//    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
-//
-//    std::vector<AttributionNodeInternal> attributions1 = {CreateAttribution(111, "App1")};
-//
-//    FieldValue fieldValue1(Field(android::util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
-//                           Value((int32_t)111));
-//    HashableDimensionKey whatKey1({fieldValue1});
-//    MetricDimensionKey dimensionKey1(whatKey1, DEFAULT_DIMENSION_KEY);
-//
-//    FieldValue fieldValue2(Field(android::util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
-//                           Value((int32_t)222));
-//    HashableDimensionKey whatKey2({fieldValue2});
-//    MetricDimensionKey dimensionKey2(whatKey2, DEFAULT_DIMENSION_KEY);
-//
-//    auto event = CreateAcquireWakelockEvent(attributions1, "wl1", bucketStartTimeNs + 2);
-//    processor->OnLogEvent(event.get());
-//
-//    event = CreateAcquireWakelockEvent(attributions1, "wl2", bucketStartTimeNs + bucketSizeNs + 2);
-//    processor->OnLogEvent(event.get());
-//
-//    event = CreateAcquireWakelockEvent(
-//        attributions1, "wl1", bucketStartTimeNs + 25 * bucketSizeNs + 2);
-//    processor->OnLogEvent(event.get());
-//
-//    EXPECT_EQ((int64_t)(bucketStartTimeNs + 25 * bucketSizeNs + 2 + 2 * 3600 * NS_PER_SEC),
-//              processor->mMetricsManagers.begin()->second->getTtlEndNs());
-//
-//    // Clear the data stored on disk as a result of the ttl.
-//    vector<uint8_t> buffer;
-//    processor->onDumpReport(cfgKey, bucketStartTimeNs + 25 * bucketSizeNs + 3, false, true,
-//                                ADB_DUMP, FAST, &buffer);
-//}
+TEST(ConfigTtlE2eTest, TestCountMetric) {
+    const int num_buckets = 1;
+    const int threshold = 3;
+    auto config = CreateStatsdConfig(num_buckets, threshold);
+    const uint64_t alert_id = config.alert(0).id();
+    const uint32_t refractory_period_sec = config.alert(0).refractory_period_secs();
 
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000;
+
+    ConfigKey cfgKey;
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
+
+    std::vector<int> attributionUids1 = {111};
+    std::vector<string> attributionTags1 = {"App1"};
+
+    FieldValue fieldValue1(Field(android::util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
+                           Value((int32_t)111));
+    HashableDimensionKey whatKey1({fieldValue1});
+    MetricDimensionKey dimensionKey1(whatKey1, DEFAULT_DIMENSION_KEY);
+
+    FieldValue fieldValue2(Field(android::util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
+                           Value((int32_t)222));
+    HashableDimensionKey whatKey2({fieldValue2});
+    MetricDimensionKey dimensionKey2(whatKey2, DEFAULT_DIMENSION_KEY);
+
+    auto event = CreateAcquireWakelockEvent(bucketStartTimeNs + 2, attributionUids1,
+                                            attributionTags1, "wl1");
+    processor->OnLogEvent(event.get());
+
+    event = CreateAcquireWakelockEvent(bucketStartTimeNs + bucketSizeNs + 2, attributionUids1,
+                                       attributionTags1, "wl2");
+    processor->OnLogEvent(event.get());
+
+    event = CreateAcquireWakelockEvent(bucketStartTimeNs + 25 * bucketSizeNs + 2, attributionUids1,
+                                       attributionTags1, "wl1");
+    processor->OnLogEvent(event.get());
+
+    EXPECT_EQ((int64_t)(bucketStartTimeNs + 25 * bucketSizeNs + 2 + 2 * 3600 * NS_PER_SEC),
+              processor->mMetricsManagers.begin()->second->getTtlEndNs());
+
+    // Clear the data stored on disk as a result of the ttl.
+    vector<uint8_t> buffer;
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 25 * bucketSizeNs + 3, false, true,
+                            ADB_DUMP, FAST, &buffer);
+}
 
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";

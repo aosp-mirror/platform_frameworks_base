@@ -328,4 +328,3 @@ void writeExperimentIdsToProto(const std::vector<int64_t>& experimentIds, std::v
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
-
