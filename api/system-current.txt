@@ -11217,19 +11217,6 @@ package android.telephony {
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final int LISTEN_VOICE_ACTIVATION_STATE = 131072; // 0x20000
   }
 
-  public final class PinResult implements android.os.Parcelable {
-    ctor public PinResult(int, int);
-    method public int describeContents();
-    method public int getAttemptsRemaining();
-    method @NonNull public static android.telephony.PinResult getDefaultFailedResult();
-    method public int getType();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PinResult> CREATOR;
-    field public static final int PIN_RESULT_TYPE_FAILURE = 2; // 0x2
-    field public static final int PIN_RESULT_TYPE_INCORRECT = 1; // 0x1
-    field public static final int PIN_RESULT_TYPE_SUCCESS = 0; // 0x0
-  }
-
   public final class PreciseCallState implements android.os.Parcelable {
     ctor public PreciseCallState(int, int, int, int, int);
     method public int describeContents();
@@ -11721,10 +11708,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPin(String);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult supplyPinReportPinResult(@NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPinReportResult(String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean supplyPuk(String, String);
-    method @Nullable @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult supplyPukReportPinResult(@NonNull String, @NonNull String);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();

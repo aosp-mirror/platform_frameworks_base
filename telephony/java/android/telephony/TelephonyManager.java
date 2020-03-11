@@ -8708,7 +8708,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @Nullable
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public PinResult supplyPinReportPinResult(@NonNull String pin) {
@@ -8733,7 +8732,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @Nullable
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public PinResult supplyPukReportPinResult(@NonNull String puk, @NonNull String pin) {
