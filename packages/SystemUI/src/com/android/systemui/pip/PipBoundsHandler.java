@@ -228,8 +228,8 @@ public class PipBoundsHandler {
      */
     Rect getDestinationBounds(float aspectRatio, Rect bounds) {
         final Rect destinationBounds;
-        final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
         if (bounds == null) {
+            final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
             destinationBounds = new Rect(defaultBounds);
         } else {
             destinationBounds = new Rect(bounds);
