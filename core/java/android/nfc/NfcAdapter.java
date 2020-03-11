@@ -245,13 +245,25 @@ public final class NfcAdapter {
 
     /**
      * Mandatory String extra field in {@link #ACTION_PREFERRED_PAYMENT_CHANGED}
-     * Indicates the condition when trigger this event.
+     * Indicates the condition when trigger this event. Possible values are:
+     * {@link #PREFERRED_PAYMENT_LOADED},
+     * {@link #PREFERRED_PAYMENT_CHANGED},
+     * {@link #PREFERRED_PAYMENT_UPDATED},
      */
     public static final String EXTRA_PREFERRED_PAYMENT_CHANGED_REASON =
             "android.nfc.extra.PREFERRED_PAYMENT_CHANGED_REASON";
-
+    /**
+     * Nfc is enabled and the preferred payment aids are registered.
+     */
     public static final int PREFERRED_PAYMENT_LOADED = 1;
+    /**
+     * User selected another payment application as the preferred payment.
+     */
     public static final int PREFERRED_PAYMENT_CHANGED = 2;
+    /**
+     * Current preferred payment has issued an update (registered/unregistered new aids or has been
+     * updated itself).
+     */
     public static final int PREFERRED_PAYMENT_UPDATED = 3;
 
     public static final int STATE_OFF = 1;
