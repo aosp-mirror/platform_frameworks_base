@@ -49,11 +49,13 @@ public class LocalMediaManager implements BluetoothCallback {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({MediaDeviceState.STATE_CONNECTED,
             MediaDeviceState.STATE_CONNECTING,
-            MediaDeviceState.STATE_DISCONNECTED})
+            MediaDeviceState.STATE_DISCONNECTED,
+            MediaDeviceState.STATE_CONNECTING_FAILED})
     public @interface MediaDeviceState {
-        int STATE_CONNECTED = 1;
-        int STATE_CONNECTING = 2;
-        int STATE_DISCONNECTED = 3;
+        int STATE_CONNECTED = 0;
+        int STATE_CONNECTING = 1;
+        int STATE_DISCONNECTED = 2;
+        int STATE_CONNECTING_FAILED = 3;
     }
 
     private final Collection<DeviceCallback> mCallbacks = new CopyOnWriteArrayList<>();
@@ -128,6 +130,7 @@ public class LocalMediaManager implements BluetoothCallback {
             final CachedBluetoothDevice cachedDevice =
                     ((BluetoothMediaDevice) device).getCachedDevice();
             if (!cachedDevice.isConnected() && !cachedDevice.isBusy()) {
+                device.setState(MediaDeviceState.STATE_CONNECTING);
                 cachedDevice.connect();
                 return;
             }
@@ -142,6 +145,7 @@ public class LocalMediaManager implements BluetoothCallback {
             mCurrentConnectedDevice.disconnect();
         }
 
+        device.setState(MediaDeviceState.STATE_CONNECTING);
         if (TextUtils.isEmpty(mPackageName)) {
             mInfoMediaManager.connectDeviceWithoutPackageName(device);
         } else {
@@ -423,6 +427,7 @@ public class LocalMediaManager implements BluetoothCallback {
             MediaDevice connectDevice = getMediaDeviceById(mMediaDevices, id);
             connectDevice = connectDevice != null
                     ? connectDevice : updateCurrentConnectedDevice();
+            connectDevice.setState(MediaDeviceState.STATE_CONNECTED);
 
             if (connectDevice == mCurrentConnectedDevice) {
                 Log.d(TAG, "onConnectedDeviceChanged() this device all ready connected!");
@@ -440,6 +445,11 @@ public class LocalMediaManager implements BluetoothCallback {
 
         @Override
         public void onRequestFailed(int reason) {
+            for (MediaDevice device : mMediaDevices) {
+                if (device.getState() == MediaDeviceState.STATE_CONNECTING) {
+                    device.setState(MediaDeviceState.STATE_CONNECTING_FAILED);
+                }
+            }
             dispatchOnRequestFailed(reason);
         }
     }

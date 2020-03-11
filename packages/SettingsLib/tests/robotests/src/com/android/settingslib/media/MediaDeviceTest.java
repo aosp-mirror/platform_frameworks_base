@@ -448,4 +448,23 @@ public class MediaDeviceTest {
         assertThat(mInfoMediaDevice1.getClientAppLabel()).isEqualTo(
                 mContext.getResources().getString(R.string.unknown));
     }
+
+    @Test
+    public void setState_verifyGetState() {
+        mInfoMediaDevice1.setState(LocalMediaManager.MediaDeviceState.STATE_CONNECTED);
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(
+                LocalMediaManager.MediaDeviceState.STATE_CONNECTED);
+
+        mInfoMediaDevice1.setState(LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(
+                LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
+
+        mInfoMediaDevice1.setState(LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(
+                LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+
+        mInfoMediaDevice1.setState(LocalMediaManager.MediaDeviceState.STATE_CONNECTING_FAILED);
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(
+                LocalMediaManager.MediaDeviceState.STATE_CONNECTING_FAILED);
+    }
 }
