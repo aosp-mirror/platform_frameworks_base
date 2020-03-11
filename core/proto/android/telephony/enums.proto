@@ -20,6 +20,43 @@ package android.telephony;
 option java_outer_classname = "TelephonyProtoEnums";
 option java_multiple_files = true;
 
+enum CallBearerEnum {
+    /** Call bearer is unknown or invalid */
+    CALL_BEARER_UNKNOWN = 0;
+
+    /** Call bearer is legacy CS */
+    CALL_BEARER_CS = 1;
+
+    /** Call bearer is IMS */
+    CALL_BEARER_IMS = 2;
+}
+
+enum CallDirectionEnum {
+    /** Call direction: unknown or invalid */
+    CALL_DIRECTION_UNKNOWN = 0;
+
+    /** Call direction: mobile originated (outgoing for this device) */
+    CALL_DIRECTION_MO = 1;
+
+    /** Call direction: mobile terminated (incoming for this device) */
+    CALL_DIRECTION_MT = 2;
+}
+
+// Call setup duration buckets.
+// See com.android.internal.telephony.metrics.VoiceCallSessionStats for definition.
+enum CallSetupDurationEnum {
+    CALL_SETUP_DURATION_UNKNOWN = 0;
+    CALL_SETUP_DURATION_EXTREMELY_FAST = 1;
+    CALL_SETUP_DURATION_ULTRA_FAST = 2;
+    CALL_SETUP_DURATION_VERY_FAST = 3;
+    CALL_SETUP_DURATION_FAST = 4;
+    CALL_SETUP_DURATION_NORMAL = 5;
+    CALL_SETUP_DURATION_SLOW = 6;
+    CALL_SETUP_DURATION_VERY_SLOW = 7;
+    CALL_SETUP_DURATION_ULTRA_SLOW = 8;
+    CALL_SETUP_DURATION_EXTREMELY_SLOW = 9;
+}
+
 // Data conn. power states, primarily used by android/telephony/DataConnectionRealTimeInfo.java.
 enum DataConnectionPowerStateEnum {
     DATA_CONNECTION_POWER_STATE_LOW = 1;
@@ -62,7 +99,6 @@ enum SignalStrengthEnum {
     SIGNAL_STRENGTH_GOOD = 3;
     SIGNAL_STRENGTH_GREAT = 4;
 }
-
 
 enum ServiceStateEnum {
     /**

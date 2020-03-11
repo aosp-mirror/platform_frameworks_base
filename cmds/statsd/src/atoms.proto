@@ -402,7 +402,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10076
+    // Next: 10080
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -486,6 +486,10 @@ message Atom {
                 10073 [(module) = "framework"];
         GnssStats gnss_stats = 10074 [(module) = "framework"];
         AppFeaturesOps app_features_ops = 10075 [(module) = "framework"];
+        VoiceCallSession voice_call_session = 10076 [(module) = "telephony"];
+        VoiceCallRatUsage voice_call_rat_usage = 10077 [(module) = "telephony"];
+        SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
+        SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -8669,6 +8673,154 @@ message AppFreezeChanged {
 
     // Time since last unfrozen.
     optional int64 time_unfrozen_millis = 4;
+}
+
+/**
+ * Pulls information for a single voice call.
+ *
+ * Each pull creates multiple atoms, one for each call. The sequence is randomized when pulled.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/PersistPullers.java
+ */
+message VoiceCallSession {
+    // Bearer (IMS or CS) when the call started.
+    optional android.telephony.CallBearerEnum bearer_at_start = 1;
+
+    // Bearer (IMS or CS) when the call ended.
+    // The bearer may change during the call, e.g. due to SRVCC.
+    optional android.telephony.CallBearerEnum bearer_at_end = 2;
+
+    // Direction of the call (incoming or outgoing).
+    optional android.telephony.CallDirectionEnum direction = 3;
+
+    // Time spent setting up the call.
+    optional android.telephony.CallSetupDurationEnum setup_duration = 4;
+
+    // Whether the call ended before the setup was completed.
+    optional bool setup_failed = 5;
+
+    // IMS reason code or CS disconnect cause.
+    // For IMS, see: frameworks/base/telephony/java/android/telephony/ims/ImsReasonInfo.java
+    // For CS, see: frameworks/base/telephony/java/android/telephony/DisconnectCause.java
+    optional int32 disconnect_reason_code = 6;
+
+    // IMS extra code or CS precise disconnect cause.
+    // For IMS, this code is vendor-specific
+    // For CS, see: frameworks/base/telephony/java/android/telephony/PreciseDisconnectCause.java
+    optional int32 disconnect_extra_code = 7;
+
+    // IMS extra message or CS vendor cause.
+    optional string disconnect_extra_message = 8;
+
+    // Radio access technology (RAT) used when call started.
+    optional android.telephony.NetworkTypeEnum rat_at_start = 9;
+
+    // Radio access technology (RAT) used when call terminated.
+    optional android.telephony.NetworkTypeEnum rat_at_end = 10;
+
+    // Number of times RAT changed during the call.
+    optional int64 rat_switch_count = 11;
+
+    // A bitmask of all codecs used during the call.
+    // See: frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/VoiceCallSessionStats.java
+    optional int64 codec_bitmask = 12;
+
+    // Number of other calls going on during call setup, for the same SIM slot.
+    optional int32 concurrent_call_count_at_start = 13;
+
+    // Number of other calls going on during call termination, for the same SIM slot.
+    optional int32 concurrent_call_count_at_end = 14;
+
+    // Index of the SIM is used, 0 for single-SIM devices.
+    optional int32 sim_slot_index = 15;
+
+    // Whether the device was in multi-SIM mode (with multiple active SIM profiles).
+    optional bool is_multi_sim = 16;
+
+    // Whether the call was made with an eSIM profile.
+    optional bool is_esim = 17;
+
+    // Carrier ID of the SIM card.
+    // See https://source.android.com/devices/tech/config/carrierid.
+    optional int32 carrier_id = 18;
+
+    // Whether an SRVCC has been completed successfully.
+    // SRVCC (CS fallback) should be recorded in the IMS call since there will be no more SRVCC
+    // events once the call is switched to CS.
+    optional bool srvcc_completed = 19;
+
+    // Number of SRVCC failures.
+    optional int64 srvcc_failure_count = 20;
+
+    // Number of SRVCC cancellations.
+    optional int64 srvcc_cancellation_count = 21;
+
+    // Whether the Real-Time Text (RTT) was ever used in the call.
+    optional bool rtt_enabled = 22;
+
+    // Whether this was an emergency call.
+    optional bool is_emergency = 23;
+
+    // Whether the call was performed while roaming.
+    optional bool is_roaming = 24;
+}
+
+/**
+ * Pulls voice call radio access technology (RAT) usage.
+ *
+ * Each pull creates multiple atoms, one for each carrier/RAT, the order of which is irrelevant to
+ * time. The atom will be skipped if not enough data is available.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/PersistPullers.java
+ */
+message VoiceCallRatUsage {
+    // Carrier ID (https://source.android.com/devices/tech/config/carrierid).
+    optional int32 carrier_id = 1;
+
+    // Radio access technology.
+    optional android.telephony.NetworkTypeEnum rat = 2;
+
+    // Total duration that voice calls spent on this carrier and RAT.
+    optional int64 total_duration_seconds = 3;
+
+    // Total number of calls using this carrier and RAT.
+    // A call is counted once even if it used the RAT multiple times.
+    optional int64 call_count = 4;
+}
+
+/**
+ * Pulls the number of active SIM slots and SIMs/eSIM profiles.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/NonPersistPullers.java
+ */
+message SimSlotState {
+    // Number of active SIM slots (both physical and eSIM profiles) in the device.
+    optional int32 active_slot_count = 1;
+
+    // Number of SIM cards (both physical and active eSIM profiles).
+    // This number is always equal to or less than the number of active SIM slots.
+    optional int32 sim_count = 2;
+
+    // Number of active eSIM profiles.
+    // This number is always equal to or less than the number of SIMs.
+    optional int32 esim_count = 3;
+}
+
+/**
+ * Pulls supported cellular radio access technologies.
+ *
+ * This atom reports the capabilities of the device, rather than the network it has access to.
+ *
+ * Pulled from:
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/metrics/NonPersistPullers.java
+ */
+message SupportedRadioAccessFamily {
+    // A bitmask of supported radio technologies.
+    // See android.telephony.TelephonyManager.NetworkTypeBitMask.
+    optional int64 network_type_bitmask = 1;
 }
 
 /**
