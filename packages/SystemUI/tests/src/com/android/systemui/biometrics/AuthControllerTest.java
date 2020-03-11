@@ -57,12 +57,14 @@ import com.android.systemui.statusbar.CommandQueue;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
@@ -110,52 +112,75 @@ public class AuthControllerTest extends SysuiTestCase {
     @Test
     public void testSendsReasonUserCanceled_whenDismissedByUserCancel() throws Exception {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED,
+                null /* credentialAttestation */);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
     public void testSendsReasonNegative_whenDismissedByButtonNegative() throws Exception {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_NEGATIVE);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE,
+                null /* credentialAttestation */);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_NEGATIVE),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
     public void testSendsReasonConfirmed_whenDismissedByButtonPositive() throws Exception {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BUTTON_POSITIVE,
+                null /* credentialAttestation */);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
     public void testSendsReasonConfirmNotRequired_whenDismissedByAuthenticated() throws Exception {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED,
+                null /* credentialAttestation */);
         verify(mReceiver).onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
+                eq(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
     public void testSendsReasonError_whenDismissedByError() throws Exception {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_ERROR);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_ERROR);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_ERROR,
+                null /* credentialAttestation */);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_ERROR),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
     public void testSendsReasonServerRequested_whenDismissedByServer() throws Exception {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER,
+                null /* credentialAttestation */);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
     public void testSendsReasonCredentialConfirmed_whenDeviceCredentialAuthenticated()
             throws Exception {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
+
+        final byte[] credentialAttestation = generateRandomHAT();
+
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED,
+                credentialAttestation);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED),
+                AdditionalMatchers.aryEq(credentialAttestation));
     }
 
     // Statusbar tests
@@ -302,8 +327,13 @@ public class AuthControllerTest extends SysuiTestCase {
         showDialog(Authenticators.DEVICE_CREDENTIAL, BiometricPrompt.TYPE_NONE);
         verify(mDialog1).show(any(), any());
 
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED);
-        verify(mReceiver).onDialogDismissed(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
+        final byte[] credentialAttestation = generateRandomHAT();
+
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED,
+                credentialAttestation);
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED),
+                AdditionalMatchers.aryEq(credentialAttestation));
 
         mAuthController.hideAuthenticationDialog();
     }
@@ -395,20 +425,24 @@ public class AuthControllerTest extends SysuiTestCase {
         assertNull(mAuthController.mCurrentDialog);
         assertNull(mAuthController.mReceiver);
         verify(mDialog1).dismissWithoutCallback(true /* animate */);
-        verify(mReceiver).onDialogDismissed(eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL));
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
     public void testDoesNotCrash_whenTryAgainPressedAfterDismissal() {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED,
+                null /* credentialAttestation */);
         mAuthController.onTryAgainPressed();
     }
 
     @Test
     public void testDoesNotCrash_whenDeviceCredentialPressedAfterDismissal() {
         showDialog(Authenticators.BIOMETRIC_WEAK, BiometricPrompt.TYPE_FACE);
-        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED);
+        mAuthController.onDismissed(AuthDialogCallback.DISMISSED_USER_CANCELED,
+                null /* credentialAttestation */);
         mAuthController.onDeviceCredentialPressed();
     }
 
@@ -422,7 +456,9 @@ public class AuthControllerTest extends SysuiTestCase {
         assertNull(mAuthController.mCurrentDialog);
         assertNull(mAuthController.mReceiver);
         verify(mDialog1).dismissWithoutCallback(true /* animate */);
-        verify(mReceiver).onDialogDismissed(eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL));
+        verify(mReceiver).onDialogDismissed(
+                eq(BiometricPrompt.DISMISSED_REASON_USER_CANCEL),
+                eq(null) /* credentialAttestation */);
     }
 
     // Helpers
@@ -433,7 +469,8 @@ public class AuthControllerTest extends SysuiTestCase {
                 biometricModality,
                 true /* requireConfirmation */,
                 0 /* userId */,
-                "testPackage");
+                "testPackage",
+                0 /* operationId */);
     }
 
     private Bundle createTestDialogBundle(int authenticators) {
@@ -453,6 +490,13 @@ public class AuthControllerTest extends SysuiTestCase {
         return bundle;
     }
 
+    private byte[] generateRandomHAT() {
+        byte[] HAT = new byte[69];
+        Random random = new Random();
+        random.nextBytes(HAT);
+        return HAT;
+    }
+
     private final class TestableAuthController extends AuthController {
         private int mBuildCount = 0;
         private Bundle mLastBiometricPromptBundle;
@@ -464,7 +508,7 @@ public class AuthControllerTest extends SysuiTestCase {
         @Override
         protected AuthDialog buildDialog(Bundle biometricPromptBundle,
                 boolean requireConfirmation, int userId, int type, String opPackageName,
-                boolean skipIntro) {
+                boolean skipIntro, long operationId) {
 
             mLastBiometricPromptBundle = biometricPromptBundle;
 

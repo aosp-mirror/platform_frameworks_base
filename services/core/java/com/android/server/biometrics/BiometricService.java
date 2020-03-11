@@ -24,6 +24,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.IActivityManager;
 import android.app.UserSwitchObserver;
@@ -296,7 +297,7 @@ public class BiometricService extends SystemService {
                 }
 
                 case MSG_ON_DISMISSED: {
-                    handleOnDismissed(msg.arg1);
+                    handleOnDismissed(msg.arg1, (byte[]) msg.obj);
                     break;
                 }
 
@@ -611,8 +612,12 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void onDialogDismissed(int reason) throws RemoteException {
-            mHandler.obtainMessage(MSG_ON_DISMISSED, reason, 0 /* arg2 */).sendToTarget();
+        public void onDialogDismissed(int reason, @Nullable byte[] credentialAttestation)
+                throws RemoteException {
+            mHandler.obtainMessage(MSG_ON_DISMISSED,
+                    reason,
+                    0 /* arg2 */,
+                    credentialAttestation /* obj */).sendToTarget();
         }
 
         @Override
@@ -1422,7 +1427,8 @@ public class BiometricService extends SystemService {
                                 0 /* biometricModality */,
                                 false /* requireConfirmation */,
                                 mCurrentAuthSession.mUserId,
-                                mCurrentAuthSession.mOpPackageName);
+                                mCurrentAuthSession.mOpPackageName,
+                                mCurrentAuthSession.mSessionId);
                     } else {
                         mPendingAuthSession.mClientReceiver.onError(modality, error, vendorCode);
                         mPendingAuthSession = null;
@@ -1458,7 +1464,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleOnDismissed(int reason) {
+    private void handleOnDismissed(int reason, @Nullable byte[] credentialAttestation) {
         if (mCurrentAuthSession == null) {
             Slog.e(TAG, "onDismissed: " + reason + ", auth session null");
             return;
@@ -1469,6 +1475,7 @@ public class BiometricService extends SystemService {
         try {
             switch (reason) {
                 case BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED:
+                    mKeyStore.addAuthToken(credentialAttestation);
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED:
                 case BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED:
                     if (mCurrentAuthSession.mTokenEscrow != null) {
@@ -1616,7 +1623,8 @@ public class BiometricService extends SystemService {
                 try {
                     mStatusBarService.showAuthenticationDialog(mCurrentAuthSession.mBundle,
                             mInternalReceiver, modality, requireConfirmation, userId,
-                            mCurrentAuthSession.mOpPackageName);
+                            mCurrentAuthSession.mOpPackageName,
+                            mCurrentAuthSession.mSessionId);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception", e);
                 }
@@ -1701,7 +1709,8 @@ public class BiometricService extends SystemService {
                         0 /* biometricModality */,
                         false /* requireConfirmation */,
                         mCurrentAuthSession.mUserId,
-                        mCurrentAuthSession.mOpPackageName);
+                        mCurrentAuthSession.mOpPackageName,
+                        sessionId);
             } else {
                 mPendingAuthSession.mState = STATE_AUTH_CALLED;
                 for (AuthenticatorWrapper authenticator : mAuthenticators) {
