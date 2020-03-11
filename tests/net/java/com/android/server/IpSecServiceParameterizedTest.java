@@ -544,12 +544,26 @@ public class IpSecServiceParameterizedTest {
 
     @Test
     public void testApplyTransportModeTransform() throws Exception {
+        verifyApplyTransportModeTransformCommon(false);
+    }
+
+    @Test
+    public void testApplyTransportModeTransformReleasedSpi() throws Exception {
+        verifyApplyTransportModeTransformCommon(true);
+    }
+
+    public void verifyApplyTransportModeTransformCommon(
+                boolean closeSpiBeforeApply) throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
                 mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
+
+        if (closeSpiBeforeApply) {
+            mIpSecService.releaseSecurityParameterIndex(ipSecConfig.getSpiResourceId());
+        }
 
         Socket socket = new Socket();
         socket.bind(null);
@@ -656,6 +670,15 @@ public class IpSecServiceParameterizedTest {
 
     @Test
     public void testApplyTunnelModeTransform() throws Exception {
+        verifyApplyTunnelModeTransformCommon(false);
+    }
+
+    @Test
+    public void testApplyTunnelModeTransformReleasedSpi() throws Exception {
+        verifyApplyTunnelModeTransformCommon(true);
+    }
+
+    public void verifyApplyTunnelModeTransformCommon(boolean closeSpiBeforeApply) throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         ipSecConfig.setMode(IpSecTransform.MODE_TUNNEL);
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
@@ -665,6 +688,10 @@ public class IpSecServiceParameterizedTest {
                 mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
         IpSecTunnelInterfaceResponse createTunnelResp =
                 createAndValidateTunnel(mSourceAddr, mDestinationAddr, "blessedPackage");
+
+        if (closeSpiBeforeApply) {
+            mIpSecService.releaseSecurityParameterIndex(ipSecConfig.getSpiResourceId());
+        }
 
         int transformResourceId = createTransformResp.resourceId;
         int tunnelResourceId = createTunnelResp.resourceId;
