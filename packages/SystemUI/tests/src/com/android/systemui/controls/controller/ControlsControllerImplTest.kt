@@ -346,6 +346,88 @@ class ControlsControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testCancelLoad() {
+        val canceller = object : Runnable {
+            var ran = false
+            override fun run() {
+                ran = true
+            }
+        }
+        `when`(bindingController.bindAndLoad(any(), any())).thenReturn(canceller)
+
+        var loaded = false
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+        controller.loadForComponent(TEST_COMPONENT, Consumer {
+            loaded = true
+        })
+
+        controller.cancelLoad()
+        delayableExecutor.runAllReady()
+
+        assertFalse(loaded)
+        assertTrue(canceller.ran)
+    }
+
+    @Test
+    fun testCancelLoad_noCancelAfterSuccessfulLoad() {
+        val canceller = object : Runnable {
+            var ran = false
+            override fun run() {
+                ran = true
+            }
+        }
+        `when`(bindingController.bindAndLoad(any(), any())).thenReturn(canceller)
+
+        var loaded = false
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+        controller.loadForComponent(TEST_COMPONENT, Consumer {
+            loaded = true
+        })
+
+        verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
+            capture(controlLoadCallbackCaptor))
+
+        controlLoadCallbackCaptor.value.accept(emptyList())
+
+        controller.cancelLoad()
+        delayableExecutor.runAllReady()
+
+        assertTrue(loaded)
+        assertFalse(canceller.ran)
+    }
+
+    @Test
+    fun testCancelLoad_noCancelAfterErrorLoad() {
+        val canceller = object : Runnable {
+            var ran = false
+            override fun run() {
+                ran = true
+            }
+        }
+        `when`(bindingController.bindAndLoad(any(), any())).thenReturn(canceller)
+
+        var loaded = false
+        controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
+        delayableExecutor.runAllReady()
+        controller.loadForComponent(TEST_COMPONENT, Consumer {
+            loaded = true
+        })
+
+        verify(bindingController).bindAndLoad(eq(TEST_COMPONENT),
+            capture(controlLoadCallbackCaptor))
+
+        controlLoadCallbackCaptor.value.error("")
+
+        controller.cancelLoad()
+        delayableExecutor.runAllReady()
+
+        assertTrue(loaded)
+        assertFalse(canceller.ran)
+    }
+
+    @Test
     fun testFavoriteInformationModifiedOnLoad() {
         controller.replaceFavoritesForStructure(TEST_STRUCTURE_INFO)
         delayableExecutor.runAllReady()
