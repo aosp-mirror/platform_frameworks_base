@@ -69,6 +69,10 @@ package android.app.usage {
 
 package android.content {
 
+  public abstract class ContentResolver {
+    method @Deprecated public void notifyChange(@NonNull Iterable<android.net.Uri>, @Nullable android.database.ContentObserver, int);
+  }
+
   public abstract class Context {
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
     method public abstract java.io.File getSharedPreferencesPath(String);
