@@ -139,7 +139,7 @@ import java.util.Map;
  *     &#64;Override
  *     public void onSampleCompleted(
  *         int trackIndex,
- *         long timeUs,
+ *         long timeMicros,
  *         int flags,
  *         int size,
  *         int offset,
@@ -163,7 +163,7 @@ import java.util.Map;
  *           &#47;* destPos= *&#47; 0,
  *           &#47;* size= *&#47; offset);
  *       bytesWrittenCount = bytesWrittenCount - offset;
- *       publishSample(sampleData, timeUs, flags);
+ *       publishSample(sampleData, timeMicros, flags);
  *     }
  *
  *    private void ensureSpaceInBuffer(int numberOfBytesToRead) {
@@ -187,7 +187,7 @@ public final class MediaParser {
      */
     public static final class SeekMap {
 
-        /** Returned by {@link #getDurationUs()} when the duration is unknown. */
+        /** Returned by {@link #getDurationMicros()} when the duration is unknown. */
         public static final int UNKNOWN_DURATION = Integer.MIN_VALUE;
 
         private final com.google.android.exoplayer2.extractor.SeekMap mExoPlayerSeekMap;
@@ -205,26 +205,26 @@ public final class MediaParser {
          * Returns the duration of the stream in microseconds or {@link #UNKNOWN_DURATION} if the
          * duration is unknown.
          */
-        public long getDurationUs() {
+        public long getDurationMicros() {
             return mExoPlayerSeekMap.getDurationUs();
         }
 
         /**
          * Obtains {@link SeekPoint SeekPoints} for the specified seek time in microseconds.
          *
-         * <p>{@code getSeekPoints(timeUs).first} contains the latest seek point for samples with
-         * timestamp equal to or smaller than {@code timeUs}.
+         * <p>{@code getSeekPoints(timeMicros).first} contains the latest seek point for samples
+         * with timestamp equal to or smaller than {@code timeMicros}.
          *
-         * <p>{@code getSeekPoints(timeUs).second} contains the earliest seek point for samples with
-         * timestamp equal to or greater than {@code timeUs}. If a seek point exists for {@code
-         * timeUs}, the returned pair will contain the same {@link SeekPoint} twice.
+         * <p>{@code getSeekPoints(timeMicros).second} contains the earliest seek point for samples
+         * with timestamp equal to or greater than {@code timeMicros}. If a seek point exists for
+         * {@code timeMicros}, the returned pair will contain the same {@link SeekPoint} twice.
          *
-         * @param timeUs A seek time in microseconds.
+         * @param timeMicros A seek time in microseconds.
          * @return The corresponding {@link SeekPoint SeekPoints}.
          */
         @NonNull
-        public Pair<SeekPoint, SeekPoint> getSeekPoints(long timeUs) {
-            SeekPoints seekPoints = mExoPlayerSeekMap.getSeekPoints(timeUs);
+        public Pair<SeekPoint, SeekPoint> getSeekPoints(long timeMicros) {
+            SeekPoints seekPoints = mExoPlayerSeekMap.getSeekPoints(timeMicros);
             return new Pair<>(toSeekPoint(seekPoints.first), toSeekPoint(seekPoints.second));
         }
     }
@@ -254,24 +254,24 @@ public final class MediaParser {
         @NonNull public static final SeekPoint START = new SeekPoint(0, 0);
 
         /** The time of the seek point, in microseconds. */
-        public final long timeUs;
+        public final long timeMicros;
 
         /** The byte offset of the seek point. */
         public final long position;
 
         /**
-         * @param timeUs The time of the seek point, in microseconds.
+         * @param timeMicros The time of the seek point, in microseconds.
          * @param position The byte offset of the seek point.
          */
-        private SeekPoint(long timeUs, long position) {
-            this.timeUs = timeUs;
+        private SeekPoint(long timeMicros, long position) {
+            this.timeMicros = timeMicros;
             this.position = position;
         }
 
         @Override
         @NonNull
         public String toString() {
-            return "[timeUs=" + timeUs + ", position=" + position + "]";
+            return "[timeMicros=" + timeMicros + ", position=" + position + "]";
         }
 
         @Override
@@ -283,12 +283,12 @@ public final class MediaParser {
                 return false;
             }
             SeekPoint other = (SeekPoint) obj;
-            return timeUs == other.timeUs && position == other.position;
+            return timeMicros == other.timeMicros && position == other.position;
         }
 
         @Override
         public int hashCode() {
-            int result = (int) timeUs;
+            int result = (int) timeMicros;
             result = 31 * result + (int) position;
             return result;
         }
@@ -345,25 +345,25 @@ public final class MediaParser {
          *
          * @param seekMap The extracted {@link SeekMap}.
          */
-        void onSeekMap(@NonNull SeekMap seekMap);
+        void onSeekMapFound(@NonNull SeekMap seekMap);
 
         /**
          * Called when the number of tracks is found.
          *
          * @param numberOfTracks The number of tracks in the stream.
          */
-        void onTracksFound(int numberOfTracks);
+        void onTrackCountFound(int numberOfTracks);
 
         /**
-         * Called when new {@link TrackData} is extracted from the stream.
+         * Called when new {@link TrackData} is found in the stream.
          *
          * @param trackIndex The index of the track for which the {@link TrackData} was extracted.
          * @param trackData The extracted {@link TrackData}.
          */
-        void onTrackData(int trackIndex, @NonNull TrackData trackData);
+        void onTrackDataFound(int trackIndex, @NonNull TrackData trackData);
 
         /**
-         * Called to write sample data to the output.
+         * Called when sample data is found in the stream.
          *
          * <p>If the invocation of this method returns before the entire {@code inputReader} {@link
          * InputReader#getLength() length} is consumed, the method will be called again for the
@@ -374,15 +374,15 @@ public final class MediaParser {
          * @param inputReader The {@link InputReader} from which to read the data.
          * @throws IOException If an exception occurs while reading from {@code inputReader}.
          */
-        void onSampleData(int trackIndex, @NonNull InputReader inputReader) throws IOException;
+        void onSampleDataFound(int trackIndex, @NonNull InputReader inputReader) throws IOException;
 
         /**
-         * Called once all the data of a sample has been passed to {@link #onSampleData}.
+         * Called once all the data of a sample has been passed to {@link #onSampleDataFound}.
          *
          * <p>Also includes sample metadata, like presentation timestamp and flags.
          *
          * @param trackIndex The index of the track to which the sample corresponds.
-         * @param timeUs The media timestamp associated with the sample, in microseconds.
+         * @param timeMicros The media timestamp associated with the sample, in microseconds.
          * @param flags Flags associated with the sample. See {@link MediaCodec
          *     MediaCodec.BUFFER_FLAG_*}.
          * @param size The size of the sample data, in bytes.
@@ -394,7 +394,7 @@ public final class MediaParser {
          */
         void onSampleCompleted(
                 int trackIndex,
-                long timeUs,
+                long timeMicros,
                 int flags,
                 int size,
                 int offset,
@@ -632,7 +632,7 @@ public final class MediaParser {
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
     private long mPendingSeekPosition;
-    private long mPendingSeekTimeUs;
+    private long mPendingSeekTimeMicros;
 
     // Public methods.
 
@@ -760,7 +760,7 @@ public final class MediaParser {
         }
 
         if (isPendingSeek()) {
-            mExtractor.seek(mPendingSeekPosition, mPendingSeekTimeUs);
+            mExtractor.seek(mPendingSeekPosition, mPendingSeekTimeMicros);
             removePendingSeek();
         }
 
@@ -786,7 +786,7 @@ public final class MediaParser {
      * Seeks within the media container being extracted.
      *
      * <p>{@link SeekPoint SeekPoints} can be obtained from the {@link SeekMap} passed to {@link
-     * OutputConsumer#onSeekMap(SeekMap)}.
+     * OutputConsumer#onSeekMapFound(SeekMap)}.
      *
      * <p>Following a call to this method, the {@link InputReader} passed to the next invocation of
      * {@link #advance} must provide data starting from {@link SeekPoint#position} in the stream.
@@ -796,9 +796,9 @@ public final class MediaParser {
     public void seek(@NonNull SeekPoint seekPoint) {
         if (mExtractor == null) {
             mPendingSeekPosition = seekPoint.position;
-            mPendingSeekTimeUs = seekPoint.timeUs;
+            mPendingSeekTimeMicros = seekPoint.timeMicros;
         } else {
-            mExtractor.seek(seekPoint.position, seekPoint.timeUs);
+            mExtractor.seek(seekPoint.position, seekPoint.timeMicros);
         }
     }
 
@@ -836,7 +836,7 @@ public final class MediaParser {
 
     private void removePendingSeek() {
         mPendingSeekPosition = -1;
-        mPendingSeekTimeUs = -1;
+        mPendingSeekTimeMicros = -1;
     }
 
     // Private classes.
@@ -897,12 +897,12 @@ public final class MediaParser {
 
         @Override
         public void endTracks() {
-            mOutputConsumer.onTracksFound(mTrackOutputAdapters.size());
+            mOutputConsumer.onTrackCountFound(mTrackOutputAdapters.size());
         }
 
         @Override
         public void seekMap(com.google.android.exoplayer2.extractor.SeekMap exoplayerSeekMap) {
-            mOutputConsumer.onSeekMap(new SeekMap(exoplayerSeekMap));
+            mOutputConsumer.onSeekMapFound(new SeekMap(exoplayerSeekMap));
         }
     }
 
@@ -916,7 +916,7 @@ public final class MediaParser {
 
         @Override
         public void format(Format format) {
-            mOutputConsumer.onTrackData(
+            mOutputConsumer.onTrackDataFound(
                     mTrackIndex,
                     new TrackData(
                             toMediaFormat(format), toFrameworkDrmInitData(format.drmInitData)));
@@ -927,7 +927,7 @@ public final class MediaParser {
                 throws IOException {
             mScratchExtractorInputAdapter.setExtractorInput(input, length);
             long positionBeforeReading = mScratchExtractorInputAdapter.getPosition();
-            mOutputConsumer.onSampleData(mTrackIndex, mScratchExtractorInputAdapter);
+            mOutputConsumer.onSampleDataFound(mTrackIndex, mScratchExtractorInputAdapter);
             return (int) (mScratchExtractorInputAdapter.getPosition() - positionBeforeReading);
         }
 
@@ -935,7 +935,7 @@ public final class MediaParser {
         public void sampleData(ParsableByteArray data, int length) {
             mScratchParsableByteArrayAdapter.resetWithByteArray(data, length);
             try {
-                mOutputConsumer.onSampleData(mTrackIndex, mScratchParsableByteArrayAdapter);
+                mOutputConsumer.onSampleDataFound(mTrackIndex, mScratchParsableByteArrayAdapter);
             } catch (IOException e) {
                 // Unexpected.
                 throw new RuntimeException(e);
