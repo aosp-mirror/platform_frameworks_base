@@ -12449,7 +12449,6 @@ public class TelephonyManager {
      * @throws {@link SecurityException} if the caller is not the system or phone process.
      * @hide
      */
-    @SystemApi
     @TestApi
     // TODO: add new permission tag indicating that this is system-only.
     public @NonNull List<ApnSetting> getDevicePolicyOverrideApns(@NonNull Context context) {
@@ -12480,7 +12479,6 @@ public class TelephonyManager {
      * @throws {@link SecurityException} if the caller is not the system or phone process.
      * @hide
      */
-    @SystemApi
     @TestApi
     // TODO: add new permission tag indicating that this is system-only.
     public int addDevicePolicyOverrideApn(@NonNull Context context,
@@ -12511,7 +12509,6 @@ public class TelephonyManager {
      * @throws {@link SecurityException} if the caller is not the system or phone process.
      * @hide
      */
-    @SystemApi
     @TestApi
     // TODO: add new permission tag indicating that this is system-only.
     public boolean modifyDevicePolicyOverrideApn(@NonNull Context context, int apnId,
