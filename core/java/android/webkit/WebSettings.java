@@ -983,48 +983,63 @@ public abstract class WebSettings {
     public abstract void setJavaScriptEnabled(boolean flag);
 
     /**
-     * Sets whether JavaScript running in the context of a file scheme URL
-     * should be allowed to access content from any origin. This includes
-     * access to content from other file scheme URLs. See
-     * {@link #setAllowFileAccessFromFileURLs}. To enable the most restrictive,
-     * and therefore secure policy, this setting should be disabled.
-     * Note that this setting affects only JavaScript access to file scheme
-     * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected. To prevent possible violation of same domain policy
-     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
-     * you should explicitly set this value to {@code false}.
+     * Sets whether cross-origin requests in the context of a file scheme URL should be allowed to
+     * access content from <i>any</i> origin. This includes access to content from other file
+     * scheme URLs or web contexts. Note that some access such as image HTML elements doesn't
+     * follow same-origin rules and isn't affected by this setting.
+     * <p>
+     * <b>Don't</b> enable this setting if you open files that may be created or altered by
+     * external sources. Enabling this setting allows malicious scripts loaded in a {@code file://}
+     * context to launch cross-site scripting attacks, either accessing arbitrary local files
+     * including WebView cookies, app private data or even credentials used on arbitrary web sites.
+     * <p class="note">
+     * Loading content via {@code file://} URLs is generally discouraged. See the note in
+     * {@link #setAllowFileAccess}.
      * <p>
      * The default value is {@code true} for apps targeting
-     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
-     * and above.
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below, and {@code false}
+     * when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN} and above. To prevent
+     * possible violation of same domain policy when targeting
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier, you should
+     * explicitly set this value to {@code false}.
      *
-     * @param flag whether JavaScript running in the context of a file scheme
-     *             URL should be allowed to access content from any origin
+     * @param flag whether JavaScript running in the context of a file scheme URL should be allowed
+     *             to access content from any origin
+     * @deprecated This setting is not secure, please use
+     *             <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader.html">
+     *             androidx.webkit.WebViewAssetLoader</a> to load file content securely.
      */
+    @Deprecated
     public abstract void setAllowUniversalAccessFromFileURLs(boolean flag);
 
     /**
-     * Sets whether JavaScript running in the context of a file scheme URL
-     * should be allowed to access content from other file scheme URLs. To
-     * enable the most restrictive, and therefore secure, policy this setting
-     * should be disabled. Note that the value of this setting is ignored if
-     * the value of {@link #getAllowUniversalAccessFromFileURLs} is {@code true}.
-     * Note too, that this setting affects only JavaScript access to file scheme
-     * resources. Other access to such resources, for example, from image HTML
-     * elements, is unaffected. To prevent possible violation of same domain policy
-     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
-     * you should explicitly set this value to {@code false}.
+     * Sets whether cross-origin requests in the context of a file scheme URL should be allowed to
+     * access content from other file scheme URLs. Note that some accesses such as image HTML
+     * elements don't follow same-origin rules and aren't affected by this setting.
      * <p>
-     * The default value is {@code true} for apps targeting
-     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
-     * and above.
+     * <b>Don't</b> enable this setting if you open files that may be created or altered by
+     * external sources. Enabling this setting allows malicious scripts loaded in a {@code file://}
+     * context to access arbitrary local files including WebView cookies and app private data.
+     * <p class="note">
+     * Loading content via {@code file://} URLs is generally discouraged. See the note in
+     * {@link #setAllowFileAccess}.
+     * <p>
+     * Note that the value of this setting is ignored if the value of
+     * {@link #getAllowUniversalAccessFromFileURLs} is {@code true}. The default value is
+     * {@code true} for apps targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1}
+     * and below, and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and above. To prevent possible violation of same domain policy when targeting
+     * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier, you should
+     * explicitly set this value to {@code false}.
      *
      * @param flag whether JavaScript running in the context of a file scheme
      *             URL should be allowed to access content from other file
      *             scheme URLs
+     * @deprecated This setting is not secure, please use
+     *             <a href="{@docRoot}reference/androidx/webkit/WebViewAssetLoader.html">
+     *             androidx.webkit.WebViewAssetLoader</a> to load file content securely.
      */
+    @Deprecated
     public abstract void setAllowFileAccessFromFileURLs(boolean flag);
 
     /**
