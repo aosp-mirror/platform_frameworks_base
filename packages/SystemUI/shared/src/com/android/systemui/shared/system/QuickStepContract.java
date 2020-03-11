@@ -85,6 +85,9 @@ public class QuickStepContract {
     // The notification panel is expanded and interactive (either locked or unlocked), and the
     // quick settings is not expanded
     public static final int SYSUI_STATE_QUICK_SETTINGS_EXPANDED = 1 << 11;
+    // The Assistant gesture should be constrained. It is up to the launcher implementation to
+    // decide how to constrain it
+    public static final int SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED = 1 << 12;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -117,6 +120,8 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_BOUNCER_SHOWING) != 0 ? "bouncer_visible" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
+        str.add((flags & SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED) != 0
+                ? "asst_gesture_constrain" : "");
         return str.toString();
     }
 
