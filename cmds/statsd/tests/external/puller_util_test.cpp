@@ -13,12 +13,16 @@
 // limitations under the License.
 
 #include "external/puller_util.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
+
 #include <vector>
-#include "statslog.h"
+
 #include "../metrics/metrics_test_helper.h"
+#include "stats_event.h"
+#include "statslog.h"
 
 #ifdef __ANDROID__
 
@@ -58,212 +62,187 @@ void extractIntoVector(vector<shared_ptr<LogEvent>> events,
     ret.push_back(vec);
   }
 }
+
+std::shared_ptr<LogEvent> makeUidLogEvent(uint64_t timestampNs, int uid, int data1, int data2) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, uidAtomTagId);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeInt32(statsEvent, data1);
+    AStatsEvent_writeInt32(statsEvent, data2);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::shared_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::shared_ptr<LogEvent> makeNonUidAtomLogEvent(uint64_t timestampNs, int data1) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, nonUidAtomTagId);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, data1);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::shared_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
 }  // anonymous namespace
 
-// TODO(b/149590301): Update these tests to use new socket schema.
-//TEST(puller_util, MergeNoDimension) {
-//  vector<shared_ptr<LogEvent>> inputData;
-//  shared_ptr<LogEvent> event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  // 30->22->31
-//  event->write(isolatedUid);
-//  event->write(hostNonAdditiveData);
-//  event->write(isolatedAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  // 20->22->21
-//  event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  event->write(hostUid);
-//  event->write(hostNonAdditiveData);
-//  event->write(hostAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid))
-//      .WillRepeatedly(Return(hostUid));
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
-//      .WillRepeatedly(ReturnArg<0>());
-//  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
-//
-//  vector<vector<int>> actual;
-//  extractIntoVector(inputData, actual);
-//  vector<int> expectedV1 = {20, 22, 52};
-//  EXPECT_EQ(1, (int)actual.size());
-//  EXPECT_THAT(actual, Contains(expectedV1));
-//}
-//
-//TEST(puller_util, MergeWithDimension) {
-//  vector<shared_ptr<LogEvent>> inputData;
-//  shared_ptr<LogEvent> event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  // 30->32->31
-//  event->write(isolatedUid);
-//  event->write(isolatedNonAdditiveData);
-//  event->write(isolatedAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  // 20->32->21
-//  event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  event->write(hostUid);
-//  event->write(isolatedNonAdditiveData);
-//  event->write(hostAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  // 20->22->21
-//  event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  event->write(hostUid);
-//  event->write(hostNonAdditiveData);
-//  event->write(hostAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid))
-//      .WillRepeatedly(Return(hostUid));
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
-//      .WillRepeatedly(ReturnArg<0>());
-//  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
-//
-//  vector<vector<int>> actual;
-//  extractIntoVector(inputData, actual);
-//  vector<int> expectedV1 = {20, 22, 21};
-//  vector<int> expectedV2 = {20, 32, 52};
-//  EXPECT_EQ(2, (int)actual.size());
-//  EXPECT_THAT(actual, Contains(expectedV1));
-//  EXPECT_THAT(actual, Contains(expectedV2));
-//}
-//
-//TEST(puller_util, NoMergeHostUidOnly) {
-//  vector<shared_ptr<LogEvent>> inputData;
-//  shared_ptr<LogEvent> event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  // 20->32->31
-//  event->write(hostUid);
-//  event->write(isolatedNonAdditiveData);
-//  event->write(isolatedAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  // 20->22->21
-//  event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  event->write(hostUid);
-//  event->write(hostNonAdditiveData);
-//  event->write(hostAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid))
-//      .WillRepeatedly(Return(hostUid));
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
-//      .WillRepeatedly(ReturnArg<0>());
-//  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
-//
-//  // 20->32->31
-//  // 20->22->21
-//  vector<vector<int>> actual;
-//  extractIntoVector(inputData, actual);
-//  vector<int> expectedV1 = {20, 32, 31};
-//  vector<int> expectedV2 = {20, 22, 21};
-//  EXPECT_EQ(2, (int)actual.size());
-//  EXPECT_THAT(actual, Contains(expectedV1));
-//  EXPECT_THAT(actual, Contains(expectedV2));
-//}
-//
-//TEST(puller_util, IsolatedUidOnly) {
-//  vector<shared_ptr<LogEvent>> inputData;
-//  shared_ptr<LogEvent> event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  // 30->32->31
-//  event->write(hostUid);
-//  event->write(isolatedNonAdditiveData);
-//  event->write(isolatedAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  // 30->22->21
-//  event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  event->write(hostUid);
-//  event->write(hostNonAdditiveData);
-//  event->write(hostAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid))
-//      .WillRepeatedly(Return(hostUid));
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid)))
-//      .WillRepeatedly(ReturnArg<0>());
-//  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
-//
-//  // 20->32->31
-//  // 20->22->21
-//  vector<vector<int>> actual;
-//  extractIntoVector(inputData, actual);
-//  vector<int> expectedV1 = {20, 32, 31};
-//  vector<int> expectedV2 = {20, 22, 21};
-//  EXPECT_EQ(2, (int)actual.size());
-//  EXPECT_THAT(actual, Contains(expectedV1));
-//  EXPECT_THAT(actual, Contains(expectedV2));
-//}
-//
-//TEST(puller_util, MultipleIsolatedUidToOneHostUid) {
-//  vector<shared_ptr<LogEvent>> inputData;
-//  shared_ptr<LogEvent> event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  // 30->32->31
-//  event->write(isolatedUid);
-//  event->write(isolatedNonAdditiveData);
-//  event->write(isolatedAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  // 31->32->21
-//  event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  event->write(isolatedUid + 1);
-//  event->write(isolatedNonAdditiveData);
-//  event->write(hostAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  // 20->32->21
-//  event = make_shared<LogEvent>(uidAtomTagId, timestamp);
-//  event->write(hostUid);
-//  event->write(isolatedNonAdditiveData);
-//  event->write(hostAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//  EXPECT_CALL(*uidMap, getHostUidOrSelf(_)).WillRepeatedly(Return(hostUid));
-//  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
-//
-//  vector<vector<int>> actual;
-//  extractIntoVector(inputData, actual);
-//  vector<int> expectedV1 = {20, 32, 73};
-//  EXPECT_EQ(1, (int)actual.size());
-//  EXPECT_THAT(actual, Contains(expectedV1));
-//}
-//
-//TEST(puller_util, NoNeedToMerge) {
-//  vector<shared_ptr<LogEvent>> inputData;
-//  shared_ptr<LogEvent> event =
-//      make_shared<LogEvent>(nonUidAtomTagId, timestamp);
-//  // 32
-//  event->write(isolatedNonAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  event = make_shared<LogEvent>(nonUidAtomTagId, timestamp);
-//  // 22
-//  event->write(hostNonAdditiveData);
-//  event->init();
-//  inputData.push_back(event);
-//
-//  sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
-//  mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, nonUidAtomTagId, {} /*no additive fields*/);
-//
-//  EXPECT_EQ(2, (int)inputData.size());
-//}
+TEST(puller_util, MergeNoDimension) {
+    vector<shared_ptr<LogEvent>> inputData;
+
+    // 30->22->31
+    inputData.push_back(
+            makeUidLogEvent(timestamp, isolatedUid, hostNonAdditiveData, isolatedAdditiveData));
+
+    // 20->22->21
+    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
+
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
+    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+
+    vector<vector<int>> actual;
+    extractIntoVector(inputData, actual);
+    vector<int> expectedV1 = {20, 22, 52};
+    EXPECT_EQ(1, (int)actual.size());
+    EXPECT_THAT(actual, Contains(expectedV1));
+}
+
+TEST(puller_util, MergeWithDimension) {
+    vector<shared_ptr<LogEvent>> inputData;
+
+    // 30->32->31
+    inputData.push_back(
+            makeUidLogEvent(timestamp, isolatedUid, isolatedNonAdditiveData, isolatedAdditiveData));
+
+    // 20->32->21
+    inputData.push_back(
+            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, hostAdditiveData));
+
+    // 20->22->21
+    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
+
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
+    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+
+    vector<vector<int>> actual;
+    extractIntoVector(inputData, actual);
+    vector<int> expectedV1 = {20, 22, 21};
+    vector<int> expectedV2 = {20, 32, 52};
+    EXPECT_EQ(2, (int)actual.size());
+    EXPECT_THAT(actual, Contains(expectedV1));
+    EXPECT_THAT(actual, Contains(expectedV2));
+}
+
+TEST(puller_util, NoMergeHostUidOnly) {
+    vector<shared_ptr<LogEvent>> inputData;
+
+    // 20->32->31
+    inputData.push_back(
+            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, isolatedAdditiveData));
+
+    // 20->22->21
+    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
+
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
+    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+
+    // 20->32->31
+    // 20->22->21
+    vector<vector<int>> actual;
+    extractIntoVector(inputData, actual);
+    vector<int> expectedV1 = {20, 32, 31};
+    vector<int> expectedV2 = {20, 22, 21};
+    EXPECT_EQ(2, (int)actual.size());
+    EXPECT_THAT(actual, Contains(expectedV1));
+    EXPECT_THAT(actual, Contains(expectedV2));
+}
+
+TEST(puller_util, IsolatedUidOnly) {
+    vector<shared_ptr<LogEvent>> inputData;
+
+    // 30->32->31
+    inputData.push_back(
+            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, isolatedAdditiveData));
+
+    // 30->22->21
+    inputData.push_back(makeUidLogEvent(timestamp, hostUid, hostNonAdditiveData, hostAdditiveData));
+
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(isolatedUid)).WillRepeatedly(Return(hostUid));
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(Ne(isolatedUid))).WillRepeatedly(ReturnArg<0>());
+    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+
+    // 20->32->31
+    // 20->22->21
+    vector<vector<int>> actual;
+    extractIntoVector(inputData, actual);
+    vector<int> expectedV1 = {20, 32, 31};
+    vector<int> expectedV2 = {20, 22, 21};
+    EXPECT_EQ(2, (int)actual.size());
+    EXPECT_THAT(actual, Contains(expectedV1));
+    EXPECT_THAT(actual, Contains(expectedV2));
+}
+
+TEST(puller_util, MultipleIsolatedUidToOneHostUid) {
+    vector<shared_ptr<LogEvent>> inputData;
+
+    // 30->32->31
+    inputData.push_back(
+            makeUidLogEvent(timestamp, isolatedUid, isolatedNonAdditiveData, isolatedAdditiveData));
+
+    // 31->32->21
+    inputData.push_back(
+            makeUidLogEvent(timestamp, isolatedUid + 1, isolatedNonAdditiveData, hostAdditiveData));
+
+    // 20->32->21
+    inputData.push_back(
+            makeUidLogEvent(timestamp, hostUid, isolatedNonAdditiveData, hostAdditiveData));
+
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+    EXPECT_CALL(*uidMap, getHostUidOrSelf(_)).WillRepeatedly(Return(hostUid));
+    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, uidAtomTagId, uidAdditiveFields);
+
+    vector<vector<int>> actual;
+    extractIntoVector(inputData, actual);
+    vector<int> expectedV1 = {20, 32, 73};
+    EXPECT_EQ(1, (int)actual.size());
+    EXPECT_THAT(actual, Contains(expectedV1));
+}
+
+TEST(puller_util, NoNeedToMerge) {
+    vector<shared_ptr<LogEvent>> inputData;
+
+    // 32
+    inputData.push_back(makeNonUidAtomLogEvent(timestamp, isolatedNonAdditiveData));
+
+    // 22
+    inputData.push_back(makeNonUidAtomLogEvent(timestamp, hostNonAdditiveData));
+
+    sp<MockUidMap> uidMap = new NaggyMock<MockUidMap>();
+    mapAndMergeIsolatedUidsToHostUid(inputData, uidMap, nonUidAtomTagId, {} /*no additive fields*/);
+
+    EXPECT_EQ(2, (int)inputData.size());
+}
 
 }  // namespace statsd
 }  // namespace os
