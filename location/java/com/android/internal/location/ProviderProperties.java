@@ -25,11 +25,10 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
- * A Parcelable containing (legacy) location provider properties.
- * This object is just used inside the framework and system services.
- *
+ * Location provider properties.
  * @hide
  */
 public final class ProviderProperties implements Parcelable {
@@ -37,14 +36,12 @@ public final class ProviderProperties implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({Criteria.POWER_LOW, Criteria.POWER_MEDIUM, Criteria.POWER_HIGH})
-    public @interface PowerRequirement {
-    }
+    public @interface PowerRequirement {}
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({Criteria.ACCURACY_FINE, Criteria.ACCURACY_COARSE})
-    public @interface Accuracy {
-    }
+    public @interface Accuracy {}
 
     /**
      * True if provider requires access to a
@@ -132,19 +129,16 @@ public final class ProviderProperties implements Parcelable {
             new Parcelable.Creator<ProviderProperties>() {
                 @Override
                 public ProviderProperties createFromParcel(Parcel in) {
-                    boolean requiresNetwork = in.readInt() == 1;
-                    boolean requiresSatellite = in.readInt() == 1;
-                    boolean requiresCell = in.readInt() == 1;
-                    boolean hasMonetaryCost = in.readInt() == 1;
-                    boolean supportsAltitude = in.readInt() == 1;
-                    boolean supportsSpeed = in.readInt() == 1;
-                    boolean supportsBearing = in.readInt() == 1;
-                    int powerRequirement = in.readInt();
-                    int accuracy = in.readInt();
-                    return new ProviderProperties(requiresNetwork, requiresSatellite,
-                            requiresCell, hasMonetaryCost, supportsAltitude, supportsSpeed,
-                            supportsBearing,
-                            powerRequirement, accuracy);
+                    return new ProviderProperties(
+                            /* requiresNetwork= */ in.readBoolean(),
+                            /* requiresSatellite= */ in.readBoolean(),
+                            /* requiresCell= */ in.readBoolean(),
+                            /* hasMonetaryCost= */ in.readBoolean(),
+                            /* supportsAltitude= */ in.readBoolean(),
+                            /* supportsSpeed= */ in.readBoolean(),
+                            /* supportsBearing= */ in.readBoolean(),
+                            /* powerRequirement= */ in.readInt(),
+                            /* accuracy= */ in.readInt());
                 }
 
                 @Override
@@ -160,15 +154,41 @@ public final class ProviderProperties implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        parcel.writeInt(mRequiresNetwork ? 1 : 0);
-        parcel.writeInt(mRequiresSatellite ? 1 : 0);
-        parcel.writeInt(mRequiresCell ? 1 : 0);
-        parcel.writeInt(mHasMonetaryCost ? 1 : 0);
-        parcel.writeInt(mSupportsAltitude ? 1 : 0);
-        parcel.writeInt(mSupportsSpeed ? 1 : 0);
-        parcel.writeInt(mSupportsBearing ? 1 : 0);
+        parcel.writeBoolean(mRequiresNetwork);
+        parcel.writeBoolean(mRequiresSatellite);
+        parcel.writeBoolean(mRequiresCell);
+        parcel.writeBoolean(mHasMonetaryCost);
+        parcel.writeBoolean(mSupportsAltitude);
+        parcel.writeBoolean(mSupportsSpeed);
+        parcel.writeBoolean(mSupportsBearing);
         parcel.writeInt(mPowerRequirement);
         parcel.writeInt(mAccuracy);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ProviderProperties)) {
+            return false;
+        }
+        ProviderProperties that = (ProviderProperties) o;
+        return mRequiresNetwork == that.mRequiresNetwork
+                && mRequiresSatellite == that.mRequiresSatellite
+                && mRequiresCell == that.mRequiresCell
+                && mHasMonetaryCost == that.mHasMonetaryCost
+                && mSupportsAltitude == that.mSupportsAltitude
+                && mSupportsSpeed == that.mSupportsSpeed
+                && mSupportsBearing == that.mSupportsBearing
+                && mPowerRequirement == that.mPowerRequirement
+                && mAccuracy == that.mAccuracy;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mRequiresNetwork, mRequiresSatellite, mRequiresCell, mHasMonetaryCost,
+                mSupportsAltitude, mSupportsSpeed, mSupportsBearing, mPowerRequirement, mAccuracy);
     }
 
     @Override
