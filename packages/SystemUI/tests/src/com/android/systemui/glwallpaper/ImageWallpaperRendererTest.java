@@ -92,6 +92,7 @@ public class ImageWallpaperRendererTest extends SysuiTestCase {
 
             mWpmSpy.setBitmap(p3Bitmap);
             ImageWallpaperRenderer rendererP3 = new ImageWallpaperRenderer(mContext, mSurfaceProxy);
+            rendererP3.reportSurfaceSize();
             assertThat(rendererP3.isWcgContent()).isTrue();
 
             mWpmSpy.setBitmap(srgbBitmap);
