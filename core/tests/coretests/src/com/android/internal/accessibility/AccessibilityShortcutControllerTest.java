@@ -17,7 +17,6 @@
 package com.android.internal.accessibility;
 
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN;
-import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
@@ -102,10 +101,8 @@ public class AccessibilityShortcutControllerTest {
     private static final long[] VIBRATOR_PATTERN_LONG = {VIBRATOR_PATTERN_1, VIBRATOR_PATTERN_2};
 
     // Convenience values for enabling/disabling to make code more readable
-    private static final int DISABLED = 0;
     private static final int ENABLED_EXCEPT_LOCK_SCREEN = 1;
     private static final int ENABLED_INCLUDING_LOCK_SCREEN = 2;
-    private static final int DISABLED_BUT_LOCK_SCREEN_ON = 3;
 
     private @Mock Context mContext;
     private @Mock FrameworkObjectProvider mFrameworkObjectProvider;
@@ -225,14 +222,6 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_disabledWithValidServiceWhenCreated_shouldReturnFalse()
-            throws Exception {
-        configureValidShortcutService();
-        configureShortcutEnabled(DISABLED_BUT_LOCK_SCREEN_ON);
-        assertFalse(getController().isAccessibilityShortcutAvailable(false));
-    }
-
-    @Test
     public void testShortcutAvailable_onLockScreenButDisabledThere_shouldReturnFalse()
             throws Exception {
         configureValidShortcutService();
@@ -285,20 +274,8 @@ public class AccessibilityShortcutControllerTest {
     }
 
     @Test
-    public void testShortcutAvailable_whenShortcutBecomesDisabled_shouldReturnFalse()
-            throws Exception {
-        configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
-        configureValidShortcutService();
-        AccessibilityShortcutController accessibilityShortcutController = getController();
-        configureShortcutEnabled(DISABLED);
-        accessibilityShortcutController.onSettingsChanged();
-        assertFalse(accessibilityShortcutController.isAccessibilityShortcutAvailable(false));
-    }
-
-    @Test
     public void testShortcutAvailable_whenShortcutBecomesEnabled_shouldReturnTrue()
             throws Exception {
-        configureShortcutEnabled(DISABLED);
         configureValidShortcutService();
         AccessibilityShortcutController accessibilityShortcutController = getController();
         configureShortcutEnabled(ENABLED_EXCEPT_LOCK_SCREEN);
@@ -594,31 +571,19 @@ public class AccessibilityShortcutControllerTest {
     }
 
     private void configureShortcutEnabled(int enabledValue) {
-        final boolean enabled;
         final boolean lockscreen;
 
         switch (enabledValue) {
-            case DISABLED:
-                enabled = false;
-                lockscreen = false;
-                break;
-            case DISABLED_BUT_LOCK_SCREEN_ON:
-                enabled = false;
-                lockscreen = true;
-                break;
             case ENABLED_INCLUDING_LOCK_SCREEN:
-                enabled = true;
                 lockscreen = true;
                 break;
             case ENABLED_EXCEPT_LOCK_SCREEN:
-                enabled = true;
                 lockscreen = false;
                 break;
             default:
                 throw new IllegalArgumentException();
         }
 
-        Settings.Secure.putInt(mContentResolver, ACCESSIBILITY_SHORTCUT_ENABLED, enabled ? 1 : 0);
         Settings.Secure.putInt(
                 mContentResolver, ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, lockscreen ? 1 : 0);
     }
