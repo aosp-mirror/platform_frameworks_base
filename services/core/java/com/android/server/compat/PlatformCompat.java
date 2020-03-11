@@ -166,6 +166,26 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
+    public int enableTargetSdkChanges(String packageName, int targetSdkVersion)
+            throws RemoteException, SecurityException {
+        checkCompatChangeOverridePermission();
+        int numChanges = mCompatConfig.enableTargetSdkChangesForPackage(packageName,
+                                                                        targetSdkVersion);
+        killPackage(packageName);
+        return numChanges;
+    }
+
+    @Override
+    public int disableTargetSdkChanges(String packageName, int targetSdkVersion)
+            throws RemoteException, SecurityException {
+        checkCompatChangeOverridePermission();
+        int numChanges = mCompatConfig.disableTargetSdkChangesForPackage(packageName,
+                                                                         targetSdkVersion);
+        killPackage(packageName);
+        return numChanges;
+    }
+
+    @Override
     public void clearOverrides(String packageName) throws RemoteException, SecurityException {
         checkCompatChangeOverridePermission();
         mCompatConfig.removePackageOverrides(packageName);
