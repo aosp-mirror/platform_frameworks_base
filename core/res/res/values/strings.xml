@@ -1217,6 +1217,14 @@
         device. This includes information such as call numbers for calls and the state of the
         calls.</string>
 
+    <!-- Title of an application permission. When granted the app is exempt from audio record
+    restrictions.
+    [CHAR LIMIT=NONE]-->
+    <string name="permlab_exemptFromAudioRecordRestrictions">exempt from audio record restrictions</string>
+    <!-- Description of an application permission. When granted the app is exempt from audio record
+    restrictions. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_exemptFromAudioRecordRestrictions">Exempt the app from restrictions to record audio.</string>
+
     <!-- Title of an application permission.  When granted the user is giving access to a third
          party app to continue a call which originated in another app.  For example, the user
          could be in a voice call over their carrier's mobile network, and a third party video
