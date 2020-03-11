@@ -12891,7 +12891,6 @@ public class TelephonyManager {
      * The IccLock state or password was changed successfully.
      * @hide
      */
-    @SystemApi
     public static final int CHANGE_ICC_LOCK_SUCCESS = Integer.MAX_VALUE;
 
     /**
@@ -12904,7 +12903,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @WorkerThread
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isIccLockEnabled() {
@@ -12941,7 +12939,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setIccLockEnabled(boolean enabled, @NonNull String password) {
         checkNotNull(password, "setIccLockEnabled password can't be null.");
@@ -12975,7 +12972,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int changeIccLockPassword(@NonNull String oldPassword, @NonNull String newPassword) {
         checkNotNull(oldPassword, "changeIccLockPassword oldPassword can't be null.");
