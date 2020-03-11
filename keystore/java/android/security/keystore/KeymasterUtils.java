@@ -165,8 +165,7 @@ public abstract class KeymasterUtils {
             }
             args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
                     KeymasterArguments.toUint64(sid));
-            args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE,
-                    KeymasterDefs.HW_AUTH_PASSWORD | KeymasterDefs.HW_AUTH_BIOMETRIC);
+            args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, spec.getUserAuthenticationType());
             args.addUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     spec.getUserAuthenticationValidityDurationSeconds());
             if (spec.isUserAuthenticationValidWhileOnBody()) {
