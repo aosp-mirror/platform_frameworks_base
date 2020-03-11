@@ -217,8 +217,8 @@ std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(uint64_t timestampNs, const
                                                      const string& wakelockName);
 
 // Create log event for releasing wakelock.
-std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(uint64_t timestampNs, int isolatedUid,
-                                                        int hostUid, bool is_create);
+std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(uint64_t timestampNs, int hostUid,
+                                                        int isolatedUid, bool is_create);
 
 // Create log event for uid process state change.
 std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
