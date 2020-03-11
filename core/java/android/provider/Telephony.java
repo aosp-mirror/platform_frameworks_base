@@ -4386,6 +4386,7 @@ public final class Telephony {
          * Indicates that whether the message has been broadcasted to the application.
          * <P>Type: BOOLEAN</P>
          */
+        // TODO: deprecate this in S.
         public static final String MESSAGE_BROADCASTED = "message_broadcasted";
 
         /**
