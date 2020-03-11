@@ -183,8 +183,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="?attr/colorBackgroundFloating"
-                android:foreground="?attr/dividerVertical"
-                android:layout_marginBottom="@dimen/resolver_tab_divider_bottom_padding"/>
+                android:foreground="?attr/dividerVertical"/>
             <FrameLayout
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
