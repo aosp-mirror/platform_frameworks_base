@@ -2398,17 +2398,20 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         final int availableWidth = right - left - v.getPaddingLeft() - v.getPaddingRight();
-        if (mChooserMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
-            gridAdapter.calculateChooserTargetWidth(availableWidth);
-            return;
-        }
-
-        if (gridAdapter.consumeLayoutRequest()
+        boolean isLayoutUpdated = gridAdapter.consumeLayoutRequest()
                 || gridAdapter.calculateChooserTargetWidth(availableWidth)
                 || recyclerView.getAdapter() == null
-                || mLastNumberOfChildren != recyclerView.getChildCount()
-                || availableWidth != mCurrAvailableWidth) {
+                || availableWidth != mCurrAvailableWidth;
+        if (isLayoutUpdated
+                || mLastNumberOfChildren != recyclerView.getChildCount()) {
             mCurrAvailableWidth = availableWidth;
+            if (isLayoutUpdated
+                    && mChooserMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
+                // This fixes b/150936654 - empty work tab in share sheet when swiping
+                mChooserMultiProfilePagerAdapter.getActiveAdapterView()
+                        .setAdapter(mChooserMultiProfilePagerAdapter.getCurrentRootAdapter());
+                return;
+            }
 
             getMainThreadHandler().post(() -> {
                 if (mResolverDrawerLayout == null || gridAdapter == null) {
