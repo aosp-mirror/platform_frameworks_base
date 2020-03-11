@@ -14726,9 +14726,8 @@ public class PackageManagerService extends IPackageManager.Stub
             verificationState.setRequiredVerifierUid(requiredUid);
             final int installerUid =
                     verificationInfo == null ? -1 : verificationInfo.installerUid;
-            if (!origin.existing && requiredUid != -1
-                    && isVerificationEnabled(
-                            pkgLite, verifierUser.getIdentifier(), installFlags, installerUid)) {
+            if (!origin.existing && isVerificationEnabled(pkgLite, verifierUser.getIdentifier(),
+                      installFlags, installerUid)) {
                 final Intent verification = new Intent(
                         Intent.ACTION_PACKAGE_NEEDS_VERIFICATION);
                 verification.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
@@ -14794,9 +14793,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
 
-                final ComponentName requiredVerifierComponent = matchComponentForVerifier(
-                        mRequiredVerifierPackage, receivers);
                 if (mRequiredVerifierPackage != null) {
+                    final ComponentName requiredVerifierComponent = matchComponentForVerifier(
+                            mRequiredVerifierPackage, receivers);
                     /*
                      * Send the intent to the required verification agent,
                      * but only start the verification timeout after the
