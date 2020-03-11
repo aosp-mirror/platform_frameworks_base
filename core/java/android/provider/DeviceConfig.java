@@ -399,6 +399,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_CONNECTIVITY_THERMAL_POWER_MANAGER =
             "connectivity_thermal_power_manager";
 
+    /**
+     * Namespace for configuration related features.
+     *
+     * @hide
+     */
+    public static final String NAMESPACE_CONFIGURATION = "configuration";
+
     private static final Object sLock = new Object();
     @GuardedBy("sLock")
     private static ArrayMap<OnPropertiesChangedListener, Pair<String, Executor>> sListeners =
