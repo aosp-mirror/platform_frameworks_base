@@ -44,25 +44,20 @@ fun Int.dpToPx(resources: Resources) = TypedValue.applyDimension(
 
 fun AssetFileDescriptor.readText() = createInputStream().reader().readText()
 
-fun rawFile(fileName: String) = R.raw::class.java.getDeclaredField(fileName).getInt(null)
-
 fun XmlPullParser.advanceToRoot() = apply {
     while (next() != XmlPullParser.START_TAG) {
         // Empty
     }
 }
 
-fun Context.copiedRawFile(fileName: String): ParcelFileDescriptor {
-    return resources.openRawResourceFd(rawFile(fileName)).use { asset ->
+fun Context.copiedAssetFile(fileName: String): ParcelFileDescriptor {
+    return resources.assets.open(fileName).use { input ->
         // AssetManager doesn't expose a direct file descriptor to the asset, so copy it to
         // an individual file so one can be created manually.
         val copiedFile = File(filesDir, fileName)
-        asset.createInputStream().use { input ->
-            copiedFile.outputStream().use { output ->
-                input.copyTo(output)
-            }
+        copiedFile.outputStream().use { output ->
+            input.copyTo(output)
         }
-
         ParcelFileDescriptor.open(copiedFile, ParcelFileDescriptor.MODE_READ_WRITE)
     }
 }

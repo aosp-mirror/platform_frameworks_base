@@ -15,9 +15,6 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="android.content.res.loader.test">
-
-    <uses-sdk android:minSdkVersion="1" android:targetSdkVersion="1" />
-    <application/>
-</manifest>
+<resources>
+    <public type="string" name="additional" id="0x7f0400fe" />
+</resources>

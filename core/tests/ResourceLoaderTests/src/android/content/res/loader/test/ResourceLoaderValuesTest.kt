@@ -26,7 +26,9 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.os.IBinder
+import android.util.ArrayMap
 import androidx.test.rule.ActivityTestRule
+import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Rule
@@ -49,102 +51,120 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     private val mTestActivityRule = ActivityTestRule<TestActivity>(TestActivity::class.java)
 
     companion object {
+        /** Converts the map to a stable JSON string representation. */
+        private fun mapToString(m : Map<String, String>) :String {
+            return JSONObject(ArrayMap<String, String>().apply { putAll(m) }).toString()
+        }
+
+        /** Creates a lambda that runs multiple resources queries and concatenates the results. */
+        fun query(queries : Map<String, (Resources) -> String>) :Resources.() -> String {
+            return {
+                val resultMap = ArrayMap<String, String>()
+                queries.forEach { q ->
+                    resultMap[q.key] = try {
+                        q.value.invoke(this)
+                    } catch (e : Exception) {
+                        e.javaClass.simpleName
+                    }
+                }
+                mapToString(resultMap)
+            }
+        }
+
         @Parameterized.Parameters(name = "{1} {0}")
         @JvmStatic
         fun parameters(): Array<Any> {
             val parameters = mutableListOf<Parameter>()
 
-            // R.string
+            // Test resolution of resources encoded within the resources.arsc.
             parameters += Parameter(
-                    { getString(android.R.string.cancel) },
-                    "stringOne", { "SomeRidiculouslyUnlikelyStringOne" },
-                    "stringTwo", { "SomeRidiculouslyUnlikelyStringTwo" },
-                    "stringThree", { "SomeRidiculouslyUnlikelyStringThree" },
-                    "stringFour", { "SomeRidiculouslyUnlikelyStringFour" },
-                    listOf(DataType.APK, DataType.ARSC)
+                    "tableBased",
+                    query(mapOf(
+                            "getOverlaid" to { res ->
+                                res.getString(R.string.test)
+                            },
+                            "getAdditional" to { res ->
+                                res.getString(0x7f0400fe /* R.string.additional */)
+                            }
+                    )),
+                    mapOf("getOverlaid" to "Not overlaid",
+                            "getAdditional" to "NotFoundException"),
+
+                    mapOf("getOverlaid" to "One",
+                            "getAdditional" to "One"),
+
+                    mapOf("getOverlaid" to "Two",
+                            "getAdditional" to "Two"),
+
+                    mapOf("getOverlaid" to "Three",
+                            "getAdditional" to "Three"),
+
+                    mapOf("getOverlaid" to "Four",
+                            "getAdditional" to "Four"),
+                    listOf(DataType.APK_DISK_FD, DataType.APK_DISK_FD_OFFSETS, DataType.APK_RAM_FD,
+                            DataType.APK_RAM_OFFSETS, DataType.ARSC_DISK_FD,
+                            DataType.ARSC_DISK_FD_OFFSETS, DataType.ARSC_RAM_MEMORY,
+                            DataType.ARSC_RAM_MEMORY_OFFSETS, DataType.SPLIT)
             )
 
-            // R.dimen
+            // Test resolution of file-based resources and assets with no assets provider.
             parameters += Parameter(
-                    { getDimensionPixelSize(android.R.dimen.app_icon_size) },
-                    "dimenOne", { 100.dpToPx(resources) },
-                    "dimenTwo", { 200.dpToPx(resources) },
-                    "dimenThree", { 300.dpToPx(resources) },
-                    "dimenFour", { 400.dpToPx(resources) },
-                    listOf(DataType.APK, DataType.ARSC)
-            )
+                    "fileBased",
+                    query(mapOf(
+                            // Drawable xml in res directory
+                            "drawableXml" to { res ->
+                                (res.getDrawable(R.drawable.drawable_xml) as ColorDrawable)
+                                        .color.toString()
+                            },
+                            // File in the assets directory
+                            "openAsset" to { res ->
+                                res.assets.open("asset.txt").reader().readText()
+                            },
+                            // From assets directory returning file descriptor
+                            "openAssetFd" to { res ->
+                                res.assets.openFd("asset.txt").readText()
+                            },
+                            // Asset as compiled XML layout in res directory
+                            "layout" to { res ->
+                                res.getLayout(R.layout.layout).advanceToRoot().name
+                            },
+                            // Bitmap drawable in res directory
+                            "drawablePng" to { res ->
+                                (res.getDrawable(R.drawable.drawable_png) as BitmapDrawable)
+                                        .bitmap.getColor(0, 0).toArgb().toString()
+                            }
+                    )),
+                    mapOf("drawableXml" to Color.parseColor("#B2D2F2").toString(),
+                            "openAsset" to "In assets directory",
+                            "openAssetFd" to "In assets directory",
+                            "layout" to "MysteryLayout",
+                            "drawablePng" to Color.parseColor("#FF00FF").toString()),
 
-            // File in the assets directory
-            parameters += Parameter(
-                    { assets.open("Asset.txt").reader().readText() },
-                    "assetOne", { "assetOne" },
-                    "assetTwo", { "assetTwo" },
-                    "assetFour", { "assetFour" },
-                    "assetThree", { "assetThree" },
-                    listOf(DataType.ASSET)
-            )
+                    mapOf("drawableXml" to Color.parseColor("#000001").toString(),
+                            "openAsset" to "One",
+                            "openAssetFd" to "One",
+                            "layout" to "RelativeLayout",
+                            "drawablePng" to Color.RED.toString()),
 
-            // From assets directory returning file descriptor
-            parameters += Parameter(
-                    { assets.openFd("Asset.txt").readText() },
-                    "assetOne", { "assetOne" },
-                    "assetTwo", { "assetTwo" },
-                    "assetFour", { "assetFour" },
-                    "assetThree", { "assetThree" },
-                    listOf(DataType.ASSET_FD)
-            )
+                    mapOf("drawableXml" to Color.parseColor("#000002").toString(),
+                            "openAsset" to "Two",
+                            "openAssetFd" to "Two",
+                            "layout" to "LinearLayout",
+                            "drawablePng" to Color.GREEN.toString()),
 
-            // From root directory returning file descriptor
-            parameters += Parameter(
-                    { assets.openNonAssetFd("NonAsset.txt").readText() },
-                    "NonAssetOne", { "NonAssetOne" },
-                    "NonAssetTwo", { "NonAssetTwo" },
-                    "NonAssetThree", { "NonAssetThree" },
-                    "NonAssetFour", { "NonAssetFour" },
-                    listOf(DataType.NON_ASSET)
-            )
+                    mapOf("drawableXml" to Color.parseColor("#000003").toString(),
+                            "openAsset" to "Three",
+                            "openAssetFd" to "Three",
+                            "layout" to "FrameLayout",
+                            "drawablePng" to Color.BLUE.toString()),
 
-            // Asset as compiled XML drawable
-            parameters += Parameter(
-                    { (getDrawable(R.drawable.non_asset_drawable) as ColorDrawable).color },
-                    "nonAssetDrawableOne", { Color.parseColor("#000001") },
-                    "nonAssetDrawableTwo", { Color.parseColor("#000002") },
-                    "nonAssetDrawableThree", { Color.parseColor("#000003") },
-                    "nonAssetDrawableFour", { Color.parseColor("#000004") },
-                    listOf(DataType.NON_ASSET_DRAWABLE)
-            )
-
-            // Asset as compiled bitmap drawable
-            parameters += Parameter(
-                    {
-                        (getDrawable(R.drawable.non_asset_bitmap) as BitmapDrawable)
-                                .bitmap.getColor(0, 0).toArgb()
-                    },
-                    "nonAssetBitmapRed", { Color.RED },
-                    "nonAssetBitmapGreen", { Color.GREEN },
-                    "nonAssetBitmapBlue", { Color.BLUE },
-                    "nonAssetBitmapWhite", { Color.WHITE },
-                    listOf(DataType.NON_ASSET_BITMAP)
-            )
-
-            // Asset as compiled XML layout
-            parameters += Parameter(
-                    { getLayout(R.layout.layout).advanceToRoot().name },
-                    "layoutOne", { "RelativeLayout" },
-                    "layoutTwo", { "LinearLayout" },
-                    "layoutThree", { "FrameLayout" },
-                    "layoutFour", { "TableLayout" },
-                    listOf(DataType.NON_ASSET_LAYOUT)
-            )
-
-            // Isolated resource split
-            parameters += Parameter(
-                    { getString(R.string.split_overlaid) },
-                    "split_one", { "Split ONE Overlaid" },
-                    "split_two", { "Split TWO Overlaid" },
-                    "split_three", { "Split THREE Overlaid" },
-                    "split_four", { "Split FOUR Overlaid" },
-                    listOf(DataType.SPLIT)
+                    mapOf("drawableXml" to Color.parseColor("#000004").toString(),
+                            "openAsset" to "Four",
+                            "openAssetFd" to "Four",
+                            "layout" to "TableLayout",
+                            "drawablePng" to Color.WHITE.toString()),
+                    listOf(DataType.APK_DISK_FD, DataType.APK_DISK_FD_OFFSETS, DataType.APK_RAM_FD,
+                            DataType.APK_RAM_OFFSETS, DataType.SPLIT)
             )
 
             return parameters.flatMap { parameter ->
@@ -162,15 +182,16 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     @field:Parameterized.Parameter(1)
     lateinit var parameter: Parameter
 
-    private val valueOne by lazy { parameter.valueOne(this) }
-    private val valueTwo by lazy { parameter.valueTwo(this) }
-    private val valueThree by lazy { parameter.valueThree(this) }
-    private val valueFour by lazy { parameter.valueFour(this) }
+    private val valueOriginal by lazy { mapToString(parameter.valueOriginal) }
+    private val valueOne by lazy {  mapToString(parameter.valueOne) }
+    private val valueTwo by lazy { mapToString(parameter.valueTwo) }
+    private val valueThree by lazy { mapToString(parameter.valueThree) }
+    private val valueFour by lazy { mapToString(parameter.valueFour) }
 
-    private fun openOne() = parameter.providerOne.openProvider()
-    private fun openTwo() = parameter.providerTwo.openProvider()
-    private fun openThree() = parameter.providerThree.openProvider()
-    private fun openFour() = parameter.providerFour.openProvider()
+    private fun openOne() = PROVIDER_ONE.openProvider(dataType)
+    private fun openTwo() = PROVIDER_TWO.openProvider(dataType)
+    private fun openThree() = PROVIDER_THREE.openProvider(dataType)
+    private fun openFour() = PROVIDER_FOUR.openProvider(dataType)
 
     // Class method for syntax highlighting purposes
     private fun getValue(c: Context = context) = parameter.getValue(c.resources)
@@ -179,6 +200,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     fun assertValueUniqueness() {
         // Ensure the parameters are valid in case of coding errors
         val original = getValue()
+        assertEquals(valueOriginal, original)
         assertNotEquals(valueOne, original)
         assertNotEquals(valueTwo, original)
         assertNotEquals(valueThree, original)
@@ -193,7 +215,6 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
     @Test
     fun addProvidersRepeatedly() {
-        val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader = ResourcesLoader()
@@ -209,12 +230,11 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueTwo, getValue())
 
         loader.removeProvider(testTwo)
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
     }
 
     @Test
     fun addLoadersRepeatedly() {
-        val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader1 = ResourcesLoader()
@@ -232,12 +252,11 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueTwo, getValue())
 
         resources.removeLoaders(loader2)
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
     }
 
     @Test
     fun setMultipleProviders() {
-        val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader = ResourcesLoader()
@@ -250,12 +269,11 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueOne, getValue())
 
         loader.providers = Collections.emptyList()
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
     }
 
     @Test
     fun addMultipleLoaders() {
-        val originalValue = getValue()
         val loader1 = ResourcesLoader()
         loader1.addProvider(openOne())
         val loader2 = ResourcesLoader()
@@ -268,7 +286,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueOne, getValue())
 
         resources.removeLoaders(loader1)
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
     }
 
     @Test(expected = UnsupportedOperationException::class)
@@ -385,7 +403,6 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
     @Test
     fun reorderProviders() {
-        val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader = ResourcesLoader()
@@ -405,12 +422,11 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueOne, getValue())
 
         loader.removeProvider(testOne)
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
     }
 
     @Test
     fun reorderLoaders() {
-        val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader1 = ResourcesLoader()
@@ -432,7 +448,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueOne, getValue())
 
         resources.removeLoaders(loader1)
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
     }
 
     @Test
@@ -470,7 +486,6 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
     @Test
     fun copyContextLoaders() {
-        val originalValue = getValue()
         val loader1 = ResourcesLoader()
         loader1.addProvider(openOne())
         val loader2 = ResourcesLoader()
@@ -490,13 +505,13 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
         // Changing the loaders of the original context should not affect the child context.
         resources.removeLoaders(loader1)
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
         assertEquals(valueTwo, getValue(childContext))
 
         // A new context created from the original after an update to the original's loaders should
         // have the updated loaders.
         val originalPrime = createContext(context, 2)
-        assertEquals(originalValue, getValue(originalPrime))
+        assertEquals(valueOriginal, getValue(originalPrime))
 
         // A new context created from the child context after an update to the child's loaders
         // should have the updated loaders.
@@ -506,7 +521,6 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
     @Test
     fun loaderUpdatesAffectContexts() {
-        val originalValue = getValue()
         val testOne = openOne()
         val testTwo = openTwo()
         val loader = ResourcesLoader()
@@ -525,15 +539,15 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
         // Changes to the loaders for a context do not affect providers.
         resources.clearLoaders()
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
         assertEquals(valueTwo, getValue(childContext))
 
         val childContext2 = createContext(context, 1)
-        assertEquals(originalValue, getValue())
-        assertEquals(originalValue, getValue(childContext2))
+        assertEquals(valueOriginal, getValue())
+        assertEquals(valueOriginal, getValue(childContext2))
 
         childContext2.resources.addLoaders(loader)
-        assertEquals(originalValue, getValue())
+        assertEquals(valueOriginal, getValue())
         assertEquals(valueTwo, getValue(childContext))
         assertEquals(valueTwo, getValue(childContext2))
     }
@@ -630,21 +644,16 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     }
 
     data class Parameter(
-        val getValue: Resources.() -> Any,
-        val providerOne: String,
-        val valueOne: ResourceLoaderValuesTest.() -> Any,
-        val providerTwo: String,
-        val valueTwo: ResourceLoaderValuesTest.() -> Any,
-        val providerThree: String,
-        val valueThree: ResourceLoaderValuesTest.() -> Any,
-        val providerFour: String,
-        val valueFour: ResourceLoaderValuesTest.() -> Any,
+        val testPrefix: String,
+        val getValue: Resources.() -> String,
+        val valueOriginal: Map<String, String>,
+        val valueOne: Map<String, String>,
+        val valueTwo: Map<String, String>,
+        val valueThree: Map<String, String>,
+        val valueFour: Map<String, String>,
         val dataTypes: List<DataType>
     ) {
-        override fun toString(): String {
-            val prefix = providerOne.commonPrefixWith(providerTwo)
-            return "$prefix${providerOne.removePrefix(prefix)}|${providerTwo.removePrefix(prefix)}"
-        }
+        override fun toString() = testPrefix
     }
 }
 

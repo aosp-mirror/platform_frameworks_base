@@ -22,7 +22,7 @@
         <option name="cleanup-apks" value="true" />
         <!-- The following value cannot be multi-line as whitespace is parsed by the installer -->
         <option name="split-apk-file-names"
-            value="FrameworksResourceLoaderTests.apk,FrameworksResourceLoaderTestsSplitOne.apk,FrameworksResourceLoaderTestsSplitTwo.apk,FrameworksResourceLoaderTestsSplitThree.apk,FrameworksResourceLoaderTestsSplitFour.apk" />
+            value="FrameworksResourceLoaderTests.apk,FrameworksResourceLoaderTests_ProviderOne_Split.apk,FrameworksResourceLoaderTests_ProviderTwo_Split.apk,FrameworksResourceLoaderTests_ProviderThree_Split.apk,FrameworksResourceLoaderTests_ProviderFour_Split.apk" />
     </target_preparer>
 
     <test class="com.android.tradefed.testtype.AndroidJUnitTest">

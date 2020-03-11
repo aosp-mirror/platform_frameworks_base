@@ -15,9 +15,10 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="android.content.res.loader.test">
-
-    <uses-sdk android:minSdkVersion="1" android:targetSdkVersion="1" />
-    <application/>
-</manifest>
+<resources>
+    <public type="dimen" name="test" id="0x7f010000" />
+    <public type="drawable" name="drawable_png" id="0x7f020000" />
+    <public type="drawable" name="drawable_xml" id="0x7f020001" />
+    <public type="layout" name="layout" id="0x7f030000" />
+    <public type="string" name="test" id="0x7f040000" />
+</resources>

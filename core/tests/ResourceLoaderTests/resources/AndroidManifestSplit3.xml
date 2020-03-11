@@ -15,9 +15,14 @@
   ~ limitations under the License.
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="android.content.res.loader.test">
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="android.content.res.loader.test"
+    split="FrameworksResourceLoaderTests_ProviderThree_Split"
+    android:isFeatureSplit="true"
+    >
 
     <uses-sdk android:minSdkVersion="1" android:targetSdkVersion="1" />
-    <application/>
+    <application android:hasCode="false" />
+
 </manifest>
