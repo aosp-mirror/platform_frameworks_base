@@ -79,6 +79,7 @@ package android {
     field public static final String DEVICE_POWER = "android.permission.DEVICE_POWER";
     field public static final String DISPATCH_PROVISIONING_MESSAGE = "android.permission.DISPATCH_PROVISIONING_MESSAGE";
     field public static final String ENTER_CAR_MODE_PRIORITIZED = "android.permission.ENTER_CAR_MODE_PRIORITIZED";
+    field public static final String EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS = "android.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS";
     field public static final String FORCE_BACK = "android.permission.FORCE_BACK";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
