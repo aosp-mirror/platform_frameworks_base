@@ -34,7 +34,7 @@
 #include "state/StateManager.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 #include "storage/StorageManager.h"
 
 using namespace android;
@@ -287,17 +287,17 @@ void StatsLogProcessor::getAndUpdateTrainInfoOnDisk(bool is_rollback,
         int64_t firstId = trainInfo->experimentIds.at(0);
         auto& ids = trainInfo->experimentIds;
         switch (trainInfo->status) {
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
+            case android::os::statsd::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALL_SUCCESS:
                 if (find(ids.begin(), ids.end(), firstId + 1) == ids.end()) {
                     ids.push_back(firstId + 1);
                 }
                 break;
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
+            case android::os::statsd::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_INITIATED:
                 if (find(ids.begin(), ids.end(), firstId + 2) == ids.end()) {
                     ids.push_back(firstId + 2);
                 }
                 break;
-            case android::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
+            case android::os::statsd::util::BINARY_PUSH_STATE_CHANGED__STATE__INSTALLER_ROLLBACK_SUCCESS:
                 if (find(ids.begin(), ids.end(), firstId + 3) == ids.end()) {
                     ids.push_back(firstId + 3);
                 }
@@ -366,13 +366,13 @@ vector<int64_t> StatsLogProcessor::processWatchdogRollbackOccurred(const int32_t
     int64_t firstId = trainInfoOnDisk.experimentIds[0];
     auto& ids = trainInfoOnDisk.experimentIds;
     switch (rollbackTypeIn) {
-        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
+      case android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_INITIATE:
             if (find(ids.begin(), ids.end(), firstId + 4) == ids.end()) {
                 ids.push_back(firstId + 4);
             }
             StorageManager::writeTrainInfo(trainInfoOnDisk);
             break;
-        case android::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
+      case android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED__ROLLBACK_TYPE__ROLLBACK_SUCCESS:
             if (find(ids.begin(), ids.end(), firstId + 5) == ids.end()) {
                 ids.push_back(firstId + 5);
             }
@@ -405,13 +405,13 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
 
     // Hard-coded logic to update train info on disk and fill in any information
     // this log event may be missing.
-    if (event->GetTagId() == android::util::BINARY_PUSH_STATE_CHANGED) {
+    if (event->GetTagId() == android::os::statsd::util::BINARY_PUSH_STATE_CHANGED) {
         onBinaryPushStateChangedEventLocked(event);
     }
 
     // Hard-coded logic to update experiment ids on disk for certain rollback
     // types and fill the rollback atom with experiment ids
-    if (event->GetTagId() == android::util::WATCHDOG_ROLLBACK_OCCURRED) {
+    if (event->GetTagId() == android::os::statsd::util::WATCHDOG_ROLLBACK_OCCURRED) {
         onWatchdogRollbackOccurredLocked(event);
     }
 
@@ -429,7 +429,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
 
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
-    if (event->GetTagId() == android::util::ISOLATED_UID_CHANGED) {
+    if (event->GetTagId() == android::os::statsd::util::ISOLATED_UID_CHANGED) {
         onIsolatedUidChangedEventLocked(*event);
     }
 
@@ -446,7 +446,7 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
     }
 
 
-    if (event->GetTagId() != android::util::ISOLATED_UID_CHANGED) {
+    if (event->GetTagId() != android::os::statsd::util::ISOLATED_UID_CHANGED) {
         // Map the isolated uid to host uid if necessary.
         mapIsolatedUidToHostUidIfNecessaryLocked(event);
     }

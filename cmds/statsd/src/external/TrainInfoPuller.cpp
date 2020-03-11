@@ -22,7 +22,7 @@
 #include "TrainInfoPuller.h"
 #include "logd/LogEvent.h"
 #include "stats_log_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 #include "storage/StorageManager.h"
 
 using std::make_shared;
@@ -33,7 +33,7 @@ namespace os {
 namespace statsd {
 
 TrainInfoPuller::TrainInfoPuller() :
-    StatsPuller(android::util::TRAIN_INFO) {
+    StatsPuller(util::TRAIN_INFO) {
 }
 
 bool TrainInfoPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
