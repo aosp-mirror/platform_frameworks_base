@@ -70,6 +70,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var iconFrame: View
     private lateinit var pageIndicator: ManagementPageIndicator
     private var mTooltipManager: TooltipManager? = null
+    private lateinit var doneButton: View
     private var listOfStructures = emptyList<StructureContainer>()
 
     private lateinit var comparator: Comparator<StructureContainer>
@@ -137,6 +138,7 @@ class ControlsFavoritingActivity @Inject constructor(
                     StructureContainer(it.key, AllModel(it.value, favoriteKeys, emptyZoneString))
                 }.sortedWith(comparator)
                 executor.execute {
+                    doneButton.isEnabled = true
                     structurePager.adapter = StructureAdapter(listOfStructures)
                     if (error) {
                         statusText.text = resources.getText(R.string.controls_favorite_load_error)
@@ -180,6 +182,7 @@ class ControlsFavoritingActivity @Inject constructor(
             layoutResource = R.layout.controls_management_favorites
             inflate()
         }
+
         statusText = requireViewById(R.id.status_message)
         if (shouldShowTooltip()) {
             mTooltipManager = TooltipManager(statusText.context,
@@ -248,15 +251,18 @@ class ControlsFavoritingActivity @Inject constructor(
             }
         }
 
-        requireViewById<Button>(R.id.done).setOnClickListener {
-            if (component == null) return@setOnClickListener
-            listOfStructures.forEach {
-                val favoritesForStorage = it.model.favorites.map { it.build() }
-                controller.replaceFavoritesForStructure(StructureInfo(component!!, it.structureName,
-                        favoritesForStorage))
+        doneButton = requireViewById<Button>(R.id.done).apply {
+            isEnabled = false
+            setOnClickListener {
+                if (component == null) return@setOnClickListener
+                listOfStructures.forEach {
+                    val favoritesForStorage = it.model.favorites.map { it.build() }
+                    controller.replaceFavoritesForStructure(
+                        StructureInfo(component!!, it.structureName, favoritesForStorage)
+                    )
+                }
+                finishAffinity()
             }
-
-            finishAffinity()
         }
     }
 
@@ -273,6 +279,7 @@ class ControlsFavoritingActivity @Inject constructor(
     override fun onDestroy() {
         currentUserTracker.stopTracking()
         listingController.removeCallback(listingCallback)
+        controller.cancelLoad()
         super.onDestroy()
     }
 
