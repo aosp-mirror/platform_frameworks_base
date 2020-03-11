@@ -173,7 +173,7 @@ public class TextClock extends TextView {
                 return; // Test disabled the clock ticks
             }
             if (mTimeZone == null && Intent.ACTION_TIMEZONE_CHANGED.equals(intent.getAction())) {
-                final String timeZone = intent.getStringExtra("time-zone");
+                final String timeZone = intent.getStringExtra(Intent.EXTRA_TIMEZONE);
                 createTime(timeZone);
             } else if (!mShouldRunTicker && (Intent.ACTION_TIME_TICK.equals(intent.getAction())
                     || Intent.ACTION_TIME_CHANGED.equals(intent.getAction()))) {

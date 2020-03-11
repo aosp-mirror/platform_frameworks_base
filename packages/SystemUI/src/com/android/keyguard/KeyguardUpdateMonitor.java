@@ -1086,7 +1086,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
             } else if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                 final Message msg = mHandler.obtainMessage(
-                        MSG_TIMEZONE_UPDATE, intent.getStringExtra("time-zone"));
+                        MSG_TIMEZONE_UPDATE, intent.getStringExtra(Intent.EXTRA_TIMEZONE));
                 mHandler.sendMessage(msg);
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
 

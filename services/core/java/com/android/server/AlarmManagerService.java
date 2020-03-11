@@ -1672,7 +1672,7 @@ class AlarmManagerService extends SystemService {
                     | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
                     | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                     | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-            intent.putExtra("time-zone", zone.getID());
+            intent.putExtra(Intent.EXTRA_TIMEZONE, zone.getID());
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL);
         }
     }
