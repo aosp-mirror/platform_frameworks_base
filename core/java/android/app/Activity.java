@@ -1041,13 +1041,14 @@ public class Activity extends ContextThemeWrapper
      * so that the system can learn appropriate ranking signals linking the activity's
      * locus id with the matching shortcut.
      *
-     * @param locusId  a unique, stable id that identifies this {@code Activity} instance from
-     *      others. This can be linked to a shortcut using
+     * @param locusId  a unique, stable id that identifies this {@code Activity} instance. LocusId
+     *      is an opaque ID that links this Activity's state to different Android concepts:
      *      {@link android.content.pm.ShortcutInfo.Builder#setLocusId(android.content.LocusId)
-     *      setLocusId} with the same locus id string.
+     *      setLocusId}. LocusID is null by default or if you explicitly reset it.
      * @param bundle extras set or updated as part of this locus context. This may help provide
      *      additional metadata such as URLs, conversation participants specific to this
-     *      {@code Activity}'s context.
+     *      {@code Activity}'s context. Bundle can be null if additional metadata is not needed.
+     *      Bundle should always be null for null locusId.
      *
      * @see android.view.contentcapture.ContentCaptureManager
      * @see android.view.contentcapture.ContentCaptureContext
