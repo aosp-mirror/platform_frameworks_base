@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package android.net.util;
+package android.net.util
 
+import android.os.Build
 import android.system.NetlinkSocketAddress
 import android.system.Os
 import android.system.OsConstants.AF_INET
@@ -26,18 +27,26 @@ import android.system.OsConstants.SOCK_DGRAM
 import android.system.PacketSocketAddress
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
+import com.android.testutils.DevSdkIgnoreRule
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val TEST_INDEX = 123
 private const val TEST_PORT = 555
+private const val FF_BYTE = 0xff.toByte()
+
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class SocketUtilsTest {
+    @Rule @JvmField
+    val ignoreRule = DevSdkIgnoreRule()
+
     @Test
     fun testMakeNetlinkSocketAddress() {
         val nlAddress = SocketUtils.makeNetlinkSocketAddress(TEST_PORT, RTMGRP_NEIGH)
@@ -50,14 +59,19 @@ class SocketUtilsTest {
     }
 
     @Test
-    fun testMakePacketSocketAddress() {
+    fun testMakePacketSocketAddress_Q() {
         val pkAddress = SocketUtils.makePacketSocketAddress(ETH_P_ALL, TEST_INDEX)
         assertTrue("Not PacketSocketAddress object", pkAddress is PacketSocketAddress)
 
-        val ff = 0xff.toByte()
-        val pkAddress2 = SocketUtils.makePacketSocketAddress(TEST_INDEX,
-                byteArrayOf(ff, ff, ff, ff, ff, ff))
+        val pkAddress2 = SocketUtils.makePacketSocketAddress(TEST_INDEX, ByteArray(6) { FF_BYTE })
         assertTrue("Not PacketSocketAddress object", pkAddress2 is PacketSocketAddress)
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    fun testMakePacketSocketAddress() {
+        val pkAddress = SocketUtils.makePacketSocketAddress(
+                ETH_P_ALL, TEST_INDEX, ByteArray(6) { FF_BYTE })
+        assertTrue("Not PacketSocketAddress object", pkAddress is PacketSocketAddress)
     }
 
     @Test
