@@ -689,8 +689,9 @@ public class ServiceState implements Parcelable {
      * @return true if registration indicates roaming, false otherwise
      * @hide
      */
-    @SystemApi
     public boolean getDataRoamingFromRegistration() {
+        // TODO: all callers should refactor to get roaming state directly from modem
+        // this should not be exposed as a public API
         return mIsDataRoamingFromRegistration;
     }
 
