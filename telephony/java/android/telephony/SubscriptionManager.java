@@ -1300,8 +1300,13 @@ public class SubscriptionManager {
      * both active and hidden SubscriptionInfos.
      *
      */
-    public @Nullable List<SubscriptionInfo> getActiveAndHiddenSubscriptionInfoList() {
-        return getActiveSubscriptionInfoList(/* userVisibleonly */false);
+    public @NonNull List<SubscriptionInfo> getCompleteActiveSubscriptionInfoList() {
+        List<SubscriptionInfo> completeList = getActiveSubscriptionInfoList(
+                /* userVisibleonly */false);
+        if (completeList == null) {
+            completeList = new ArrayList<>();
+        }
+        return completeList;
     }
 
     /**
