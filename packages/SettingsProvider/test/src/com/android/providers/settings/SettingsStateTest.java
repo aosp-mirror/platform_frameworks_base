@@ -241,6 +241,18 @@ public class SettingsStateTest extends AndroidTestCase {
         assertTrue(settingsReader.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
     }
 
+    public void testResetSetting_preservedFlagIsReset() {
+        SettingsState settingsState = getSettingStateObject();
+        // Initialize the setting.
+        settingsState.insertSettingLocked(SETTING_NAME, "1", null, false, TEST_PACKAGE);
+        // Update the setting so that preserved flag is set.
+        settingsState.insertSettingLocked(SETTING_NAME, "2", null, false, TEST_PACKAGE);
+
+        settingsState.resetSettingLocked(SETTING_NAME);
+        assertFalse(settingsState.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
+
+    }
+
     private SettingsState getSettingStateObject() {
         SettingsState settingsState = new SettingsState(getContext(), mLock, mSettingsFile, 1,
                 SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
