@@ -27,8 +27,8 @@ import static android.provider.Settings.Secure.LOCATION_COARSE_ACCURACY_M;
 import static android.provider.Settings.Secure.LOCATION_MODE;
 import static android.provider.Settings.Secure.LOCATION_MODE_OFF;
 
-import static com.android.server.LocationManagerService.D;
-import static com.android.server.LocationManagerService.TAG;
+import static com.android.server.location.LocationManagerService.D;
+import static com.android.server.location.LocationManagerService.TAG;
 
 import android.app.ActivityManager;
 import android.content.Context;
