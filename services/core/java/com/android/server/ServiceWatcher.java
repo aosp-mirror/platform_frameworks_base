@@ -75,15 +75,6 @@ public class ServiceWatcher implements ServiceConnection {
     }
 
     /**
-     * Function to run on binder interface.
-     * @param <T> Type to return.
-     */
-    public interface BlockingBinderRunner<T> {
-        /** Called to run client code with the binder. */
-        T run(IBinder binder) throws RemoteException;
-    }
-
-    /**
      * Information on the service ServiceWatcher has selected as the best option for binding.
      */
     public static final class ServiceInfo implements Comparable<ServiceInfo> {
