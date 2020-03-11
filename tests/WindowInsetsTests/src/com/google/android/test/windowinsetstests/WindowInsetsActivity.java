@@ -34,9 +34,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.Window;
 import android.view.WindowInsets;
-import android.view.WindowInsets.Type;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Callback;
 import android.view.WindowInsetsAnimationControlListener;
@@ -101,7 +99,7 @@ public class WindowInsetsActivity extends AppCompatActivity {
                                 && !mRequestedController) {
                             mRequestedController = true;
                             v.getWindowInsetsController().controlWindowInsetsAnimation(ime(),
-                                    1000, new LinearInterpolator(),
+                                    1000, new LinearInterpolator(), null /* cancellationSignal */,
                                     mCurrentRequest = new WindowInsetsAnimationControlListener() {
                                         @Override
                                         public void onReady(
@@ -208,7 +206,7 @@ public class WindowInsetsActivity extends AppCompatActivity {
                         if ((types & ime()) != 0 && !hasControl) {
                             hasControl = true;
                             controller.controlWindowInsetsAnimation(ime(), -1,
-                                    new LinearInterpolator(),
+                                    new LinearInterpolator(), null /* cancellationSignal */,
                                     new WindowInsetsAnimationControlListener() {
                                         @Override
                                         public void onReady(

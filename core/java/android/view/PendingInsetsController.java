@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.CancellationSignal;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
@@ -56,21 +58,6 @@ public class PendingInsetsController implements WindowInsetsController {
             mReplayedInsetsController.hide(types);
         } else {
             mRequests.add(new HideRequest(types));
-        }
-    }
-
-    @Override
-    public CancellationSignal controlWindowInsetsAnimation(int types, long durationMillis,
-            Interpolator interpolator,
-            WindowInsetsAnimationControlListener listener) {
-        if (mReplayedInsetsController != null) {
-            return mReplayedInsetsController.controlWindowInsetsAnimation(types, durationMillis,
-                    interpolator, listener);
-        } else {
-            listener.onCancelled();
-            CancellationSignal cancellationSignal = new CancellationSignal();
-            cancellationSignal.cancel();
-            return cancellationSignal;
         }
     }
 
@@ -174,6 +161,19 @@ public class PendingInsetsController implements WindowInsetsController {
     @VisibleForTesting
     public void detach() {
         mReplayedInsetsController = null;
+    }
+
+    @Override
+    public void controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
+            @Nullable Interpolator interpolator,
+            CancellationSignal cancellationSignal,
+            @NonNull WindowInsetsAnimationControlListener listener) {
+        if (mReplayedInsetsController != null) {
+            mReplayedInsetsController.controlWindowInsetsAnimation(types, durationMillis,
+                    interpolator, cancellationSignal, listener);
+        } else {
+            listener.onCancelled();
+        }
     }
 
     private interface PendingRequest {
