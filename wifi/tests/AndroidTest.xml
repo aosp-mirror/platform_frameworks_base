@@ -25,4 +25,10 @@
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
         <option name="hidden-api-checks" value="false"/>
     </test>
+
+    <!-- Only run FrameworksWifiApiTests in MTS if the Wifi Mainline module is installed. -->
+    <object type="module_controller"
+            class="com.android.tradefed.testtype.suite.module.MainlineTestModuleController">
+        <option name="mainline-module-package-name" value="com.google.android.wifi" />
+    </object>
 </configuration>
