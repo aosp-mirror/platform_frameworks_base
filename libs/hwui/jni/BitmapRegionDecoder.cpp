@@ -49,11 +49,7 @@ static jobject createBitmapRegionDecoder(JNIEnv* env, std::unique_ptr<SkStreamRe
 }
 
 static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
-                                     jint offset, jint length, jboolean isShareable) {
-    /*  If isShareable we could decide to just wrap the java array and
-        share it, but that means adding a globalref to the java array object
-        For now we just always copy the array's data if isShareable.
-     */
+                                              jint offset, jint length) {
     AutoJavaByteArray ar(env, byteArray);
     std::unique_ptr<SkMemoryStream> stream(new SkMemoryStream(ar.ptr() + offset, length, true));
 
@@ -63,7 +59,7 @@ static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray b
 }
 
 static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
-                                          jobject fileDescriptor, jboolean isShareable) {
+                                                   jobject fileDescriptor) {
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
@@ -82,12 +78,9 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
     return brd;
 }
 
-static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
-                                  jobject is,       // InputStream
-                                  jbyteArray storage, // byte[]
-                                  jboolean isShareable) {
+static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz, jobject is, // InputStream
+                                           jbyteArray storage) { // byte[]
     jobject brd = NULL;
-    // for now we don't allow shareable with java inputstreams
     std::unique_ptr<SkStreamRewindable> stream(CopyJavaInputStream(env, is, storage));
 
     if (stream) {
@@ -97,9 +90,7 @@ static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
     return brd;
 }
 
-static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
-                                 jlong native_asset, // Asset
-                                 jboolean isShareable) {
+static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz, jlong native_asset) {
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     std::unique_ptr<SkMemoryStream> stream(CopyAssetToStream(asset));
     if (NULL == stream) {
@@ -261,22 +252,22 @@ static const JNINativeMethod gBitmapRegionDecoderMethods[] = {
     {   "nativeClean", "(J)V", (void*)nativeClean},
 
     {   "nativeNewInstance",
-        "([BIIZ)Landroid/graphics/BitmapRegionDecoder;",
+        "([BII)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromByteArray
     },
 
     {   "nativeNewInstance",
-        "(Ljava/io/InputStream;[BZ)Landroid/graphics/BitmapRegionDecoder;",
+        "(Ljava/io/InputStream;[B)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromStream
     },
 
     {   "nativeNewInstance",
-        "(Ljava/io/FileDescriptor;Z)Landroid/graphics/BitmapRegionDecoder;",
+        "(Ljava/io/FileDescriptor;)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromFileDescriptor
     },
 
     {   "nativeNewInstance",
-        "(JZ)Landroid/graphics/BitmapRegionDecoder;",
+        "(J)Landroid/graphics/BitmapRegionDecoder;",
         (void*)nativeNewInstanceFromAsset
     },
 };
