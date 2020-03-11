@@ -131,6 +131,7 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         LocalServices.addService(PackageManagerInternal.class, mMockPmi);
         when(mMockPmi.getPackageList(any())).thenReturn(new PackageList(
                 Collections.singletonList(TEST_COMPONENT.getPackageName()), /* observer */ null));
+        when(mMockPmi.getSystemUiServiceComponent()).thenReturn(new ComponentName("", ""));
         mTarget.onSystemReady();
 
         final ArgumentCaptor<PackageManagerInternal.PackageListObserver> observerCaptor =

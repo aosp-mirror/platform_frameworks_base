@@ -203,10 +203,11 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final IApplicationThread caller = mock(IApplicationThread.class);
         final WindowProcessListener listener = mock(WindowProcessListener.class);
 
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.packageName = "com.android.test.package";
         final WindowProcessController wpc =
                 containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
-                ? null : new WindowProcessController(
-                        service, mock(ApplicationInfo.class), null, 0, -1, null, listener);
+                ? null : new WindowProcessController(service, ai, null, 0, -1, null, listener);
         doReturn(wpc).when(service).getProcessController(anyObject());
 
         final Intent intent = new Intent();
@@ -345,6 +346,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         doReturn(false).when(mMockPackageManager).isInstantAppInstallerComponent(any());
         doReturn(null).when(mMockPackageManager).resolveIntent(any(), any(), anyInt(), anyInt(),
                 anyInt(), anyBoolean(), anyInt());
+        doReturn(new ComponentName("", "")).when(mMockPackageManager).getSystemUiServiceComponent();
 
         // Never review permissions
         doReturn(false).when(mMockPackageManager).isPermissionsReviewRequired(any(), anyInt());
@@ -656,6 +658,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final WindowProcessListener listener = mock(WindowProcessListener.class);
         final ApplicationInfo ai = new ApplicationInfo();
         ai.uid = callingUid;
+        ai.packageName = "com.android.test.package";
         final WindowProcessController callerApp =
                 new WindowProcessController(mService, ai, null, callingUid, -1, null, listener);
         callerApp.setHasForegroundActivities(hasForegroundActivities);
