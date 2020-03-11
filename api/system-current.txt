@@ -9969,7 +9969,7 @@ package android.service.dataloader {
   }
 
   public static final class DataLoaderService.FileSystemConnector {
-    method public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
   }
 
 }
