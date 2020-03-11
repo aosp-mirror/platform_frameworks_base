@@ -3,9 +3,9 @@ package com.android.permission.persistence {
 
   public interface RuntimePermissionsPersistence {
     method @NonNull public static com.android.permission.persistence.RuntimePermissionsPersistence createInstance();
-    method public void deleteAsUser(@NonNull android.os.UserHandle);
-    method @Nullable public com.android.permission.persistence.RuntimePermissionsState readAsUser(@NonNull android.os.UserHandle);
-    method public void writeAsUser(@NonNull com.android.permission.persistence.RuntimePermissionsState, @NonNull android.os.UserHandle);
+    method public void deleteForUser(@NonNull android.os.UserHandle);
+    method @Nullable public com.android.permission.persistence.RuntimePermissionsState readForUser(@NonNull android.os.UserHandle);
+    method public void writeForUser(@NonNull com.android.permission.persistence.RuntimePermissionsState, @NonNull android.os.UserHandle);
   }
 
   public final class RuntimePermissionsState {
@@ -17,7 +17,7 @@ package com.android.permission.persistence {
     field public static final int NO_VERSION = -1; // 0xffffffff
   }
 
-  public static class RuntimePermissionsState.PermissionState {
+  public static final class RuntimePermissionsState.PermissionState {
     ctor public RuntimePermissionsState.PermissionState(@NonNull String, boolean, int);
     method public int getFlags();
     method @NonNull public String getName();
@@ -30,9 +30,9 @@ package com.android.role.persistence {
 
   public interface RolesPersistence {
     method @NonNull public static com.android.role.persistence.RolesPersistence createInstance();
-    method public void deleteAsUser(@NonNull android.os.UserHandle);
-    method @Nullable public com.android.role.persistence.RolesState readAsUser(@NonNull android.os.UserHandle);
-    method public void writeAsUser(@NonNull com.android.role.persistence.RolesState, @NonNull android.os.UserHandle);
+    method public void deleteForUser(@NonNull android.os.UserHandle);
+    method @Nullable public com.android.role.persistence.RolesState readForUser(@NonNull android.os.UserHandle);
+    method public void writeForUser(@NonNull com.android.role.persistence.RolesState, @NonNull android.os.UserHandle);
   }
 
   public final class RolesState {
