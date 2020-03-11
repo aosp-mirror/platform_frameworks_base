@@ -37,7 +37,8 @@ public abstract class TaskStackChangeListener {
     public void onTaskSnapshotChanged(int taskId, ThumbnailData snapshot) { }
     public void onActivityPinned(String packageName, int userId, int taskId, int stackId) { }
     public void onActivityUnpinned() { }
-    public void onPinnedActivityRestartAttempt(boolean clearedTask) { }
+    public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
+            boolean clearedTask) { }
     public void onActivityForcedResizable(String packageName, int taskId, int reason) { }
     public void onActivityDismissingDockedStack() { }
     public void onActivityLaunchOnSecondaryDisplayFailed() { }
