@@ -31,7 +31,6 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,14 +46,18 @@ open class ControlsBindingControllerImpl @Inject constructor(
         private const val TAG = "ControlsBindingControllerImpl"
     }
 
-    private val refreshing = AtomicBoolean(false)
-
     private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
 
     override val currentUserId: Int
         get() = currentUser.identifier
 
     private var currentProvider: ControlsProviderLifecycleManager? = null
+
+    /*
+     * Will track any active subscriber for subscribe/unsubscribe requests coming into
+     * this controller. Only one can be active at any time
+     */
+    private var statefulControlSubscriber: StatefulControlSubscriber? = null
 
     private val actionCallbackService = object : IControlsActionCallback.Stub() {
         override fun accept(
@@ -66,27 +69,6 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
     }
 
-    private val subscriberService = object : IControlsSubscriber.Stub() {
-        override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {
-            backgroundExecutor.execute(OnSubscribeRunnable(token, subs))
-        }
-
-        override fun onNext(token: IBinder, c: Control) {
-            if (!refreshing.get()) {
-                Log.d(TAG, "Refresh outside of window for token:$token")
-            } else {
-                backgroundExecutor.execute(OnNextRunnable(token, c))
-            }
-        }
-        override fun onError(token: IBinder, s: String) {
-            backgroundExecutor.execute(OnErrorRunnable(token, s))
-        }
-
-        override fun onComplete(token: IBinder) {
-            backgroundExecutor.execute(OnCompleteRunnable(token))
-        }
-    }
-
     @VisibleForTesting
     internal open fun createProviderManager(component: ComponentName):
             ControlsProviderLifecycleManager {
@@ -94,23 +76,21 @@ open class ControlsBindingControllerImpl @Inject constructor(
                 context,
                 backgroundExecutor,
                 actionCallbackService,
-                subscriberService,
                 currentUser,
                 component
         )
     }
 
     private fun retrieveLifecycleManager(component: ComponentName):
-            ControlsProviderLifecycleManager? {
+            ControlsProviderLifecycleManager {
         if (currentProvider != null && currentProvider?.componentName != component) {
             unbind()
         }
 
-        if (currentProvider == null) {
-            currentProvider = createProviderManager(component)
-        }
+        val provider = currentProvider ?: createProviderManager(component)
+        currentProvider = provider
 
-        return currentProvider
+        return provider
     }
 
     override fun bindAndLoad(
@@ -118,21 +98,23 @@ open class ControlsBindingControllerImpl @Inject constructor(
         callback: ControlsBindingController.LoadCallback
     ): Runnable {
         val subscriber = LoadSubscriber(callback)
-        retrieveLifecycleManager(component)?.maybeBindAndLoad(subscriber)
+        retrieveLifecycleManager(component).maybeBindAndLoad(subscriber)
         return subscriber.loadCancel()
     }
 
     override fun subscribe(structureInfo: StructureInfo) {
-        if (refreshing.compareAndSet(false, true)) {
-            val provider = retrieveLifecycleManager(structureInfo.componentName)
-            provider?.maybeBindAndSubscribe(structureInfo.controls.map { it.controlId })
-        }
+        // make sure this has happened. only allow one active subscription
+        unsubscribe()
+
+        statefulControlSubscriber = null
+        val provider = retrieveLifecycleManager(structureInfo.componentName)
+        val scs = StatefulControlSubscriber(lazyController.get(), provider, backgroundExecutor)
+        statefulControlSubscriber = scs
+        provider.maybeBindAndSubscribe(structureInfo.controls.map { it.controlId }, scs)
     }
 
     override fun unsubscribe() {
-        if (refreshing.compareAndSet(true, false)) {
-            currentProvider?.unsubscribe()
-        }
+        statefulControlSubscriber?.cancel()
     }
 
     override fun action(
@@ -140,20 +122,24 @@ open class ControlsBindingControllerImpl @Inject constructor(
         controlInfo: ControlInfo,
         action: ControlAction
     ) {
-        retrieveLifecycleManager(componentName)
-            ?.maybeBindAndSendAction(controlInfo.controlId, action)
+        if (statefulControlSubscriber == null) {
+            Log.w(TAG, "No actions can occur outside of an active subscription. Ignoring.")
+        } else {
+            retrieveLifecycleManager(componentName)
+                .maybeBindAndSendAction(controlInfo.controlId, action)
+        }
     }
 
     override fun bindService(component: ComponentName) {
-        retrieveLifecycleManager(component)?.bindService()
+        retrieveLifecycleManager(component).bindService()
     }
 
     override fun changeUser(newUser: UserHandle) {
         if (newUser == currentUser) return
 
+        unsubscribe()
         unbind()
-
-        refreshing.set(false)
+        currentProvider = null
         currentUser = newUser
     }
 
@@ -174,8 +160,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     override fun toString(): String {
         return StringBuilder("  ControlsBindingController:\n").apply {
-            append("    refreshing=${refreshing.get()}\n")
             append("    currentUser=$currentUser\n")
+            append("    StatefulControlSubscriber=$statefulControlSubscriber")
             append("    Providers=$currentProvider\n")
         }.toString()
     }
@@ -213,53 +199,12 @@ open class ControlsBindingControllerImpl @Inject constructor(
         }
     }
 
-    private inner class OnNextRunnable(
-        token: IBinder,
-        val control: Control
-    ) : CallbackRunnable(token) {
-        override fun doRun() {
-            if (!refreshing.get()) {
-                Log.d(TAG, "onRefresh outside of window from:${provider?.componentName}")
-            }
-
-            provider?.let {
-                lazyController.get().refreshStatus(it.componentName, control)
-            }
-        }
-    }
-
     private inner class OnSubscribeRunnable(
         token: IBinder,
         val subscription: IControlsSubscription
     ) : CallbackRunnable(token) {
         override fun doRun() {
-            if (!refreshing.get()) {
-                Log.d(TAG, "onRefresh outside of window from '${provider?.componentName}'")
-            }
-            provider?.let {
-                it.startSubscription(subscription)
-            }
-        }
-    }
-
-    private inner class OnCompleteRunnable(
-        token: IBinder
-    ) : CallbackRunnable(token) {
-        override fun doRun() {
-            provider?.let {
-                Log.i(TAG, "onComplete receive from '${it.componentName}'")
-            }
-        }
-    }
-
-    private inner class OnErrorRunnable(
-        token: IBinder,
-        val error: String
-    ) : CallbackRunnable(token) {
-        override fun doRun() {
-            provider?.let {
-                Log.e(TAG, "onError receive from '${it.componentName}': $error")
-            }
+            provider?.startSubscription(subscription)
         }
     }
 
