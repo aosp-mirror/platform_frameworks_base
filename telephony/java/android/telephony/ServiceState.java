@@ -580,7 +580,6 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public @RegState int getDataRegistrationState() {
         return getDataRegState();
     }
