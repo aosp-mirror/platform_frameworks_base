@@ -1279,7 +1279,7 @@ package android.hardware.lights {
 
   public final class LightsManager.LightsSession implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void close();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void setLights(@NonNull android.hardware.lights.LightsRequest);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void requestLights(@NonNull android.hardware.lights.LightsRequest);
   }
 
   public final class LightsRequest {
