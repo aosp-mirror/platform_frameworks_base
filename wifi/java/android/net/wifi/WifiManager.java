@@ -3372,7 +3372,7 @@ public class WifiManager {
      */
     @NonNull
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public SoftApConfiguration getSoftApConfiguration() {
         try {
             return mService.getSoftApConfiguration();
