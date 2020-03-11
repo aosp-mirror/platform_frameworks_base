@@ -19,6 +19,7 @@ package com.android.server.people.data;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Binder;
 import android.provider.Telephony.Sms;
 import android.provider.Telephony.TextBasedSmsColumns;
 import android.telephony.PhoneNumberUtils;
@@ -65,35 +66,40 @@ class SmsQueryHelper {
         String selection = Sms.DATE + " > ?";
         String[] selectionArgs = new String[] { Long.toString(sinceTime) };
         boolean hasResults = false;
-        try (Cursor cursor = mContext.getContentResolver().query(
-                Sms.CONTENT_URI, projection, selection, selectionArgs, null)) {
-            if (cursor == null) {
-                Slog.w(TAG, "Cursor is null when querying SMS table.");
-                return false;
-            }
-            while (cursor.moveToNext()) {
-                // ID
-                int msgIdIndex = cursor.getColumnIndex(Sms._ID);
-                String msgId = cursor.getString(msgIdIndex);
+        Binder.allowBlockingForCurrentThread();
+        try {
+            try (Cursor cursor = mContext.getContentResolver().query(
+                    Sms.CONTENT_URI, projection, selection, selectionArgs, null)) {
+                if (cursor == null) {
+                    Slog.w(TAG, "Cursor is null when querying SMS table.");
+                    return false;
+                }
+                while (cursor.moveToNext()) {
+                    // ID
+                    int msgIdIndex = cursor.getColumnIndex(Sms._ID);
+                    String msgId = cursor.getString(msgIdIndex);
 
-                // Date
-                int dateIndex = cursor.getColumnIndex(Sms.DATE);
-                long date = cursor.getLong(dateIndex);
+                    // Date
+                    int dateIndex = cursor.getColumnIndex(Sms.DATE);
+                    long date = cursor.getLong(dateIndex);
 
-                // Type
-                int typeIndex = cursor.getColumnIndex(Sms.TYPE);
-                int type = cursor.getInt(typeIndex);
+                    // Type
+                    int typeIndex = cursor.getColumnIndex(Sms.TYPE);
+                    int type = cursor.getInt(typeIndex);
 
-                // Address
-                int addressIndex = cursor.getColumnIndex(Sms.ADDRESS);
-                String address = PhoneNumberUtils.formatNumberToE164(
-                        cursor.getString(addressIndex), mCurrentCountryIso);
+                    // Address
+                    int addressIndex = cursor.getColumnIndex(Sms.ADDRESS);
+                    String address = PhoneNumberUtils.formatNumberToE164(
+                            cursor.getString(addressIndex), mCurrentCountryIso);
 
-                mLastMessageTimestamp = Math.max(mLastMessageTimestamp, date);
-                if (address != null && addEvent(address, date, type)) {
-                    hasResults = true;
+                    mLastMessageTimestamp = Math.max(mLastMessageTimestamp, date);
+                    if (address != null && addEvent(address, date, type)) {
+                        hasResults = true;
+                    }
                 }
             }
+        } finally {
+            Binder.defaultBlockingForCurrentThread();
         }
         return hasResults;
     }
