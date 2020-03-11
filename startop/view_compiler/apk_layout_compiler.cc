@@ -168,8 +168,7 @@ void CompileApkLayouts(const std::string& filename, CompilationTarget target,
 void CompileApkLayoutsFd(android::base::unique_fd fd, CompilationTarget target,
                          std::ostream& target_out) {
   constexpr const char* friendly_name{"viewcompiler assets"};
-  auto assets = android::ApkAssets::LoadFromFd(
-      std::move(fd), friendly_name, /*system=*/false, /*force_shared_lib=*/false);
+  auto assets = android::ApkAssets::LoadFromFd(std::move(fd), friendly_name);
   CompileApkAssetsLayouts(assets, target, target_out);
 }
 

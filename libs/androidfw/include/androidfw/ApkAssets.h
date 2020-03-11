@@ -75,33 +75,33 @@ class ApkAssets {
   // Creates an ApkAssets.
   // If `system` is true, the package is marked as a system package, and allows some functions to
   // filter out this package when computing what configurations/resources are available.
-  static std::unique_ptr<const ApkAssets> Load(const std::string& path,
-                                               package_property_t flags = 0U);
+  static std::unique_ptr<const ApkAssets> Load(
+      const std::string& path, package_property_t flags = 0U,
+      std::unique_ptr<const AssetsProvider> override_asset = nullptr);
 
   // Creates an ApkAssets from the given file descriptor, and takes ownership of the file
   // descriptor. The `friendly_name` is some name that will be used to identify the source of
   // this ApkAssets in log messages and other debug scenarios.
   // If `length` equals kUnknownLength, offset must equal 0; otherwise, the apk data will be read
   // using the `offset` into the file descriptor and will be `length` bytes long.
-  static std::unique_ptr<const ApkAssets> LoadFromFd(base::unique_fd fd,
-                                                     const std::string& friendly_name,
-                                                     package_property_t flags = 0U,
-                                                     off64_t offset = 0,
-                                                     off64_t length = kUnknownLength);
+  static std::unique_ptr<const ApkAssets> LoadFromFd(
+      base::unique_fd fd, const std::string& friendly_name, package_property_t flags = 0U,
+      std::unique_ptr<const AssetsProvider> override_asset = nullptr, off64_t offset = 0,
+      off64_t length = kUnknownLength);
 
   // Creates an ApkAssets from the given path which points to a resources.arsc.
-  static std::unique_ptr<const ApkAssets> LoadTable(const std::string& path,
-                                                    package_property_t flags = 0U);
+  static std::unique_ptr<const ApkAssets> LoadTable(
+      const std::string& path, package_property_t flags = 0U,
+      std::unique_ptr<const AssetsProvider> override_asset = nullptr);
 
   // Creates an ApkAssets from the given file descriptor which points to an resources.arsc, and
   // takes ownership of the file descriptor.
   // If `length` equals kUnknownLength, offset must equal 0; otherwise, the .arsc data will be read
   // using the `offset` into the file descriptor and will be `length` bytes long.
-  static std::unique_ptr<const ApkAssets> LoadTableFromFd(base::unique_fd fd,
-                                                          const std::string& friendly_name,
-                                                          package_property_t flags = 0U,
-                                                          off64_t offset = 0,
-                                                          off64_t length = kUnknownLength);
+  static std::unique_ptr<const ApkAssets> LoadTableFromFd(
+      base::unique_fd fd, const std::string& friendly_name, package_property_t flags = 0U,
+      std::unique_ptr<const AssetsProvider> override_asset = nullptr, off64_t offset = 0,
+      off64_t length = kUnknownLength);
 
   // Creates an ApkAssets from an IDMAP, which contains the original APK path, and the overlay
   // data.
@@ -110,11 +110,14 @@ class ApkAssets {
 
   // Creates an ApkAssets from the directory path. File-based resources are read within the
   // directory as if the directory is an APK.
-  static std::unique_ptr<const ApkAssets> LoadFromDir(const std::string& path,
-                                                      package_property_t flags = 0U);
+  static std::unique_ptr<const ApkAssets> LoadFromDir(
+      const std::string& path, package_property_t flags = 0U,
+      std::unique_ptr<const AssetsProvider> override_asset = nullptr);
 
   // Creates a totally empty ApkAssets with no resources table and no file entries.
-  static std::unique_ptr<const ApkAssets> LoadEmpty(package_property_t flags = 0U);
+  static std::unique_ptr<const ApkAssets> LoadEmpty(
+      package_property_t flags = 0U,
+      std::unique_ptr<const AssetsProvider> override_asset = nullptr);
 
   inline const std::string& GetPath() const {
     return path_;
@@ -158,15 +161,17 @@ class ApkAssets {
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
 
-  static std::unique_ptr<const ApkAssets> LoadImpl(std::unique_ptr<const AssetsProvider> assets,
-                                                   const std::string& path,
-                                                   std::unique_ptr<Asset> idmap_asset,
-                                                   std::unique_ptr<const LoadedIdmap> idmap,
-                                                   package_property_t property_flags);
+  static std::unique_ptr<const ApkAssets> LoadImpl(
+      std::unique_ptr<const AssetsProvider> assets, const std::string& path,
+      package_property_t property_flags,
+      std::unique_ptr<const AssetsProvider> override_assets = nullptr,
+      std::unique_ptr<Asset> idmap_asset = nullptr,
+      std::unique_ptr<const LoadedIdmap> idmap  = nullptr);
 
-  static std::unique_ptr<const ApkAssets> LoadTableImpl(std::unique_ptr<Asset> resources_asset,
-                                                        const std::string& path,
-                                                        package_property_t property_flags);
+  static std::unique_ptr<const ApkAssets> LoadTableImpl(
+      std::unique_ptr<Asset> resources_asset, const std::string& path,
+      package_property_t property_flags,
+      std::unique_ptr<const AssetsProvider> override_assets = nullptr);
 
   ApkAssets(std::unique_ptr<const AssetsProvider> assets_provider,
             std::string path,

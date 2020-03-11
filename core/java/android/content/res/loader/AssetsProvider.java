@@ -18,11 +18,9 @@ package android.content.res.loader;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.os.ParcelFileDescriptor;
-
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Provides callbacks that allow for the value of a file-based resources or assets of a
@@ -33,6 +31,10 @@ public interface AssetsProvider {
     /**
      * Callback that allows the value of a file-based resources or asset to be specified or
      * overridden.
+     *
+     * <p>The system will take ownership of the file descriptor returned from this method, so
+     * {@link ParcelFileDescriptor#dup() dup} the file descriptor before returning if the system
+     * should not own it.
      *
      * <p>There are two situations in which this method will be called:
      * <ul>
@@ -52,17 +54,7 @@ public interface AssetsProvider {
      * @see AssetManager#open
      */
     @Nullable
-    default InputStream loadAsset(@NonNull String path, int accessMode) throws IOException {
-        return null;
-    }
-
-    /**
-     * {@link ParcelFileDescriptor} variant of {@link #loadAsset(String, int)}.
-     *
-     * @param path the asset path being loaded
-     */
-    @Nullable
-    default ParcelFileDescriptor loadAssetParcelFd(@NonNull String path) throws IOException {
+    default AssetFileDescriptor loadAssetFd(@NonNull String path, int accessMode) {
         return null;
     }
 }

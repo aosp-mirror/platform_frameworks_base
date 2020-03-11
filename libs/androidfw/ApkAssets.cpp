@@ -144,8 +144,8 @@ class ZipAssetsProvider : public AssetsProvider {
   }
 
  protected:
-    std::unique_ptr<Asset> OpenInternal(
-        const std::string& path, Asset::AccessMode mode, bool* file_exists) const override {
+  std::unique_ptr<Asset> OpenInternal(
+      const std::string& path, Asset::AccessMode mode, bool* file_exists) const override {
     if (file_exists) {
       *file_exists = false;
     }
@@ -292,49 +292,91 @@ class EmptyAssetsProvider : public AssetsProvider {
   DISALLOW_COPY_AND_ASSIGN(EmptyAssetsProvider);
 };
 
-std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path,
-                                                 const package_property_t flags) {
+// AssetProvider implementation
+class MultiAssetsProvider : public AssetsProvider {
+ public:
+  ~MultiAssetsProvider() override = default;
+
+  static std::unique_ptr<const AssetsProvider> Create(
+      std::unique_ptr<const AssetsProvider> child, std::unique_ptr<const AssetsProvider> parent) {
+    CHECK(parent != nullptr) << "parent provider must not be null";
+    return (!child) ? std::move(parent)
+                    : std::unique_ptr<const AssetsProvider>(new MultiAssetsProvider(
+                        std::move(child), std::move(parent)));
+  }
+
+  bool ForEachFile(const std::string& root_path,
+                   const std::function<void(const StringPiece&, FileType)>& f) const override {
+    // TODO: Only call the function once for files defined in the parent and child
+    return child_->ForEachFile(root_path, f) && parent_->ForEachFile(root_path, f);
+  }
+
+ protected:
+  std::unique_ptr<Asset> OpenInternal(
+      const std::string& path, Asset::AccessMode mode, bool* file_exists) const override {
+    auto asset = child_->Open(path, mode, file_exists);
+    return (asset) ? std::move(asset) : parent_->Open(path, mode, file_exists);
+  }
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MultiAssetsProvider);
+
+  MultiAssetsProvider(std::unique_ptr<const AssetsProvider> child,
+                      std::unique_ptr<const AssetsProvider> parent)
+                      : child_(std::move(child)), parent_(std::move(parent)) { }
+
+  std::unique_ptr<const AssetsProvider> child_;
+  std::unique_ptr<const AssetsProvider> parent_;
+};
+
+// Opens the archive using the file path. Calling CloseArchive on the zip handle will close the
+// file.
+std::unique_ptr<const ApkAssets> ApkAssets::Load(
+    const std::string& path, const package_property_t flags,
+    std::unique_ptr<const AssetsProvider> override_asset) {
   auto assets = ZipAssetsProvider::Create(path);
-  return (assets) ? LoadImpl(std::move(assets), path, nullptr /*idmap_asset*/,
-                             nullptr /*loaded_idmap*/, flags)
+  return (assets) ? LoadImpl(std::move(assets), path, flags, std::move(override_asset))
                   : nullptr;
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
-                                                       const std::string& friendly_name,
-                                                       const package_property_t flags,
-                                                       const off64_t offset,
-                                                       const off64_t length) {
+// Opens the archive using the file file descriptor with the specified file offset and read length.
+// If the `assume_ownership` parameter is 'true' calling CloseArchive will close the file.
+std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(
+    unique_fd fd, const std::string& friendly_name, const package_property_t flags,
+    std::unique_ptr<const AssetsProvider> override_asset, const off64_t offset,
+    const off64_t length) {
   CHECK(length >= kUnknownLength) << "length must be greater than or equal to " << kUnknownLength;
   CHECK(length != kUnknownLength || offset == 0) << "offset must be 0 if length is "
                                                  << kUnknownLength;
+
   auto assets = ZipAssetsProvider::Create(std::move(fd), friendly_name, offset, length);
-  return (assets) ? LoadImpl(std::move(assets), friendly_name, nullptr /*idmap_asset*/,
-                             nullptr /*loaded_idmap*/, flags)
+  return (assets) ? LoadImpl(std::move(assets), friendly_name, flags, std::move(override_asset))
                   : nullptr;
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadTable(const std::string& path,
-                                                      const package_property_t flags) {
-  auto resources_asset = CreateAssetFromFile(path);
-  return (resources_asset) ? LoadTableImpl(std::move(resources_asset), path, flags)
-                           : nullptr;
+std::unique_ptr<const ApkAssets> ApkAssets::LoadTable(
+    const std::string& path, const package_property_t flags,
+    std::unique_ptr<const AssetsProvider> override_asset) {
+
+  auto assets = CreateAssetFromFile(path);
+  return (assets) ? LoadTableImpl(std::move(assets), path, flags, std::move(override_asset))
+                  : nullptr;
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadTableFromFd(unique_fd fd,
-                                                            const std::string& friendly_name,
-                                                            const package_property_t flags,
-                                                            const off64_t offset,
-                                                            const off64_t length) {
-  auto resources_asset = CreateAssetFromFd(std::move(fd), nullptr /* path */, offset, length);
-  return (resources_asset) ? LoadTableImpl(std::move(resources_asset), friendly_name, flags)
-                           : nullptr;
+std::unique_ptr<const ApkAssets> ApkAssets::LoadTableFromFd(
+    unique_fd fd, const std::string& friendly_name, const package_property_t flags,
+    std::unique_ptr<const AssetsProvider> override_asset, const off64_t offset,
+    const off64_t length) {
+
+  auto assets = CreateAssetFromFd(std::move(fd), nullptr /* path */, offset, length);
+  return (assets) ? LoadTableImpl(std::move(assets), friendly_name, flags,
+                                  std::move(override_asset))
+                  : nullptr;
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
                                                         const package_property_t flags) {
   CHECK((flags & PROPERTY_LOADER) == 0U) << "Cannot load RROs through loaders";
-
   std::unique_ptr<Asset> idmap_asset = CreateAssetFromFile(idmap_path);
   if (idmap_asset == nullptr) {
     return {};
@@ -351,23 +393,28 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
   
   auto overlay_path = loaded_idmap->OverlayApkPath();
   auto assets = ZipAssetsProvider::Create(overlay_path);
-  return (assets) ? LoadImpl(std::move(assets), overlay_path, std::move(idmap_asset),
-                             std::move(loaded_idmap), flags | PROPERTY_OVERLAY)
+  return (assets) ? LoadImpl(std::move(assets), overlay_path, flags | PROPERTY_OVERLAY,
+                             nullptr /* override_asset */, std::move(idmap_asset),
+                             std::move(loaded_idmap))
                   : nullptr;
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadFromDir(const std::string& path,
-                                                        const package_property_t flags) {
+std::unique_ptr<const ApkAssets> ApkAssets::LoadFromDir(
+    const std::string& path, const package_property_t flags,
+    std::unique_ptr<const AssetsProvider> override_asset) {
+
   auto assets = DirectoryAssetsProvider::Create(path);
-  return (assets) ? LoadImpl(std::move(assets), path, nullptr /*idmap_asset*/,
-                             nullptr /*loaded_idmap*/, flags)
+  return (assets) ? LoadImpl(std::move(assets), path, flags, std::move(override_asset))
                   : nullptr;
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadEmpty(const package_property_t flags) {
-  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(
-      std::unique_ptr<AssetsProvider>(new EmptyAssetsProvider()), "empty" /* path */,
-                                      -1 /* last_mod-time */, flags));
+std::unique_ptr<const ApkAssets> ApkAssets::LoadEmpty(
+    const package_property_t flags, std::unique_ptr<const AssetsProvider> override_asset) {
+
+  auto assets = (override_asset) ? std::move(override_asset)
+                                 : std::unique_ptr<const AssetsProvider>(new EmptyAssetsProvider());
+  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(std::move(assets), "empty" /* path */,
+                                                      -1 /* last_mod-time */, flags));
   loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
   // Need to force a move for mingw32.
   return std::move(loaded_apk);
@@ -413,27 +460,30 @@ std::unique_ptr<Asset> ApkAssets::CreateAssetFromFd(base::unique_fd fd,
                                           Asset::AccessMode::ACCESS_RANDOM);
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<const AssetsProvider> assets,
-                                                     const std::string& path,
-                                                     std::unique_ptr<Asset> idmap_asset,
-                                                     std::unique_ptr<const LoadedIdmap> idmap,
-                                                     package_property_t property_flags) {
+std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
+    std::unique_ptr<const AssetsProvider> assets, const std::string& path,
+    package_property_t property_flags, std::unique_ptr<const AssetsProvider> override_assets,
+    std::unique_ptr<Asset> idmap_asset, std::unique_ptr<const LoadedIdmap> idmap) {
+
   const time_t last_mod_time = getFileModDate(path.c_str());
+
+  // Open the resource table via mmap unless it is compressed. This logic is taken care of by Open.
+  bool resources_asset_exists = false;
+  auto resources_asset_ = assets->Open(kResourcesArsc, Asset::AccessMode::ACCESS_BUFFER,
+                                       &resources_asset_exists);
+  
+  assets = MultiAssetsProvider::Create(std::move(override_assets), std::move(assets));
 
   // Wrap the handle in a unique_ptr so it gets automatically closed.
   std::unique_ptr<ApkAssets>
       loaded_apk(new ApkAssets(std::move(assets), path, last_mod_time, property_flags));
-
-  // Open the resource table via mmap unless it is compressed. This logic is taken care of by Open.
-  bool resources_asset_exists = false;
-  loaded_apk->resources_asset_ = loaded_apk->assets_provider_->Open(
-      kResourcesArsc, Asset::AccessMode::ACCESS_BUFFER, &resources_asset_exists);
 
   if (!resources_asset_exists) {
     loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
     return std::move(loaded_apk);
   }
 
+  loaded_apk->resources_asset_ = std::move(resources_asset_);
   if (!loaded_apk->resources_asset_) {
     LOG(ERROR) << "Failed to open '" << kResourcesArsc << "' in APK '" << path << "'.";
     return {};
@@ -457,14 +507,17 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(std::unique_ptr<const Asset
   return std::move(loaded_apk);
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadTableImpl(std::unique_ptr<Asset> resources_asset,
-                                                          const std::string& path,
-                                                          package_property_t property_flags) {
+std::unique_ptr<const ApkAssets> ApkAssets::LoadTableImpl(
+    std::unique_ptr<Asset> resources_asset, const std::string& path,
+    package_property_t property_flags, std::unique_ptr<const AssetsProvider> override_assets) {
+
   const time_t last_mod_time = getFileModDate(path.c_str());
 
+  auto assets = (override_assets) ? std::move(override_assets)
+                                  : std::unique_ptr<AssetsProvider>(new EmptyAssetsProvider());
+
   std::unique_ptr<ApkAssets> loaded_apk(
-      new ApkAssets(std::unique_ptr<AssetsProvider>(new EmptyAssetsProvider()), path, last_mod_time,
-                    property_flags));
+      new ApkAssets(std::move(assets), path, last_mod_time, property_flags));
   loaded_apk->resources_asset_ = std::move(resources_asset);
 
   const StringPiece data(

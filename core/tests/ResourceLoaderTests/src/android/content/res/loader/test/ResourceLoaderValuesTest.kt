@@ -26,9 +26,7 @@ import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.os.IBinder
-import android.util.ArrayMap
 import androidx.test.rule.ActivityTestRule
-import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Rule
@@ -51,26 +49,6 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     private val mTestActivityRule = ActivityTestRule<TestActivity>(TestActivity::class.java)
 
     companion object {
-        /** Converts the map to a stable JSON string representation. */
-        private fun mapToString(m : Map<String, String>) :String {
-            return JSONObject(ArrayMap<String, String>().apply { putAll(m) }).toString()
-        }
-
-        /** Creates a lambda that runs multiple resources queries and concatenates the results. */
-        fun query(queries : Map<String, (Resources) -> String>) :Resources.() -> String {
-            return {
-                val resultMap = ArrayMap<String, String>()
-                queries.forEach { q ->
-                    resultMap[q.key] = try {
-                        q.value.invoke(this)
-                    } catch (e : Exception) {
-                        e.javaClass.simpleName
-                    }
-                }
-                mapToString(resultMap)
-            }
-        }
-
         @Parameterized.Parameters(name = "{1} {0}")
         @JvmStatic
         fun parameters(): Array<Any> {
@@ -109,20 +87,12 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
             // Test resolution of file-based resources and assets with no assets provider.
             parameters += Parameter(
-                    "fileBased",
+                    "tableFileBased",
                     query(mapOf(
                             // Drawable xml in res directory
                             "drawableXml" to { res ->
                                 (res.getDrawable(R.drawable.drawable_xml) as ColorDrawable)
                                         .color.toString()
-                            },
-                            // File in the assets directory
-                            "openAsset" to { res ->
-                                res.assets.open("asset.txt").reader().readText()
-                            },
-                            // From assets directory returning file descriptor
-                            "openAssetFd" to { res ->
-                                res.assets.openFd("asset.txt").readText()
                             },
                             // Asset as compiled XML layout in res directory
                             "layout" to { res ->
@@ -135,37 +105,108 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
                             }
                     )),
                     mapOf("drawableXml" to Color.parseColor("#B2D2F2").toString(),
-                            "openAsset" to "In assets directory",
-                            "openAssetFd" to "In assets directory",
                             "layout" to "MysteryLayout",
                             "drawablePng" to Color.parseColor("#FF00FF").toString()),
 
                     mapOf("drawableXml" to Color.parseColor("#000001").toString(),
-                            "openAsset" to "One",
-                            "openAssetFd" to "One",
                             "layout" to "RelativeLayout",
                             "drawablePng" to Color.RED.toString()),
 
                     mapOf("drawableXml" to Color.parseColor("#000002").toString(),
-                            "openAsset" to "Two",
-                            "openAssetFd" to "Two",
                             "layout" to "LinearLayout",
                             "drawablePng" to Color.GREEN.toString()),
 
                     mapOf("drawableXml" to Color.parseColor("#000003").toString(),
-                            "openAsset" to "Three",
-                            "openAssetFd" to "Three",
                             "layout" to "FrameLayout",
                             "drawablePng" to Color.BLUE.toString()),
 
                     mapOf("drawableXml" to Color.parseColor("#000004").toString(),
-                            "openAsset" to "Four",
-                            "openAssetFd" to "Four",
                             "layout" to "TableLayout",
                             "drawablePng" to Color.WHITE.toString()),
                     listOf(DataType.APK_DISK_FD, DataType.APK_DISK_FD_OFFSETS, DataType.APK_RAM_FD,
                             DataType.APK_RAM_OFFSETS, DataType.SPLIT, DataType.DIRECTORY)
             )
+
+            // Test resolution of assets.
+            parameters += Parameter(
+                    "fileBased",
+                    query(mapOf(
+                            // File in the assets directory
+                            "openAsset" to { res ->
+                                res.assets.open("asset.txt").reader().readText()
+                            },
+                            // From assets directory returning file descriptor
+                            "openAssetFd" to { res ->
+                                res.assets.openFd("asset.txt").readText()
+                            },
+                            // Asset as compiled XML layout in res directory
+                            "layout" to { res ->
+                                res.assets.openXmlResourceParser("res/layout/layout.xml")
+                                        .advanceToRoot().name
+                            }
+                    )),
+                    mapOf("openAsset" to "In assets directory",
+                            "openAssetFd" to "In assets directory",
+                            "layout" to "MysteryLayout"),
+
+                    mapOf("openAsset" to "One",
+                            "openAssetFd" to "One",
+                            "layout" to "RelativeLayout"),
+
+                    mapOf("openAsset" to "Two",
+                            "openAssetFd" to "Two",
+                            "layout" to "LinearLayout"),
+
+                    mapOf("openAsset" to "Three",
+                            "openAssetFd" to "Three",
+                            "layout" to "FrameLayout"),
+
+                    mapOf("openAsset" to "Four",
+                            "openAssetFd" to "Four",
+                            "layout" to "TableLayout"),
+                    listOf(DataType.EMPTY)
+            )
+
+            // Test assets from apk and provider
+            parameters += Parameter(
+                    "fileBasedApkAssetsProvider",
+                    query(mapOf(
+                            // File in the assets directory
+                            "openAsset" to { res ->
+                                res.assets.open("asset.txt").reader().readText()
+                            },
+                            // From assets directory returning file descriptor
+                            "openAssetFd" to { res ->
+                                res.assets.openFd("asset.txt").readText()
+                            }
+                    )),
+                    mapOf("openAsset" to "In assets directory",
+                            "openAssetFd" to "In assets directory"),
+
+                    mapOf("openAsset" to "AssetsOne",
+                            "openAssetFd" to "AssetsOne"),
+                    { MemoryAssetsProvider().addLoadAssetFdResult("assets/asset.txt",
+                            "AssetsOne") },
+
+                    mapOf("openAsset" to "Two",
+                            "openAssetFd" to "Two"),
+                    null /* assetProviderTwo */,
+
+                    mapOf("openAsset" to "AssetsThree",
+                            "openAssetFd" to "AssetsThree"),
+                    { MemoryAssetsProvider().addLoadAssetFdResult("assets/asset.txt",
+                            "AssetsThree") },
+
+                    mapOf("openAsset" to "Four",
+                            "openAssetFd" to "Four"),
+                    null /* assetProviderFour */,
+                    listOf(DataType.APK_DISK_FD, DataType.APK_DISK_FD_OFFSETS, DataType.APK_RAM_FD,
+                            DataType.APK_RAM_OFFSETS, DataType.DIRECTORY)
+
+            )
+
+            // TODO(151949807): Increase testing for cookie based APIs and for what happens when
+            // some providers do not overlay base resources
 
             return parameters.flatMap { parameter ->
                 parameter.dataTypes.map { dataType ->
@@ -188,10 +229,15 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     private val valueThree by lazy { mapToString(parameter.valueThree) }
     private val valueFour by lazy { mapToString(parameter.valueFour) }
 
-    private fun openOne() = PROVIDER_ONE.openProvider(dataType)
-    private fun openTwo() = PROVIDER_TWO.openProvider(dataType)
-    private fun openThree() = PROVIDER_THREE.openProvider(dataType)
-    private fun openFour() = PROVIDER_FOUR.openProvider(dataType)
+    private fun openOne() = PROVIDER_ONE.openProvider(dataType,
+            parameter.assetProviderOne?.invoke())
+    private fun openTwo() = PROVIDER_TWO.openProvider(dataType,
+            parameter.assetProviderTwo?.invoke())
+    private fun openThree() = PROVIDER_THREE.openProvider(dataType,
+            parameter.assetProviderThree?.invoke())
+    private fun openFour() = PROVIDER_FOUR.openProvider(dataType,
+            parameter.assetProviderFour?.invoke())
+    private fun openEmpty() = PROVIDER_EMPTY.openProvider(DataType.EMPTY, null)
 
     // Class method for syntax highlighting purposes
     private fun getValue(c: Context = context) = parameter.getValue(c.resources)
@@ -286,6 +332,27 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         assertEquals(valueOne, getValue())
 
         resources.removeLoaders(loader1)
+        assertEquals(valueOriginal, getValue())
+    }
+
+    @Test
+    fun emptyProvider() {
+        val testOne = openOne()
+        val testTwo = openTwo()
+        val testEmpty = openEmpty()
+        val loader = ResourcesLoader()
+
+        resources.addLoaders(loader)
+        loader.providers = listOf(testOne, testEmpty, testTwo)
+        assertEquals(valueTwo, getValue())
+
+        loader.removeProvider(testTwo)
+        assertEquals(valueOne, getValue())
+
+        loader.removeProvider(testOne)
+        assertEquals(valueOriginal, getValue())
+
+        loader.providers = Collections.emptyList()
         assertEquals(valueOriginal, getValue())
     }
 
@@ -476,6 +543,9 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
         loader1.removeProvider(testOne)
         assertEquals(valueFour, getValue())
+
+        loader2.removeProvider(testFour)
+        assertEquals(valueThree, getValue())
     }
 
     private fun createContext(context: Context, id: Int): Context {
@@ -644,15 +714,29 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     }
 
     data class Parameter(
-        val testPrefix: String,
-        val getValue: Resources.() -> String,
-        val valueOriginal: Map<String, String>,
-        val valueOne: Map<String, String>,
-        val valueTwo: Map<String, String>,
-        val valueThree: Map<String, String>,
-        val valueFour: Map<String, String>,
-        val dataTypes: List<DataType>
+            val testPrefix: String,
+            val getValue: Resources.() -> String,
+            val valueOriginal: Map<String, String>,
+            val valueOne: Map<String, String>,
+            val assetProviderOne: (() -> MemoryAssetsProvider)? = null,
+            val valueTwo: Map<String, String>,
+            val assetProviderTwo: (() -> MemoryAssetsProvider)? = null,
+            val valueThree: Map<String, String>,
+            val assetProviderThree: (() -> MemoryAssetsProvider)? = null,
+            val valueFour: Map<String, String>,
+            val assetProviderFour: (() -> MemoryAssetsProvider)? = null,
+            val dataTypes: List<DataType>
     ) {
+        constructor(testPrefix: String,
+                    getValue: Resources.() -> String,
+                    valueOriginal : Map<String, String>,
+                    valueOne: Map<String, String>,
+                    valueTwo: Map<String, String>,
+                    valueThree: Map<String, String>,
+                    valueFour: Map<String, String>,
+                    dataTypes: List<DataType>): this(testPrefix, getValue, valueOriginal, valueOne,
+                null, valueTwo, null, valueThree, null, valueFour, null, dataTypes)
+
         override fun toString() = testPrefix
     }
 }
