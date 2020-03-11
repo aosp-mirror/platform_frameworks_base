@@ -1386,6 +1386,11 @@ public class BubbleStackView extends FrameLayout {
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
         }
+
+        if (bubble.equals(mBubbleOverflow.getIconView())) {
+            return;
+        }
+
         mExpandedAnimationController.prepareForBubbleDrag(bubble, mMagneticTarget);
 
         // We're dragging an individual bubble, so set the magnetized object to the magnetized
@@ -1398,7 +1403,7 @@ public class BubbleStackView extends FrameLayout {
 
     /** Called with the coordinates to which an individual bubble has been dragged. */
     public void onBubbleDragged(View bubble, float x, float y) {
-        if (!mIsExpanded || mIsExpansionAnimating) {
+        if (!mIsExpanded || mIsExpansionAnimating || bubble.equals(mBubbleOverflow.getIconView())) {
             return;
         }
 
@@ -1413,12 +1418,24 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "onBubbleDragFinish: bubble=" + bubble);
         }
 
-        if (!mIsExpanded || mIsExpansionAnimating) {
+        if (!mIsExpanded || mIsExpansionAnimating || bubble.equals(mBubbleOverflow.getIconView())) {
             return;
         }
 
         mExpandedAnimationController.snapBubbleBack(bubble, velX, velY);
         hideDismissTarget();
+    }
+
+    /** Expands the clicked bubble. */
+    public void expandBubble(Bubble bubble) {
+        if (bubble.equals(mBubbleData.getSelectedBubble())) {
+            // If the bubble we're supposed to expand is the selected bubble, that means the
+            // overflow bubble is currently expanded. Don't tell BubbleData to set this bubble as
+            // selected, since it already is. Just call the stack's setSelectedBubble to expand it.
+            setSelectedBubble(bubble);
+        } else {
+            mBubbleData.setSelectedBubble(bubble);
+        }
     }
 
     void onDragStart() {
