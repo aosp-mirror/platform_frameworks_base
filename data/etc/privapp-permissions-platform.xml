@@ -238,6 +238,7 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkstack.tethering">
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
