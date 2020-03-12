@@ -165,7 +165,7 @@
         <item>中文 (繁體)</item>
     </string-array>
 
-    <array name="simColors">
+    <array name="sim_colors">
         <item>@color/Teal_700</item>
         <item>@color/Blue_700</item>
         <item>@color/Indigo_700</item>
