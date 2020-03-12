@@ -28,7 +28,6 @@
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
 #include <binder/BinderService.h>
-#include <binder/Nullable.h>
 #include <binder/ParcelFileDescriptor.h>
 #include <binder/Status.h>
 #include <sys/stat.h>
@@ -1084,7 +1083,7 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
         return false;
     }
     FileSystemControlParcel fsControlParcel;
-    fsControlParcel.incremental = aidl::make_nullable<IncrementalFileSystemControlParcel>();
+    fsControlParcel.incremental = IncrementalFileSystemControlParcel();
     fsControlParcel.incremental->cmd.reset(base::unique_fd(::dup(ifs.control.cmd)));
     fsControlParcel.incremental->pendingReads.reset(
             base::unique_fd(::dup(ifs.control.pendingReads)));
