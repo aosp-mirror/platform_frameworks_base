@@ -1541,6 +1541,28 @@
         <flag name="microphone" value="0x80" />
     </attr>
 
+    <!-- Enable sampled memory bug detection in this process.
+         When enabled, a very small, random subset of native
+         memory allocations are protected with guard pages, providing an
+         ASan-like error report in case of a memory corruption bug.
+
+         GWP-ASan is a recursive acronym. It stands for “GWP-ASan Will Provide Allocation SANity”.
+         See the <a href="http://llvm.org/docs/GwpAsan.html">LLVM documentation</a>
+         for more information about this feature.
+
+         <p>This tag can be applied to any tag that allows
+         {@link android.R.styleable#AndroidManifestProcess process} tag:
+         {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
+         a default setting for all application components), or with the
+         {@link android.R.styleable#AndroidManifestProvider provider},
+         {@link android.R.styleable#AndroidManifestService service},
+         {@link android.R.styleable#AndroidManifestReceiver receiver},
+         {@link android.R.styleable#AndroidManifestActivity activity} tag.
+         When multiple components run in the same process,
+         the first component to start determines the behavior of the entire process.
+
+         The default value is {@code false}. -->
+    <attr name="enableGwpAsan" format="boolean" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1806,6 +1828,9 @@
 
              The default value is {@code true}. -->
         <attr name="allowNativeHeapPointerTagging" format="boolean" />
+
+        <attr name="enableGwpAsan" />
+
     </declare-styleable>
 
     <!-- The <code>feature</code> tag declares a feature. A feature is a logical part of an app.
@@ -2312,6 +2337,7 @@
     <declare-styleable name="AndroidManifestProcess" parent="AndroidManifestProcesses">
         <!-- Required name of the process that is allowed -->
         <attr name="process" />
+        <attr name="enableGwpAsan" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied

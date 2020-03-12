@@ -41,6 +41,9 @@ public class ParsedProcess implements Parcelable {
     @DataClass.ParcelWith(Parcelling.BuiltIn.ForInternedStringSet.class)
     protected Set<String> deniedPermissions = emptySet();
 
+    @Nullable
+    protected Boolean enableGwpAsan = null;
+
     public ParsedProcess() {
     }
 
@@ -71,13 +74,15 @@ public class ParsedProcess implements Parcelable {
     @DataClass.Generated.Member
     public ParsedProcess(
             @NonNull String name,
-            @NonNull Set<String> deniedPermissions) {
+            @NonNull Set<String> deniedPermissions,
+            @Nullable Boolean enableGwpAsan) {
         this.name = name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
         this.deniedPermissions = deniedPermissions;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, deniedPermissions);
+        this.enableGwpAsan = enableGwpAsan;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -90,6 +95,11 @@ public class ParsedProcess implements Parcelable {
     @DataClass.Generated.Member
     public @NonNull Set<String> getDeniedPermissions() {
         return deniedPermissions;
+    }
+
+    @DataClass.Generated.Member
+    public @Nullable Boolean getEnableGwpAsan() {
+        return enableGwpAsan;
     }
 
     @DataClass.Generated.Member
@@ -109,8 +119,12 @@ public class ParsedProcess implements Parcelable {
         // You can override field parcelling by defining methods like:
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
+        byte flg = 0;
+        if (enableGwpAsan != null) flg |= 0x4;
+        dest.writeByte(flg);
         dest.writeString(name);
         sParcellingForDeniedPermissions.parcel(deniedPermissions, dest, flags);
+        if (enableGwpAsan != null) dest.writeBoolean(enableGwpAsan);
     }
 
     @Override
@@ -124,8 +138,10 @@ public class ParsedProcess implements Parcelable {
         // You can override field unparcelling by defining methods like:
         // static FieldType unparcelFieldName(Parcel in) { ... }
 
+        byte flg = in.readByte();
         String _name = in.readString();
         Set<String> _deniedPermissions = sParcellingForDeniedPermissions.unparcel(in);
+        Boolean _enableGwpAsan = (flg & 0x4) == 0 ? null : (Boolean) in.readBoolean();
 
         this.name = _name;
         com.android.internal.util.AnnotationValidations.validate(
@@ -133,6 +149,7 @@ public class ParsedProcess implements Parcelable {
         this.deniedPermissions = _deniedPermissions;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, deniedPermissions);
+        this.enableGwpAsan = _enableGwpAsan;
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -152,10 +169,10 @@ public class ParsedProcess implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1581452315946L,
+            time = 1582589960479L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/content/pm/parsing/component/ParsedProcess.java",
-            inputSignatures = "protected @android.annotation.NonNull java.lang.String name\nprotected @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\nclass ParsedProcess extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=false, genParcelable=true, genAidl=false, genBuilder=false)")
+            inputSignatures = "protected @android.annotation.NonNull java.lang.String name\nprotected @android.annotation.NonNull @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringSet.class) java.util.Set<java.lang.String> deniedPermissions\nprotected @android.annotation.Nullable java.lang.Boolean enableGwpAsan\npublic  void addStateFrom(android.content.pm.parsing.component.ParsedProcess)\nclass ParsedProcess extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=false, genParcelable=true, genAidl=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 
