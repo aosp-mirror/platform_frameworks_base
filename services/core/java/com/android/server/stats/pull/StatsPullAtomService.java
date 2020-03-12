@@ -406,8 +406,8 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.BATTERY_VOLTAGE:
                     case FrameworkStatsLog.BATTERY_CYCLE_COUNT:
                         return pullHealthHal(atomTag, data);
-                    case FrameworkStatsLog.APP_FEATURES_OPS:
-                        return pullAppFeaturesOps(atomTag, data);
+                    case FrameworkStatsLog.ATTRIBUTED_APP_OPS:
+                        return pullAttributedAppOps(atomTag, data);
                     default:
                         throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
                 }
@@ -562,7 +562,7 @@ public class StatsPullAtomService extends SystemService {
         registerAppsOnExternalStorageInfo();
         registerFaceSettings();
         registerAppOps();
-        registerAppFeaturesOps();
+        registerAttributedAppOps();
         registerRuntimeAppOpAccessMessage();
         registerNotificationRemoteViews();
         registerDangerousPermissionState();
@@ -2898,8 +2898,8 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private void registerAppFeaturesOps() {
-        int tagId = FrameworkStatsLog.APP_FEATURES_OPS;
+    private void registerAttributedAppOps() {
+        int tagId = FrameworkStatsLog.ATTRIBUTED_APP_OPS;
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
@@ -2908,7 +2908,7 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
-    int pullAppFeaturesOps(int atomTag, List<StatsEvent> pulledData) {
+    int pullAttributedAppOps(int atomTag, List<StatsEvent> pulledData) {
         final long token = Binder.clearCallingIdentity();
         try {
             AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
@@ -2946,7 +2946,7 @@ public class StatsPullAtomService extends SystemService {
         appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
         HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                 TimeUnit.MILLISECONDS);
-        return processHistoricalOps(histOps, FrameworkStatsLog.APP_FEATURES_OPS, null);
+        return processHistoricalOps(histOps, FrameworkStatsLog.ATTRIBUTED_APP_OPS, null);
     }
 
     int processHistoricalOps(HistoricalOps histOps, int atomTag, List<StatsEvent> pulledData) {
@@ -2956,15 +2956,15 @@ public class StatsPullAtomService extends SystemService {
             final int uid = uidOps.getUid();
             for (int pkgIdx = 0; pkgIdx < uidOps.getPackageCount(); pkgIdx++) {
                 final HistoricalPackageOps packageOps = uidOps.getPackageOpsAt(pkgIdx);
-                if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
-                    for (int featureIdx = 0; featureIdx < packageOps.getFeatureCount();
-                            featureIdx++) {
-                        final AppOpsManager.HistoricalFeatureOps featureOps =
-                                packageOps.getFeatureOpsAt(featureIdx);
-                        for (int opIdx = 0; opIdx < featureOps.getOpCount(); opIdx++) {
-                            final AppOpsManager.HistoricalOp op = featureOps.getOpAt(opIdx);
+                if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
+                    for (int attributionIdx = 0;
+                            attributionIdx < packageOps.getAttributedOpsCount(); attributionIdx++) {
+                        final AppOpsManager.AttributedHistoricalOps attributedOps =
+                                packageOps.getAttributedOpsAt(attributionIdx);
+                        for (int opIdx = 0; opIdx < attributedOps.getOpCount(); opIdx++) {
+                            final AppOpsManager.HistoricalOp op = attributedOps.getOpAt(opIdx);
                             counter += processHistoricalOp(op, atomTag, pulledData, uid,
-                                    packageOps.getPackageName(), featureOps.getFeatureId());
+                                    packageOps.getPackageName(), attributedOps.getTag());
                         }
                     }
                 } else if (atomTag == FrameworkStatsLog.APP_OPS) {
@@ -2981,18 +2981,19 @@ public class StatsPullAtomService extends SystemService {
 
     private int processHistoricalOp(AppOpsManager.HistoricalOp op, int atomTag,
             @Nullable List<StatsEvent> pulledData, int uid, String packageName,
-            @Nullable String feature) {
-        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+            @Nullable String attributionTag) {
+        if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
             if (pulledData == null) { // this is size estimation call
                 if (op.getForegroundAccessCount(OP_FLAGS_PULLED) + op.getBackgroundAccessCount(
                         OP_FLAGS_PULLED) == 0) {
                     return 0;
                 } else {
-                    return 32 + packageName.length() + (feature == null ? 1 : feature.length());
+                    return 32 + packageName.length() + (attributionTag == null ? 1
+                            : attributionTag.length());
                 }
             } else {
-                if (abs((op.getOpCode() + feature + packageName).hashCode() + RANDOM_SEED) % 100
-                        >= mAppOpsSamplingRate) {
+                if (abs((op.getOpCode() + attributionTag + packageName).hashCode() + RANDOM_SEED)
+                        % 100 >= mAppOpsSamplingRate) {
                     return 0;
                 }
             }
@@ -3002,10 +3003,10 @@ public class StatsPullAtomService extends SystemService {
         e.setAtomId(atomTag);
         e.writeInt(uid);
         e.writeString(packageName);
-        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
-            e.writeString(feature);
+        if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
+            e.writeString(attributionTag);
         }
-        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+        if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
             e.writeString(op.getOpName());
         } else {
             e.writeInt(op.getOpCode());
@@ -3032,7 +3033,7 @@ public class StatsPullAtomService extends SystemService {
                 e.writeBoolean(false);
             }
         }
-        if (atomTag == FrameworkStatsLog.APP_FEATURES_OPS) {
+        if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
             e.writeInt(mAppOpsSamplingRate);
         }
         pulledData.add(e.build());
@@ -3055,10 +3056,10 @@ public class StatsPullAtomService extends SystemService {
             e.writeInt(message.getUid());
             e.writeString(message.getPackageName());
             e.writeString(message.getOp());
-            if (message.getFeatureId() == null) {
+            if (message.getAttributionTag() == null) {
                 e.writeString("");
             } else {
-                e.writeString(message.getFeatureId());
+                e.writeString(message.getAttributionTag());
             }
             e.writeString(message.getMessage());
             e.writeInt(message.getSamplingStrategy());
