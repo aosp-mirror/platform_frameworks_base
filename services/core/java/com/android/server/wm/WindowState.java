@@ -2917,8 +2917,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // and add the window only if the permission was granted. Therefore, if
         // the mode is MODE_DEFAULT we want the op to succeed as the window is
         // shown.
-        final int mode = mWmService.mAppOps.startOpNoThrow(mAppOp,
-                getOwningUid(), getOwningPackage(), true);
+        final int mode = mWmService.mAppOps.startOpNoThrow(mAppOp, getOwningUid(),
+                getOwningPackage(), true /* startIfModeDefault */, null /* featureId */,
+                "init-default-visibility");
         if (mode != MODE_ALLOWED && mode != MODE_DEFAULT) {
             setAppOpVisibilityLw(false);
         }
@@ -2926,7 +2927,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void resetAppOpsState() {
         if (mAppOp != OP_NONE && mAppOpVisibility) {
-            mWmService.mAppOps.finishOp(mAppOp, getOwningUid(), getOwningPackage());
+            mWmService.mAppOps.finishOp(mAppOp, getOwningUid(), getOwningPackage(),
+                    null /* featureId */);
         }
     }
 
@@ -2941,11 +2943,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // as this would mean we will get another change callback and will reconcile.
             int mode = mWmService.mAppOps.checkOpNoThrow(mAppOp, uid, packageName);
             if (mode != MODE_ALLOWED && mode != MODE_DEFAULT) {
-                mWmService.mAppOps.finishOp(mAppOp, uid, packageName);
+                mWmService.mAppOps.finishOp(mAppOp, uid, packageName, null /* featureId */);
                 setAppOpVisibilityLw(false);
             }
         } else {
-            final int mode = mWmService.mAppOps.startOpNoThrow(mAppOp, uid, packageName, true);
+            final int mode = mWmService.mAppOps.startOpNoThrow(mAppOp, uid, packageName,
+                    true /* startIfModeDefault */, null /* featureId */, "attempt-to-be-visible");
             if (mode == MODE_ALLOWED || mode == MODE_DEFAULT) {
                 setAppOpVisibilityLw(true);
             }
