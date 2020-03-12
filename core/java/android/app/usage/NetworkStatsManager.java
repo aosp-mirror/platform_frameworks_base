@@ -29,6 +29,7 @@ import android.net.ConnectivityManager;
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsService;
 import android.net.NetworkIdentity;
+import android.net.NetworkStack;
 import android.net.NetworkTemplate;
 import android.net.netstats.provider.AbstractNetworkStatsProvider;
 import android.net.netstats.provider.NetworkStatsProviderCallback;
@@ -540,7 +541,9 @@ public class NetworkStatsManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STATS_PROVIDER,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
     @NonNull public NetworkStatsProviderCallback registerNetworkStatsProvider(
             @NonNull String tag,
             @NonNull AbstractNetworkStatsProvider provider) {
