@@ -113,7 +113,7 @@ Status Idmap2Service::verifyIdmap(const std::string& overlay_apk_path,
 Status Idmap2Service::createIdmap(const std::string& target_apk_path,
                                   const std::string& overlay_apk_path, int32_t fulfilled_policies,
                                   bool enforce_overlayable, int32_t user_id ATTRIBUTE_UNUSED,
-                                  aidl::nullable<std::string>* _aidl_return) {
+                                  std::optional<std::string>* _aidl_return) {
   assert(_aidl_return);
   SYSTRACE << "Idmap2Service::createIdmap " << target_apk_path << " " << overlay_apk_path;
   _aidl_return->reset();
@@ -155,7 +155,7 @@ Status Idmap2Service::createIdmap(const std::string& target_apk_path,
     return error("failed to write to idmap path " + idmap_path);
   }
 
-  *_aidl_return = aidl::make_nullable<std::string>(idmap_path);
+  *_aidl_return = idmap_path;
   return ok();
 }
 
