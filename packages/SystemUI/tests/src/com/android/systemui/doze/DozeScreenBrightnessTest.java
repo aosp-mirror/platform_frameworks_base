@@ -248,31 +248,6 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
-    public void pausingAod_softBlanks_withSpuriousSensorDuringPause() throws Exception {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
-        mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
-        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
-
-        reset(mDozeHost);
-        mSensor.sendSensorEvent(1);
-        verify(mDozeHost).setAodDimmingScrim(eq(1f));
-    }
-
-    @Test
-    public void screenOff_softBlanks() throws Exception {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
-        mScreen.transitionTo(DOZE_AOD, DOZE);
-        verify(mDozeHost).setAodDimmingScrim(eq(1f));
-
-        reset(mDozeHost);
-        mScreen.transitionTo(DOZE, DOZE_AOD);
-        mSensor.sendSensorEvent(2);
-        verify(mDozeHost).setAodDimmingScrim(eq(0f));
-    }
-
-    @Test
     public void pausingAod_unblanksAfterSensor() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE_AOD);
