@@ -5619,8 +5619,8 @@ package android.media.tv.tuner.frontend {
     method public int getConstellation();
     method public int getGuardInterval();
     method public int getHierarchy();
-    method public int getHpCodeRate();
-    method public int getLpCodeRate();
+    method public int getHighPriorityCodeRate();
+    method public int getLowPriorityCodeRate();
     method public int getPlpGroupId();
     method public int getPlpId();
     method public int getPlpMode();
@@ -5648,20 +5648,20 @@ package android.media.tv.tuner.frontend {
     field public static final int CODERATE_8_9 = 512; // 0x200
     field public static final int CODERATE_AUTO = 1; // 0x1
     field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int CONSTELLATION_16QAM = 4; // 0x4
+    field public static final int CONSTELLATION_256QAM = 16; // 0x10
+    field public static final int CONSTELLATION_64QAM = 8; // 0x8
     field public static final int CONSTELLATION_AUTO = 1; // 0x1
-    field public static final int CONSTELLATION_CONSTELLATION_16QAM = 4; // 0x4
-    field public static final int CONSTELLATION_CONSTELLATION_256QAM = 16; // 0x10
-    field public static final int CONSTELLATION_CONSTELLATION_64QAM = 8; // 0x8
-    field public static final int CONSTELLATION_CONSTELLATION_QPSK = 2; // 0x2
+    field public static final int CONSTELLATION_QPSK = 2; // 0x2
     field public static final int CONSTELLATION_UNDEFINED = 0; // 0x0
+    field public static final int GUARD_INTERVAL_19_128 = 64; // 0x40
+    field public static final int GUARD_INTERVAL_19_256 = 128; // 0x80
+    field public static final int GUARD_INTERVAL_1_128 = 32; // 0x20
+    field public static final int GUARD_INTERVAL_1_16 = 4; // 0x4
+    field public static final int GUARD_INTERVAL_1_32 = 2; // 0x2
+    field public static final int GUARD_INTERVAL_1_4 = 16; // 0x10
+    field public static final int GUARD_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_AUTO = 1; // 0x1
-    field public static final int GUARD_INTERVAL_INTERVAL_19_128 = 64; // 0x40
-    field public static final int GUARD_INTERVAL_INTERVAL_19_256 = 128; // 0x80
-    field public static final int GUARD_INTERVAL_INTERVAL_1_128 = 32; // 0x20
-    field public static final int GUARD_INTERVAL_INTERVAL_1_16 = 4; // 0x4
-    field public static final int GUARD_INTERVAL_INTERVAL_1_32 = 2; // 0x2
-    field public static final int GUARD_INTERVAL_INTERVAL_1_4 = 16; // 0x10
-    field public static final int GUARD_INTERVAL_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_UNDEFINED = 0; // 0x0
     field public static final int HIERARCHY_1_INDEPTH = 64; // 0x40
     field public static final int HIERARCHY_1_NATIVE = 4; // 0x4
@@ -5696,8 +5696,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHierarchy(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriority(boolean);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHpCodeRate(int);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLpCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriorityCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLowPriorityCodeRate(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setMiso(boolean);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpGroupId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpId(int);
