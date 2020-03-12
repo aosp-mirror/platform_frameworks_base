@@ -42,6 +42,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.view.Display;
 import android.view.DisplayAdjustments;
+import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.autofill.AutofillManager.AutofillClient;
 
 import java.io.File;
@@ -978,7 +979,7 @@ public class ContextWrapper extends Context {
 
     @Override
     @NonNull
-    public Context createWindowContext(int type, @Nullable Bundle options) {
+    public Context createWindowContext(@WindowType int type, @Nullable Bundle options) {
         return mBase.createWindowContext(type, options);
     }
 

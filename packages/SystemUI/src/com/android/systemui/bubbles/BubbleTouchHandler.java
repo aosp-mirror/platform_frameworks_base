@@ -189,7 +189,7 @@ class BubbleTouchHandler implements View.OnTouchListener {
                     if (key == BubbleOverflow.KEY) {
                         mStack.showOverflow();
                     } else {
-                        mBubbleData.setSelectedBubble(mBubbleData.getBubbleWithKey(key));
+                        mStack.expandBubble(mBubbleData.getBubbleWithKey(key));
                     }
                 }
                 resetForNextGesture();

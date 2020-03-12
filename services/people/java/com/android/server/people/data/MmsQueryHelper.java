@@ -21,6 +21,7 @@ import android.annotation.WorkerThread;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Binder;
 import android.provider.Telephony.BaseMmsColumns;
 import android.provider.Telephony.Mms;
 import android.telephony.PhoneNumberUtils;
@@ -71,31 +72,36 @@ class MmsQueryHelper {
         // NOTE: The field Mms.DATE is stored in seconds, not milliseconds.
         String[] selectionArgs = new String[] { Long.toString(sinceTime / MILLIS_PER_SECONDS) };
         boolean hasResults = false;
-        try (Cursor cursor = mContext.getContentResolver().query(
-                Mms.CONTENT_URI, projection, selection, selectionArgs, null)) {
-            if (cursor == null) {
-                Slog.w(TAG, "Cursor is null when querying MMS table.");
-                return false;
-            }
-            while (cursor.moveToNext()) {
-                // ID
-                int msgIdIndex = cursor.getColumnIndex(Mms._ID);
-                String msgId = cursor.getString(msgIdIndex);
+        Binder.allowBlockingForCurrentThread();
+        try {
+            try (Cursor cursor = mContext.getContentResolver().query(
+                    Mms.CONTENT_URI, projection, selection, selectionArgs, null)) {
+                if (cursor == null) {
+                    Slog.w(TAG, "Cursor is null when querying MMS table.");
+                    return false;
+                }
+                while (cursor.moveToNext()) {
+                    // ID
+                    int msgIdIndex = cursor.getColumnIndex(Mms._ID);
+                    String msgId = cursor.getString(msgIdIndex);
 
-                // Date
-                int dateIndex = cursor.getColumnIndex(Mms.DATE);
-                long date = cursor.getLong(dateIndex) * MILLIS_PER_SECONDS;
+                    // Date
+                    int dateIndex = cursor.getColumnIndex(Mms.DATE);
+                    long date = cursor.getLong(dateIndex) * MILLIS_PER_SECONDS;
 
-                // Message box
-                int msgBoxIndex = cursor.getColumnIndex(Mms.MESSAGE_BOX);
-                int msgBox = cursor.getInt(msgBoxIndex);
+                    // Message box
+                    int msgBoxIndex = cursor.getColumnIndex(Mms.MESSAGE_BOX);
+                    int msgBox = cursor.getInt(msgBoxIndex);
 
-                mLastMessageTimestamp = Math.max(mLastMessageTimestamp, date);
-                String address = getMmsAddress(msgId, msgBox);
-                if (address != null && addEvent(address, date, msgBox)) {
-                    hasResults = true;
+                    mLastMessageTimestamp = Math.max(mLastMessageTimestamp, date);
+                    String address = getMmsAddress(msgId, msgBox);
+                    if (address != null && addEvent(address, date, msgBox)) {
+                        hasResults = true;
+                    }
                 }
             }
+        } finally {
+            Binder.defaultBlockingForCurrentThread();
         }
         return hasResults;
     }

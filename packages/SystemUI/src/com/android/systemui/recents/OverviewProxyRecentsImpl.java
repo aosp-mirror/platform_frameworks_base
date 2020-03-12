@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
+import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.trust.TrustManager;
@@ -37,6 +39,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.phone.StatusBar;
 
@@ -63,6 +66,21 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
     private TrustManager mTrustManager;
     private OverviewProxyService mOverviewProxyService;
 
+    private TaskStackChangeListener mListener = new TaskStackChangeListener() {
+        @Override
+        public void onActivityRestartAttempt(ActivityManager.RunningTaskInfo task,
+                boolean homeTaskVisible, boolean clearedTask) {
+            if (task.configuration.windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+                return;
+            }
+
+            if (homeTaskVisible) {
+                showRecentApps(false /* triggeredFromAltTab */);
+            }
+        }
+    };
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     @Inject
     public OverviewProxyRecentsImpl(Optional<Lazy<StatusBar>> statusBarLazy,
@@ -77,6 +95,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
         mHandler = new Handler();
         mTrustManager = (TrustManager) context.getSystemService(Context.TRUST_SERVICE);
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mListener);
     }
 
     @Override

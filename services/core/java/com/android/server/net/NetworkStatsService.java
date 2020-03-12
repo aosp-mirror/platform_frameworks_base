@@ -306,9 +306,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mUidOperations = new NetworkStats(0L, 10);
 
-    /** Must be set in factory by calling #setHandler. */
-    private Handler mHandler;
-    private Handler.Callback mHandlerCallback;
+    @NonNull
+    private final Handler mHandler;
 
     private volatile boolean mSystemReady;
     private long mPersistThreshold = 2 * MB_IN_BYTES;
@@ -323,6 +322,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final SparseIntArray mOpenSessionCallsPerUid = new SparseIntArray();
 
     private final static int DUMP_STATS_SESSION_COUNT = 20;
+
+    @NonNull
+    private final Dependencies mDeps;
 
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
@@ -339,9 +341,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 Clock.systemUTC());
     }
 
-    private static final class NetworkStatsHandler extends Handler {
-        NetworkStatsHandler(Looper looper, Handler.Callback callback) {
-            super(looper, callback);
+    private final class NetworkStatsHandler extends Handler {
+        NetworkStatsHandler(@NonNull Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_PERFORM_POLL: {
+                    performPoll(FLAG_PERSIST_ALL);
+                    break;
+                }
+                case MSG_PERFORM_POLL_REGISTER_ALERT: {
+                    performPoll(FLAG_PERSIST_NETWORK);
+                    registerGlobalAlert();
+                    break;
+                }
+            }
         }
     }
 
@@ -355,14 +372,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         NetworkStatsService service = new NetworkStatsService(context, networkManager, alarmManager,
                 wakeLock, getDefaultClock(), context.getSystemService(TelephonyManager.class),
                 new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(),
-                new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir());
+                new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
+                new Dependencies());
         service.registerLocalService();
 
-        HandlerThread handlerThread = new HandlerThread(TAG);
-        Handler.Callback callback = new HandlerCallback(service);
-        handlerThread.start();
-        Handler handler = new NetworkStatsHandler(handlerThread.getLooper(), callback);
-        service.setHandler(handler, callback);
         return service;
     }
 
@@ -373,7 +386,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             AlarmManager alarmManager, PowerManager.WakeLock wakeLock, Clock clock,
             TelephonyManager teleManager, NetworkStatsSettings settings,
             NetworkStatsFactory factory, NetworkStatsObservers statsObservers, File systemDir,
-            File baseDir) {
+            File baseDir, @NonNull Dependencies deps) {
         mContext = Objects.requireNonNull(context, "missing Context");
         mNetworkManager = Objects.requireNonNull(networkManager,
             "missing INetworkManagementService");
@@ -387,17 +400,31 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mSystemDir = Objects.requireNonNull(systemDir, "missing systemDir");
         mBaseDir = Objects.requireNonNull(baseDir, "missing baseDir");
         mUseBpfTrafficStats = new File("/sys/fs/bpf/map_netd_app_uid_stats_map").exists();
+        mDeps = Objects.requireNonNull(deps, "missing Dependencies");
+
+        final HandlerThread handlerThread = mDeps.makeHandlerThread();
+        handlerThread.start();
+        mHandler = new NetworkStatsHandler(handlerThread.getLooper());
+    }
+
+    /**
+     * Dependencies of NetworkStatsService, for injection in tests.
+     */
+    // TODO: Move more stuff into dependencies object.
+    @VisibleForTesting
+    public static class Dependencies {
+        /**
+         * Create a HandlerThread to use in NetworkStatsService.
+         */
+        @NonNull
+        public HandlerThread makeHandlerThread() {
+            return new HandlerThread(TAG);
+        }
     }
 
     private void registerLocalService() {
         LocalServices.addService(NetworkStatsManagerInternal.class,
                 new NetworkStatsManagerInternalImpl());
-    }
-
-    @VisibleForTesting
-    void setHandler(Handler handler, Handler.Callback callback) {
-        mHandler = handler;
-        mHandlerCallback = callback;
     }
 
     public void systemReady() {
@@ -1918,33 +1945,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mStatsProviderCbList.unregister(this);
         }
 
-    }
-
-    @VisibleForTesting
-    static class HandlerCallback implements Handler.Callback {
-        private final NetworkStatsService mService;
-
-        HandlerCallback(NetworkStatsService service) {
-            this.mService = service;
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_PERFORM_POLL: {
-                    mService.performPoll(FLAG_PERSIST_ALL);
-                    return true;
-                }
-                case MSG_PERFORM_POLL_REGISTER_ALERT: {
-                    mService.performPoll(FLAG_PERSIST_NETWORK);
-                    mService.registerGlobalAlert();
-                    return true;
-                }
-                default: {
-                    return false;
-                }
-            }
-        }
     }
 
     private void assertSystemReady() {

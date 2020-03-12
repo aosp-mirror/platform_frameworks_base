@@ -38,6 +38,8 @@ public class PendingInsetsController implements WindowInsetsController {
     private @Behavior int mBehavior = KEEP_BEHAVIOR;
     private final InsetsState mDummyState = new InsetsState();
     private InsetsController mReplayedInsetsController;
+    private ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
+            = new ArrayList<>();
 
     @Override
     public void show(int types) {
@@ -112,6 +114,27 @@ public class PendingInsetsController implements WindowInsetsController {
         return mDummyState;
     }
 
+    @Override
+    public void addOnControllableInsetsChangedListener(
+            OnControllableInsetsChangedListener listener) {
+        if (mReplayedInsetsController != null) {
+            mReplayedInsetsController.addOnControllableInsetsChangedListener(listener);
+        } else {
+            mControllableInsetsChangedListeners.add(listener);
+            listener.onControllableInsetsChanged(this, 0);
+        }
+    }
+
+    @Override
+    public void removeOnControllableInsetsChangedListener(
+            OnControllableInsetsChangedListener listener) {
+        if (mReplayedInsetsController != null) {
+            mReplayedInsetsController.removeOnControllableInsetsChangedListener(listener);
+        } else {
+            mControllableInsetsChangedListeners.remove(listener);
+        }
+    }
+
     /**
      * Replays the commands on {@code controller} and attaches it to this instance such that any
      * calls will be forwarded to the real instance in the future.
@@ -128,9 +151,15 @@ public class PendingInsetsController implements WindowInsetsController {
         for (int i = 0; i < size; i++) {
             mRequests.get(i).replay(controller);
         }
+        size = mControllableInsetsChangedListeners.size();
+        for (int i = 0; i < size; i++) {
+            controller.addOnControllableInsetsChangedListener(
+                    mControllableInsetsChangedListeners.get(i));
+        }
 
         // Reset all state so it doesn't get applied twice just in case
         mRequests.clear();
+        mControllableInsetsChangedListeners.clear();
         mBehavior = KEEP_BEHAVIOR;
         mAppearance = 0;
         mAppearanceMask = 0;

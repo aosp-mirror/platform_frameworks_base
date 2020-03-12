@@ -2735,27 +2735,30 @@ public class WifiManager {
     }
 
     /**
-     * Return the filtered ScanResults which may be authenticated by the suggested network
-     * configurations.
-     * @param networkSuggestions The list of {@link WifiNetworkSuggestion}
-     * @param scanResults The scan results to be filtered, this is optional, if it is null or
-     * empty, wifi system would use the recent scan results in the system.
-     * @return The map of {@link WifiNetworkSuggestion} and the list of {@link ScanResult} which
-     * may be authenticated by the corresponding network configuration.
+     * Get the filtered ScanResults which match the network configurations specified by the
+     * {@code networkSuggestionsToMatch}. Suggestions which use {@link WifiConfiguration} use
+     * SSID and the security type to match. Suggestions which use {@link PasspointConfigration}
+     * use the matching rules of Hotspot 2.0.
+     * @param networkSuggestionsToMatch The list of {@link WifiNetworkSuggestion} to match against.
+     * These may or may not be suggestions which are installed on the device.
+     * @param scanResults The scan results to be filtered. Optional - if not provided(empty list),
+     * the Wi-Fi service will use the most recent scan results which the system has.
+     * @return The map of {@link WifiNetworkSuggestion} to the list of {@link ScanResult}
+     * corresponding to networks which match them.
      * @hide
      */
     @SystemApi
     @RequiresPermission(allOf = {ACCESS_FINE_LOCATION, ACCESS_WIFI_STATE})
     @NonNull
     public Map<WifiNetworkSuggestion, List<ScanResult>> getMatchingScanResults(
-            @NonNull List<WifiNetworkSuggestion> networkSuggestions,
+            @NonNull List<WifiNetworkSuggestion> networkSuggestionsToMatch,
             @Nullable List<ScanResult> scanResults) {
-        if (networkSuggestions == null) {
+        if (networkSuggestionsToMatch == null) {
             throw new IllegalArgumentException("networkSuggestions must not be null.");
         }
         try {
             return mService.getMatchingScanResults(
-                    networkSuggestions, scanResults,
+                    networkSuggestionsToMatch, scanResults,
                     mContext.getOpPackageName(), mContext.getFeatureId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -3372,7 +3375,7 @@ public class WifiManager {
      */
     @NonNull
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.ACCESS_WIFI_STATE)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public SoftApConfiguration getSoftApConfiguration() {
         try {
             return mService.getSoftApConfiguration();
@@ -4989,7 +4992,7 @@ public class WifiManager {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
     public void factoryReset() {
         try {
             mService.factoryReset(mContext.getOpPackageName());

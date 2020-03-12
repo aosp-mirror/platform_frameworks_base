@@ -19,7 +19,6 @@ package com.android.settingslib.media;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -121,8 +120,6 @@ public class LocalMediaManagerTest {
 
         verify(currentDevice).disconnect();
         verify(device).connect();
-        verify(mCallback).onSelectedDeviceStateChanged(any(),
-                eq(LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED));
     }
 
     @Test
@@ -368,7 +365,8 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_2);
 
         assertThat(mLocalMediaManager.getCurrentConnectedDevice()).isEqualTo(device2);
-        verify(mCallback).onDeviceAttributesChanged();
+        verify(mCallback).onSelectedDeviceStateChanged(device2,
+                LocalMediaManager.MediaDeviceState.STATE_CONNECTED);
     }
 
     @Test

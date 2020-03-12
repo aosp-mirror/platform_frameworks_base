@@ -680,7 +680,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         }
 
         @Override
-        public void onPinnedActivityRestartAttempt(boolean clearedTask) {
+        public void onActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
+                boolean clearedTask) {
+            if (task.configuration.windowConfiguration.getWindowingMode()
+                    != WINDOWING_MODE_PINNED) {
+                return;
+            }
             if (DEBUG) Log.d(TAG, "onPinnedActivityRestartAttempt()");
 
             // If PIPed activity is launched again by Launcher or intent, make it fullscreen.

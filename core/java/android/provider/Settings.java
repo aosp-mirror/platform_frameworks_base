@@ -98,7 +98,8 @@ import java.util.Set;
  * The Settings provider contains global system-level device preferences.
  */
 public final class Settings {
-    private static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
+    /** @hide */
+    public static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
 
     // Intent actions for Settings
 
@@ -709,10 +710,7 @@ public final class Settings {
      * If not specified, the default behavior is
      * {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_WEAK}.
      * <p>
-     * Output: Returns {@link android.app.Activity#RESULT_CANCELED} if the user already has an
-     * authenticator that meets the requirements, or if the device cannot fulfill the request
-     * (e.g. does not have biometric hardware). Returns {@link android.app.Activity#RESULT_OK}
-     * otherwise. Note that callers should still check
+     * Output: Nothing. Note that callers should still check
      * {@link android.hardware.biometrics.BiometricManager#canAuthenticate(int)}
      * afterwards to ensure that the user actually completed enrollment.
      */

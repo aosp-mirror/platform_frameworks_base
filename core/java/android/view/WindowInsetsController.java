@@ -20,7 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
+import android.inputmethodservice.InputMethodService;
 import android.os.CancellationSignal;
+import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.animation.Interpolator;
 
@@ -212,4 +214,55 @@ public interface WindowInsetsController {
      * @hide
      */
     InsetsState getState();
+
+    /**
+     * Adds a {@link OnControllableInsetsChangedListener} to the window insets controller.
+     *
+     * @param listener The listener to add.
+     *
+     * @see OnControllableInsetsChangedListener
+     * @see #removeOnControllableInsetsChangedListener(OnControllableInsetsChangedListener)
+     */
+    void addOnControllableInsetsChangedListener(
+            @NonNull OnControllableInsetsChangedListener listener);
+
+    /**
+     * Removes a {@link OnControllableInsetsChangedListener} from the window insets controller.
+     *
+     * @param listener The listener to remove.
+     *
+     * @see OnControllableInsetsChangedListener
+     * @see #addOnControllableInsetsChangedListener(OnControllableInsetsChangedListener)
+     */
+    void removeOnControllableInsetsChangedListener(
+            @NonNull OnControllableInsetsChangedListener listener);
+
+    /**
+     * Listener to be notified when the set of controllable {@link InsetsType} controlled by a
+     * {@link WindowInsetsController} changes.
+     * <p>
+     * Once a {@link InsetsType} becomes controllable, the app will be able to control the window
+     * that is causing this type of insets by calling {@link #controlWindowInsetsAnimation}.
+     * <p>
+     * Note: When listening to controllability of the {@link Type#ime},
+     * {@link #controlWindowInsetsAnimation} may still fail in case the {@link InputMethodService}
+     * decides to cancel the show request. This could happen when there is a hardware keyboard
+     * attached.
+     *
+     * @see #addOnControllableInsetsChangedListener(OnControllableInsetsChangedListener)
+     * @see #removeOnControllableInsetsChangedListener(OnControllableInsetsChangedListener)
+     */
+    interface OnControllableInsetsChangedListener {
+
+        /**
+         * Called when the set of controllable {@link InsetsType} changes.
+         *
+         * @param controller The controller for which the set of controllable {@link InsetsType}s
+         *                   are changing.
+         * @param typeMask Bitwise type-mask of the {@link InsetsType}s the controller is currently
+         *                 able to control.
+         */
+        void onControllableInsetsChanged(@NonNull WindowInsetsController controller,
+                @InsetsType int typeMask);
+    }
 }

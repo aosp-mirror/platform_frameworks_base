@@ -249,7 +249,7 @@ public class CarrierTextControllerTest extends SysuiTestCase {
 
         // STOPSHIP(b/130246708) This line makes sure that SubscriptionManager provides the
         // same answer as KeyguardUpdateMonitor. Remove when this is addressed
-        when(mSubscriptionManager.getActiveAndHiddenSubscriptionInfoList()).thenReturn(
+        when(mSubscriptionManager.getCompleteActiveSubscriptionInfoList()).thenReturn(
                 new ArrayList<>());
 
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(

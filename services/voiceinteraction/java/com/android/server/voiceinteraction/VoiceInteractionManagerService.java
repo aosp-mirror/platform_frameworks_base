@@ -41,6 +41,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
+import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -223,6 +224,7 @@ public class VoiceInteractionManagerService extends SystemService {
     class VoiceInteractionManagerServiceStub extends IVoiceInteractionManagerService.Stub {
 
         VoiceInteractionManagerServiceImpl mImpl;
+        KeyphraseEnrollmentInfo mEnrollmentApplicationInfo;
 
         private boolean mSafeMode;
         private int mCurUser;
@@ -444,6 +446,15 @@ public class VoiceInteractionManagerService extends SystemService {
             synchronized (this) {
                 setCurrentUserLocked(ActivityManager.getCurrentUser());
                 switchImplementationIfNeededLocked(false);
+            }
+        }
+
+        private void getOrCreateEnrollmentApplicationInfo() {
+            synchronized (this) {
+                if (mEnrollmentApplicationInfo == null) {
+                    mEnrollmentApplicationInfo = new KeyphraseEnrollmentInfo(
+                            mContext.getPackageManager());
+                }
             }
         }
 
@@ -1380,12 +1391,17 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
                 dumpSupportedUsers(pw, "  ");
+                if (mEnrollmentApplicationInfo == null) {
+                    pw.println("  (No enrollment application info)");
+                } else {
+                    pw.println("  " + mEnrollmentApplicationInfo.toString());
+                }
                 mDbHelper.dump(pw);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
-                    return;
+                } else {
+                    mImpl.dumpLocked(fd, pw, args);
                 }
-                mImpl.dumpLocked(fd, pw, args);
             }
             mSoundTriggerInternal.dump(fd, pw, args);
         }
@@ -1438,8 +1454,9 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         private boolean isCallerTrustedEnrollmentApplication() {
-            return mImpl.mEnrollmentApplicationInfo.isUidSupportedEnrollmentApplication(
-                    Binder.getCallingUid());
+            getOrCreateEnrollmentApplicationInfo();
+            return mEnrollmentApplicationInfo.isUidSupportedEnrollmentApplication(
+                            Binder.getCallingUid());
         }
 
         private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {

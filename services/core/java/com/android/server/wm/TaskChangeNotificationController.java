@@ -30,13 +30,15 @@ import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 
+import com.android.internal.os.SomeArgs;
+
 import java.util.ArrayList;
 
 class TaskChangeNotificationController {
     private static final int LOG_STACK_STATE_MSG = 1;
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 2;
     private static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 3;
-    private static final int NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
+    private static final int NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
     private static final int NOTIFY_FORCED_RESIZABLE_MSG = 6;
     private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 7;
     private static final int NOTIFY_TASK_ADDED_LISTENERS_MSG = 8;
@@ -118,8 +120,10 @@ class TaskChangeNotificationController {
         l.onActivityUnpinned();
     };
 
-    private final TaskStackConsumer mNotifyPinnedActivityRestartAttempt = (l, m) -> {
-        l.onPinnedActivityRestartAttempt(m.arg1 != 0);
+    private final TaskStackConsumer mNotifyActivityRestartAttempt = (l, m) -> {
+        SomeArgs args = (SomeArgs) m.obj;
+        l.onActivityRestartAttempt((RunningTaskInfo) args.arg1, args.argi1 != 0,
+                args.argi2 != 0);
     };
 
     private final TaskStackConsumer mNotifyActivityForcedResizable = (l, m) -> {
@@ -220,8 +224,8 @@ class TaskChangeNotificationController {
                 case NOTIFY_ACTIVITY_UNPINNED_LISTENERS_MSG:
                     forAllRemoteListeners(mNotifyActivityUnpinned, msg);
                     break;
-                case NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG:
-                    forAllRemoteListeners(mNotifyPinnedActivityRestartAttempt, msg);
+                case NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyActivityRestartAttempt, msg);
                     break;
                 case NOTIFY_FORCED_RESIZABLE_MSG:
                     forAllRemoteListeners(mNotifyActivityForcedResizable, msg);
@@ -265,6 +269,9 @@ class TaskChangeNotificationController {
                 case NOTIFY_TASK_FOCUS_CHANGED_MSG:
                     forAllRemoteListeners(mNotifyTaskFocusChanged, msg);
                     break;
+            }
+            if (msg.obj instanceof SomeArgs) {
+                ((SomeArgs) msg.obj).recycle();
             }
         }
     }
@@ -358,15 +365,18 @@ class TaskChangeNotificationController {
 
     /**
      * Notifies all listeners when an attempt was made to start an an activity that is already
-     * running in the pinned stack and the activity was not actually started, but the task is
-     * either brought to the front or a new Intent is delivered to it.
+     * running, but the task is either brought to the front or a new Intent is delivered to it.
      */
-    void notifyPinnedActivityRestartAttempt(boolean clearedTask) {
-        mHandler.removeMessages(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
-        final Message msg =
-                mHandler.obtainMessage(NOTIFY_PINNED_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG,
-                        clearedTask ? 1 : 0, 0);
-        forAllLocalListeners(mNotifyPinnedActivityRestartAttempt, msg);
+    void notifyActivityRestartAttempt(RunningTaskInfo task, boolean homeTaskVisible,
+            boolean clearedTask) {
+        mHandler.removeMessages(NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG);
+        final SomeArgs args = SomeArgs.obtain();
+        args.arg1 = task;
+        args.argi1 = homeTaskVisible ? 1 : 0;
+        args.argi2 = clearedTask ? 1 : 0;
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG,
+                        args);
+        forAllLocalListeners(mNotifyActivityRestartAttempt, msg);
         msg.sendToTarget();
     }
 

@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemApi.Client;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -50,6 +51,13 @@ public final class RolesState {
     @NonNull
     private final Map<String, Set<String>> mRoles;
 
+    /**
+     * Create a new instance of this class.
+     *
+     * @param version the version of the roles
+     * @param packagesHash the hash of all packages in the system
+     * @param roles the roles
+     */
     public RolesState(int version, @Nullable String packagesHash,
             @NonNull Map<String, Set<String>> roles) {
         mVersion = version;
@@ -57,17 +65,51 @@ public final class RolesState {
         mRoles = roles;
     }
 
+    /**
+     * Get the version of the roles.
+     *
+     * @return the version of the roles
+     */
     public int getVersion() {
         return mVersion;
     }
 
+    /**
+     * Get the hash of all packages in the system.
+     *
+     * @return the hash of all packages in the system
+     */
     @Nullable
     public String getPackagesHash() {
         return mPackagesHash;
     }
 
+    /**
+     * Get the roles.
+     *
+     * @return the roles
+     */
     @NonNull
     public Map<String, Set<String>> getRoles() {
         return mRoles;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        RolesState that = (RolesState) object;
+        return mVersion == that.mVersion
+                && Objects.equals(mPackagesHash, that.mPackagesHash)
+                && Objects.equals(mRoles, that.mRoles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mVersion, mPackagesHash, mRoles);
     }
 }
