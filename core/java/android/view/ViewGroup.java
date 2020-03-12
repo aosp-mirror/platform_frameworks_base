@@ -7258,6 +7258,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 : DISPATCH_MODE_CONTINUE_ON_SUBTREE;
     }
 
+    /**
+     * @hide
+     */
+    @Override
+    public boolean hasWindowInsetsAnimationCallback() {
+        if (super.hasWindowInsetsAnimationCallback()) {
+            return true;
+        }
+
+        // If we are root-level content view that fits insets, we imitate consuming behavior, so
+        // no child will retrieve window insets animation callback.
+        // See dispatchWindowInsetsAnimationPrepare.
+        boolean isOptionalFitSystemWindows = (mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) != 0
+                || isFrameworkOptionalFitsSystemWindows();
+        if (isOptionalFitSystemWindows && mAttachInfo != null
+                && mAttachInfo.mContentOnApplyWindowInsetsListener != null) {
+            return false;
+        }
+
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            if (getChildAt(i).hasWindowInsetsAnimationCallback()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void dispatchWindowInsetsAnimationPrepare(
             @NonNull WindowInsetsAnimation animation) {
