@@ -47,6 +47,7 @@
     <uses-permission android:name="android.permission.NETWORK_STACK" />
     <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.NETWORK_FACTORY" />
+    <uses-permission android:name="android.permission.NETWORK_STATS_PROVIDER" />
 
     <application>
         <uses-library android:name="android.test.runner" />
