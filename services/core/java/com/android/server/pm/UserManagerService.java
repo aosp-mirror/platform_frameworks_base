@@ -455,11 +455,13 @@ public class UserManagerService extends IUserManager.Stub {
 
         @Override
         public void onFinished(int id, Bundle extras) {
-            try {
-                mContext.startIntentSender(mTarget, null, 0, 0, 0);
-            } catch (IntentSender.SendIntentException e) {
-                Slog.e(LOG_TAG, "Failed to start the target in the callback", e);
-            }
+            mHandler.post(() -> {
+                try {
+                    mContext.startIntentSender(mTarget, null, 0, 0, 0);
+                } catch (IntentSender.SendIntentException e) {
+                    Slog.e(LOG_TAG, "Failed to start the target in the callback", e);
+                }
+            });
         }
     }
 
