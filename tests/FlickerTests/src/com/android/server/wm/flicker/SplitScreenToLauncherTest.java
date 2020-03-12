@@ -18,12 +18,17 @@ package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.splitScreenToLauncher;
 import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.exitSplitScreen;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.isInSplitScreen;
+
+import android.support.test.uiautomator.UiDevice;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -96,5 +101,14 @@ public class SplitScreenToLauncherTest extends FlickerTestBase {
                 .then()
                 .hidesAboveAppWindow(DOCKED_STACK_DIVIDER)
                 .forAllEntries());
+    }
+
+    @AfterClass
+    public static void teardown() {
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+
+        if (isInSplitScreen(device)) {
+            exitSplitScreen(device);
+        }
     }
 }
