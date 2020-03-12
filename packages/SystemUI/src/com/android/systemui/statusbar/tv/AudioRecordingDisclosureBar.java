@@ -24,6 +24,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.IntDef;
+import android.annotation.UiThread;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -133,6 +134,7 @@ class AudioRecordingDisclosureBar {
                 new OnActiveRecordingListener());
     }
 
+    @UiThread
     private void onStartedRecording(String packageName) {
         if (!mActiveAudioRecordingPackages.add(packageName)) {
             // This app is already known to perform recording
@@ -164,6 +166,7 @@ class AudioRecordingDisclosureBar {
         }
     }
 
+    @UiThread
     private void onDoneRecording(String packageName) {
         if (!mActiveAudioRecordingPackages.remove(packageName)) {
             // Was not marked as an active recorder, do nothing
@@ -179,6 +182,7 @@ class AudioRecordingDisclosureBar {
         }
     }
 
+    @UiThread
     private void show(String packageName) {
         // Inflate the indicator view
         mIndicatorView = LayoutInflater.from(mContext).inflate(
@@ -253,6 +257,7 @@ class AudioRecordingDisclosureBar {
         mState = STATE_APPEARING;
     }
 
+    @UiThread
     private void expand(String packageName) {
         final String label = getApplicationLabel(packageName);
         mTextView.setText(mContext.getString(R.string.app_accessed_mic, label));
@@ -276,6 +281,7 @@ class AudioRecordingDisclosureBar {
         mState = STATE_MAXIMIZING;
     }
 
+    @UiThread
     private void minimize() {
         final int targetOffset = mTextsContainers.getWidth();
         final AnimatorSet set = new AnimatorSet();
@@ -297,6 +303,7 @@ class AudioRecordingDisclosureBar {
         mState = STATE_MINIMIZING;
     }
 
+    @UiThread
     private void hide() {
         final int targetOffset =
                 mIndicatorView.getWidth() - (int) mIconTextsContainer.getTranslationX();
@@ -317,12 +324,14 @@ class AudioRecordingDisclosureBar {
         mState = STATE_DISAPPEARING;
     }
 
+    @UiThread
     private void onExpanded() {
         mState = STATE_SHOWN;
 
         mIndicatorView.postDelayed(this::minimize, MAXIMIZED_DURATION);
     }
 
+    @UiThread
     private void onMinimized() {
         mState = STATE_MINIMIZED;
 
@@ -336,6 +345,7 @@ class AudioRecordingDisclosureBar {
         }
     }
 
+    @UiThread
     private void onHidden() {
         final WindowManager windowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
@@ -358,6 +368,7 @@ class AudioRecordingDisclosureBar {
         }
     }
 
+    @UiThread
     private void startPulsatingAnimation() {
         final View pulsatingView = mIconTextsContainer.findViewById(R.id.pulsating_circle);
         final ObjectAnimator animator =
