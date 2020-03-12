@@ -19,6 +19,7 @@ package com.android.server;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
+import android.app.ActivityThread;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -40,6 +41,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.CachedDeviceState;
+import com.android.internal.util.DumpUtils;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -49,6 +51,7 @@ import java.util.List;
 public class BinderCallsStatsService extends Binder {
 
     private static final String TAG = "BinderCallsStatsService";
+    private static final String SERVICE_NAME = "binder_calls_stats";
 
     private static final String PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
             = "persist.sys.binder_calls_detailed_tracking";
@@ -246,7 +249,7 @@ public class BinderCallsStatsService extends Binder {
             mService = new BinderCallsStatsService(
                     mBinderCallsStats, mWorkSourceProvider);
             publishLocalService(Internal.class, new Internal(mBinderCallsStats));
-            publishBinderService("binder_calls_stats", mService);
+            publishBinderService(SERVICE_NAME, mService);
             boolean detailedTrackingEnabled = SystemProperties.getBoolean(
                     PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING, false);
 
@@ -293,6 +296,11 @@ public class BinderCallsStatsService extends Binder {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(ActivityThread.currentApplication(),
+                SERVICE_NAME, pw)) {
+            return;
+        }
+
         boolean verbose = false;
         if (args != null) {
             for (final String arg : args) {

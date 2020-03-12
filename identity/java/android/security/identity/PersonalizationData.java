@@ -46,7 +46,7 @@ public class PersonalizationData {
         return Collections.unmodifiableCollection(mProfiles);
     }
 
-    Collection<String> getNamespaceNames() {
+    Collection<String> getNamespaces() {
         return Collections.unmodifiableCollection(mNamespaces.keySet());
     }
 
@@ -120,7 +120,7 @@ public class PersonalizationData {
          * @param value                   The value to add, in CBOR encoding.
          * @return The builder.
          */
-        public @NonNull Builder setEntry(@NonNull String namespace, @NonNull String name,
+        public @NonNull Builder putEntry(@NonNull String namespace, @NonNull String name,
                 @NonNull Collection<AccessControlProfileId> accessControlProfileIds,
                 @NonNull byte[] value) {
             NamespaceData namespaceData = mData.mNamespaces.get(namespace);

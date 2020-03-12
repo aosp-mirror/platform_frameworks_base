@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
+import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
+
 import static com.android.server.am.ActivityManagerDebugConfig.*;
 
 import android.app.ActivityManager;
@@ -1588,7 +1591,9 @@ public final class BroadcastQueue {
                     + receiverUid);
         }
 
-        if (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0) {
+        final boolean isActivityCapable =
+                (brOptions != null && brOptions.getTemporaryAppWhitelistDuration() > 0);
+        if (isActivityCapable) {
             scheduleTempWhitelistLocked(receiverUid,
                     brOptions.getTemporaryAppWhitelistDuration(), r);
         }
@@ -1643,6 +1648,7 @@ public final class BroadcastQueue {
                 info.activityInfo.applicationInfo, true,
                 r.intent.getFlags() | Intent.FLAG_FROM_BACKGROUND,
                 new HostingRecord("broadcast", r.curComponent),
+                isActivityCapable ? ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE : ZYGOTE_POLICY_FLAG_EMPTY,
                 (r.intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0, false, false))
                         == null) {
             // Ah, this recipient is unavailable.  Finish it if necessary,

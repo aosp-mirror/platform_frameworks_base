@@ -33,7 +33,8 @@ public final class OverrideAllowedState implements Parcelable {
             DISABLED_NOT_DEBUGGABLE,
             DISABLED_NON_TARGET_SDK,
             DISABLED_TARGET_SDK_TOO_HIGH,
-            PACKAGE_DOES_NOT_EXIST
+            PACKAGE_DOES_NOT_EXIST,
+            LOGGING_ONLY_CHANGE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {
@@ -49,7 +50,7 @@ public final class OverrideAllowedState implements Parcelable {
     public static final int DISABLED_NOT_DEBUGGABLE = 1;
     /**
      * Change cannot be overridden, due to the build being non-debuggable and the change being
-     * non-targetSdk.
+     * enabled regardless of targetSdk.
      */
     public static final int DISABLED_NON_TARGET_SDK = 2;
     /**
@@ -60,6 +61,10 @@ public final class OverrideAllowedState implements Parcelable {
      * Package does not exist.
      */
     public static final int PACKAGE_DOES_NOT_EXIST = 4;
+    /**
+     * Change is marked as logging only, and cannot be toggled.
+     */
+    public static final int LOGGING_ONLY_CHANGE = 5;
 
     @State
     public final int state;
@@ -118,6 +123,10 @@ public final class OverrideAllowedState implements Parcelable {
                         "Cannot override %1$d for %2$s because the package does not exist, and "
                                 + "the change is targetSdk gated.",
                         changeId, packageName));
+            case LOGGING_ONLY_CHANGE:
+                throw new SecurityException(String.format(
+                        "Cannot override %1$d because it is marked as a logging-only change.",
+                        changeId));
         }
     }
 
@@ -149,5 +158,29 @@ public final class OverrideAllowedState implements Parcelable {
         return state == otherState.state
                 && appTargetSdk == otherState.appTargetSdk
                 && changeIdTargetSdk == otherState.changeIdTargetSdk;
+    }
+
+    private String stateName() {
+        switch (state) {
+            case ALLOWED:
+                return "ALLOWED";
+            case DISABLED_NOT_DEBUGGABLE:
+                return "DISABLED_NOT_DEBUGGABLE";
+            case DISABLED_NON_TARGET_SDK:
+                return "DISABLED_NON_TARGET_SDK";
+            case DISABLED_TARGET_SDK_TOO_HIGH:
+                return "DISABLED_TARGET_SDK_TOO_HIGH";
+            case PACKAGE_DOES_NOT_EXIST:
+                return "PACKAGE_DOES_NOT_EXIST";
+            case LOGGING_ONLY_CHANGE:
+                return "LOGGING_ONLY_CHANGE";
+        }
+        return "UNKNOWN";
+    }
+
+    @Override
+    public String toString() {
+        return "OverrideAllowedState(state=" + stateName() + "; appTargetSdk=" + appTargetSdk
+                + "; changeIdTargetSdk=" + changeIdTargetSdk + ")";
     }
 }

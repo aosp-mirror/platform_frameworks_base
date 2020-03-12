@@ -23,9 +23,8 @@ import android.os.SystemProperties;
 /**
  * A structure describing general information about a display, such as its
  * size, density, and font scaling.
- * <p>To access the DisplayMetrics members, initialize an object like this:</p>
- * <pre> DisplayMetrics metrics = new DisplayMetrics();
- * getWindowManager().getDefaultDisplay().getMetrics(metrics);</pre>
+ * <p>To access the DisplayMetrics members, retrieve display metrics like this:</p>
+ * <pre>context.getResources().getDisplayMetrics();</pre>
  */
 public class DisplayMetrics {
     /**
@@ -245,7 +244,7 @@ public class DisplayMetrics {
      * this density value will be 1; on a 120 dpi screen it would be .75; etc.
      *  
      * <p>This value does not exactly follow the real screen size (as given by 
-     * {@link #xdpi} and {@link #ydpi}, but rather is used to scale the size of
+     * {@link #xdpi} and {@link #ydpi}), but rather is used to scale the size of
      * the overall UI in steps based on gross changes in the display dpi.  For 
      * example, a 240x320 screen will have a density of 1 even if its width is 
      * 1.8", 1.3", etc. However, if the screen resolution is increased to 

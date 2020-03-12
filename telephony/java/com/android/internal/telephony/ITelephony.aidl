@@ -22,6 +22,7 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
+import android.os.ParcelFileDescriptor;
 import android.os.ResultReceiver;
 import android.os.WorkSource;
 import android.net.NetworkStats;
@@ -41,6 +42,7 @@ import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
 import android.telephony.PhoneNumberRange;
 import android.telephony.RadioAccessFamily;
+import android.telephony.RadioAccessSpecifier;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
@@ -55,6 +57,7 @@ import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.OperatorInfo;
@@ -1814,14 +1817,6 @@ interface ITelephony {
     boolean switchSlots(in int[] physicalSlots);
 
     /**
-     * Sets radio indication update mode. This can be used to control the behavior of indication
-     * update from modem to Android frameworks. For example, by default several indication updates
-     * are turned off when screen is off, but in some special cases (e.g. carkit is connected but
-     * screen is off) we want to turn on those indications even when the screen is off.
-     */
-    void setRadioIndicationUpdateMode(int subId, int filters, int mode);
-
-    /**
      * Returns whether mobile data roaming is enabled on the subscription with id {@code subId}.
      *
      * @param subId the subscription id
@@ -2127,9 +2122,14 @@ interface ITelephony {
     void notifyOtaEmergencyNumberDbInstalled();
 
     /**
-     * Override the file partition name for testing OTA emergency number database.
+     * Override a customized file partition name for OTA emergency number database.
      */
-    void updateTestOtaEmergencyNumberDbFilePath(String otaFilePath);
+    void updateOtaEmergencyNumberDbFilePath(in ParcelFileDescriptor otaParcelFileDescriptor);
+
+    /**
+     * Reset file partition to default for OTA emergency number database.
+     */
+    void resetOtaEmergencyNumberDbFilePath();
 
     /**
      * Enable or disable a logical modem stack associated with the slotIndex.
@@ -2194,6 +2194,9 @@ interface ITelephony {
     boolean isDataEnabledForApn(int apnType, int subId, String callingPackage);
 
     boolean isApnMetered(int apnType, int subId);
+
+    oneway void setSystemSelectionChannels(in List<RadioAccessSpecifier> specifiers,
+            int subId, IBooleanConsumer resultCallback);
 
     boolean isMvnoMatched(int subId, int mvnoType, String mvnoMatchData);
 

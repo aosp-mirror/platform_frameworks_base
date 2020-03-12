@@ -41,6 +41,7 @@ interface IUserManager {
      */
 
     UserInfo createUser(in String name, int flags);
+    UserInfo preCreateUser(int flags);
     UserInfo createProfileForUser(in String name, int flags, int userHandle,
             in String[] disallowedPackages);
     UserInfo createRestrictedProfile(String name, int parentUserHandle);
@@ -53,7 +54,7 @@ interface IUserManager {
     void setUserIcon(int userHandle, in Bitmap icon);
     ParcelFileDescriptor getUserIcon(int userHandle);
     UserInfo getPrimaryUser();
-    List<UserInfo> getUsers(boolean excludeDying);
+    List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying, boolean excludePreCreated);
     List<UserInfo> getProfiles(int userHandle, boolean enabledOnly);
     int[] getProfileIds(int userId, boolean enabledOnly);
     boolean canAddMoreManagedProfiles(int userHandle, boolean allowedToRemoveOne);
@@ -92,6 +93,7 @@ interface IUserManager {
     boolean someUserHasSeedAccount(in String accountName, in String accountType);
     boolean isManagedProfile(int userId);
     boolean isDemoUser(int userId);
+    boolean isPreCreated(int userId);
     UserInfo createProfileForUserEvenWhenDisallowed(in String name, int flags, int userHandle,
             in String[] disallowedPackages);
     boolean isUserUnlockingOrUnlocked(int userId);

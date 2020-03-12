@@ -392,13 +392,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてテレビの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"配信が終了してもメモリに残るstickyブロードキャストの配信をアプリに許可します。この許可を使用し過ぎると、メモリの使用量が増えてモバイル デバイスの動作が遅くなったり不安定になったりする恐れがあります。"</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"連絡先の読み取り"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"テレビに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"モバイル デバイスに保存されている連絡先に関するデータの読み取りをアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリに連絡先データの保存を許可することになり、悪意のあるアプリによって知らないうちに連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"タブレットに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"テレビに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"スマートフォンに保存されている連絡先に関するデータの読み取りをアプリに許可します。これにより、連絡先データの保存をアプリに許可することになり、知らないうちに悪意のあるアプリによって連絡先データが共有される恐れがあります。"</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"連絡先の変更"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"テレビに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"モバイルデバイスに保存されている連絡先に関するデータの変更をアプリに許可します。このデータには、電話、メール、または他の手段で特定の相手と連絡をとった頻度も含まれます。これにより、アプリが連絡先データを削除できるようになります。"</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"タブレットに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"テレビに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"スマートフォンに保存されている連絡先に関するデータの変更をアプリに許可します。これにより、連絡先データの削除をアプリに許可することになります。"</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"通話履歴の読み取り"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"このアプリは通話履歴を読み取ることができます。"</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"通話履歴の書き込み"</string>
@@ -422,6 +422,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"フォアグラウンドでのみ（ネットワークに基づく）おおよその位置情報にアクセス"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"このアプリは、フォアグラウンドでのみユーザーのおおよその位置情報を取得できます。これらの位置情報サービスを ON にして、車でアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"これが、おおよその位置情報または正確な位置情報へのアクセスの追加権限の場合、アプリはバックグラウンドでの実行中も位置情報にアクセスできます。"</string>
@@ -1243,6 +1244,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"アラーム音"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"通知音"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"不明"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> に接続できません"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"タップしてプライバシー設定を変更し、もう一度お試しください"</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"プライバシー設定を変更しますか？"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> があなたのデバイスの MAC アドレス（固有の識別番号）を使用して接続できるようになります。これにより、付近のデバイスがあなたのデバイスの位置情報を追跡できるようになる可能性があります。\n\n続行すると、<xliff:g id="SSID_1">%1$s</xliff:g> があなたのプライバシー設定を変更し、もう一度接続を試みます。"</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"設定を変更"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"設定を更新しました。もう一度接続してみてください。"</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"プライバシー設定を変更できません"</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"ネットワークが見つかりません"</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="other">複数のWi-Fiネットワークが利用できます</item>
       <item quantity="one">Wi-Fiネットワークが利用できます</item>
@@ -1811,8 +1820,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2923798442660964928">"バッテリー セーバーを有効にすると、電池を長持ちさせるようバックグラウンド アクティビティ、一部の視覚効果など、電力消費量の多い機能が制限されます。"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="2500910959722815154">"バッテリー セーバーを有効にすると、電池を長持ちさせるため、バックグラウンド アクティビティや一部の視覚効果など、電力消費量の多い機能が制限されます。"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -1915,6 +1924,8 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"タップしてプロファイルをロック解除"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g> に接続しました"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"タップしてファイルを表示"</string>
+    <string name="pin_target" msgid="8036028973110156895">"固定"</string>
+    <string name="unpin_target" msgid="3963318576590204447">"固定を解除"</string>
     <string name="app_info" msgid="6113278084877079851">"アプリ情報"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"デモを開始しています…"</string>

@@ -29,8 +29,8 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
+import static android.telephony.TelephonyManager.MODEM_COUNT_DUAL_MODEM;
 
-import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
@@ -91,7 +91,6 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
@@ -528,7 +527,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
      */
     public List<SubscriptionInfo> getFilteredSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> subscriptions = getSubscriptionInfo(false);
-        if (subscriptions.size() == MAX_PHONE_COUNT_DUAL_SIM) {
+        if (subscriptions.size() == MODEM_COUNT_DUAL_MODEM) {
             SubscriptionInfo info1 = subscriptions.get(0);
             SubscriptionInfo info2 = subscriptions.get(1);
             if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
@@ -1129,7 +1128,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 dispatchBootCompleted();
             } else if (TelephonyIntents.ACTION_SERVICE_STATE_CHANGED.equals(action)) {
                 ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
-                int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
                 if (DEBUG) {
                     Log.v(TAG, "action " + action + " serviceState=" + serviceState + " subId="
@@ -1281,9 +1280,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (!TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
                 throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
             }
-            String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-            int slotId = intent.getIntExtra(PhoneConstants.PHONE_KEY, 0);
-            int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+            String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
+            int slotId = intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
+            int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
             if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent

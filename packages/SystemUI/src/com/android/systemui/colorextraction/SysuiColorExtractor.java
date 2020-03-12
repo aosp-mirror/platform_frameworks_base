@@ -68,9 +68,11 @@ public class SysuiColorExtractor extends ColorExtractor implements Dumpable,
         mBackdropColors.setMainColor(Color.BLACK);
 
         // Listen to all users instead of only the current one.
-        wallpaperManager.removeOnColorsChangedListener(this);
-        wallpaperManager.addOnColorsChangedListener(this, null /* handler */,
-                UserHandle.USER_ALL);
+        if (wallpaperManager.isWallpaperSupported()) {
+            wallpaperManager.removeOnColorsChangedListener(this);
+            wallpaperManager.addOnColorsChangedListener(this, null /* handler */,
+                    UserHandle.USER_ALL);
+        }
     }
 
     @Override

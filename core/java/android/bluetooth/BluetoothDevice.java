@@ -230,6 +230,13 @@ public final class BluetoothDevice implements Parcelable {
     public static final int BATTERY_LEVEL_UNKNOWN = -1;
 
     /**
+     * Used as an error value for {@link #getBatteryLevel()} to represent bluetooth is off
+     *
+     * @hide
+     */
+    public static final int BATTERY_LEVEL_BLUETOOTH_OFF = -100;
+
+    /**
      * Used as a Parcelable {@link BluetoothDevice} extra field in every intent
      * broadcast by this class. It contains the {@link BluetoothDevice} that
      * the intent applies to.
@@ -1113,20 +1120,38 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
+     * Get the Bluetooth alias of the remote device.
+     * If Alias is null, get the Bluetooth name instead.
+     *
+     * @return the Bluetooth alias, or null if no alias or there was a problem
+     * @hide
+     * @see #getAlias()
+     * @see #getName()
+     */
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link #getName()} instead.")
+    public String getAliasName() {
+        String name = getAlias();
+        if (name == null) {
+            name = getName();
+        }
+        return name;
+    }
+
+    /**
      * Get the most recent identified battery level of this Bluetooth device
      *
-     * @return Battery level in percents from 0 to 100, or {@link #BATTERY_LEVEL_UNKNOWN} if
-     * Bluetooth is disabled, or device is disconnected, or does not have any battery reporting
-     * service, or return value is invalid
+     * @return Battery level in percents from 0 to 100, {@link #BATTERY_LEVEL_BLUETOOTH_OFF} if
+     * Bluetooth is disabled or {@link #BATTERY_LEVEL_UNKNOWN} if device is disconnected, or does
+     * not have any battery reporting service, or return value is invalid
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public int getBatteryLevel() {
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "Bluetooth disabled. Cannot get remote device battery level");
-            return BATTERY_LEVEL_UNKNOWN;
+            return BATTERY_LEVEL_BLUETOOTH_OFF;
         }
         try {
             return service.getBatteryLevel(this);
@@ -1212,7 +1237,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean isBondingInitiatedLocally() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1250,13 +1275,12 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Cancel an in-progress bonding request started with {@link #createBond}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return true on success, false on error
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean cancelBondProcess() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1279,13 +1303,12 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Delete the link key associated with the remote device, and
      * immediately terminate connections to that device that require
      * authentication and encryption.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return true on success, false on error
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean removeBond() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1329,13 +1352,12 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Returns whether there is an open connection to this device.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return True if there is at least one open connection to this device.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isConnected() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1353,13 +1375,12 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Returns whether there is an open connection to this device
      * that has been encrypted.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return True if there is at least one encrypted connection to this device.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isEncrypted() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1512,7 +1533,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setPin(@Nullable String pin) {
+    public boolean setPin(@NonNull String pin) {
         byte[] pinBytes = convertPinToBytes(pin);
         if (pinBytes == null) {
             return false;
@@ -1548,6 +1569,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean cancelPairing() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1579,8 +1601,8 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getPhonebookAccessPermission() {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public @AccessPermission int getPhonebookAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
             return ACCESS_UNKNOWN;
@@ -1659,7 +1681,6 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Sets whether the phonebook access is allowed to this device.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
      *
      * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link
      * #ACCESS_REJECTED}.
@@ -1668,7 +1689,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setPhonebookAccessPermission(int value) {
+    public boolean setPhonebookAccessPermission(@AccessPermission int value) {
         final IBluetooth service = sService;
         if (service == null) {
             return false;
@@ -1688,7 +1709,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @AccessPermission int getMessageAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1705,7 +1726,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Sets whether the message access is allowed to this device.
      *
-     * @param value is the value we are setting the message access permission to
+     * @param value Can be {@link #ACCESS_UNKNOWN} if the device is unbonded,
+     * {@link #ACCESS_ALLOWED} if the permission is being granted, or {@link #ACCESS_REJECTED} if
+     * the permission is not being granted.
      * @return Whether the value has been successfully set.
      * @hide
      */
@@ -1735,7 +1758,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @AccessPermission int getSimAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1752,8 +1775,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Sets whether the Sim access is allowed to this device.
      *
-     * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link
-     * #ACCESS_REJECTED}.
+     * @param value Can be {@link #ACCESS_UNKNOWN} if the device is unbonded,
+     * {@link #ACCESS_ALLOWED} if the permission is being granted, or {@link #ACCESS_REJECTED} if
+     * the permission is not being granted.
      * @return Whether the value has been successfully set.
      * @hide
      */

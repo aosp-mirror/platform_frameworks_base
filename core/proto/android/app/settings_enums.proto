@@ -2417,10 +2417,15 @@ enum PageId {
     // OS: Q
     SETTINGS_AWARE_DISPLAY = 1750;
 
+    // OPEN: Settings > System > Input & Gesture > tap gesture
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_GESTURE_TAP = 1751;
+
     // OPEN: Settings > Developer Options > Platform Compat
     // CATEGORY: SETTINGS
     // OS: R
-    SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;    
+    SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;
 
     // OPEN: Settings > Developer Options > Wireless debugging
     // CATEGORY: SETTINGS
@@ -2436,6 +2441,7 @@ enum PageId {
     // OPEN: Settings > Developer Options > Wireless debugging
     //   > Pair device with QR code > Scan QR code > Pairing device dialog
     // CATEGORY: SETTINGS
+    // OS: R
     ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
 
     // OPEN: Settings > Developer Options > Wireless debugging

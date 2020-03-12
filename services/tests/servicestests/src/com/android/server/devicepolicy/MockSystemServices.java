@@ -31,8 +31,6 @@ import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
-import android.app.timedetector.TimeDetector;
-import android.app.timezonedetector.TimeZoneDetector;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ContentValues;
@@ -109,8 +107,6 @@ public class MockSystemServices {
     public final TelephonyManager telephonyManager;
     public final AccountManager accountManager;
     public final AlarmManager alarmManager;
-    public final TimeDetector timeDetector;
-    public final TimeZoneDetector timeZoneDetector;
     public final KeyChain.KeyChainConnection keyChainConnection;
     /** Note this is a partial mock, not a real mock. */
     public final PackageManager packageManager;
@@ -150,8 +146,6 @@ public class MockSystemServices {
         telephonyManager = mock(TelephonyManager.class);
         accountManager = mock(AccountManager.class);
         alarmManager = mock(AlarmManager.class);
-        timeDetector = mock(TimeDetector.class);
-        timeZoneDetector = mock(TimeZoneDetector.class);
         keyChainConnection = mock(KeyChain.KeyChainConnection.class, RETURNS_DEEP_STUBS);
 
         // Package manager is huge, so we use a partial mock instead.

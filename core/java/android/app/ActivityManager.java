@@ -2905,7 +2905,7 @@ public class ActivityManager {
         public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
         /**
-         * Constant for {@link #importance}: This process is contains services
+         * Constant for {@link #importance}: This process contains services
          * that should remain running.  These are background services apps have
          * started, not something the user is aware of, so they may be killed by
          * the system relatively freely (though it is generally desired that they
@@ -3868,6 +3868,30 @@ public class ActivityManager {
             throw new IllegalArgumentException("UserHandle cannot be null.");
         }
         return switchUser(user.getIdentifier());
+    }
+
+    /**
+     * Updates mcc mnc configuration and applies changes to the entire system.
+     *
+     * @param mcc mcc configuration to update.
+     * @param mnc mnc configuration to update.
+     * @throws RemoteException; IllegalArgumentException if mcc or mnc is null;
+     * @return Returns {@code true} if the configuration was updated successfully;
+     *         {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION)
+    public boolean updateMccMncConfiguration(@NonNull String mcc, @NonNull String mnc) {
+        if (mcc == null || mnc == null) {
+            throw new IllegalArgumentException("mcc or mnc cannot be null.");
+        }
+        try {
+            return getService().updateMccMncConfiguration(mcc, mnc);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

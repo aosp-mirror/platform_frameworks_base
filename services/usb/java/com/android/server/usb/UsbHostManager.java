@@ -486,7 +486,7 @@ public class UsbHostManager {
 
     /* Opens the specified USB device */
     public ParcelFileDescriptor openDevice(String deviceAddress, UsbUserSettingsManager settings,
-            String packageName, int uid) {
+            String packageName, int pid, int uid) {
         synchronized (mLock) {
             if (isBlackListed(deviceAddress)) {
                 throw new SecurityException("USB device is on a restricted bus");
@@ -498,7 +498,7 @@ public class UsbHostManager {
                         "device " + deviceAddress + " does not exist or is restricted");
             }
 
-            settings.checkPermission(device, packageName, uid);
+            settings.checkPermission(device, packageName, pid, uid);
             return nativeOpenDevice(deviceAddress);
         }
     }

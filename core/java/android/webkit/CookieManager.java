@@ -22,7 +22,10 @@ import android.net.WebAddress;
 
 /**
  * Manages the cookies used by an application's {@link WebView} instances.
- * Cookies are manipulated according to RFC2109.
+ * <p>
+ * CookieManager represents cookies as strings in the same format as the
+ * HTTP {@code Cookie} and {@code Set-Cookie} header fields (defined in
+ * <a href="https://tools.ietf.org/html/draft-ietf-httpbis-rfc6265bis-03">RFC6265bis</a>).
  */
 public abstract class CookieManager {
     /**

@@ -390,6 +390,8 @@ public class SliceManager {
             }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
             final Bundle res = provider.call(SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {
                 return null;

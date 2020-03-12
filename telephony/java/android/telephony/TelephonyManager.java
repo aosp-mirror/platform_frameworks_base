@@ -53,6 +53,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
@@ -95,6 +96,7 @@ import android.util.Pair;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.CellNetworkScanResult;
+import com.android.internal.telephony.IBooleanConsumer;
 import com.android.internal.telephony.INumberVerificationCallback;
 import com.android.internal.telephony.IOns;
 import com.android.internal.telephony.IPhoneSubInfo;
@@ -118,6 +120,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -153,7 +156,7 @@ public class TelephonyManager {
      */
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
-    private static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
+    public static final long CALLBACK_ON_MORE_ERROR_CODE_CHANGE = 130595455L;
 
     /**
      * The key to use when placing the result of {@link #requestModemActivityInfo(ResultReceiver)}
@@ -8906,7 +8909,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Shut down all the live radios over all the slot index.
+     * Shut down all the live radios over all the slot indexes.
+     *
+     * <p>To know when the radio has completed powering off, use
+     * {@link PhoneStateListener#LISTEN_SERVICE_STATE LISTEN_SERVICE_STATE}.
      *
      * @hide
      */
@@ -8919,7 +8925,8 @@ public class TelephonyManager {
                 telephony.shutdownMobileRadios();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#shutdownMobileRadios", e);
+            Log.e(TAG, "Error calling ITelephony#shutdownAllRadios", e);
+            e.rethrowAsRuntimeException();
         }
     }
 
@@ -8938,7 +8945,8 @@ public class TelephonyManager {
                 return telephony.needMobileRadioShutdown();
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#needMobileRadioShutdown", e);
+            Log.e(TAG, "Error calling ITelephony#isAnyRadioPoweredOn", e);
+            e.rethrowAsRuntimeException();
         }
         return false;
     }
@@ -11107,21 +11115,21 @@ public class TelephonyManager {
     }
 
     /**
-     * Checks whether cellular data connection is enabled in the device.
+     * Checks whether cellular data connection is allowed in the device.
      *
-     * Whether cellular data connection is enabled, meaning upon request whether will try to setup
-     * metered data connection considering all factors below:
-     * 1) User turned on data setting {@link #isDataEnabled}.
-     * 2) Carrier allows data to be on.
-     * 3) Network policy.
-     * And possibly others.
-     *
-     * @return {@code true} if the overall data connection is capable; {@code false} if not.
+     * <p>Whether cellular data connection is allowed considers all factors below:
+     * <UL>
+     *   <LI>User turned on data setting {@link #isDataEnabled}.</LI>
+     *   <LI>Carrier allows data to be on.</LI>
+     *   <LI>Network policy.</LI>
+     *   <LI>And possibly others.</LI>
+     * </UL>
+     * @return {@code true} if the overall data connection is allowed; {@code false} if not.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public boolean isDataConnectionEnabled() {
+    public boolean isDataConnectionAllowed() {
         boolean retVal = false;
         try {
             int subId = getSubId(SubscriptionManager.getDefaultDataSubscriptionId());
@@ -11129,8 +11137,9 @@ public class TelephonyManager {
             if (telephony != null)
                 retVal = telephony.isDataEnabled(subId);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error isDataConnectionEnabled", e);
+            Log.e(TAG, "Error isDataConnectionAllowed", e);
         } catch (NullPointerException e) {
+            return false;
         }
         return retVal;
     }
@@ -11164,14 +11173,6 @@ public class TelephonyManager {
      */
     public static final int INDICATION_UPDATE_MODE_IGNORE_SCREEN_OFF        = 2;
 
-    /** @hide */
-    @IntDef(prefix = { "INDICATION_UPDATE_MODE_" }, value = {
-            INDICATION_UPDATE_MODE_NORMAL,
-            INDICATION_UPDATE_MODE_IGNORE_SCREEN_OFF
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface IndicationUpdateMode{}
-
     /**
      * The indication for signal strength update.
      * @hide
@@ -11201,51 +11202,6 @@ public class TelephonyManager {
      * @hide
      */
     public static final int INDICATION_FILTER_PHYSICAL_CHANNEL_CONFIG       = 0x10;
-
-    /** @hide */
-    @IntDef(flag = true, prefix = { "INDICATION_FILTER_" }, value = {
-            INDICATION_FILTER_SIGNAL_STRENGTH,
-            INDICATION_FILTER_FULL_NETWORK_STATE,
-            INDICATION_FILTER_DATA_CALL_DORMANCY_CHANGED,
-            INDICATION_FILTER_LINK_CAPACITY_ESTIMATE,
-            INDICATION_FILTER_PHYSICAL_CHANNEL_CONFIG
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface IndicationFilters{}
-
-    /**
-     * Sets radio indication update mode. This can be used to control the behavior of indication
-     * update from modem to Android frameworks. For example, by default several indication updates
-     * are turned off when screen is off, but in some special cases (e.g. carkit is connected but
-     * screen is off) we want to turn on those indications even when the screen is off.
-     *
-     * <p>Requires Permission:
-     *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
-     *
-     * @param filters Indication filters. Should be a bitmask of INDICATION_FILTER_XXX.
-     * @see #INDICATION_FILTER_SIGNAL_STRENGTH
-     * @see #INDICATION_FILTER_FULL_NETWORK_STATE
-     * @see #INDICATION_FILTER_DATA_CALL_DORMANCY_CHANGED
-     * @param updateMode The voice activation state
-     * @see #INDICATION_UPDATE_MODE_NORMAL
-     * @see #INDICATION_UPDATE_MODE_IGNORE_SCREEN_OFF
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setRadioIndicationUpdateMode(@IndicationFilters int filters,
-                                             @IndicationUpdateMode int updateMode) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null) {
-                telephony.setRadioIndicationUpdateMode(getSubId(), filters, updateMode);
-            }
-        } catch (RemoteException ex) {
-            // This could happen if binder process crashes.
-            if (!isSystemProcess()) {
-                ex.rethrowAsRuntimeException();
-            }
-        }
-    }
 
     /**
      * A test API to override carrier information including mccmnc, imsi, iccid, gid1, gid2,
@@ -11614,11 +11570,9 @@ public class TelephonyManager {
     }
 
     /**
-     * Override the file path for testing OTA emergency number database in a file partition.
+     * Override the file path for OTA emergency number database in a file partition.
      *
-     * @param otaFilePath The test OTA emergency number database file path;
-     *                    if "RESET", recover the original database file partition.
-     *                    Format: <root file folder>@<file path>
+     * @param otaParcelFileDescriptor parcelable file descriptor for OTA emergency number database.
      *
      * <p> Requires permission:
      * {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
@@ -11628,16 +11582,42 @@ public class TelephonyManager {
     @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
     @SystemApi
     @TestApi
-    public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String otaFilePath) {
+    public void updateOtaEmergencyNumberDbFilePath(
+            @NonNull ParcelFileDescriptor otaParcelFileDescriptor) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
-                telephony.updateTestOtaEmergencyNumberDbFilePath(otaFilePath);
+                telephony.updateOtaEmergencyNumberDbFilePath(otaParcelFileDescriptor);
             } else {
                 throw new IllegalStateException("telephony service is null.");
             }
         } catch (RemoteException ex) {
-            Log.e(TAG, "notifyOtaEmergencyNumberDatabaseInstalled RemoteException", ex);
+            Log.e(TAG, "updateOtaEmergencyNumberDbFilePath RemoteException", ex);
+            ex.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Reset the file path to default for OTA emergency number database in a file partition.
+     *
+     * <p> Requires permission:
+     * {@link android.Manifest.permission#READ_ACTIVE_EMERGENCY_SESSION}
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION)
+    @SystemApi
+    @TestApi
+    public void resetOtaEmergencyNumberDbFilePath() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.resetOtaEmergencyNumberDbFilePath();
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Log.e(TAG, "resetOtaEmergencyNumberDbFilePath RemoteException", ex);
             ex.rethrowAsRuntimeException();
         }
     }
@@ -11841,7 +11821,7 @@ public class TelephonyManager {
     }
 
     /**
-     * A test API to return the emergency number db version.
+     * Returns the emergency number database version.
      *
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
@@ -11850,6 +11830,7 @@ public class TelephonyManager {
      */
     @TestApi
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public int getEmergencyNumberDbVersion() {
         try {
             ITelephony telephony = getITelephony();
@@ -12542,6 +12523,69 @@ public class TelephonyManager {
             }
         }
         return true;
+    }
+
+    /**
+     * Specify which bands modem's background scan must act on.
+     * If {@code specifiers} is non-empty, the scan will be restricted to the bands specified.
+     * Otherwise, it scans all bands.
+     *
+     * For example, CBRS is only on LTE band 48. By specifying this band,
+     * modem saves more power.
+     *
+     * @param specifiers which bands to scan.
+     * @param executor The executor to execute the callback on
+     * @param callback The callback that gets invoked when the radio responds to the request. Called
+     *                 with {@code true} if the request succeeded, {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSystemSelectionChannels(@NonNull List<RadioAccessSpecifier> specifiers,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<Boolean> callback) {
+        Objects.requireNonNull(specifiers, "Specifiers must not be null.");
+        Objects.requireNonNull(executor, "Executor must not be null.");
+        Objects.requireNonNull(callback, "Callback must not be null.");
+        setSystemSelectionChannelsInternal(specifiers, executor, callback);
+    }
+
+    /**
+     * Same as {@link #setSystemSelectionChannels(List, Executor, Consumer<Boolean>)}, but to be
+     * used when the caller does not need feedback on the results of the operation.
+     * @param specifiers which bands to scan.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setSystemSelectionChannels(@NonNull List<RadioAccessSpecifier> specifiers) {
+        Objects.requireNonNull(specifiers, "Specifiers must not be null.");
+        setSystemSelectionChannelsInternal(specifiers, null, null);
+    }
+
+
+    private void setSystemSelectionChannelsInternal(@NonNull List<RadioAccessSpecifier> specifiers,
+            @Nullable @CallbackExecutor Executor executor,
+            @Nullable Consumer<Boolean> callback) {
+        IBooleanConsumer aidlConsumer = callback == null ? null : new IBooleanConsumer.Stub() {
+            @Override
+            public void accept(boolean result) {
+                executor.execute(() -> callback.accept(result));
+            }
+        };
+
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                service.setSystemSelectionChannels(specifiers, getSubId(), aidlConsumer);
+            }
+        } catch (RemoteException ex) {
+            if (!isSystemProcess()) {
+                ex.rethrowAsRuntimeException();
+            }
+        }
     }
 
     /**

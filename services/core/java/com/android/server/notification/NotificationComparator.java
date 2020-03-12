@@ -123,6 +123,12 @@ public class NotificationComparator
             return -1 * Integer.compare(leftPriority, rightPriority);
         }
 
+        final boolean leftInterruptive = left.isInterruptive();
+        final boolean rightInterruptive = right.isInterruptive();
+        if (leftInterruptive != rightInterruptive) {
+            return -1 * Boolean.compare(leftInterruptive, rightInterruptive);
+        }
+
         // then break ties by time, most recent first
         return -1 * Long.compare(left.getRankingTimeMs(), right.getRankingTimeMs());
     }

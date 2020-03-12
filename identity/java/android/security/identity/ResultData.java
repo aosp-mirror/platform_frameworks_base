@@ -152,7 +152,7 @@ public abstract class ResultData {
      * @return collection of name of namespaces containing retrieved entries. May be empty if no
      *     data was retrieved.
      */
-    public abstract @NonNull Collection<String> getNamespaceNames();
+    public abstract @NonNull Collection<String> getNamespaces();
 
     /**
      * Get the names of all entries.
@@ -196,8 +196,7 @@ public abstract class ResultData {
      * @param name the name of the entry to get the value for.
      * @return the status indicating whether the value was retrieved and if not, why.
      */
-    @Status
-    public abstract int getStatus(@NonNull String namespaceName, @NonNull String name);
+    public abstract @Status int getStatus(@NonNull String namespaceName, @NonNull String name);
 
     /**
      * Gets the raw CBOR data for the value of an entry.

@@ -49,8 +49,8 @@ import java.util.concurrent.CountDownLatch;
  * limited to a local network over Multicast DNS. DNS service discovery is described at
  * http://files.dns-sd.org/draft-cheshire-dnsext-dns-sd.txt
  *
- * <p> The API is asynchronous and responses to requests from an application are on listener
- * callbacks on a seperate internal thread.
+ * <p> The API is asynchronous, and responses to requests from an application are on listener
+ * callbacks on a separate internal thread.
  *
  * <p> There are three main operations the API supports - registration, discovery and resolution.
  * <pre>

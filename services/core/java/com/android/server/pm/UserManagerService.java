@@ -41,6 +41,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
+import android.content.pm.UserInfo.UserInfoFlag;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Binder;
@@ -66,6 +67,7 @@ import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManager.EnforcingUser;
@@ -83,6 +85,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.TimingsTraceLog;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
@@ -155,6 +158,7 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
+    private static final String ATTR_PRE_CREATED = "preCreated";
     private static final String ATTR_GUEST_TO_REMOVE = "guestToRemove";
     private static final String ATTR_USER_VERSION = "version";
     private static final String ATTR_PROFILE_GROUP_ID = "profileGroupId";
@@ -475,6 +479,10 @@ public class UserManagerService extends IUserManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mUms.cleanupPartialUsers();
+
+                if (mUms.mPm.isDeviceUpgrading()) {
+                    mUms.cleanupPreCreatedUsers();
+                }
             }
         }
 
@@ -582,7 +590,8 @@ public class UserManagerService extends IUserManager.Stub {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
-                if ((ui.partial || ui.guestToRemove || ui.isEphemeral()) && i != 0) {
+                if ((ui.partial || ui.guestToRemove || (ui.isEphemeral() && !ui.preCreated))
+                        && i != 0) {
                     partials.add(ui);
                     addRemovingUserIdLocked(ui.id);
                     ui.partial = true;
@@ -594,6 +603,33 @@ public class UserManagerService extends IUserManager.Stub {
             UserInfo ui = partials.get(i);
             Slog.w(LOG_TAG, "Removing partially created user " + ui.id
                     + " (name=" + ui.name + ")");
+            removeUserState(ui.id);
+        }
+    }
+
+    /**
+     * Removes any pre-created users from the system. Should be invoked after OTAs, to ensure
+     * pre-created users are not stale. New pre-created pool can be re-created after the update.
+     */
+    void cleanupPreCreatedUsers() {
+        final ArrayList<UserInfo> preCreatedUsers;
+        synchronized (mUsersLock) {
+            final int userSize = mUsers.size();
+            preCreatedUsers = new ArrayList<>(userSize);
+            for (int i = 0; i < userSize; i++) {
+                UserInfo ui = mUsers.valueAt(i).info;
+                if (ui.preCreated) {
+                    preCreatedUsers.add(ui);
+                    addRemovingUserIdLocked(ui.id);
+                    ui.flags |= UserInfo.FLAG_DISABLED;
+                    ui.partial = true;
+                }
+            }
+        }
+        final int preCreatedSize = preCreatedUsers.size();
+        for (int i = 0; i < preCreatedSize; i++) {
+            UserInfo ui = preCreatedUsers.get(i);
+            Slog.i(LOG_TAG, "Removing pre-created user " + ui.id);
             removeUserState(ui.id);
         }
     }
@@ -645,20 +681,25 @@ public class UserManagerService extends IUserManager.Stub {
         return null;
     }
 
-    @Override
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
+        return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */ true);
+    }
+
+    @Override
+    public @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+            boolean excludePreCreated) {
         checkManageOrCreateUsersPermission("query users");
         synchronized (mUsersLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
                 UserInfo ui = mUsers.valueAt(i).info;
-                if (ui.partial) {
+                if ((excludePartial && ui.partial)
+                        || (excludeDying && mRemovingUserIds.get(ui.id))
+                        || (excludePreCreated && ui.preCreated)) {
                     continue;
                 }
-                if (!excludeDying || !mRemovingUserIds.get(ui.id)) {
-                    users.add(userWithName(ui));
-                }
+                users.add(userWithName(ui));
             }
             return users;
         }
@@ -1179,8 +1220,9 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void checkManageOrInteractPermIfCallerInOtherProfileGroup(int userId, String name) {
-        int callingUserId = UserHandle.getCallingUserId();
+    private void checkManageOrInteractPermIfCallerInOtherProfileGroup(@UserIdInt int userId,
+            String name) {
+        final int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId == userId || isSameProfileGroupNoChecks(callingUserId, userId) ||
                 hasManageUsersPermission()) {
             return;
@@ -1193,8 +1235,8 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean isDemoUser(int userId) {
-        int callingUserId = UserHandle.getCallingUserId();
+    public boolean isDemoUser(@UserIdInt int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId != userId && !hasManageUsersPermission()) {
             throw new SecurityException("You need MANAGE_USERS permission to query if u=" + userId
                     + " is a demo user");
@@ -1202,6 +1244,19 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isDemo();
+        }
+    }
+
+    @Override
+    public boolean isPreCreated(@UserIdInt int userId) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (callingUserId != userId && !hasManageUsersPermission()) {
+            throw new SecurityException("You need MANAGE_USERS permission to query if u=" + userId
+                    + " is pre-created");
+        }
+        synchronized (mUsersLock) {
+            UserInfo userInfo = getUserInfoLU(userId);
+            return userInfo != null && userInfo.preCreated;
         }
     }
 
@@ -1859,7 +1914,7 @@ public class UserManagerService extends IUserManager.Stub {
         // Skip over users being removed
         for (int i = 0; i < totalUserCount; i++) {
             UserInfo user = mUsers.valueAt(i).info;
-            if (!mRemovingUserIds.get(user.id) && !user.isGuest()) {
+            if (!mRemovingUserIds.get(user.id) && !user.isGuest() && !user.preCreated) {
                 aliveUserCount++;
             }
         }
@@ -2320,6 +2375,9 @@ public class UserManagerService extends IUserManager.Stub {
         if (userInfo.partial) {
             serializer.attribute(null, ATTR_PARTIAL, "true");
         }
+        if (userInfo.preCreated) {
+            serializer.attribute(null, ATTR_PRE_CREATED, "true");
+        }
         if (userInfo.guestToRemove) {
             serializer.attribute(null, ATTR_GUEST_TO_REMOVE, "true");
         }
@@ -2476,6 +2534,7 @@ public class UserManagerService extends IUserManager.Stub {
         int profileBadge = 0;
         int restrictedProfileParentId = UserInfo.NO_PROFILE_GROUP_ID;
         boolean partial = false;
+        boolean preCreated = false;
         boolean guestToRemove = false;
         boolean persistSeedData = false;
         String seedAccountName = null;
@@ -2519,6 +2578,10 @@ public class UserManagerService extends IUserManager.Stub {
             String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
             if ("true".equals(valueString)) {
                 partial = true;
+            }
+            valueString = parser.getAttributeValue(null, ATTR_PRE_CREATED);
+            if ("true".equals(valueString)) {
+                preCreated = true;
             }
             valueString = parser.getAttributeValue(null, ATTR_GUEST_TO_REMOVE);
             if ("true".equals(valueString)) {
@@ -2573,6 +2636,7 @@ public class UserManagerService extends IUserManager.Stub {
         userInfo.lastLoggedInTime = lastLoggedInTime;
         userInfo.lastLoggedInFingerprint = lastLoggedInFingerprint;
         userInfo.partial = partial;
+        userInfo.preCreated = preCreated;
         userInfo.guestToRemove = guestToRemove;
         userInfo.profileGroupId = profileGroupId;
         userInfo.profileBadge = profileBadge;
@@ -2644,7 +2708,8 @@ public class UserManagerService extends IUserManager.Stub {
     public UserInfo createProfileForUserEvenWhenDisallowed(String name, int flags, int userId,
             String[] disallowedPackages) {
         checkManageOrCreateUsersPermission(flags);
-        return createUserInternalUnchecked(name, flags, userId, disallowedPackages);
+        return createUserInternalUnchecked(name, flags, userId, /* preCreate= */ false,
+                disallowedPackages);
     }
 
     @Override
@@ -2659,12 +2724,27 @@ public class UserManagerService extends IUserManager.Stub {
         return createUserInternal(name, flags, UserHandle.USER_NULL);
     }
 
-    private UserInfo createUserInternal(String name, int flags, int parentId) {
+    @Override
+    public UserInfo preCreateUser(int flags) {
+        checkManageOrCreateUsersPermission(flags);
+
+        Preconditions.checkArgument(!UserInfo.isManagedProfile(flags),
+                "cannot pre-create managed profiles");
+
+        Slog.i(LOG_TAG, "Pre-creating user with flags " + UserInfo.flagsToString(flags));
+
+        return createUserInternalUnchecked(/* name= */ null, flags,
+                /* parentId= */ UserHandle.USER_NULL, /* preCreate= */ true,
+                /* disallowedPackages= */ null);
+    }
+
+    private UserInfo createUserInternal(@Nullable String name, @UserInfoFlag int flags,
+            @UserIdInt int parentId) {
         return createUserInternal(name, flags, parentId, null);
     }
 
-    private UserInfo createUserInternal(String name, int flags, int parentId,
-            String[] disallowedPackages) {
+    private UserInfo createUserInternal(@Nullable String name, @UserInfoFlag int flags,
+            @UserIdInt int parentId, @Nullable String[] disallowedPackages) {
         String restriction = ((flags & UserInfo.FLAG_MANAGED_PROFILE) != 0)
                 ? UserManager.DISALLOW_ADD_MANAGED_PROFILE
                 : UserManager.DISALLOW_ADD_USER;
@@ -2672,19 +2752,80 @@ public class UserManagerService extends IUserManager.Stub {
             Log.w(LOG_TAG, "Cannot add user. " + restriction + " is enabled.");
             return null;
         }
-        return createUserInternalUnchecked(name, flags, parentId, disallowedPackages);
+        return createUserInternalUnchecked(name, flags, parentId, /* preCreate= */ false,
+                disallowedPackages);
     }
 
-    private UserInfo createUserInternalUnchecked(String name, int flags, int parentId,
-            String[] disallowedPackages) {
+    private UserInfo createUserInternalUnchecked(@Nullable String name, @UserInfoFlag int flags,
+            @UserIdInt int parentId, boolean preCreate,
+            @Nullable String[] disallowedPackages) {
+        final TimingsTraceLog t = new TimingsTraceLog(LOG_TAG, Trace.TRACE_TAG_SYSTEM_SERVER);
+        t.traceBegin("createUser-" + flags);
+        try {
+            return createUserInternalUncheckedNoTracing(name, flags, parentId, preCreate,
+                disallowedPackages, t);
+        } finally {
+            t.traceEnd();
+        }
+    }
+
+    private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name,
+            @UserInfoFlag int flags, @UserIdInt int parentId, boolean preCreate,
+            @Nullable String[] disallowedPackages, @NonNull TimingsTraceLog t) {
+
+        // First try to use a pre-created user (if available).
+        // NOTE: currently we don't support pre-created managed profiles
+        if (!preCreate && (parentId < 0 && !UserInfo.isManagedProfile(flags))) {
+            final UserData preCreatedUserData;
+            synchronized (mUsersLock) {
+                preCreatedUserData = getPreCreatedUserLU(flags);
+            }
+            if (preCreatedUserData != null) {
+                final UserInfo preCreatedUser = preCreatedUserData.info;
+                if (UserInfo.isGuest(flags) && areGuestUsersEphemeral()) {
+                    // TODO(b/143092698): this pre-created user has (persisted) storage keys
+                    // that will be removed when the user is stopped and ideally we should
+                    // remove them from storage right now, but that's not possible with the
+                    // current StorageManager APIs (there are just a
+                    // createUserKey(userId, serial, isEphemeral) and destroyUserKey(userId)
+                    // methods; we would need a makeUserKeyEphemeral(userId) method)
+                    preCreatedUserData.info.flags |= UserInfo.FLAG_EPHEMERAL;
+                }
+                Log.i(LOG_TAG, "Reusing pre-created user " + preCreatedUser.id + " for flags "
+                        + UserInfo.flagsToString(flags) + "; new flags: "
+                        + UserInfo.flagsToString(preCreatedUserData.info.flags));
+                if (DBG) {
+                    Log.d(LOG_TAG, "pre-created user flags: "
+                            + UserInfo.flagsToString(preCreatedUser.flags)
+                            + " new-user flags: " + UserInfo.flagsToString(flags));
+                }
+                preCreatedUser.name = name;
+                preCreatedUser.preCreated = false;
+                preCreatedUser.creationTime = getCreationTime();
+
+                synchronized (mPackagesLock) {
+                    writeUserLP(preCreatedUserData);
+                    writeUserListLP();
+                }
+
+                updateUserIds();
+                if (!mPm.readPermissionStateForUser(preCreatedUser.id)) {
+                    // Could not read the existing permissions, re-grant them.
+                    mPm.onNewUserCreated(preCreatedUser.id);
+                }
+                dispatchUserAddedIntent(preCreatedUser);
+                return preCreatedUser;
+            }
+        }
+
         DeviceStorageMonitorInternal dsm = LocalServices
                 .getService(DeviceStorageMonitorInternal.class);
         if (dsm.isMemoryLow()) {
             Log.w(LOG_TAG, "Cannot add user. Not enough space on disk.");
             return null;
         }
-        final boolean isGuest = (flags & UserInfo.FLAG_GUEST) != 0;
-        final boolean isManagedProfile = (flags & UserInfo.FLAG_MANAGED_PROFILE) != 0;
+        final boolean isGuest = UserInfo.isGuest(flags);
+        final boolean isManagedProfile = UserInfo.isManagedProfile(flags);
         final boolean isRestricted = (flags & UserInfo.FLAG_RESTRICTED) != 0;
         final boolean isDemo = (flags & UserInfo.FLAG_DEMO) != 0;
         final long ident = Binder.clearCallingIdentity();
@@ -2705,13 +2846,13 @@ public class UserManagerService extends IUserManager.Stub {
                     return null;
                 }
                 if (!isGuest && !isManagedProfile && !isDemo && isUserLimitReached()) {
-                    // If we're not adding a guest/demo user or a managed profile and the limit has
-                    // been reached, cannot add a user.
+                    // If we're not adding a guest/demo user or a managed profile,
+                    // and the limit has been reached, cannot add a user.
                     Log.e(LOG_TAG, "Cannot add user. Maximum user limit is reached.");
                     return null;
                 }
                 // If we're adding a guest and there already exists one, bail.
-                if (isGuest && findCurrentGuestUser() != null) {
+                if (isGuest && !preCreate && findCurrentGuestUser() != null) {
                     Log.e(LOG_TAG, "Cannot add guest user. Guest user already exists.");
                     return null;
                 }
@@ -2747,21 +2888,21 @@ public class UserManagerService extends IUserManager.Stub {
 
                 userId = getNextAvailableId();
                 Environment.getUserSystemDirectory(userId).mkdirs();
-                boolean ephemeralGuests = Resources.getSystem()
-                        .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
+                boolean ephemeralGuests = areGuestUsersEphemeral();
 
                 synchronized (mUsersLock) {
                     // Add ephemeral flag to guests/users if required. Also inherit it from parent.
-                    if ((isGuest && ephemeralGuests) || mForceEphemeralUsers
-                            || (parent != null && parent.info.isEphemeral())) {
+                    if (!preCreate && ((isGuest && ephemeralGuests)
+                            || mForceEphemeralUsers
+                            || (parent != null && parent.info.isEphemeral()))) {
                         flags |= UserInfo.FLAG_EPHEMERAL;
                     }
 
                     userInfo = new UserInfo(userId, name, null, flags);
                     userInfo.serialNumber = mNextSerialNumber++;
-                    long now = System.currentTimeMillis();
-                    userInfo.creationTime = (now > EPOCH_PLUS_30_YEARS) ? now : 0;
+                    userInfo.creationTime = getCreationTime();
                     userInfo.partial = true;
+                    userInfo.preCreated = preCreate;
                     userInfo.lastLoggedInFingerprint = Build.FINGERPRINT;
                     if (isManagedProfile && parentId != UserHandle.USER_NULL) {
                         userInfo.profileBadge = getFreeProfileBadgeLU(parentId);
@@ -2807,17 +2948,93 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.append(userId, restrictions);
             }
+
+            t.traceBegin("PM.onNewUserCreated-" + userId);
             mPm.onNewUserCreated(userId);
-            Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
-            addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
-                    android.Manifest.permission.MANAGE_USERS);
-            MetricsLogger.count(mContext, isGuest ? TRON_GUEST_CREATED
-                    : (isDemo ? TRON_DEMO_CREATED : TRON_USER_CREATED), 1);
+            t.traceEnd();
+            if (preCreate) {
+                // Must start user (which will be stopped right away, through
+                // UserController.finishUserUnlockedCompleted) so services can properly
+                // intialize it.
+                // TODO(b/140750212): in the long-term, we should add a onCreateUser() callback
+                // on SystemService instead.
+                Slog.i(LOG_TAG, "starting pre-created user " + userInfo.toFullString());
+                final IActivityManager am = ActivityManager.getService();
+                try {
+                    am.startUserInBackground(userId);
+                } catch (RemoteException e) {
+                    Slog.w(LOG_TAG, "could not start pre-created user " + userId, e);
+                }
+            } else {
+                dispatchUserAddedIntent(userInfo);
+            }
+
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+
+        // TODO(b/140750212): it's possible to reach "max users overflow" when the user is created
+        // "from scratch" (i.e., not from a pre-created user) and reaches the maximum number of
+        // users without counting the pre-created one. Then when the pre-created is converted, the
+        // "effective" number of max users is exceeds. Example:
+        // Max: 3 Current: 2 full (u0 and u10) + 1 pre-created (u11)
+        // Step 1: create(/* flags doesn't match u11 */): u12 is created, "effective max" is now 3
+        //         (u0, u10, u12) but "real" max is 4 (u0, u10, u11, u12)
+        // Step 2: create(/* flags match u11 */): u11 is converted, now "effective max" is also 4
+        //         (u0, u10, u11, u12)
+        // One way to avoid this issue is by removing a pre-created user from the pool when the
+        // "real" max exceeds the max here.
+
         return userInfo;
+    }
+
+    private long getCreationTime() {
+        final long now = System.currentTimeMillis();
+        return (now > EPOCH_PLUS_30_YEARS) ? now : 0;
+    }
+
+    private void dispatchUserAddedIntent(@NonNull UserInfo userInfo) {
+        Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
+        addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
+        mContext.sendBroadcastAsUser(addedIntent, UserHandle.ALL,
+                android.Manifest.permission.MANAGE_USERS);
+        MetricsLogger.count(mContext, userInfo.isGuest() ? TRON_GUEST_CREATED
+                : (userInfo.isDemo() ? TRON_DEMO_CREATED : TRON_USER_CREATED), 1);
+    }
+
+    private boolean areGuestUsersEphemeral() {
+        return Resources.getSystem()
+                .getBoolean(com.android.internal.R.bool.config_guestUserEphemeral);
+    }
+
+    /**
+     * Gets a pre-created user for the given flag.
+     *
+     * <p>Should be used only during user creation, so the pre-created user can be used (instead of
+     * creating and initializing a new user from scratch).
+     */
+    // TODO(b/140750212): add unit test
+    @GuardedBy("mUsersLock")
+    private @Nullable UserData getPreCreatedUserLU(@UserInfoFlag int flags) {
+        if (DBG) {
+            Slog.d(LOG_TAG, "getPreCreatedUser(): flags= " + UserInfo.flagsToString(flags));
+        }
+        final int userSize = mUsers.size();
+        for (int i = 0; i < userSize; i++) {
+            final UserData user = mUsers.valueAt(i);
+            if (DBG) Slog.d(LOG_TAG, i + ":" + user.info.toFullString());
+            if (user.info.preCreated
+                    && (user.info.flags & ~UserInfo.FLAG_INITIALIZED) == flags) {
+                if (!user.info.isInitialized()) {
+                    Slog.w(LOG_TAG, "found pre-created user for flags "
+                            + "" + UserInfo.flagsToString(flags)
+                            + ", but it's not initialized yet: " + user.info.toFullString());
+                    continue;
+                }
+                return user;
+            }
+        }
+        return null;
     }
 
     @VisibleForTesting
@@ -2872,7 +3089,8 @@ public class UserManagerService extends IUserManager.Stub {
             final int size = mUsers.size();
             for (int i = 0; i < size; i++) {
                 final UserInfo user = mUsers.valueAt(i).info;
-                if (user.isGuest() && !user.guestToRemove && !mRemovingUserIds.get(user.id)) {
+                if (user.isGuest() && !user.guestToRemove && !user.preCreated
+                        && !mRemovingUserIds.get(user.id)) {
                     return user;
                 }
             }
@@ -3426,14 +3644,16 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             final int userSize = mUsers.size();
             for (int i = 0; i < userSize; i++) {
-                if (!mUsers.valueAt(i).info.partial) {
+                UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial && !userInfo.preCreated) {
                     num++;
                 }
             }
             final int[] newUsers = new int[num];
             int n = 0;
             for (int i = 0; i < userSize; i++) {
-                if (!mUsers.valueAt(i).info.partial) {
+                UserInfo userInfo = mUsers.valueAt(i).info;
+                if (!userInfo.partial && !userInfo.preCreated) {
                     newUsers[n++] = mUsers.keyAt(i);
                 }
             }
@@ -3485,7 +3705,10 @@ public class UserManagerService extends IUserManager.Stub {
      * recycled.
      */
     void reconcileUsers(String volumeUuid) {
-        mUserDataPreparer.reconcileUsers(volumeUuid, getUsers(true /* excludeDying */));
+        mUserDataPreparer.reconcileUsers(volumeUuid, getUsers(
+                /* excludePartial= */ true,
+                /* excludeDying= */ true,
+                /* excludePreCreated= */ false));
     }
 
     /**
@@ -3651,7 +3874,7 @@ public class UserManagerService extends IUserManager.Stub {
         try {
             switch(cmd) {
                 case "list":
-                    return runList(pw);
+                    return runList(pw, shell);
                 default:
                     return shell.handleDefaultCommands(cmd);
             }
@@ -3661,17 +3884,58 @@ public class UserManagerService extends IUserManager.Stub {
         return -1;
     }
 
-    private int runList(PrintWriter pw) throws RemoteException {
+    private int runList(PrintWriter pw, Shell shell) throws RemoteException {
+        boolean all = false;
+        boolean verbose = false;
+        String opt;
+        while ((opt = shell.getNextOption()) != null) {
+            switch (opt) {
+                case "-v":
+                    verbose = true;
+                    break;
+                case "--all":
+                    all = true;
+                    break;
+                default:
+                    pw.println("Invalid option: " + opt);
+                    return -1;
+            }
+        }
         final IActivityManager am = ActivityManager.getService();
-        final List<UserInfo> users = getUsers(false);
+        final List<UserInfo> users = getUsers(/* excludePartial= */ !all,
+                /* excludingDying=*/ false, /* excludePreCreated= */ !all);
         if (users == null) {
             pw.println("Error: couldn't get users");
             return 1;
         } else {
-            pw.println("Users:");
-            for (int i = 0; i < users.size(); i++) {
-                String running = am.isUserRunning(users.get(i).id, 0) ? " running" : "";
-                pw.println("\t" + users.get(i).toString() + running);
+            final int size = users.size();
+            int currentUser = UserHandle.USER_NULL;
+            if (verbose) {
+                pw.printf("%d users:\n\n", size);
+                currentUser = am.getCurrentUser().id;
+            } else {
+                // NOTE: the standard "list users" command is used by integration tests and
+                // hence should not be changed. If you need to add more info, use the
+                // verbose option.
+                pw.println("Users:");
+            }
+            for (int i = 0; i < size; i++) {
+                final UserInfo user = users.get(i);
+                final boolean running = am.isUserRunning(user.id, 0);
+                final boolean current = user.id == currentUser;
+                if (verbose) {
+                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s\n", i, user.id, user.name,
+                            UserInfo.flagsToString(user.flags),
+                            running ? " (running)" : "",
+                            user.partial ? " (partial)" : "",
+                            user.preCreated ? " (pre-created)" : "",
+                            current ? " (current)" : "");
+                } else {
+                    // NOTE: the standard "list users" command is used by integration tests and
+                    // hence should not be changed. If you need to add more info, use the
+                    // verbose option.
+                    pw.printf("\t%s%s\n", user, running ? " running" : "");
+                }
             }
             return 0;
         }
@@ -3683,6 +3947,16 @@ public class UserManagerService extends IUserManager.Stub {
 
         long now = System.currentTimeMillis();
         final long nowRealtime = SystemClock.elapsedRealtime();
+
+        final ActivityManagerInternal amInternal = LocalServices
+                .getService(ActivityManagerInternal.class);
+        pw.print("Current user: ");
+        if (amInternal != null) {
+            pw.println(amInternal.getCurrentUserId());
+        } else {
+            pw.println("N/A");
+        }
+
         StringBuilder sb = new StringBuilder();
         synchronized (mPackagesLock) {
             synchronized (mUsersLock) {
@@ -3696,13 +3970,19 @@ public class UserManagerService extends IUserManager.Stub {
                     final int userId = userInfo.id;
                     pw.print("  "); pw.print(userInfo);
                     pw.print(" serialNo="); pw.print(userInfo.serialNumber);
+                    pw.print(" isPrimary="); pw.print(userInfo.isPrimary());
                     if (mRemovingUserIds.get(userId)) {
                         pw.print(" <removing> ");
                     }
                     if (userInfo.partial) {
                         pw.print(" <partial>");
                     }
+                    if (userInfo.preCreated) {
+                        pw.print(" <pre-created>");
+                    }
                     pw.println();
+                    pw.print("    Flags: "); pw.print(userInfo.flags); pw.print(" (");
+                    pw.print(UserInfo.flagsToString(userInfo.flags)); pw.println(")");
                     pw.print("    State: ");
                     final int state;
                     synchronized (mUserStates) {
@@ -3778,13 +4058,16 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mUserStates) {
                 pw.println("  Started users state: " + mUserStates);
             }
-            // Dump some capabilities
-            pw.println();
-            pw.println("  Max users: " + UserManager.getMaxSupportedUsers());
-            pw.println("  Supports switchable users: " + UserManager.supportsMultipleUsers());
-            pw.println("  All guests ephemeral: " + Resources.getSystem().getBoolean(
-                    com.android.internal.R.bool.config_guestUserEphemeral));
-        }
+        } // synchronized (mPackagesLock)
+
+        // Dump some capabilities
+        pw.println();
+        pw.print("  Max users: " + UserManager.getMaxSupportedUsers());
+        pw.println(" (limit reached: " + isUserLimitReached() + ")");
+        pw.println("  Supports switchable users: " + UserManager.supportsMultipleUsers());
+        pw.println("  All guests ephemeral: " + areGuestUsersEphemeral());
+        pw.println("  Is split-system user: " + UserManager.isSplitSystemUser());
+        pw.println("  User version: " + mUserVersion);
     }
 
     private static void dumpTimeAgo(PrintWriter pw, StringBuilder sb, long nowTime, long time) {
@@ -3969,7 +4252,7 @@ public class UserManagerService extends IUserManager.Stub {
         public UserInfo createUserEvenWhenDisallowed(String name, int flags,
                 String[] disallowedPackages) {
             UserInfo user = createUserInternalUnchecked(name, flags, UserHandle.USER_NULL,
-                    disallowedPackages);
+                    /* preCreated= */ false, disallowedPackages);
             // Keep this in sync with UserManager.createUser
             if (user != null && !user.isAdmin() && !user.isDemo()) {
                 setUserRestriction(UserManager.DISALLOW_SMS, true, user.id);
@@ -4134,7 +4417,7 @@ public class UserManagerService extends IUserManager.Stub {
             pw.println("  help");
             pw.println("    Print this help text.");
             pw.println("");
-            pw.println("  list");
+            pw.println("  list [-v] [-all]");
             pw.println("    Prints all users on the system.");
         }
     }

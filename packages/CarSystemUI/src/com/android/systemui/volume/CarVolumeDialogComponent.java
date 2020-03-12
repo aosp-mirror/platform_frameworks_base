@@ -31,6 +31,10 @@ public class CarVolumeDialogComponent extends VolumeDialogComponent {
     }
 
     protected VolumeDialog createDefault() {
-        return new CarVolumeDialogImpl(mContext);
+        CarVolumeDialogImpl carVolumeDialog = new CarVolumeDialogImpl(mContext);
+        // Since VolumeUI is initialized when the first Volume Up/Down event is received we need to
+        // show the dialog on initialization too.
+        carVolumeDialog.show(Events.SHOW_REASON_VOLUME_CHANGED);
+        return carVolumeDialog;
     }
 }

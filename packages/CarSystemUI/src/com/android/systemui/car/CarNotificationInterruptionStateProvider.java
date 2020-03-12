@@ -22,6 +22,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.policy.BatteryController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,8 +35,9 @@ public class CarNotificationInterruptionStateProvider extends
     @Inject
     public CarNotificationInterruptionStateProvider(Context context,
             NotificationFilter filter,
-            StatusBarStateController stateController) {
-        super(context, filter, stateController);
+            StatusBarStateController stateController,
+            BatteryController batteryController) {
+        super(context, filter, stateController, batteryController);
     }
 
     @Override
