@@ -37,7 +37,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
-import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseLongArray;
 
@@ -349,8 +348,8 @@ class Rollback {
         PackageRollbackInfo packageRollbackInfo = new PackageRollbackInfo(
                 new VersionedPackage(packageName, newVersion),
                 new VersionedPackage(packageName, installedVersion),
-                new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
-                isApex, false /* isApkInApex */, new IntArray(),
+                new ArrayList<>() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
+                isApex, false /* isApkInApex */, new ArrayList<>(),
                 new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
 
         synchronized (mLock) {
@@ -375,13 +374,19 @@ class Rollback {
         PackageRollbackInfo packageRollbackInfo = new PackageRollbackInfo(
                 new VersionedPackage(packageName, 0 /* newVersion */),
                 new VersionedPackage(packageName, installedVersion),
-                new IntArray() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
-                false /* isApex */, true /* isApkInApex */, new IntArray(),
+                new ArrayList<>() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
+                false /* isApex */, true /* isApkInApex */, new ArrayList<>(),
                 new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
         synchronized (mLock) {
             info.getPackages().add(packageRollbackInfo);
         }
         return true;
+    }
+
+    private static void addAll(List<Integer> list, int[] arr) {
+        for (int i = 0; i < arr.length; ++i) {
+            list.add(arr[i]);
+        }
     }
 
     /**
@@ -399,7 +404,7 @@ class Rollback {
                     if (pkgRollbackInfo.getRollbackDataPolicy()
                             == PackageManager.RollbackDataPolicy.RESTORE) {
                         dataHelper.snapshotAppData(info.getRollbackId(), pkgRollbackInfo, userIds);
-                        pkgRollbackInfo.getSnapshottedUsers().addAll(IntArray.wrap(userIds));
+                        addAll(pkgRollbackInfo.getSnapshottedUsers(), userIds);
                         RollbackStore.saveRollback(this);
                     }
                     break;
@@ -644,7 +649,7 @@ class Rollback {
                 if (pkgInfo.isApex()) {
                     containsApex = true;
                 } else {
-                    IntArray snapshottedUsers = pkgInfo.getSnapshottedUsers();
+                    List<Integer> snapshottedUsers = pkgInfo.getSnapshottedUsers();
                     for (int i = 0; i < snapshottedUsers.size(); i++) {
                         // Destroy app data snapshot.
                         int userId = snapshottedUsers.get(i);

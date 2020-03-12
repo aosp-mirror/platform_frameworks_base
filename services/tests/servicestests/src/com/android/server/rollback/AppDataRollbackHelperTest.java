@@ -32,7 +32,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
-import android.util.IntArray;
 import android.util.SparseLongArray;
 
 import com.android.server.pm.ApexManager;
@@ -48,6 +47,7 @@ import org.mockito.Mockito;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(JUnit4.class)
 public class AppDataRollbackHelperTest {
@@ -71,8 +71,8 @@ public class AppDataRollbackHelperTest {
         helper.snapshotAppData(5, info, new int[]{10, 11});
 
         assertEquals(2, info.getPendingBackups().size());
-        assertEquals(10, info.getPendingBackups().get(0));
-        assertEquals(11, info.getPendingBackups().get(1));
+        assertEquals(10, (int) info.getPendingBackups().get(0));
+        assertEquals(11, (int) info.getPendingBackups().get(1));
 
         assertEquals(0, info.getCeSnapshotInodes().size());
 
@@ -91,7 +91,7 @@ public class AppDataRollbackHelperTest {
         PackageRollbackInfo info2 = createPackageRollbackInfo("com.foo.bar");
         helper.snapshotAppData(7, info2, new int[]{10, 11});
         assertEquals(1, info2.getPendingBackups().size());
-        assertEquals(11, info2.getPendingBackups().get(0));
+        assertEquals(11, (int) info2.getPendingBackups().get(0));
 
         assertEquals(1, info2.getCeSnapshotInodes().size());
         assertEquals(239L, info2.getCeSnapshotInodes().get(10));
@@ -105,11 +105,19 @@ public class AppDataRollbackHelperTest {
         inOrder.verifyNoMoreInteractions();
     }
 
+    private static List<Integer> toList(int[] arr) {
+        List<Integer> ret = new ArrayList<>();
+        for (int i = 0; i < arr.length; ++i) {
+            ret.add(arr[i]);
+        }
+        return ret;
+    }
+
     private static PackageRollbackInfo createPackageRollbackInfo(String packageName,
             final int[] installedUsers) {
         return new PackageRollbackInfo(
                 new VersionedPackage(packageName, 2), new VersionedPackage(packageName, 1),
-                new IntArray(), new ArrayList<>(), false, false, IntArray.wrap(installedUsers),
+                new ArrayList<>(), new ArrayList<>(), false, false, toList(installedUsers),
                 new SparseLongArray());
     }
 
@@ -128,7 +136,7 @@ public class AppDataRollbackHelperTest {
         AppDataRollbackHelper helper = spy(new AppDataRollbackHelper(installer, mApexManager));
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo");
-        IntArray pendingBackups = info.getPendingBackups();
+        List<Integer> pendingBackups = info.getPendingBackups();
         pendingBackups.add(10);
         pendingBackups.add(11);
 
@@ -144,7 +152,7 @@ public class AppDataRollbackHelperTest {
         inOrder.verifyNoMoreInteractions();
 
         assertEquals(1, pendingBackups.size());
-        assertEquals(11, pendingBackups.get(0));
+        assertEquals(11, (int) pendingBackups.get(0));
     }
 
     @Test
