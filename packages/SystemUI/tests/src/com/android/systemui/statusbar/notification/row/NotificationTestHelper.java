@@ -362,7 +362,7 @@ public class NotificationTestHelper {
                         notification.getChannelId(),
                         notification.getChannelId(),
                         importance);
-        channel.setBlockableSystem(true);
+        channel.setBlockable(true);
 
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setPkg(pkg)

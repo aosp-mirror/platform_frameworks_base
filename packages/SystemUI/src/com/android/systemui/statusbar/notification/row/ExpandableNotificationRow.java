@@ -527,7 +527,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (!isNonblockable && mEntry != null && mEntry.mIsSystemNotification != null) {
             if (mEntry.mIsSystemNotification) {
                 if (mEntry.getChannel() != null
-                        && !mEntry.getChannel().isBlockableSystem()) {
+                        && !mEntry.getChannel().isBlockable()) {
                     isNonblockable = true;
                 }
             }
