@@ -2631,10 +2631,7 @@
     <string name="controls_favorite_default_title">Controls</string>
     <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
     <string name="controls_favorite_subtitle">Choose controls for quick access</string>
-    <!-- Controls management controls screen favorites header [CHAR LIMIT=50] -->
-    <string name="controls_favorite_header_favorites">Favorites</string>
-    <!-- Controls management controls screen all header [CHAR LIMIT=50] -->
-    <string name="controls_favorite_header_all">All</string>
+
     <!-- Controls management controls screen error on load message [CHAR LIMIT=60] -->
     <string name="controls_favorite_load_error">The list of all controls could not be loaded.</string>
     <!-- Controls management controls screen header for Other zone [CHAR LIMIT=60] -->
