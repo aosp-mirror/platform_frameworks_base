@@ -102,9 +102,9 @@ oneway interface IWindow {
     void closeSystemDialogs(String reason);
 
     /**
-     * Called for wallpaper windows when their offsets change.
+     * Called for wallpaper windows when their offsets or zoom level change.
      */
-    void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, boolean sync);
+    void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, float zoom, boolean sync);
 
     void dispatchWallpaperCommand(String action, int x, int y,
             int z, in Bundle extras, boolean sync);
