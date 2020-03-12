@@ -236,7 +236,7 @@ public class Clock extends TextView implements DemoMode, Tunable, CommandQueue.C
 
             String action = intent.getAction();
             if (action.equals(Intent.ACTION_TIMEZONE_CHANGED)) {
-                String tz = intent.getStringExtra("time-zone");
+                String tz = intent.getStringExtra(Intent.EXTRA_TIMEZONE);
                 handler.post(() -> {
                     mCalendar = Calendar.getInstance(TimeZone.getTimeZone(tz));
                     if (mClockFormat != null) {
