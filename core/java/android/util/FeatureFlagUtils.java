@@ -67,9 +67,9 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_controller_loading_enhancement", "false");
         DEFAULT_FLAGS.put("settings_conditionals", "false");
         DEFAULT_FLAGS.put(NOTIF_CONVO_BYPASS_SHORTCUT_REQ, "true");
-        // Disabled by default until b/148278926 is resolved. This flags guards a feature
-        // introduced in R and will be removed in the next release (b/148367230).
-        DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "false");
+        // This flags guards a feature introduced in R and will be removed in the next release
+        // (b/148367230).
+        DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "true");
 
         DEFAULT_FLAGS.put("settings_tether_all_in_one", "true");
         DEFAULT_FLAGS.put(SETTINGS_SCHEDULES_FLAG, "false");
