@@ -2372,7 +2372,12 @@ public class TelephonyManager {
     public static final int PHONE_TYPE_CDMA = PhoneConstants.PHONE_TYPE_CDMA;
     /** Phone is via SIP. */
     public static final int PHONE_TYPE_SIP = PhoneConstants.PHONE_TYPE_SIP;
-    /** Phone is via IMS. */
+
+    /**
+     * Phone is via IMS.
+     *
+     * @hide
+     */
     public static final int PHONE_TYPE_IMS = PhoneConstants.PHONE_TYPE_IMS;
 
     /**
@@ -2380,7 +2385,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int PHONE_TYPE_THIRD_PARTY = PhoneConstants.PHONE_TYPE_THIRD_PARTY;
 
     /**
