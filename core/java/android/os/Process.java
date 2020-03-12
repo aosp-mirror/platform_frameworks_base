@@ -929,6 +929,19 @@ public class Process {
     public static final native void setProcessFrozen(int pid, int uid, boolean frozen);
 
     /**
+     * Enable or disable the freezer. When enable == false all frozen processes are unfrozen,
+     * but aren't removed from the freezer. Processes can still be added or removed
+     * by using setProcessFrozen, but they won't actually be frozen until the freezer is enabled
+     * again. If enable == true the freezer is enabled again, and all processes
+     * in the freezer (including the ones added while the freezer was disabled) are frozen.
+     *
+     * @param enable Specify whether to enable (true) or disable (false) the freezer.
+     *
+     * @hide
+     */
+    public static final native void enableFreezer(boolean enable);
+
+    /**
      * Return the scheduling group of requested process.
      *
      * @hide
