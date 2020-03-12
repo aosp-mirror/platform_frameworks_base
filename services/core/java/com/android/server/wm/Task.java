@@ -4123,8 +4123,16 @@ class Task extends WindowContainer<WindowContainer> {
         return mMainWindowSizeChangeTransaction;
     }
 
+    void setActivityWindowingMode(int windowingMode) {
+        PooledConsumer c = PooledLambda.obtainConsumer(ActivityRecord::setWindowingMode,
+            PooledLambda.__(ActivityRecord.class), windowingMode);
+        forAllActivities(c);
+        c.recycle();
+    }
+
     @Override
     long getProtoFieldId() {
         return TASK;
     }
+
 }
