@@ -16,6 +16,7 @@
 
 package com.android.server.tv.tunerresourcemanager;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -40,6 +41,8 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -70,8 +73,30 @@ public class TunerResourceManagerService extends SystemService {
     private TvInputManager mManager;
     private UseCasePriorityHints mPriorityCongfig = new UseCasePriorityHints();
 
+    // An internal resource request count to help generate resource handle.
+    private int mResourceRequestCount = 0;
+
     // Used to synchronize the access to the service.
     private final Object mLock = new Object();
+
+    /**
+     * Tuner resource type to help generate resource handle
+     */
+    @IntDef({
+        TUNER_RESOURCE_TYPE_FRONTEND,
+        TUNER_RESOURCE_TYPE_DEMUX,
+        TUNER_RESOURCE_TYPE_DESCRAMBLER,
+        TUNER_RESOURCE_TYPE_LNB,
+        TUNER_RESOURCE_TYPE_CAS_SESSION,
+     })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TunerResourceType {}
+
+    public static final int TUNER_RESOURCE_TYPE_FRONTEND = 0;
+    public static final int TUNER_RESOURCE_TYPE_DEMUX = 1;
+    public static final int TUNER_RESOURCE_TYPE_DESCRAMBLER = 2;
+    public static final int TUNER_RESOURCE_TYPE_LNB = 3;
+    public static final int TUNER_RESOURCE_TYPE_CAS_SESSION = 4;
 
     public TunerResourceManagerService(@Nullable Context context) {
         super(context);
@@ -171,15 +196,15 @@ public class TunerResourceManagerService extends SystemService {
 
         @Override
         public boolean requestFrontend(@NonNull TunerFrontendRequest request,
-                @NonNull int[] frontendId) throws RemoteException {
+                @NonNull int[] frontendHandle) throws RemoteException {
             enforceTunerAccessPermission("requestFrontend");
             enforceTrmAccessPermission("requestFrontend");
-            if (frontendId == null) {
+            if (frontendHandle == null) {
                 throw new RemoteException("frontendId can't be null");
             }
             synchronized (mLock) {
                 try {
-                    return requestFrontendInternal(request, frontendId);
+                    return requestFrontendInternal(request, frontendHandle);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }
@@ -219,7 +244,7 @@ public class TunerResourceManagerService extends SystemService {
 
         @Override
         public boolean requestCasSession(
-                @NonNull CasSessionRequest request, @NonNull int[] sessionResourceId) {
+                @NonNull CasSessionRequest request, @NonNull int[] sessionResourceHandle) {
             enforceTrmAccessPermission("requestCasSession");
             if (DEBUG) {
                 Slog.d(TAG, "requestCasSession(request=" + request + ")");
@@ -229,7 +254,7 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
-        public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbId) {
+        public boolean requestLnb(@NonNull TunerLnbRequest request, @NonNull int[] lnbHandle) {
             enforceTunerAccessPermission("requestLnb");
             enforceTrmAccessPermission("requestLnb");
             if (DEBUG) {
@@ -393,13 +418,13 @@ public class TunerResourceManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    protected boolean requestFrontendInternal(TunerFrontendRequest request, int[] frontendId)
+    protected boolean requestFrontendInternal(TunerFrontendRequest request, int[] frontendHandle)
             throws RemoteException {
         if (DEBUG) {
             Slog.d(TAG, "requestFrontend(request=" + request + ")");
         }
 
-        frontendId[0] = TunerResourceManager.INVALID_FRONTEND_ID;
+        frontendHandle[0] = TunerResourceManager.INVALID_RESOURCE_HANDLE;
         if (!checkClientExists(request.getClientId())) {
             Slog.e(TAG, "Request frontend from unregistered client:" + request.getClientId());
             return false;
@@ -435,17 +460,20 @@ public class TunerResourceManagerService extends SystemService {
 
         // Grant frontend when there is unused resource.
         if (grantingFrontendId > -1) {
-            frontendId[0] = grantingFrontendId;
-            updateFrontendClientMappingOnNewGrant(frontendId[0], request.getClientId());
+            frontendHandle[0] = generateResourceHandle(
+                    TUNER_RESOURCE_TYPE_FRONTEND, grantingFrontendId);
+            updateFrontendClientMappingOnNewGrant(grantingFrontendId, request.getClientId());
             return true;
         }
 
         // When all the resources are occupied, grant the lowest priority resource if the
         // request client has higher priority.
         if (inUseLowestPriorityFrId > -1 && (requestClient.getPriority() > currentLowestPriority)) {
-            frontendId[0] = inUseLowestPriorityFrId;
-            reclaimFrontendResource(getFrontendResource(frontendId[0]).getOwnerClientId());
-            updateFrontendClientMappingOnNewGrant(frontendId[0], request.getClientId());
+            frontendHandle[0] = generateResourceHandle(
+                    TUNER_RESOURCE_TYPE_FRONTEND, inUseLowestPriorityFrId);
+            reclaimFrontendResource(getFrontendResource(
+                    inUseLowestPriorityFrId).getOwnerClientId());
+            updateFrontendClientMappingOnNewGrant(inUseLowestPriorityFrId, request.getClientId());
             return true;
         }
 
@@ -612,6 +640,12 @@ public class TunerResourceManagerService extends SystemService {
     @VisibleForTesting
     protected boolean checkClientExists(int clientId) {
         return mClientProfiles.keySet().contains(clientId);
+    }
+
+    private int generateResourceHandle(@TunerResourceType int resourceType, int resourceId) {
+        return (resourceType & 0x000000ff) << 24
+                | (resourceId << 16)
+                | (mResourceRequestCount++ & 0xffff);
     }
 
     private void enforceTrmAccessPermission(String apiName) {
