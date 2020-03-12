@@ -52,6 +52,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -493,12 +494,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             PendingControlRequest pendingRequest = mPendingImeControlRequest;
             mPendingImeControlRequest = null;
             mHandler.removeCallbacks(mPendingControlTimeout);
-            controlAnimationUnchecked(
-                    pendingRequest.types, pendingRequest.cancellationSignal,
+            CancellationSignal cancellationSignal = controlAnimationUnchecked(
+                    pendingRequest.types,
                     pendingRequest.listener, mFrame,
                     true /* fromIme */, pendingRequest.durationMs, pendingRequest.interpolator,
                     false /* fade */, pendingRequest.animationType,
                     pendingRequest.layoutInsetsDuringAnimation);
+            pendingRequest.cancellationSignal.setOnCancelListener(cancellationSignal::cancel);
             return;
         }
 
@@ -544,26 +546,24 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     @Override
-    public void controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
+    public CancellationSignal controlWindowInsetsAnimation(@InsetsType int types, long durationMs,
             @Nullable Interpolator interpolator,
-            @Nullable CancellationSignal cancellationSignal,
             @NonNull WindowInsetsAnimationControlListener listener) {
-        controlWindowInsetsAnimation(types, cancellationSignal, listener,
-                false /* fromIme */, durationMillis, interpolator, ANIMATION_TYPE_USER);
+        return controlWindowInsetsAnimation(types, listener, false /* fromIme */, durationMs,
+                interpolator, ANIMATION_TYPE_USER);
     }
 
-    private void controlWindowInsetsAnimation(@InsetsType int types,
-            @Nullable CancellationSignal cancellationSignal,
-            WindowInsetsAnimationControlListener listener,
-            boolean fromIme, long durationMs, @Nullable Interpolator interpolator,
-            @AnimationType int animationType) {
+    private CancellationSignal controlWindowInsetsAnimation(@InsetsType int types,
+            WindowInsetsAnimationControlListener listener, boolean fromIme, long durationMs,
+            @Nullable Interpolator interpolator, @AnimationType int animationType) {
         if (!checkDisplayFramesForControlling()) {
             listener.onCancelled();
-            return;
+            CancellationSignal cancellationSignal = new CancellationSignal();
+            cancellationSignal.cancel();
+            return cancellationSignal;
         }
-        controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
-                interpolator, false /* fade */, animationType,
-                getLayoutInsetsDuringAnimationMode(types));
+        return controlAnimationUnchecked(types, listener, mFrame, fromIme, durationMs, interpolator,
+                false /* fade */, animationType, getLayoutInsetsDuringAnimationMode(types));
     }
 
     private boolean checkDisplayFramesForControlling() {
@@ -573,16 +573,17 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         return mState.getDisplayFrame().equals(mFrame);
     }
 
-    private void controlAnimationUnchecked(@InsetsType int types,
-            @Nullable CancellationSignal cancellationSignal,
+    private CancellationSignal controlAnimationUnchecked(@InsetsType int types,
             WindowInsetsAnimationControlListener listener, Rect frame, boolean fromIme,
             long durationMs, Interpolator interpolator, boolean fade,
             @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation) {
+        CancellationSignal cancellationSignal = new CancellationSignal();
         if (types == 0) {
             // nothing to animate.
             listener.onCancelled();
-            return;
+            cancellationSignal.cancel();
+            return cancellationSignal;
         }
         cancelExistingControllers(types);
         mLastStartedAnimTypes |= types;
@@ -602,28 +603,26 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     interpolator, animationType, layoutInsetsDuringAnimation, cancellationSignal);
             mPendingImeControlRequest = request;
             mHandler.postDelayed(mPendingControlTimeout, PENDING_CONTROL_TIMEOUT_MS);
-            if (cancellationSignal != null) {
-                cancellationSignal.setOnCancelListener(() -> {
-                    if (mPendingImeControlRequest == request) {
-                        abortPendingImeControlRequest();
-                    }
-                });
-            }
-            return;
+            cancellationSignal.setOnCancelListener(() -> {
+                if (mPendingImeControlRequest == request) {
+                    abortPendingImeControlRequest();
+                }
+            });
+            return cancellationSignal;
         }
 
         if (typesReady == 0) {
             listener.onCancelled();
-            return;
+            cancellationSignal.cancel();
+            return cancellationSignal;
         }
 
         final InsetsAnimationControlImpl controller = new InsetsAnimationControlImpl(controls,
                 frame, mState, listener, typesReady, this, durationMs, interpolator, fade,
                 layoutInsetsDuringAnimation, animationType);
         mRunningAnimations.add(new RunningAnimation(controller, animationType));
-        if (cancellationSignal != null) {
-            cancellationSignal.setOnCancelListener(controller::onCancelled);
-        }
+        cancellationSignal.setOnCancelListener(controller::onCancelled);
+        return cancellationSignal;
     }
 
     /**
@@ -884,8 +883,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         // Show/hide animations always need to be relative to the display frame, in order that shown
         // and hidden state insets are correct.
         controlAnimationUnchecked(
-                types, new CancellationSignal(), listener, mState.getDisplayFrame(), fromIme,
-                listener.getDurationMs(),
+                types, listener, mState.getDisplayFrame(), fromIme, listener.getDurationMs(),
                 INTERPOLATOR, true /* fade */, show ? ANIMATION_TYPE_SHOW : ANIMATION_TYPE_HIDE,
                 show ? LAYOUT_INSETS_DURING_ANIMATION_SHOWN
                         : LAYOUT_INSETS_DURING_ANIMATION_HIDDEN);
