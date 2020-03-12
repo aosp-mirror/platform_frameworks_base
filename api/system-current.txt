@@ -7156,7 +7156,7 @@ package android.net.wifi {
     method @NonNull public java.util.List<android.net.MacAddress> getBlockedClientList();
     method public int getChannel();
     method public int getMaxNumberOfClients();
-    method public int getShutdownTimeoutMillis();
+    method public long getShutdownTimeoutMillis();
     method public boolean isAutoShutdownEnabled();
     method public boolean isClientControlByUserEnabled();
     method @Nullable public android.net.wifi.WifiConfiguration toWifiConfiguration();
@@ -7170,16 +7170,17 @@ package android.net.wifi {
     ctor public SoftApConfiguration.Builder();
     ctor public SoftApConfiguration.Builder(@NonNull android.net.wifi.SoftApConfiguration);
     method @NonNull public android.net.wifi.SoftApConfiguration build();
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder enableClientControlByUser(boolean);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAllowedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAutoShutdownEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBand(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBlockedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBssid(@Nullable android.net.MacAddress);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientList(@NonNull java.util.List<android.net.MacAddress>, @NonNull java.util.List<android.net.MacAddress>);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientControlByUserEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(@IntRange(from=0) int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) long);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
   }
 
