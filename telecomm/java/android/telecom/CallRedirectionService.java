@@ -38,16 +38,14 @@ import com.android.internal.telecom.ICallRedirectionService;
  *
  * <p>
  * Below is an example manifest registration for a {@code CallRedirectionService}.
- * <pre>
  * {@code
  * <service android:name="your.package.YourCallRedirectionServiceImplementation"
- *          android:permission="android.permission.BIND_REDIRECTION_SERVICE">
+ *          android:permission="android.permission.BIND_CALL_REDIRECTION_SERVICE">
  *      <intent-filter>
  *          <action android:name="android.telecom.CallRedirectionService"/>
  *      </intent-filter>
  * </service>
  * }
- * </pre>
  */
 public abstract class CallRedirectionService extends Service {
     /**
