@@ -236,6 +236,8 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setEnabled(boolean enabled);
 
+    ParsingPackage setGwpAsanEnabled(Boolean enableGwpAsan);
+
     ParsingPackage setCrossProfile(boolean crossProfile);
 
     ParsingPackage setFullBackupContent(int fullBackupContent);
