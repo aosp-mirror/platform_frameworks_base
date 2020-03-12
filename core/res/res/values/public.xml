@@ -3040,8 +3040,6 @@
       <public name="config_defaultCallScreening" />
       <!-- @hide @SystemApi @TestApi -->
       <public name="config_systemGallery" />
-      <!-- @hide @SystemApi -->
-      <public name="low_memory" />
     </public-group>
 
     <public-group type="bool" first-id="0x01110005">
@@ -3069,12 +3067,6 @@
     <public-group type="array" first-id="0x01070006">
       <!-- @hide @SystemApi -->
       <public name="simColors" />
-      <!-- @hide @SystemApi -->
-      <public name="config_restrictedPreinstalledCarrierApps" />
-      <!-- @hide @SystemApi -->
-      <public name="config_sms_enabled_single_shift_tables" />
-      <!-- @hide @SystemApi -->
-      <public name="config_sms_enabled_locking_shift_tables" />
     </public-group>
 
     <public-group type="string" first-id="0x0104002c">
