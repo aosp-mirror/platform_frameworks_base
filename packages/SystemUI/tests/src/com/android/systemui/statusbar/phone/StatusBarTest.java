@@ -42,7 +42,7 @@ import android.app.Notification;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
-import android.content.Context;
+import android.content.ContentResolver;
 import android.content.IntentFilter;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.fingerprint.FingerprintManager;
@@ -109,18 +109,18 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.VibratorHelper;
-import com.android.systemui.statusbar.notification.BypassHeadsUpNotifier;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.NotificationAlertingManager;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
-import com.android.systemui.statusbar.notification.NotificationInterruptionStateProvider;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
+import com.android.systemui.statusbar.notification.interruption.BypassHeadsUpNotifier;
+import com.android.systemui.statusbar.notification.interruption.NotificationAlertingManager;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerFake;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -130,6 +130,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.ExtensionController;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler;
@@ -161,7 +162,7 @@ public class StatusBarTest extends SysuiTestCase {
     private StatusBar mStatusBar;
     private FakeMetricsLogger mMetricsLogger;
     private PowerManager mPowerManager;
-    private TestableNotificationInterruptionStateProvider mNotificationInterruptionStateProvider;
+    private TestableNotificationInterruptStateProviderImpl mNotificationInterruptStateProvider;
 
     @Mock private NotificationsController mNotificationsController;
     @Mock private LightBarController mLightBarController;
@@ -179,7 +180,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
-    @Mock private NotificationInterruptionStateProvider.HeadsUpSuppressor mHeadsUpSuppressor;
     @Mock private VisualStabilityManager mVisualStabilityManager;
     @Mock private NotificationListener mNotificationListener;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
@@ -193,9 +193,9 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private NotificationEntryListener mEntryListener;
     @Mock private NotificationFilter mNotificationFilter;
     @Mock private NotificationAlertingManager mNotificationAlertingManager;
+    @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock private NotificationLogger.ExpansionStateLogger mExpansionStateLogger;
     @Mock private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    @Mock private AmbientDisplayConfiguration mAmbientDisplayConfiguration;
     @Mock private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock private BroadcastDispatcher mBroadcastDispatcher;
     @Mock private AssistManager mAssistManager;
@@ -263,10 +263,12 @@ public class StatusBarTest extends SysuiTestCase {
         mPowerManager = new PowerManager(mContext, powerManagerService, thermalService,
                 Handler.createAsync(Looper.myLooper()));
 
-        mNotificationInterruptionStateProvider =
-                new TestableNotificationInterruptionStateProvider(mContext, mPowerManager,
+        mNotificationInterruptStateProvider =
+                new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
+                        mPowerManager,
                         mDreamManager, mAmbientDisplayConfiguration, mNotificationFilter,
-                        mStatusBarStateController, mBatteryController);
+                        mStatusBarStateController, mBatteryController, mHeadsUpManager,
+                        new Handler(TestableLooper.get(this).getLooper()));
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -298,9 +300,6 @@ public class StatusBarTest extends SysuiTestCase {
             runnable.run();
             return null;
         }).when(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any());
-
-        mNotificationInterruptionStateProvider.setUpWithPresenter(mNotificationPresenter,
-                mHeadsUpManager, mHeadsUpSuppressor);
 
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
@@ -348,7 +347,7 @@ public class StatusBarTest extends SysuiTestCase {
                 ),
                 mNotificationGutsManager,
                 notificationLogger,
-                mNotificationInterruptionStateProvider,
+                mNotificationInterruptStateProvider,
                 mNotificationViewHierarchyManager,
                 mKeyguardViewMediator,
                 mNotificationAlertingManager,
@@ -562,7 +561,6 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a")
                 .setGroup("a")
@@ -578,7 +576,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .setImportance(IMPORTANCE_HIGH)
                 .build();
 
-        assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
+        assertTrue(mNotificationInterruptStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
@@ -587,7 +585,6 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a")
                 .setGroup("a")
@@ -603,7 +600,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .setImportance(IMPORTANCE_HIGH)
                 .build();
 
-        assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
+        assertFalse(mNotificationInterruptStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
@@ -612,7 +609,6 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
 
@@ -625,7 +621,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .setSuppressedVisualEffects(SUPPRESSED_EFFECT_PEEK)
                 .build();
 
-        assertFalse(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
+        assertFalse(mNotificationInterruptStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
@@ -634,7 +630,6 @@ public class StatusBarTest extends SysuiTestCase {
         when(mHeadsUpManager.isSnoozed(anyString())).thenReturn(false);
         when(mNotificationFilter.shouldFilterOut(any())).thenReturn(false);
         when(mDreamManager.isDreaming()).thenReturn(false);
-        when(mHeadsUpSuppressor.canHeadsUp(any(), any())).thenReturn(true);
 
         Notification n = new Notification.Builder(getContext(), "a").build();
 
@@ -646,7 +641,7 @@ public class StatusBarTest extends SysuiTestCase {
                 .setImportance(IMPORTANCE_HIGH)
                 .build();
 
-        assertTrue(mNotificationInterruptionStateProvider.shouldHeadsUp(entry));
+        assertTrue(mNotificationInterruptStateProvider.shouldHeadsUp(entry));
     }
 
     @Test
@@ -872,19 +867,21 @@ public class StatusBarTest extends SysuiTestCase {
         verify(mDozeServiceHost).setDozeSuppressed(false);
     }
 
-    public static class TestableNotificationInterruptionStateProvider extends
-            NotificationInterruptionStateProvider {
+    public static class TestableNotificationInterruptStateProviderImpl extends
+            NotificationInterruptStateProviderImpl {
 
-        TestableNotificationInterruptionStateProvider(
-                Context context,
+        TestableNotificationInterruptStateProviderImpl(
+                ContentResolver contentResolver,
                 PowerManager powerManager,
                 IDreamManager dreamManager,
                 AmbientDisplayConfiguration ambientDisplayConfiguration,
                 NotificationFilter filter,
                 StatusBarStateController controller,
-                BatteryController batteryController) {
-            super(context, powerManager, dreamManager, ambientDisplayConfiguration, filter,
-                    batteryController, controller);
+                BatteryController batteryController,
+                HeadsUpManager headsUpManager,
+                Handler mainHandler) {
+            super(contentResolver, powerManager, dreamManager, ambientDisplayConfiguration, filter,
+                    batteryController, controller, headsUpManager, mainHandler);
             mUseHeadsUp = true;
         }
     }
