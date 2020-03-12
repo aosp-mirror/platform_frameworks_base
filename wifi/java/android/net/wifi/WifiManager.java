@@ -1353,7 +1353,7 @@ public class WifiManager {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
                     mService.getConfiguredNetworks(mContext.getOpPackageName(),
-                            mContext.getFeatureId());
+                            mContext.getAttributionTag());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1370,7 +1370,7 @@ public class WifiManager {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
                     mService.getPrivilegedConfiguredNetworks(mContext.getOpPackageName(),
-                            mContext.getFeatureId());
+                            mContext.getAttributionTag());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1899,7 +1899,7 @@ public class WifiManager {
             @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
         try {
             return mService.addNetworkSuggestions(
-                    networkSuggestions, mContext.getOpPackageName(), mContext.getFeatureId());
+                    networkSuggestions, mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2681,8 +2681,8 @@ public class WifiManager {
     public boolean startScan(WorkSource workSource) {
         try {
             String packageName = mContext.getOpPackageName();
-            String featureId = mContext.getFeatureId();
-            return mService.startScan(packageName, featureId);
+            String attributionTag = mContext.getAttributionTag();
+            return mService.startScan(packageName, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2714,7 +2714,7 @@ public class WifiManager {
     public WifiInfo getConnectionInfo() {
         try {
             return mService.getConnectionInfo(mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2729,7 +2729,7 @@ public class WifiManager {
     public List<ScanResult> getScanResults() {
         try {
             return mService.getScanResults(mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2760,7 +2760,7 @@ public class WifiManager {
         try {
             return mService.getMatchingScanResults(
                     networkSuggestionsToMatch, scanResults,
-                    mContext.getOpPackageName(), mContext.getFeatureId());
+                    mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3199,7 +3199,7 @@ public class WifiManager {
                     new LocalOnlyHotspotCallbackProxy(this, executor, callback);
             try {
                 String packageName = mContext.getOpPackageName();
-                String featureId = mContext.getFeatureId();
+                String featureId = mContext.getAttributionTag();
                 int returnCode = mService.startLocalOnlyHotspot(proxy, packageName, featureId,
                         config);
                 if (returnCode != LocalOnlyHotspotCallback.REQUEST_REGISTERED) {
@@ -5891,7 +5891,7 @@ public class WifiManager {
         try {
             mService.registerSuggestionConnectionStatusListener(new Binder(),
                     new SuggestionConnectionStatusListenerProxy(executor, listener),
-                    listener.hashCode(), mContext.getOpPackageName(), mContext.getFeatureId());
+                    listener.hashCode(), mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

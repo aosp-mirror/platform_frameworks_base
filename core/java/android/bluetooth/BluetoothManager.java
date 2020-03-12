@@ -62,7 +62,7 @@ public final class BluetoothManager {
      * @hide
      */
     public BluetoothManager(Context context) {
-        if (context.getFeatureId() == null) {
+        if (context.getAttributionTag() == null) {
             context = context.getApplicationContext();
             if (context == null) {
                 throw new IllegalArgumentException(
