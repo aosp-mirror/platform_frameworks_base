@@ -255,12 +255,14 @@ open class ControlsBindingControllerImpl @Inject constructor(
         override fun onError(token: IBinder, s: String) {
             hasError = true
             _loadCancelInternal = {}
+            currentProvider?.cancelLoadTimeout()
             backgroundExecutor.execute(OnLoadErrorRunnable(token, s, callback))
         }
 
         override fun onComplete(token: IBinder) {
             _loadCancelInternal = {}
             if (!hasError) {
+                currentProvider?.cancelLoadTimeout()
                 backgroundExecutor.execute(OnLoadRunnable(token, loadedControls, callback))
             }
         }
