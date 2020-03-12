@@ -156,17 +156,16 @@ public interface WindowInsetsController {
      *                     calculate {@link WindowInsetsAnimation#getInterpolatedFraction()}.
      * @param listener The {@link WindowInsetsAnimationControlListener} that gets called when the
      *                 windows are ready to be controlled, among other callbacks.
-     * @param cancellationSignal A cancellation signal that the caller can use to cancel the
-     *                           request to obtain control, or once they have control, to cancel the
-     *                           control.
+     * @return A cancellation signal that the caller can use to cancel the request to obtain
+     *         control, or once they have control, to cancel the control.
      * @see WindowInsetsAnimation#getFraction()
      * @see WindowInsetsAnimation#getInterpolatedFraction()
      * @see WindowInsetsAnimation#getInterpolator()
      * @see WindowInsetsAnimation#getDurationMillis()
      */
-    void controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
+    @NonNull
+    CancellationSignal controlWindowInsetsAnimation(@InsetsType int types, long durationMillis,
             @Nullable Interpolator interpolator,
-            @Nullable CancellationSignal cancellationSignal,
             @NonNull WindowInsetsAnimationControlListener listener);
 
     /**
