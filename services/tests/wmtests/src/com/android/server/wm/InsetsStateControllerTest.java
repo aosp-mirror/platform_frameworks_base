@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -69,7 +71,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
         statusBar.setControllableInsetProvider(getController().getSourceProvider(ITYPE_STATUS_BAR));
-        assertNotNull(getController().getInsetsForDispatch(app).getSource(ITYPE_STATUS_BAR));
+        assertNotNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_STATUS_BAR));
     }
 
     @Test
@@ -98,6 +100,34 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
         assertEquals(0, getController().getInsetsForDispatch(navBar).getSourcesCount());
+    }
+
+    @Test
+    public void testStripForDispatch_pip() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+
+        getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
+        getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
+        app.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_STATUS_BAR));
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_NAVIGATION_BAR));
+    }
+
+    @Test
+    public void testStripForDispatch_freeform() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+
+        getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
+        getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
+        app.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_STATUS_BAR));
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_NAVIGATION_BAR));
     }
 
     @Test
