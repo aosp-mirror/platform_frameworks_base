@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.inputmethod.EditorInfo;
