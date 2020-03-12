@@ -31,7 +31,8 @@ interface ICrossProfileApps {
             in String callingFeatureId, in ComponentName component, int userId,
             boolean launchMainActivity);
     void startActivityAsUserByIntent(in IApplicationThread caller, in String callingPackage,
-            in String callingFeatureId, in Intent intent, int userId, in IBinder callingActivity);
+            in String callingFeatureId, in Intent intent, int userId, in IBinder callingActivity,
+            in Bundle options);
     List<UserHandle> getTargetUserProfiles(in String callingPackage);
     boolean canInteractAcrossProfiles(in String callingPackage);
     boolean canRequestInteractAcrossProfiles(in String callingPackage);
