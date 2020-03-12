@@ -3016,8 +3016,6 @@
       <public name="allowNativeHeapPointerTagging" />
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
-      <public name="allowDontAutoRevokeWhenUnused" />
-      <public name="dontAutoRevokeWhenUnused" />
       <public name="enableGwpAsan" />
     </public-group>
 

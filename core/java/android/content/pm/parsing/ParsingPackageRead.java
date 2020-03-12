@@ -203,20 +203,6 @@ public interface ParsingPackageRead extends Parcelable {
     List<String> getRequestedPermissions();
 
     /**
-     * Permissions that specified {@code allowDontAutoRevokeWhenUnused=true}
-     * in their {@code uses-permission} requests.
-     */
-    @NonNull
-    List<String> getAutoRevokeExemptionRequestedPermissions();
-
-    /**
-     * Permissions that specified {@code dontAutoRevokeWhenUnused=true}
-     * in their {@code uses-permission} requests.
-     */
-    @NonNull
-    List<String> getAutoRevokeExemptionGrantedPermissions();
-
-    /**
      * Whether or not the app requested explicitly resizeable Activities.
      * A null value means nothing was explicitly requested.
      */
