@@ -175,11 +175,4 @@ interface IWallpaperManager {
      * Called from SystemUI when it shows the AoD UI.
      */
     oneway void setInAmbientMode(boolean inAmbientMode, long animationDuration);
-
-    /**
-     * Called when the wallpaper needs to zoom out.
-     * The zoom value goes from 0 to 1 (inclusive) where 1 means fully zoomed out,
-     * 0 means fully zoomed in
-     */
-    oneway void setWallpaperZoomOut(float zoom, String callingPackage, int displayId);
 }
