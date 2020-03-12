@@ -53,7 +53,6 @@ public final class PhoneAccount implements Parcelable {
      * {@link android.telecom.ConnectionService}.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SORT_ORDER =
             "android.telecom.extra.SORT_ORDER";
 
@@ -89,7 +88,6 @@ public final class PhoneAccount implements Parcelable {
      * rather than cellular calls.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE =
             "android.telecom.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
 
@@ -114,7 +112,6 @@ public final class PhoneAccount implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SUPPORTS_VIDEO_CALLING_FALLBACK =
             "android.telecom.extra.SUPPORTS_VIDEO_CALLING_FALLBACK";
 
@@ -163,7 +160,6 @@ public final class PhoneAccount implements Parcelable {
      * in progress.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_PLAY_CALL_RECORDING_TONE =
             "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
 
@@ -258,7 +254,6 @@ public final class PhoneAccount implements Parcelable {
      * See {@link #getCapabilities}
      * @hide
      */
-    @SystemApi
     public static final int CAPABILITY_EMERGENCY_CALLS_ONLY = 0x80;
 
     /**
@@ -282,7 +277,6 @@ public final class PhoneAccount implements Parcelable {
      * convert all outgoing video calls to emergency numbers to audio-only.
      * @hide
      */
-    @SystemApi
     public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 0x200;
 
     /**
@@ -340,7 +334,6 @@ public final class PhoneAccount implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final int CAPABILITY_EMERGENCY_PREFERRED = 0x2000;
 
     /**
