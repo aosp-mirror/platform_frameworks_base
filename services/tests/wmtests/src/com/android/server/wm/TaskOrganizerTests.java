@@ -129,7 +129,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final Task task = createTaskInStack(stack, 0 /* userId */);
         final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_MULTI_WINDOW);
         final ITaskOrganizer organizer2 = registerMockOrganizer(WINDOWING_MODE_PINNED);
- 
+
         stack.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
         verify(organizer).taskAppeared(any());
         stack.setWindowingMode(WINDOWING_MODE_PINNED);
@@ -345,7 +345,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
             public void taskAppeared(RunningTaskInfo taskInfo) { }
 
             @Override
-            public void taskVanished(IWindowContainer container) { }
+            public void taskVanished(RunningTaskInfo container) { }
 
             @Override
             public void transactionReady(int id, SurfaceControl.Transaction t) { }
@@ -399,7 +399,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
             public void taskAppeared(RunningTaskInfo taskInfo) { }
 
             @Override
-            public void taskVanished(IWindowContainer container) { }
+            public void taskVanished(RunningTaskInfo container) { }
 
             @Override
             public void transactionReady(int id, SurfaceControl.Transaction t) { }
@@ -539,7 +539,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
             mInfo = info;
         }
         @Override
-        public void taskVanished(IWindowContainer wc) {
+        public void taskVanished(RunningTaskInfo info) {
         }
         @Override
         public void transactionReady(int id, SurfaceControl.Transaction t) {

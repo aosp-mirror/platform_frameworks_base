@@ -49,6 +49,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.location.ILocationManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
@@ -92,13 +93,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * The Settings provider contains global system-level device preferences.
  */
 public final class Settings {
-    private static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
+    /** @hide */
+    public static final boolean DEFAULT_OVERRIDEABLE_BY_RESTORE = false;
 
     // Intent actions for Settings
 
@@ -709,10 +712,7 @@ public final class Settings {
      * If not specified, the default behavior is
      * {@link android.hardware.biometrics.BiometricManager.Authenticators#BIOMETRIC_WEAK}.
      * <p>
-     * Output: Returns {@link android.app.Activity#RESULT_CANCELED} if the user already has an
-     * authenticator that meets the requirements, or if the device cannot fulfill the request
-     * (e.g. does not have biometric hardware). Returns {@link android.app.Activity#RESULT_OK}
-     * otherwise. Note that callers should still check
+     * Output: Nothing. Note that callers should still check
      * {@link android.hardware.biometrics.BiometricManager#canAuthenticate(int)}
      * afterwards to ensure that the user actually completed enrollment.
      */
@@ -8918,7 +8918,6 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_ACCESSIBILITY_SERVICES);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
-            CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
         }
 
@@ -8971,9 +8970,13 @@ public final class Settings {
          */
         @Deprecated
         public static boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
-            String allowedProviders = Settings.Secure.getStringForUser(cr,
-                    LOCATION_PROVIDERS_ALLOWED, cr.getUserId());
-            return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
+            IBinder binder = ServiceManager.getService(Context.LOCATION_SERVICE);
+            ILocationManager lm = Objects.requireNonNull(ILocationManager.Stub.asInterface(binder));
+            try {
+                return lm.isProviderEnabledForUser(provider, cr.getUserId());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**

@@ -225,6 +225,7 @@ public class Filter implements AutoCloseable {
         mCallback = cb;
         mExecutor = executor;
     }
+
     /** @hide */
     public FilterCallback getCallback() {
         return mCallback;

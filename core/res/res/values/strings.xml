@@ -1168,6 +1168,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permdesc_systemCamera">This privileged | system app can take pictures and record videos using a system camera at any time. Requires the android.permission.CAMERA permission to be held by the app as well</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_cameraOpenCloseListener">Allow an application or service to receive callbacks about camera devices being opened or closed.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_cameraOpenCloseListener">This signature app can receive callbacks when any camera device is being opened (by what application package) or closed.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1213,6 +1218,14 @@
     <string name="permdesc_callCompanionApp">Allows the app to see and control ongoing calls on the
         device. This includes information such as call numbers for calls and the state of the
         calls.</string>
+
+    <!-- Title of an application permission. When granted the app is exempt from audio record
+    restrictions.
+    [CHAR LIMIT=NONE]-->
+    <string name="permlab_exemptFromAudioRecordRestrictions">exempt from audio record restrictions</string>
+    <!-- Description of an application permission. When granted the app is exempt from audio record
+    restrictions. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_exemptFromAudioRecordRestrictions">Exempt the app from restrictions to record audio.</string>
 
     <!-- Title of an application permission.  When granted the user is giving access to a third
          party app to continue a call which originated in another app.  For example, the user

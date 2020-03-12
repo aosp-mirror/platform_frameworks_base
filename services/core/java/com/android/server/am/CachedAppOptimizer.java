@@ -121,6 +121,7 @@ public final class CachedAppOptimizer {
     static final int COMPACT_PROCESS_MSG = 1;
     static final int COMPACT_SYSTEM_MSG = 2;
     static final int SET_FROZEN_PROCESS_MSG = 3;
+    static final int REPORT_UNFREEZE_MSG = 4;
 
     //TODO:change this static definition into a configurable flag.
     static final int FREEZE_TIMEOUT_MS = 500;
@@ -613,30 +614,6 @@ public final class CachedAppOptimizer {
                 FREEZE_TIMEOUT_MS);
     }
 
-    private final class UnfreezeStats {
-        final int mPid;
-        final String mName;
-        final long mFrozenDuration;
-
-        UnfreezeStats(int pid, String name, long frozenDuration) {
-            mPid = pid;
-            mName = name;
-            mFrozenDuration = frozenDuration;
-        }
-
-        public int getPid() {
-            return mPid;
-        }
-
-        public String getName() {
-            return mName;
-        }
-
-        public long getFrozenDuration() {
-            return mFrozenDuration;
-        }
-    }
-
     @GuardedBy("mAm")
     void unfreezeAppLocked(ProcessRecord app) {
         mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
@@ -667,12 +644,11 @@ public final class CachedAppOptimizer {
                 Slog.d(TAG_AM, "sync unfroze " + app.pid + " " + app.processName);
             }
 
-            UnfreezeStats stats = new UnfreezeStats(app.pid, app.processName,
-                    app.freezeUnfreezeTime - freezeTime);
-
             mFreezeHandler.sendMessage(
-                    mFreezeHandler.obtainMessage(SET_FROZEN_PROCESS_MSG, REPORT_UNFREEZE, 0,
-                        stats));
+                    mFreezeHandler.obtainMessage(REPORT_UNFREEZE_MSG,
+                        app.pid,
+                        (int) Math.min(app.freezeUnfreezeTime - freezeTime, Integer.MAX_VALUE),
+                        app.processName));
         }
     }
 
@@ -945,14 +921,19 @@ public final class CachedAppOptimizer {
 
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what != SET_FROZEN_PROCESS_MSG) {
-                return;
-            }
+            switch (msg.what) {
+                case SET_FROZEN_PROCESS_MSG:
+                    freezeProcess((ProcessRecord) msg.obj);
+                    break;
+                case REPORT_UNFREEZE_MSG:
+                    int pid = msg.arg1;
+                    int frozenDuration = msg.arg2;
+                    String processName = (String) msg.obj;
 
-            if (msg.arg1 == DO_FREEZE) {
-                freezeProcess((ProcessRecord) msg.obj);
-            } else if (msg.arg1 == REPORT_UNFREEZE) {
-                reportUnfreeze((UnfreezeStats) msg.obj);
+                    reportUnfreeze(pid, frozenDuration, processName);
+                    break;
+                default:
+                    return;
             }
         }
 
@@ -1015,18 +996,18 @@ public final class CachedAppOptimizer {
             }
         }
 
-        private void reportUnfreeze(UnfreezeStats stats) {
+        private void reportUnfreeze(int pid, int frozenDuration, String processName) {
 
-            EventLog.writeEvent(EventLogTags.AM_UNFREEZE, stats.getPid(), stats.getName());
+            EventLog.writeEvent(EventLogTags.AM_UNFREEZE, pid, processName);
 
             // See above for why we're not taking mPhenotypeFlagLock here
             if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
                 FrameworkStatsLog.write(
                         FrameworkStatsLog.APP_FREEZE_CHANGED,
                         FrameworkStatsLog.APP_FREEZE_CHANGED__ACTION__UNFREEZE_APP,
-                        stats.getPid(),
-                        stats.getName(),
-                        stats.getFrozenDuration());
+                        pid,
+                        processName,
+                        frozenDuration);
             }
         }
     }

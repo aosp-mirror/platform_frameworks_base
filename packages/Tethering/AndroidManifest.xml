@@ -44,7 +44,8 @@
         android:extractNativeLibs="false"
         android:persistent="true">
         <service android:name="com.android.server.connectivity.tethering.TetheringService"
-                 android:permission="android.permission.MAINLINE_NETWORK_STACK">
+                 android:permission="android.permission.MAINLINE_NETWORK_STACK"
+                 android:exported="true">
             <intent-filter>
                 <action android:name="android.net.ITetheringConnector"/>
             </intent-filter>

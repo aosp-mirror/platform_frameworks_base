@@ -63,5 +63,6 @@
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS"/>
         <permission name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
+        <permission name="android.permission.CAMERA_OPEN_CLOSE_LISTENER" />
     </privapp-permissions>
 </permissions>

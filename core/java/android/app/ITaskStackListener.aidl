@@ -37,13 +37,15 @@ oneway interface ITaskStackListener {
 
     /**
      * Called whenever IActivityManager.startActivity is called on an activity that is already
-     * running in the pinned stack and the activity is not actually started, but the task is either
-     * brought to the front or a new Intent is delivered to it.
+     * running, but the task is either brought to the front or a new Intent is delivered to it.
      *
+     * @param task information about the task the activity was relaunched into
+     * @param homeVisible whether or not the home task is visible
      * @param clearedTask whether or not the launch activity also cleared the task as a part of
      * starting
      */
-    void onPinnedActivityRestartAttempt(boolean clearedTask);
+    void onActivityRestartAttempt(in ActivityManager.RunningTaskInfo task, boolean homeTaskVisible,
+            boolean clearedTask);
 
     /**
      * Called when we launched an activity that we forced to be resizable.

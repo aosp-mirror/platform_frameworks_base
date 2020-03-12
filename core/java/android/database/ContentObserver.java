@@ -19,6 +19,9 @@ package android.database;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver.NotifyFlags;
 import android.net.Uri;
@@ -26,12 +29,26 @@ import android.os.Handler;
 import android.os.UserHandle;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Receives call backs for changes to content.
  * Must be implemented by objects which are added to a {@link ContentObservable}.
  */
 public abstract class ContentObserver {
+    /**
+     * Starting in {@link android.os.Build.VERSION_CODES#R}, there is a new
+     * public API overload {@link #onChange(boolean, Uri, int)} that delivers a
+     * {@code int flags} argument.
+     * <p>
+     * Some apps may be relying on a previous hidden API that delivered a
+     * {@code int userId} argument, and this change is used to control delivery
+     * of the new {@code int flags} argument in its place.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
+    private static final long ADD_CONTENT_OBSERVER_FLAGS = 150939131L;
+
     private final Object mLock = new Object();
     private Transport mTransport; // guarded by mLock
 
@@ -164,16 +181,26 @@ public abstract class ContentObserver {
      * @param uris The Uris of the changed content.
      * @param flags Flags indicating details about this change.
      */
-    public void onChange(boolean selfChange, @NonNull Iterable<Uri> uris, @NotifyFlags int flags) {
+    public void onChange(boolean selfChange, @NonNull Collection<Uri> uris,
+            @NotifyFlags int flags) {
         for (Uri uri : uris) {
             onChange(selfChange, uri, flags);
         }
     }
 
     /** @hide */
-    public void onChange(boolean selfChange, @NonNull Iterable<Uri> uris, @NotifyFlags int flags,
-            @UserIdInt int userId) {
-        onChange(selfChange, uris, flags);
+    public void onChange(boolean selfChange, @NonNull Collection<Uri> uris,
+            @NotifyFlags int flags, @UserIdInt int userId) {
+        // There are dozens of people relying on the hidden API inside the
+        // system UID, so hard-code the old behavior for all of them; for
+        // everyone else we gate based on a specific change
+        if (!CompatChanges.isChangeEnabled(ADD_CONTENT_OBSERVER_FLAGS)
+                || android.os.Process.myUid() == android.os.Process.SYSTEM_UID) {
+            // Deliver userId through argument to preserve hidden API behavior
+            onChange(selfChange, uris, userId);
+        } else {
+            onChange(selfChange, uris, flags);
+        }
     }
 
     /**
@@ -186,7 +213,7 @@ public abstract class ContentObserver {
      *
      * @deprecated Callers should migrate towards using a richer overload that
      *             provides more details about the change, such as
-     *             {@link #dispatchChange(boolean, Iterable, int)}.
+     *             {@link #dispatchChange(boolean, Collection, int)}.
      */
     @Deprecated
     public final void dispatchChange(boolean selfChange) {
@@ -206,7 +233,7 @@ public abstract class ContentObserver {
      * @param uri The Uri of the changed content.
      */
     public final void dispatchChange(boolean selfChange, @Nullable Uri uri) {
-        dispatchChange(selfChange, Arrays.asList(uri), 0, UserHandle.getCallingUserId());
+        dispatchChange(selfChange, uri, 0);
     }
 
     /**
@@ -224,7 +251,7 @@ public abstract class ContentObserver {
      */
     public final void dispatchChange(boolean selfChange, @Nullable Uri uri,
             @NotifyFlags int flags) {
-        dispatchChange(selfChange, Arrays.asList(uri), flags, UserHandle.getCallingUserId());
+        dispatchChange(selfChange, Arrays.asList(uri), flags);
     }
 
     /**
@@ -240,13 +267,13 @@ public abstract class ContentObserver {
      * @param uris The Uri of the changed content.
      * @param flags Flags indicating details about this change.
      */
-    public final void dispatchChange(boolean selfChange, @NonNull Iterable<Uri> uris,
+    public final void dispatchChange(boolean selfChange, @NonNull Collection<Uri> uris,
             @NotifyFlags int flags) {
         dispatchChange(selfChange, uris, flags, UserHandle.getCallingUserId());
     }
 
     /** @hide */
-    public final void dispatchChange(boolean selfChange, @NonNull Iterable<Uri> uris,
+    public final void dispatchChange(boolean selfChange, @NonNull Collection<Uri> uris,
             @NotifyFlags int flags, @UserIdInt int userId) {
         if (mHandler == null) {
             onChange(selfChange, uris, flags, userId);

@@ -27,7 +27,7 @@ import android.app.ActivityManager;
  */
 oneway interface ITaskOrganizer {
     void taskAppeared(in ActivityManager.RunningTaskInfo taskInfo);
-    void taskVanished(in IWindowContainer container);
+    void taskVanished(in ActivityManager.RunningTaskInfo taskInfo);
 
     /**
      * Called upon completion of

@@ -66,7 +66,18 @@ public final class InstallSourceInfo implements Parcelable {
         mInstallingPackageName = source.readString();
     }
 
-    /** The name of the package that requested the installation, or null if not available. */
+    /**
+     * The name of the package that requested the installation, or null if not available.
+     *
+     * This is normally the same as the installing package name. If the installing package name
+     * is changed, for example by calling
+     * {@link PackageManager#setInstallerPackageName(String, String)}, the initiating package name
+     * remains unchanged. It continues to identify the actual package that performed the install
+     * or update.
+     * <p>
+     * Null may be returned if the app was not installed by a package (e.g. a system app or an app
+     * installed via adb) or if the initiating package has itself been uninstalled.
+     */
     @Nullable
     public String getInitiatingPackageName() {
         return mInitiatingPackageName;
@@ -100,9 +111,11 @@ public final class InstallSourceInfo implements Parcelable {
     /**
      * The name of the package responsible for the installation (the installer of record), or null
      * if not available.
-     * Note that this may differ from the initiating package name and can be modified.
-     *
-     * @see PackageManager#setInstallerPackageName(String, String)
+     * Note that this may differ from the initiating package name and can be modified via
+     * {@link PackageManager#setInstallerPackageName(String, String)}.
+     * <p>
+     * Null may be returned if the app was not installed by a package (e.g. a system app or an app
+     * installed via adb) or if the installing package has itself been uninstalled.
      */
     @Nullable
     public String getInstallingPackageName() {

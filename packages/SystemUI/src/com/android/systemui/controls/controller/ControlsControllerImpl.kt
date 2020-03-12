@@ -72,6 +72,8 @@ class ControlsControllerImpl @Inject constructor (
 
     private var userChanging: Boolean = true
 
+    private var loadCanceller: Runnable? = null
+
     private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
     override val currentUserId
         get() = currentUser.identifier
@@ -127,7 +129,7 @@ class ControlsControllerImpl @Inject constructor (
     internal val settingObserver = object : ContentObserver(null) {
         override fun onChange(
             selfChange: Boolean,
-            uris: MutableIterable<Uri>,
+            uris: Collection<Uri>,
             flags: Int,
             userId: Int
         ) {
@@ -213,8 +215,9 @@ class ControlsControllerImpl @Inject constructor (
         if (!confirmAvailability()) {
             if (userChanging) {
                 // Try again later, userChanging should not last forever. If so, we have bigger
-                // problems
-                executor.executeDelayed(
+                // problems. This will return a runnable that allows to cancel the delayed version,
+                // it will not be able to cancel the load if
+                loadCanceller = executor.executeDelayed(
                         { loadForComponent(componentName, dataCallback) },
                         USER_CHANGE_RETRY_DELAY,
                         TimeUnit.MILLISECONDS
@@ -224,10 +227,11 @@ class ControlsControllerImpl @Inject constructor (
             }
             return
         }
-        bindingController.bindAndLoad(
+        loadCanceller = bindingController.bindAndLoad(
                 componentName,
                 object : ControlsBindingController.LoadCallback {
                     override fun accept(controls: List<Control>) {
+                        loadCanceller = null
                         executor.execute {
                             val favoritesForComponentKeys = Favorites
                                 .getControlsForComponent(componentName).map { it.controlId }
@@ -251,12 +255,12 @@ class ControlsControllerImpl @Inject constructor (
                                 controlsWithFavorite,
                                 favoritesForComponentKeys
                             )
-
                             dataCallback.accept(loadData)
                         }
                     }
 
                     override fun error(message: String) {
+                        loadCanceller = null
                         executor.execute {
                             val loadData = Favorites.getControlsForComponent(componentName)
                                 .let { controls ->
@@ -269,12 +273,17 @@ class ControlsControllerImpl @Inject constructor (
                                         true
                                 )
                             }
-
                             dataCallback.accept(loadData)
                         }
                     }
                 }
         )
+    }
+
+    override fun cancelLoad() {
+        loadCanceller?.let {
+            executor.execute(it)
+        }
     }
 
     private fun createRemovedStatus(

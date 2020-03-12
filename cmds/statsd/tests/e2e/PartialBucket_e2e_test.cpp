@@ -113,96 +113,107 @@ StatsdConfig MakeGaugeMetricConfig(int64_t minTime) {
 }
 }  // anonymous namespace
 
-// TODO(b/149590301): Update this test to use new socket schema.
-//TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
-//    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
-//    SendConfig(service, MakeConfig());
-//    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-//                                             // initialized with.
-//
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 2).get());
-//
-//    ConfigMetricsReport report = GetReports(service->mProcessor, start + 3);
-//    // Expect no metrics since the bucket has not finished yet.
-//    EXPECT_EQ(1, report.metrics_size());
-//    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
-//}
-//
-//TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
-//    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
-//    SendConfig(service, MakeConfig());
-//    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-//                                             // initialized with.
-//
-//    // Force the uidmap to update at timestamp 2.
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
-//    // This is a new installation, so there shouldn't be a split (should be same as the without
-//    // split case).
-//    service->mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
-//                               String16(""));
-//    // Goes into the second bucket.
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
-//
-//    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
-//    EXPECT_EQ(1, report.metrics_size());
-//    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
-//}
-//
-//TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
-//    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
-//    SendConfig(service, MakeConfig());
-//    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-//                                             // initialized with.
-//    service->mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
-//                                {String16("")});
-//
-//    // Force the uidmap to update at timestamp 2.
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
-//    service->mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
-//                               String16(""));
-//    // Goes into the second bucket.
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
-//
-//    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
-//    backfillStartEndTimestamp(&report);
-//
-//    ASSERT_EQ(1, report.metrics_size());
-//    ASSERT_EQ(1, report.metrics(0).count_metrics().data_size());
-//    ASSERT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info_size());
-//    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
-//                    has_start_bucket_elapsed_nanos());
-//    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
-//                    has_end_bucket_elapsed_nanos());
-//    EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
-//}
-//
-//TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
-//    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
-//    SendConfig(service, MakeConfig());
-//    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
-//                                             // initialized with.
-//    service->mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
-//                                {String16("")});
-//
-//    // Force the uidmap to update at timestamp 2.
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 1).get());
-//    service->mUidMap->removeApp(start + 2, String16(kApp1.c_str()), 1);
-//    // Goes into the second bucket.
-//    service->mProcessor->OnLogEvent(CreateAppCrashEvent(100, start + 3).get());
-//
-//    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
-//    backfillStartEndTimestamp(&report);
-//
-//    ASSERT_EQ(1, report.metrics_size());
-//    ASSERT_EQ(1, report.metrics(0).count_metrics().data_size());
-//    ASSERT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info_size());
-//    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
-//                    has_start_bucket_elapsed_nanos());
-//    EXPECT_TRUE(report.metrics(0).count_metrics().data(0).bucket_info(0).
-//                    has_end_bucket_elapsed_nanos());
-//    EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
-//}
+TEST(PartialBucketE2eTest, TestCountMetricWithoutSplit) {
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    SendConfig(service, MakeConfig());
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
+
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 1, 100).get());
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 2, 100).get());
+
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 3);
+    // Expect no metrics since the bucket has not finished yet.
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
+}
+
+TEST(PartialBucketE2eTest, TestCountMetricNoSplitOnNewApp) {
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    SendConfig(service, MakeConfig());
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
+
+    // Force the uidmap to update at timestamp 2.
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 1, 100).get());
+    // This is a new installation, so there shouldn't be a split (should be same as the without
+    // split case).
+    service->mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
+                                String16(""));
+    // Goes into the second bucket.
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 3, 100).get());
+
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
+    EXPECT_EQ(1, report.metrics_size());
+    EXPECT_EQ(0, report.metrics(0).count_metrics().data_size());
+}
+
+TEST(PartialBucketE2eTest, TestCountMetricSplitOnUpgrade) {
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    SendConfig(service, MakeConfig());
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
+    service->mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
+                                {String16("")});
+
+    // Force the uidmap to update at timestamp 2.
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 1, 100).get());
+    service->mUidMap->updateApp(start + 2, String16(kApp1.c_str()), 1, 2, String16("v2"),
+                                String16(""));
+    // Goes into the second bucket.
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 3, 100).get());
+
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
+    backfillStartEndTimestamp(&report);
+
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info_size());
+    EXPECT_TRUE(report.metrics(0)
+                        .count_metrics()
+                        .data(0)
+                        .bucket_info(0)
+                        .has_start_bucket_elapsed_nanos());
+    EXPECT_TRUE(report.metrics(0)
+                        .count_metrics()
+                        .data(0)
+                        .bucket_info(0)
+                        .has_end_bucket_elapsed_nanos());
+    EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
+}
+
+TEST(PartialBucketE2eTest, TestCountMetricSplitOnRemoval) {
+    shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);
+    SendConfig(service, MakeConfig());
+    int64_t start = getElapsedRealtimeNs();  // This is the start-time the metrics producers are
+                                             // initialized with.
+    service->mUidMap->updateMap(start, {1}, {1}, {String16("v1")}, {String16(kApp1.c_str())},
+                                {String16("")});
+
+    // Force the uidmap to update at timestamp 2.
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 1, 100).get());
+    service->mUidMap->removeApp(start + 2, String16(kApp1.c_str()), 1);
+    // Goes into the second bucket.
+    service->mProcessor->OnLogEvent(CreateAppCrashEvent(start + 3, 100).get());
+
+    ConfigMetricsReport report = GetReports(service->mProcessor, start + 4);
+    backfillStartEndTimestamp(&report);
+
+    ASSERT_EQ(1, report.metrics_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data_size());
+    ASSERT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info_size());
+    EXPECT_TRUE(report.metrics(0)
+                        .count_metrics()
+                        .data(0)
+                        .bucket_info(0)
+                        .has_start_bucket_elapsed_nanos());
+    EXPECT_TRUE(report.metrics(0)
+                        .count_metrics()
+                        .data(0)
+                        .bucket_info(0)
+                        .has_end_bucket_elapsed_nanos());
+    EXPECT_EQ(1, report.metrics(0).count_metrics().data(0).bucket_info(0).count());
+}
 
 TEST(PartialBucketE2eTest, TestValueMetricWithoutMinPartialBucket) {
     shared_ptr<StatsService> service = SharedRefBase::make<StatsService>(nullptr, nullptr);

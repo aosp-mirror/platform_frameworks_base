@@ -20,7 +20,7 @@
 
 #include <android/util/ProtoOutputStream.h>
 #include "../stats_log_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 #include "storage/StorageManager.h"
 
 namespace android {
@@ -113,9 +113,9 @@ const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_UID = 1;
 const int FIELD_ID_ACTIVATION_BROADCAST_GUARDRAIL_TIME = 2;
 
 const std::map<int, std::pair<size_t, size_t>> StatsdStats::kAtomDimensionKeySizeLimitMap = {
-        {android::util::BINDER_CALLS, {6000, 10000}},
-        {android::util::LOOPER_STATS, {1500, 2500}},
-        {android::util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
+        {util::BINDER_CALLS, {6000, 10000}},
+        {util::LOOPER_STATS, {1500, 2500}},
+        {util::CPU_TIME_PER_UID_FREQ, {6000, 10000}},
 };
 
 StatsdStats::StatsdStats() {

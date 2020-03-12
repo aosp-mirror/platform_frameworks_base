@@ -955,11 +955,6 @@ public class SettingsProvider extends ContentProvider {
                             updateSecureSetting(Settings.Secure.LOCATION_MODE,
                                     setting != null ? setting.getValue() : null, null,
                                             true, userId, true);
-                            setting = getSecureSetting(
-                                    Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userId);
-                            updateSecureSetting(Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                                    setting != null ? setting.getValue() : null, null,
-                                            true, userId, true);
                         }
                     } finally {
                         Binder.restoreCallingIdentity(identity);
@@ -1347,7 +1342,7 @@ public class SettingsProvider extends ContentProvider {
                 final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId,
                         name);
 
-                if (!isSecureSettingAccessible(name, callingUserId, owningUserId)) {
+                if (!isSecureSettingAccessible(name)) {
                     // This caller is not permitted to access this setting. Pretend the setting
                     // doesn't exist.
                     continue;
@@ -1387,7 +1382,7 @@ public class SettingsProvider extends ContentProvider {
         // Determine the owning user as some profile settings are cloned from the parent.
         final int owningUserId = resolveOwningUserIdForSecureSettingLocked(callingUserId, name);
 
-        if (!isSecureSettingAccessible(name, callingUserId, owningUserId)) {
+        if (!isSecureSettingAccessible(name)) {
             // This caller is not permitted to access this setting. Pretend the setting doesn't
             // exist.
             SettingsState settings = mSettingsRegistry.getSettingsLocked(SETTINGS_TYPE_SECURE,
@@ -1607,12 +1602,6 @@ public class SettingsProvider extends ContentProvider {
 
         // Mutate the value.
         synchronized (mLock) {
-            // Special cases for location providers (sigh).
-            if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)) {
-                return updateLocationProvidersAllowedLocked(value, tag, owningUserId, makeDefault,
-                        forceNotify);
-            }
-
             switch (operation) {
                 case MUTATION_OPERATION_INSERT: {
                     return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
@@ -1821,15 +1810,7 @@ public class SettingsProvider extends ContentProvider {
     /**
      * Returns {@code true} if the specified secure setting should be accessible to the caller.
      */
-    private boolean isSecureSettingAccessible(String name, int callingUserId,
-            int owningUserId) {
-        // Special case for location (sigh).
-        // This check is not inside the name-based checks below because this method performs checks
-        // only if the calling user ID is not the same as the owning user ID.
-        if (isLocationProvidersAllowedRestricted(name, callingUserId, owningUserId)) {
-            return false;
-        }
-
+    private boolean isSecureSettingAccessible(String name) {
         switch (name) {
             case "bluetooth_address":
                 // BluetoothManagerService for some reason stores the Android's Bluetooth MAC
@@ -1844,20 +1825,6 @@ public class SettingsProvider extends ContentProvider {
             default:
                 return true;
         }
-    }
-
-    private boolean isLocationProvidersAllowedRestricted(String name, int callingUserId,
-            int owningUserId) {
-        // Optimization - location providers are restricted only for managed profiles.
-        if (callingUserId == owningUserId) {
-            return false;
-        }
-        if (Settings.Secure.LOCATION_PROVIDERS_ALLOWED.equals(name)
-                && mUserManager.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION,
-                new UserHandle(callingUserId))) {
-            return true;
-        }
-        return false;
     }
 
     private int resolveOwningUserIdForSecureSettingLocked(int userId, String setting) {
@@ -2052,73 +2019,6 @@ public class SettingsProvider extends ContentProvider {
             throw new SecurityException("Permission denial: writing to settings requires:"
                     + permission);
         }
-    }
-
-    /*
-     * Used to parse changes to the value of Settings.Secure.LOCATION_PROVIDERS_ALLOWED.
-     * This setting contains a list of the currently enabled location providers.
-     * But helper functions in android.providers.Settings can enable or disable
-     * a single provider by using a "+" or "-" prefix before the provider name.
-     *
-     * <p>See also {@link com.android.server.pm.UserRestrictionsUtils#isSettingRestrictedForUser()}.
-     * If DISALLOW_SHARE_LOCATION is set, the said method will only allow values with
-     * the "-" prefix.
-     *
-     * @returns whether the enabled location providers changed.
-     */
-    @GuardedBy("mLock")
-    private boolean updateLocationProvidersAllowedLocked(String value, String tag,
-            int owningUserId, boolean makeDefault, boolean forceNotify) {
-        if (TextUtils.isEmpty(value)) {
-            return false;
-        }
-        Setting oldSetting = getSecureSetting(
-                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, owningUserId);
-        if (oldSetting == null) {
-            return false;
-        }
-        String oldProviders = oldSetting.getValue();
-        List<String> oldProvidersList = TextUtils.isEmpty(oldProviders)
-                ? new ArrayList<>() : new ArrayList<>(Arrays.asList(oldProviders.split(",")));
-        Set<String> newProvidersSet = new ArraySet<>();
-        newProvidersSet.addAll(oldProvidersList);
-
-        String[] providerUpdates = value.split(",");
-        boolean inputError = false;
-        for (String provider : providerUpdates) {
-            // do not update location_providers_allowed when input is invalid
-            if (TextUtils.isEmpty(provider)) {
-                inputError = true;
-                break;
-            }
-            final char prefix = provider.charAt(0);
-            // do not update location_providers_allowed when input is invalid
-            if (prefix != '+' && prefix != '-') {
-                inputError = true;
-                break;
-            }
-            // skip prefix
-            provider = provider.substring(1);
-            if (prefix == '+') {
-                newProvidersSet.add(provider);
-            } else if (prefix == '-') {
-                newProvidersSet.remove(provider);
-            }
-        }
-        String newProviders = TextUtils.join(",", newProvidersSet.toArray());
-        if (inputError == true || newProviders.equals(oldProviders)) {
-            // nothing changed, so no need to update the database
-            if (forceNotify) {
-                mSettingsRegistry.notifyForSettingsChange(
-                        makeKey(SETTINGS_TYPE_SECURE, owningUserId),
-                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            }
-            return false;
-        }
-        return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_SECURE,
-                owningUserId, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, newProviders, tag,
-                makeDefault, getCallingPackage(), forceNotify, CRITICAL_SECURE_SETTINGS,
-                /* overrideableByRestore */ false);
     }
 
     private static void warnOrThrowForUndesiredSecureSettingsMutationForTargetSdk(
@@ -2778,6 +2678,11 @@ public class SettingsProvider extends ContentProvider {
         public boolean insertSettingLocked(int type, int userId, String name, String value,
                 String tag, boolean makeDefault, boolean forceNonSystemPackage, String packageName,
                 boolean forceNotify, Set<String> criticalSettings, boolean overrideableByRestore) {
+            if (overrideableByRestore != Settings.DEFAULT_OVERRIDEABLE_BY_RESTORE) {
+                getContext().enforceCallingOrSelfPermission(
+                        Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE,
+                        "Caller is not allowed to modify settings overrideable by restore");
+            }
             final int key = makeKey(type, userId);
 
             boolean success = false;

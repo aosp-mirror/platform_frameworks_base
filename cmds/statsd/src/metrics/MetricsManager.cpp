@@ -31,7 +31,7 @@
 #include "state/StateManager.h"
 #include "stats_log_util.h"
 #include "stats_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_INT32;
@@ -291,7 +291,7 @@ bool MetricsManager::checkLogCredentials(const LogEvent& event) {
 }
 
 bool MetricsManager::eventSanityCheck(const LogEvent& event) {
-    if (event.GetTagId() == android::util::APP_BREADCRUMB_REPORTED) {
+    if (event.GetTagId() == util::APP_BREADCRUMB_REPORTED) {
         // Check that app breadcrumb reported fields are valid.
         status_t err = NO_ERROR;
 
@@ -318,7 +318,7 @@ bool MetricsManager::eventSanityCheck(const LogEvent& event) {
             VLOG("APP_BREADCRUMB_REPORTED does not have valid state %ld", appHookState);
             return false;
         }
-    } else if (event.GetTagId() == android::util::DAVEY_OCCURRED) {
+    } else if (event.GetTagId() == util::DAVEY_OCCURRED) {
         // Daveys can be logged from any app since they are logged in libs/hwui/JankTracker.cpp.
         // Check that the davey duration is reasonable. Max length check is for privacy.
         status_t err = NO_ERROR;

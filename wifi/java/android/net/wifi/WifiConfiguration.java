@@ -498,7 +498,9 @@ public class WifiConfiguration implements Parcelable {
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.SAE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 requirePmf = true;
                 break;
             case SECURITY_TYPE_EAP_SUITE_B:
@@ -517,7 +519,9 @@ public class WifiConfiguration implements Parcelable {
                 allowedProtocols.set(WifiConfiguration.Protocol.RSN);
                 allowedKeyManagement.set(WifiConfiguration.KeyMgmt.OWE);
                 allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+                allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.GCMP_256);
                 allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+                allowedGroupCiphers.set(WifiConfiguration.GroupCipher.GCMP_256);
                 requirePmf = true;
                 break;
             case SECURITY_TYPE_WAPI_PSK:
@@ -629,13 +633,6 @@ public class WifiConfiguration implements Parcelable {
      * string otherwise.
      */
     public String preSharedKey;
-
-    /**
-     * Optional SAE Password Id for use with WPA3-SAE. It is an ASCII string.
-     * @hide
-     */
-    @SystemApi
-    public @Nullable String saePasswordId;
 
     /**
      * Four WEP keys. For each of the four values, provide either an ASCII
@@ -2330,9 +2327,6 @@ public class WifiConfiguration implements Parcelable {
             sbuf.append('*');
         }
 
-        sbuf.append('\n').append(" SAE Password Id: ");
-        sbuf.append(this.saePasswordId);
-
         sbuf.append("\nEnterprise config:\n");
         sbuf.append(enterpriseConfig);
 
@@ -2727,7 +2721,6 @@ public class WifiConfiguration implements Parcelable {
             providerFriendlyName = source.providerFriendlyName;
             isHomeProviderNetwork = source.isHomeProviderNetwork;
             preSharedKey = source.preSharedKey;
-            saePasswordId = source.saePasswordId;
 
             mNetworkSelectionStatus.copy(source.getNetworkSelectionStatus());
             apBand = source.apBand;
@@ -2815,7 +2808,6 @@ public class WifiConfiguration implements Parcelable {
             dest.writeLong(roamingConsortiumId);
         }
         dest.writeString(preSharedKey);
-        dest.writeString(saePasswordId);
         for (String wepKey : wepKeys) {
             dest.writeString(wepKey);
         }
@@ -2891,7 +2883,6 @@ public class WifiConfiguration implements Parcelable {
                     config.roamingConsortiumIds[i] = in.readLong();
                 }
                 config.preSharedKey = in.readString();
-                config.saePasswordId = in.readString();
                 for (int i = 0; i < config.wepKeys.length; i++) {
                     config.wepKeys[i] = in.readString();
                 }

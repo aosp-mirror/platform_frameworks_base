@@ -59,7 +59,8 @@ public final class Prefs {
             Key.TOUCHED_RINGER_TOGGLE,
             Key.HAS_SEEN_ODI_CAPTIONS_TOOLTIP,
             Key.HAS_SEEN_BUBBLES_EDUCATION,
-            Key.HAS_SEEN_BUBBLES_MANAGE_EDUCATION
+            Key.HAS_SEEN_BUBBLES_MANAGE_EDUCATION,
+            Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
     })
     public @interface Key {
         @Deprecated
@@ -107,6 +108,7 @@ public final class Prefs {
         String HAS_SEEN_ODI_CAPTIONS_TOOLTIP = "HasSeenODICaptionsTooltip";
         String HAS_SEEN_BUBBLES_EDUCATION = "HasSeenBubblesOnboarding";
         String HAS_SEEN_BUBBLES_MANAGE_EDUCATION = "HasSeenBubblesManageOnboarding";
+        String CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT = "ControlsStructureSwipeTooltipCount";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

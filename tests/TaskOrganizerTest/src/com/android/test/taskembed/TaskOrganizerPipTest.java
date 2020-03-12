@@ -49,7 +49,7 @@ public class TaskOrganizerPipTest extends Service {
             } catch (Exception e) {
             }
         }
-        public void taskVanished(IWindowContainer wc) {
+        public void taskVanished(ActivityManager.RunningTaskInfo ti) {
         }
         public void transactionReady(int id, SurfaceControl.Transaction t) {
         }

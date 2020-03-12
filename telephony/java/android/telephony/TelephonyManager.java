@@ -3763,29 +3763,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the ISO-3166 country code equivalent for the SIM provider's country code
-     * of the default subscription
-     * <p>
-     * The ISO-3166 country code is provided in lowercase 2 character format.
-     * @return the lowercase 2 character ISO-3166 country code, or empty string is not available.
-     * <p>
-     * Note: This API is introduced to unblock mainlining work as the following APIs in
-     * Linkify.java invokes getSimCountryIso() without a context. TODO(Bug 144576376): remove
-     * this API once the following APIs are redesigned to access telephonymanager with a context.
-     *
-     * {@link Linkify#addLinks(@NonNull Spannable text, @LinkifyMask int mask)}
-     * {@link Linkify#addLinks(@NonNull Spannable text, @LinkifyMask int mask,
-               @Nullable Function<String, URLSpan> urlSpanFactory)}
-     *
-     * @hide
-     */
-    @SystemApi
-    @NonNull
-    public static String getDefaultSimCountryIso() {
-        return getSimCountryIso(SubscriptionManager.getDefaultSubscriptionId());
-    }
-
-    /**
      * Returns the ISO country code equivalent for the SIM provider's country code.
      *
      * @param subId for which SimCountryIso is returned
@@ -8708,7 +8685,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @Nullable
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public PinResult supplyPinReportPinResult(@NonNull String pin) {
@@ -8733,7 +8709,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @Nullable
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public PinResult supplyPukReportPinResult(@NonNull String puk, @NonNull String pin) {
@@ -12227,12 +12202,14 @@ public class TelephonyManager {
 
     /**
      * It indicates whether modem is enabled or not per slot.
-     * It's the corresponding status of {@link #enableModemForSlot}.
+     * It's the corresponding status of TelephonyManager.enableModemForSlot.
      *
+     * <p>Requires Permission:
+     * READ_PRIVILEGED_PHONE_STATE or
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * @param slotIndex which slot it's checking.
-     * @hide
      */
-    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public boolean isModemEnabledForSlot(int slotIndex) {
         try {
             ITelephony telephony = getITelephony();
