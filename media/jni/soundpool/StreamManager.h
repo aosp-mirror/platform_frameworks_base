@@ -70,9 +70,10 @@ private:
     static int staticFunction(void *data) {
         JavaThread *jt = static_cast<JavaThread *>(data);
         jt->mF();
+        jt->mIsClosed = true;  // set the flag that we are closed
+                               // now before we allow the destructor to execute;
+                               // otherwise there may be a use after free.
         jt->mPromise.set_value();
-        jt->mIsClosed = true;  // publicly inform that we are closed
-                               // after we have accessed all variables.
         return 0;
     }
 
