@@ -1858,13 +1858,12 @@ public class WallpaperManager {
      *
      * @hide
      */
-    public void setWallpaperZoomOut(float zoom) {
+    public void setWallpaperZoomOut(IBinder windowToken, float zoom) {
         if (zoom < 0 || zoom > 1f) {
             throw new IllegalArgumentException("zoom must be between 0 and one: " + zoom);
         }
         try {
-            sGlobals.mService.setWallpaperZoomOut(zoom, mContext.getOpPackageName(),
-                    mContext.getDisplayId());
+            WindowManagerGlobal.getWindowSession().setWallpaperZoomOut(windowToken, zoom);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
