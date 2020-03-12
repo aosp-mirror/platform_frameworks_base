@@ -2224,9 +2224,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                             .addTaggedData(MetricsEvent.FIELD_DISPLAY_ID, getDisplayId()));
         }
 
-        // If there was no pinned stack, we still need to notify the controller of the display info
-        // update as a result of the config change.
-        if (mPinnedStackControllerLocked != null && !hasPinnedTask()) {
+        if (mPinnedStackControllerLocked != null) {
             mPinnedStackControllerLocked.onDisplayInfoChanged(getDisplayInfo());
         }
     }
