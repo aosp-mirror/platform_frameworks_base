@@ -32,7 +32,7 @@
 #include <frameworks/base/cmds/statsd/src/statsd_config.pb.h>
 #include <frameworks/base/cmds/statsd/src/uid_data.pb.h>
 #include <private/android_filesystem_config.h>
-#include <statslog.h>
+#include <statslog_statsd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/system_properties.h>
@@ -767,7 +767,8 @@ status_t StatsService::cmd_log_app_breadcrumb(int out, const Vector<String8>& ar
     }
     if (good) {
         dprintf(out, "Logging AppBreadcrumbReported(%d, %d, %d) to statslog.\n", uid, label, state);
-        android::util::stats_write(android::util::APP_BREADCRUMB_REPORTED, uid, label, state);
+        android::os::statsd::util::stats_write(
+                android::os::statsd::util::APP_BREADCRUMB_REPORTED, uid, label, state);
     } else {
         print_cmd_help(out);
         return UNKNOWN_ERROR;
@@ -1188,7 +1189,7 @@ Status StatsService::unsetBroadcastSubscriber(int64_t configId,
 Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
     // Permission check not necessary as it's meant for applications to write to
     // statsd.
-    android::util::stats_write(util::APP_BREADCRUMB_REPORTED,
+    android::os::statsd::util::stats_write(android::os::statsd::util::APP_BREADCRUMB_REPORTED,
                                (int32_t) AIBinder_getCallingUid(), label,
                                state);
     return Status::ok();

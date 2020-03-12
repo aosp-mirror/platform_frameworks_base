@@ -19,6 +19,7 @@ package com.android.server.people.data;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -75,12 +76,6 @@ class UserData {
 
     void setUserUnlocked() {
         mIsUnlocked = true;
-
-        // Ensures per user root directory for people data is present, and attempt to load
-        // data from disk.
-        mPerUserPeopleDataDir.mkdirs();
-        mPackageDataMap.putAll(PackageData.packagesDataFromDisk(mUserId, this::isDefaultDialer,
-                this::isDefaultSmsApp, mScheduledExecutorService, mPerUserPeopleDataDir));
     }
 
     void setUserStopped() {
@@ -89,6 +84,15 @@ class UserData {
 
     boolean isUnlocked() {
         return mIsUnlocked;
+    }
+
+    @WorkerThread
+    void loadUserData() {
+        mPerUserPeopleDataDir.mkdir();
+        Map<String, PackageData> packageDataMap = PackageData.packagesDataFromDisk(
+                mUserId, this::isDefaultDialer, this::isDefaultSmsApp, mScheduledExecutorService,
+                mPerUserPeopleDataDir);
+        mPackageDataMap.putAll(packageDataMap);
     }
 
     /**

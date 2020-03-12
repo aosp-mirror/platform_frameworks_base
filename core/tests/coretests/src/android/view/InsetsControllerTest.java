@@ -49,6 +49,7 @@ import android.os.CancellationSignal;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
+import android.view.WindowInsetsController.OnControllableInsetsChangedListener;
 import android.view.WindowManager.BadTokenException;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.LinearInterpolator;
@@ -67,6 +68,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Supplier;
@@ -171,15 +174,24 @@ public class InsetsControllerTest {
         mController.onControlsChanged(new InsetsSourceControl[] { control });
         assertEquals(mLeash,
                 mController.getSourceConsumer(ITYPE_STATUS_BAR).getControl().getLeash());
+        mController.addOnControllableInsetsChangedListener(
+                ((controller, typeMask) -> assertEquals(statusBars(), typeMask)));
     }
 
     @Test
     public void testControlsRevoked() {
+        OnControllableInsetsChangedListener listener
+                = mock(OnControllableInsetsChangedListener.class);
+        mController.addOnControllableInsetsChangedListener(listener);
         InsetsSourceControl control =
                 new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point());
         mController.onControlsChanged(new InsetsSourceControl[] { control });
         mController.onControlsChanged(new InsetsSourceControl[0]);
         assertNull(mController.getSourceConsumer(ITYPE_STATUS_BAR).getControl());
+        InOrder inOrder = Mockito.inOrder(listener);
+        inOrder.verify(listener).onControllableInsetsChanged(eq(mController), eq(0));
+        inOrder.verify(listener).onControllableInsetsChanged(eq(mController), eq(statusBars()));
+        inOrder.verify(listener).onControllableInsetsChanged(eq(mController), eq(0));
     }
 
     @Test
@@ -206,10 +218,15 @@ public class InsetsControllerTest {
     public void testFrameDoesntMatchDisplay() {
         mController.onFrameChanged(new Rect(0, 0, 100, 100));
         mController.getState().setDisplayFrame(new Rect(0, 0, 200, 200));
+        InsetsSourceControl control =
+                new InsetsSourceControl(ITYPE_STATUS_BAR, mLeash, new Point());
+        mController.onControlsChanged(new InsetsSourceControl[] { control });
         WindowInsetsAnimationControlListener controlListener =
                 mock(WindowInsetsAnimationControlListener.class);
         mController.controlWindowInsetsAnimation(0, 0 /* durationMs */, new LinearInterpolator(),
                 controlListener);
+        mController.addOnControllableInsetsChangedListener(
+                (controller, typeMask) -> assertEquals(0, typeMask));
         verify(controlListener).onCancelled();
         verify(controlListener, never()).onReady(any(), anyInt());
     }

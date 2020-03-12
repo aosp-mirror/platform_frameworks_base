@@ -19,22 +19,27 @@ package com.android.systemui.controls.management
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewStub
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.viewpager2.widget.ViewPager2
+import com.android.systemui.Prefs
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.ControlsServiceInfo
+import com.android.systemui.controls.TooltipManager
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.qs.PageIndicator
 import com.android.systemui.settings.CurrentUserTracker
 import java.text.Collator
 import java.util.concurrent.Executor
@@ -51,6 +56,8 @@ class ControlsFavoritingActivity @Inject constructor(
     companion object {
         private const val TAG = "ControlsFavoritingActivity"
         const val EXTRA_APP = "extra_app_label"
+        private const val TOOLTIP_PREFS_KEY = Prefs.Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
+        private const val TOOLTIP_MAX_SHOWN = 2
     }
 
     private var component: ComponentName? = null
@@ -61,7 +68,9 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var titleView: TextView
     private lateinit var iconView: ImageView
     private lateinit var iconFrame: View
-    private lateinit var pageIndicator: PageIndicator
+    private lateinit var pageIndicator: ManagementPageIndicator
+    private var mTooltipManager: TooltipManager? = null
+    private lateinit var doneButton: View
     private var listOfStructures = emptyList<StructureContainer>()
 
     private lateinit var comparator: Comparator<StructureContainer>
@@ -129,6 +138,7 @@ class ControlsFavoritingActivity @Inject constructor(
                     StructureContainer(it.key, AllModel(it.value, favoriteKeys, emptyZoneString))
                 }.sortedWith(comparator)
                 executor.execute {
+                    doneButton.isEnabled = true
                     structurePager.adapter = StructureAdapter(listOfStructures)
                     if (error) {
                         statusText.text = resources.getText(R.string.controls_favorite_load_error)
@@ -174,7 +184,47 @@ class ControlsFavoritingActivity @Inject constructor(
         }
 
         statusText = requireViewById(R.id.status_message)
-        pageIndicator = requireViewById(R.id.structure_page_indicator)
+        if (shouldShowTooltip()) {
+            mTooltipManager = TooltipManager(statusText.context,
+                TOOLTIP_PREFS_KEY, TOOLTIP_MAX_SHOWN)
+            addContentView(
+                mTooltipManager?.layout,
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    Gravity.TOP or Gravity.LEFT
+                )
+            )
+        }
+        pageIndicator = requireViewById<ManagementPageIndicator>(
+            R.id.structure_page_indicator).apply {
+            addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int
+                ) {
+                    if (v.visibility == View.VISIBLE && mTooltipManager != null) {
+                        val p = IntArray(2)
+                        v.getLocationOnScreen(p)
+                        val x = p[0] + (right - left) / 2
+                        val y = p[1] + bottom - top
+                        mTooltipManager?.show(R.string.controls_structure_tooltip, x, y)
+                    }
+                }
+            })
+            visibilityListener = {
+                if (it != View.VISIBLE) {
+                    mTooltipManager?.hide(true)
+                }
+            }
+        }
 
         titleView = requireViewById<TextView>(R.id.title).apply {
             text = appName ?: resources.getText(R.string.controls_favorite_default_title)
@@ -184,6 +234,12 @@ class ControlsFavoritingActivity @Inject constructor(
         iconView = requireViewById(com.android.internal.R.id.icon)
         iconFrame = requireViewById(R.id.icon_frame)
         structurePager = requireViewById<ViewPager2>(R.id.structure_pager)
+        structurePager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                mTooltipManager?.hide(true)
+            }
+        })
         bindButtons()
     }
 
@@ -195,22 +251,40 @@ class ControlsFavoritingActivity @Inject constructor(
             }
         }
 
-        requireViewById<Button>(R.id.done).setOnClickListener {
-            if (component == null) return@setOnClickListener
-            listOfStructures.forEach {
-                val favoritesForStorage = it.model.favorites.map { it.build() }
-                controller.replaceFavoritesForStructure(StructureInfo(component!!, it.structureName,
-                        favoritesForStorage))
+        doneButton = requireViewById<Button>(R.id.done).apply {
+            isEnabled = false
+            setOnClickListener {
+                if (component == null) return@setOnClickListener
+                listOfStructures.forEach {
+                    val favoritesForStorage = it.model.favorites.map { it.build() }
+                    controller.replaceFavoritesForStructure(
+                        StructureInfo(component!!, it.structureName, favoritesForStorage)
+                    )
+                }
+                finishAffinity()
             }
-
-            finishAffinity()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mTooltipManager?.hide(false)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        mTooltipManager?.hide(false)
     }
 
     override fun onDestroy() {
         currentUserTracker.stopTracking()
         listingController.removeCallback(listingCallback)
+        controller.cancelLoad()
         super.onDestroy()
+    }
+
+    private fun shouldShowTooltip(): Boolean {
+        return Prefs.getInt(applicationContext, TOOLTIP_PREFS_KEY, 0) < TOOLTIP_MAX_SHOWN
     }
 }
 

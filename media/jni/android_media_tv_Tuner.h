@@ -180,10 +180,11 @@ struct JTuner : public RefBase {
     int setLna(bool enable);
     jobject getLnbIds();
     jobject openLnbById(int id);
+    jobject openLnbByName(jstring name);
     jobject openFilter(DemuxFilterType type, int bufferSize);
     jobject openTimeFilter();
     jobject openDescrambler();
-    jobject openDvr(DvrType type, int bufferSize);
+    jobject openDvr(DvrType type, jlong bufferSize);
 
 protected:
     Result openDemux();

@@ -21,6 +21,7 @@ package android {
     field public static final String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final String SUSPEND_APPS = "android.permission.SUSPEND_APPS";
     field public static final String TEST_MANAGE_ROLLBACKS = "android.permission.TEST_MANAGE_ROLLBACKS";
+    field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String WRITE_DEVICE_CONFIG = "android.permission.WRITE_DEVICE_CONFIG";
     field @Deprecated public static final String WRITE_MEDIA_STORAGE = "android.permission.WRITE_MEDIA_STORAGE";
     field public static final String WRITE_OBB = "android.permission.WRITE_OBB";
@@ -427,6 +428,7 @@ package android.app {
     method public boolean isBlockableSystem();
     method public boolean isImportanceLockedByCriticalDeviceFunction();
     method public boolean isImportanceLockedByOEM();
+    method public void lockFields(int);
     method public void setBlockableSystem(boolean);
     method public void setDeleted(boolean);
     method public void setFgServiceShown(boolean);
@@ -434,6 +436,7 @@ package android.app {
     method public void setImportanceLockedByOEM(boolean);
     method public void setImportantConversation(boolean);
     method public void setOriginalImportance(int);
+    field public static final int USER_LOCKED_SOUND = 32; // 0x20
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
@@ -1278,7 +1281,7 @@ package android.hardware.lights {
 
   public final class LightsManager.LightsSession implements java.lang.AutoCloseable {
     method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void close();
-    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void setLights(@NonNull android.hardware.lights.LightsRequest);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_LIGHTS) public void requestLights(@NonNull android.hardware.lights.LightsRequest);
   }
 
   public final class LightsRequest {
@@ -2811,9 +2814,9 @@ package android.permission {
   }
 
   public final class PermissionManager {
-    method @IntRange(from=0) @RequiresPermission(anyOf={"android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY", "android.permission.UPGRADE_RUNTIME_PERMISSIONS"}) public int getRuntimePermissionsVersion();
+    method @IntRange(from=0) @RequiresPermission(anyOf={"android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY", android.Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS}) public int getRuntimePermissionsVersion();
     method @NonNull public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
-    method @RequiresPermission(anyOf={"android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY", "android.permission.UPGRADE_RUNTIME_PERMISSIONS"}) public void setRuntimePermissionsVersion(@IntRange(from=0) int);
+    method @RequiresPermission(anyOf={"android.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY", android.Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS}) public void setRuntimePermissionsVersion(@IntRange(from=0) int);
   }
 
   public static final class PermissionManager.SplitPermissionInfo {

@@ -59,6 +59,11 @@ interface ControlsController : UserAwareController {
     )
 
     /**
+     * Cancels a pending load call
+     */
+    fun cancelLoad()
+
+    /**
      * Request to subscribe for favorited controls per structure
      *
      * @param structureInfo structure to limit the subscription to

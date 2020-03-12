@@ -18,7 +18,7 @@
 #include "logd/LogEvent.h"
 
 #include "stats_log_util.h"
-#include "statslog.h"
+#include "statslog_statsd.h"
 
 #include <android/binder_ibinder.h>
 #include <android-base/stringprintf.h>
@@ -100,7 +100,7 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
                    const std::map<int32_t, float>& float_map) {
     mLogdTimestampNs = wallClockTimestampNs;
     mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::KEY_VALUE_PAIRS_ATOM;
+    mTagId = util::KEY_VALUE_PAIRS_ATOM;
     mLogUid = uid;
 
     int pos[] = {1, 1, 1};
@@ -153,7 +153,7 @@ LogEvent::LogEvent(const string& trainName, int64_t trainVersionCode, bool requi
                    const std::vector<uint8_t>& experimentIds, int32_t userId) {
     mLogdTimestampNs = getWallClockNs();
     mElapsedTimestampNs = getElapsedRealtimeNs();
-    mTagId = android::util::BINARY_PUSH_STATE_CHANGED;
+    mTagId = util::BINARY_PUSH_STATE_CHANGED;
     mLogUid = AIBinder_getCallingUid();
     mLogPid = AIBinder_getCallingPid();
 
@@ -172,7 +172,7 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                    const InstallTrainInfo& trainInfo) {
     mLogdTimestampNs = wallClockTimestampNs;
     mElapsedTimestampNs = elapsedTimestampNs;
-    mTagId = android::util::TRAIN_INFO;
+    mTagId = util::TRAIN_INFO;
 
     mValues.push_back(
             FieldValue(Field(mTagId, getSimpleField(1)), Value(trainInfo.trainVersionCode)));

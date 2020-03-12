@@ -41,9 +41,9 @@ import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.util.leak.LeakDetector;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -69,7 +69,8 @@ public class TunerServiceImpl extends TunerService {
     // Map of Uris we listen on to their settings keys.
     private final ArrayMap<Uri, String> mListeningUris = new ArrayMap<>();
     // Map of settings keys to the listener.
-    private final HashMap<String, Set<Tunable>> mTunableLookup = new HashMap<>();
+    private final ConcurrentHashMap<String, Set<Tunable>> mTunableLookup =
+            new ConcurrentHashMap<>();
     // Set of all tunables, used for leak detection.
     private final HashSet<Tunable> mTunables = LeakDetector.ENABLED ? new HashSet<>() : null;
     private final Context mContext;

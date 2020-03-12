@@ -148,6 +148,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
          * regardless of what has focus.
          */
         private boolean mTargetShown = false;
+        private float mTargetPrimaryDim = 0.f;
+        private float mTargetSecondaryDim = 0.f;
 
         // The following are the current (most recent) states set during animation
         /** {@code true} if the secondary split has IME focus. */
@@ -186,8 +188,12 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         @Override
         public void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
                 boolean imeShouldShow, SurfaceControl.Transaction t) {
+            if (!inSplitMode()) {
+                return;
+            }
+            final boolean splitIsVisible = !mView.isHidden();
             mSecondaryHasFocus = getSecondaryHasFocus(displayId);
-            mTargetAdjusted = imeShouldShow && mSecondaryHasFocus
+            mTargetAdjusted = splitIsVisible && imeShouldShow && mSecondaryHasFocus
                     && !mSplitLayout.mDisplayLayout.isLandscape();
             mHiddenTop = hiddenTop;
             mShownTop = shownTop;
@@ -195,6 +201,10 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             if (mLastAdjustTop < 0) {
                 mLastAdjustTop = imeShouldShow ? hiddenTop : shownTop;
             }
+            mTargetPrimaryDim = (mSecondaryHasFocus && mTargetShown && splitIsVisible)
+                    ? ADJUSTED_NONFOCUS_DIM : 0.f;
+            mTargetSecondaryDim = (!mSecondaryHasFocus && mTargetShown && splitIsVisible)
+                    ? ADJUSTED_NONFOCUS_DIM : 0.f;
             if (mAnimation != null || (mImeWasShown && imeShouldShow
                     && mTargetAdjusted != mAdjusted)) {
                 // We need to animate adjustment independently of the IME position, so
@@ -202,7 +212,11 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 // different split's editor has gained focus while the IME is still visible.
                 startAsyncAnimation();
             }
-            updateImeAdjustState();
+            if (splitIsVisible) {
+                // If split is hidden, we don't want to trigger any relayouts that would cause the
+                // divider to show again.
+                updateImeAdjustState();
+            }
         }
 
         private void updateImeAdjustState() {
@@ -245,7 +259,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         @Override
         public void onImePositionChanged(int displayId, int imeTop,
                 SurfaceControl.Transaction t) {
-            if (mAnimation != null) {
+            if (mAnimation != null || !inSplitMode()) {
                 // Not synchronized with IME anymore, so return.
                 return;
             }
@@ -257,7 +271,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         @Override
         public void onImeEndPositioning(int displayId, boolean cancelled,
                 SurfaceControl.Transaction t) {
-            if (mAnimation != null) {
+            if (mAnimation != null || !inSplitMode()) {
                 // Not synchronized with IME anymore, so return.
                 return;
             }
@@ -273,14 +287,10 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                         mSplitLayout.mAdjustedSecondary);
             }
             final float invProg = 1.f - progress;
-            final float targetPrimaryDim =
-                    (mSecondaryHasFocus && mTargetShown) ? ADJUSTED_NONFOCUS_DIM : 0.f;
-            final float targetSecondaryDim =
-                    (!mSecondaryHasFocus && mTargetShown) ? ADJUSTED_NONFOCUS_DIM : 0.f;
             mView.setResizeDimLayer(t, true /* primary */,
-                    mLastPrimaryDim * invProg + progress * targetPrimaryDim);
+                    mLastPrimaryDim * invProg + progress * mTargetPrimaryDim);
             mView.setResizeDimLayer(t, false /* primary */,
-                    mLastSecondaryDim * invProg + progress * targetSecondaryDim);
+                    mLastSecondaryDim * invProg + progress * mTargetSecondaryDim);
         }
 
         private void onEnd(boolean cancelled, SurfaceControl.Transaction t) {
@@ -289,10 +299,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 mAdjusted = mTargetAdjusted;
                 mImeWasShown = mTargetShown;
                 mLastAdjustTop = mAdjusted ? mShownTop : mHiddenTop;
-                mLastPrimaryDim =
-                        (mSecondaryHasFocus && mTargetShown) ? ADJUSTED_NONFOCUS_DIM : 0.f;
-                mLastSecondaryDim =
-                        (!mSecondaryHasFocus && mTargetShown) ? ADJUSTED_NONFOCUS_DIM : 0.f;
+                mLastPrimaryDim = mTargetPrimaryDim;
+                mLastSecondaryDim = mTargetSecondaryDim;
             }
         }
 
