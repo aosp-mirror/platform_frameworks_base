@@ -207,23 +207,23 @@
     <string name="power_dialog" product="default" msgid="1107775420270203046">"خيارات الهاتف"</string>
     <string name="silent_mode" msgid="8796112363642579333">"وضع صامت"</string>
     <string name="turn_on_radio" msgid="2961717788170634233">"تشغيل اللاسلكي"</string>
-    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف تشغيل الشبكة اللاسلكية"</string>
+    <string name="turn_off_radio" msgid="7222573978109933360">"إيقاف تفعيل الشبكة اللاسلكية"</string>
     <string name="screen_lock" msgid="2072642720826409809">"قفل الشاشة"</string>
     <string name="power_off" msgid="4111692782492232778">"إيقاف التشغيل"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"إيقاف الرنين"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"اهتزاز الرنين"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"تشغيل الرنين"</string>
-    <string name="reboot_to_update_title" msgid="2125818841916373708">"‏تحديث نظام Android"</string>
+    <string name="reboot_to_update_title" msgid="2125818841916373708">"‏إعادة تحميل نظام Android"</string>
     <string name="reboot_to_update_prepare" msgid="6978842143587422365">"جارٍ الإعداد للتحديث…"</string>
     <string name="reboot_to_update_package" msgid="4644104795527534811">"جارٍ معالجة حزمة التحديث…"</string>
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"جارٍ إعادة التشغيل…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"إعادة الضبط على الإعدادات الأصلية"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"جارٍ إعادة التشغيل…"</string>
     <string name="shutdown_progress" msgid="5017145516412657345">"جارٍ إيقاف التشغيل..."</string>
-    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف تشغيل الجهاز اللوحي."</string>
+    <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"سيتم إيقاف تفعيل الجهاز اللوحي."</string>
     <string name="shutdown_confirm" product="tv" msgid="9187068694573722129">"سيتم إيقاف التلفزيون."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"سيتم إيقاف المشاهدة."</string>
-    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف تشغيل هاتفك."</string>
+    <string name="shutdown_confirm" product="default" msgid="136816458966692315">"سيتم إيقاف تفعيل هاتفك."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"هل تريد إيقاف التشغيل؟"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"إعادة تشغيل في الوضع الآمن"</string>
     <string name="reboot_safemode_confirm" msgid="1658357874737219624">"هل تريد إعادة تشغيل الكمبيوتر في الوضع الآمن؟ سيؤدي ذلك إلى إيقاف جميع تطبيقات الجهات الخارجية التي تم تثبيتها. ستتم استعادتها عند إعادة التشغيل مرة أخرى."</string>
@@ -404,13 +404,13 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="4148011273011857829">"يتيح للتطبيق إرسال عمليات بث طويلة تظل بعد انتهاء البث. وقد يؤدي الاستخدام المفرط إلى بطء أو عدم استقرار في التلفزيون حيث يتم استخدام قدر كبير من الذاكرة."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"للسماح للتطبيق بإرسال مجموعات بث مستمرة، والتي تظل بعد انتهاء البث. قد يؤدي الاستخدام بكثرة إلى حدوث بطء أو عدم استقرار في الهاتف من خلال التسبب في استخدام الهاتف لمساحة كبيرة للغاية من الذاكرة."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"قراءة جهات الاتصال"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="3792628955305119168">"للسماح للتطبيق بقراءة بيانات حول جهات الاتصال المخزنة على الجهاز اللوحي، بما في ذلك مدى تكرار اتصالك بأفراد بعينهم أو مراسلتهم عبر البريد الإلكتروني أو التواصل معهم بطرق أخرى خلافًا لذلك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهات الاتصال، وقد تشارك التطبيقات الضارة بيانات جهات الاتصال بدون معرفتك."</string>
-    <string name="permdesc_readContacts" product="tv" msgid="337000443018803616">"يتيح للتطبيق قراءة بيانات حول جهات الاتصال المخزنة على التلفزيون، بما في ذلك مدى تكرار الاتصال وإرسال الرسائل الإلكترونية والتواصل بالطرق الأخرى مع أفراد بعينهم. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
-    <string name="permdesc_readContacts" product="default" msgid="6938416250821270191">"للسماح للتطبيق بقراءة بيانات حول جهات الاتصال المخزنة على الهاتف، بما في ذلك مدى تكرار اتصالك بأفراد بعينهم أو مراسلتهم عبر البريد الإلكتروني أو التواصل معهم بطرق أخرى خلافًا لذلك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهات الاتصال، وقد تشارك التطبيقات الضارة بيانات جهات الاتصال بدون معرفتك."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="80783131858366692">"يسمح هذا الإذن للتطبيق بقراءة بيانات حول جهات الاتصال المخزّنة على جهازك اللوحي. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
+    <string name="permdesc_readContacts" product="tv" msgid="4930202526885367788">"يسمح هذا الإذن للتطبيق بقراءة بيانات حول جهات الاتصال المخزّنة على تلفزيونك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
+    <string name="permdesc_readContacts" product="default" msgid="6808717801527690363">"يسمح هذا الإذن للتطبيق بقراءة بيانات حول جهات الاتصال المخزّنة على هاتفك. ويتيح هذا الإذن للتطبيقات حفظ بيانات جهة الاتصال، وقد تشارك التطبيقات الضارة بيانات جهة الاتصال بدون علمك."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"تعديل جهات الاتصال"</string>
-    <string name="permdesc_writeContacts" product="tablet" msgid="4460252002098005534">"للسماح للتطبيق بتعديل البيانات حول جهات الاتصال المخزنة على جهازك اللوحي، بما في ذلك مدى تكرار اتصالك بجهات اتصال بعينها أو مراسلتها عبر البريد الإلكتروني أو التواصل معها بأية طريقة أخرى خلافًا لذلك. وقد يتيح هذا الإذن للتطبيقات حذف بيانات جهات الاتصال."</string>
-    <string name="permdesc_writeContacts" product="tv" msgid="9001239026576070891">"يتيح للتطبيق تعديل البيانات حول جهات الاتصال المخزنة على التلفزيون، بما في ذلك مدى تكرار اتصالك بجهات اتصال بعينها أو مراسلتها عبر البريد الإلكتروني أو التواصل معها بأية طريقة أخرى خلافًا لذلك. ويتيح هذا الإذن للتطبيقات حذف بيانات جهات الاتصال."</string>
-    <string name="permdesc_writeContacts" product="default" msgid="4152877294201215490">"للسماح للتطبيق بتعديل البيانات حول جهات الاتصال المخزنة على هاتفك، بما في ذلك مدى تكرار اتصالك بجهات اتصال بعينها أو مراسلتها عبر البريد الإلكتروني أو التواصل معها بأية طريقة أخرى خلافًا لذلك. وقد يتيح هذا الإذن للتطبيقات حذف بيانات جهات الاتصال."</string>
+    <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على جهازك اللوحي. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
+    <string name="permdesc_writeContacts" product="tv" msgid="7554829984159606156">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على تلفزيونك. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="8304795696237065281">"يسمح هذا الإذن للتطبيق بتعديل البيانات حول جهات الاتصال المخزّنة على هاتفك. ويسمح هذا الإذن للتطبيقات بحذف بيانات جهات الاتصال."</string>
     <string name="permlab_readCallLog" msgid="1739990210293505948">"قراءة سجل المكالمات"</string>
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"يمكن لهذا التطبيق قراءة سجل المكالمات."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"كتابة سجل المكالمات"</string>
@@ -434,6 +434,7 @@
     <string name="permlab_accessCoarseLocation" msgid="8215351553392299056">"الوصول إلى الموقع الجغرافي التقريبي (بالاعتماد على الشبكة) في الخلفية فقط"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="7479449026750078899">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على جهازك اللوحي كي يتمكن التطبيق من استخدامها."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على جهاز التلفزيون كي يتمكن التطبيق من استخدامها."</string>
+    <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"لا يمكن لهذا التطبيق معرفة موقعك الجغرافي التقريبي إلا إذا كان يعمل في الخلفية. ويجب تفعيل خدمات الموقع الجغرافي هذه وأن تكون متاحة في سيارتك حتى يتمكن التطبيق من استخدامها."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على هاتفك كي يتمكن التطبيق من استخدامها."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"الوصول إلى الموقع الجغرافي في الخلفية"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"إذا تمّ منح إذن التطبيق هذا بالإضافة إلى الموقع الجغرافي التقريبي أو الدقيق، يمكن للتطبيق الوصول إلى الموقع الجغرافي أثناء تشغيله في الخلفية."</string>
@@ -923,7 +924,7 @@
     <string name="factorytest_no_action" msgid="339252838115675515">"‏لم يتم العثور على أي حزمة توفر إجراء FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"إعادة تشغيل"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"تعرض الصفحة في \"<xliff:g id="TITLE">%s</xliff:g>\":"</string>
-    <string name="js_dialog_title_default" msgid="3769524569903332476">"جافا سكريبت"</string>
+    <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"تأكيد الانتقال"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"مغادرة هذه الصفحة"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"البقاء في هذه الصفحة"</string>
@@ -987,8 +988,8 @@
     <string name="searchview_description_submit" msgid="6771060386117334686">"إرسال طلب البحث"</string>
     <string name="searchview_description_voice" msgid="42360159504884679">"البحث الصوتي"</string>
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"‏هل تريد تفعيل ميزة Explore by Touch؟"</string>
-    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الجهاز اللوحي."</string>
-    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تشغيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
+    <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تفعيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الجهاز اللوحي."</string>
+    <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"‏يريد <xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> تفعيل ميزة Explore by Touch. عند تفعيل ميزة Explore by Touch، سيكون بإمكانك سماع أو مشاهدة أوصاف لما تحت إصبعك أو إجراء إيماءات للتفاعل مع الهاتف."</string>
     <string name="oneMonthDurationPast" msgid="4538030857114635777">"قبل شهر واحد"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"قبل شهر واحد"</string>
     <plurals name="last_num_days" formatted="false" msgid="687443109145393632">
@@ -1270,18 +1271,18 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"العرض دائمًا"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"‏تم تصميم <xliff:g id="APP_NAME">%1$s</xliff:g> لإصدار غير متوافق من نظام تشغيل Android وقد يحدث خلل في أدائه. قد يتوفّر إصدار محدّث من التطبيق."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"الإظهار دائمًا"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"البحث عن تحديث"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"البحث عن إعادة تحميل"</string>
     <string name="smv_application" msgid="3775183542777792638">"‏انتهك التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (العملية <xliff:g id="PROCESS">%2$s</xliff:g>) سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="smv_process" msgid="1398801497130695446">"‏انتهكت العملية <xliff:g id="PROCESS">%1$s</xliff:g> سياسة StrictMode المفروضة ذاتيًا."</string>
-    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"جارٍ تحديث الهاتف…"</string>
-    <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"جارٍ تحديث الجهاز اللوحي…"</string>
-    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"جارٍ تحديث الجهاز…"</string>
+    <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"جارٍ إعادة تحميل الهاتف…"</string>
+    <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"جارٍ إعادة تحميل الجهاز اللوحي…"</string>
+    <string name="android_upgrading_title" product="device" msgid="6774767702998149762">"جارٍ إعادة تحميل الجهاز…"</string>
     <string name="android_start_title" product="default" msgid="4036708252778757652">"جارٍ بدء تشغيل الهاتف…"</string>
     <string name="android_start_title" product="automotive" msgid="7917984412828168079">"‏جارٍ تشغيل Android…"</string>
     <string name="android_start_title" product="tablet" msgid="4429767260263190344">"جارٍ بدء تشغيل الجهاز اللوحي…"</string>
     <string name="android_start_title" product="device" msgid="6967413819673299309">"جارٍ بدء تشغيل الجهاز…"</string>
     <string name="android_upgrading_fstrim" msgid="3259087575528515329">"جارٍ تحسين مساحة التخزين."</string>
-    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"جارٍ إنهاء تحديث النظام…"</string>
+    <string name="android_upgrading_notification_title" product="default" msgid="3509927005342279257">"جارٍ إنهاء إعادة تحميل النظام…"</string>
     <string name="app_upgrading_toast" msgid="1016267296049455585">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="1339564803894466737">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="589736917792300956">"جارٍ تحضير <xliff:g id="APPNAME">%1$s</xliff:g>."</string>
@@ -1323,6 +1324,14 @@
     <string name="ringtone_picker_title_alarm" msgid="7438934548339024767">"أصوات التنبيه"</string>
     <string name="ringtone_picker_title_notification" msgid="6387191794719608122">"أصوات الإشعار"</string>
     <string name="ringtone_unknown" msgid="5059495249862816475">"غير معروف"</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"لا يمكن الاتصال بـ <xliff:g id="SSID">%1$s</xliff:g>."</string>
+    <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"انقر لتغيير إعدادات الخصوصية وإعادة المحاولة."</string>
+    <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"هل تريد تغيير إعداد الخصوصية؟"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"‏قد يحتاج <xliff:g id="SSID_0">%1$s</xliff:g> إلى الاتصال باستخدام عنوان MAC الخاص بجهازك ومعرّف فريد. وقد يسمح هذا الإجراء للأجهزة القريبة بتتبع الموقع الجغرافي لجهازك. \n\nفي حال مواصلة تنفيذ هذا الإجراء، سيغيّر <xliff:g id="SSID_1">%1$s</xliff:g> إعداد الخصوصية ويحاول إعادة الاتصال."</string>
+    <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"تغيير الإعداد"</string>
+    <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"تم تعديل الإعداد. حاوِل إعادة الاتصال."</string>
+    <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"لا يمكن تغيير إعداد الخصوصية."</string>
+    <string name="wifi_disable_mac_randomization_dialog_network_not_found" msgid="6829886686837356040">"لم يتم العثور على الشبكة."</string>
     <plurals name="wifi_available" formatted="false" msgid="7209257945504714015">
       <item quantity="zero">‏لا تتوفر أي شبكات Wi-Fi</item>
       <item quantity="two">‏تتوفر شبكتا Wi-Fi</item>
@@ -1454,7 +1463,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‏اختيار إيقاف تصحيح أخطاء USB."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"تم تفعيل وضع \"مفعّل الاختبار\""</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"يمكنك إجراء إعادة ضبط على الإعدادات الأصلية لإيقاف وضع \"مفعِّل اختبار\"."</string>
-    <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏السوائل والشوائب في منفذ USB"</string>
+    <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏السوائل أو الشوائب في منفذ USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏تمّ إيقاف منفذ USB تلقائيًا. انقُر لمعرفة المزيد من المعلومات."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏مسموح باستخدام منفذ USB"</string>
     <string name="usb_contaminant_not_detected_message" msgid="892863190942660462">"لم يَعُد الهاتف يكتشف سوائل أو شوائب."</string>
@@ -1911,8 +1920,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"تم التحديث بواسطة المشرف"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"تم الحذف بواسطة المشرف"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"موافق"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="2923798442660964928">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد نشاط الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية. "<annotation id="url">"مزيد من المعلومات"</annotation></string>
-    <string name="battery_saver_description" msgid="2500910959722815154">"لإطالة عمر البطارية، تساعد ميزة \"توفير شحن البطارية\" على إيقاف أو تقييد النشاط في الخلفية وبعض التأثيرات المرئية وغيرها من الميزات التي تستنفد طاقة البطارية."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"\n\n"<annotation id="url">"مزيد من المعلومات"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"‏لإطالة عمر البطارية، \"توفير شحن البطارية\":\n·تفعيل \"التصميم الداكن\"\n إيقاف النشاط في الخلفية أو تقييده وأيضًا بعض التأثيرات المرئية والميزات الأخرى، مثلاً \"Ok Google\"."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"للمساعدة في خفض استخدام البيانات، تمنع ميزة \"توفير البيانات\" بعض التطبيقات من إرسال البيانات وتلقّيها في الخلفية. يمكن للتطبيق الذي تستخدمه الآن الوصول إلى البيانات، ولكن لا يمكنه تنفيذ ذلك كثيرًا. وهذا يعني أن الصور مثلاً لا تظهر حتى تنقر عليها."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"هل تريد تشغيل توفير البيانات؟"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"تشغيل"</string>
@@ -2043,7 +2052,7 @@
     <string name="work_mode_off_message" msgid="8417484421098563803">"سيتم تفعيل تطبيقات العمل التي تستخدمها والإشعارات والبيانات وغيرها من ميزات الملف الشخصي للعمل"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"تشغيل"</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"‏تمّ إنشاء هذا التطبيق لإصدار قديم من Android وقد لا يعمل بشكل صحيح. جرِّب البحث عن تحديثات أو الاتصال بمطوّر البرامج."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن تحديث"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"البحث عن إعادة تحميل"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"لديك رسائل جديدة"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"‏فتح تطبيق الرسائل القصيرة SMS للعرض"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"قد تكون بعض الوظائف مُقيّدة."</string>
@@ -2051,6 +2060,8 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"انقر لإلغاء قفل الملف الشخصي للعمل"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"تم الاتصال بـ <xliff:g id="PRODUCT_NAME">%1$s</xliff:g>"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"انقر لعرض الملفات"</string>
+    <string name="pin_target" msgid="8036028973110156895">"تثبيت"</string>
+    <string name="unpin_target" msgid="3963318576590204447">"إزالة تثبيت"</string>
     <string name="app_info" msgid="6113278084877079851">"معلومات عن التطبيق"</string>
     <string name="negative_duration" msgid="1938335096972945232">"−<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="demo_starting_message" msgid="6577581216125805905">"جارٍ بدء العرض التوضيحي…"</string>
@@ -2092,9 +2103,9 @@
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g> في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"؟"</string>
     <string name="autofill_update_title" msgid="3630695947047069136">"هل تريد التحديث في "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"؟"</string>
-    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"هل تريد تحديث <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
-    <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"هل تريد تحديث <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"هل تريد تحديث هذه العناصر في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g>؟"</string>
+    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"هل تريد إعادة تحميل <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"هل تريد إعادة تحميل <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"هل تريد إعادة تحميل هذه العناصر في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g>؟"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"حفظ"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"لا، شكرًا"</string>
     <string name="autofill_update_yes" msgid="4608662968996874445">"تعديل"</string>

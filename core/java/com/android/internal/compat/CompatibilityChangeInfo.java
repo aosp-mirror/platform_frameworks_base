@@ -30,6 +30,7 @@ public class CompatibilityChangeInfo implements Parcelable {
     private final @Nullable String mName;
     private final int mEnableAfterTargetSdk;
     private final boolean mDisabled;
+    private final boolean mLoggingOnly;
     private final @Nullable String mDescription;
 
     public long getId() {
@@ -49,17 +50,22 @@ public class CompatibilityChangeInfo implements Parcelable {
         return mDisabled;
     }
 
+    public boolean getLoggingOnly() {
+        return mLoggingOnly;
+    }
+
     public String getDescription()  {
         return mDescription;
     }
 
     public CompatibilityChangeInfo(
             Long changeId, String name, int enableAfterTargetSdk, boolean disabled,
-            String description) {
+            boolean loggingOnly, String description) {
         this.mChangeId = changeId;
         this.mName = name;
         this.mEnableAfterTargetSdk = enableAfterTargetSdk;
         this.mDisabled = disabled;
+        this.mLoggingOnly = loggingOnly;
         this.mDescription = description;
     }
 
@@ -68,6 +74,7 @@ public class CompatibilityChangeInfo implements Parcelable {
         mName = in.readString();
         mEnableAfterTargetSdk = in.readInt();
         mDisabled = in.readBoolean();
+        mLoggingOnly = in.readBoolean();
         mDescription = in.readString();
     }
 
@@ -82,6 +89,7 @@ public class CompatibilityChangeInfo implements Parcelable {
         dest.writeString(mName);
         dest.writeInt(mEnableAfterTargetSdk);
         dest.writeBoolean(mDisabled);
+        dest.writeBoolean(mLoggingOnly);
         dest.writeString(mDescription);
     }
 

@@ -40,52 +40,57 @@ class CompatConfigBuilder {
     }
 
     CompatConfigBuilder addTargetSdkChangeWithId(int sdk, long id) {
-        mChanges.add(new CompatChange(id, "", sdk, false, ""));
+        mChanges.add(new CompatChange(id, "", sdk, false, false, ""));
         return this;
     }
 
     CompatConfigBuilder addTargetSdkDisabledChangeWithId(int sdk, long id) {
-        mChanges.add(new CompatChange(id, "", sdk, true, ""));
+        mChanges.add(new CompatChange(id, "", sdk, true, false, ""));
         return this;
     }
 
     CompatConfigBuilder addTargetSdkChangeWithIdAndName(int sdk, long id, String name) {
-        mChanges.add(new CompatChange(id, name, sdk, false, ""));
+        mChanges.add(new CompatChange(id, name, sdk, false, false, ""));
         return this;
     }
 
     CompatConfigBuilder addTargetSdkChangeWithIdAndDescription(int sdk, long id,
             String description) {
-        mChanges.add(new CompatChange(id, "", sdk, false, description));
+        mChanges.add(new CompatChange(id, "", sdk, false, false, description));
         return this;
     }
 
     CompatConfigBuilder addEnabledChangeWithId(long id) {
-        mChanges.add(new CompatChange(id, "", -1, false, ""));
+        mChanges.add(new CompatChange(id, "", -1, false, false, ""));
         return this;
     }
 
     CompatConfigBuilder addEnabledChangeWithIdAndName(long id, String name) {
-        mChanges.add(new CompatChange(id, name, -1, false, ""));
+        mChanges.add(new CompatChange(id, name, -1, false, false, ""));
         return this;
     }
     CompatConfigBuilder addEnabledChangeWithIdAndDescription(long id, String description) {
-        mChanges.add(new CompatChange(id, "", -1, false, description));
+        mChanges.add(new CompatChange(id, "", -1, false, false, description));
         return this;
     }
 
     CompatConfigBuilder addDisabledChangeWithId(long id) {
-        mChanges.add(new CompatChange(id, "", -1, true, ""));
+        mChanges.add(new CompatChange(id, "", -1, true, false, ""));
         return this;
     }
 
     CompatConfigBuilder addDisabledChangeWithIdAndName(long id, String name) {
-        mChanges.add(new CompatChange(id, name, -1, true, ""));
+        mChanges.add(new CompatChange(id, name, -1, true, false, ""));
         return this;
     }
 
     CompatConfigBuilder addDisabledChangeWithIdAndDescription(long id, String description) {
-        mChanges.add(new CompatChange(id, "", -1, true, description));
+        mChanges.add(new CompatChange(id, "", -1, true, false, description));
+        return this;
+    }
+
+    CompatConfigBuilder addLoggingOnlyChangeWithId(long id) {
+        mChanges.add(new CompatChange(id, "", -1, false, true, ""));
         return this;
     }
 

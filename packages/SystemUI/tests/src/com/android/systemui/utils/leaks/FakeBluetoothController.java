@@ -57,6 +57,16 @@ public class FakeBluetoothController extends BaseLeakChecker<Callback> implement
     }
 
     @Override
+    public boolean isBluetoothAudioProfileOnly() {
+        return false;
+    }
+
+    @Override
+    public boolean isBluetoothAudioActive() {
+        return false;
+    }
+
+    @Override
     public String getConnectedDeviceName() {
         return null;
     }

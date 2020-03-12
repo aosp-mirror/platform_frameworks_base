@@ -995,20 +995,8 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             r.notifyUnknownVisibilityLaunched();
         }
 
-        try {
-            if (Trace.isTagEnabled(TRACE_TAG_ACTIVITY_MANAGER)) {
-                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dispatchingStartProcess:"
-                        + r.processName);
-            }
-            // Post message to start process to avoid possible deadlock of calling into AMS with the
-            // ATMS lock held.
-            final Message msg = PooledLambda.obtainMessage(
-                    ActivityManagerInternal::startProcess, mService.mAmInternal, r.processName,
-                    r.info.applicationInfo, knownToBeDead, "activity", r.intent.getComponent());
-            mService.mH.sendMessage(msg);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
-        }
+        final boolean isTop = andResume && r.isTopRunningActivity();
+        mService.startProcessAsync(r, knownToBeDead, isTop, isTop ? "top-activity" : "activity");
     }
 
     boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo, String resultWho,

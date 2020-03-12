@@ -346,6 +346,10 @@
     <protected-broadcast android:name="com.android.server.am.DELETE_DUMPHEAP" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_WARNING" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_RAPID" />
+    <protected-broadcast android:name="com.android.server.wifi.ACTION_SHOW_SET_RANDOMIZATION_DETAILS" />
+    <protected-broadcast android:name="com.android.server.wifi.action.NetworkSuggestion.USER_ALLOWED_APP" />
+    <protected-broadcast android:name="com.android.server.wifi.action.NetworkSuggestion.USER_DISALLOWED_APP" />
+    <protected-broadcast android:name="com.android.server.wifi.action.NetworkSuggestion.USER_DISMISSED" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.USER_DISMISSED_NOTIFICATION" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.CONNECT_TO_NETWORK" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.PICK_WIFI_NETWORK" />
@@ -1639,6 +1643,10 @@
 
     <!-- @SystemApi @hide Allows applications to register network factory or agent -->
     <permission android:name="android.permission.NETWORK_FACTORY"
+                android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Allows applications to access network stats provider -->
+    <permission android:name="android.permission.NETWORK_STATS_PROVIDER"
                 android:protectionLevel="signature" />
 
     <!-- Allows Settings and SystemUI to call methods in Networking services

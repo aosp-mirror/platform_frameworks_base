@@ -51,6 +51,8 @@ import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.SnoozeCriterion;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import androidx.test.runner.AndroidJUnit4;
+
 import com.android.server.UiServiceTestCase;
 
 import org.junit.After;
@@ -60,8 +62,6 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.test.runner.AndroidJUnit4;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -116,6 +116,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
             assertEquals(getSmartReplies(key, i), ranking.getSmartReplies());
             assertEquals(canBubble(i), ranking.canBubble());
+            assertEquals(visuallyInterruptive(i), ranking.visuallyInterruptive());
         }
     }
 
@@ -182,7 +183,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.isNoisy(),
                 (ArrayList) tweak.getSmartActions(),
                 (ArrayList) tweak.getSmartReplies(),
-                tweak.canBubble()
+                tweak.canBubble(),
+                tweak.visuallyInterruptive()
         );
         assertNotEquals(nru, nru2);
     }
@@ -258,7 +260,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     getNoisy(i),
                     getSmartActions(key, i),
                     getSmartReplies(key, i),
-                    canBubble(i)
+                    canBubble(i),
+                    visuallyInterruptive(i)
             );
             rankings[i] = ranking;
         }
@@ -360,6 +363,10 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
     }
 
     private boolean canBubble(int index) {
+        return index % 4 == 0;
+    }
+
+    private boolean visuallyInterruptive(int index) {
         return index % 4 == 0;
     }
 

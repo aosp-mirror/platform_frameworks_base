@@ -559,6 +559,37 @@ public class UpdateEngine {
         }
     }
 
+    private static class CleanupAppliedPayloadCallback extends IUpdateEngineCallback.Stub {
+        private int mErrorCode = ErrorCodeConstants.ERROR;
+        private boolean mCompleted = false;
+        private Object mLock = new Object();
+        private int getResult() {
+            synchronized (mLock) {
+                while (!mCompleted) {
+                    try {
+                        mLock.wait();
+                    } catch (InterruptedException ex) {
+                        // do nothing, just wait again.
+                    }
+                }
+                return mErrorCode;
+            }
+        }
+
+        @Override
+        public void onStatusUpdate(int status, float percent) {
+        }
+
+        @Override
+        public void onPayloadApplicationComplete(int errorCode) {
+            synchronized (mLock) {
+                mErrorCode = errorCode;
+                mCompleted = true;
+                mLock.notifyAll();
+            }
+        }
+    }
+
     /**
      * Cleanup files used by the previous update and free up space after the
      * device has been booted successfully into the new build.
@@ -590,8 +621,10 @@ public class UpdateEngine {
     @WorkerThread
     @ErrorCode
     public int cleanupAppliedPayload() {
+        CleanupAppliedPayloadCallback callback = new CleanupAppliedPayloadCallback();
         try {
-            return mUpdateEngine.cleanupSuccessfulUpdate();
+            mUpdateEngine.cleanupSuccessfulUpdate(callback);
+            return callback.getResult();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -134,6 +134,7 @@ package android {
     field public static final String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
     field public static final String NETWORK_SIGNAL_STRENGTH_WAKEUP = "android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
+    field public static final String NETWORK_STATS_PROVIDER = "android.permission.NETWORK_STATS_PROVIDER";
     field public static final String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
@@ -323,6 +324,7 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
     method public void unregisterHomeVisibilityObserver(@NonNull android.app.HomeVisibilityObserver);
+    method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
   }
 
   public static interface ActivityManager.OnUidImportanceListener {
@@ -1238,7 +1240,7 @@ package android.app.usage {
   }
 
   public class NetworkStatsManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.net.netstats.provider.NetworkStatsProviderCallback registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.AbstractNetworkStatsProvider);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.netstats.provider.NetworkStatsProviderCallback registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.AbstractNetworkStatsProvider);
   }
 
   public static final class UsageEvents.Event {
@@ -1389,23 +1391,23 @@ package android.bluetooth {
   }
 
   public final class BluetoothDevice implements android.os.Parcelable {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean cancelBondProcess();
-    method public boolean cancelPairing();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getBatteryLevel();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getMessageAccessPermission();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean cancelBondProcess();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean cancelPairing();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getBatteryLevel();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getMessageAccessPermission();
     method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public byte[] getMetadata(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getPhonebookAccessPermission();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getSimAccessPermission();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isBondingInitiatedLocally();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getPhonebookAccessPermission();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getSimAccessPermission();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isBondingInitiatedLocally();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isConnected();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isEncrypted();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isInSilenceMode();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean removeBond();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean removeBond();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setAlias(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMessageAccessPermission(int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setMetadata(int, @NonNull byte[]);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setPhonebookAccessPermission(int);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPin(@Nullable String);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setPin(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSilenceMode(boolean);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setSimAccessPermission(int);
     field public static final int ACCESS_ALLOWED = 1; // 0x1
@@ -1470,13 +1472,11 @@ package android.bluetooth {
   }
 
   public final class BluetoothPan implements java.lang.AutoCloseable android.bluetooth.BluetoothProfile {
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public void close();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) protected void finalize();
-    method @NonNull public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH) public boolean isTetheringOn();
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public void setBluetoothTethering(boolean);
-    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public java.util.List<android.bluetooth.BluetoothDevice> getConnectedDevices();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionState(@Nullable android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean isTetheringOn();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public void setBluetoothTethering(boolean);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
     field public static final String ACTION_CONNECTION_STATE_CHANGED = "android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED";
     field public static final String EXTRA_LOCAL_ROLE = "android.bluetooth.pan.extra.LOCAL_ROLE";
     field public static final int LOCAL_NAP_ROLE = 1; // 0x1
@@ -4421,7 +4421,7 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS) public String getCaptivePortalServerUrl();
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void getLatestTetheringEntitlementResult(int, boolean, @NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEntitlementResultListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.TETHER_PRIVILEGED, android.Manifest.permission.WRITE_SETTINGS}) public boolean isTetheringSupported();
-    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public int registerNetworkProvider(@NonNull android.net.NetworkProvider);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_FACTORY}) public int registerNetworkProvider(@NonNull android.net.NetworkProvider);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void registerTetheringEventCallback(@NonNull java.util.concurrent.Executor, @NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     method @Deprecated public void requestNetwork(@NonNull android.net.NetworkRequest, @NonNull android.net.ConnectivityManager.NetworkCallback, int, int, @NonNull android.os.Handler);
     method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_SETUP_WIZARD, android.Manifest.permission.NETWORK_STACK}) public void setAirplaneMode(boolean);
@@ -4430,7 +4430,7 @@ package android.net {
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void stopTethering(int);
-    method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void unregisterNetworkProvider(@NonNull android.net.NetworkProvider);
+    method @RequiresPermission(anyOf={android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, android.Manifest.permission.NETWORK_FACTORY}) public void unregisterNetworkProvider(@NonNull android.net.NetworkProvider);
     method @Deprecated @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public void unregisterTetheringEventCallback(@NonNull android.net.ConnectivityManager.OnTetheringEventCallback);
     field public static final String EXTRA_CAPTIVE_PORTAL_PROBE_SPEC = "android.net.extra.CAPTIVE_PORTAL_PROBE_SPEC";
     field public static final String EXTRA_CAPTIVE_PORTAL_USER_AGENT = "android.net.extra.CAPTIVE_PORTAL_USER_AGENT";
@@ -4460,7 +4460,7 @@ package android.net {
   }
 
   public class EthernetManager {
-    method @NonNull public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.EthernetManager.TetheredInterfaceRequest requestTetheredInterface(@NonNull java.util.concurrent.Executor, @NonNull android.net.EthernetManager.TetheredInterfaceCallback);
   }
 
   public static interface EthernetManager.TetheredInterfaceCallback {
@@ -4925,6 +4925,9 @@ package android.net {
     field public static final int TETHER_ERROR_UNKNOWN_IFACE = 1; // 0x1
     field public static final int TETHER_ERROR_UNSUPPORTED = 3; // 0x3
     field public static final int TETHER_ERROR_UNTETHER_IFACE_ERROR = 7; // 0x7
+    field public static final int TETHER_HARDWARE_OFFLOAD_FAILED = 2; // 0x2
+    field public static final int TETHER_HARDWARE_OFFLOAD_STARTED = 1; // 0x1
+    field public static final int TETHER_HARDWARE_OFFLOAD_STOPPED = 0; // 0x0
   }
 
   public static interface TetheringManager.OnTetheringEntitlementResultListener {
@@ -4941,6 +4944,7 @@ package android.net {
     ctor public TetheringManager.TetheringEventCallback();
     method public void onClientsChanged(@NonNull java.util.Collection<android.net.TetheredClient>);
     method public void onError(@NonNull String, int);
+    method public void onOffloadStatusChanged(int);
     method @Deprecated public void onTetherableInterfaceRegexpsChanged(@NonNull android.net.TetheringManager.TetheringInterfaceRegexps);
     method public void onTetherableInterfacesChanged(@NonNull java.util.List<java.lang.String>);
     method public void onTetheredInterfacesChanged(@NonNull java.util.List<java.lang.String>);
@@ -5980,13 +5984,15 @@ package android.os {
     field public static final String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
     field public static final String ACTION_UPDATE_CONVERSATION_ACTIONS = "android.intent.action.UPDATE_CONVERSATION_ACTIONS";
     field public static final String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
-    field public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
+    field @RequiresPermission("android.permission.UPDATE_CONFIG") public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
     field public static final String ACTION_UPDATE_INTENT_FIREWALL = "android.intent.action.UPDATE_INTENT_FIREWALL";
     field public static final String ACTION_UPDATE_LANG_ID = "android.intent.action.UPDATE_LANG_ID";
     field public static final String ACTION_UPDATE_NETWORK_WATCHLIST = "android.intent.action.UPDATE_NETWORK_WATCHLIST";
     field public static final String ACTION_UPDATE_PINS = "android.intent.action.UPDATE_PINS";
     field public static final String ACTION_UPDATE_SMART_SELECTION = "android.intent.action.UPDATE_SMART_SELECTION";
     field public static final String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
+    field public static final String EXTRA_REQUIRED_HASH = "android.os.extra.REQUIRED_HASH";
+    field public static final String EXTRA_VERSION = "android.os.extra.VERSION";
   }
 
   public class Environment {
@@ -7922,7 +7928,7 @@ package android.telecom {
   }
 
   public static class CallScreeningService.CallResponse.Builder {
-    method @NonNull public android.telecom.CallScreeningService.CallResponse.Builder setShouldScreenCallViaAudioProcessing(boolean);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_OUTPUT) public android.telecom.CallScreeningService.CallResponse.Builder setShouldScreenCallViaAudioProcessing(boolean);
   }
 
   public abstract class Conference extends android.telecom.Conferenceable {
@@ -9254,7 +9260,7 @@ package android.telephony {
 
   public class SmsMessage {
     method @Nullable public static android.telephony.SmsMessage.SubmitPdu getSmsPdu(int, int, @Nullable String, @NonNull String, @NonNull String, long);
-    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, int, int, int, int, int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public static byte[] getSubmitPduEncodedMessage(boolean, @NonNull String, @NonNull String, int, @IntRange(from=0) int, @IntRange(from=0) int, @IntRange(from=0, to=255) int, @IntRange(from=1, to=255) int, @IntRange(from=1, to=255) int);
   }
 
   public class SubscriptionInfo implements android.os.Parcelable {
@@ -9359,7 +9365,7 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
-    method public int getEmergencyNumberDbVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getIsimImpu();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
@@ -9389,7 +9395,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
     method public boolean isCurrentSimOperator(@NonNull String, int, @Nullable String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataAllowedInVoiceCall();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionEnabled();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionAllowed();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
@@ -9418,6 +9424,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void resetAllCarrierActions();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void resetCarrierKeysForImsiEncryption();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void resetIms(int);
+    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void resetOtaEmergencyNumberDbFilePath();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean resetRadioConfig();
     method @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL) public void resetSettings();
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
@@ -9444,6 +9451,8 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setRadioPower(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSimPowerStateForSlot(int, int);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSystemSelectionChannels(@NonNull java.util.List<android.telephony.RadioAccessSpecifier>);
     method @Deprecated public void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setVoiceActivationState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void shutdownAllRadios();
@@ -9455,8 +9464,8 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int[] supplyPukReportResult(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean switchSlots(int[]);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void toggleRadioOnOff();
+    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateOtaEmergencyNumberDbFilePath(@NonNull android.os.ParcelFileDescriptor);
     method public void updateServiceLocation();
-    method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateTestOtaEmergencyNumberDbFilePath(@NonNull String);
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
     field public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE = "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
     field public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE = "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";

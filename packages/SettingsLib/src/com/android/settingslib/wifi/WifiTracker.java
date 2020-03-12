@@ -70,8 +70,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * Tracks saved or available wifi networks and their state.
@@ -475,7 +477,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 continue;
             }
 
-            String apKey = AccessPoint.getKey(result);
+            String apKey = AccessPoint.getKey(mContext, result);
             List<ScanResult> resultList;
             if (scanResultsByApKey.containsKey(apKey)) {
                 resultList = scanResultsByApKey.get(apKey);
@@ -548,14 +550,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private void updateAccessPoints(final List<ScanResult> newScanResults,
             List<WifiConfiguration> configs) {
 
-        // Map configs and scan results necessary to make AccessPoints
-        final Map<String, WifiConfiguration> configsByKey = new ArrayMap(configs.size());
-        if (configs != null) {
-            for (WifiConfiguration config : configs) {
-                configsByKey.put(AccessPoint.getKey(config), config);
-            }
-        }
-
         WifiConfiguration connectionConfig = null;
         if (mLastInfo != null) {
             connectionConfig = getWifiConfigurationForNetworkId(mLastInfo.getNetworkId(), configs);
@@ -587,7 +581,26 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                         getCachedOrCreate(entry.getValue(), cachedAccessPoints);
 
                 // Update the matching config if there is one, to populate saved network info
-                accessPoint.update(configsByKey.get(entry.getKey()));
+                final List<WifiConfiguration> matchedConfigs = configs.stream()
+                        .filter(config -> accessPoint.matches(config))
+                        .collect(Collectors.toList());
+
+                final int matchedConfigCount = matchedConfigs.size();
+                if (matchedConfigCount == 0) {
+                    accessPoint.update(null);
+                } else if (matchedConfigCount == 1) {
+                    accessPoint.update(matchedConfigs.get(0));
+                } else {
+                    // We may have 2 matched configured WifiCongiguration if the AccessPoint is
+                    // of PSK/SAE transition mode or open/OWE transition mode.
+                    Optional<WifiConfiguration> preferredConfig = matchedConfigs.stream()
+                            .filter(config -> isSaeOrOwe(config)).findFirst();
+                    if (preferredConfig.isPresent()) {
+                        accessPoint.update(preferredConfig.get());
+                    } else {
+                        accessPoint.update(matchedConfigs.get(0));
+                    }
+                }
 
                 accessPoints.add(accessPoint);
             }
@@ -653,6 +666,11 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         conditionallyNotifyListeners();
     }
 
+    private static boolean isSaeOrOwe(WifiConfiguration config) {
+        final int security = AccessPoint.getSecurity(config);
+        return security == AccessPoint.SECURITY_SAE || security == AccessPoint.SECURITY_OWE;
+    }
+
     @VisibleForTesting
     List<AccessPoint> updatePasspointAccessPoints(
             List<Pair<WifiConfiguration, Map<Integer, List<ScanResult>>>> passpointConfigsAndScans,
@@ -701,7 +719,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private AccessPoint getCachedOrCreate(
             List<ScanResult> scanResults,
             List<AccessPoint> cache) {
-        AccessPoint accessPoint = getCachedByKey(cache, AccessPoint.getKey(scanResults.get(0)));
+        AccessPoint accessPoint = getCachedByKey(cache,
+                AccessPoint.getKey(mContext, scanResults.get(0)));
         if (accessPoint == null) {
             accessPoint = new AccessPoint(mContext, scanResults);
         } else {

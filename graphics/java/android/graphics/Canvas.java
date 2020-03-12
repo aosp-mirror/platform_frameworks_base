@@ -2095,9 +2095,11 @@ public class Canvas extends BaseCanvas {
 
     /**
      * Draw the text, with origin at (x,y), using the specified paint, along the specified path. The
-     * paint's Align setting determins where along the path to start the text.
+     * paint's Align setting determines where along the path to start the text.
      *
      * @param text The text to be drawn
+     * @param index The starting index within the text to be drawn
+     * @param count Starting from index, the number of characters to draw
      * @param path The path the text should follow for its baseline
      * @param hOffset The distance along the path to add to the text's starting position
      * @param vOffset The distance above(-) or below(+) the path to position the text
@@ -2110,7 +2112,7 @@ public class Canvas extends BaseCanvas {
 
     /**
      * Draw the text, with origin at (x,y), using the specified paint, along the specified path. The
-     * paint's Align setting determins where along the path to start the text.
+     * paint's Align setting determines where along the path to start the text.
      *
      * @param text The text to be drawn
      * @param path The path the text should follow for its baseline

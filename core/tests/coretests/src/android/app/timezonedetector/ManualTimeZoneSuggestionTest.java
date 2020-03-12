@@ -18,11 +18,18 @@ package android.app.timezonedetector;
 
 import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
+import static android.app.timezonedetector.ShellCommandTestSupport.createShellCommandWithArgsAndOptions;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import android.os.ShellCommand;
 
 import org.junit.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class ManualTimeZoneSuggestionTest {
 
@@ -57,5 +64,37 @@ public class ManualTimeZoneSuggestionTest {
         suggestion.addDebugInfo("This is debug info");
         ManualTimeZoneSuggestion rtSuggestion = roundTripParcelable(suggestion);
         assertEquals(suggestion.getDebugInfo(), rtSuggestion.getDebugInfo());
+    }
+
+    @Test
+    public void testPrintCommandLineOpts() throws Exception {
+        try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+            ManualTimeZoneSuggestion.printCommandLineOpts(pw);
+            assertTrue(sw.getBuffer().length() > 0);
+        }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_noArgs() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions("");
+        ManualTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
+    }
+
+    @Test
+    public void testParseCommandLineArg_validSuggestion() {
+        ShellCommand testShellCommand =
+                createShellCommandWithArgsAndOptions("--zone_id Europe/London");
+        ManualTimeZoneSuggestion expectedSuggestion =
+                new ManualTimeZoneSuggestion("Europe/London");
+        ManualTimeZoneSuggestion actualSuggestion =
+                ManualTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
+        assertEquals(expectedSuggestion, actualSuggestion);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testParseCommandLineArg_unknownArgument() {
+        ShellCommand testShellCommand = createShellCommandWithArgsAndOptions(
+                "--zone_id Europe/London --bad_arg 0");
+        ManualTimeZoneSuggestion.parseCommandLineArg(testShellCommand);
     }
 }

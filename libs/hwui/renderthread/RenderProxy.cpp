@@ -82,9 +82,10 @@ void RenderProxy::setName(const char* name) {
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
 }
 
-void RenderProxy::setSurface(const sp<Surface>& surface) {
-    mRenderThread.queue().post(
-            [this, surf = surface]() mutable { mContext->setSurface(std::move(surf)); });
+void RenderProxy::setSurface(const sp<Surface>& surface, bool enableTimeout) {
+    mRenderThread.queue().post([this, surf = surface, enableTimeout]() mutable {
+        mContext->setSurface(std::move(surf), enableTimeout);
+    });
 }
 
 void RenderProxy::allocateBuffers() {

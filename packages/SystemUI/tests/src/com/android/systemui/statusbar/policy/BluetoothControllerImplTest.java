@@ -39,6 +39,7 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.settingslib.bluetooth.CachedBluetoothDeviceManager;
 import com.android.settingslib.bluetooth.LocalBluetoothAdapter;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfile;
 import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.SysuiTestCase;
 
@@ -228,5 +229,29 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         }
         assertTrue(mBluetoothControllerImpl.isBluetoothConnected());
         verify(callback, atLeastOnce()).onBluetoothStateChange(anyBoolean());
+    }
+
+    @Test
+    public void testOnActiveDeviceChanged_updatesAudioActive() {
+        assertFalse(mBluetoothControllerImpl.isBluetoothAudioActive());
+        assertFalse(mBluetoothControllerImpl.isBluetoothAudioProfileOnly());
+
+        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
+        mDevices.add(device);
+        when(device.isActiveDevice(BluetoothProfile.HEADSET)).thenReturn(true);
+
+        List<LocalBluetoothProfile> profiles = new ArrayList<>();
+        LocalBluetoothProfile profile = mock(LocalBluetoothProfile.class);
+        profiles.add(profile);
+        when(profile.getProfileId()).thenReturn(BluetoothProfile.HEADSET);
+        when(device.getProfiles()).thenReturn(profiles);
+        when(device.isConnectedProfile(profile)).thenReturn(true);
+
+        mBluetoothControllerImpl.onAclConnectionStateChanged(device,
+                BluetoothProfile.STATE_CONNECTED);
+        mBluetoothControllerImpl.onActiveDeviceChanged(device, BluetoothProfile.HEADSET);
+
+        assertTrue(mBluetoothControllerImpl.isBluetoothAudioActive());
+        assertTrue(mBluetoothControllerImpl.isBluetoothAudioProfileOnly());
     }
 }
