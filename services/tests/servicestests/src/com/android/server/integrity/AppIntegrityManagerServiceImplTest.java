@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -321,6 +322,11 @@ public class AppIntegrityManagerServiceImplTest {
         // we cannot check installer cert because it seems to be device specific.
         assertEquals(VERSION_CODE, appInstallMetadata.getVersionCode());
         assertFalse(appInstallMetadata.isPreInstalled());
+        // Asserting source stamp not present.
+        assertFalse(appInstallMetadata.isStampPresent());
+        assertFalse(appInstallMetadata.isStampVerified());
+        assertFalse(appInstallMetadata.isStampTrusted());
+        assertNull(appInstallMetadata.getStampCertificateHash());
         // These are hardcoded in the test apk android manifest
         Map<String, String> allowedInstallers =
                 appInstallMetadata.getAllowedInstallersAndCertificates();
