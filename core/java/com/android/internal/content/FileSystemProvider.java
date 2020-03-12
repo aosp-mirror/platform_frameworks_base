@@ -430,7 +430,7 @@ public abstract class FileSystemProvider extends DocumentsProvider {
             if (shouldHide(file)) continue;
 
             if (file.isDirectory()) {
-                for (File child : file.listFiles()) {
+                for (File child : FileUtils.listFilesOrEmpty(file)) {
                     pending.add(child);
                 }
             }
