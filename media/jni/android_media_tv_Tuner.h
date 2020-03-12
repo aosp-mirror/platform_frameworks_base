@@ -184,7 +184,7 @@ struct JTuner : public RefBase {
     jobject openFilter(DemuxFilterType type, int bufferSize);
     jobject openTimeFilter();
     jobject openDescrambler();
-    jobject openDvr(DvrType type, int bufferSize);
+    jobject openDvr(DvrType type, jlong bufferSize);
 
 protected:
     Result openDemux();

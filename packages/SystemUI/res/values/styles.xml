@@ -650,6 +650,7 @@
     <!-- Controls styles -->
     <style name="Theme.ControlsManagement" parent="@android:style/Theme.DeviceDefault.NoActionBar">
         <item name="android:windowIsTranslucent">false</item>
+        <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
     <style name="TextAppearance.Control">

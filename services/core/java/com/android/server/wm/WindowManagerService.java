@@ -2447,10 +2447,6 @@ public class WindowManagerService extends IWindowManager.Stub
             // of a transaction to avoid artifacts.
             win.mAnimatingExit = true;
         } else {
-            final DisplayContent displayContent = win.getDisplayContent();
-            if (displayContent.mInputMethodWindow == win) {
-                displayContent.setInputMethodWindowLocked(null);
-            }
             boolean stopped = win.mActivityRecord != null ? win.mActivityRecord.mAppStopped : true;
             // We set mDestroying=true so ActivityRecord#notifyAppStopped in-to destroy surfaces
             // will later actually destroy the surface if we do not do so here. Normally we leave

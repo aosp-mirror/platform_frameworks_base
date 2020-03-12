@@ -379,7 +379,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (DEBUG_SIM_STATES) {
             Log.v(TAG, "onSubscriptionInfoChanged()");
             List<SubscriptionInfo> sil = mSubscriptionManager
-                    .getActiveAndHiddenSubscriptionInfoList();
+                    .getCompleteActiveSubscriptionInfoList();
             if (sil != null) {
                 for (SubscriptionInfo subInfo : sil) {
                     Log.v(TAG, "SubInfo:" + subInfo);
@@ -433,10 +433,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     public List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
         if (sil == null || forceReload) {
-            sil = mSubscriptionManager.getActiveAndHiddenSubscriptionInfoList();
+            sil = mSubscriptionManager.getCompleteActiveSubscriptionInfoList();
         }
         if (sil == null) {
-            // getActiveAndHiddenSubscriptionInfoList was null callers expect an empty list.
+            // getCompleteActiveSubscriptionInfoList was null callers expect an empty list.
             mSubscriptionInfo = new ArrayList<SubscriptionInfo>();
         } else {
             mSubscriptionInfo = sil;
@@ -1086,7 +1086,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
             } else if (Intent.ACTION_TIMEZONE_CHANGED.equals(action)) {
                 final Message msg = mHandler.obtainMessage(
-                        MSG_TIMEZONE_UPDATE, intent.getStringExtra("time-zone"));
+                        MSG_TIMEZONE_UPDATE, intent.getStringExtra(Intent.EXTRA_TIMEZONE));
                 mHandler.sendMessage(msg);
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
 

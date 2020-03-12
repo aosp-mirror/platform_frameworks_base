@@ -79,6 +79,7 @@ package android {
     field public static final String DEVICE_POWER = "android.permission.DEVICE_POWER";
     field public static final String DISPATCH_PROVISIONING_MESSAGE = "android.permission.DISPATCH_PROVISIONING_MESSAGE";
     field public static final String ENTER_CAR_MODE_PRIORITIZED = "android.permission.ENTER_CAR_MODE_PRIORITIZED";
+    field public static final String EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS = "android.permission.EXEMPT_FROM_AUDIO_RECORD_RESTRICTIONS";
     field public static final String FORCE_BACK = "android.permission.FORCE_BACK";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field public static final String GET_APP_OPS_STATS = "android.permission.GET_APP_OPS_STATS";
@@ -7241,7 +7242,6 @@ package android.net.wifi {
     field @Deprecated public int numScorerOverride;
     field @Deprecated public int numScorerOverrideAndSwitchedNetwork;
     field @Deprecated public boolean requirePmf;
-    field @Deprecated @Nullable public String saePasswordId;
     field @Deprecated public boolean shared;
     field @Deprecated public boolean useExternalScores;
   }
@@ -9969,7 +9969,7 @@ package android.service.dataloader {
   }
 
   public static final class DataLoaderService.FileSystemConnector {
-    method public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
+    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void writeData(@NonNull String, long, long, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
   }
 
 }
@@ -10647,14 +10647,7 @@ package android.telecom {
   }
 
   public final class PhoneAccount implements android.os.Parcelable {
-    field public static final int CAPABILITY_EMERGENCY_CALLS_ONLY = 128; // 0x80
-    field public static final int CAPABILITY_EMERGENCY_PREFERRED = 8192; // 0x2000
-    field public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 512; // 0x200
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
-    field public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE = "android.telecom.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
-    field public static final String EXTRA_PLAY_CALL_RECORDING_TONE = "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
-    field public static final String EXTRA_SORT_ORDER = "android.telecom.extra.SORT_ORDER";
-    field public static final String EXTRA_SUPPORTS_VIDEO_CALLING_FALLBACK = "android.telecom.extra.SUPPORTS_VIDEO_CALLING_FALLBACK";
   }
 
   public static class PhoneAccount.Builder {
@@ -10740,20 +10733,13 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
-    field public static final String ACTION_CURRENT_TTY_MODE_CHANGED = "android.telecom.action.CURRENT_TTY_MODE_CHANGED";
-    field public static final String ACTION_TTY_PREFERRED_MODE_CHANGED = "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
     field public static final int CALL_SOURCE_EMERGENCY_DIALPAD = 1; // 0x1
     field public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2; // 0x2
     field public static final int CALL_SOURCE_UNSPECIFIED = 0; // 0x0
     field public static final String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
-    field public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
-    field public static final String EXTRA_CALL_TECHNOLOGY_TYPE = "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
     field public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
-    field public static final String EXTRA_CURRENT_TTY_MODE = "android.telecom.extra.CURRENT_TTY_MODE";
     field public static final String EXTRA_IS_USER_INTENT_EMERGENCY_CALL = "android.telecom.extra.IS_USER_INTENT_EMERGENCY_CALL";
-    field public static final String EXTRA_TTY_PREFERRED_MODE = "android.telecom.extra.TTY_PREFERRED_MODE";
-    field public static final String EXTRA_UNKNOWN_CALL_HANDLE = "android.telecom.extra.UNKNOWN_CALL_HANDLE";
     field public static final int TTY_MODE_FULL = 1; // 0x1
     field public static final int TTY_MODE_HCO = 2; // 0x2
     field public static final int TTY_MODE_OFF = 0; // 0x0
@@ -11598,7 +11584,6 @@ package android.telephony {
     method @Deprecated public boolean getDataEnabled();
     method @Deprecated public boolean getDataEnabled(int);
     method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
-    method @NonNull public static String getDefaultSimCountryIso();
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
@@ -11640,7 +11625,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isInEmergencySmsMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isLteCdmaEvdoGsmWcdmaEnabled();
-    method public boolean isModemEnabledForSlot(int);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isOpportunisticNetworkEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isPotentialEmergencyNumber(@NonNull String);
@@ -11787,7 +11771,6 @@ package android.telephony {
     field public static final long NETWORK_TYPE_BITMASK_TD_SCDMA = 65536L; // 0x10000L
     field public static final long NETWORK_TYPE_BITMASK_UMTS = 4L; // 0x4L
     field public static final long NETWORK_TYPE_BITMASK_UNKNOWN = 0L; // 0x0L
-    field public static final int PHONE_TYPE_THIRD_PARTY = 4; // 0x4
     field public static final int RADIO_POWER_OFF = 0; // 0x0
     field public static final int RADIO_POWER_ON = 1; // 0x1
     field public static final int RADIO_POWER_UNAVAILABLE = 2; // 0x2
