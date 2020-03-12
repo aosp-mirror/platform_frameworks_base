@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -128,6 +129,35 @@ public class CrossProfileApps {
             @NonNull Intent intent,
             @NonNull UserHandle targetUser,
             @Nullable Activity callingActivity) {
+        startActivity(intent, targetUser, callingActivity, /* options= */ null);
+    }
+
+    /**
+     * Starts the specified activity of the caller package in the specified profile.
+     *
+     * <p>The caller must have the {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES},
+     * {@code android.Manifest.permission#INTERACT_ACROSS_USERS}, or {@code
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission. Both the caller and
+     * target user profiles must be in the same profile group. The target user must be a valid user
+     * returned from {@link #getTargetUserProfiles()}.
+     *
+     * @param intent The intent to launch. A component in the caller package must be specified.
+     * @param targetUser The {@link UserHandle} of the profile; must be one of the users returned by
+     *        {@link #getTargetUserProfiles()} if different to the calling user, otherwise a
+     *        {@link SecurityException} will be thrown.
+     * @param callingActivity The activity to start the new activity from for the purposes of
+     *        deciding which task the new activity should belong to. If {@code null}, the activity
+     *        will always be started in a new task.
+     * @param options The activity options or {@code null}. See {@link android.app.ActivityOptions}.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.INTERACT_ACROSS_PROFILES,
+            android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public void startActivity(
+            @NonNull Intent intent,
+            @NonNull UserHandle targetUser,
+            @Nullable Activity callingActivity,
+            @Nullable Bundle options) {
         try {
             mService.startActivityAsUserByIntent(
                     mContext.getIApplicationThread(),
@@ -135,7 +165,8 @@ public class CrossProfileApps {
                     mContext.getFeatureId(),
                     intent,
                     targetUser.getIdentifier(),
-                    callingActivity != null ? callingActivity.getActivityToken() : null);
+                    callingActivity != null ? callingActivity.getActivityToken() : null,
+                    options);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
