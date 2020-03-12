@@ -16,50 +16,61 @@
 
 package android.app.blob;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.IdRes;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.List;
 
 /**
- * Class to provide information about an accessor of a shared blob.
+ * Class to provide information about a lease (acquired using
+ * {@link BlobStoreManager#acquireLease(BlobHandle, int)} or one of it's variants)
+ * for a shared blob.
  *
  * @hide
  */
-public final class AccessorInfo implements Parcelable {
+@TestApi
+public final class LeaseInfo implements Parcelable {
     private final String mPackageName;
-    private final long mExpiryTimeMs;
+    private final long mExpiryTimeMillis;
     private final int mDescriptionResId;
     private final CharSequence mDescription;
 
-    public AccessorInfo(String packageName, long expiryTimeMs,
-            int descriptionResId, CharSequence description) {
+    public LeaseInfo(@NonNull String packageName, @CurrentTimeMillisLong long expiryTimeMs,
+            @IdRes int descriptionResId, @Nullable CharSequence description) {
         mPackageName = packageName;
-        mExpiryTimeMs = expiryTimeMs;
+        mExpiryTimeMillis = expiryTimeMs;
         mDescriptionResId = descriptionResId;
         mDescription = description;
     }
 
-    private AccessorInfo(Parcel in) {
+    private LeaseInfo(Parcel in) {
         mPackageName = in.readString();
-        mExpiryTimeMs = in.readLong();
+        mExpiryTimeMillis = in.readLong();
         mDescriptionResId = in.readInt();
         mDescription = in.readCharSequence();
     }
 
+    @NonNull
     public String getPackageName() {
         return mPackageName;
     }
 
-    public long getExpiryTimeMs() {
-        return mExpiryTimeMs;
+    @CurrentTimeMillisLong
+    public long getExpiryTimeMillis() {
+        return mExpiryTimeMillis;
     }
 
+    @IdRes
     public int getDescriptionResId() {
         return mDescriptionResId;
     }
 
+    @Nullable
     public CharSequence getDescription() {
         return mDescription;
     }
@@ -67,16 +78,16 @@ public final class AccessorInfo implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeString(mPackageName);
-        dest.writeLong(mExpiryTimeMs);
+        dest.writeLong(mExpiryTimeMillis);
         dest.writeInt(mDescriptionResId);
         dest.writeCharSequence(mDescription);
     }
 
     @Override
     public String toString() {
-        return "AccessorInfo {"
+        return "LeaseInfo {"
                 + "package: " + mPackageName + ","
-                + "expiryMs: " + mExpiryTimeMs + ","
+                + "expiryMs: " + mExpiryTimeMillis + ","
                 + "descriptionResId: " + mDescriptionResId + ","
                 + "description: " + mDescription + ","
                 + "}";
@@ -86,11 +97,11 @@ public final class AccessorInfo implements Parcelable {
         return mPackageName;
     }
 
-    public static String toShortString(List<AccessorInfo> accessors) {
+    static String toShortString(List<LeaseInfo> leaseInfos) {
         final StringBuilder sb = new StringBuilder();
         sb.append("[");
-        for (int i = 0, size = accessors.size(); i < size; ++i) {
-            sb.append(accessors.get(i).toShortString());
+        for (int i = 0, size = leaseInfos.size(); i < size; ++i) {
+            sb.append(leaseInfos.get(i).toShortString());
             sb.append(",");
         }
         sb.append("]");
@@ -103,17 +114,17 @@ public final class AccessorInfo implements Parcelable {
     }
 
     @NonNull
-    public static final Creator<AccessorInfo> CREATOR = new Creator<AccessorInfo>() {
+    public static final Creator<LeaseInfo> CREATOR = new Creator<LeaseInfo>() {
         @Override
         @NonNull
-        public AccessorInfo createFromParcel(Parcel source) {
-            return new AccessorInfo(source);
+        public LeaseInfo createFromParcel(Parcel source) {
+            return new LeaseInfo(source);
         }
 
         @Override
         @NonNull
-        public AccessorInfo[] newArray(int size) {
-            return new AccessorInfo[size];
+        public LeaseInfo[] newArray(int size) {
+            return new LeaseInfo[size];
         }
     };
 }

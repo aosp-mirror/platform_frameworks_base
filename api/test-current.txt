@@ -593,7 +593,20 @@ package android.app.backup {
 package android.app.blob {
 
   public class BlobStoreManager {
+    method @Nullable public android.app.blob.LeaseInfo getLeaseInfo(@NonNull android.app.blob.BlobHandle) throws java.io.IOException;
+    method @NonNull public java.util.List<android.app.blob.BlobHandle> getLeasedBlobs() throws java.io.IOException;
     method public void waitForIdle(long) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException;
+  }
+
+  public final class LeaseInfo implements android.os.Parcelable {
+    ctor public LeaseInfo(@NonNull String, long, @IdRes int, @Nullable CharSequence);
+    method public int describeContents();
+    method @Nullable public CharSequence getDescription();
+    method @IdRes public int getDescriptionResId();
+    method public long getExpiryTimeMillis();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.blob.LeaseInfo> CREATOR;
   }
 
 }
