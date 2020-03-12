@@ -1291,6 +1291,14 @@
         android:description="@string/permdesc_camera"
         android:protectionLevel="dangerous|instant" />
 
+    <!-- Allows receiving the camera service notifications when a camera is opened
+            (by a certain application package) or closed.
+        @hide -->
+    <permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_cameraOpenCloseListener"
+        android:description="@string/permdesc_cameraOpenCloseListener"
+        android:protectionLevel="signature" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device sensors                           -->

@@ -1161,6 +1161,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_camera">This app can take pictures and record videos using the camera at any time.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_cameraOpenCloseListener">Allow an application or service to receive callbacks about camera devices being opened or closed.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permdesc_cameraOpenCloseListener">This signature app can receive callbacks when any camera device is being opened (by what application package) or closed.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_vibrate">control vibration</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
