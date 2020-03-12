@@ -1,4 +1,12 @@
 // Signature format: 2.0
+package android {
+
+  public static final class R.attr {
+    field public static final int featureId = 16844301; // 0x101060d
+  }
+
+}
+
 package android.app {
 
   public class ActivityManager {
@@ -69,11 +77,17 @@ package android.app.usage {
 
 package android.content {
 
+  public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
+    method @Deprecated @Nullable public final String getCallingFeatureId();
+  }
+
   public abstract class ContentResolver {
     method @Deprecated public void notifyChange(@NonNull Iterable<android.net.Uri>, @Nullable android.database.ContentObserver, int);
   }
 
   public abstract class Context {
+    method @Deprecated @NonNull public android.content.Context createFeatureContext(@Nullable String);
+    method @Deprecated @Nullable public String getFeatureId();
     method public abstract android.content.SharedPreferences getSharedPreferences(java.io.File, int);
     method public abstract java.io.File getSharedPreferencesPath(String);
   }

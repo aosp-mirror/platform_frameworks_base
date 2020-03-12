@@ -159,8 +159,8 @@ import java.util.function.Supplier;
  * <p>Some apps are forwarding access to other apps. E.g. an app might get the location from the
  * system's location provider and then send the location further to a 3rd app. In this case the
  * app passing on the data needs to call {@link #noteProxyOp} to signal the access proxying. This
- * might also make sense inside of a single app if the access is forwarded between two features of
- * the app.
+ * might also make sense inside of a single app if the access is forwarded between two parts of
+ * the tagged with different attribution tags.
  *
  * <p>An app can register an {@link OnOpNotedCallback} to get informed about what accesses the
  * system is tracking for it. As each runtime permission has an associated app-op this API is
@@ -2650,23 +2650,23 @@ public class AppOpsManager {
         private @IntRange(from = 0) int mUid;
         /** Package of the proxy that noted the op */
         private @Nullable String mPackageName;
-        /** ID of the feature of the proxy that noted the op */
-        private @Nullable String mFeatureId;
+        /** Attribution tag of the proxy that noted the op */
+        private @Nullable String mAttributionTag;
 
         /**
          * Reinit existing object with new state.
          *
          * @param uid UID of the proxy app that noted the op
          * @param packageName Package of the proxy that noted the op
-         * @param featureId ID of the feature of the proxy that noted the op
+         * @param attributionTag attribution tag of the proxy that noted the op
          *
          * @hide
          */
         public void reinit(@IntRange(from = 0) int uid, @Nullable String packageName,
-                @Nullable String featureId) {
+                @Nullable String attributionTag) {
             mUid = Preconditions.checkArgumentNonnegative(uid);
             mPackageName = packageName;
-            mFeatureId = featureId;
+            mAttributionTag = attributionTag;
         }
 
 
@@ -2691,21 +2691,21 @@ public class AppOpsManager {
          *   UID of the proxy app that noted the op
          * @param packageName
          *   Package of the proxy that noted the op
-         * @param featureId
-         *   ID of the feature of the proxy that noted the op
+         * @param attributionTag
+         *   Attribution tag of the proxy that noted the op
          * @hide
          */
         @DataClass.Generated.Member
         public OpEventProxyInfo(
                 @IntRange(from = 0) int uid,
                 @Nullable String packageName,
-                @Nullable String featureId) {
+                @Nullable String attributionTag) {
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
                     "from", 0);
             this.mPackageName = packageName;
-            this.mFeatureId = featureId;
+            this.mAttributionTag = attributionTag;
 
             // onConstructed(); // You can define this method to get a callback
         }
@@ -2719,7 +2719,7 @@ public class AppOpsManager {
         public OpEventProxyInfo(@NonNull OpEventProxyInfo orig) {
             mUid = orig.mUid;
             mPackageName = orig.mPackageName;
-            mFeatureId = orig.mFeatureId;
+            mAttributionTag = orig.mAttributionTag;
         }
 
         /**
@@ -2739,11 +2739,11 @@ public class AppOpsManager {
         }
 
         /**
-         * ID of the feature of the proxy that noted the op
+         * Attribution tag of the proxy that noted the op
          */
         @DataClass.Generated.Member
-        public @Nullable String getFeatureId() {
-            return mFeatureId;
+        public @Nullable String getAttributionTag() {
+            return mAttributionTag;
         }
 
         @Override
@@ -2754,11 +2754,11 @@ public class AppOpsManager {
 
             byte flg = 0;
             if (mPackageName != null) flg |= 0x2;
-            if (mFeatureId != null) flg |= 0x4;
+            if (mAttributionTag != null) flg |= 0x4;
             dest.writeByte(flg);
             dest.writeInt(mUid);
             if (mPackageName != null) dest.writeString(mPackageName);
-            if (mFeatureId != null) dest.writeString(mFeatureId);
+            if (mAttributionTag != null) dest.writeString(mAttributionTag);
         }
 
         @Override
@@ -2775,14 +2775,14 @@ public class AppOpsManager {
             byte flg = in.readByte();
             int uid = in.readInt();
             String packageName = (flg & 0x2) == 0 ? null : in.readString();
-            String featureId = (flg & 0x4) == 0 ? null : in.readString();
+            String attributionTag = (flg & 0x4) == 0 ? null : in.readString();
 
             this.mUid = uid;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mUid,
                     "from", 0);
             this.mPackageName = packageName;
-            this.mFeatureId = featureId;
+            this.mAttributionTag = attributionTag;
 
             // onConstructed(); // You can define this method to get a callback
         }
@@ -2806,7 +2806,7 @@ public class AppOpsManager {
                 time = 1576814974615L,
                 codegenVersion = "1.0.14",
                 sourceFile = "frameworks/base/core/java/android/app/AppOpsManager.java",
-                inputSignatures = "private @android.annotation.IntRange(from=0L) int mUid\nprivate @android.annotation.Nullable java.lang.String mPackageName\nprivate @android.annotation.Nullable java.lang.String mFeatureId\npublic  void reinit(int,java.lang.String,java.lang.String)\nclass OpEventProxyInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genHiddenCopyConstructor=true)")
+                inputSignatures = "private @android.annotation.IntRange(from=0L) int mUid\nprivate @android.annotation.Nullable java.lang.String mPackageName\nprivate @android.annotation.Nullable java.lang.String mAttributionTag\npublic  void reinit(int,java.lang.String,java.lang.String)\nclass OpEventProxyInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genHiddenCopyConstructor=true)")
         @Deprecated
         private void __metadata() {}
         */
@@ -3005,7 +3005,7 @@ public class AppOpsManager {
 
     /**
      * Last {@link #noteOp} and {@link #startOp} events performed for a single op and a specific
-     * {@link Context#createFeatureContext(String) feature} for all uidModes and opFlags.
+     * {@link Context#createAttributionContext(String) attribution} for all uidModes and opFlags.
      *
      * @hide
      */
@@ -3014,7 +3014,7 @@ public class AppOpsManager {
     @Immutable
     // @DataClass(genHiddenConstructor = true) codegen verifier is broken
     @DataClass.Suppress({"getAccessEvents", "getRejectEvents", "getOp"})
-    public static final class OpFeatureEntry implements Parcelable {
+    public static final class AttributedOpEntry implements Parcelable {
         /** The code of the op */
         private final @IntRange(from = 0, to = _NUM_OP - 1) int mOp;
         /** Whether the op is running */
@@ -3313,8 +3313,8 @@ public class AppOpsManager {
         }
 
         /**
-         * Gets the proxy info of the app that performed the last access on behalf of this feature
-         * and as a result blamed the op on this app.
+         * Gets the proxy info of the app that performed the last access on behalf of this
+         * attribution and as a result blamed the op on this attribution.
          *
          * @param flags The op flags
          *
@@ -3331,7 +3331,7 @@ public class AppOpsManager {
 
         /**
          * Gets the proxy info of the app that performed the last foreground access on behalf of
-         * this feature and as a result blamed the op on this app.
+         * this attribution and as a result blamed the op on this attribution.
          *
          * @param flags The op flags
          *
@@ -3349,7 +3349,7 @@ public class AppOpsManager {
 
         /**
          * Gets the proxy info of the app that performed the last background access on behalf of
-         * this feature and as a result blamed the op on this app.
+         * this attribution and as a result blamed the op on this attribution.
          *
          * @param flags The op flags
          *
@@ -3366,8 +3366,8 @@ public class AppOpsManager {
         }
 
         /**
-         * Gets the proxy info of the app that performed the last access on behalf of this feature
-         * and as a result blamed the op on this app.
+         * Gets the proxy info of the app that performed the last access on behalf of this
+         * attribution and as a result blamed the op on this attribution.
          *
          * @param fromUidState The lowest UID state for which to query
          * @param toUidState The highest UID state for which to query (inclusive)
@@ -3442,7 +3442,7 @@ public class AppOpsManager {
 
 
         /**
-         * Creates a new OpFeatureEntry.
+         * Creates a new OpAttributionEntry.
          *
          * @param op
          *   The code of the op
@@ -3455,7 +3455,7 @@ public class AppOpsManager {
          * @hide
          */
         @DataClass.Generated.Member
-        public OpFeatureEntry(
+        public AttributedOpEntry(
                 @IntRange(from = 0, to = _NUM_OP - 1) int op,
                 boolean running,
                 @Nullable LongSparseArray<NoteOpEvent> accessEvents,
@@ -3525,7 +3525,7 @@ public class AppOpsManager {
         /** @hide */
         @SuppressWarnings({"unchecked", "RedundantCast"})
         @DataClass.Generated.Member
-        /* package-private */ OpFeatureEntry(@NonNull Parcel in) {
+        /* package-private */ AttributedOpEntry(@NonNull Parcel in) {
             // You can override field unparcelling by defining methods like:
             // static FieldType unparcelFieldName(Parcel in) { ... }
 
@@ -3548,16 +3548,16 @@ public class AppOpsManager {
         }
 
         @DataClass.Generated.Member
-        public static final @NonNull Parcelable.Creator<OpFeatureEntry> CREATOR
-                = new Parcelable.Creator<OpFeatureEntry>() {
+        public static final @NonNull Parcelable.Creator<AttributedOpEntry> CREATOR
+                = new Parcelable.Creator<AttributedOpEntry>() {
             @Override
-            public OpFeatureEntry[] newArray(int size) {
-                return new OpFeatureEntry[size];
+            public AttributedOpEntry[] newArray(int size) {
+                return new AttributedOpEntry[size];
             }
 
             @Override
-            public OpFeatureEntry createFromParcel(@NonNull Parcel in) {
-                return new OpFeatureEntry(in);
+            public AttributedOpEntry createFromParcel(@NonNull Parcel in) {
+                return new AttributedOpEntry(in);
             }
         };
 
@@ -3566,7 +3566,7 @@ public class AppOpsManager {
                 time = 1574809856239L,
                 codegenVersion = "1.0.14",
                 sourceFile = "frameworks/base/core/java/android/app/AppOpsManager.java",
-                inputSignatures = "private final @android.annotation.IntRange(from=0L, to=_NUM_OP - 1) int mOp\nprivate final  boolean mRunning\nprivate final @com.android.internal.util.DataClass.ParcelWith(android.app.OpFeatureEntry.LongSparseArrayParceling.class) @android.annotation.Nullable android.util.LongSparseArray<android.app.NoteOpEvent> mAccessEvents\nprivate final @com.android.internal.util.DataClass.ParcelWith(android.app.OpFeatureEntry.LongSparseArrayParceling.class) @android.annotation.Nullable android.util.LongSparseArray<android.app.NoteOpEvent> mRejectEvents\npublic @android.annotation.NonNull android.util.ArraySet<java.lang.Long> collectKeys()\npublic @android.app.UidState int getLastAccessUidState(int)\npublic @android.app.UidState int getLastForegroundAccessUidState(int)\npublic @android.app.UidState int getLastBackgroundAccessUidState(int)\npublic @android.app.UidState int getLastRejectUidState(int)\npublic @android.app.UidState int getLastForegroundRejectUidState(int)\npublic @android.app.UidState int getLastBackgroundRejectUidState(int)\npublic  long getAccessTime(int,int)\npublic  long getRejectTime(int,int)\npublic  long getDuration(int,int)\npublic  int getProxyUid(int,int)\npublic @android.annotation.Nullable java.lang.String getProxyPackageName(int,int)\npublic @android.annotation.Nullable java.lang.String getProxyFeatureId(int,int)\nclass OpFeatureEntry extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
+                inputSignatures = "private final @android.annotation.IntRange(from=0L, to=_NUM_OP - 1) int mOp\nprivate final  boolean mRunning\nprivate final @com.android.internal.util.DataClass.ParcelWith(android.app.OpAttributionEntry.LongSparseArrayParceling.class) @android.annotation.Nullable android.util.LongSparseArray<android.app.NoteOpEvent> mAccessEvents\nprivate final @com.android.internal.util.DataClass.ParcelWith(android.app.OpAttributionEntry.LongSparseArrayParceling.class) @android.annotation.Nullable android.util.LongSparseArray<android.app.NoteOpEvent> mRejectEvents\npublic @android.annotation.NonNull android.util.ArraySet<java.lang.Long> collectKeys()\npublic @android.app.UidState int getLastAccessUidState(int)\npublic @android.app.UidState int getLastForegroundAccessUidState(int)\npublic @android.app.UidState int getLastBackgroundAccessUidState(int)\npublic @android.app.UidState int getLastRejectUidState(int)\npublic @android.app.UidState int getLastForegroundRejectUidState(int)\npublic @android.app.UidState int getLastBackgroundRejectUidState(int)\npublic  long getAccessTime(int,int)\npublic  long getRejectTime(int,int)\npublic  long getDuration(int,int)\npublic  int getProxyUid(int,int)\npublic @android.annotation.Nullable java.lang.String getProxyPackageName(int,int)\npublic @android.annotation.Nullable java.lang.String getProxyAttributionTag(int,int)\nclass OpAttributionEntry extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
         @Deprecated
         private void __metadata() {}
          */
@@ -3592,8 +3592,8 @@ public class AppOpsManager {
         private final @IntRange(from = 0, to = _NUM_OP - 1) int mOp;
         /** The mode of the op */
         private final @Mode int mMode;
-        /** The features that have been used when checking the op */
-        private final @NonNull Map<String, OpFeatureEntry> mFeatures;
+        /** The attributed entries by attribution tag */
+        private final @NonNull Map<String, AttributedOpEntry> mAttributedOpEntries;
 
         /**
          * @hide
@@ -3634,7 +3634,7 @@ public class AppOpsManager {
          * @see #getLastAccessForegroundTime(int)
          * @see #getLastAccessBackgroundTime(int)
          * @see #getLastAccessTime(int, int, int)
-         * @see OpFeatureEntry#getLastAccessTime(int)
+         * @see AttributedOpEntry#getLastAccessTime(int)
          */
         public long getLastAccessTime(@OpFlags int flags) {
             return getLastAccessTime(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, flags);
@@ -3651,7 +3651,7 @@ public class AppOpsManager {
          * @see #getLastAccessTime(int)
          * @see #getLastAccessBackgroundTime(int)
          * @see #getLastAccessTime(int, int, int)
-         * @see OpFeatureEntry#getLastAccessForegroundTime(int)
+         * @see AttributedOpEntry#getLastAccessForegroundTime(int)
          */
         public long getLastAccessForegroundTime(@OpFlags int flags) {
             return getLastAccessTime(MAX_PRIORITY_UID_STATE, resolveFirstUnrestrictedUidState(mOp),
@@ -3669,7 +3669,7 @@ public class AppOpsManager {
          * @see #getLastAccessTime(int)
          * @see #getLastAccessForegroundTime(int)
          * @see #getLastAccessTime(int, int, int)
-         * @see OpFeatureEntry#getLastAccessBackgroundTime(int)
+         * @see AttributedOpEntry#getLastAccessBackgroundTime(int)
          */
         public long getLastAccessBackgroundTime(@OpFlags int flags) {
             return getLastAccessTime(resolveLastRestrictedUidState(mOp), MIN_PRIORITY_UID_STATE,
@@ -3686,13 +3686,14 @@ public class AppOpsManager {
         private @Nullable NoteOpEvent getLastAccessEvent(@UidState int fromUidState,
                 @UidState int toUidState, @OpFlags int flags) {
             NoteOpEvent lastAccessEvent = null;
-            for (OpFeatureEntry featureEntry : mFeatures.values()) {
-                NoteOpEvent lastFeatureAccessEvent = featureEntry.getLastAccessEvent(fromUidState,
-                        toUidState, flags);
+            for (AttributedOpEntry attributionEntry : mAttributedOpEntries.values()) {
+                NoteOpEvent lastAttributionAccessEvent = attributionEntry.getLastAccessEvent(
+                        fromUidState, toUidState, flags);
 
-                if (lastAccessEvent == null || (lastFeatureAccessEvent != null
-                        && lastFeatureAccessEvent.getNoteTime() > lastAccessEvent.getNoteTime())) {
-                    lastAccessEvent = lastFeatureAccessEvent;
+                if (lastAccessEvent == null || (lastAttributionAccessEvent != null
+                        && lastAttributionAccessEvent.getNoteTime()
+                        > lastAccessEvent.getNoteTime())) {
+                    lastAccessEvent = lastAttributionAccessEvent;
                 }
             }
 
@@ -3712,7 +3713,7 @@ public class AppOpsManager {
          * @see #getLastAccessTime(int)
          * @see #getLastAccessForegroundTime(int)
          * @see #getLastAccessBackgroundTime(int)
-         * @see OpFeatureEntry#getLastAccessTime(int, int, int)
+         * @see AttributedOpEntry#getLastAccessTime(int, int, int)
          */
         public long getLastAccessTime(@UidState int fromUidState, @UidState int toUidState,
                 @OpFlags int flags) {
@@ -3748,7 +3749,7 @@ public class AppOpsManager {
          * @see #getLastRejectForegroundTime(int)
          * @see #getLastRejectBackgroundTime(int)
          * @see #getLastRejectTime(int, int, int)
-         * @see OpFeatureEntry#getLastRejectTime(int)
+         * @see AttributedOpEntry#getLastRejectTime(int)
          */
         public long getLastRejectTime(@OpFlags int flags) {
             return getLastRejectTime(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, flags);
@@ -3765,7 +3766,7 @@ public class AppOpsManager {
          * @see #getLastRejectTime(int)
          * @see #getLastRejectBackgroundTime(int)
          * @see #getLastRejectTime(int, int, int)
-         * @see OpFeatureEntry#getLastRejectForegroundTime(int)
+         * @see AttributedOpEntry#getLastRejectForegroundTime(int)
          */
         public long getLastRejectForegroundTime(@OpFlags int flags) {
             return getLastRejectTime(MAX_PRIORITY_UID_STATE, resolveFirstUnrestrictedUidState(mOp),
@@ -3783,7 +3784,7 @@ public class AppOpsManager {
          * @see #getLastRejectTime(int)
          * @see #getLastRejectForegroundTime(int)
          * @see #getLastRejectTime(int, int, int)
-         * @see OpFeatureEntry#getLastRejectBackgroundTime(int)
+         * @see AttributedOpEntry#getLastRejectBackgroundTime(int)
          */
         public long getLastRejectBackgroundTime(@OpFlags int flags) {
             return getLastRejectTime(resolveLastRestrictedUidState(mOp), MIN_PRIORITY_UID_STATE,
@@ -3800,13 +3801,14 @@ public class AppOpsManager {
         private @Nullable NoteOpEvent getLastRejectEvent(@UidState int fromUidState,
                 @UidState int toUidState, @OpFlags int flags) {
             NoteOpEvent lastAccessEvent = null;
-            for (OpFeatureEntry featureEntry : mFeatures.values()) {
-                NoteOpEvent lastFeatureAccessEvent = featureEntry.getLastRejectEvent(fromUidState,
-                        toUidState, flags);
+            for (AttributedOpEntry attributionEntry : mAttributedOpEntries.values()) {
+                NoteOpEvent lastAttributionAccessEvent = attributionEntry.getLastRejectEvent(
+                        fromUidState, toUidState, flags);
 
-                if (lastAccessEvent == null || (lastFeatureAccessEvent != null
-                        && lastFeatureAccessEvent.getNoteTime() > lastAccessEvent.getNoteTime())) {
-                    lastAccessEvent = lastFeatureAccessEvent;
+                if (lastAccessEvent == null || (lastAttributionAccessEvent != null
+                        && lastAttributionAccessEvent.getNoteTime()
+                        > lastAccessEvent.getNoteTime())) {
+                    lastAccessEvent = lastAttributionAccessEvent;
                 }
             }
 
@@ -3827,7 +3829,7 @@ public class AppOpsManager {
          * @see #getLastRejectForegroundTime(int)
          * @see #getLastRejectBackgroundTime(int)
          * @see #getLastRejectTime(int, int, int)
-         * @see OpFeatureEntry#getLastRejectTime(int, int, int)
+         * @see AttributedOpEntry#getLastRejectTime(int, int, int)
          */
         public long getLastRejectTime(@UidState int fromUidState, @UidState int toUidState,
                 @OpFlags int flags) {
@@ -3843,8 +3845,8 @@ public class AppOpsManager {
          * @return Whether the operation is running.
          */
         public boolean isRunning() {
-            for (OpFeatureEntry opFeatureEntry : mFeatures.values()) {
-                if (opFeatureEntry.isRunning()) {
+            for (AttributedOpEntry opAttributionEntry : mAttributedOpEntries.values()) {
+                if (opAttributionEntry.isRunning()) {
                     return true;
                 }
             }
@@ -3870,7 +3872,7 @@ public class AppOpsManager {
          * @see #getLastForegroundDuration(int)
          * @see #getLastBackgroundDuration(int)
          * @see #getLastDuration(int, int, int)
-         * @see OpFeatureEntry#getLastDuration(int)
+         * @see AttributedOpEntry#getLastDuration(int)
          */
         public long getLastDuration(@OpFlags int flags) {
             return getLastDuration(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, flags);
@@ -3886,7 +3888,7 @@ public class AppOpsManager {
          * @see #getLastDuration(int)
          * @see #getLastBackgroundDuration(int)
          * @see #getLastDuration(int, int, int)
-         * @see OpFeatureEntry#getLastForegroundDuration(int)
+         * @see AttributedOpEntry#getLastForegroundDuration(int)
          */
         public long getLastForegroundDuration(@OpFlags int flags) {
             return getLastDuration(MAX_PRIORITY_UID_STATE, resolveFirstUnrestrictedUidState(mOp),
@@ -3903,7 +3905,7 @@ public class AppOpsManager {
          * @see #getLastDuration(int)
          * @see #getLastForegroundDuration(int)
          * @see #getLastDuration(int, int, int)
-         * @see OpFeatureEntry#getLastBackgroundDuration(int)
+         * @see AttributedOpEntry#getLastBackgroundDuration(int)
          */
         public long getLastBackgroundDuration(@OpFlags int flags) {
             return getLastDuration(resolveLastRestrictedUidState(mOp), MIN_PRIORITY_UID_STATE,
@@ -3922,7 +3924,7 @@ public class AppOpsManager {
          * @see #getLastDuration(int)
          * @see #getLastForegroundDuration(int)
          * @see #getLastBackgroundDuration(int)
-         * @see OpFeatureEntry#getLastDuration(int, int, int)
+         * @see AttributedOpEntry#getLastDuration(int, int, int)
          */
         public long getLastDuration(@UidState int fromUidState, @UidState int toUidState,
                 @OpFlags int flags) {
@@ -3997,7 +3999,7 @@ public class AppOpsManager {
          * @see #getLastForegroundProxyInfo(int)
          * @see #getLastBackgroundProxyInfo(int)
          * @see #getLastProxyInfo(int, int, int)
-         * @see OpFeatureEntry#getLastProxyInfo(int)
+         * @see AttributedOpEntry#getLastProxyInfo(int)
          */
         public @Nullable OpEventProxyInfo getLastProxyInfo(@OpFlags int flags) {
             return getLastProxyInfo(MAX_PRIORITY_UID_STATE, MIN_PRIORITY_UID_STATE, flags);
@@ -4014,7 +4016,7 @@ public class AppOpsManager {
          * @see #getLastProxyInfo(int)
          * @see #getLastBackgroundProxyInfo(int)
          * @see #getLastProxyInfo(int, int, int)
-         * @see OpFeatureEntry#getLastForegroundProxyInfo(int)
+         * @see AttributedOpEntry#getLastForegroundProxyInfo(int)
          */
         public @Nullable OpEventProxyInfo getLastForegroundProxyInfo(@OpFlags int flags) {
             return getLastProxyInfo(MAX_PRIORITY_UID_STATE, resolveFirstUnrestrictedUidState(mOp),
@@ -4032,7 +4034,7 @@ public class AppOpsManager {
          * @see #getLastProxyInfo(int)
          * @see #getLastForegroundProxyInfo(int)
          * @see #getLastProxyInfo(int, int, int)
-         * @see OpFeatureEntry#getLastBackgroundProxyInfo(int)
+         * @see AttributedOpEntry#getLastBackgroundProxyInfo(int)
          */
         public @Nullable OpEventProxyInfo getLastBackgroundProxyInfo(@OpFlags int flags) {
             return getLastProxyInfo(resolveLastRestrictedUidState(mOp), MIN_PRIORITY_UID_STATE,
@@ -4052,7 +4054,7 @@ public class AppOpsManager {
          * @see #getLastProxyInfo(int)
          * @see #getLastForegroundProxyInfo(int)
          * @see #getLastBackgroundProxyInfo(int)
-         * @see OpFeatureEntry#getLastProxyInfo(int, int, int)
+         * @see AttributedOpEntry#getLastProxyInfo(int, int, int)
          */
         public @Nullable OpEventProxyInfo getLastProxyInfo(@UidState int fromUidState,
                 @UidState int toUidState, @OpFlags int flags) {
@@ -4086,15 +4088,15 @@ public class AppOpsManager {
          *   The code of the op
          * @param mode
          *   The mode of the op
-         * @param features
-         *   The features that have been used when checking the op
+         * @param attributedOpEntries
+         *   The attributions that have been used when noting the op
          * @hide
          */
         @DataClass.Generated.Member
         public OpEntry(
                 @IntRange(from = 0, to = _NUM_OP - 1) int op,
                 @Mode int mode,
-                @NonNull Map<String,OpFeatureEntry> features) {
+                @NonNull Map<String, AttributedOpEntry> attributedOpEntries) {
             this.mOp = op;
             com.android.internal.util.AnnotationValidations.validate(
                     IntRange.class, null, mOp,
@@ -4103,9 +4105,9 @@ public class AppOpsManager {
             this.mMode = mode;
             com.android.internal.util.AnnotationValidations.validate(
                     Mode.class, null, mMode);
-            this.mFeatures = features;
+            this.mAttributedOpEntries = attributedOpEntries;
             com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mFeatures);
+                    NonNull.class, null, mAttributedOpEntries);
 
             // onConstructed(); // You can define this method to get a callback
         }
@@ -4119,14 +4121,14 @@ public class AppOpsManager {
         }
 
         /**
-         * The features that have been used when checking the op keyed by id of the feature.
+         * The attributed entries keyed by attribution tag.
          *
-         * @see Context#createFeatureContext(String)
+         * @see Context#createAttributionContext(String)
          * @see #noteOp(String, int, String, String, String)
          */
         @DataClass.Generated.Member
-        public @NonNull Map<String,OpFeatureEntry> getFeatures() {
-            return mFeatures;
+        public @NonNull Map<String, AttributedOpEntry> getAttributedOpEntries() {
+            return mAttributedOpEntries;
         }
 
         @Override
@@ -4137,7 +4139,7 @@ public class AppOpsManager {
 
             dest.writeInt(mOp);
             dest.writeInt(mMode);
-            dest.writeMap(mFeatures);
+            dest.writeMap(mAttributedOpEntries);
         }
 
         @Override
@@ -4153,8 +4155,8 @@ public class AppOpsManager {
 
             int op = in.readInt();
             int mode = in.readInt();
-            Map<String,OpFeatureEntry> features = new java.util.LinkedHashMap<>();
-            in.readMap(features, OpFeatureEntry.class.getClassLoader());
+            Map<String, AttributedOpEntry> attributions = new java.util.LinkedHashMap<>();
+            in.readMap(attributions, AttributedOpEntry.class.getClassLoader());
 
             this.mOp = op;
             com.android.internal.util.AnnotationValidations.validate(
@@ -4164,9 +4166,9 @@ public class AppOpsManager {
             this.mMode = mode;
             com.android.internal.util.AnnotationValidations.validate(
                     Mode.class, null, mMode);
-            this.mFeatures = features;
+            this.mAttributedOpEntries = attributions;
             com.android.internal.util.AnnotationValidations.validate(
-                    NonNull.class, null, mFeatures);
+                    NonNull.class, null, mAttributedOpEntries);
 
             // onConstructed(); // You can define this method to get a callback
         }
@@ -4190,7 +4192,7 @@ public class AppOpsManager {
                 time = 1574809856259L,
                 codegenVersion = "1.0.14",
                 sourceFile = "frameworks/base/core/java/android/app/AppOpsManager.java",
-                inputSignatures = "private final @android.annotation.IntRange(from=0L, to=_NUM_OP - 1) int mOp\nprivate final @android.app.Mode int mMode\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,android.app.OpFeatureEntry> mFeatures\npublic @android.annotation.UnsupportedAppUsage(maxTargetSdk=Build.VERSION_CODES.Q, publicAlternatives=\"{@code \" + \"#getOpStr()}\") int getOp()\npublic @android.annotation.NonNull java.lang.String getOpStr()\npublic @java.lang.Deprecated @android.annotation.UnsupportedAppUsage(maxTargetSdk=Build.VERSION_CODES.Q, publicAlternatives=\"{@code \" + \"#getAccessTime(int, int)}\") long getTime()\npublic @java.lang.Deprecated long getLastAccessTime(int)\npublic @java.lang.Deprecated long getLastAccessForegroundTime(int)\npublic @java.lang.Deprecated long getLastAccessBackgroundTime(int)\npublic @java.lang.Deprecated long getLastAccessTime(int,int,int)\npublic @java.lang.Deprecated @android.annotation.UnsupportedAppUsage(maxTargetSdk=Build.VERSION_CODES.Q, publicAlternatives=\"{@code \" + \"#getLastRejectTime(int, int, int)}\") long getRejectTime()\npublic @java.lang.Deprecated long getLastRejectTime(int)\npublic @java.lang.Deprecated long getLastRejectForegroundTime(int)\npublic @java.lang.Deprecated long getLastRejectBackgroundTime(int)\npublic @java.lang.Deprecated long getLastRejectTime(int,int,int)\npublic  long getAccessTime(int,int)\npublic  long getRejectTime(int,int)\npublic  boolean isRunning()\nprivate  android.app.NoteOpEvent getLastAccessEvent(int,int,int)\npublic @java.lang.Deprecated long getDuration()\npublic @java.lang.Deprecated long getLastForegroundDuration(int)\npublic @java.lang.Deprecated long getLastBackgroundDuration(int)\npublic @java.lang.Deprecated long getLastDuration(int,int,int)\npublic @java.lang.Deprecated int getProxyUid()\npublic @java.lang.Deprecated @android.annotation.Nullable java.lang.String getProxyPackageName()\nprivate @android.app.UidState int getLastAccessUidStateForFlagsInStatesOfAllFeatures(int,int,int)\npublic @android.app.UidState int getLastAccessUidState(int)\npublic @android.app.UidState int getLastForegroundAccessUidState(int)\npublic @android.app.UidState int getLastBackgroundAccessUidState(int)\nprivate @android.app.UidState int getLastRejectUidStateForFlagsInStatesOfAllFeatures(int,int,int)\npublic @android.app.UidState int getLastRejectUidState(int)\npublic @android.app.UidState int getLastForegroundRejectUidState(int)\npublic @android.app.UidState int getLastBackgroundRejectUidState(int)\npublic  long getDuration(int,int)\npublic  int getProxyUid(int,int)\nprivate  int getProxyUid(int,int,int)\npublic @android.annotation.Nullable java.lang.String getProxyPackageName(int,int)\nprivate @android.annotation.Nullable java.lang.String getProxyPackageName(int,int,int)\nclass OpEntry extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
+                inputSignatures = "private final @android.annotation.IntRange(from=0L, to=_NUM_OP - 1) int mOp\nprivate final @android.app.Mode int mMode\nprivate final @android.annotation.NonNull java.util.Map<java.lang.String,android.app.OpAttributionEntry> mAttributions\npublic @android.annotation.UnsupportedAppUsage(maxTargetSdk=Build.VERSION_CODES.Q, publicAlternatives=\"{@code \" + \"#getOpStr()}\") int getOp()\npublic @android.annotation.NonNull java.lang.String getOpStr()\npublic @java.lang.Deprecated @android.annotation.UnsupportedAppUsage(maxTargetSdk=Build.VERSION_CODES.Q, publicAlternatives=\"{@code \" + \"#getAccessTime(int, int)}\") long getTime()\npublic @java.lang.Deprecated long getLastAccessTime(int)\npublic @java.lang.Deprecated long getLastAccessForegroundTime(int)\npublic @java.lang.Deprecated long getLastAccessBackgroundTime(int)\npublic @java.lang.Deprecated long getLastAccessTime(int,int,int)\npublic @java.lang.Deprecated @android.annotation.UnsupportedAppUsage(maxTargetSdk=Build.VERSION_CODES.Q, publicAlternatives=\"{@code \" + \"#getLastRejectTime(int, int, int)}\") long getRejectTime()\npublic @java.lang.Deprecated long getLastRejectTime(int)\npublic @java.lang.Deprecated long getLastRejectForegroundTime(int)\npublic @java.lang.Deprecated long getLastRejectBackgroundTime(int)\npublic @java.lang.Deprecated long getLastRejectTime(int,int,int)\npublic  long getAccessTime(int,int)\npublic  long getRejectTime(int,int)\npublic  boolean isRunning()\nprivate  android.app.NoteOpEvent getLastAccessEvent(int,int,int)\npublic @java.lang.Deprecated long getDuration()\npublic @java.lang.Deprecated long getLastForegroundDuration(int)\npublic @java.lang.Deprecated long getLastBackgroundDuration(int)\npublic @java.lang.Deprecated long getLastDuration(int,int,int)\npublic @java.lang.Deprecated int getProxyUid()\npublic @java.lang.Deprecated @android.annotation.Nullable java.lang.String getProxyPackageName()\nprivate @android.app.UidState int getLastAccessUidStateForFlagsInStatesOfAllAttributions(int,int,int)\npublic @android.app.UidState int getLastAccessUidState(int)\npublic @android.app.UidState int getLastForegroundAccessUidState(int)\npublic @android.app.UidState int getLastBackgroundAccessUidState(int)\nprivate @android.app.UidState int getLastRejectUidStateForFlagsInStatesOfAllAttributions(int,int,int)\npublic @android.app.UidState int getLastRejectUidState(int)\npublic @android.app.UidState int getLastForegroundRejectUidState(int)\npublic @android.app.UidState int getLastBackgroundRejectUidState(int)\npublic  long getDuration(int,int)\npublic  int getProxyUid(int,int)\nprivate  int getProxyUid(int,int,int)\npublic @android.annotation.Nullable java.lang.String getProxyPackageName(int,int)\nprivate @android.annotation.Nullable java.lang.String getProxyPackageName(int,int,int)\nclass OpEntry extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true)")
         @Deprecated
         private void __metadata() {}
          */
@@ -4206,7 +4208,7 @@ public class AppOpsManager {
         void visitHistoricalOps(@NonNull HistoricalOps ops);
         void visitHistoricalUidOps(@NonNull HistoricalUidOps ops);
         void visitHistoricalPackageOps(@NonNull HistoricalPackageOps ops);
-        void visitHistoricalFeatureOps(@NonNull HistoricalFeatureOps ops);
+        void visitHistoricalAttributionOps(@NonNull AttributedHistoricalOps ops);
         void visitHistoricalOp(@NonNull HistoricalOp ops);
     }
 
@@ -4219,7 +4221,7 @@ public class AppOpsManager {
     @IntDef(flag = true, prefix = { "FILTER_BY_" }, value = {
             FILTER_BY_UID,
             FILTER_BY_PACKAGE_NAME,
-            FILTER_BY_FEATURE_ID,
+            FILTER_BY_ATTRIBUTION_TAG,
             FILTER_BY_OP_NAMES
     })
     public @interface HistoricalOpsRequestFilter {}
@@ -4239,11 +4241,11 @@ public class AppOpsManager {
     public static final int FILTER_BY_PACKAGE_NAME = 1<<1;
 
     /**
-     * Filter historical appop request by feature id.
+     * Filter historical appop request by attribution tag.
      *
      * @hide
      */
-    public static final int FILTER_BY_FEATURE_ID = 1<<2;
+    public static final int FILTER_BY_ATTRIBUTION_TAG = 1<<2;
 
     /**
      * Filter historical appop request by op names.
@@ -4264,7 +4266,7 @@ public class AppOpsManager {
     public static final class HistoricalOpsRequest {
         private final int mUid;
         private final @Nullable String mPackageName;
-        private final @Nullable String mFeatureId;
+        private final @Nullable String mAttributionTag;
         private final @Nullable List<String> mOpNames;
         private final @HistoricalOpsRequestFilter int mFilter;
         private final long mBeginTimeMillis;
@@ -4272,12 +4274,12 @@ public class AppOpsManager {
         private final @OpFlags int mFlags;
 
         private HistoricalOpsRequest(int uid, @Nullable String packageName,
-                @Nullable String featureId, @Nullable List<String> opNames,
+                @Nullable String attributionTag, @Nullable List<String> opNames,
                 @HistoricalOpsRequestFilter int filter, long beginTimeMillis,
                 long endTimeMillis, @OpFlags int flags) {
             mUid = uid;
             mPackageName = packageName;
-            mFeatureId = featureId;
+            mAttributionTag = attributionTag;
             mOpNames = opNames;
             mFilter = filter;
             mBeginTimeMillis = beginTimeMillis;
@@ -4295,7 +4297,7 @@ public class AppOpsManager {
         public static final class Builder {
             private int mUid = Process.INVALID_UID;
             private @Nullable String mPackageName;
-            private @Nullable String mFeatureId;
+            private @Nullable String mAttributionTag;
             private @Nullable List<String> mOpNames;
             private @HistoricalOpsRequestFilter int mFilter;
             private final long mBeginTimeMillis;
@@ -4359,14 +4361,14 @@ public class AppOpsManager {
             }
 
             /**
-             * Sets the feature id to query for.
+             * Sets the attribution tag to query for.
              *
-             * @param featureId The id of the feature.
+             * @param attributionTag attribution tag
              * @return This builder.
              */
-            public @NonNull Builder setFeatureId(@Nullable String featureId) {
-                mFeatureId = featureId;
-                mFilter |= FILTER_BY_FEATURE_ID;
+            public @NonNull Builder setAttributionTag(@Nullable String attributionTag) {
+                mAttributionTag = attributionTag;
+                mFilter |= FILTER_BY_ATTRIBUTION_TAG;
 
                 return this;
             }
@@ -4417,7 +4419,7 @@ public class AppOpsManager {
              * @return a new {@link HistoricalOpsRequest}.
              */
             public @NonNull HistoricalOpsRequest build() {
-                return new HistoricalOpsRequest(mUid, mPackageName, mFeatureId, mOpNames,
+                return new HistoricalOpsRequest(mUid, mPackageName, mAttributionTag, mOpNames,
                         mFilter, mBeginTimeMillis, mEndTimeMillis, mFlags);
             }
         }
@@ -4577,7 +4579,7 @@ public class AppOpsManager {
          *
          * @param uid Uid to filter for.
          * @param packageName Package to filter for.
-         * @param featureId Package to filter for.
+         * @param attributionTag attribution tag to filter for
          * @param opNames Ops to filter for.
          * @param filter Which parameters to filter on.
          * @param beginTimeMillis The begin time to filter for or {@link Long#MIN_VALUE} for all.
@@ -4585,7 +4587,7 @@ public class AppOpsManager {
          *
          * @hide
          */
-        public void filter(int uid, @Nullable String packageName, @Nullable String featureId,
+        public void filter(int uid, @Nullable String packageName, @Nullable String attributionTag,
                 @Nullable String[] opNames, @HistoricalOpsRequestFilter int filter,
                 long beginTimeMillis, long endTimeMillis) {
             final long durationMillis = getDurationMillis();
@@ -4599,7 +4601,7 @@ public class AppOpsManager {
                 if ((filter & FILTER_BY_UID) != 0 && uid != uidOp.getUid()) {
                     mHistoricalUidOps.removeAt(i);
                 } else {
-                    uidOp.filter(packageName, featureId, opNames, filter, scaleFactor);
+                    uidOp.filter(packageName, attributionTag, opNames, filter, scaleFactor);
                     if (uidOp.getPackageCount() == 0) {
                         mHistoricalUidOps.removeAt(i);
                     }
@@ -4630,28 +4632,28 @@ public class AppOpsManager {
         /** @hide */
         @TestApi
         public void increaseAccessCount(int opCode, int uid, @NonNull String packageName,
-                @Nullable String featureId, @UidState int uidState,  @OpFlags int flags,
+                @Nullable String attributionTag, @UidState int uidState,  @OpFlags int flags,
                 long increment) {
             getOrCreateHistoricalUidOps(uid).increaseAccessCount(opCode,
-                    packageName, featureId, uidState, flags, increment);
+                    packageName, attributionTag, uidState, flags, increment);
         }
 
         /** @hide */
         @TestApi
         public void increaseRejectCount(int opCode, int uid, @NonNull String packageName,
-                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
                 long increment) {
             getOrCreateHistoricalUidOps(uid).increaseRejectCount(opCode,
-                    packageName, featureId, uidState, flags, increment);
+                    packageName, attributionTag, uidState, flags, increment);
         }
 
         /** @hide */
         @TestApi
         public void increaseAccessDuration(int opCode, int uid, @NonNull String packageName,
-                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
                 long increment) {
             getOrCreateHistoricalUidOps(uid).increaseAccessDuration(opCode,
-                    packageName, featureId, uidState, flags, increment);
+                    packageName, attributionTag, uidState, flags, increment);
         }
 
         /** @hide */
@@ -4931,7 +4933,7 @@ public class AppOpsManager {
             }
         }
 
-        private void filter(@Nullable String packageName, @Nullable String featureId,
+        private void filter(@Nullable String packageName, @Nullable String attributionTag,
                 @Nullable String[] opNames, @HistoricalOpsRequestFilter int filter,
                 double fractionToRemove) {
             final int packageCount = getPackageCount();
@@ -4941,8 +4943,8 @@ public class AppOpsManager {
                         packageOps.getPackageName())) {
                     mHistoricalPackageOps.removeAt(i);
                 } else {
-                    packageOps.filter(featureId, opNames, filter, fractionToRemove);
-                    if (packageOps.getFeatureCount() == 0) {
+                    packageOps.filter(attributionTag, opNames, filter, fractionToRemove);
+                    if (packageOps.getAttributedOpsCount() == 0) {
                         mHistoricalPackageOps.removeAt(i);
                     }
                 }
@@ -4961,24 +4963,24 @@ public class AppOpsManager {
         }
 
         private void increaseAccessCount(int opCode, @NonNull String packageName,
-                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
                 long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseAccessCount(
-                    opCode, featureId, uidState, flags, increment);
+                    opCode, attributionTag, uidState, flags, increment);
         }
 
         private void increaseRejectCount(int opCode, @NonNull String packageName,
-                @Nullable String featureId, @UidState int uidState,  @OpFlags int flags,
+                @Nullable String attributionTag, @UidState int uidState,  @OpFlags int flags,
                 long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseRejectCount(
-                    opCode, featureId, uidState, flags, increment);
+                    opCode, attributionTag, uidState, flags, increment);
         }
 
         private void increaseAccessDuration(int opCode, @NonNull String packageName,
-                @Nullable String featureId, @UidState int uidState, @OpFlags int flags,
+                @Nullable String attributionTag, @UidState int uidState, @OpFlags int flags,
                 long increment) {
             getOrCreateHistoricalPackageOps(packageName).increaseAccessDuration(
-                    opCode, featureId, uidState, flags, increment);
+                    opCode, attributionTag, uidState, flags, increment);
         }
 
         /**
@@ -5123,7 +5125,7 @@ public class AppOpsManager {
     @SystemApi
     public static final class HistoricalPackageOps implements Parcelable {
         private final @NonNull String mPackageName;
-        private @Nullable ArrayMap<String, HistoricalFeatureOps> mHistoricalFeatureOps;
+        private @Nullable ArrayMap<String, AttributedHistoricalOps> mAttributedHistoricalOps;
 
         /** @hide */
         public HistoricalPackageOps(@NonNull String packageName) {
@@ -5132,70 +5134,71 @@ public class AppOpsManager {
 
         private HistoricalPackageOps(@NonNull HistoricalPackageOps other) {
             mPackageName = other.mPackageName;
-            final int opCount = other.getFeatureCount();
+            final int opCount = other.getAttributedOpsCount();
             for (int i = 0; i < opCount; i++) {
-                final HistoricalFeatureOps origOps = other.getFeatureOpsAt(i);
-                final HistoricalFeatureOps cloneOps = new HistoricalFeatureOps(origOps);
-                if (mHistoricalFeatureOps == null) {
-                    mHistoricalFeatureOps = new ArrayMap<>(opCount);
+                final AttributedHistoricalOps origOps = other.getAttributedOpsAt(i);
+                final AttributedHistoricalOps cloneOps = new AttributedHistoricalOps(origOps);
+                if (mAttributedHistoricalOps == null) {
+                    mAttributedHistoricalOps = new ArrayMap<>(opCount);
                 }
-                mHistoricalFeatureOps.put(cloneOps.getFeatureId(), cloneOps);
+                mAttributedHistoricalOps.put(cloneOps.getTag(), cloneOps);
             }
         }
 
         private HistoricalPackageOps(@NonNull Parcel parcel) {
             mPackageName = parcel.readString();
-            mHistoricalFeatureOps = parcel.createTypedArrayMap(HistoricalFeatureOps.CREATOR);
+            mAttributedHistoricalOps = parcel.createTypedArrayMap(AttributedHistoricalOps.CREATOR);
         }
 
         private @Nullable HistoricalPackageOps splice(double fractionToRemove) {
             HistoricalPackageOps splice = null;
-            final int featureCount = getFeatureCount();
-            for (int i = 0; i < featureCount; i++) {
-                final HistoricalFeatureOps origOps = getFeatureOpsAt(i);
-                final HistoricalFeatureOps spliceOps = origOps.splice(fractionToRemove);
+            final int attributionCount = getAttributedOpsCount();
+            for (int i = 0; i < attributionCount; i++) {
+                final AttributedHistoricalOps origOps = getAttributedOpsAt(i);
+                final AttributedHistoricalOps spliceOps = origOps.splice(fractionToRemove);
                 if (spliceOps != null) {
                     if (splice == null) {
                         splice = new HistoricalPackageOps(mPackageName);
                     }
-                    if (splice.mHistoricalFeatureOps == null) {
-                        splice.mHistoricalFeatureOps = new ArrayMap<>();
+                    if (splice.mAttributedHistoricalOps == null) {
+                        splice.mAttributedHistoricalOps = new ArrayMap<>();
                     }
-                    splice.mHistoricalFeatureOps.put(spliceOps.getFeatureId(), spliceOps);
+                    splice.mAttributedHistoricalOps.put(spliceOps.getTag(), spliceOps);
                 }
             }
             return splice;
         }
 
         private void merge(@NonNull HistoricalPackageOps other) {
-            final int featureCount = other.getFeatureCount();
-            for (int i = 0; i < featureCount; i++) {
-                final HistoricalFeatureOps otherFeatureOps = other.getFeatureOpsAt(i);
-                final HistoricalFeatureOps thisFeatureOps = getFeatureOps(
-                        otherFeatureOps.getFeatureId());
-                if (thisFeatureOps != null) {
-                    thisFeatureOps.merge(otherFeatureOps);
+            final int attributionCount = other.getAttributedOpsCount();
+            for (int i = 0; i < attributionCount; i++) {
+                final AttributedHistoricalOps otherAttributionOps = other.getAttributedOpsAt(i);
+                final AttributedHistoricalOps thisAttributionOps = getAttributedOps(
+                        otherAttributionOps.getTag());
+                if (thisAttributionOps != null) {
+                    thisAttributionOps.merge(otherAttributionOps);
                 } else {
-                    if (mHistoricalFeatureOps == null) {
-                        mHistoricalFeatureOps = new ArrayMap<>();
+                    if (mAttributedHistoricalOps == null) {
+                        mAttributedHistoricalOps = new ArrayMap<>();
                     }
-                    mHistoricalFeatureOps.put(otherFeatureOps.getFeatureId(), otherFeatureOps);
+                    mAttributedHistoricalOps.put(otherAttributionOps.getTag(),
+                            otherAttributionOps);
                 }
             }
         }
 
-        private void filter(@Nullable String featureId, @Nullable String[] opNames,
+        private void filter(@Nullable String attributionTag, @Nullable String[] opNames,
                 @HistoricalOpsRequestFilter int filter, double fractionToRemove) {
-            final int featureCount = getFeatureCount();
-            for (int i = featureCount - 1; i >= 0; i--) {
-                final HistoricalFeatureOps featureOps = getFeatureOpsAt(i);
-                if ((filter & FILTER_BY_FEATURE_ID) != 0 && !Objects.equals(featureId,
-                        featureOps.getFeatureId())) {
-                    mHistoricalFeatureOps.removeAt(i);
+            final int attributionCount = getAttributedOpsCount();
+            for (int i = attributionCount - 1; i >= 0; i--) {
+                final AttributedHistoricalOps attributionOps = getAttributedOpsAt(i);
+                if ((filter & FILTER_BY_ATTRIBUTION_TAG) != 0 && !Objects.equals(attributionTag,
+                        attributionOps.getTag())) {
+                    mAttributedHistoricalOps.removeAt(i);
                 } else {
-                    featureOps.filter(opNames, filter, fractionToRemove);
-                    if (featureOps.getOpCount() == 0) {
-                        mHistoricalFeatureOps.removeAt(i);
+                    attributionOps.filter(opNames, filter, fractionToRemove);
+                    if (attributionOps.getOpCount() == 0) {
+                        mAttributedHistoricalOps.removeAt(i);
                     }
                 }
             }
@@ -5203,38 +5206,38 @@ public class AppOpsManager {
 
         private void accept(@NonNull HistoricalOpsVisitor visitor) {
             visitor.visitHistoricalPackageOps(this);
-            final int featureCount = getFeatureCount();
-            for (int i = 0; i < featureCount; i++) {
-                getFeatureOpsAt(i).accept(visitor);
+            final int attributionCount = getAttributedOpsCount();
+            for (int i = 0; i < attributionCount; i++) {
+                getAttributedOpsAt(i).accept(visitor);
             }
         }
 
         private boolean isEmpty() {
-            final int featureCount = getFeatureCount();
-            for (int i = featureCount - 1; i >= 0; i--) {
-                final HistoricalFeatureOps featureOps = mHistoricalFeatureOps.valueAt(i);
-                if (!featureOps.isEmpty()) {
+            final int attributionCount = getAttributedOpsCount();
+            for (int i = attributionCount - 1; i >= 0; i--) {
+                final AttributedHistoricalOps attributionOps = mAttributedHistoricalOps.valueAt(i);
+                if (!attributionOps.isEmpty()) {
                     return false;
                 }
             }
             return true;
         }
 
-        private void increaseAccessCount(int opCode, @Nullable String featureId,
+        private void increaseAccessCount(int opCode, @Nullable String attributionTag,
                 @UidState int uidState, @OpFlags int flags, long increment) {
-            getOrCreateHistoricalFeatureOps(featureId).increaseAccessCount(
+            getOrCreateAttributedHistoricalOps(attributionTag).increaseAccessCount(
                     opCode, uidState, flags, increment);
         }
 
-        private void increaseRejectCount(int opCode, @Nullable String featureId,
+        private void increaseRejectCount(int opCode, @Nullable String attributionTag,
                 @UidState int uidState, @OpFlags int flags, long increment) {
-            getOrCreateHistoricalFeatureOps(featureId).increaseRejectCount(
+            getOrCreateAttributedHistoricalOps(attributionTag).increaseRejectCount(
                     opCode, uidState, flags, increment);
         }
 
-        private void increaseAccessDuration(int opCode, @Nullable String featureId,
+        private void increaseAccessDuration(int opCode, @Nullable String attributionTag,
                 @UidState int uidState, @OpFlags int flags, long increment) {
-            getOrCreateHistoricalFeatureOps(featureId).increaseAccessDuration(
+            getOrCreateAttributedHistoricalOps(attributionTag).increaseAccessDuration(
                     opCode, uidState, flags, increment);
         }
 
@@ -5247,17 +5250,18 @@ public class AppOpsManager {
             return mPackageName;
         }
 
-        private @NonNull HistoricalFeatureOps getOrCreateHistoricalFeatureOps(
-                @Nullable String featureId) {
-            if (mHistoricalFeatureOps == null) {
-                mHistoricalFeatureOps = new ArrayMap<>();
+        private @NonNull AttributedHistoricalOps getOrCreateAttributedHistoricalOps(
+                @Nullable String attributionTag) {
+            if (mAttributedHistoricalOps == null) {
+                mAttributedHistoricalOps = new ArrayMap<>();
             }
-            HistoricalFeatureOps historicalFeatureOp = mHistoricalFeatureOps.get(featureId);
-            if (historicalFeatureOp == null) {
-                historicalFeatureOp = new HistoricalFeatureOps(featureId);
-                mHistoricalFeatureOps.put(featureId, historicalFeatureOp);
+            AttributedHistoricalOps historicalAttributionOp = mAttributedHistoricalOps.get(
+                    attributionTag);
+            if (historicalAttributionOp == null) {
+                historicalAttributionOp = new AttributedHistoricalOps(attributionTag);
+                mAttributedHistoricalOps.put(attributionTag, historicalAttributionOp);
             }
-            return historicalFeatureOp;
+            return historicalAttributionOp;
         }
 
         /**
@@ -5268,13 +5272,13 @@ public class AppOpsManager {
          */
         public @IntRange(from = 0) int getOpCount() {
             int numOps = 0;
-            int numFeatures = getFeatureCount();
+            int numAttributions = getAttributedOpsCount();
 
             for (int code = 0; code < _NUM_OP; code++) {
                 String opName = opToPublicName(code);
 
-                for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
-                    if (getFeatureOpsAt(featureNum).getOp(opName) != null) {
+                for (int attributionNum = 0; attributionNum < numAttributions; attributionNum++) {
+                    if (getAttributedOpsAt(attributionNum).getOp(opName) != null) {
                         numOps++;
                         break;
                     }
@@ -5287,7 +5291,7 @@ public class AppOpsManager {
         /**
          * Gets the historical op at a given index.
          *
-         * <p>This combines the counts from all features.
+         * <p>This combines the counts from all attributions.
          *
          * @param index The index to lookup.
          * @return The op at the given index.
@@ -5295,13 +5299,13 @@ public class AppOpsManager {
          */
         public @NonNull HistoricalOp getOpAt(@IntRange(from = 0) int index) {
             int numOpsFound = 0;
-            int numFeatures = getFeatureCount();
+            int numAttributions = getAttributedOpsCount();
 
             for (int code = 0; code < _NUM_OP; code++) {
                 String opName = opToPublicName(code);
 
-                for (int featureNum = 0; featureNum < numFeatures; featureNum++) {
-                    if (getFeatureOpsAt(featureNum).getOp(opName) != null) {
+                for (int attributionNum = 0; attributionNum < numAttributions; attributionNum++) {
+                    if (getAttributedOpsAt(attributionNum).getOp(opName) != null) {
                         if (numOpsFound == index) {
                             return getOp(opName);
                         } else {
@@ -5318,25 +5322,25 @@ public class AppOpsManager {
         /**
          * Gets the historical entry for a given op name.
          *
-         * <p>This combines the counts from all features.
+         * <p>This combines the counts from all attributions.
          *
          * @param opName The op name.
          * @return The historical entry for that op name.
          */
         public @Nullable HistoricalOp getOp(@NonNull String opName) {
-            if (mHistoricalFeatureOps == null) {
+            if (mAttributedHistoricalOps == null) {
                 return null;
             }
 
             HistoricalOp combinedOp = null;
-            int numFeatures = getFeatureCount();
-            for (int i = 0; i < numFeatures; i++) {
-                HistoricalOp featureOp = getFeatureOpsAt(i).getOp(opName);
-                if (featureOp != null) {
+            int numAttributions = getAttributedOpsCount();
+            for (int i = 0; i < numAttributions; i++) {
+                HistoricalOp attributionOp = getAttributedOpsAt(i).getOp(opName);
+                if (attributionOp != null) {
                     if (combinedOp == null) {
-                        combinedOp = new HistoricalOp(featureOp);
+                        combinedOp = new HistoricalOp(attributionOp);
                     } else {
-                        combinedOp.merge(featureOp);
+                        combinedOp.merge(attributionOp);
                     }
                 }
             }
@@ -5352,7 +5356,7 @@ public class AppOpsManager {
         @Override
         public void writeToParcel(@NonNull Parcel parcel, int flags) {
             parcel.writeString(mPackageName);
-            parcel.writeTypedArrayMap(mHistoricalFeatureOps, flags);
+            parcel.writeTypedArrayMap(mAttributedHistoricalOps, flags);
         }
 
         public static final @android.annotation.NonNull Creator<HistoricalPackageOps> CREATOR =
@@ -5380,11 +5384,11 @@ public class AppOpsManager {
             if (!mPackageName.equals(other.mPackageName)) {
                 return false;
             }
-            if (mHistoricalFeatureOps == null) {
-                if (other.mHistoricalFeatureOps != null) {
+            if (mAttributedHistoricalOps == null) {
+                if (other.mAttributedHistoricalOps != null) {
                     return false;
                 }
-            } else if (!mHistoricalFeatureOps.equals(other.mHistoricalFeatureOps)) {
+            } else if (!mAttributedHistoricalOps.equals(other.mAttributedHistoricalOps)) {
                 return false;
             }
             return true;
@@ -5393,58 +5397,58 @@ public class AppOpsManager {
         @Override
         public int hashCode() {
             int result = mPackageName != null ? mPackageName.hashCode() : 0;
-            result = 31 * result + (mHistoricalFeatureOps != null ? mHistoricalFeatureOps.hashCode()
-                    : 0);
+            result = 31 * result + (mAttributedHistoricalOps != null
+                    ? mAttributedHistoricalOps.hashCode() : 0);
             return result;
         }
 
         /**
-         * Gets number of feature with historical ops.
+         * Gets number of attributed historical ops.
          *
-         * @return The number of feature with historical ops.
+         * @return The number of attribution with historical ops.
          *
-         * @see #getFeatureOpsAt(int)
+         * @see #getAttributedOpsAt(int)
          */
-        public @IntRange(from = 0) int getFeatureCount() {
-            if (mHistoricalFeatureOps == null) {
+        public @IntRange(from = 0) int getAttributedOpsCount() {
+            if (mAttributedHistoricalOps == null) {
                 return 0;
             }
-            return mHistoricalFeatureOps.size();
+            return mAttributedHistoricalOps.size();
         }
 
         /**
-         * Gets the historical feature ops at a given index.
+         * Gets the attributed historical ops at a given index.
          *
          * @param index The index.
          *
-         * @return The historical feature ops at the given index.
+         * @return The historical attribution ops at the given index.
          *
-         * @see #getFeatureCount()
+         * @see #getAttributedOpsCount()
          */
-        public @NonNull HistoricalFeatureOps getFeatureOpsAt(@IntRange(from = 0) int index) {
-            if (mHistoricalFeatureOps == null) {
+        public @NonNull AttributedHistoricalOps getAttributedOpsAt(@IntRange(from = 0) int index) {
+            if (mAttributedHistoricalOps == null) {
                 throw new IndexOutOfBoundsException();
             }
-            return mHistoricalFeatureOps.valueAt(index);
+            return mAttributedHistoricalOps.valueAt(index);
         }
 
         /**
-         * Gets the historical feature ops for a given feature.
+         * Gets the attributed historical ops for a given attribution tag.
          *
-         * @param featureId The feature id.
+         * @param attributionTag The attribution tag.
          *
-         * @return The historical ops for the feature.
+         * @return The historical ops for the attribution.
          */
-        public @Nullable HistoricalFeatureOps getFeatureOps(@NonNull String featureId) {
-            if (mHistoricalFeatureOps == null) {
+        public @Nullable AttributedHistoricalOps getAttributedOps(@NonNull String attributionTag) {
+            if (mAttributedHistoricalOps == null) {
                 return null;
             }
-            return mHistoricalFeatureOps.get(featureId);
+            return mAttributedHistoricalOps.get(attributionTag);
         }
     }
 
     /**
-     * This class represents historical app op information about a feature in a package.
+     * This class represents historical app op information about a attribution in a package.
      *
      * @hide
      */
@@ -5454,20 +5458,20 @@ public class AppOpsManager {
     @DataClass(genHiddenConstructor = true,
             genEqualsHashCode = true, genHiddenCopyConstructor = true) */
     @DataClass.Suppress("getHistoricalOps")
-    public static final class HistoricalFeatureOps implements Parcelable {
-        /** Id of the {@link Context#createFeatureContext feature} in the package */
-        private final @Nullable String mFeatureId;
+    public static final class AttributedHistoricalOps implements Parcelable {
+        /** {@link Context#createAttributionContext attribution} tag */
+        private final @Nullable String mTag;
 
-        /** Ops for this feature */
+        /** Ops for this attribution */
         private @Nullable ArrayMap<String, HistoricalOp> mHistoricalOps;
 
         /** @hide */
-        public HistoricalFeatureOps(@NonNull String featureId) {
-            mFeatureId = featureId;
+        public AttributedHistoricalOps(@NonNull String tag) {
+            mTag = tag;
         }
 
-        private HistoricalFeatureOps(@NonNull HistoricalFeatureOps other) {
-            mFeatureId = other.mFeatureId;
+        private AttributedHistoricalOps(@NonNull AttributedHistoricalOps other) {
+            mTag = other.mTag;
             final int opCount = other.getOpCount();
             for (int i = 0; i < opCount; i++) {
                 final HistoricalOp origOp = other.getOpAt(i);
@@ -5479,15 +5483,15 @@ public class AppOpsManager {
             }
         }
 
-        private @Nullable HistoricalFeatureOps splice(double fractionToRemove) {
-            HistoricalFeatureOps splice = null;
+        private @Nullable AttributedHistoricalOps splice(double fractionToRemove) {
+            AttributedHistoricalOps splice = null;
             final int opCount = getOpCount();
             for (int i = 0; i < opCount; i++) {
                 final HistoricalOp origOps = getOpAt(i);
                 final HistoricalOp spliceOps = origOps.splice(fractionToRemove);
                 if (spliceOps != null) {
                     if (splice == null) {
-                        splice = new HistoricalFeatureOps(mFeatureId, null);
+                        splice = new AttributedHistoricalOps(mTag, null);
                     }
                     if (splice.mHistoricalOps == null) {
                         splice.mHistoricalOps = new ArrayMap<>();
@@ -5498,7 +5502,7 @@ public class AppOpsManager {
             return splice;
         }
 
-        private void merge(@NonNull HistoricalFeatureOps other) {
+        private void merge(@NonNull AttributedHistoricalOps other) {
             final int opCount = other.getOpCount();
             for (int i = 0; i < opCount; i++) {
                 final HistoricalOp otherOp = other.getOpAt(i);
@@ -5595,7 +5599,7 @@ public class AppOpsManager {
         }
 
         private void accept(@NonNull HistoricalOpsVisitor visitor) {
-            visitor.visitHistoricalFeatureOps(this);
+            visitor.visitHistoricalAttributionOps(this);
             final int opCount = getOpCount();
             for (int i = 0; i < opCount; i++) {
                 getOpAt(i).accept(visitor);
@@ -5631,46 +5635,46 @@ public class AppOpsManager {
 
 
         /**
-         * Creates a new HistoricalFeatureOps.
+         * Creates a new HistoricalAttributionOps.
          *
-         * @param featureId
-         *   Id of the {@link Context#createFeatureContext feature} in the package
+         * @param tag
+         *   {@link Context#createAttributionContext attribution} tag
          * @param historicalOps
-         *   Ops for this feature
+         *   Ops for this attribution
          * @hide
          */
         @DataClass.Generated.Member
-        public HistoricalFeatureOps(
-                @Nullable String featureId,
+        public AttributedHistoricalOps(
+                @Nullable String tag,
                 @Nullable ArrayMap<String,HistoricalOp> historicalOps) {
-            this.mFeatureId = featureId;
+            this.mTag = tag;
             this.mHistoricalOps = historicalOps;
 
             // onConstructed(); // You can define this method to get a callback
         }
 
         /**
-         * Id of the {@link Context#createFeatureContext feature} in the package
+         * {@link Context#createAttributionContext attribution} tag
          */
         @DataClass.Generated.Member
-        public @Nullable String getFeatureId() {
-            return mFeatureId;
+        public @Nullable String getTag() {
+            return mTag;
         }
 
         @Override
         @DataClass.Generated.Member
         public boolean equals(@Nullable Object o) {
             // You can override field equality logic by defining either of the methods like:
-            // boolean fieldNameEquals(HistoricalFeatureOps other) { ... }
+            // boolean fieldNameEquals(HistoricalAttributionOps other) { ... }
             // boolean fieldNameEquals(FieldType otherValue) { ... }
 
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             @SuppressWarnings("unchecked")
-            HistoricalFeatureOps that = (HistoricalFeatureOps) o;
+            AttributedHistoricalOps that = (AttributedHistoricalOps) o;
             //noinspection PointlessBooleanExpression
             return true
-                    && Objects.equals(mFeatureId, that.mFeatureId)
+                    && Objects.equals(mTag, that.mTag)
                     && Objects.equals(mHistoricalOps, that.mHistoricalOps);
         }
 
@@ -5681,7 +5685,7 @@ public class AppOpsManager {
             // int fieldNameHashCode() { ... }
 
             int _hash = 1;
-            _hash = 31 * _hash + Objects.hashCode(mFeatureId);
+            _hash = 31 * _hash + Objects.hashCode(mTag);
             _hash = 31 * _hash + Objects.hashCode(mHistoricalOps);
             return _hash;
         }
@@ -5693,10 +5697,10 @@ public class AppOpsManager {
             // void parcelFieldName(Parcel dest, int flags) { ... }
 
             byte flg = 0;
-            if (mFeatureId != null) flg |= 0x1;
+            if (mTag != null) flg |= 0x1;
             if (mHistoricalOps != null) flg |= 0x2;
             dest.writeByte(flg);
-            if (mFeatureId != null) dest.writeString(mFeatureId);
+            if (mTag != null) dest.writeString(mTag);
             if (mHistoricalOps != null) dest.writeMap(mHistoricalOps);
         }
 
@@ -5707,35 +5711,35 @@ public class AppOpsManager {
         /** @hide */
         @SuppressWarnings({"unchecked", "RedundantCast"})
         @DataClass.Generated.Member
-        /* package-private */ HistoricalFeatureOps(@NonNull Parcel in) {
+        /* package-private */ AttributedHistoricalOps(@NonNull Parcel in) {
             // You can override field unparcelling by defining methods like:
             // static FieldType unparcelFieldName(Parcel in) { ... }
 
             byte flg = in.readByte();
-            String featureId = (flg & 0x1) == 0 ? null : in.readString();
+            String attributionTag = (flg & 0x1) == 0 ? null : in.readString();
             ArrayMap<String,HistoricalOp> historicalOps = null;
             if ((flg & 0x2) != 0) {
                 historicalOps = new ArrayMap();
                 in.readMap(historicalOps, HistoricalOp.class.getClassLoader());
             }
 
-            this.mFeatureId = featureId;
+            this.mTag = attributionTag;
             this.mHistoricalOps = historicalOps;
 
             // onConstructed(); // You can define this method to get a callback
         }
 
         @DataClass.Generated.Member
-        public static final @NonNull Parcelable.Creator<HistoricalFeatureOps> CREATOR
-                = new Parcelable.Creator<HistoricalFeatureOps>() {
+        public static final @NonNull Parcelable.Creator<AttributedHistoricalOps> CREATOR
+                = new Parcelable.Creator<AttributedHistoricalOps>() {
             @Override
-            public HistoricalFeatureOps[] newArray(int size) {
-                return new HistoricalFeatureOps[size];
+            public AttributedHistoricalOps[] newArray(int size) {
+                return new AttributedHistoricalOps[size];
             }
 
             @Override
-            public HistoricalFeatureOps createFromParcel(@NonNull Parcel in) {
-                return new HistoricalFeatureOps(in);
+            public AttributedHistoricalOps createFromParcel(@NonNull Parcel in) {
+                return new AttributedHistoricalOps(in);
             }
         };
 
@@ -5744,7 +5748,7 @@ public class AppOpsManager {
                 time = 1578113234821L,
                 codegenVersion = "1.0.14",
                 sourceFile = "frameworks/base/core/java/android/app/AppOpsManager.java",
-                inputSignatures = "private final @android.annotation.Nullable java.lang.String mFeatureId\nprivate @android.annotation.Nullable android.util.ArrayMap<java.lang.String,android.app.HistoricalOp> mHistoricalOps\nprivate @android.annotation.Nullable android.app.HistoricalFeatureOps splice(double)\nprivate  void merge(android.app.HistoricalFeatureOps)\nprivate  void filter(java.lang.String[],int,double)\nprivate  boolean isEmpty()\nprivate  void increaseAccessCount(int,int,int,long)\nprivate  void increaseRejectCount(int,int,int,long)\nprivate  void increaseAccessDuration(int,int,int,long)\npublic @android.annotation.IntRange(from=0L) int getOpCount()\npublic @android.annotation.NonNull android.app.HistoricalOp getOpAt(int)\npublic @android.annotation.Nullable android.app.HistoricalOp getOp(java.lang.String)\nprivate  void accept(android.app.HistoricalOpsVisitor)\nprivate @android.annotation.NonNull android.app.HistoricalOp getOrCreateHistoricalOp(int)\nclass HistoricalFeatureOps extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genEqualsHashCode=true, genHiddenCopyConstructor=true)")
+                inputSignatures = "private final @android.annotation.Nullable java.lang.String mAttributionTag\nprivate @android.annotation.Nullable android.util.ArrayMap<java.lang.String,android.app.HistoricalOp> mHistoricalOps\nprivate @android.annotation.Nullable android.app.HistoricalAttributionOps splice(double)\nprivate  void merge(android.app.HistoricalAttributionOps)\nprivate  void filter(java.lang.String[],int,double)\nprivate  boolean isEmpty()\nprivate  void increaseAccessCount(int,int,int,long)\nprivate  void increaseRejectCount(int,int,int,long)\nprivate  void increaseAccessDuration(int,int,int,long)\npublic @android.annotation.IntRange(from=0L) int getOpCount()\npublic @android.annotation.NonNull android.app.HistoricalOp getOpAt(int)\npublic @android.annotation.Nullable android.app.HistoricalOp getOp(java.lang.String)\nprivate  void accept(android.app.HistoricalOpsVisitor)\nprivate @android.annotation.NonNull android.app.HistoricalOp getOrCreateHistoricalOp(int)\nclass HistoricalAttributionOps extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genHiddenConstructor=true, genEqualsHashCode=true, genHiddenCopyConstructor=true)")
         @Deprecated
         private void __metadata() {}
         */
@@ -6420,7 +6424,7 @@ public class AppOpsManager {
         Objects.requireNonNull(executor, "executor cannot be null");
         Objects.requireNonNull(callback, "callback cannot be null");
         try {
-            mService.getHistoricalOps(request.mUid, request.mPackageName, request.mFeatureId,
+            mService.getHistoricalOps(request.mUid, request.mPackageName, request.mAttributionTag,
                     request.mOpNames, request.mFilter, request.mBeginTimeMillis,
                     request.mEndTimeMillis, request.mFlags, new RemoteCallback((result) -> {
                 final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
@@ -6460,8 +6464,9 @@ public class AppOpsManager {
         Objects.requireNonNull(callback, "callback cannot be null");
         try {
             mService.getHistoricalOpsFromDiskRaw(request.mUid, request.mPackageName,
-                    request.mFeatureId, request.mOpNames, request.mFilter, request.mBeginTimeMillis,
-                    request.mEndTimeMillis, request.mFlags, new RemoteCallback((result) -> {
+                    request.mAttributionTag, request.mOpNames, request.mFilter,
+                    request.mBeginTimeMillis, request.mEndTimeMillis, request.mFlags,
+                    new RemoteCallback((result) -> {
                 final HistoricalOps ops = result.getParcelable(KEY_HISTORICAL_OPS);
                 final long identity = Binder.clearCallingIdentity();
                 try {
@@ -7044,8 +7049,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
-     * null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or {@code
+     * null} for default attribution
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7055,8 +7060,8 @@ public class AppOpsManager {
      * @throws SecurityException If the app has been configured to crash on this op.
      */
     public int noteOp(@NonNull String op, int uid, @Nullable String packageName,
-            @Nullable String featureId, @Nullable String message) {
-        return noteOp(strOpToOp(op), uid, packageName, featureId, message);
+            @Nullable String attributionTag, @Nullable String message) {
+        return noteOp(strOpToOp(op), uid, packageName, attributionTag, message);
     }
 
     /**
@@ -7072,7 +7077,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or {@code
+     * null} for default attribution
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7083,9 +7089,9 @@ public class AppOpsManager {
      *
      * @hide
      */
-    public int noteOp(int op, int uid, @Nullable String packageName, @Nullable String featureId,
-            @Nullable String message) {
-        final int mode = noteOpNoThrow(op, uid, packageName, featureId, message);
+    public int noteOp(int op, int uid, @Nullable String packageName,
+            @Nullable String attributionTag, @Nullable String message) {
+        final int mode = noteOpNoThrow(op, uid, packageName, attributionTag, message);
         if (mode == MODE_ERRORED) {
             throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
         }
@@ -7120,8 +7126,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
-     * null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or {@code
+     * null} for default attribution
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7129,8 +7135,8 @@ public class AppOpsManager {
      * causing the app to crash).
      */
     public int noteOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
-            @Nullable String featureId, @Nullable String message) {
-        return noteOpNoThrow(strOpToOp(op), uid, packageName, featureId, message);
+            @Nullable String attributionTag, @Nullable String message) {
+        return noteOpNoThrow(strOpToOp(op), uid, packageName, attributionTag, message);
     }
 
     /**
@@ -7140,7 +7146,8 @@ public class AppOpsManager {
      * @param op The operation to note.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or {@code
+     * null} for default attribution
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7150,7 +7157,7 @@ public class AppOpsManager {
      * @hide
      */
     public int noteOpNoThrow(int op, int uid, @Nullable String packageName,
-            @Nullable String featureId, @Nullable String message) {
+            @Nullable String attributionTag, @Nullable String message) {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
@@ -7161,14 +7168,14 @@ public class AppOpsManager {
                 }
             }
 
-            int mode = mService.noteOperation(op, uid, packageName, featureId,
+            int mode = mService.noteOperation(op, uid, packageName, attributionTag,
                     collectionMode == COLLECT_ASYNC, message);
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
-                    collectNotedOpForSelf(op, featureId);
+                    collectNotedOpForSelf(op, attributionTag);
                 } else if (collectionMode == COLLECT_SYNC) {
-                    collectNotedOpSync(op, featureId);
+                    collectNotedOpSync(op, attributionTag);
                 }
             }
 
@@ -7208,8 +7215,8 @@ public class AppOpsManager {
      * @param op The operation to note. One of the OP_* constants.
      * @param proxiedPackageName The name of the application calling into the proxy application.
      * @param proxiedUid The uid of the proxied application
-     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
-     *                           feature
+     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
+     * attribution tag} or {@code null} for default attribution
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
@@ -7221,8 +7228,8 @@ public class AppOpsManager {
      * @hide
      */
     public int noteProxyOp(int op, @Nullable String proxiedPackageName, int proxiedUid,
-            @Nullable String proxiedFeatureId, @Nullable String message) {
-        int mode = noteProxyOpNoThrow(op, proxiedPackageName, proxiedUid, proxiedFeatureId,
+            @Nullable String proxiedAttributionTag, @Nullable String message) {
+        int mode = noteProxyOpNoThrow(op, proxiedPackageName, proxiedUid, proxiedAttributionTag,
                 message);
         if (mode == MODE_ERRORED) {
             throw new SecurityException("Proxy package " + mContext.getOpPackageName()
@@ -7241,8 +7248,8 @@ public class AppOpsManager {
      * @param op The operation to note. One of the OPSTR_* constants.
      * @param proxiedPackageName The name of the application calling into the proxy application.
      * @param proxiedUid The uid of the proxied application
-     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
-     *                           feature
+     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
+     * attribution tag} or {@code null} for default attribution
      * @param message A message describing the reason the op was noted
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or {@link #MODE_IGNORED}
@@ -7252,8 +7259,8 @@ public class AppOpsManager {
      * op.
      */
     public int noteProxyOp(@NonNull String op, @Nullable String proxiedPackageName, int proxiedUid,
-            @Nullable String proxiedFeatureId, @Nullable String message) {
-        return noteProxyOp(strOpToOp(op), proxiedPackageName, proxiedUid, proxiedFeatureId,
+            @Nullable String proxiedAttributionTag, @Nullable String message) {
+        return noteProxyOp(strOpToOp(op), proxiedPackageName, proxiedUid, proxiedAttributionTag,
                 message);
     }
 
@@ -7284,14 +7291,14 @@ public class AppOpsManager {
      * @param op The op to note
      * @param proxiedPackageName The package to note the op for
      * @param proxiedUid The uid the package belongs to
-     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
-     *                           feature
+     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
+     * attribution tag} or {@code null} for default attribution
      * @param message A message describing the reason the op was noted
      */
     public int noteProxyOpNoThrow(@NonNull String op, @Nullable String proxiedPackageName,
-            int proxiedUid, @Nullable String proxiedFeatureId, @Nullable String message) {
+            int proxiedUid, @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOpNoThrow(strOpToOp(op), proxiedPackageName, proxiedUid,
-                proxiedFeatureId, message);
+                proxiedAttributionTag, message);
     }
 
     /**
@@ -7302,14 +7309,14 @@ public class AppOpsManager {
      * @param proxiedPackageName The package to note the op for or {@code null} if the op should be
      *                           noted for the "android" package
      * @param proxiedUid The uid the package belongs to
-     * @param proxiedFeatureId The feature in the proxied app or {@code null} for default
-     *                           feature
+     * @param proxiedAttributionTag The proxied {@link Context#createAttributionContext
+     * attribution tag} or {@code null} for default attribution
      * @param message A message describing the reason the op was noted
      *
      * @hide
      */
     public int noteProxyOpNoThrow(int op, @Nullable String proxiedPackageName, int proxiedUid,
-            @Nullable String proxiedFeatureId, @Nullable String message) {
+            @Nullable String proxiedAttributionTag, @Nullable String message) {
         int myUid = Process.myUid();
 
         try {
@@ -7323,17 +7330,17 @@ public class AppOpsManager {
             }
 
             int mode = mService.noteProxyOperation(op, proxiedUid, proxiedPackageName,
-                    proxiedFeatureId, myUid, mContext.getOpPackageName(),
-                    mContext.getFeatureId(), collectionMode == COLLECT_ASYNC, message);
+                    proxiedAttributionTag, myUid, mContext.getOpPackageName(),
+                    mContext.getAttributionTag(), collectionMode == COLLECT_ASYNC, message);
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
-                    collectNotedOpForSelf(op, proxiedFeatureId);
+                    collectNotedOpForSelf(op, proxiedAttributionTag);
                 } else if (collectionMode == COLLECT_SYNC
                         // Only collect app-ops when the proxy is trusted
                         && mContext.checkPermission(Manifest.permission.UPDATE_APP_OPS_STATS, -1,
                         myUid) == PackageManager.PERMISSION_GRANTED) {
-                    collectNotedOpSync(op, proxiedFeatureId);
+                    collectNotedOpSync(op, proxiedAttributionTag);
                 }
             }
 
@@ -7522,8 +7529,8 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OPSTR_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The {@link Context#createFeatureContext feature} in the package or {@code
-     * null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or
+     * {@code null} for default attribution
      * @param message Description why op was started
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7534,8 +7541,8 @@ public class AppOpsManager {
      * the package is not in the passed in UID.
      */
     public int startOp(@NonNull String op, int uid, @Nullable String packageName,
-            @Nullable String featureId, @Nullable String message) {
-        return startOp(strOpToOp(op), uid, packageName, false, featureId, message);
+            @Nullable String attributionTag, @Nullable String message) {
+        return startOp(strOpToOp(op), uid, packageName, false, attributionTag, message);
     }
 
     /**
@@ -7544,7 +7551,8 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or
+     * {@code null} for default attribution
      * @param startIfModeDefault Whether to start if mode is {@link #MODE_DEFAULT}.
      * @param message Description why op was started
      *
@@ -7558,8 +7566,8 @@ public class AppOpsManager {
      * @hide
      */
     public int startOp(int op, int uid, @Nullable String packageName, boolean startIfModeDefault,
-            @Nullable String featureId, @Nullable String message) {
-        final int mode = startOpNoThrow(op, uid, packageName, startIfModeDefault, featureId,
+            @Nullable String attributionTag, @Nullable String message) {
+        final int mode = startOpNoThrow(op, uid, packageName, startIfModeDefault, attributionTag,
                 message);
         if (mode == MODE_ERRORED) {
             throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
@@ -7602,7 +7610,8 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or
+     * {@code null} for default attribution
      * @param message Description why op was started
      *
      * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
@@ -7610,8 +7619,8 @@ public class AppOpsManager {
      * causing the app to crash).
      */
     public int startOpNoThrow(@NonNull String op, int uid, @NonNull String packageName,
-            @NonNull String featureId, @Nullable String message) {
-        return startOpNoThrow(strOpToOp(op), uid, packageName, false, featureId, message);
+            @NonNull String attributionTag, @Nullable String message) {
+        return startOpNoThrow(strOpToOp(op), uid, packageName, false, attributionTag, message);
     }
 
     /**
@@ -7621,7 +7630,8 @@ public class AppOpsManager {
      * @param op The operation to start.  One of the OP_* constants.
      * @param uid The user id of the application attempting to perform the operation.
      * @param packageName The name of the application attempting to perform the operation.
-     * @param featureId The feature in the app or {@code null} for default feature
+     * @param attributionTag The {@link Context#createAttributionContext attribution tag} or
+     * {@code null} for default attribution
      * @param startIfModeDefault Whether to start if mode is {@link #MODE_DEFAULT}.
      * @param message Description why op was started
      *
@@ -7632,7 +7642,7 @@ public class AppOpsManager {
      * @hide
      */
     public int startOpNoThrow(int op, int uid, @NonNull String packageName,
-            boolean startIfModeDefault, @Nullable String featureId, @Nullable String message) {
+            boolean startIfModeDefault, @Nullable String attributionTag, @Nullable String message) {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
@@ -7644,13 +7654,13 @@ public class AppOpsManager {
             }
 
             int mode = mService.startOperation(getClientId(), op, uid, packageName,
-                    featureId, startIfModeDefault, collectionMode == COLLECT_ASYNC, message);
+                    attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message);
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
-                    collectNotedOpForSelf(op, featureId);
+                    collectNotedOpForSelf(op, attributionTag);
                 } else if (collectionMode == COLLECT_SYNC) {
-                    collectNotedOpSync(op, featureId);
+                    collectNotedOpSync(op, attributionTag);
                 }
             }
 
@@ -7684,8 +7694,8 @@ public class AppOpsManager {
      * previously passed in when starting the operation.
      */
     public void finishOp(@NonNull String op, int uid, @NonNull String packageName,
-            @Nullable String featureId) {
-        finishOp(strOpToOp(op), uid, packageName, featureId);
+            @Nullable String attributionTag) {
+        finishOp(strOpToOp(op), uid, packageName, attributionTag);
     }
 
     /**
@@ -7706,9 +7716,9 @@ public class AppOpsManager {
      * @hide
      */
     public void finishOp(int op, int uid, @NonNull String packageName,
-            @Nullable String featureId) {
+            @Nullable String attributionTag) {
         try {
-            mService.finishOperation(getClientId(), op, uid, packageName, featureId);
+            mService.finishOperation(getClientId(), op, uid, packageName, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -7819,15 +7829,15 @@ public class AppOpsManager {
      * Collect a noted op for the current process.
      *
      * @param op The noted op
-     * @param featureId The feature the op is noted for
+     * @param attributionTag The attribution tag the op is noted for
      */
-    private void collectNotedOpForSelf(int op, @Nullable String featureId) {
+    private void collectNotedOpForSelf(int op, @Nullable String attributionTag) {
         synchronized (sLock) {
             if (sOnOpNotedCallback != null) {
-                sOnOpNotedCallback.onSelfNoted(new SyncNotedAppOp(op, featureId));
+                sOnOpNotedCallback.onSelfNoted(new SyncNotedAppOp(op, attributionTag));
             }
         }
-        sMessageCollector.onSelfNoted(new SyncNotedAppOp(op, featureId));
+        sMessageCollector.onSelfNoted(new SyncNotedAppOp(op, attributionTag));
     }
 
     /**
@@ -7836,9 +7846,9 @@ public class AppOpsManager {
      * <p> Delivered to caller via {@link #prefixParcelWithAppOpsIfNeeded}
      *
      * @param op The noted op
-     * @param featureId The feature the op is noted for
+     * @param attributionTag The attribution tag the op is noted for
      */
-    private void collectNotedOpSync(int op, @Nullable String featureId) {
+    private void collectNotedOpSync(int op, @Nullable String attributionTag) {
         // If this is inside of a two-way binder call:
         // We are inside of a two-way binder call. Delivered to caller via
         // {@link #prefixParcelWithAppOpsIfNeeded}
@@ -7848,16 +7858,16 @@ public class AppOpsManager {
             sAppOpsNotedInThisBinderTransaction.set(appOpsNoted);
         }
 
-        long[] appOpsNotedForFeature = appOpsNoted.get(featureId);
-        if (appOpsNotedForFeature == null) {
-            appOpsNotedForFeature = new long[2];
-            appOpsNoted.put(featureId, appOpsNotedForFeature);
+        long[] appOpsNotedForAttribution = appOpsNoted.get(attributionTag);
+        if (appOpsNotedForAttribution == null) {
+            appOpsNotedForAttribution = new long[2];
+            appOpsNoted.put(attributionTag, appOpsNotedForAttribution);
         }
 
         if (op < 64) {
-            appOpsNotedForFeature[0] |= 1L << op;
+            appOpsNotedForAttribution[0] |= 1L << op;
         } else {
-            appOpsNotedForFeature[1] |= 1L << (op - 64);
+            appOpsNotedForAttribution[1] |= 1L << (op - 64);
         }
     }
 
@@ -7938,10 +7948,10 @@ public class AppOpsManager {
 
         p.writeInt(Parcel.EX_HAS_NOTED_APPOPS_REPLY_HEADER);
 
-        int numFeatureWithNotesAppOps = notedAppOps.size();
-        p.writeInt(numFeatureWithNotesAppOps);
+        int numAttributionWithNotesAppOps = notedAppOps.size();
+        p.writeInt(numAttributionWithNotesAppOps);
 
-        for (int i = 0; i < numFeatureWithNotesAppOps; i++) {
+        for (int i = 0; i < numAttributionWithNotesAppOps; i++) {
             p.writeString(notedAppOps.keyAt(i));
             p.writeLong(notedAppOps.valueAt(i)[0]);
             p.writeLong(notedAppOps.valueAt(i)[1]);
@@ -7959,10 +7969,10 @@ public class AppOpsManager {
      * @hide
      */
     public static void readAndLogNotedAppops(@NonNull Parcel p) {
-        int numFeaturesWithNotedAppOps = p.readInt();
+        int numAttributionsWithNotedAppOps = p.readInt();
 
-        for (int i = 0; i < numFeaturesWithNotedAppOps; i++) {
-            String featureId = p.readString();
+        for (int i = 0; i < numAttributionsWithNotedAppOps; i++) {
+            String attributionTag = p.readString();
             long[] rawNotedAppOps = new long[2];
             rawNotedAppOps[0] = p.readLong();
             rawNotedAppOps[1] = p.readLong();
@@ -7974,13 +7984,13 @@ public class AppOpsManager {
                     for (int code = notedAppOps.nextSetBit(0); code != -1;
                             code = notedAppOps.nextSetBit(code + 1)) {
                         if (sOnOpNotedCallback != null) {
-                            sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code, featureId));
+                            sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code, attributionTag));
                         }
                     }
                 }
                 for (int code = notedAppOps.nextSetBit(0); code != -1;
                         code = notedAppOps.nextSetBit(code + 1)) {
-                    sMessageCollector.onNoted(new SyncNotedAppOp(code, featureId));
+                    sMessageCollector.onNoted(new SyncNotedAppOp(code, attributionTag));
                 }
             }
         }

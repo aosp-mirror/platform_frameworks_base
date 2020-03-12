@@ -32,8 +32,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.ProcessInfo;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedComponent;
-import android.content.pm.parsing.component.ParsedFeature;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
@@ -253,7 +253,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     protected List<ParsedProvider> providers = emptyList();
 
     @NonNull
-    private List<ParsedFeature> features = emptyList();
+    private List<ParsedAttribution> attributions = emptyList();
 
     @NonNull
     protected List<ParsedPermission> permissions = emptyList();
@@ -648,8 +648,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl addFeature(ParsedFeature feature) {
-        this.features = CollectionUtils.add(this.features, feature);
+    public ParsingPackageImpl addAttribution(ParsedAttribution attribution) {
+        this.attributions = CollectionUtils.add(this.attributions, attribution);
         return this;
     }
 
@@ -1018,7 +1018,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeTypedList(this.receivers);
         dest.writeTypedList(this.services);
         dest.writeTypedList(this.providers);
-        dest.writeTypedList(this.features);
+        dest.writeTypedList(this.attributions);
         dest.writeTypedList(this.permissions);
         dest.writeTypedList(this.permissionGroups);
         dest.writeTypedList(this.instrumentations);
@@ -1178,7 +1178,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.receivers = in.createTypedArrayList(ParsedActivity.CREATOR);
         this.services = in.createTypedArrayList(ParsedService.CREATOR);
         this.providers = in.createTypedArrayList(ParsedProvider.CREATOR);
-        this.features = in.createTypedArrayList(ParsedFeature.CREATOR);
+        this.attributions = in.createTypedArrayList(ParsedAttribution.CREATOR);
         this.permissions = in.createTypedArrayList(ParsedPermission.CREATOR);
         this.permissionGroups = in.createTypedArrayList(ParsedPermissionGroup.CREATOR);
         this.instrumentations = in.createTypedArrayList(ParsedInstrumentation.CREATOR);
@@ -1548,8 +1548,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public List<ParsedFeature> getFeatures() {
-        return features;
+    public List<ParsedAttribution> getAttributions() {
+        return attributions;
     }
 
     @NonNull

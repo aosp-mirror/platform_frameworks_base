@@ -38,7 +38,7 @@ import java.util.ArrayList;
  * @hide
  */
 public interface IContentProvider extends IInterface {
-    public Cursor query(String callingPkg, @Nullable String featureId, Uri url,
+    public Cursor query(String callingPkg, @Nullable String attributionTag, Uri url,
             @Nullable String[] projection,
             @Nullable Bundle queryArgs, @Nullable ICancellationSignal cancellationSignal)
             throws RemoteException;
@@ -59,8 +59,8 @@ public interface IContentProvider extends IInterface {
             throws RemoteException {
         return insert(callingPkg, null, url, initialValues, null);
     }
-    public Uri insert(String callingPkg, String featureId, Uri url, ContentValues initialValues,
-            Bundle extras) throws RemoteException;
+    public Uri insert(String callingPkg, String attributionTag, Uri url,
+            ContentValues initialValues, Bundle extras) throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
             + "ContentProviderClient#bulkInsert(android.net.Uri, android.content.ContentValues[])"
@@ -69,7 +69,7 @@ public interface IContentProvider extends IInterface {
             throws RemoteException {
         return bulkInsert(callingPkg, null, url, initialValues);
     }
-    public int bulkInsert(String callingPkg, String featureId, Uri url,
+    public int bulkInsert(String callingPkg, String attributionTag, Uri url,
             ContentValues[] initialValues) throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
@@ -80,7 +80,7 @@ public interface IContentProvider extends IInterface {
         return delete(callingPkg, null, url,
                 ContentResolver.createSqlQueryBundle(selection, selectionArgs));
     }
-    public int delete(String callingPkg, String featureId, Uri url, Bundle extras)
+    public int delete(String callingPkg, String attributionTag, Uri url, Bundle extras)
             throws RemoteException;
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Use {@link "
@@ -91,18 +91,18 @@ public interface IContentProvider extends IInterface {
         return update(callingPkg, null, url, values,
                 ContentResolver.createSqlQueryBundle(selection, selectionArgs));
     }
-    public int update(String callingPkg, String featureId, Uri url, ContentValues values,
+    public int update(String callingPkg, String attributionTag, Uri url, ContentValues values,
             Bundle extras) throws RemoteException;
 
-    public ParcelFileDescriptor openFile(String callingPkg, @Nullable String featureId, Uri url,
-            String mode, ICancellationSignal signal, IBinder callerToken)
+    public ParcelFileDescriptor openFile(String callingPkg, @Nullable String attributionTag,
+            Uri url, String mode, ICancellationSignal signal, IBinder callerToken)
             throws RemoteException, FileNotFoundException;
 
-    public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String featureId,
+    public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String attributionTag,
             Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
 
-    public ContentProviderResult[] applyBatch(String callingPkg, @Nullable String featureId,
+    public ContentProviderResult[] applyBatch(String callingPkg, @Nullable String attributionTag,
             String authority, ArrayList<ContentProviderOperation> operations)
             throws RemoteException, OperationApplicationException;
 
@@ -115,15 +115,15 @@ public interface IContentProvider extends IInterface {
         return call(callingPkg, null, "unknown", method, arg, extras);
     }
 
-    public Bundle call(String callingPkg, @Nullable String featureId, String authority,
+    public Bundle call(String callingPkg, @Nullable String attributionTag, String authority,
             String method, @Nullable String arg, @Nullable Bundle extras) throws RemoteException;
 
-    public int checkUriPermission(String callingPkg, @Nullable String featureId, Uri uri, int uid,
-            int modeFlags) throws RemoteException;
+    public int checkUriPermission(String callingPkg, @Nullable String attributionTag, Uri uri,
+            int uid, int modeFlags) throws RemoteException;
 
     public ICancellationSignal createCancellationSignal() throws RemoteException;
 
-    public Uri canonicalize(String callingPkg, @Nullable String featureId, Uri uri)
+    public Uri canonicalize(String callingPkg, @Nullable String attributionTag, Uri uri)
             throws RemoteException;
 
     /**
@@ -131,20 +131,21 @@ public interface IContentProvider extends IInterface {
      * call returns immediately, and the resulting type is returned when available via
      * a binder callback.
      */
-    void canonicalizeAsync(String callingPkg, @Nullable String featureId, Uri uri,
+    void canonicalizeAsync(String callingPkg, @Nullable String attributionTag, Uri uri,
             RemoteCallback callback) throws RemoteException;
 
-    public Uri uncanonicalize(String callingPkg, @Nullable String featureId, Uri uri)
+    public Uri uncanonicalize(String callingPkg, @Nullable String attributionTag, Uri uri)
             throws RemoteException;
 
-    public boolean refresh(String callingPkg, @Nullable String featureId, Uri url,
+    public boolean refresh(String callingPkg, @Nullable String attributionTag, Uri url,
             @Nullable Bundle extras, ICancellationSignal cancellationSignal) throws RemoteException;
 
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
 
-    public AssetFileDescriptor openTypedAssetFile(String callingPkg, @Nullable String featureId,
-            Uri url, String mimeType, Bundle opts, ICancellationSignal signal)
+    public AssetFileDescriptor openTypedAssetFile(String callingPkg,
+            @Nullable String attributionTag, Uri url, String mimeType, Bundle opts,
+            ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
 
     /* IPC constants */

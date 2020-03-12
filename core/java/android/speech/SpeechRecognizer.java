@@ -342,7 +342,7 @@ public class SpeechRecognizer {
         }
         try {
             mService.startListening(recognizerIntent, mListener, mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
             if (DBG) Log.d(TAG, "service start listening command succeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "startListening() failed", e);
@@ -357,7 +357,7 @@ public class SpeechRecognizer {
         }
         try {
             mService.stopListening(mListener, mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
             if (DBG) Log.d(TAG, "service stop listening command succeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "stopListening() failed", e);
@@ -371,7 +371,7 @@ public class SpeechRecognizer {
             return;
         }
         try {
-            mService.cancel(mListener, mContext.getOpPackageName(), mContext.getFeatureId());
+            mService.cancel(mListener, mContext.getOpPackageName(), mContext.getAttributionTag());
             if (DBG) Log.d(TAG, "service cancel command succeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "cancel() failed", e);
@@ -400,7 +400,8 @@ public class SpeechRecognizer {
     public void destroy() {
         if (mService != null) {
             try {
-                mService.cancel(mListener, mContext.getOpPackageName(), mContext.getFeatureId());
+                mService.cancel(mListener, mContext.getOpPackageName(),
+                        mContext.getAttributionTag());
             } catch (final RemoteException e) {
                 // Not important
             }

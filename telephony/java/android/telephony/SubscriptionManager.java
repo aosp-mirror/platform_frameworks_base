@@ -1148,7 +1148,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 subInfo = iSub.getActiveSubscriptionInfo(subId, mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1182,7 +1182,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubscriptionInfoForIccId(iccId, mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1216,7 +1216,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubscriptionInfoForSimSlotIndex(slotIndex,
-                        mContext.getOpPackageName(), mContext.getFeatureId());
+                        mContext.getOpPackageName(), mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1240,7 +1240,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAllSubInfoList(mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1326,7 +1326,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1377,7 +1377,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAvailableSubscriptionInfoList(mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1495,7 +1495,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getAllSubInfoCount(mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -1524,7 +1524,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubInfoCount(mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2279,7 +2279,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 resultValue = iSub.getSubscriptionProperty(subId, propKey,
-                        context.getOpPackageName(), context.getFeatureId());
+                        context.getOpPackageName(), context.getAttributionTag());
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2443,7 +2443,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 return iSub.isActiveSubId(subId, mContext.getOpPackageName(),
-                        mContext.getFeatureId());
+                        mContext.getAttributionTag());
             }
         } catch (RemoteException ex) {
         }
@@ -2706,13 +2706,14 @@ public class SubscriptionManager {
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions() {
         String contextPkg = mContext != null ? mContext.getOpPackageName() : "<unknown>";
-        String contextFeature = mContext != null ? mContext.getFeatureId() : null;
+        String contextAttributionTag = mContext != null ? mContext.getAttributionTag() : null;
         List<SubscriptionInfo> subInfoList = null;
 
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                subInfoList = iSub.getOpportunisticSubscriptions(contextPkg, contextFeature);
+                subInfoList = iSub.getOpportunisticSubscriptions(contextPkg,
+                        contextAttributionTag);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2951,7 +2952,7 @@ public class SubscriptionManager {
     public @NonNull List<SubscriptionInfo> getSubscriptionsInGroup(@NonNull ParcelUuid groupUuid) {
         Preconditions.checkNotNull(groupUuid, "groupUuid can't be null");
         String contextPkg = mContext != null ? mContext.getOpPackageName() : "<unknown>";
-        String contextFeature = mContext != null ? mContext.getFeatureId() : null;
+        String contextAttributionTag = mContext != null ? mContext.getAttributionTag() : null;
         if (VDBG) {
             logd("[getSubscriptionsInGroup]+ groupUuid:" + groupUuid);
         }
@@ -2960,7 +2961,8 @@ public class SubscriptionManager {
         try {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
-                result = iSub.getSubscriptionsInGroup(groupUuid, contextPkg, contextFeature);
+                result = iSub.getSubscriptionsInGroup(groupUuid, contextPkg,
+                        contextAttributionTag);
             } else {
                 if (!isSystemProcess()) {
                     throw new IllegalStateException("telephony service is null.");

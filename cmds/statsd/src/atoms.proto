@@ -485,7 +485,7 @@ message Atom {
         PackageNotificationChannelGroupPreferences package_notification_channel_group_preferences =
                 10073 [(module) = "framework"];
         GnssStats gnss_stats = 10074 [(module) = "framework"];
-        AppFeaturesOps app_features_ops = 10075 [(module) = "framework"];
+        AttributedAppOps attributed_app_ops = 10075 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -7600,18 +7600,19 @@ message AppOps {
 }
 
 /**
- * Historical app ops data per package and features.
+ * Historical app ops data per package and attribution tag.
  */
-message AppFeaturesOps {
+message AttributedAppOps {
     // Uid of the package requesting the op
     optional int32 uid = 1 [(is_uid) = true];
 
     // Name of the package performing the op
     optional string package_name = 2;
 
-    // feature id; provided by developer when accessing related API, limited at 50 chars by API.
-    // Features must be provided through manifest using <feature> tag available in R and above.
-    optional string feature_id = 3;
+    // tag; provided by developer when accessing related API, limited at 50 chars by API.
+    // Attributions must be provided through manifest using <attribution> tag available in R and
+    // above.
+    optional string tag = 3;
 
     // operation id; maps to the OPSTR_* constants in AppOpsManager.java
     optional string op = 4;
@@ -8473,9 +8474,11 @@ message RuntimeAppOpAccess {
     // operation string id per OPSTR_ constants in AppOpsManager.java
     optional string op = 3;
 
-    // feature id; provided by developer when accessing related API, limited at 50 chars by API.
-    // Features must be provided through manifest using <feature> tag available in R and above.
-    optional string feature_id = 4;
+    // attribution_tag; provided by developer when accessing related API, limited at 50 chars by
+    // API.
+    // Attributions must be provided through manifest using <attribution> tag available in R and
+    // above.
+    optional string attribution_tag = 4;
 
     // message related to app op access, limited to 600 chars by API
     optional string message = 5;
