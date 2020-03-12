@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.systemui.statusbar.notification
+package com.android.systemui.statusbar.notification.interruption
 
 import android.content.Context
 import android.media.MediaMetadata
@@ -24,6 +24,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.NotificationEntryManager
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
