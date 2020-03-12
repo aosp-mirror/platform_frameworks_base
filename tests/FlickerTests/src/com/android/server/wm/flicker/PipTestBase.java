@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,48 +16,61 @@
 
 package com.android.server.wm.flicker;
 
-import static com.android.server.wm.flicker.CommonTransitions.exitPipModeToApp;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.closePipWindow;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.hasPipWindow;
 
+import android.support.test.uiautomator.UiDevice;
+
+import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.PipAppHelper;
 
-import org.junit.Before;
+import org.junit.AfterClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 
-/**
- * Test Pip launch.
- * To run this test: {@code atest FlickerTests:PipToAppTest}
- */
 @LargeTest
 @RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class PipToAppTest extends PipTestBase {
-    public PipToAppTest(String beginRotationName, int beginRotation) {
+public abstract class PipTestBase extends NonRotationTestBase {
+    static final String sPipWindowTitle = "PipMenuActivity";
+
+    public PipTestBase(String beginRotationName, int beginRotation) {
         super(beginRotationName, beginRotation);
+
+        this.mTestApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
     }
 
-    @Before
-    public void runTransition() {
-        run(exitPipModeToApp((PipAppHelper) mTestApp, mUiDevice, mBeginRotation)
-                .includeJankyRuns().build());
+    @AfterClass
+    public static void teardown() {
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+
+        if (hasPipWindow(device)) {
+            closePipWindow(device);
+        }
     }
 
     @Test
-    public void checkVisibility_backgroundWindowVisibleBehindPipLayer() {
+    public void checkVisibility_pipWindowBecomesVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
                 .skipUntilFirstAssertion()
                 .showsAppWindowOnTop(sPipWindowTitle)
                 .then()
-                .showsBelowAppWindow("Wallpaper")
+                .hidesAppWindow(sPipWindowTitle)
+                .forAllEntries());
+    }
+
+    @Test
+    public void checkVisibility_pipLayerBecomesVisible() {
+        checkResults(result -> LayersTraceSubject.assertThat(result)
+                .skipUntilFirstAssertion()
+                .showsLayer(sPipWindowTitle)
                 .then()
-                .showsAppWindowOnTop(mTestApp.getPackage())
-                .then()
-                .hidesAppWindowOnTop(mTestApp.getPackage())
+                .hidesLayer(sPipWindowTitle)
                 .forAllEntries());
     }
 }

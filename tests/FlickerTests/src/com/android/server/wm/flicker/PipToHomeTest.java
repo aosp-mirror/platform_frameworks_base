@@ -18,11 +18,7 @@ package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.exitPipModeToHome;
 
-import android.view.Surface;
-
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.flicker.helpers.PipAppHelper;
 
@@ -32,51 +28,24 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.junit.runners.Parameterized;
 
 /**
  * Test Pip launch.
  * To run this test: {@code atest FlickerTests:PipToHomeTest}
  */
 @LargeTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class PipToHomeTest extends FlickerTestBase {
-
-    static final String sPipWindowTitle = "PipActivity";
-
-    // public PipToHomeTest(String beginRotationName, int beginRotation) {
-    public PipToHomeTest() {
-        // super(beginRotationName, beginRotation);
-
-        this.mTestApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
+public class PipToHomeTest extends PipTestBase {
+    public PipToHomeTest(String beginRotationName, int beginRotation) {
+        super(beginRotationName, beginRotation);
     }
 
     @Before
     public void runTransition() {
-        // run(exitPipModeToHome((PipAppHelper) mTestApp, mUiDevice, mBeginRotation)
-        run(exitPipModeToHome((PipAppHelper) mTestApp, mUiDevice, Surface.ROTATION_0)
+        run(exitPipModeToHome((PipAppHelper) mTestApp, mUiDevice, mBeginRotation)
                 .includeJankyRuns().build());
-    }
-
-    @Ignore
-    @Test
-    public void checkVisibility_pipWindowBecomesVisible() {
-        checkResults(result -> WmTraceSubject.assertThat(result)
-                .skipUntilFirstAssertion()
-                .showsAppWindowOnTop(sPipWindowTitle)
-                .then()
-                .hidesAppWindow(sPipWindowTitle)
-                .forAllEntries());
-    }
-
-    @Test
-    public void checkVisibility_pipLayerBecomesVisible() {
-        checkResults(result -> LayersTraceSubject.assertThat(result)
-                .skipUntilFirstAssertion()
-                .showsLayer(sPipWindowTitle)
-                .then()
-                .hidesLayer(sPipWindowTitle)
-                .forAllEntries());
     }
 
     @Ignore
