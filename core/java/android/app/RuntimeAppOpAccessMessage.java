@@ -44,7 +44,7 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
     /** Name of package for which runtime app op access message was collected */
     private final @NonNull String mPackageName;
     /** Feature of package for which runtime app op access message was collected */
-    private final @Nullable String mFeatureId;
+    private final @Nullable String mAttributionTag;
     /** Message collected (including stacktrace for synchronous ops) */
     private final @NonNull String mMessage;
     /** Sampling strategy used to collect this message. */
@@ -63,8 +63,8 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
      *   Op code of operation access which was collected
      * @param packageName
      *   Name of package for which runtime app op access message was collected
-     * @param featureId
-     *   Feature of package for which runtime app op access message was collected
+     * @param attributionTag
+     *   Attribution tag for which runtime app op access message was collected
      * @param message
      *   Message collected (including stacktrace for synchronous ops)
      * @param samplingStrategy
@@ -75,7 +75,7 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
             @IntRange(from = 0L) int uid,
             @IntRange(from = 0L) int opCode,
             @NonNull String packageName,
-            @Nullable String featureId,
+            @Nullable String attributionTag,
             @NonNull String message,
             @AppOpsManager.SamplingStrategy int samplingStrategy) {
         this.mUid = uid;
@@ -90,7 +90,7 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
         this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPackageName);
-        this.mFeatureId = featureId;
+        this.mAttributionTag = attributionTag;
         this.mMessage = message;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMessage);
@@ -134,11 +134,11 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
     }
 
     /**
-     * Feature of package for which runtime app op access message was collected
+     * Attribution tag for which runtime app op access message was collected
      */
     @DataClass.Generated.Member
-    public @Nullable String getFeatureId() {
-        return mFeatureId;
+    public @Nullable String getAttributionTag() {
+        return mAttributionTag;
     }
 
     /**
@@ -164,12 +164,12 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
         // void parcelFieldName(Parcel dest, int flags) { ... }
 
         byte flg = 0;
-        if (mFeatureId != null) flg |= 0x8;
+        if (mAttributionTag != null) flg |= 0x8;
         dest.writeByte(flg);
         dest.writeInt(mUid);
         dest.writeInt(mOpCode);
         dest.writeString(mPackageName);
-        if (mFeatureId != null) dest.writeString(mFeatureId);
+        if (mAttributionTag != null) dest.writeString(mAttributionTag);
         dest.writeString(mMessage);
         dest.writeInt(mSamplingStrategy);
     }
@@ -189,7 +189,7 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
         int uid = in.readInt();
         int opCode = in.readInt();
         String packageName = in.readString();
-        String featureId = (flg & 0x8) == 0 ? null : in.readString();
+        String attributionTag = (flg & 0x8) == 0 ? null : in.readString();
         String message = in.readString();
         int samplingStrategy = in.readInt();
 
@@ -205,7 +205,7 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
         this.mPackageName = packageName;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mPackageName);
-        this.mFeatureId = featureId;
+        this.mAttributionTag = attributionTag;
         this.mMessage = message;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, mMessage);
@@ -234,7 +234,7 @@ public final class RuntimeAppOpAccessMessage implements Parcelable {
             time = 1581517099127L,
             codegenVersion = "1.0.14",
             sourceFile = "frameworks/base/core/java/android/app/RuntimeAppOpAccessMessage.java",
-            inputSignatures = "private final @android.annotation.IntRange(from=0L) int mUid\nprivate final @android.annotation.IntRange(from=0L, to=AppOpsManager._NUM_OP - 1) int mOpCode\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.Nullable java.lang.String mFeatureId\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.app.AppOpsManager.SamplingStrategy int mSamplingStrategy\npublic @android.annotation.NonNull java.lang.String getOp()\nclass RuntimeAppOpAccessMessage extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false)")*/
+            inputSignatures = "private final @android.annotation.IntRange(from=0L) int mUid\nprivate final @android.annotation.IntRange(from=0L, to=AppOpsManager._NUM_OP - 1) int mOpCode\nprivate final @android.annotation.NonNull java.lang.String mPackageName\nprivate final @android.annotation.Nullable java.lang.String mAttributionTag\nprivate final @android.annotation.NonNull java.lang.String mMessage\nprivate final @android.app.AppOpsManager.SamplingStrategy int mSamplingStrategy\npublic @android.annotation.NonNull java.lang.String getOp()\nclass RuntimeAppOpAccessMessage extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstructor=false)")*/
     @Deprecated
     private void __metadata() {}
 

@@ -2599,7 +2599,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             try {
                 result = ActivityTaskManager.getService().startActivityAsUser(
-                        null, mContext.getBasePackageName(), mContext.getFeatureId(),
+                        null, mContext.getBasePackageName(), mContext.getAttributionTag(),
                         intent,
                         intent.resolveTypeIfNeeded(mContext.getContentResolver()),
                         null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null,

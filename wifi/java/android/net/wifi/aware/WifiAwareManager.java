@@ -267,7 +267,7 @@ public class WifiAwareManager {
 
             try {
                 Binder binder = new Binder();
-                mService.connect(binder, mContext.getOpPackageName(), mContext.getFeatureId(),
+                mService.connect(binder, mContext.getOpPackageName(), mContext.getAttributionTag(),
                         new WifiAwareEventCallbackProxy(this, looper, binder, attachCallback,
                                 identityChangedListener), configRequest,
                         identityChangedListener != null);
@@ -298,7 +298,7 @@ public class WifiAwareManager {
         }
 
         try {
-            mService.publish(mContext.getOpPackageName(), mContext.getFeatureId(), clientId,
+            mService.publish(mContext.getOpPackageName(), mContext.getAttributionTag(), clientId,
                     publishConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, true, callback,
                             clientId));
@@ -336,7 +336,7 @@ public class WifiAwareManager {
         }
 
         try {
-            mService.subscribe(mContext.getOpPackageName(), mContext.getFeatureId(), clientId,
+            mService.subscribe(mContext.getOpPackageName(), mContext.getAttributionTag(), clientId,
                     subscribeConfig,
                     new WifiAwareDiscoverySessionCallbackProxy(this, looper, false, callback,
                             clientId));

@@ -34,34 +34,40 @@ import java.util.Collections;
 import java.util.List;
 
 /** @hide */
-public class ParsedFeatureUtils {
+public class ParsedAttributionUtils {
 
     @NonNull
-    public static ParseResult<ParsedFeature> parseFeature(Resources res, XmlResourceParser parser,
-            ParseInput input) throws IOException, XmlPullParserException {
-        String featureId;
+    public static ParseResult<ParsedAttribution> parseAttribution(Resources res,
+            XmlResourceParser parser, ParseInput input)
+            throws IOException, XmlPullParserException {
+        String attributionTag;
         int label;
         List<String> inheritFrom = null;
 
-        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestFeature);
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestAttribution);
         if (sa == null) {
-            return input.error("<feature> could not be parsed");
+            return input.error("<attribution> could not be parsed");
         }
 
         try {
-            featureId = sa.getNonConfigurationString(R.styleable.AndroidManifestFeature_featureId,
-                    0);
-            if (featureId == null) {
-                return input.error("<featureId> does not specify android:featureId");
+            attributionTag = sa.getNonConfigurationString(
+                    R.styleable.AndroidManifestAttribution_tag, 0);
+            if (attributionTag == null) {
+                // TODO moltmann: Remove handling of featureId
+                attributionTag = sa.getNonConfigurationString(
+                        R.styleable.AndroidManifestAttribution_featureId, 0);
+                if (attributionTag == null) {
+                    return input.error("<attribution> does not specify android:tag");
+                }
             }
-            if (featureId.length() > ParsedFeature.MAX_FEATURE_ID_LEN) {
-                return input.error("<featureId> is too long. Max length is "
-                        + ParsedFeature.MAX_FEATURE_ID_LEN);
+            if (attributionTag.length() > ParsedAttribution.MAX_ATTRIBUTION_TAG_LEN) {
+                return input.error("android:tag is too long. Max length is "
+                        + ParsedAttribution.MAX_ATTRIBUTION_TAG_LEN);
             }
 
-            label = sa.getResourceId(R.styleable.AndroidManifestFeature_label, 0);
+            label = sa.getResourceId(R.styleable.AndroidManifestAttribution_label, 0);
             if (label == Resources.ID_NULL) {
-                return input.error("<featureId> does not specify android:label");
+                return input.error("<attribution> does not specify android:label");
             }
         } finally {
             sa.recycle();
@@ -77,14 +83,15 @@ public class ParsedFeatureUtils {
 
             String tagName = parser.getName();
             if (tagName.equals("inherit-from")) {
-                sa = res.obtainAttributes(parser, R.styleable.AndroidManifestFeatureInheritFrom);
+                sa = res.obtainAttributes(parser,
+                        R.styleable.AndroidManifestAttributionInheritFrom);
                 if (sa == null) {
                     return input.error("<inherit-from> could not be parsed");
                 }
 
                 try {
                     String inheritFromId = sa.getNonConfigurationString(
-                            R.styleable.AndroidManifestFeatureInheritFrom_featureId,0);
+                            R.styleable.AndroidManifestAttributionInheritFrom_tag, 0);
 
                     if (inheritFrom == null) {
                         inheritFrom = new ArrayList<>();
@@ -94,7 +101,7 @@ public class ParsedFeatureUtils {
                     sa.recycle();
                 }
             } else {
-                return input.error("Bad element under <feature>: " + tagName);
+                return input.error("Bad element under <attribution>: " + tagName);
             }
         }
 
@@ -104,6 +111,6 @@ public class ParsedFeatureUtils {
             ((ArrayList) inheritFrom).trimToSize();
         }
 
-        return input.success(new ParsedFeature(featureId, label, inheritFrom));
+        return input.success(new ParsedAttribution(attributionTag, label, inheritFrom));
     }
 }
