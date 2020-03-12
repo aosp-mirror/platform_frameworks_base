@@ -23,6 +23,7 @@ import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.net.NetworkStack.checkNetworkStackPermission;
@@ -1790,6 +1791,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (IllegalStateException e) {
             Log.wtf(TAG, "problem reading network stats", e);
             return new NetworkStats(0L, 10);
+        }
+    }
+
+    // TODO: It is copied from ConnectivitySerivce, consider refactor these check permission
+    //  functions to a proper util.
+    private boolean checkAnyPermissionOf(String... permissions) {
+        for (String permission : permissions) {
+            if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void enforceAnyPermissionOf(String... permissions) {
+        if (!checkAnyPermissionOf(permissions)) {
+            throw new SecurityException("Requires one of the following permissions: "
+                    + String.join(", ", permissions) + ".");
         }
     }
 
