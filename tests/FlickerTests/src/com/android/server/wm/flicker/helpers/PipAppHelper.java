@@ -16,13 +16,14 @@
 
 package com.android.server.wm.flicker.helpers;
 
-import static com.android.server.wm.flicker.helpers.AutomationUtils.getPipWindowSelector;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.hasPipWindow;
+
+import static org.junit.Assert.assertNotNull;
 
 import android.app.Instrumentation;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject2;
-import android.support.test.uiautomator.Until;
 
 public class PipAppHelper extends FlickerAppHelper {
 
@@ -32,12 +33,10 @@ public class PipAppHelper extends FlickerAppHelper {
 
     public void clickEnterPipButton(UiDevice device) {
         UiObject2 enterPipButton = device.findObject(By.res(getPackage(), "enter_pip"));
+        assertNotNull("Pip button not found, this usually happens when the device was left "
+                + "in an unknown state (e.g. in split screen)", enterPipButton);
         enterPipButton.click();
-        UiObject2 pipWindow = device.wait(Until.findObject(getPipWindowSelector()), sFindTimeout);
-
-        if (pipWindow == null) {
-            throw new RuntimeException("Unable to find PIP window");
-        }
+        hasPipWindow(device);
     }
 
     public void closePipWindow(UiDevice device) {
