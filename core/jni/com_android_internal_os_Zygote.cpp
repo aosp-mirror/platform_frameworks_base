@@ -356,10 +356,14 @@ static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorage
 
 // Must match values in com.android.internal.os.Zygote.
 enum RuntimeFlags : uint32_t {
-  DEBUG_ENABLE_JDWP = 1,
-  PROFILE_FROM_SHELL = 1 << 15,
-  MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
-  MEMORY_TAG_LEVEL_TBI = 1 << 19,
+    DEBUG_ENABLE_JDWP = 1,
+    PROFILE_FROM_SHELL = 1 << 15,
+    MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
+    MEMORY_TAG_LEVEL_TBI = 1 << 19,
+    GWP_ASAN_LEVEL_MASK = (1 << 21) | (1 << 22),
+    GWP_ASAN_LEVEL_NEVER = 0 << 21,
+    GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
+    GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -1740,6 +1744,18 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
   }
   android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
+
+  bool forceEnableGwpAsan = false;
+  switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
+      default:
+      case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
+          break;
+      case RuntimeFlags::GWP_ASAN_LEVEL_ALWAYS:
+          forceEnableGwpAsan = true;
+          [[fallthrough]];
+      case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
+          android_mallopt(M_INITIALIZE_GWP_ASAN, &forceEnableGwpAsan, sizeof(forceEnableGwpAsan));
+  }
 
   if (NeedsNoRandomizeWorkaround()) {
     // Work around ARM kernel ASLR lossage (http://b/5817320).
