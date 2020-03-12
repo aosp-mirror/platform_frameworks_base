@@ -798,7 +798,7 @@ public class SubscriptionInfo implements Parcelable {
                 + " hplmns=" + Arrays.toString(mHplmns)
                 + " subscriptionType=" + mSubscriptionType
                 + " mGroupOwner=" + mGroupOwner
-                + " carrierConfigAccessRules=" + mCarrierConfigAccessRules
+                + " carrierConfigAccessRules=" + Arrays.toString(mCarrierConfigAccessRules)
                 + " mAreUiccApplicationsEnabled=" + mAreUiccApplicationsEnabled + "}";
     }
 
