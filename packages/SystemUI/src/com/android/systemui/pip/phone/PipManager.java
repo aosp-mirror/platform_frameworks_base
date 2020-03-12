@@ -115,7 +115,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         @Override
         public void onActivityUnpinned() {
-            final Pair<ComponentName, Integer> topPipActivityInfo = PipUtils.getTopPinnedActivity(
+            final Pair<ComponentName, Integer> topPipActivityInfo = PipUtils.getTopPipActivity(
                     mContext, mActivityManager);
             final ComponentName topActivity = topPipActivityInfo.first;
             mMenuController.onActivityUnpinned();
