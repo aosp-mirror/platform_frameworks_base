@@ -1653,6 +1653,10 @@
     <permission android:name="android.permission.NETWORK_FACTORY"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi @hide Allows applications to access network stats provider -->
+    <permission android:name="android.permission.NETWORK_STATS_PROVIDER"
+                android:protectionLevel="signature" />
+
     <!-- Allows Settings and SystemUI to call methods in Networking services
          <p>Not for use by third-party or privileged applications.
          @SystemApi @TestApi
