@@ -92,7 +92,7 @@ public enum ScrimState {
     BOUNCER {
         @Override
         public void prepare(ScrimState previousState) {
-            mBehindAlpha = ScrimController.BUSY_SCRIM_ALPHA;
+            mBehindAlpha = mDefaultScrimAlpha;
             mFrontAlpha = 0f;
             mBubbleAlpha = 0f;
         }
@@ -106,7 +106,7 @@ public enum ScrimState {
         public void prepare(ScrimState previousState) {
             mBehindAlpha = 0;
             mBubbleAlpha = 0f;
-            mFrontAlpha = ScrimController.BUSY_SCRIM_ALPHA;
+            mFrontAlpha = mDefaultScrimAlpha;
         }
     },
 
@@ -233,9 +233,9 @@ public enum ScrimState {
             mBehindTint = Color.TRANSPARENT;
             mBubbleTint = Color.TRANSPARENT;
 
-            mFrontAlpha = ScrimController.TRANSPARENT;
-            mBehindAlpha = ScrimController.BUSY_SCRIM_ALPHA;
-            mBubbleAlpha = ScrimController.BUSY_SCRIM_ALPHA;
+            mFrontAlpha = 0f;
+            mBehindAlpha = mDefaultScrimAlpha;
+            mBubbleAlpha = mDefaultScrimAlpha;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION;
             mBlankScreen = false;
@@ -255,6 +255,7 @@ public enum ScrimState {
     float mBubbleAlpha;
 
     float mScrimBehindAlphaKeyguard;
+    float mDefaultScrimAlpha;
     ScrimView mScrimInFront;
     ScrimView mScrimBehind;
     ScrimView mScrimForBubble;
@@ -339,6 +340,10 @@ public enum ScrimState {
 
     public void setScrimBehindAlphaKeyguard(float scrimBehindAlphaKeyguard) {
         mScrimBehindAlphaKeyguard = scrimBehindAlphaKeyguard;
+    }
+
+    public void setDefaultScrimAlpha(float defaultScrimAlpha) {
+        mDefaultScrimAlpha = defaultScrimAlpha;
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {
