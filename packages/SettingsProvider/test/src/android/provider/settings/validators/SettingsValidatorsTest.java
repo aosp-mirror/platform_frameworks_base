@@ -277,6 +277,27 @@ public class SettingsValidatorsTest {
     }
 
     @Test
+    public void testPositiveLongValidator_zero() {
+        assertTrue(SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR.validate("0"));
+    }
+
+    @Test
+    public void testPositiveLongValidator_negative() {
+        assertFalse(SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR.validate("-5"));
+    }
+
+
+    @Test
+    public void testPositiveLongValidator_positive() {
+        assertTrue(SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR.validate("5"));
+    }
+
+    @Test
+    public void testPositiveLongValidator_floatFormat() {
+        assertFalse(SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR.validate("4.4756"));
+    }
+
+    @Test
     public void testTTSListValidator_withNullInput_returnsFalse() {
         assertFalse(SettingsValidators.TTS_LIST_VALIDATOR.validate(null));
     }

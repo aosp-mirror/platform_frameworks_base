@@ -75,6 +75,9 @@ public class SettingsHelper {
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_VR_LISTENERS);
         sBroadcastOnRestore.add(Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
         sBroadcastOnRestore.add(Settings.Global.BLUETOOTH_ON);
+        sBroadcastOnRestore.add(Settings.Secure.UI_NIGHT_MODE);
+        sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_START_TIME);
+        sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
     }
 
     private interface SettingsLookup {
