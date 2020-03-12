@@ -9068,18 +9068,6 @@ package android.printservice.recommendation {
 
 package android.provider {
 
-  public class BlockedNumberContract {
-    field public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
-    field public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
-    field public static final String RES_BLOCK_STATUS = "block_status";
-    field public static final int STATUS_BLOCKED_IN_LIST = 1; // 0x1
-    field public static final int STATUS_BLOCKED_NOT_IN_CONTACTS = 5; // 0x5
-    field public static final int STATUS_BLOCKED_PAYPHONE = 4; // 0x4
-    field public static final int STATUS_BLOCKED_RESTRICTED = 2; // 0x2
-    field public static final int STATUS_BLOCKED_UNKNOWN_NUMBER = 3; // 0x3
-    field public static final int STATUS_NOT_BLOCKED = 0; // 0x0
-  }
-
   @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
     field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
     field @Deprecated public static final String CONTENT_TYPE = "vnd.android.cursor.dir/contact_metadata";
