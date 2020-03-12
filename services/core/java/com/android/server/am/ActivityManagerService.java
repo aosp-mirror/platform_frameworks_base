@@ -19810,6 +19810,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         void setPermissions(@Nullable String[] permissions) {
             mPermissions = permissions;
+            PackageManager.invalidatePackageInfoCache();
         }
 
         @Override
