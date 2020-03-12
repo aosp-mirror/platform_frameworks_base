@@ -56,11 +56,11 @@ import android.view.animation.LinearInterpolator;
 import android.view.test.InsetsModeSession;
 import android.widget.TextView;
 
-import com.android.server.testutils.OffsettableClock;
-import com.android.server.testutils.TestHandler;
-
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.testutils.OffsettableClock;
+import com.android.server.testutils.TestHandler;
 
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -72,7 +72,6 @@ import org.mockito.InOrder;
 import org.mockito.Mockito;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.function.Supplier;
 
 /**
  * Tests for {@link InsetsController}.
@@ -204,7 +203,7 @@ public class InsetsControllerTest {
             WindowInsetsAnimationControlListener mockListener =
                     mock(WindowInsetsAnimationControlListener.class);
             mController.controlWindowInsetsAnimation(statusBars(), 10 /* durationMs */,
-                    new LinearInterpolator(), mockListener);
+                    new LinearInterpolator(), new CancellationSignal(), mockListener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -224,7 +223,7 @@ public class InsetsControllerTest {
         WindowInsetsAnimationControlListener controlListener =
                 mock(WindowInsetsAnimationControlListener.class);
         mController.controlWindowInsetsAnimation(0, 0 /* durationMs */, new LinearInterpolator(),
-                controlListener);
+                new CancellationSignal(), controlListener);
         mController.addOnControllableInsetsChangedListener(
                 (controller, typeMask) -> assertEquals(0, typeMask));
         verify(controlListener).onCancelled();
@@ -515,7 +514,7 @@ public class InsetsControllerTest {
             WindowInsetsAnimationControlListener mockListener =
                     mock(WindowInsetsAnimationControlListener.class);
             mController.controlWindowInsetsAnimation(statusBars(), 0 /* durationMs */,
-                    new LinearInterpolator(), mockListener);
+                    new LinearInterpolator(), new CancellationSignal(), mockListener);
 
             ArgumentCaptor<WindowInsetsAnimationController> controllerCaptor =
                     ArgumentCaptor.forClass(WindowInsetsAnimationController.class);
@@ -542,9 +541,10 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener mockListener =
                     mock(WindowInsetsAnimationControlListener.class);
-            CancellationSignal cancellationSignal = mController.controlWindowInsetsAnimation(
+            CancellationSignal cancellationSignal = new CancellationSignal();
+            mController.controlWindowInsetsAnimation(
                     statusBars(), 0 /* durationMs */,
-                    new LinearInterpolator(), mockListener);
+                    new LinearInterpolator(), cancellationSignal, mockListener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -567,7 +567,8 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener);
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(),
+                    null /* cancellationSignal */, listener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -591,7 +592,8 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener);
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(),
+                    null /* cancellationSignal */, listener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -611,7 +613,8 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener);
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(),
+                    null /* cancellationSignal */, listener);
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
@@ -632,8 +635,10 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             WindowInsetsAnimationControlListener listener =
                     mock(WindowInsetsAnimationControlListener.class);
-            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(), listener)
-                    .cancel();
+            CancellationSignal cancellationSignal = new CancellationSignal();
+            mController.controlWindowInsetsAnimation(ime(), 0, new LinearInterpolator(),
+                    cancellationSignal, listener);
+            cancellationSignal.cancel();
 
             verify(listener).onCancelled();
 
