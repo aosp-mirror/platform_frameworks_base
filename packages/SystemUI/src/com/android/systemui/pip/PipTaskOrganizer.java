@@ -415,11 +415,16 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         }
         mLastReportedBounds.set(destinationBounds);
         try {
+            // If we are animating to fullscreen, then we need to reset the override bounds on the
+            // task to ensure that the task "matches" the parent's bounds
+            Rect taskBounds = direction == TRANSITION_DIRECTION_TO_FULLSCREEN
+                    ? null
+                    : destinationBounds;
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             if (direction == TRANSITION_DIRECTION_TO_PIP) {
-                wct.scheduleFinishEnterPip(mToken, destinationBounds);
+                wct.scheduleFinishEnterPip(mToken, taskBounds);
             } else {
-                wct.setBounds(mToken, destinationBounds);
+                wct.setBounds(mToken, taskBounds);
             }
             wct.setBoundsChangeTransaction(mToken, tx);
             mTaskOrganizerController.applyContainerTransaction(wct, null /* ITaskOrganizer */);
