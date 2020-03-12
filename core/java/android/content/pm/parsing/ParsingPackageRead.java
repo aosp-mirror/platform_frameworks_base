@@ -840,6 +840,13 @@ public interface ParsingPackageRead extends Parcelable {
     @Nullable
     Set<String> getMimeGroups();
 
+    /**
+     * @see ApplicationInfo#enableGwpAsan
+     * @see R.styleable#AndroidManifest_enableGwpAsan
+     */
+    @Nullable
+    public Boolean isGwpAsanEnabled();
+
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();
 }

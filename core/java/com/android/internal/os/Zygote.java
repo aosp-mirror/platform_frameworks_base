@@ -140,6 +140,33 @@ public final class Zygote {
      */
     public static final int MEMORY_TAG_LEVEL_SYNC = 3 << 19;
 
+    /**
+     * A two-bit field for GWP-ASan level of this process. See the possible values below.
+     */
+    public static final int GWP_ASAN_LEVEL_MASK = (1 << 21) | (1 << 22);
+
+    /**
+     * Disable GWP-ASan in this process.
+     * GWP-ASan is a low-overhead memory bug detector using guard pages on a small
+     * subset of heap allocations.
+     */
+    public static final int GWP_ASAN_LEVEL_NEVER = 0 << 21;
+
+    /**
+     * Enable GWP-ASan in this process with a small sampling rate.
+     * With approx. 1% chance GWP-ASan will be activated and apply its protection
+     * to a small subset of heap allocations.
+     * Otherwise (~99% chance) this process is unaffected.
+     */
+    public static final int GWP_ASAN_LEVEL_LOTTERY = 1 << 21;
+
+    /**
+     * Always enable GWP-ASan in this process.
+     * GWP-ASan is activated unconditionally (but still, only a small subset of
+     * allocations is protected).
+     */
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
     /** Default external storage should be mounted. */
