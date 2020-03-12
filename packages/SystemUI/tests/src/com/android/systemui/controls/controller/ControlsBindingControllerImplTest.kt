@@ -63,7 +63,7 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
     private lateinit var mockControlsController: ControlsController
 
     @Captor
-    private lateinit var subscriberCaptor: ArgumentCaptor<IControlsSubscriber>
+    private lateinit var subscriberCaptor: ArgumentCaptor<IControlsSubscriber.Stub>
 
     @Captor
     private lateinit var loadSubscriberCaptor: ArgumentCaptor<IControlsSubscriber.Stub>
@@ -146,6 +146,44 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
         loadSubscriberCaptor.value.onComplete(b)
         canceller.run()
         verify(subscription, never()).cancel()
+    }
+
+    @Test
+    fun testLoad_onCompleteRemovesTimeout() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        val subscription = mock(IControlsSubscription::class.java)
+
+        val canceller = controller.bindAndLoad(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoad(capture(subscriberCaptor))
+        val b = Binder()
+        subscriberCaptor.value.onSubscribe(b, subscription)
+
+        subscriberCaptor.value.onComplete(b)
+        verify(providers[0]).cancelLoadTimeout()
+    }
+
+    @Test
+    fun testLoad_onErrorRemovesTimeout() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        val subscription = mock(IControlsSubscription::class.java)
+
+        val canceller = controller.bindAndLoad(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoad(capture(subscriberCaptor))
+        val b = Binder()
+        subscriberCaptor.value.onSubscribe(b, subscription)
+
+        subscriberCaptor.value.onError(b, "")
+        verify(providers[0]).cancelLoadTimeout()
     }
 
     @Test

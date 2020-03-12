@@ -43,6 +43,7 @@ import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -140,6 +141,19 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         executor.runAllReady()
 
         verify(subscriberService).onError(any(), anyString())
+    }
+
+    @Test
+    fun testMaybeBindAndLoad_timeoutCancelled() {
+        manager.maybeBindAndLoad(subscriberService)
+        executor.runAllReady()
+
+        manager.cancelLoadTimeout()
+
+        executor.advanceClockToLast()
+        executor.runAllReady()
+
+        verify(subscriberService, never()).onError(any(), anyString())
     }
 
     @Test
