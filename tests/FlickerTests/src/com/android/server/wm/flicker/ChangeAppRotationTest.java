@@ -149,11 +149,11 @@ public class ChangeAppRotationTest extends FlickerTestBase {
         checkResults(result -> LayersTraceSubject.assertThat(result)
                 .showsLayer(mTestApp.getPackage())
                 .then()
-                .replaceVisibleLayer(mTestApp.getPackage(), "Screenshot")
+                .replaceVisibleLayer(mTestApp.getPackage(), SCREENSHOT_LAYER)
                 .then()
-                .showsLayer(mTestApp.getPackage()).and().showsLayer("Screenshot")
+                .showsLayer(mTestApp.getPackage()).and().showsLayer(SCREENSHOT_LAYER)
                 .then()
-                .replaceVisibleLayer("Screenshot", mTestApp.getPackage())
+                .replaceVisibleLayer(SCREENSHOT_LAYER, mTestApp.getPackage())
                 .forAllEntries());
     }
 

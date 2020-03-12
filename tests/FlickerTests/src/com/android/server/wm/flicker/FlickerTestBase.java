@@ -49,6 +49,7 @@ import java.util.function.Consumer;
  */
 public class FlickerTestBase {
     public static final String TAG = "FLICKER";
+    static final String SCREENSHOT_LAYER = "RotationLayer";
     static final String NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar";
     static final String STATUS_BAR_WINDOW_TITLE = "StatusBar";
     static final String DOCKED_STACK_DIVIDER = "DockedStackDivider";
