@@ -124,9 +124,6 @@
     <!-- Increased height of a collapsed media notification in the status bar -->
     <dimen name="notification_min_height_media">160dp</dimen>
 
-    <!-- Increased height of a collapsed messaging notification in the status bar -->
-    <dimen name="notification_min_height_messaging">118dp</dimen>
-
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
 
