@@ -477,11 +477,19 @@ public class AudioEffect {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
     public AudioEffect(@NonNull UUID uuid, @NonNull AudioDeviceAttributes device) {
-        this(EFFECT_TYPE_NULL, Objects.requireNonNull(uuid), 0, -2, Objects.requireNonNull(device));
+        this(EFFECT_TYPE_NULL, Objects.requireNonNull(uuid),
+                0, -2, Objects.requireNonNull(device));
     }
 
     private AudioEffect(UUID type, UUID uuid, int priority,
             int audioSession, @Nullable AudioDeviceAttributes device)
+            throws IllegalArgumentException, UnsupportedOperationException,
+            RuntimeException {
+        this(type, uuid, priority, audioSession, device, false);
+    }
+
+    private AudioEffect(UUID type, UUID uuid, int priority,
+            int audioSession, @Nullable AudioDeviceAttributes device, boolean probe)
             throws IllegalArgumentException, UnsupportedOperationException,
             RuntimeException {
         int[] id = new int[1];
@@ -498,7 +506,7 @@ public class AudioEffect {
         int initResult = native_setup(new WeakReference<AudioEffect>(this),
                 type.toString(), uuid.toString(), priority, audioSession,
                 deviceType, deviceAddress,
-                id, desc, ActivityThread.currentOpPackageName());
+                id, desc, ActivityThread.currentOpPackageName(), probe);
         if (initResult != SUCCESS && initResult != ALREADY_EXISTS) {
             Log.e(TAG, "Error code " + initResult
                     + " when initializing AudioEffect.");
@@ -517,8 +525,33 @@ public class AudioEffect {
         }
         mId = id[0];
         mDescriptor = desc[0];
-        synchronized (mStateLock) {
-            mState = STATE_INITIALIZED;
+        if (!probe) {
+            synchronized (mStateLock) {
+                mState = STATE_INITIALIZED;
+            }
+        }
+    }
+
+    /**
+     * Checks if an AudioEffect identified by the supplied uuid can be attached
+     * to an audio device described by the supplied AudioDeviceAttributes.
+     * @param uuid unique identifier of a particular effect implementation.
+     * @param device the device the effect would be attached to.
+     * @return true if possible, false otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_DEFAULT_AUDIO_EFFECTS)
+    public static boolean isEffectSupportedForDevice(
+            @NonNull UUID uuid, @NonNull AudioDeviceAttributes device) {
+        try {
+            AudioEffect fx = new AudioEffect(
+                    EFFECT_TYPE_NULL, Objects.requireNonNull(uuid),
+                    0, -2, Objects.requireNonNull(device), true);
+            fx.release();
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
@@ -1340,7 +1373,7 @@ public class AudioEffect {
     private native final int native_setup(Object audioeffect_this, String type,
             String uuid, int priority, int audioSession,
             int deviceType, String deviceAddress, int[] id, Object[] desc,
-            String opPackageName);
+            String opPackageName, boolean probe);
 
     private native final void native_finalize();
 

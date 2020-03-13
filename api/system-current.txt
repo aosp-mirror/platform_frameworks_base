@@ -4403,6 +4403,7 @@ package android.media.audiofx {
 
   public class AudioEffect {
     ctor @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public AudioEffect(@NonNull java.util.UUID, @NonNull android.media.AudioDeviceAttributes);
+    method @RequiresPermission("android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS") public static boolean isEffectSupportedForDevice(@NonNull java.util.UUID, @NonNull android.media.AudioDeviceAttributes);
   }
 
 }
