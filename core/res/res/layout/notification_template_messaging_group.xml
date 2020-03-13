@@ -20,14 +20,19 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
-    <ImageView
-        android:id="@+id/message_icon"
-        android:layout_width="@dimen/messaging_avatar_size"
-        android:layout_height="@dimen/messaging_avatar_size"
-        android:layout_marginEnd="12dp"
-        android:scaleType="centerCrop"
-        android:importantForAccessibility="no" />
+    <FrameLayout
+        android:layout_width="@dimen/conversation_content_start"
+        android:layout_height="wrap_content">         <!--TODO: make sure to make this padding dynamic-->
+        <ImageView
+            android:layout_gravity="top|center_horizontal"
+            android:id="@+id/message_icon"
+            android:layout_width="@dimen/messaging_avatar_size"
+            android:layout_height="@dimen/messaging_avatar_size"
+            android:scaleType="centerCrop"
+            android:importantForAccessibility="no" />
+    </FrameLayout>
     <com.android.internal.widget.RemeasuringLinearLayout
+        android:id="@+id/messaging_group_content_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -43,7 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/notification_text_margin_top"
-            android:spacing="2dp"/>
+            android:spacing="2dp" />
     </com.android.internal.widget.RemeasuringLinearLayout>
     <FrameLayout
         android:id="@+id/messaging_group_icon_container"

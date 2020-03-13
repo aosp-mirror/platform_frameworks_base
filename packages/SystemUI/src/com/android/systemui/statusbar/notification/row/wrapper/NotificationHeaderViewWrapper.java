@@ -53,12 +53,13 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     protected final ViewTransformationHelper mTransformationHelper;
 
     protected int mColor;
-    private ImageView mIcon;
 
+    private ImageView mIcon;
     private NotificationExpandButton mExpandButton;
     protected NotificationHeaderView mNotificationHeader;
     private TextView mHeaderText;
     private ImageView mWorkProfileImage;
+
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
     private boolean mShowExpandButtonAtEnd;
@@ -105,12 +106,16 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mExpandButton = mView.findViewById(com.android.internal.R.id.expand_button);
         mWorkProfileImage = mView.findViewById(com.android.internal.R.id.profile_badge);
         mNotificationHeader = mView.findViewById(com.android.internal.R.id.notification_header);
-        mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
-        mColor = mNotificationHeader.getOriginalIconColor();
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
+            mColor = mNotificationHeader.getOriginalIconColor();
+        }
     }
 
     private void addAppOpsOnClickListener(ExpandableNotificationRow row) {
-        mNotificationHeader.setAppOpsOnClickListener(row.getAppOpsOnClickListener());
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setAppOpsOnClickListener(row.getAppOpsOnClickListener());
+        }
     }
 
     @Override
@@ -127,9 +132,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         updateCropToPaddingForImageViews();
         Notification notification = row.getEntry().getSbn().getNotification();
         mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
-        // The work profile image is always the same lets just set the icon tag for it not to
-        // animate
-        mWorkProfileImage.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
+        if (mWorkProfileImage != null) {
+            // The work profile image is always the same lets just set the icon tag for it not to
+            // animate
+            mWorkProfileImage.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
+        }
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.
@@ -174,8 +181,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected void updateTransformedTypes() {
         mTransformationHelper.reset();
-        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON, mIcon);
-        if (mIsLowPriority) {
+        mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON,
+                mIcon);
+        if (mIsLowPriority && mHeaderText != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
                     mHeaderText);
         }
@@ -184,7 +192,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     @Override
     public void updateExpandability(boolean expandable, View.OnClickListener onClickListener) {
         mExpandButton.setVisibility(expandable ? View.VISIBLE : View.GONE);
-        mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setOnClickListener(expandable ? onClickListener : null);
+        }
     }
 
     @Override
