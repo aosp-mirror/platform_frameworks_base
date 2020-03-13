@@ -77,6 +77,7 @@ public final class Looper {
     @UnsupportedAppUsage
     final MessageQueue mQueue;
     final Thread mThread;
+    private boolean mInLoop;
 
     @UnsupportedAppUsage
     private Printer mLogging;
@@ -155,6 +156,12 @@ public final class Looper {
         if (me == null) {
             throw new RuntimeException("No Looper; Looper.prepare() wasn't called on this thread.");
         }
+        if (me.mInLoop) {
+            Slog.w(TAG, "Loop again would have the queued messages be executed"
+                    + " before this one completed.");
+        }
+
+        me.mInLoop = true;
         final MessageQueue queue = me.mQueue;
 
         // Make sure the identity of this thread is that of the local process,
