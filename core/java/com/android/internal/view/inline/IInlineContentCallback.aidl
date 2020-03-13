@@ -24,4 +24,6 @@ import android.view.SurfaceControlViewHost;
  */
 oneway interface IInlineContentCallback {
     void onContent(in SurfaceControlViewHost.SurfacePackage content);
+    void onClick();
+    void onLongClick();
 }
