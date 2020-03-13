@@ -25,6 +25,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.pm.ApplicationInfo;
 import android.os.AsyncTask;
 import android.os.CancellationSignal;
 import android.service.notification.StatusBarNotification;
@@ -716,6 +718,10 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         sbn.getNotification());
 
                 Context packageContext = sbn.getPackageContext(mContext);
+                if (recoveredBuilder.usesTemplate()) {
+                    // For all of our templates, we want it to be RTL
+                    packageContext = new RtlEnabledContext(packageContext);
+                }
                 Notification notification = sbn.getNotification();
                 if (notification.isMediaNotification()) {
                     MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
@@ -781,6 +787,19 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             // Notify the resolver that the inflation task has finished,
             // try to purge unnecessary cached entries.
             mRow.getImageResolver().purgeCache();
+        }
+
+        private class RtlEnabledContext extends ContextWrapper {
+            private RtlEnabledContext(Context packageContext) {
+                super(packageContext);
+            }
+
+            @Override
+            public ApplicationInfo getApplicationInfo() {
+                ApplicationInfo applicationInfo = super.getApplicationInfo();
+                applicationInfo.flags |= ApplicationInfo.FLAG_SUPPORTS_RTL;
+                return applicationInfo;
+            }
         }
     }
 
