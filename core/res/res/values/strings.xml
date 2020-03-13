@@ -3450,8 +3450,6 @@
     <!-- A notification is shown when connected network without internet due to private dns validation failed. This is the notification's message. [CHAR LIMIT=NONE] -->
     <string name="private_dns_broken_detailed">Private DNS server cannot be accessed</string>
 
-    <!-- A notification is shown after the user logs in to a captive portal network, to indicate that the network should now have internet connectivity. This is the message of notification. [CHAR LIMIT=50] -->
-    <string name="captive_portal_logged_in_detailed">Connected</string>
     <!-- A notification is shown when the user connects to a network that doesn't have access to some services (e.g. Push notifications may not work). This is the notification's title. [CHAR LIMIT=50] -->
     <string name="network_partial_connectivity"><xliff:g id="network_ssid" example="GoogleGuest">%1$s</xliff:g> has limited connectivity</string>
 
