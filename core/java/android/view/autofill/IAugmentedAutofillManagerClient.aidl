@@ -38,7 +38,8 @@ interface IAugmentedAutofillManagerClient {
     /**
      * Autofills the activity with the contents of the values.
      */
-    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values);
+    void autofill(int sessionId, in List<AutofillId> ids, in List<AutofillValue> values,
+            boolean hideHighlight);
 
     /**
       * Requests showing the fill UI.
