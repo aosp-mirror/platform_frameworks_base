@@ -95,8 +95,10 @@ public class KernelCpuThreadReaderSettingsObserver extends ContentObserver {
                 KernelCpuThreadReader.create(
                         NUM_BUCKETS_DEFAULT, UidPredicate.fromString(COLLECTED_UIDS_DEFAULT));
         mKernelCpuThreadReaderDiff =
-                new KernelCpuThreadReaderDiff(
-                        mKernelCpuThreadReader, MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT);
+                mKernelCpuThreadReader == null
+                        ? null
+                        : new KernelCpuThreadReaderDiff(
+                                mKernelCpuThreadReader, MINIMUM_TOTAL_CPU_USAGE_MILLIS_DEFAULT);
     }
 
     @Override
