@@ -8804,10 +8804,11 @@ public class DevicePolicyManager {
      * <p>
      * The following settings used to be supported, but can be controlled in other ways:
      * <ul>
-     * <li>{@link android.provider.Settings.Global#AUTO_TIME} : Use {@link #setAutoTime} and
+     * <li>{@link android.provider.Settings.Global#AUTO_TIME} : Use {@link #setAutoTimeEnabled} and
      * {@link UserManager#DISALLOW_CONFIG_DATE_TIME} instead.</li>
-     * <li>{@link android.provider.Settings.Global#AUTO_TIME_ZONE} : Use {@link #setAutoTimeZone}
-     * and {@link UserManager#DISALLOW_CONFIG_DATE_TIME} instead.</li>
+     * <li>{@link android.provider.Settings.Global#AUTO_TIME_ZONE} : Use
+     * {@link #setAutoTimeZoneEnabled} and {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
+     * instead.</li>
      * <li>{@link android.provider.Settings.Global#DATA_ROAMING} : Use
      * {@link UserManager#DISALLOW_DATA_ROAMING} instead.</li>
      * </ul>
