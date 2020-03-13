@@ -11987,7 +11987,8 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
      * @param timeoutMillis Maximum time the profile is allowed to be off in milliseconds or 0 if
-     *        not limited.
+     *        not limited. The minimum non-zero value corresponds to 72 hours. If an admin sets a
+     *        smaller non-zero vaulue, 72 hours will be set instead.
      * @throws IllegalStateException if the profile owner doesn't have an activity that handles
      *        {@link #ACTION_CHECK_POLICY_COMPLIANCE}
      * @see #setPersonalAppsSuspended
