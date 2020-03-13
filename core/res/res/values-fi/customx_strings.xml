@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automaattinen</string>
+    <string name="live_display_auto_summary">Säädä näytön värilämpötilaa automaattisesti auringonlaskun ja -nousun jälkeen</string>
+    <string name="live_display_off">Ei käytössä</string>
+    <string name="live_display_off_summary">Poista kaikki mukautukset</string>
+    <string name="live_display_day">Päivä</string>
+    <string name="live_display_day_summary">Käytä vain päiväasetusta</string>
+    <string name="live_display_night">Yö</string>
+    <string name="live_display_night_summary">Käytä vain yöasetusta</string>
+    <string name="live_display_outdoor">Ulkoilma (kirkas aurinko)</string>
+    <string name="live_display_outdoor_summary">Käytä vain ulkoilma-asetusta</string>
+    <string name="live_display_hint">LiveDisplay voi vähentää silmien rasitusta ja auttaa nukkumaan öisin. Kokeile sitä painamalla tästä!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay pois.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automaattitila.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: päivätila.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: yötila.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: ulkoilmatila.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay pois päältä.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay asetettu automaattitilaan.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay asetettu päivätilaan.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay asetettu yötilaan.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay asetettu ulkoilmatilaan.</string>
+</resources>

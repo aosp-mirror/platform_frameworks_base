@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatiškai</string>
+    <string name="live_display_auto_summary">Automatiškai reguliuoti ekrano spalvų temperatūrą po saulėlydžio ir saulėtekio</string>
+    <string name="live_display_off">Išjungti</string>
+    <string name="live_display_off_summary">Išjungti visus pakeitimus</string>
+    <string name="live_display_day">Diena</string>
+    <string name="live_display_day_summary">Naudoti tik dienos nustatymus</string>
+    <string name="live_display_night">Naktis</string>
+    <string name="live_display_night_summary">Naudoti tik nakties nustatymus</string>
+    <string name="live_display_outdoor">Lauko (ryški saulė)</string>
+    <string name="live_display_outdoor_summary">Naudoti tik lauko nustatymus</string>
+    <string name="live_display_hint">LiveDisplay gali padėti sumažinti akių nuovargį bei padėti jums naktį miegoti. Spauskite čia, kad išbandytumėte!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay išjungtas.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automatinis režimas.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: dienos režimas.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: nakties režimas.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: lauko režimas.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay išjungtas.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay pakeistas į automatinį režimą.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay pakeistas į dienos režimą.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay pakeistas į nakties režimą.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay pakeistas į lauko režimą.</string>
+</resources>

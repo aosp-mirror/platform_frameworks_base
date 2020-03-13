@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">ಸ್ವಯಂಚಾಲಿತ</string>
+    <string name="live_display_auto_summary">ಸೂರ್ಯೋದಯ ಮತ್ತು ಸೂರ್ಯಾಸ್ತದ ಬಳಿಕ ಪರದೆ‌ಯ ಬಣ್ಣ-ತಾಪವನ್ನು ಸ್ವಯಂ ಸರಿಹೊಂದಿಸು</string>
+    <string name="live_display_off">ಆಫ್</string>
+    <string name="live_display_off_summary">ಎಲ್ಲಾ ಹೊಂದಾಣಿಕೆಗಳನ್ನು ಅಶಕ್ತಿಸು</string>
+    <string name="live_display_day">ಹಗಲು</string>
+    <string name="live_display_day_summary">ಹಗಲಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾತ್ರ ಬಳಸಿ</string>
+    <string name="live_display_night">ರಾತ್ರಿ</string>
+    <string name="live_display_night_summary">ರಾತ್ರಿ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾತ್ರ ಬಳಸಿ</string>
+    <string name="live_display_outdoor">ಹೊರಾಂಗಣ (ಪ್ರಖರ ಸೂರ್ಯ)</string>
+    <string name="live_display_outdoor_summary">ಔಟ್‌ಡೋರ್‌ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾತ್ರ ಬಳಸಿ</string>
+    <string name="live_display_hint">ಕಣ್ಣಿನ ತೊಂದರೆಯನ್ನು ಕಡಿಮೆ ಮಾಡಲು ಲೈವ್ ಡಿಸ್‌ಪ್ಲೇ ನೆರವಾಗುತ್ತದೆ ಮತ್ತು ರಾತ್ರಿಯಲ್ಲಿ ನಿದ್ರೆಗೂ ಸಹಾಯವಾಗುತ್ತದೆ. ಪ್ರಯತ್ನಿಸಲು ಇಲ್ಲಿ ಪ್ರಯತ್ನಿಸಿ!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay ಆಫ್.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: ಸ್ವಯಂ ರೀತಿ.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: ಹಗಲು ರೀತಿ.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: ರಾತ್ರಿ ರೀತಿ.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: ಹೊರಾಂಗಣ ರೀತಿ.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay ನಂದಿದೆ.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay ಸ್ವಯಂ ರೀತಿಗೆ ಬದಲಾಗಿದೆ.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay ಹಗಲು ರೀತಿಗೆ ಬದಲಾಗಿದೆ.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay ರಾತ್ರಿ ರೀತಿಗೆ ಬದಲಾಗಿದೆ.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay ಹೊರಾಂಗಣ ರೀತಿಗೆ ಬದಲಾಗಿದೆ.</string>
+</resources>

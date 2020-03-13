@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automàticu</string>
+    <string name="live_display_auto_summary">Acontza automaticamente sa temperadura de su colore de s\'ischermu a pustis de s\'arbèschida e de s\'intrinada</string>
+    <string name="live_display_off">Istudadu</string>
+    <string name="live_display_off_summary">Disabìlita totu sos acontzos</string>
+    <string name="live_display_day">Die</string>
+    <string name="live_display_day_summary">Imprea petzi sas impostatziones pro sa die</string>
+    <string name="live_display_night">Note</string>
+    <string name="live_display_night_summary">Imprea petzi sas impostatziones pro sa note</string>
+    <string name="live_display_outdoor">In foras (lughe de su sole)</string>
+    <string name="live_display_outdoor_summary">Imprea petzi sas impostatziones pro istare in foras</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay istudadu.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: modalidade automàtica.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: modalidade pro sa die.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: modalidade pro sa note.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: modalidade a s\'àera aberta.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay istudadu.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay: cambiadu in modalidade automàtica.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay: cambiadu in modalidade pro sa die.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay: cambiadu in modalidade pro sa note.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay: cambiadu in modalidade a s\'àera aberta.</string>
+</resources>

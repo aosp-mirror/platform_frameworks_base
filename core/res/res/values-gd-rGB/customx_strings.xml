@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Fèin-obrachail</string>
+    <string name="live_display_auto_summary">Cuir gleus air teothachd nan dath air an sgrìn gu fèin-obrachail às dèidh laighe is èirigh na grèine</string>
+    <string name="live_display_off">Dheth</string>
+    <string name="live_display_off_summary">Cuir à comas gach gleusadh</string>
+    <string name="live_display_day">Latha</string>
+    <string name="live_display_day_summary">Cleachd roghainnean an latha a-mhàin</string>
+    <string name="live_display_night">Oidhche</string>
+    <string name="live_display_night_summary">Cleachd roghainnean na h-oidhche a-mhàin</string>
+    <string name="live_display_outdoor">Taobh a-muigh (grian dheàrrsach)</string>
+    <string name="live_display_outdoor_summary">Cleachd roghainnean an taoibh a-muigh a-mhàin</string>
+    <string name="live_display_hint">Cuidichidh LiveDisplay thu ach an seachnaich thu sgithear sùla is airson cadal a dh’oidhche. Briog an-seo airson fheuchainn!</string>
+    <string name="accessibility_quick_settings_live_display_off">Tha LiveDisplay dheth.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: modh fèin-obrachail.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: modh latha.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: modh oidhche.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: modh taoibh a-muigh.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">Tha LiveDisplay dheth.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">Chaidh LiveDisplay atharrachadh dhan mhodh fhèin-obrachail.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">Chaidh LiveDisplay atharrachadh gu modh an latha.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">Chaidh LiveDisplay atharrachadh gu modh na h-oidhche.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">Chaidh LiveDisplay atharrachadh gu modh an taoibh a-muigh.</string>
+</resources>

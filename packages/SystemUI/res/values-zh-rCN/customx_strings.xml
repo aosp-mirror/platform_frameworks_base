@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">系统</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">恢复模式</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">引导程序</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">下载</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <string name="global_action_restart_fastboot">Fastbootd</string>
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">当前</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">光标左移</string>
+    <string name="accessibility_dpad_right">光标右移</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">保持亮屏</string>
+    <string name="accessibility_quick_settings_caffeine_off">保持亮屏关闭。</string>
+    <string name="accessibility_quick_settings_caffeine_on">保持亮屏开启。</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">浮动通知</string>
+    <string name="accessibility_quick_settings_heads_up_off">浮动通知关。</string>
+    <string name="accessibility_quick_settings_heads_up_on">浮动通知开。</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">浮动通知已关闭。</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">浮动通知已开启。</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">同步</string>
+    <string name="accessibility_quick_settings_sync_off">同步关闭。</string>
+    <string name="accessibility_quick_settings_sync_on">同步开启。</string>
+    <string name="accessibility_quick_settings_sync_changed_off">同步已关闭。</string>
+    <string name="accessibility_quick_settings_sync_changed_on">同步已开启。</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB 共享网络</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">音量面板</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">环境显示</string>
+    <string name="accessibility_quick_settings_ambient_display_off">关闭环境显示。</string>
+    <string name="accessibility_quick_settings_ambient_display_on">开启环境显示。</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">环境显示已关闭。</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">环境显示已开启。</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">位置报告：节电模式。</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">位置报告：仅传感器模式。</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">位置报告：高准确度模式。</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">耗电量低</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">节省\n电量</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">仅限设备</string>
+    <string name="quick_settings_location_gps_only_label_twoline">仅限\n设备</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">准确度高</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">高\n精确度</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">位置</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">选择模式：</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">准确度高</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">耗电量低</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">仅限设备</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">使用 GPS、Wi\u2011Fi、蓝牙或移动网络确定位置</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">使用 Wi\u2011Fi、蓝牙或移动网络确定位置</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">使用 GPS 来确定位置</string>
+    <!-- VPN QS tile -->
+    <string name="quick_settings_vpn_label">VPN</string>
+    <string name="quick_settings_vpn_connect_dialog_title">连接到\u2026</string>
+    <string name="vpn_credentials_hint">请输入您连接 <xliff:g id="name">%s</xliff:g> 的凭据</string>
+    <string name="vpn_credentials_username">用户名</string>
+    <string name="vpn_credentials_password">密码</string>
+    <string name="vpn_credentials_dialog_connect">连接</string>
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">拖动或点击以添加/删除图标</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">使用4G图标替代LTE图标</string>
+    <string name="show_fourg_summary">显示 4G 网络指示图标而非 LTE 图标</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">阅读模式</string>
+    <string name="accessibility_quick_settings_reading_mode_on">开启阅读模式。</string>
+    <string name="accessibility_quick_settings_reading_mode_off">关闭阅读模式。</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">阅读模式已开启。</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">阅读模式已关闭。</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Samodejno</string>
+    <string name="live_display_auto_summary">Samodejno nastavi barvno temperaturo zaslona po sončnem zahodu in vzhodu</string>
+    <string name="live_display_off">Izklopljeno</string>
+    <string name="live_display_off_summary">Onemogoči vse prilagoditve</string>
+    <string name="live_display_day">Dan</string>
+    <string name="live_display_day_summary">Uporabi samo dnevne nastavitve</string>
+    <string name="live_display_night">Noč</string>
+    <string name="live_display_night_summary">Uporabi samo nočne nastavitve</string>
+    <string name="live_display_outdoor">Na prostem (močna sončna svetloba)</string>
+    <string name="live_display_outdoor_summary">Uporabi samo nastavitve na prostem</string>
+    <string name="live_display_hint">LiveDisplay vam lahko pomaga pri zmanjšanju obremenitve oči in spanju ponoči. Kliknite tukaj, da ga preskusite!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay izklopljen.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: samodejni način.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: dnevni način.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: nočni način.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: način na prostem.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay izklopljen.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay spremenjen v samodejni način.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay spremenjen v dnevni način.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay spremenjen v nočni način.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay spremenjen v način na prostem.</string>
+</resources>

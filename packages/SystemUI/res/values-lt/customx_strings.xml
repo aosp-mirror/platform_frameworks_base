@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Atkūrimo režimas</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Perkrovos režimas</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Atsisiuntimo režimas</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Žymeklis kairėje</string>
+    <string name="accessibility_dpad_right">Žymeklis dešinėje</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kofeino režimas</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kofeino režimas išjungtas.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kofeino režimas įjungtas.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Iššokantys pranešimai</string>
+    <string name="accessibility_quick_settings_heads_up_off">Iššokantys pranešimai išjungti.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Iššokantys pranešimai įjungti.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Iššokantys pranešimai išjungti.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Iššokantys pranešimai įjungti.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sinchronizavimas</string>
+    <string name="accessibility_quick_settings_sync_off">Sinchronizavimas išjungtas.</string>
+    <string name="accessibility_quick_settings_sync_on">Sinchronizavimas įjungtas.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sinchronizavimas išjungtas.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sinchronizavimas įjungtas.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB susiejimas</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Garsumo skydelis</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Ambient display</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Ambient display išjungta.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Ambient display įjungta.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Ambient display išjungta.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Ambient display įjungta.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Vietovės ataskaitos: akumuliatoriaus tausojimo režimas.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Vietovės ataskaitos: tik daviklių režimas.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Vietovės ataskaitos: didelio tikslumo režimas.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Akumuliatoriaus tausojimas</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Tik įrenginys</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Didelis tikslumas</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Didelis tikslumas</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Akumuliatoriaus tausojimas</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Tik įrenginys</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Vilkite arba spustelėkite, kad pridėtumėte/panaikintumėte plyteles</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Rodyti 4G vietoj LTE</string>
+    <string name="show_fourg_summary">Pakeisti LTE tinklo indikatorius į 4G</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Skaitymo režimas</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Skaitymo režimas įjungtas.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Skaitymo režimas išjungtas.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Skaitymo režimas įjungtas.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Skaitymo režimas išjungtas.</string>
+</resources>

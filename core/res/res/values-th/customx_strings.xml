@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">อัตโนมัติ</string>
+    <string name="live_display_auto_summary">ปรับอุณหภูมิสีของหน้าจออัตโนมัติหลังจากพระอาทิตย์ขึ้นและตก</string>
+    <string name="live_display_off">ปิด</string>
+    <string name="live_display_off_summary">ปิดการใช้งานทั้งหมด</string>
+    <string name="live_display_day">กลางวัน</string>
+    <string name="live_display_day_summary">ใช้การตั้งค่ากลางวันเท่านั้น</string>
+    <string name="live_display_night">กลางคืน</string>
+    <string name="live_display_night_summary">ใช้การตั้งค่ากลางคืนเท่านั้น</string>
+    <string name="live_display_outdoor">กลางแจ้ง (แดดจ้ามาก)</string>
+    <string name="live_display_outdoor_summary">ใช้การตั้งค่ากลางแจ้งเท่านั้น</string>
+    <string name="live_display_hint">LiveDisplay สามารถช่วยลดอาการปวดตา และช่วยให้คุณนอนหลับในเวลากลางคืน คลิกที่นี่เพื่อลอง!</string>
+    <string name="accessibility_quick_settings_live_display_off">Live Display ปิดอยู่</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: รูปแบบอัตโนมัติ</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: รูปแบบกลางวัน</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: รูปแบบกลางคืน</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: รูปแบบกลางแจ้ง</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay ถูกปิด</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay เปลี่ยนเป็นรูปแบบอัตโนมัติ</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay เปลี่ยนเป็นรูปแบบกลางวัน</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay เปลี่ยนเป็นรูปแบบกลางคืน</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay เปลี่ยนเป็นรูปแบบกลางแจ้ง</string>
+</resources>

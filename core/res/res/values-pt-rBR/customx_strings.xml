@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <string name="app_killed_message">Aplicativo encerrado</string>
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automático</string>
+    <string name="live_display_auto_summary">Ajusta automaticamente a temperatura de cor da tela após o pôr do sol e nascer do sol</string>
+    <string name="live_display_off">Desligado</string>
+    <string name="live_display_off_summary">Desativar todos os ajustes</string>
+    <string name="live_display_day">Dia</string>
+    <string name="live_display_day_summary">Usar apenas configurações diurnas</string>
+    <string name="live_display_night">Noite</string>
+    <string name="live_display_night_summary">Use apenas configurações noturnas</string>
+    <string name="live_display_outdoor">Ao ar livre (sol forte)</string>
+    <string name="live_display_outdoor_summary">Usar apenas configurações de ao ar livre</string>
+    <string name="live_display_hint">LiveDisplay pode ajudar a reduzir o cansaço visual e ajudá-lo a dormir à noite. Clique aqui para experimentá-lo!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay desligado.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: modo automático.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: modo diurno.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: modo noturno.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: modo ao ar livre.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay foi desligado.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay alterado para modo automático.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay alterado para modo diurno.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay alterado para modo noturno.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay alterado para modo ao ar livre.</string>
+</resources>

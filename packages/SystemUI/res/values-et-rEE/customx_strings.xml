@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Taastus</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Käivituslaadur</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Allalaadimine</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Praegune</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Kursor vasakule</string>
+    <string name="accessibility_dpad_right">Kursor paremale</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kofeiin</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kofeiin välja.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kofeiin sisse.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Piiluvad teated</string>
+    <string name="accessibility_quick_settings_heads_up_off">Piiluvad teated väljas.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Piiluvad teated sees.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Piiluvad teated on väljalülitatud.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Piiluvad teated on sisselülitatud.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sünk</string>
+    <string name="accessibility_quick_settings_sync_off">Sünk väljas.</string>
+    <string name="accessibility_quick_settings_sync_on">Sünk sees.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sünk välja lülitatud.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sünk sisse lülitatud.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB lõastamine</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Helipaneel</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Säästlik ekraan</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Säästlik ekraan väljas.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Säästlik ekraan sees.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Säästlik ekraan väljalülitatud.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Säästlik ekraan sisselülitatud.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Asukoha teatamine: aku säästmise režiim.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Asukoha teatamine: ainult andurite režiim.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Asukoha teatamine: kõrge täpsusega režiim.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Akut säästev</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Ainult seade</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Kõrge täpsusega</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Kõrge täpsusega</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Akut säästev</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Ainult seade</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">Kasutage asukoha määramiseks GPS-i</string>
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Lohistage või puudutage, et lisada/eemaldada ikoone</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Kuva LTE asemel 4G</string>
+    <string name="show_fourg_summary">Asendab olekuribal LTE indikaatori 4G-ga</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Lugemisrežiim</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Lugemisrežiim sees.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Lugemisrežiim väljas.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Lugemisrežiim sisselülitatud.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Lugemisrežiim väljalülitatud.</string>
+</resources>

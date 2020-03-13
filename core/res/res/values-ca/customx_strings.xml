@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automàtic</string>
+    <string name="live_display_auto_summary">Ajusta automàticament la temperatura de color de la pantalla després de la posta de sol i de l\'alba</string>
+    <string name="live_display_off">Desactivat</string>
+    <string name="live_display_off_summary">Deshabilita totes les configuracions</string>
+    <string name="live_display_day">Dia</string>
+    <string name="live_display_day_summary">Utilitza només la configuració de dia</string>
+    <string name="live_display_night">Nit</string>
+    <string name="live_display_night_summary">Utilitza només la configuració de nit</string>
+    <string name="live_display_outdoor">Exterior (sol intens)</string>
+    <string name="live_display_outdoor_summary">Utilitza només la configuració d\'exterior</string>
+    <string name="live_display_hint">LiveDisplay pot ajudar-te a reduir la fatiga visual i ajudar-te a dormir a la nit. Fes clic aquí per provar-ho!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay desactivat.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: mode automàtic.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: mode diürn.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: mode nocturn.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: mode exterior.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">S\'ha desactivat el LiveDisplay.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay canviat al mode automàtic.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay canviat al mode diürn.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay canviat al mode nocturn.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay canviat al mode exterior.</string>
+</resources>

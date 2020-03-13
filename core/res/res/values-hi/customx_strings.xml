@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">स्वचालित</string>
+    <string name="live_display_auto_summary">सूर्यास्त और सूर्योदय के बाद स्क्रीन के रंग तापमान को स्वचालित रूप से समायोजित करें</string>
+    <string name="live_display_off">बंद</string>
+    <string name="live_display_off_summary">सभी समायोजन अक्षम करें</string>
+    <string name="live_display_day">दिन</string>
+    <string name="live_display_day_summary">केवल दिन की सेटिंग्स का उपयोग करें</string>
+    <string name="live_display_night">रात</string>
+    <string name="live_display_night_summary">केवल रात की सेटिंग्स का ही इस्तेमाल करें</string>
+    <string name="live_display_outdoor">बाहर (चमकदार सूरज)</string>
+    <string name="live_display_outdoor_summary">केवल बाहरी सेटिंग्स का उपयोग करें</string>
+    <string name="live_display_hint">लाइवडिसप्ले आंखों के तनाव को कम करने और रात में सोने में आपकी मदद कर सकता है। इसे आज़माने के लिए यहाँ क्लिक करें!</string>
+    <string name="accessibility_quick_settings_live_display_off">लाइवडिसप्ले बंद।</string>
+    <string name="accessibility_quick_settings_live_display_auto">लाइव डिस्पले: स्वत:</string>
+    <string name="accessibility_quick_settings_live_display_day">लाइव डिस्पले: दिन की तरह</string>
+    <string name="accessibility_quick_settings_live_display_night">लाइव डिस्प्ले: रात्रि की तरह</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">लाइव डिस्पले: बाहर की तराह</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">लाइव डिस्पले बंद</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">लाइव डिस्पले स्वत: में बदल गया</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">लाइव डिस्पले दिन मोड में बदल गया</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">लाइव डिस्पले रात्री मोड में बदल गया</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">लाइव डिस्पले बहारी मोड में बदल गया</string>
+</resources>

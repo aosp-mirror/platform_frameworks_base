@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">ഓട്ടോമാറ്റിക്ക്</string>
+    <string name="live_display_auto_summary">സൂര്യാസ്തമയത്തിനും സൂര്യോദയത്തിനും ശേഷം സ്ക്രീനിന്റെ കളര്‍ താപനില സ്വയം ക്രമീകരിക്കുക</string>
+    <string name="live_display_off">ഓഫാണ്</string>
+    <string name="live_display_off_summary">എല്ലാ ക്രമീകരണങ്ങളും നിർത്തുക</string>
+    <string name="live_display_day">പകൽ</string>
+    <string name="live_display_day_summary">പകല്‍ ക്രമീകരണങ്ങൾ മാത്രം ഉപയോഗിക്കുക</string>
+    <string name="live_display_night">രാത്രി</string>
+    <string name="live_display_night_summary">രാത്രി ക്രമീകരണങ്ങൾ മാത്രം ഉപയോഗിക്കുക</string>
+    <string name="live_display_outdoor">ഔട്ട്ഡോർ (തെളിഞ്ഞ സൂര്യൻ)</string>
+    <string name="live_display_outdoor_summary">ഔട്ട്ഡോർ ക്രമീകരണങ്ങൾ മാത്രം ഉപയോഗിക്കുക</string>
+    <string name="live_display_hint">ലൈവ്ഡിസ്പ്ലേ നിങ്ങളുടെ കണ്ണിന്റെ സമ്മര്‍ദ്ദം കുറയ്ക്കുകയും രാത്രി ഉറങ്ങാൻ നിങ്ങളെ സഹായിക്കുകയും ചെയ്യുന്നു. ഇത് പരീക്ഷിക്കാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക!</string>
+    <string name="accessibility_quick_settings_live_display_off">ലൈവ്ഡിസ്പ്ലേ ഓഫ്.</string>
+    <string name="accessibility_quick_settings_live_display_auto">ലൈവ്ഡിസ്പ്ലേ: ഓട്ടോ മോഡ്.</string>
+    <string name="accessibility_quick_settings_live_display_day">ലൈവ്ഡിസ്പ്ലേ: ഡേ മോഡ്.</string>
+    <string name="accessibility_quick_settings_live_display_night">ലൈവ്ഡിസ്പ്ലേ: നൈറ്റ് മോഡ്.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">ലൈവ്ഡിസ്പ്ലേ: ഔട്ഡോർ മോഡ്.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">ലൈവ്ഡിസ്പ്ലേ ഓഫ് ചെയ്തു.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">ലൈവ്ഡിസ്പ്ലേ ഓട്ടോ മോഡിലേക്ക് മാറ്റിയിരിക്കുന്നു.</string>
+</resources>

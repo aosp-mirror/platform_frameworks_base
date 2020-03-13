@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">রিকভারি</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">বুটলোডার</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">ডাউনলোড মোড</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">কার্সর বামে</string>
+    <string name="accessibility_dpad_right">কার্সর ডানে</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <!-- Heads up QS tile -->
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">সমলয়</string>
+    <!-- USB tethering QS tile -->
+    <!-- Volume panel QS tile -->
+    <!-- Ambient display QS tile -->
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <!-- Status bar network traffic monitor strings -->
+    <string name="kilobitspersecond_short">কিবি/সে</string>
+    <string name="megabitspersecond_short">মেবি/সে</string>
+    <string name="kilobytespersecond_short">কিবা/সে</string>
+    <string name="megabytespersecond_short">মেবা/সে</string>
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">LTE এর পরিবর্তে 4G দেখান</string>
+    <string name="show_fourg_summary">4G এর বদলে LTE করুন</string>
+    <!-- Reader mode QS tile -->
+</resources>

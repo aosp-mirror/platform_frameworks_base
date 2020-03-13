@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">স্বয়ংক্ৰিয়</string>
+    <string name="live_display_auto_summary">সূৰ্যাস্ত আৰু সূৰ্যোদয়ৰ পাছত স্বয়ংক্ৰিয়ভাবে স্ক্ৰীণৰ ৰং তাপমাত্ৰা মিলাওক।</string>
+    <string name="live_display_off">অফ</string>
+    <string name="live_display_off_summary">সকলো সমাযোজন অক্ষম কৰক</string>
+    <string name="live_display_day">দিন</string>
+    <string name="live_display_day_summary">কেৱল দিনৰ ছেটিংচ ব্যৱহাৰ কৰক</string>
+    <string name="live_display_night">নাইট</string>
+    <string name="live_display_night_summary">কেৱল ৰাতিৰ ছেটিংচ ব্যৱহাৰ কৰক</string>
+    <string name="live_display_outdoor">আউটডোৰ (উজ্জ্বল ৰ\'দ)</string>
+    <string name="live_display_outdoor_summary">কেৱল আউটডোৰ ছেটিংচ ব্যৱহাৰ কৰক</string>
+    <string name="live_display_hint">লাইভপ্রদর্শন আপোনাৰ চকুৰ ওপৰত চাপ কমাব পাৰে আৰু ৰাতি শোৱাত সহায় কৰিব পাৰে। ইয়াক চেষ্টা কৰি চাবলৈ ইয়াত ক্লিক কৰক!</string>
+</resources>

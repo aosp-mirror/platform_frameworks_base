@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatikus</string>
+    <string name="live_display_auto_summary">Automatikusan beállítja a képernyő színhőmérsékletét napnyugta és napkelte után</string>
+    <string name="live_display_off">Ki</string>
+    <string name="live_display_off_summary">Az összes beállítás kikapcsolása</string>
+    <string name="live_display_day">Nap</string>
+    <string name="live_display_day_summary">Csak a nappali beállítások használata</string>
+    <string name="live_display_night">Éjszaka</string>
+    <string name="live_display_night_summary">Csak az éjszakai beállítások használata</string>
+    <string name="live_display_outdoor">Kültéri (erős napfény)</string>
+    <string name="live_display_outdoor_summary">Csak a kültéri beállítások használata</string>
+    <string name="live_display_hint">A LiveDisplay segíthet a szemek terhelésének csökkentésében és a jobb éjszakai alvásban. Kattintson ide, hogy kipróbálja!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay ki.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automatikus mód.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: nappali mód.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: éjszakai mód.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: szabadtéri mód.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay kikapcsolva.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay automatikus módra változtatva.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay nappali módra változtatva.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay éjszakai módra változtatva.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay szabadtéri módra változtatva.</string>
+</resources>

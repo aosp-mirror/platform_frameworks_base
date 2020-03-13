@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Systeem</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Werstel</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Bootloader</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Downloade</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Aktuele</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Cursor links</string>
+    <string name="accessibility_dpad_right">Cursor rjochts</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kafeïne</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kafeïne út.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kafeïne oan.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Heads-up</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads-up út.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads-up oan.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads-up útskeakele.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads-up ynskeakele.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Syngronisearje</string>
+    <string name="accessibility_quick_settings_sync_off">Syngr. út.</string>
+    <string name="accessibility_quick_settings_sync_on">Syngr. oan.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Syngr. útskeakele.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Syngr. ynskeakele.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB-tethering</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Folumepaniel</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Omjouwingsdisplay</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Omjouwingsdisplay út.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Omjouwingsdisplay oan.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Omjouwingsdisplay útskeakele.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Omjouwingsdisplay ynskeakele.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Lokaasjemelding: batterijbesparring.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Lokaasjemelding: allinnich apparaat.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Lokaasjemelding: grutte sekuerens.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Batterijbesparring</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Batterij\nbesparring</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Allinnich apparaat</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Allinnich\napparaat</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Grutte sekuerens</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Grutte\nsekuerens</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Lokaasje</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Modus kieze:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Grutte sekuerens</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Batterijbesparring</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Allinnich apparaat</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">GPS, wifi, Bluetooth of mobile netwurken brûke om lokaasje te bepalen</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Wifi, Bluetooth of mobile netwurken brûke om lokaasje te bepalen</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Lêsmodus</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Lêsmodus oan.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Lêsmodus út.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Lêsmodus ynskeakele.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Lêsmodus útskeakele.</string>
+</resources>

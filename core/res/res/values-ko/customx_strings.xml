@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">자동</string>
+    <string name="live_display_auto_summary">일출과 일몰 후 화면의 색 온도를 자동으로 조정</string>
+    <string name="live_display_off">꺼짐</string>
+    <string name="live_display_off_summary">모든 조정 비활성화</string>
+    <string name="live_display_day">주간</string>
+    <string name="live_display_day_summary">주간 설정만 사용</string>
+    <string name="live_display_night">야간</string>
+    <string name="live_display_night_summary">야간 설정만 사용</string>
+    <string name="live_display_outdoor">야외 (밝은 햇빛)</string>
+    <string name="live_display_outdoor_summary">야외 설정만 사용</string>
+    <string name="live_display_hint">LiveDisplay는 눈의 피로를 줄이고 밤에 수면을 돕습니다. 여기를 클릭해 사용해 보세요!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay 꺼짐.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: 자동 모드.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: 주간 모드.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: 야간 모드.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: 야외 모드.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay가 꺼졌습니다.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay가 자동 모드로 변경되었습니다.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay가 주간 모드로 변경되었습니다.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay가 야간 모드로 변경되었습니다.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay가 야외 모드로 변경되었습니다.</string>
+</resources>

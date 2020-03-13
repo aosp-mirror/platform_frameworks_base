@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">કર્સર ડાબું</string>
+    <string name="accessibility_dpad_right">કર્સર જમણું</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">કેફીન</string>
+    <string name="accessibility_quick_settings_caffeine_off">કેફીન બંધ.</string>
+    <string name="accessibility_quick_settings_caffeine_on">કેફીન ચાલુ.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">હેડ્સ અપ</string>
+    <string name="accessibility_quick_settings_heads_up_off">હેડ્સ અપ બંધ.</string>
+    <string name="accessibility_quick_settings_heads_up_on">હેડ્સ અપ ચાલુ.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">હેડ્સ અપ બંધ કરાયું.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">હેડ્સ અપ ચાલુ કરાયું.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">સમન્વયન</string>
+    <string name="accessibility_quick_settings_sync_off">સિંક્રનાઇઝ બંધ.</string>
+    <string name="accessibility_quick_settings_sync_on">સિંક્રનાઇઝ ચાલુ.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">સિંક્રનાઇઝ બંધ કરાયું.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">સિંક્રનાઇઝ ચાલુ કરાયું.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB ટિથરિંગ</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">વૉલ્યુમ પૅનલ.</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">વ્યાપક ડિસ્પ્લે</string>
+    <string name="accessibility_quick_settings_ambient_display_off">વ્યાપક પ્રદર્શન બંધ.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">વ્યાપક પ્રદર્શન ચાલુ.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">વ્યાપક પ્રદર્શન બંધ કરાયું.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">વ્યાપક પ્રદર્શન ચાલુ કરાયું.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">સ્થાન રિપોર્ટિંગ: બૅટરી બચત મોડ.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">સ્થાન રિપોર્ટિંગ: ફક્ત સેન્સર્સ મોડ.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">સ્થાન રિપોર્ટિંગ: ઉચ્ચ સચોટતા મોડ.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">બૅટરી બચત</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">ફક્ત ઉપકરણ</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">ઉચ્ચ સચોટતા</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">ઉચ્ચ સચોટતા</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">બૅટરી બચત</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">ફક્ત ઉપકરણ</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <!-- Reader mode QS tile -->
+</resources>

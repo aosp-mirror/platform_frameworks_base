@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">रिकवरी</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">बूटलोडर</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">डाउनलोड मोड</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">कर्सर बायाँ</string>
+    <string name="accessibility_dpad_right">कर्सर दायाँ</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">कैफीन मोड</string>
+    <string name="accessibility_quick_settings_caffeine_off">कैफीन मोड बंद</string>
+    <string name="accessibility_quick_settings_caffeine_on">कैफीन मोड शुरु</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">हेड्स अप।</string>
+    <string name="accessibility_quick_settings_heads_up_off">हेड्स अप बंद है।</string>
+    <string name="accessibility_quick_settings_heads_up_on">हेड्स अप चालू है।</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">हेड्स अप को बंद किया गया है।</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">हेड्स अप को चालू किया गया।</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">संकालन</string>
+    <string name="accessibility_quick_settings_sync_off">संकालन बंद है।</string>
+    <string name="accessibility_quick_settings_sync_on">संकालन चालू है।</string>
+    <string name="accessibility_quick_settings_sync_changed_off">संकालन को बंद किया गया है।</string>
+    <string name="accessibility_quick_settings_sync_changed_on">संकालन को चालू किया गया है।</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">यूएसबी टेदरिंग</string>
+    <!-- Volume panel QS tile -->
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">परिवेशी प्रदर्शन</string>
+    <string name="accessibility_quick_settings_ambient_display_off">परिवेशी प्रदर्शन बंद है।</string>
+    <string name="accessibility_quick_settings_ambient_display_on">परिवेशी प्रदर्शन चालू है।</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">परिवेशी प्रदर्शन को बंद किया गया है।</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">परिवेशी प्रदर्शन को चालू किया गया।</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">स्थान रिपोर्टिंग: बैटरी बचानेवाला मोड।</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">स्थान रिपोर्टिंग: केवल सेंसर मोड।</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">स्थान रिपोर्टिंग: उच्च सटीकता मोड।</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">बैटरी बचानेवाला</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">केवल उपकरण</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">उच्च सटीकता</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">उच्च सटीकता</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">बैटरी बचानेवाला</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">केवल उपकरण</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">टाइल जोड़ने के लिए दबाएँ या दबा कर खींचें</string>
+    <!-- Status bar network traffic monitor strings -->
+    <string name="kilobitspersecond_short">किलो बिट प्रति सेकेंड</string>
+    <string name="megabitspersecond_short">मेगा बिट प्रति सेकेंड</string>
+    <string name="kilobytespersecond_short">किलो बाइट प्रति सेकेंड</string>
+    <string name="megabytespersecond_short">मेगा बाइट प्रति सेकेंड</string>
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">LTE के बजाय 4G दिखाएँ</string>
+    <string name="show_fourg_summary">LTE की जगह 4G दिखाए।</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">पठन मोड</string>
+    <string name="accessibility_quick_settings_reading_mode_on">पठन मोड चालू।</string>
+    <string name="accessibility_quick_settings_reading_mode_off">पठन मोड बंद।</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">पठन मोड चालू है।</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">पठन मोड बंद है।</string>
+</resources>

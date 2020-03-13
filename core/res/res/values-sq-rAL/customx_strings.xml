@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatike</string>
+    <string name="live_display_auto_summary">Rregullo automatikisht temperaturën e ngjyrave të ekranit pas lindjes dhe perëndimit të diellit</string>
+    <string name="live_display_off">Inaktiv</string>
+    <string name="live_display_off_summary">Çaktivizo të gjitha rregullimet</string>
+    <string name="live_display_day">Ditë</string>
+    <string name="live_display_day_summary">Përdor vetëm parametrat për ditën</string>
+    <string name="live_display_night">Natë</string>
+    <string name="live_display_night_summary">Përdor vetëm parametrat për natën</string>
+    <string name="live_display_outdoor">Jashtë shtëpie (diell i fortë)</string>
+    <string name="live_display_outdoor_summary">Përdor vetëm parametrat për jashtë shtëpie</string>
+    <string name="live_display_hint">LiveDisplay do t\'ju reduktojë lodhjen e syve dhe do t\'ju ndihmojë të flini natën. Shtyp këtu për ta provuar!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay inaktiv.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automatike.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: profili i ditës.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: profili i natës.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: profili jashtë shtëpisë.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay u çaktivizua.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay u kthye në profilin automatik.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay u kthye në profilin e ditës.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay u kthye në profilin e natës.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay u kthye në profilin jashtë shtëpisë.</string>
+</resources>

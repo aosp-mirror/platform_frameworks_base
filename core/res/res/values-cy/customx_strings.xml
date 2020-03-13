@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Awtomatig</string>
+    <string name="live_display_auto_summary">Addasu tymheredd lliw\'r sgrin yn awtomatig ar ôl machlud a gwawr</string>
+    <string name="live_display_off">I ffwrdd</string>
+    <string name="live_display_off_summary">Analluogi pob addasiad</string>
+    <string name="live_display_day">Dydd</string>
+    <string name="live_display_day_summary">Defnyddio gosodiadau dydd yn unig</string>
+    <string name="live_display_night">Nos</string>
+    <string name="live_display_night_summary">Defnyddio gosodiadau nos yn unig</string>
+    <string name="live_display_outdoor">Awyr agored (heulwen)</string>
+    <string name="live_display_outdoor_summary">Defnyddio gosodiadau awyr agored yn unig</string>
+    <string name="live_display_hint">Gall LiveDisplay helpu lleihau straen ar y llygaid a dy helpu i gysgu gyda\'r nos. Clicia yma i roi cynnig arno!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay i ffwrdd.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: modd awtomatig.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: modd dydd.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: modd nos.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: modd awyr agored.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay wedi\'i droi i ffwrdd.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay wedi\'i newid i fodd awtomatig.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay wedi\'i newid i fodd dydd.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay wedi\'i newid i fodd nos.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay wedi\'i newid i fodd awyr agored.</string>
+</resources>

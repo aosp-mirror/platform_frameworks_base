@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Аўтаматычна</string>
+    <string name="live_display_auto_summary">Аўтаматычная падладка колеравай тэмпературы экрана пасля заходу і ўзыходу сонца</string>
+    <string name="live_display_off">Адключана</string>
+    <string name="live_display_off_summary">Адключыць аўтападладку</string>
+    <string name="live_display_day">Дзень</string>
+    <string name="live_display_day_summary">Толькі дзённыя налады</string>
+    <string name="live_display_night">Ноч</string>
+    <string name="live_display_night_summary">Выкарыстоўваць толькі начныя налады</string>
+    <string name="live_display_outdoor">На вуліцы (яскравае сонца)</string>
+    <string name="live_display_outdoor_summary">Толькі вулічны рэжым</string>
+    <string name="live_display_hint">LiveDisplay зніжае напружанне на вочы і паляпшае сон. Націсні тут, каб паспрабаваць!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay выключаны.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: аўтаматычны рэжым.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: дзённы рэжым.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: начны рэжым.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: вулiчны рэжым.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay выключаны.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay зменены на аўтаматычны рэжым.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay зменены на дзённы рэжым.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay пераключаны ў начны рэжым.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay пераключаны ў вулiчны рэжым.</string>
+</resources>

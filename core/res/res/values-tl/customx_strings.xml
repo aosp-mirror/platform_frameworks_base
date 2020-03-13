@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Awtomatik</string>
+    <string name="live_display_auto_summary">Awtomatikong ayusin ang temperatura ng kulay ng screen pagkatapos ng paglubog ng araw at pagsikat ng araw</string>
+    <string name="live_display_off_summary">Huwag paganahin ang lahat ng mga pagsasaayos</string>
+    <string name="live_display_day">Araw</string>
+    <string name="live_display_day_summary">Gamitin lamang ang day settings</string>
+    <string name="live_display_night">Gabi</string>
+    <string name="live_display_night_summary">Gamitin lamang ang night settings</string>
+    <string name="live_display_outdoor">Labasan (maliwanag)</string>
+    <string name="live_display_outdoor_summary">Gamitin ang mga setting ng panlabas lamang</string>
+    <string name="live_display_hint">Ang LiveDisplay ay makatutulong upang mabawasan ang pananakit ng mata at makatutulong sa iyong pagtulog sa gabi. Pindutin dito para masubukan ito!</string>
+    <string name="accessibility_quick_settings_live_display_off">Naka-off ang LiveDisplay.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: pang-araw na mode.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: pang-gabi na mode.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: panlabas na mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay ay nakapatay.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay ay binago sa awtomatikong mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">Ang LiveDisplay ay nabago sa pang-araw na mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay ay binago sa pang-gabi na mode.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">Ang LiveDisplay ay nabago sa panlabas na mode.</string>
+</resources>

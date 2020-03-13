@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Outomaties</string>
+    <string name="live_display_auto_summary">Kleurtemperatuur van die skerm sal outomaties aanpas na sononder en sonop</string>
+    <string name="live_display_off">Af</string>
+    <string name="live_display_off_summary">Skakel al die aanpassings af</string>
+    <string name="live_display_day">Dag</string>
+    <string name="live_display_day_summary">Gebruik dag instellings alleenlik</string>
+    <string name="live_display_night">Nag</string>
+    <string name="live_display_night_summary">Gebruik nag instellings alleenlik</string>
+    <string name="live_display_outdoor">Buitekant (helder son)</string>
+    <string name="live_display_outdoor_summary">Gebruik buite instellings alleenlik</string>
+    <string name="live_display_hint">LewendigeVertoning kan jou oogspanning verminder en help jou slaap in die nag. Klik hier om dit uit te probeer!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay af.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: outo modus.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: dag modus.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: nag modus.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: buitelug modus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay afgeskakel.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay verander na outo modus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay verander na dag modus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay verander na nag modus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay verander na buitelug modus.</string>
+</resources>

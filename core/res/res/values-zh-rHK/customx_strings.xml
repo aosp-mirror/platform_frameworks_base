@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">自動</string>
+    <string name="live_display_auto_summary">依日夜週期自動調節螢幕色溫</string>
+    <string name="live_display_off">關閉</string>
+    <string name="live_display_off_summary">停用所有調整</string>
+    <string name="live_display_day">日間</string>
+    <string name="live_display_day_summary">僅限使用日間設定</string>
+    <string name="live_display_night">夜間</string>
+    <string name="live_display_night_summary">僅限使用夜間設定</string>
+    <string name="live_display_outdoor">戶外 (陽光)</string>
+    <string name="live_display_outdoor_summary">僅限使用戶外設定</string>
+    <string name="live_display_hint">LiveDisplay 可以幫助減少眼睛疲勞及睡前使用造成的不適。按一下此處來試試！</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay 關閉</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay：自動模式</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay：日間模式</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay：夜間模式</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay：戶外模式</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay 已關閉</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay 已變更為自動模式</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay 已變更為日間模式</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay 已變更為夜間模式</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay 已變更為戶外模式</string>
+</resources>

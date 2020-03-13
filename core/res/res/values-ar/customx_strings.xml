@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">تلقائي</string>
+    <string name="live_display_auto_summary">ضبط درجة الحرارة اللونية للشاشة تلقائياً بعد غروب الشمس وشروق الشمس</string>
+    <string name="live_display_off">إيقاف تشغيل</string>
+    <string name="live_display_off_summary">تعطيل جميع التعديلات</string>
+    <string name="live_display_day">نهار</string>
+    <string name="live_display_day_summary">استخدام إعدادات النهار فقط</string>
+    <string name="live_display_night">الليل</string>
+    <string name="live_display_night_summary">استخدام إعدادات الليل فقط</string>
+    <string name="live_display_outdoor">خارج المنزل ( شمس ساطعة)</string>
+    <string name="live_display_outdoor_summary">استخدم إعدادات خارج المنزل فقط</string>
+    <string name="live_display_hint">يمكن أن تساعد ميزة LiveDisplay في تقليل إجهاد العين ومساعدتك على النوم في الليل. انقر هنا لتجربتها!</string>
+    <string name="accessibility_quick_settings_live_display_off">إيقاف تشغيل LiveDisplay.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: الوضع التلقائي.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: الوضع النهاري.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: الوضع الليلي.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: وضع الأماكن المفتوحة.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">تم إيقاف تشغيل LiveDisplay.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">تم تغيير LiveDisplay إلى الوضع التلقائي.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">تم تغيير LiveDisplay إلى الوضع النهاري.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">تم تغيير LiveDisplay إلى الوضع الليلي.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">تم تغيير LiveDisplay إلى وضع الأماكن المفتوحة.</string>
+</resources>

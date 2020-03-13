@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">સ્વચલિત</string>
+    <string name="live_display_auto_summary">સૂર્યોદય અને સૂર્યાસ્ત પછી સ્ક્રીનના રંગ તાપમાનને સ્વયંચાલિત રીતે સમાયોજિત કરો</string>
+    <string name="live_display_off">બંધ</string>
+    <string name="live_display_off_summary">તમામ ફેરફારો અક્ષમ કરો</string>
+    <string name="live_display_day">દિવસ</string>
+    <string name="live_display_day_summary">ફકત ડે સેટિંગ્સનો ઉપયોગ કરો</string>
+    <string name="live_display_night">રાત્રિ</string>
+    <string name="live_display_night_summary">ફકત નાઇટ સેટિંગ્સનો ઉપયોગ કરો</string>
+    <string name="live_display_outdoor">આઉટડોર (તેજ તડકો)</string>
+    <string name="live_display_outdoor_summary">ફકત આઉટડોર સેટિંગ્સનો ઉપયોગ કરો</string>
+    <string name="live_display_hint">લાઇવડિસ્પ્લેથી આંખો પરની તાણ ઘટાડી શકાય છે અને તમને રાતે સૂવામાં મદદરૂપ થઈ શકે. અજમાવવા અહીં ક્લિક કરો!</string>
+</resources>

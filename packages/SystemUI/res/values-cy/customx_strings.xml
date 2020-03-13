@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">System</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Modd adfer</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Cychwynnydd</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Modd lawrlwytho</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Cyfredol</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Pwyntydd chwith</string>
+    <string name="accessibility_dpad_right">Pwyntydd de</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Caffîn</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffîn i ffwrdd.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffîn ymlaen.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Rhagrybudd</string>
+    <string name="accessibility_quick_settings_heads_up_off">Rhagrybudd i ffwrdd.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Rhagrybudd ymlaen.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Rhagrybudd wedi\'i droi i ffwrdd.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Rhagrybudd wedi\'i droi ymlaen.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Cysoni</string>
+    <string name="accessibility_quick_settings_sync_off">Cysoni i ffwrdd.</string>
+    <string name="accessibility_quick_settings_sync_on">Cysoni ymlaen.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Cysoni wedi\'i droi i ffwrdd.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Cysoni wedi\'i droi ymlaen.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">Tenynnu USB</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Panel uchder sain</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Dangosydd amgylchynol</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Dangosydd amgylchynol i ffwrdd.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Dangosydd amgylchynol ymlaen.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Dangosydd amgylchynol wedi\'i droi i ffwrdd.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Dangosydd amgylchynol wedi\'i droi ymlaen.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Adrodd lleoliad: Modd arbed batri.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Adrodd lleoliad: Modd synwyryddion yn unig.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Adrodd lleoliad: Modd cywirdeb manwl.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Arbed batri</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Arbed\nbatri</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Dyfais yn unig</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Dyfais\nyn unig</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Cywirdeb manwl</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Manwl\ngywirdeb</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Lleoliad</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Dewisa modd:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Cywirdeb manwl</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Arbed batri</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Dyfais yn unig</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Defnyddio GPS, Wi\u2011Fi, Bluetooth, neu rwydweithiau symudol i adnabod lleoliad</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Defnyddio Wi\u2011Fi, Bluetooth, neu rwydweithiau symudol i adnabod lleoliad</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">Defnyddio GPS i adnabod lleoliad</string>
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <!-- Status bar network traffic monitor strings -->
+    <string name="kilobitspersecond_short">kb/e</string>
+    <string name="megabitspersecond_short">Mb/e</string>
+    <string name="kilobytespersecond_short">kB/e</string>
+    <string name="megabytespersecond_short">MB/e</string>
+    <!-- 4G LTE switch -->
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Modd darllen</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Modd darllen ymlaen.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Modd darllen i ffwrdd.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Cafodd modd darllen ei droi ymlaen.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Cafodd modd darllen ei droi i ffwrdd.</string>
+</resources>

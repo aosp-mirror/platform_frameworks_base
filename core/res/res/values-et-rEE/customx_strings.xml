@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automaatne</string>
+    <string name="live_display_auto_summary">Automaatselt reguleeri ekraani värvitemperatuuri pärast päikeseloojangut ja -tõusu</string>
+    <string name="live_display_off">Väljas</string>
+    <string name="live_display_off_summary">Keela kõik muudatused</string>
+    <string name="live_display_day">Päev</string>
+    <string name="live_display_day_summary">Kasuta ainult päevaseadeid</string>
+    <string name="live_display_night">Öö</string>
+    <string name="live_display_night_summary">Kasuta ainult ööseadeid</string>
+    <string name="live_display_outdoor">Õues (ere päike)</string>
+    <string name="live_display_outdoor_summary">Kasuta ainult õueseadeid</string>
+    <string name="live_display_hint">LiveDisplay võib aidata silmade väsimust vähendada ja öösel paremini magada. Vajuta siia, et seda proovida!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay väljas.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automaatrežiim.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: päevarežiim.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: öörežiim.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: õuerežiim.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay on välja lülitatud.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay on muudetud automaatrežiimi.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay on muudetud päevarežiimi.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay on muudetud öörežiimi.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay on muudetud õuerežiimi.</string>
+</resources>

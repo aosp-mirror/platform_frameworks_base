@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">స్వయంచాలకం</string>
+    <string name="live_display_auto_summary">సూర్యాస్తమయం మరియు సూర్యోదయం తరువాత స్వయంచాలకంగా స్క్రీన్ యొక్క వర్ణ ఉష్ణోగ్రతను సవరించుము.</string>
+    <string name="live_display_off">ఆఫ్‌లో ఉంది</string>
+    <string name="live_display_off_summary">అన్ని సవరణలను నిలిపివేయుము</string>
+    <string name="live_display_day">పగలు</string>
+    <string name="live_display_day_summary">పగటి సెట్టింగులను మాత్రమే ఉపయోగించుము</string>
+    <string name="live_display_night">రాత్రి</string>
+    <string name="live_display_night_summary">రాత్రి సెట్టింగులను మాత్రమే ఉపయోగించుము</string>
+    <string name="live_display_outdoor">ఆరుబయట (ప్రకాశవంతమైన సూర్యుడు)</string>
+    <string name="live_display_outdoor_summary">ఆరుబయటి సెట్టింగులను మాత్రమే ఉపయోగించుము</string>
+    <string name="live_display_hint">ప్రత్యక్ష ప్రదర్శన మీ కంటిపై ఒత్తిడిని తగ్గించడానికి సహాయపడుతుంది మరియు రాత్రి సమయంలో నిద్రపోవడానికి సహకరిస్తుంది. దానిని ప్రయత్నించి చూడడానికి ఇక్కడ క్లిక్ చేయండి!</string>
+    <string name="accessibility_quick_settings_live_display_day">పగటి మోడ్.</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automaticky</string>
+    <string name="live_display_auto_summary">Automaticky upraviť teplotu farieb obrazovky po západe a východe slnka</string>
+    <string name="live_display_off">Vypnúť</string>
+    <string name="live_display_off_summary">Zahodiť všetky úpravy</string>
+    <string name="live_display_day">Deň</string>
+    <string name="live_display_day_summary">Použiť nastavenia len cez deň</string>
+    <string name="live_display_night">Noc</string>
+    <string name="live_display_night_summary">Použiť len nastavenia pre noc</string>
+    <string name="live_display_outdoor">Vonku (slnečno)</string>
+    <string name="live_display_outdoor_summary">Používať len nastavenia pre vonkajšie prostredie</string>
+    <string name="live_display_hint">LiveDisplay môže pomôcť znížiť únavu očí a pomôže vám spať v noci. Kliknite sem a vyskúšajte túto funkciu!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay vyp.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automatický režim.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: denný režim.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: nočný režim.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: režim vonku.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay vypnutý.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay sa zmenil na automatický režim.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay sa zmenil na denný režim.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay sa zmenil na nočný režim.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay sa zmenil na režim vonku.</string>
+</resources>

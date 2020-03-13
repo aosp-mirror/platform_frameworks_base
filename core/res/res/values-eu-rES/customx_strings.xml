@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatikoa</string>
+    <string name="live_display_auto_summary">Doitu automatikoki pantailaren kolore tenperatura ilunabarra eta egunsentiaren ostean</string>
+    <string name="live_display_off">Ez</string>
+    <string name="live_display_off_summary">Ezgaitu doitze guztiak</string>
+    <string name="live_display_day">Eguna</string>
+    <string name="live_display_day_summary">Erabili egun ezarpenak besterik ez</string>
+    <string name="live_display_night">Gaua</string>
+    <string name="live_display_night_summary">Erabili gau ezarpenak besterik ez</string>
+    <string name="live_display_outdoor">Kalean (eguzkipean)</string>
+    <string name="live_display_outdoor_summary">Erabili kaleko ezarpenak besterik ez</string>
+    <string name="live_display_hint">LiveDisplayk begi nekea gutxitu eta gauez lo egiten lagundu dezake. Probatu ezazu!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay ezgaituta.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: modu automatikoa.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: eguna modua.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: gaua modua.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: kaleko modua.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay ezgaituta.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay modu automatikora aldatu da.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay eguna modura aldatu da.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay gaua modura aldatu da.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay kaleko modura aldatu da.</string>
+</resources>

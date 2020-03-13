@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">ସ୍ୱତଃସ୍ପୃତ</string>
+    <string name="live_display_auto_summary">ସୂର୍ଯ୍ୟାସ୍ତ ଓ ସୂର୍ଯ୍ୟୋଦୟ ପରେ ରଙ୍ଗ ତାପମାତ୍ରା ସ୍ୱତଃ ଆଡ୍‍ଜଷ୍ଟ କରନ୍ତୁ</string>
+    <string name="live_display_off">ଅଫ୍</string>
+    <string name="live_display_off_summary">ସ୍ସମସ୍ତ ଆଡ୍‍ଜଷ୍ଟ୍ମେଣ୍ଟ ଅଷମ କରନ୍ତୁ</string>
+    <string name="live_display_day">ଦିନ</string>
+    <string name="live_display_day_summary">କେବଳ ଦିନ ସେଟିଂସ୍‍ ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="live_display_night">ରାତ୍ରି</string>
+    <string name="live_display_night_summary">କେବଳ ରାତ୍ରି ସେଟିଂସ୍‍ ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="live_display_outdoor">ଆଉଟ୍‍ଡୋର୍‍ (ଟାଣ ଖରା)</string>
+    <string name="live_display_outdoor_summary">କେବଳ ଆଉଟ୍‍ଡୋର୍‍ ସେଟିଂସ୍‍ ବ୍ୟବହାର କରନ୍ତୁ</string>
+    <string name="live_display_hint">ଲାଇଭ୍‍ଡିସ୍‍ପ୍ଲେ ଆଇଷ୍ଟ୍ରେନ୍‍ କମାଇବାରେ ଓ ରାତିରେ ଆପଣଙ୍କୁ ଶୋଇବାରେ ସାହାଯ୍ୟ କରିପାରେ। ଏହା ବ୍ୟବହାର କରିବା ପାଇଁ ଏଠାରେ କ୍ଲିକ୍‍ କରନ୍ତୁ!</string>
+    <string name="accessibility_quick_settings_live_display_off">ଲାଇଭ୍ ପ୍ରଦର୍ଶନ ବନ୍ଦ।</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">ଲାଇଭ୍ ପ୍ରଦର୍ଶନ ବନ୍ଦ କରାଗଲା।</string>
+</resources>

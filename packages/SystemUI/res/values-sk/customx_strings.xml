@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Systém</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Recovery</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Bootloader</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Sťahovanie</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Aktuálny</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Kurzor vľavo</string>
+    <string name="accessibility_dpad_right">Kurzor vpravo</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kofeín</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kofeín vypnutý.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kofeín zapnutý.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Plávajúce oznámenia</string>
+    <string name="accessibility_quick_settings_heads_up_off">Plávajúce oznámenia zakázané.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Plávajúce oznámenia povolené.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Plávajúce oznámenia zakázané.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Plávajúce oznámenia povolené.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Synchronizácia</string>
+    <string name="accessibility_quick_settings_sync_off">Synch. vyp.</string>
+    <string name="accessibility_quick_settings_sync_on">Synch. zap.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Synchronizácia vypnutá.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Synchronizácia zapnutá.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">Zdieľanie cez USB</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Panel hlasitosti</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Ambientné zobrazenie</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Ambientné zobrazenie povolené.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Ambientné zobrazenie zakázané.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Ambientné zobrazenie povolené.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Ambientné zobrazenie zakázané.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Hlásenie polohy: režim šetrenia batérie.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Hlásenie polohy: režim iba so snímačmi.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Hlásenie polohy: režim vysokej presnosti.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Šetrenie batérie</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Šetrenie batérie</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Iba zariadenie</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Iba\nGPS</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Vysoká presnosť</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Vysoká presnosť</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Poloha</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Vyberte režim:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Vysoká presnosť</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Šetrenie batérie</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Iba zariadenie</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Pre zisťovanie polohy používať GPS, Wi-Fi, Bluetooth alebo mobilné siete</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Pre zisťovanie polohy používať Wi-Fi, Bluetooth alebo mobilné siete</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Ťahaním alebo dotykom pridáte/odstránite dlaždice</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Zobraziť 4G namiesto LTE</string>
+    <string name="show_fourg_summary">Nahradiť indikátor LTE v stavovom riadku indikátorom 4G</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Režim čítania</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Režim čítania zap.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Režim čítania vyp.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Režim čítania je zapnutý.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Režim čítania je vypnutý.</string>
+</resources>

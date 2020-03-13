@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">အလိုအလျောက်</string>
+    <string name="live_display_auto_summary">နေ၀င် နေထွက်အချိန်ပေါ်မူတည်၍ မျက်နှာပြင်အလင်းအမှောင်ကို အလိုအလျောက် ချိန်ညှိခြင်း</string>
+    <string name="live_display_off">ပိတ်ထားမည်။</string>
+    <string name="live_display_off_summary">ချိန်ညှိမှုအားလုံး ပိတ်ထားခြင်း</string>
+    <string name="live_display_day">နေ့</string>
+    <string name="live_display_day_summary">နေ့ဘက်အသုံးပြုသည့် ချိန်ညှိမှုများကိုသာ အသုံးပြုမည်</string>
+    <string name="live_display_night">ည</string>
+    <string name="live_display_night_summary">ညဘက်အသုံးပြုသည့် ချိန်ညှိမှုများကိုသာ အသုံးပြုမည်</string>
+    <string name="live_display_outdoor">အပြင်(နေပူ)</string>
+    <string name="live_display_outdoor_summary">အပြင်ဘက်တွင် အသုံးပြုသည့် ချိန်ညှိမှုများကိုသာ အသုံးပြုမည်</string>
+    <string name="live_display_hint">LiveDisplay သည် ဖုန်းသုံးခြင်းကြောင့် မျက်စိပြာခြင်းကို လျော့နည်းစေပြီး ညဘက်အိပ်မပျော်ခြင်းကို ကူညီပေးပါသည်။ ယခုပင် စမ်းကြည့်ပါ။</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay ပိတ်မည်။</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay အလိုအလျောက်ပွင့်စနစ်</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay နေ့စနစ်</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay ညစနစ်</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay ပြင်ပစနစ်</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay ပိတ်ထားသည်။</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay ကို အလိုအလျောက်ပွင့်စနစ်သို့ ပြောင်းလဲထားသည်။</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay ကို နေ့စနစ်သို့ ပြောင်းလဲထားသည်။</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay ကို ညစနစ်သို့ ပြောင်းလဲထားသည်။</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay ကို ပြင်ပစနစ်သို့ ပြောင်းလဲထားသည်။</string>
+</resources>

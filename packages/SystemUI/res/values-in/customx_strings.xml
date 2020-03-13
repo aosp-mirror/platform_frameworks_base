@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Sistem</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Recovery</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Bootloader</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Download</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <string name="global_action_restart_fastboot">Fastbootd</string>
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Saat ini</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Kursor kiri</string>
+    <string name="accessibility_dpad_right">Kursor kanan</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kafein</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kafein mati.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kafein hidup.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Notifikasi mengambang</string>
+    <string name="accessibility_quick_settings_heads_up_off">Notifikasi mengambang mati.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Notifikasi mengambang hidup.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Notifikasi mengambang dimatikan.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Notifikasi mengambang dihidupkan.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sinkronisasi</string>
+    <string name="accessibility_quick_settings_sync_off">Sinkronisasi mati.</string>
+    <string name="accessibility_quick_settings_sync_on">Sinkronisasi hidup.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sinkronisasi dimatikan.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sinkronisasi dihidupkan.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">Tethering USB</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Panel volume</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Tampilan ambien</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Tampilan ambien mati.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Tampilan ambien hidup.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Tampilan ambien dimatikan.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Tampilan ambien dihidupkan.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Laporan Lokasi: mode hemat baterai.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Laporan Lokasi: mode hanya sensor.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Laporan Lokasi: mode akurasi tinggi.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Hemat baterai</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Hemat\nbaterai</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Hanya perangkat</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Hanya\nperangkat</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Akurasi tinggi</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Akurasi\ntinggi</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Lokasi</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Pilih mode:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Akurasi tinggi</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Hemat baterai</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Hanya perangkat</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Menggunakan GPS, Wi\u2011Fi, Bluetooth atau jaringan seluler untuk menentukan lokasi</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Menggunakan Wi\u2011Fi, Bluetooth atau jaringan seluler untuk menentukan lokasi</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">Menggunakan GPS untuk menentukan lokasi</string>
+    <!-- VPN QS tile -->
+    <string name="quick_settings_vpn_label">VPN</string>
+    <string name="quick_settings_vpn_connect_dialog_title">Mengubungkan ke\u2026</string>
+    <string name="vpn_credentials_hint">Silakan masukkan kredensial Anda untuk menghubungkan ke<xliff:g id="name">%s</xliff:g></string>
+    <string name="vpn_credentials_username">Nama pengguna</string>
+    <string name="vpn_credentials_password">Kata sandi</string>
+    <string name="vpn_credentials_dialog_connect">Hubungkan</string>
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Seret atau ketuk untuk menambah/menghapus ikon</string>
+    <!-- Status bar network traffic monitor strings -->
+    <string name="kilobitspersecond_short">kbps</string>
+    <string name="megabitspersecond_short">Mbps</string>
+    <string name="kilobytespersecond_short">kBps</string>
+    <string name="megabytespersecond_short">MBps</string>
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Tampilkan 4G daripada LTE</string>
+    <string name="show_fourg_summary">Mengganti indikator bilah status LTE dengan 4G</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Modus membaca</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Modus membaca hidup.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Modus membaca mati.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Modus membaca dihidupkan.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Modus membaca dimatikan.</string>
+</resources>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatisch</string>
+    <string name="live_display_auto_summary">Automatisch kleurtemperatuur van scherm aanpassen na zonsopkomst en -ondergang</string>
+    <string name="live_display_off">Uit</string>
+    <string name="live_display_off_summary">Alle aanpassingen uitschakelen</string>
+    <string name="live_display_day">Overdag</string>
+    <string name="live_display_day_summary">Alleen instellingen voor overdag gebruiken</string>
+    <string name="live_display_night">Nacht</string>
+    <string name="live_display_night_summary">Alleen instellingen voor \'s nachts gebruiken</string>
+    <string name="live_display_outdoor">Buitenshuis (felle zon)</string>
+    <string name="live_display_outdoor_summary">Alleen instellingen voor buitenshuis gebruiken</string>
+    <string name="live_display_hint">LiveDisplay kan oogvermoeidheid verminderen en helpt u om \'s nachts te slapen. Tik hier om het uit te proberen!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay uit.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automatisch.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: dagstand.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: nachtstand.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: buitenstand.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay uitgeschakeld.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay gewijzigd naar automatisch.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay gewijzigd naar dagstand.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay gewijzigd naar nachtstand.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay gewijzigd naar buitenstand.</string>
+</resources>

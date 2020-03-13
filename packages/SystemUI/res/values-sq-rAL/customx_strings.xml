@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Sistemi</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Rimëkëmbje</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Bootloader</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Shkarko</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Aktualisht</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Kursori majtas</string>
+    <string name="accessibility_dpad_right">Kursori djathtas</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kafeina</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kafeina inaktive.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kafeina aktive.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Heads up</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads-up inaktiv.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads-up Aktiv.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Njoftimet Heads-up u çaktivizuan.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Njoftimet Heads-up u aktivizuan.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sinkronizimi</string>
+    <string name="accessibility_quick_settings_sync_off">Sinkronizimi inaktiv.</string>
+    <string name="accessibility_quick_settings_sync_on">Sinkronizimi aktiv.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sinkronizimi u çaktivizua.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sinkronizimi u aktivizua.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB tethering</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Paneli i volumit</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Drita e ekranit sipas ambientit</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Drita e ekranit sipas ambientit inaktive.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Drita e ekranit sipas ambientit aktive.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Drita e ekranit sipas ambientit u çaktivizua.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Drita e ekranit sipas ambientit u aktivizua.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Raportimi i vendndodhjes: kursim i baterisë.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Raportimi i vendndodhjes: vetëm nga sensorët.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Raportimi i vendndodhjes: me saktësi të lartë.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Kursim i baterisë</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Kursim i\nbaterisë</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Vetëm pajisja</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Vetëm\npajisja</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Saktësi e lartë</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Saktësi\ne lartë</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Vendndodhja</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Zgjidh profilin:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Saktësi e lartë</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Kursim i baterisë</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Vetëm pajisja</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Përdor Wi\u2011Fi, Bluetooth, ose rrjetet celulare për të përcaktuar vendndodhjen</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Përdor Wi\u2011Fi, Bluetooth, ose rrjetet celulare për të përcaktuar vendndodhjen</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">Përdor GPS për të caktuar vendndodhjen</string>
+    <!-- VPN QS tile -->
+    <string name="quick_settings_vpn_label">VPN</string>
+    <string name="quick_settings_vpn_connect_dialog_title">Lidhu tek\u2026</string>
+    <string name="vpn_credentials_username">Perdoruesi</string>
+    <string name="vpn_credentials_password">Fjalëkalimi</string>
+    <string name="vpn_credentials_dialog_connect">Lidhu</string>
+    <!-- QS customizer -->
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Mënyrë Leximi</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Metoda pë lexim aktive.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Metoda pë lexim jo aktive.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Metoda për lexim u aktivizua.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Metoda për lexim u ç\'aktivizua.</string>
+</resources>

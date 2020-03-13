@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automātiski</string>
+    <string name="live_display_auto_summary">Automātiski pieregulēt ekrāna krāsu temperatūru pēc saulrieta un saullēkta</string>
+    <string name="live_display_off">Izslēgts</string>
+    <string name="live_display_off_summary">Atslēgt visas izmaiņas</string>
+    <string name="live_display_day">Diena</string>
+    <string name="live_display_day_summary">Izmantot tikai dienas uzstādījumus</string>
+    <string name="live_display_night">Nakts</string>
+    <string name="live_display_night_summary">Izmantot tikai nakts uzstādījumus</string>
+    <string name="live_display_outdoor">Ārpusē (spilgta saule)</string>
+    <string name="live_display_outdoor_summary">Izmantot tikai ārpusē uzstādījumus</string>
+    <string name="live_display_hint">LiveDisplay var palīdzēt mazināt noslodzi uz acīm un palīdzēt gulēt naktī. Spiest šeit lai pamēģinātu!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay izslēgts.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automātiskais režīms.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: dienas režīms.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: nakst režīms.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: ārpusē režīms.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay izslēgts.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay pārslēgt uz automātisko metodi.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay pārslēgt uz dienas metodi.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay pārslēgt uz nakts metodi.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay pārslēgt uz ārpuses metodi.</string>
+</resources>

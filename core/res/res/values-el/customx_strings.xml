@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Αυτόματο</string>
+    <string name="live_display_auto_summary">Αυτόματη ρύθμιση της θερμοκρασίας χρώματος της οθόνης μετά τη δύση και την ανατολή του ηλίου</string>
+    <string name="live_display_off">Ανενεργό</string>
+    <string name="live_display_off_summary">Απενεργοποίηση όλων των ρυθμίσεων</string>
+    <string name="live_display_day">Ημέρα</string>
+    <string name="live_display_day_summary">Χρήση μόνο των ρυθμίσεων ημέρας</string>
+    <string name="live_display_night">Νύχτα</string>
+    <string name="live_display_night_summary">Χρήση μόνο των ρυθμίσεων νύχτας</string>
+    <string name="live_display_outdoor">Εξωτερικός χώρος (ήλιος)</string>
+    <string name="live_display_outdoor_summary">Χρήση μόνο των ρυθμίσεων εξωτερικού χώρου</string>
+    <string name="live_display_hint">Το LiveDisplay μπορεί να βοηθήσει στη μείωση της κόπωσης των ματιών και να σας βοηθήσει να κοιμηθείτε τη νύχτα. Κάντε κλικ εδώ για να το δοκιμάσετε!</string>
+    <string name="accessibility_quick_settings_live_display_off">Ανενεργό LiveDisplay.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: αυτόματη λειτουργία.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: λειτουργία ημέρας.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: λειτουργία νύχτας.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: λειτουργία εξωτερικού χώρου.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">Το LiveDisplay απενεργοποιήθηκε.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">Το LiveDisplay άλλαξε σε αυτόματη λειτουργία.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">Το LiveDisplay άλλαξε σε λειτουργία ημέρας.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">Το LiveDisplay άλλαξε σε λειτουργία νύχτας.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">Το LiveDisplay άλλαξε σε λειτουργία εξωτερικού χώρου.</string>
+</resources>

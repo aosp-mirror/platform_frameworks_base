@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatisk</string>
+    <string name="live_display_auto_summary">Juster fargetemperatur på skjermen etter solnedgang og soloppgang</string>
+    <string name="live_display_off">Av</string>
+    <string name="live_display_off_summary">Deaktivere alle justeringer</string>
+    <string name="live_display_day">Dag</string>
+    <string name="live_display_day_summary">Bruk kun dag innstillinger</string>
+    <string name="live_display_night">Natt</string>
+    <string name="live_display_night_summary">Bruk kun natt innstillinger</string>
+    <string name="live_display_outdoor">Utendørs (sterkt sollys)</string>
+    <string name="live_display_outdoor_summary">Bruk kun utendørs innstillinger</string>
+    <string name="live_display_hint">LiveDisplay kan redusere øyebelastning og redusere søvnvansker. Trykk her for å prøve det!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay av.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automatisk.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: dagmodus.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: natt modus.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: utendørs modus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay slått av.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay endret til automatisk modus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay endret til dagsmodus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay endret til nattmodus.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay endret til utendørs modus.</string>
+</resources>

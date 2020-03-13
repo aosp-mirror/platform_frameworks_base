@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">स्वयंचलित</string>
+    <string name="live_display_auto_summary">सूर्यास्त व सूर्योदयानंतर स्क्रीनचे रंग तापमान स्वयंचलितपणे समायोजित करा</string>
+    <string name="live_display_off">बंद</string>
+    <string name="live_display_off_summary">सर्व समायोजने अक्षम करा</string>
+    <string name="live_display_day">दिवस</string>
+    <string name="live_display_day_summary">केवळ दिवस सेटिंग्ज वापरा</string>
+    <string name="live_display_night">रात्र</string>
+    <string name="live_display_night_summary">केवळ रात्र सेटिंग्ज वापरा</string>
+    <string name="live_display_outdoor">आऊटडोअर (चमकदार सूर्य)</string>
+    <string name="live_display_outdoor_summary">केवळ आऊटडोअर सेटिंग्ज वापरा</string>
+    <string name="live_display_hint">थेटप्रदर्शन डोळ्यांचा ताण कमी करण्यास मदत करते आणि तुम्हाला रात्री झोपण्यास मदत करते. ते वापरून पाहण्यासाठी इथे क्लिक करा!</string>
+</resources>

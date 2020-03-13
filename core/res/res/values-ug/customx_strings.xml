@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">ئاپتوماتېك</string>
+    <string name="live_display_auto_summary">كۈن چىققان ۋە كۈن پاتقاندىن كېيىن ئېكران رەڭ تېمپېراتورىسىنى ئۆزلۈكىدىن تەڭشەيدۇ</string>
+    <string name="live_display_off">تاقاق</string>
+    <string name="live_display_off_summary">بارلىق تەڭشەشلەرنى چەكلەيدۇ</string>
+    <string name="live_display_day">كۈن</string>
+    <string name="live_display_day_summary">كۈندۈز تەڭشەكلىرىنىلا ئىشلىتىدۇ</string>
+    <string name="live_display_night">كېچە</string>
+    <string name="live_display_night_summary">كېچە تەڭشەكلىرىنىلا ئىشلىتىدۇ</string>
+    <string name="live_display_outdoor">تالا (قۇياش نۇرى)</string>
+    <string name="live_display_outdoor_summary">تالا تەڭشەكلىرىنىلا ئىشلىتىدۇ</string>
+    <string name="live_display_hint">LiveDisplay كۆز چارچىشىنى يېنىكلىتىشكە ياردەم بېرىدۇ، كېچىدە ئۇخلىشىڭىزغا ياردەم بېرىدۇ. سىناش ئۈچۈن بۇ جاينى چېكىڭ!</string>
+</resources>

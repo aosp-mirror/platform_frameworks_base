@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">ਸਵੈਚਲਿਤ</string>
+    <string name="live_display_auto_summary">ਆਥਣ ਅਤੇ ਪਹੁ-ਫੁਟਾਲੇ ਤੋਂ ਬਾਅਦ ਸਕ੍ਰੀਨ ਦੇ ਰੰਗ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਵੱਧ-ਘੱਟ ਕਰੋ</string>
+    <string name="live_display_off">ਬੰਦ</string>
+    <string name="live_display_off_summary">ਸਾਰੇ ਫੇਰਬਦਲ ਬੰਦ ਕਰੋ</string>
+    <string name="live_display_day">ਦਿਨ</string>
+    <string name="live_display_day_summary">ਬੱਸ ਦਿਨ ਸੈਟਿੰਗਾਂ ਵਰਤੋ</string>
+    <string name="live_display_night">ਰਾਤ</string>
+    <string name="live_display_night_summary">ਬੱਸ ਰਾਤ ਸੈਟਿੰਗਾਂ ਵਰਤੋ</string>
+    <string name="live_display_outdoor">ਬਾਹਰੀ (ਚਮਕਦਾਰ ਧੁੱਪ)</string>
+    <string name="live_display_outdoor_summary">ਬੱਸ ਬਾਹਰੀ ਸੈਟਿੰਗਾਂ ਵਰਤੋ</string>
+    <string name="live_display_hint">LiveDisplay ਨਾਲ ਅੱਖਾਂ \'ਤੇ ਜ਼ੋਰ ਘੱਟ ਪੈਂਦਾ ਹੈ ਅਤੇ ਰਾਤ ਨੂੰ ਆਸਾਨੀ ਨਾਲ ਸੌ ਸਕਦੇ ਹੋ। ਇਸਨੂੰ ਵਰਤਣ ਲਈ ਇੱਥੇ ਕਲਿੱਕ ਕਰੋ!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay ਬੰਦ।</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: ਸਵੈਚਲਿਤ ਮੋਡ।</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: ਦਿਨ ਮੋਡ।</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: ਰਾਤ ਮੋਡ।</string>
+</resources>

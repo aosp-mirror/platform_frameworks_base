@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Atkopšana</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Sāknētājs</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Lejupielāžu režīms</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Kursoru pa kreisi</string>
+    <string name="accessibility_dpad_right">Kursoru pa labi</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kofeīna režīms</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kofeīna režīms ir atspējots.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kofeīna režīms ir iespējots.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Uznirstošie paziņojumi</string>
+    <string name="accessibility_quick_settings_heads_up_off">Uznirstošie paziņojumi ir atspējoti.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Uznirstošie paziņojumi ir iespējoti.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Uznirstošie paziņojumi ir izslēgti.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Uznirstošie paziņojumi ir ieslēgti.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sinhronizēt</string>
+    <string name="accessibility_quick_settings_sync_off">Sinhronizācija izslēgta.</string>
+    <string name="accessibility_quick_settings_sync_on">Sinhronizācija ieslēgta.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sinhronizācija ir izslēgta.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sinhronizācija ir ieslēgta.</string>
+    <!-- USB tethering QS tile -->
+    <!-- Volume panel QS tile -->
+    <!-- Ambient display QS tile -->
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Radīt 4G nevis LTE</string>
+    <string name="show_fourg_summary">Aizvieto LTE statusa joslas indikatorus ar 4G</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Lasīšanas režīms</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Lasīšanas režīms ieslēgts.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Lasīšanas režīms izslēgts.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Lasīšanas režīms ieslēgts.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Lasīšanas režīms izslēgts.</string>
+</resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Система</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Режим відновлення</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Завантажувач</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Режим завантаження</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Поточний</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Курсор ліворуч</string>
+    <string name="accessibility_dpad_right">Курсор праворуч</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Кофеїн</string>
+    <string name="accessibility_quick_settings_caffeine_off">Кофеїн вимкнено.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Кофеїн увімкнено.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Спливаючі сповіщення</string>
+    <string name="accessibility_quick_settings_heads_up_off">Спливаючі сповіщення вимкнено.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Спливаючі сповіщення увімкнено.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Спливаючі сповіщення вимкнено.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Спливаючі сповіщення увімкнено.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Синхронізація</string>
+    <string name="accessibility_quick_settings_sync_off">Синхронізацію вимкнено.</string>
+    <string name="accessibility_quick_settings_sync_on">Синхронізацію увімкнено.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Синхронізацію вимкнено.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Синхронізація увімкнено.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB-модем</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Панель гучності</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Ambient дисплей</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Ambient дисплей вимкнено.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Ambient дисплей увімкнено.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Ambient дисплей вимкнено.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Ambient дисплей увімкнено.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Надсилання місцезнаходження: економія батареї.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Надсилання місця розташування: тільки датчики.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Надсилання місцезнаходження: висока точність.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Економія батареї</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Економія\nбатареї</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">По датчиках пристрою</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Тільки\nпристрій</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Висока точність</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Висока\nточність</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Місцезнаходження</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Виберіть режим:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Висока точність</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Економія батареї</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">По датчиках пристрою</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Використовувати GPS, Wi‑Fi, Bluetooth і мобільні мережі, щоб визначати місцезнаходження</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Використовувати Wi‑Fi, Bluetooth і мобільні мережі, щоб визначати місцезнаходження</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Перетягніть або торкніться, щоб додати плитки</string>
+    <!-- Status bar network traffic monitor strings -->
+    <string name="kilobitspersecond_short">кбіт/с</string>
+    <string name="megabitspersecond_short">Мбіт/с</string>
+    <string name="kilobytespersecond_short">кБайт/с</string>
+    <string name="megabytespersecond_short">МБайт/с</string>
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Показувати 4G, замість LTE</string>
+    <string name="show_fourg_summary">Замінити LTE в рядку стану на 4G</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Режим читання</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Режим читання включений.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Режим читання відключений.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Режим читання увімкнено.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Режим читання вимкнено.</string>
+</resources>

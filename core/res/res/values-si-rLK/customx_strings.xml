@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">ස්වයංක්‍රීය</string>
+    <string name="live_display_off">අක්‍රිය</string>
+    <string name="live_display_off_summary">සියළු සැකසුම් අක්‍රීය කරන්න</string>
+    <string name="live_display_day">දවස</string>
+    <string name="live_display_day_summary">දින සැකසුම් පමණක් භාවිතා කරන්න</string>
+    <string name="live_display_night">රාත්‍රිය</string>
+    <string name="live_display_night_summary">රාත්‍රී සැකසුම් පමණක් භාවිතා කරන්න</string>
+    <string name="live_display_outdoor">එළිමහන (දීප්තිමත් හිරු එළිය)</string>
+    <string name="live_display_outdoor_summary">එළිමහන් සැකසුම් පමණක් භාවිතා කරන්න</string>
+</resources>

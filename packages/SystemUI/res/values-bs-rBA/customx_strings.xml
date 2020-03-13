@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Sistem</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Oporavak</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Mod preuzimanja</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <!-- Navigation bar dpad -->
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Caffeine mod</string>
+    <string name="accessibility_quick_settings_caffeine_off">Caffeine mod je onemogućen.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Caffeine mod je omogućen.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Iskačuća obaveštenja</string>
+    <string name="accessibility_quick_settings_heads_up_off">Iskačuća obaveštenja su onemogućena.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Iskačuća obaveštenja su omogućena.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Iskačuća obaveštenja su isključena.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Iskačuća obaveštenja su uključena.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sinhronizacija</string>
+    <string name="accessibility_quick_settings_sync_off">Sinhronizacija isključena.</string>
+    <string name="accessibility_quick_settings_sync_on">Sinhronizacija uključena.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sinhronizacija je isključena.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sinhronizacija je uključena.</string>
+    <!-- USB tethering QS tile -->
+    <!-- Volume panel QS tile -->
+    <!-- Ambient display QS tile -->
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label_twoline">Ušteda\nbaterije</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label_twoline">Samo\nuređaj</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Visoka preciznost</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Lokacija</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Visoka preciznost</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Koristi GPS, Wi\u2011Fi, Bluetooth, ili mobilnu mrežu za utvrđivanje lokacije</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Koristi Wi\u2011Fi, Bluetooth, ili mobilnu mrežu za utvrđivanje lokacije</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Prevuci ili dodirni za dodavanje / brisanje dugmadi</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Prikaži oznaku 4G umesto LTE</string>
+    <string name="show_fourg_summary">Zameni LTE indikator sa 4G u statusbaru</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Mod čitanja</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Mod čitanja je uključen.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Mod čitanja je isključen.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Mod čitanja je uključen.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Mod čitanja je isključen.</string>
+</resources>

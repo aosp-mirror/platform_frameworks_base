@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">স্বয়ংক্রিয়</string>
+    <string name="live_display_auto_summary">সূর্যোদয় এবং সূর্যাস্ত এর পরে স্ক্রীন এর রঙের মাত্রা সংক্রীয় ভাবে পরিবর্তীত হবে</string>
+    <string name="live_display_off">বন্ধ</string>
+    <string name="live_display_off_summary">সমস্ত পরিবর্তন বন্ধ করা হোক</string>
+    <string name="live_display_day">দিন</string>
+    <string name="live_display_day_summary">কেবল সকালের সেটিংস গুলি ব্যবহার করা হোক</string>
+    <string name="live_display_night">রাত্রি</string>
+</resources>

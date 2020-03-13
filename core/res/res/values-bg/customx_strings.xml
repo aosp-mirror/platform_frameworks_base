@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Автоматично</string>
+    <string name="live_display_auto_summary">Автоматично регулиране на цветовата температура след залез/изгрев</string>
+    <string name="live_display_off">Изключено</string>
+    <string name="live_display_off_summary">Деактивиране на всички регулировки</string>
+    <string name="live_display_day">Дневен</string>
+    <string name="live_display_day_summary">Използвайте само настройките за ден</string>
+    <string name="live_display_night">Нощен</string>
+    <string name="live_display_night_summary">Само настройки на нощен режим</string>
+    <string name="live_display_outdoor">На открито (ярко слънце)</string>
+    <string name="live_display_outdoor_summary">Само настройки на режим на открито</string>
+    <string name="live_display_hint">Използването на адаптивен дисплей може да помогне за намаляване умората в очите през нощта. Докоснете тук, за да го изпробвате!</string>
+    <string name="accessibility_quick_settings_live_display_off">Изключи адаптивен дисплей.</string>
+    <string name="accessibility_quick_settings_live_display_auto">Адаптивен дисплей: автоматичен режим.</string>
+    <string name="accessibility_quick_settings_live_display_day">Адаптивен дисплей: дневен режим.</string>
+    <string name="accessibility_quick_settings_live_display_night">Адаптивен дисплей: нощен режим.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">Адаптивен дисплей: външен режим.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">Адаптивен дисплей е изключен.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">Адаптивен дисплей е променен на автоматичен режим.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">Адаптивен дисплей е променен на дневен режим.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">Адаптивен дисплей е променен на нощен режим.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">Адаптивен дисплей е променен на външен режим.</string>
+</resources>

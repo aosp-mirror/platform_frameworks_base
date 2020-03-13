@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Aiseag</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Bootloader</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Luchdadh a-nuas</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Làithreach</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Cùrsair clì</string>
+    <string name="accessibility_dpad_right">Cùrsair deas</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Caffeine</string>
+    <string name="accessibility_quick_settings_caffeine_off">Tha Caffeine dheth.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Tha Caffeine air.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">An aire</string>
+    <string name="accessibility_quick_settings_heads_up_off">Tha am modh aire dheth.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Tha am modh aire air.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Chaidh am modh aire a chur dheth.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Chaidh am modh aire a chur air.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sioncronaich</string>
+    <string name="accessibility_quick_settings_sync_off">Sioncronachadh dheth.</string>
+    <string name="accessibility_quick_settings_sync_on">Sioncronachadh air.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Tha an sioncronachadh dheth.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Tha an sioncronachadh air.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">Teadhrachadh USB</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Panail àirde na fuaime</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Taisbeanadh cuairteach</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Tha an taisbeanadh cuairteach dheth.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Tha an taisbeanadh cuairteach air.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Chaidh an taisbeanadh cuairteach a chur dheth.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Chaidh an taisbeanadh cuairteach a chur air.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Aithriseadh an ionaid: modh chaomhnadh a’ bhataraidh.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Aithriseadh an ionaid: am modh mothachaidh a-mhàin.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Aithriseadh an ionaid: modh na pongalachd àrd.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Caomhnadh a’ bhataraidh</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">An t-uidheam a-mhàin</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Pongalachd àrd</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Pongalachd àrd</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Caomhnadh a’ bhataraidh</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">An t-uidheam a-mhàin</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Modh leughaidh</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Tha am modh leughaidh air.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Tha am modh leughaidh dheth.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Tha am modh leughaidh air.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Tha am modh leughaidh dheth.</string>
+</resources>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <string name="app_killed_message">Uygulama sonlandırıldı</string>
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Otomatik</string>
+    <string name="live_display_auto_summary">Gün batımı ve doğumundan sonra ekranın renk sıcaklığını otomatik ayarlar</string>
+    <string name="live_display_off">Kapalı</string>
+    <string name="live_display_off_summary">Tüm ayarlamaları devre dışı bırak</string>
+    <string name="live_display_day">Gün</string>
+    <string name="live_display_day_summary">Sadece gündüz ayarlarını kullan</string>
+    <string name="live_display_night">Gece</string>
+    <string name="live_display_night_summary">Sadece gece ayarlarını kullan</string>
+    <string name="live_display_outdoor">Açık alan (parlak güneş)</string>
+    <string name="live_display_outdoor_summary">Sadece açık alan ayarlarını kullanır</string>
+    <string name="live_display_hint">LiveDisplay göz yorgunluğunuzu azaltıp geceleri uyumanıza yardımcı olabilir. Denemek için buraya tıklayın!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay kapalı.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: otomatik mod.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: gündüz modu.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: gece modu.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: açık hava modu.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay kapatıldı.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay otomatik moda geçti.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay gündüz moduna geçti.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay gece moduna geçti.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay açık hava moduna geçti.</string>
+</resources>

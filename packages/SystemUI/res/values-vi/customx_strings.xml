@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Hệ thống</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Chế độ phục hồi</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Trình nạp khởi động</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Tải xuống</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Hiện tại</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Trỏ trái</string>
+    <string name="accessibility_dpad_right">Trỏ phải</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Cafein</string>
+    <string name="accessibility_quick_settings_caffeine_off">Đã tắt Cafein.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Đã bật Cafein.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Heads up</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads up tắt.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads up bật.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads up đã tắt.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads up đã bật.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Đồng bộ</string>
+    <string name="accessibility_quick_settings_sync_off">Tắt đồng bộ.</string>
+    <string name="accessibility_quick_settings_sync_on">Bật đồng bộ.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Đã tắt đồng bộ.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Đã bật đồng bộ.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">Kết nối mạng qua USB</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Bảng điều khiển âm lượng</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Hiển thị môi trường xung quanh</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Tắt hiển thị môi trường xung quanh.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Hiển thị môi trường xung quanh bật.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Hiển thị môi trường xung quanh đã tắt.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Hiển thị môi trường xung quanh đã bật.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Báo cáo vị trí: chế độ tiết kiệm pin.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Báo cáo vị trí: chế độ chỉ cám biến.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Báo cáo vị trí: chế độ chính xác cao.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Tiết kiệm pin</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Tiết kiệm\npin</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Chỉ thiết bị</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Chỉ\nthiết bị</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Chính xác cao</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Cao\nchính xác</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Vị trí</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Chọn chế độ:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Chính xác cao</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Tiết kiệm pin</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Chỉ thiết bị</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Sử dụng GPS, Wi\u2011Fi, Bluetooth hoặc mạng di động để xác định vị trí</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Sử dụng Wi\u2011Fi, Bluetooth hoặc mạng di động để xác định vị trí</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Kéo hoặc chạm để thêm/xoá ô</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Hiển thị biểu tượng 4G thay cho LTE</string>
+    <string name="show_fourg_summary">Thay thế biểu tượng LTE bằng 4G</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Chế độ đọc</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Chế độ đọc đang bật.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Chế độ đọc đang tắt.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Chế độ đọc đã được bật.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Chế độ đọc đã được tắt.</string>
+</resources>

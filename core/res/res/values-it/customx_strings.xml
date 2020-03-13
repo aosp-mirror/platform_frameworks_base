@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatico</string>
+    <string name="live_display_auto_summary">Regola automaticamente la temperatura di colore dello schermo dopo il tramonto e l\'alba</string>
+    <string name="live_display_off_summary">Disattiva tutte le regolazioni</string>
+    <string name="live_display_day">Giorno</string>
+    <string name="live_display_day_summary">Usa solo le impostazioni giorno</string>
+    <string name="live_display_night">Notte</string>
+    <string name="live_display_night_summary">Usa solo le impostazioni notte</string>
+    <string name="live_display_outdoor">All\'aperto (sole)</string>
+    <string name="live_display_outdoor_summary">Usa solo le impostazioni all\'aperto</string>
+    <string name="live_display_hint">LiveDisplay aiuta a ridurre l\'affaticamento degli occhi e conciliare il sonno. Tocca qui per provarlo!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay non attivo.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: modalità automatica.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: modalità giorno.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: modalità notte.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: modalità all\'aperto.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay disattivato.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay in modalità automatica.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay in modalità giorno.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay in modalità notte.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay in modalità all\'aperto.</string>
+</resources>

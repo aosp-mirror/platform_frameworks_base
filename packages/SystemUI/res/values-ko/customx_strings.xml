@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">시스템</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">복구 모드</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">부트로더</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">다운로드</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">현재 사용자</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">커서 왼쪽</string>
+    <string name="accessibility_dpad_right">커서 오른쪽</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">카페인</string>
+    <string name="accessibility_quick_settings_caffeine_off">카페인 꺼짐.</string>
+    <string name="accessibility_quick_settings_caffeine_on">카페인 켜짐.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">헤드업 알림</string>
+    <string name="accessibility_quick_settings_heads_up_off">헤드업 알림이 꺼짐.</string>
+    <string name="accessibility_quick_settings_heads_up_on">헤드업 알림이 켜짐.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">헤드업 알림이 꺼졌습니다.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">헤드업 알림이 켜졌습니다.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">동기화</string>
+    <string name="accessibility_quick_settings_sync_off">동기화 꺼짐</string>
+    <string name="accessibility_quick_settings_sync_on">동기화 켜짐</string>
+    <string name="accessibility_quick_settings_sync_changed_off">동기화가 해제되었습니다.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">동기화가 설정되었습니다.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB 테더링</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">볼륨 패널</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">절전 모드 자동 해제</string>
+    <string name="accessibility_quick_settings_ambient_display_off">절전 모드 자동 해제가 꺼짐.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">절전 모드 자동 해제가 켜짐.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">절전 모드 자동 해제가 꺼졌습니다.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">절전 모드 자동 해제가 켜졌습니다.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">위치 보고: 배터리 절약 모드.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">위치 보고: 기기 전용 모드.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">위치 보고: 높은 정확성 모드.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">배터리 절약</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">배터리\n절약</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">기기 전용</string>
+    <string name="quick_settings_location_gps_only_label_twoline">기기\n전용</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">높은 정확도</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">높은\n정확성</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">위치</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">모드 선택:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">높은 정확도</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">배터리 절약</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">기기 전용</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">GPS, Wi\u2011Fi, 블루투스 또는 이동통신망을 사용하여 위치를 찾습니다.</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Wi\u2011Fi, 블루투스 또는 이동통신망을 사용하여 위치를 찾습니다.</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">GPS를 사용하여 위치를 찾습니다.</string>
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">드래그하거나 탭하여 타일 추가/삭제</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">LTE 대신 4G 표시</string>
+    <string name="show_fourg_summary">LTE 상태 표시줄 표시기를 4G로 바꿉니다</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">독서 모드</string>
+    <string name="accessibility_quick_settings_reading_mode_on">독서 모드를 켭니다.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">독서 모드를 끕니다.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">독서 모드가 켜졌습니다.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">독서 모드가 꺼졌습니다.</string>
+</resources>

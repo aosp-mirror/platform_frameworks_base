@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">システム</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">リカバリー</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">ブートローダー</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">ダウンロード</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">現在</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">カーソルを左へ</string>
+    <string name="accessibility_dpad_right">カーソルを右へ</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">カフェイン</string>
+    <string name="accessibility_quick_settings_caffeine_off">カフェインはOFFです。</string>
+    <string name="accessibility_quick_settings_caffeine_on">カフェインはONです。</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">ヘッドアップ</string>
+    <string name="accessibility_quick_settings_heads_up_off">ヘッドアップはOFFです。</string>
+    <string name="accessibility_quick_settings_heads_up_on">ヘッドアップはONです。</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">ヘッドアップがOFFになりました。</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">ヘッドアップがONになりました。</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">同期</string>
+    <string name="accessibility_quick_settings_sync_off">同期はOFFです。</string>
+    <string name="accessibility_quick_settings_sync_on">同期はONです。</string>
+    <string name="accessibility_quick_settings_sync_changed_off">同期がOFFになりました。</string>
+    <string name="accessibility_quick_settings_sync_changed_on">同期がONになりました。</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USBテザリング</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">音量パネル</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">アンビエント表示</string>
+    <string name="accessibility_quick_settings_ambient_display_off">アンビエント表示は OFF です。</string>
+    <string name="accessibility_quick_settings_ambient_display_on">アンビエント表示は ON です。</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">アンビエント表示が OFF になりました。</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">アンビエント表示が ON になりました。</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">位置情報レポート: バッテリー節約モードです。</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">位置情報レポート: 端末のみモードです。</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">位置情報レポート: 高精度モードです。</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">バッテリー節約</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">バッテリー\n節約</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">端末のみ</string>
+    <string name="quick_settings_location_gps_only_label_twoline">GPS のみ</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">高精度</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">高精度</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">位置情報</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">選択モード:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">高精度</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">バッテリー節約</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">端末のみ</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">GPS、Wi-Fi、Bluetooth、モバイルネットワークで現在地を特定します</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Wi-Fi、Bluetooth、モバイルネットワークで現在地を特定します</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">GPS で現在地を特定する</string>
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">タイルを追加や削除するにはドラックかタップして下さい</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">LTE の代わりに 4G を表示</string>
+    <string name="show_fourg_summary">電波アイコンを LTE から 4G に置き換える</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">読書モード</string>
+    <string name="accessibility_quick_settings_reading_mode_on">読書モードは ON です。</string>
+    <string name="accessibility_quick_settings_reading_mode_off">読書モードは OFF です。</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">読書モードが ON になりました。</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">読書モードが OFF になりました。</string>
+</resources>

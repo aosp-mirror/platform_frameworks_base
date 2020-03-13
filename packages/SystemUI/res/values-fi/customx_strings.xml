@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Järjestelmä</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Recovery-tila</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Bootloader-tila</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Lataa</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Nykyinen</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Kohdistin vasemmalle</string>
+    <string name="accessibility_dpad_right">Kohdistin oikealle</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kofeiini</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kofeiini pois.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kofeiini päällä.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Heads up</string>
+    <string name="accessibility_quick_settings_heads_up_off">Heads up pois.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Heads up päällä.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Heads up pois päältä.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Heads up päällä.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Synkronointi</string>
+    <string name="accessibility_quick_settings_sync_off">Synkronointi pois.</string>
+    <string name="accessibility_quick_settings_sync_on">Synkronointi päällä.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Synkronointi pois päältä.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Synkronointi päällä.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB-jakaminen</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Äänenvoimakkuuspaneeli</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Ambient-näyttö</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Ambient-näyttö pois.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Ambient-näyttö päällä.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Ambient-näyttö pois päältä.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Ambient-näyttö päällä.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Sijainnin raportointi: virransäästötila.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Sijainti: Vain laite.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Sijainnin raportointi: korkea tarkkuus.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Virransäästö</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Virran-\nsäästö</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Vain laite</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Vain\nlaite</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Korkea tarkkuus</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Suuri\ntarkkuus</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Sijainti</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Valitse tila:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Korkea tarkkuus</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Virransäästö</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Vain laite</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Paikanna GPS:n ja Wi\u2011Fi-, Bluetooth- ja mobiiliverkkojen avulla</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Paikanna WiF\u2011i-, Bluetooth- ja mobiiliverkkojen avulla</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">Paikanna sijaintisi GPS:n avulla</string>
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Vedä tai paina lisääksesi/poistaaksesi tiilejä</string>
+    <!-- Status bar network traffic monitor strings -->
+    <string name="kilobytespersecond_short">kt/s</string>
+    <string name="megabytespersecond_short">Mt/s</string>
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Näytä 4G LTE:n sijasta</string>
+    <string name="show_fourg_summary">Korvaa LTE-kuvakkeen 4G:llä tilapalkissa</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Lukutila</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Lukutila päällä.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Lukutila pois.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Lukutila otettiin käyttöön.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Lukutila poistettiin käytöstä.</string>
+</resources>

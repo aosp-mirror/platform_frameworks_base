@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatik</string>
+    <string name="live_display_auto_summary">Mengubah suhu warna skrin selepas matahari terbit dan terbenam secara automatik</string>
+    <string name="live_display_off">Tutup</string>
+    <string name="live_display_off_summary">Menyahdayakan semua pelarasan</string>
+    <string name="live_display_day">Hari</string>
+    <string name="live_display_day_summary">Gunakan seting siang sahaja</string>
+    <string name="live_display_night">Malam</string>
+    <string name="live_display_night_summary">Gunakan seting malam sahaja</string>
+    <string name="live_display_outdoor">Luar (matahari cerah)</string>
+    <string name="live_display_outdoor_summary">Gunakan seting luar sahaja</string>
+    <string name="live_display_hint">LiveDisplay boleh tolong mengurangkan sakit mata dan membantu anda tidur pada waktu malam. Klik sini untuk mencubanya!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay dimatikan.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: mod auto.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: mod siang.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: mod malam.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: mod luar.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay telah dimatikan.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay telah ditukar kepada mod auto.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay telah ditukar kepada mod siang.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay telah ditukar kepada mod malam.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay telah ditukar kepada mod luar.</string>
+</resources>

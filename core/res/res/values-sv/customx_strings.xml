@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Automatisk</string>
+    <string name="live_display_auto_summary">Justera automatiskt skärmens färgtemperatur efter solnedgång och soluppgång</string>
+    <string name="live_display_off">Av</string>
+    <string name="live_display_off_summary">Inaktivera alla justeringar</string>
+    <string name="live_display_day">Dag</string>
+    <string name="live_display_day_summary">Använd enbart dagläge</string>
+    <string name="live_display_night">Natt</string>
+    <string name="live_display_night_summary">Använd enbart nattläge</string>
+    <string name="live_display_outdoor">Utomhus (stark sol)</string>
+    <string name="live_display_outdoor_summary">Använd endast utomhusläge</string>
+    <string name="live_display_hint">LiveDisplay kan minska överansträngning av ögonen och hjälpa dig med nattsömnen. Klicka här för att prova!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay av.</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: automatiskt läge.</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: dagläge.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: nattläge.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: utomhusläge.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay avslaget.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay ändrades till automatiskt läge.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay ändrades till dagläge.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay ändrades till nattläge.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay ändrades till utomhusläge.</string>
+</resources>

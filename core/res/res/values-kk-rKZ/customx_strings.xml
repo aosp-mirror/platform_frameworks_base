@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Long-press back kill application -->
+    <!-- LiveDisplay strings -->
+    <string name="live_display_auto">Автоматты түрде</string>
+    <string name="live_display_auto_summary">Автоматическая настройка цветовой температуры экрана после захода солнца и восхода солнца
+Автоматты түрде күн ауысқанда экранның жарығын өзгерту</string>
+    <string name="live_display_off">Жоқ</string>
+    <string name="live_display_off_summary">Барлық реттеулерді өшіру</string>
+    <string name="live_display_day">Күн</string>
+    <string name="live_display_day_summary">Тек күн ретеуін қолдану</string>
+    <string name="live_display_night">Түн</string>
+    <string name="live_display_night_summary">Тек түнгі реттеулерді қолдану</string>
+    <string name="live_display_outdoor">Ашық күн</string>
+    <string name="live_display_outdoor_summary">Тек ашық күн реттеулерін қолдану</string>
+    <string name="live_display_hint">LiveDisplay көздің қабығын азайтып, түнде ұйықтауға көмектеседі. Көріп көру үшін мына жерді басыңыз!</string>
+    <string name="accessibility_quick_settings_live_display_off">LiveDisplay сөндірулі</string>
+    <string name="accessibility_quick_settings_live_display_auto">LiveDisplay: автоматты түрде</string>
+    <string name="accessibility_quick_settings_live_display_day">LiveDisplay: күн.</string>
+    <string name="accessibility_quick_settings_live_display_night">LiveDisplay: түн.</string>
+    <string name="accessibility_quick_settings_live_display_outdoor">LiveDisplay: ашық күн.</string>
+    <string name="accessibility_quick_settings_live_display_changed_off">LiveDisplay сөндірулі.</string>
+    <string name="accessibility_quick_settings_live_display_changed_auto">LiveDisplay: автоматты түрге өзгеру.</string>
+    <string name="accessibility_quick_settings_live_display_changed_day">LiveDisplay: күнге өзгеру.</string>
+    <string name="accessibility_quick_settings_live_display_changed_night">LiveDisplay: түнге өзгеру.</string>
+    <string name="accessibility_quick_settings_live_display_changed_outdoor">LiveDisplay: ашық күнге өзгеру.</string>
+</resources>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <string name="global_action_restart_system">Sistema</string>
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Berreskuratzea</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Abiarazlea</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Deskarga</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <string name="global_action_current_user">Unekoa</string>
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Kurtsorea ezkerrean</string>
+    <string name="accessibility_dpad_right">Kurtsorearen eskuinean</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Kafeina</string>
+    <string name="accessibility_quick_settings_caffeine_off">Kafeina ez.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Kafeina bai.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Jakinarazpen flotatzaileak</string>
+    <string name="accessibility_quick_settings_heads_up_off">Jakinarazpen flotatzaileak ezgaituta.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Jakinarazpen flotatzaileak gaituta.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Jakinarazpen flotatzaileak ezgaituta.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Jakinarazpen flotatzaileak gaituta.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Sinkronizazioa</string>
+    <string name="accessibility_quick_settings_sync_off">Sinkronizazioa ezgaituta.</string>
+    <string name="accessibility_quick_settings_sync_on">Sinkronizazioa gaituta.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Sinkronizazioa ezgaituta.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Sinkronizazioa gaituta.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB tethering</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Bolumen panela</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Ambient display</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Ambient display itzalita.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Ambient display piztuta.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Ambient display itzalita.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Ambient display piztuta.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Kokaleku txostena: bateria aurrezteko modua.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Kokaleku txostena: sentsoreak besterik ez modua.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Kokaleku txostena: Zehaztasun handiko modua.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Bateria aurreztea</string>
+    <string name="quick_settings_location_battery_saving_label_twoline">Bateria\naurreztea</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Gailua bakarrik</string>
+    <string name="quick_settings_location_gps_only_label_twoline">Gailua\nbesterik ez</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Zehaztasun handia</string>
+    <string name="quick_settings_location_high_accuracy_label_twoline">Zehaztasun\nhandia</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_title">Kokalekua</string>
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_detail_menu_title">Hautaketa modua:</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Zehaztasun handia</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Bateria aurreztea</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Gailua bakarrik</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_description">Erabili GPS, Wi\u2011Fi, Bluetooth, edo sare mugikorrak kokalekua zehazteko</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_description">Erabili Wi\u2011Fi, Bluetooth, edo sare mugikorrak kokalekua zehazteko</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_description">Erabili GPS sistema kokapena zehazteko</string>
+    <!-- VPN QS tile -->
+    <string name="vpn_credentials_username">Erabiltzaile-izena</string>
+    <string name="vpn_credentials_password">Pasahitza</string>
+    <string name="vpn_credentials_dialog_connect">Konektatu</string>
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Arratratu edo sakatu fitxak gehitzeko / kentzeko</string>
+    <!-- Status bar network traffic monitor strings -->
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">4G erakutsi LTE beharrean</string>
+    <string name="show_fourg_summary">LTE beharrean 4G jartzen du egoera barran</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Irakurketa modua</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Irakurketa modua gaituta.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Irakurketa modua desgaituta.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Irakurketa modua gaitu da.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Irakurketa modua desgaitu da.</string>
+</resources>

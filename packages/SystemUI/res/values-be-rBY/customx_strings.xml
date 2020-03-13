@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- Advanced restart menu -->
+    <!-- Button to restart the device, within the Restart Options dialog -->
+    <!-- Button to restart the device into recovery mode, within the Restart Options dialog -->
+    <string name="global_action_restart_recovery">Рэжым аднаўлення</string>
+    <!-- Button to restart the device into bootloader mode, within the Restart Options dialog -->
+    <string name="global_action_restart_bootloader">Загрузчык</string>
+    <!-- Button to restart the device into download mode, within the Restart Options dialog -->
+    <string name="global_action_restart_download">Рэжым спампоўкі</string>
+    <!-- Button to restart the device into fastboot mode, within the Restart Options dialog -->
+    <!-- Label for current user in power menu options dialog -->
+    <!-- Navigation bar dpad -->
+    <string name="accessibility_dpad_left">Курсор налева</string>
+    <string name="accessibility_dpad_right">Курсор направа</string>
+    <!-- Custom QS tiles -->
+    <!-- Caffeine QS tile -->
+    <string name="quick_settings_caffeine_label">Забарона сну</string>
+    <string name="accessibility_quick_settings_caffeine_off">Забарона сну выключана.</string>
+    <string name="accessibility_quick_settings_caffeine_on">Забарона сну ўключана.</string>
+    <!-- Heads up QS tile -->
+    <string name="quick_settings_heads_up_label">Усплывальныя паведамленні</string>
+    <string name="accessibility_quick_settings_heads_up_off">Усплывальныя паведамленні адключаны.</string>
+    <string name="accessibility_quick_settings_heads_up_on">Усплывальныя паведамленні ўключаны.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_off">Усплывальныя паведамленні адключаны.</string>
+    <string name="accessibility_quick_settings_heads_up_changed_on">Усплывальныя паведамленні ўключаны.</string>
+    <!-- Sync QS tile -->
+    <string name="quick_settings_sync_label">Сінхранізацыя</string>
+    <string name="accessibility_quick_settings_sync_off">Сінхранізацыя адключана.</string>
+    <string name="accessibility_quick_settings_sync_on">Сінхранізацыя ўключана.</string>
+    <string name="accessibility_quick_settings_sync_changed_off">Сінхранізацыя адключаная.</string>
+    <string name="accessibility_quick_settings_sync_changed_on">Сінхранізацыя ўключана.</string>
+    <!-- USB tethering QS tile -->
+    <string name="quick_settings_usb_tether_label">USB-мадэм</string>
+    <!-- Volume panel QS tile -->
+    <string name="quick_settings_volume_panel_label">Панэль гучнасці</string>
+    <!-- Ambient display QS tile -->
+    <string name="quick_settings_ambient_display_label">Індыкацыя падзей</string>
+    <string name="accessibility_quick_settings_ambient_display_off">Індыкацыя падзей экранам адключаная.</string>
+    <string name="accessibility_quick_settings_ambient_display_on">Індыкацыя падзей экранам уключана.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_off">Індыкацыя падзей экранам адключаная.</string>
+    <string name="accessibility_quick_settings_ambient_display_changed_on">Індыкацыя падзей экранам уключана.</string>
+    <!-- Content description of the location tile in quick settings when on, battery saving mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_battery_saving">Адпраўка месцазнаходжання: рэжым эканоміі батарэі.</string>
+    <!-- Content description of the location tile in quick settings when on, sensors only mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_gps_only">Адпраўка месцазнаходжання: толькі па GPS.</string>
+    <!-- Content description of the location tile in quick settings when on, high accuracy mode (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_location_high_accuracy">Адпраўка месцазнаходжання: рэжым высокай дакладнасці.</string>
+    <!-- QuickSettings: Location (On, low-power) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_battery_saving_label">Па каардынатах сеткі</string>
+    <!-- QuickSettings: Location (On, gps-only) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_gps_only_label">Па спадарожніках GPS</string>
+    <!-- QuickSettings: Location (On, high-accuracy) [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_location_high_accuracy_label">Па ўсіх крыніцах</string>
+    <!-- QuickSettings: Location detail panel title [CHAR LIMIT=NONE] -->
+    <!-- QuickSettings: Location detail panel menu title [CHAR LIMIT=NONE] -->
+    <!-- [CHAR LIMIT=30] Location detail panel, high accuracy location mode -->
+    <string name="quick_settings_location_detail_mode_high_accuracy_title">Па ўсіх крыніцах</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, battery saving location mode -->
+    <string name="quick_settings_location_detail_mode_battery_saving_title">Па каардынатах сеткі</string>
+    <!-- [CHAR LIMIT=30] Location detail panel, device only location mode -->
+    <string name="quick_settings_location_detail_mode_sensors_only_title">Па спадарожніках GPS</string>
+    <!-- [CHAR LIMIT=130] Location detail panel, description for high accuracy mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for battery saving mode -->
+    <!-- [CHAR LIMIT=130] Location detail panel, description for sensors only mode -->
+    <!-- VPN QS tile -->
+    <!-- QS customizer -->
+    <string name="drag_or_tap_to_add_tiles">Перацягнiце альбо націснiце, каб дадаць/выдаліць пліткі</string>
+    <!-- Status bar network traffic monitor strings -->
+    <string name="kilobitspersecond_short">кб/с</string>
+    <string name="megabitspersecond_short">Мб/c</string>
+    <string name="kilobytespersecond_short">кБ/с</string>
+    <string name="megabytespersecond_short">МБ/с</string>
+    <!-- 4G LTE switch -->
+    <string name="show_fourg_title">Паказваць 4G замест LTE</string>
+    <string name="show_fourg_summary">Замяняе LTE індыкатар ў радку стану на 4G</string>
+    <!-- Reader mode QS tile -->
+    <string name="quick_settings_reading_mode">Рэжым чытання</string>
+    <string name="accessibility_quick_settings_reading_mode_on">Рэжым чытання ўключаны.</string>
+    <string name="accessibility_quick_settings_reading_mode_off">Рэжым чытання адключаны.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_on">Рэжым чытання актываваны.</string>
+    <string name="accessibility_quick_settings_reading_mode_changed_off">Рэжым чытання дэактываваны.</string>
+</resources>
