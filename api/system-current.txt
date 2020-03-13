@@ -999,8 +999,8 @@ package android.app.compat {
 
   public final class CompatChanges {
     method public static boolean isChangeEnabled(long);
-    method public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
-    method public static boolean isChangeEnabled(long, int);
+    method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(allOf={"android.permission.READ_COMPAT_CHANGE_CONFIG", "android.permission.LOG_COMPAT_CHANGE"}) public static boolean isChangeEnabled(long, int);
   }
 
 }
