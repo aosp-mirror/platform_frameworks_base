@@ -5215,6 +5215,10 @@ public class DevicePolicyManager {
      * <p>Because this method might take several seconds to complete, it should only be called from
      * a worker thread. This method returns {@code null} when called from the main thread.
      *
+     * <p>This method is not thread-safe, calling it from multiple threads at the same time will
+     * result in undefined behavior. If the calling thread is interrupted while the invocation is
+     * in-flight, it will eventually terminate and return {@code null}.
+     *
      * <p>Note: If the provided {@code alias} is of an existing alias, all former grants that apps
      * have been given to access the key and certificates associated with this alias will be
      * revoked.
