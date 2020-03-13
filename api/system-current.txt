@@ -13048,7 +13048,6 @@ package android.telephony.ims.stub {
     method public int transact(android.os.Bundle);
     method public int updateCallBarring(int, int, String[]);
     method public int updateCallBarringForServiceClass(int, int, String[], int);
-    method public int updateCallBarringWithPassword(int, int, @Nullable String[], int, @NonNull String);
     method public int updateCallForward(int, int, String, int, int);
     method public int updateCallWaiting(boolean, int);
     method public int updateClip(boolean);
