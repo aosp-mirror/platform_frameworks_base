@@ -91,7 +91,6 @@
         android:textAppearance="@style/TextAppearance.Material.Notification.Time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginStart="@dimen/notification_header_separating_margin"
         android:layout_marginEnd="@dimen/notification_header_separating_margin"
         android:showRelative="true"

@@ -35,6 +35,7 @@ import android.widget.TextView;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.widget.ConversationLayout;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.TransformableView;
 import com.android.systemui.statusbar.notification.TransformState;
@@ -61,6 +62,9 @@ public abstract class NotificationViewWrapper implements TransformableView {
                 return new NotificationMediaTemplateViewWrapper(ctx, v, row);
             } else if ("messaging".equals(v.getTag())) {
                 return new NotificationMessagingTemplateViewWrapper(ctx, v, row);
+            } else if ("conversation".equals(v.getTag())) {
+                return new NotificationConversationTemplateViewWrapper(ctx, (ConversationLayout) v,
+                        row);
             }
             Class<? extends Notification.Style> style =
                     row.getEntry().getSbn().getNotification().getNotificationStyle();

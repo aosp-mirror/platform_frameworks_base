@@ -41,6 +41,7 @@ public class ViewTransformationHelper implements TransformableView,
     private static final int TAG_CONTAINS_TRANSFORMED_VIEW = R.id.contains_transformed_view;
 
     private ArrayMap<Integer, View> mTransformedViews = new ArrayMap<>();
+    private ArraySet<Integer> mKeysTransformingToSimilar = new ArraySet<>();
     private ArrayMap<Integer, CustomTransformation> mCustomTransformations = new ArrayMap<>();
     private ValueAnimator mViewTransformationAnimation;
 
@@ -48,8 +49,22 @@ public class ViewTransformationHelper implements TransformableView,
         mTransformedViews.put(key, transformedView);
     }
 
+    /**
+     * Add a view that transforms to a similar sibling, meaning that we should consider any mapping
+     * found treated as the same viewType. This is useful for imageViews, where it's hard to compare
+     * if the source images are the same when they are bitmap based.
+     *
+     * @param key The key how this is added
+     * @param transformedView the view that is added
+     */
+    public void addViewTransformingToSimilar(int key, View transformedView) {
+        addTransformedView(key, transformedView);
+        mKeysTransformingToSimilar.add(key);
+    }
+
     public void reset() {
         mTransformedViews.clear();
+        mKeysTransformingToSimilar.clear();
     }
 
     public void setCustomTransformation(CustomTransformation transformation, int viewType) {
@@ -60,7 +75,11 @@ public class ViewTransformationHelper implements TransformableView,
     public TransformState getCurrentState(int fadingView) {
         View view = mTransformedViews.get(fadingView);
         if (view != null && view.getVisibility() != View.GONE) {
-            return TransformState.createFrom(view, this);
+            TransformState transformState = TransformState.createFrom(view, this);
+            if (mKeysTransformingToSimilar.contains(fadingView)) {
+                transformState.setIsSameAsAnyView(true);
+            }
+            return transformState;
         }
         return null;
     }
