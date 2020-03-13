@@ -35,6 +35,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
@@ -85,6 +86,8 @@ public class QSPanelTest extends SysuiTestCase {
     private NotificationMediaManager mNotificationMediaManager;
     @Mock
     private Executor mBackgroundExecutor;
+    @Mock
+    private LocalBluetoothManager mLocalBluetoothManager;
 
     @Before
     public void setup() throws Exception {
@@ -94,7 +97,8 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
-                    mQSLogger, mNotificationMediaManager, mBackgroundExecutor);
+                    mQSLogger, mNotificationMediaManager, mBackgroundExecutor,
+                    mLocalBluetoothManager);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
             mParentView.addView(mQsPanel);
