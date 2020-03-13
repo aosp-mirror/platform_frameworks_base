@@ -7803,12 +7803,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handleNetworkTestedWithExtras(
             @NonNull ConnectivityReportEvent reportEvent, @NonNull PersistableBundle extras) {
         final NetworkAgentInfo nai = reportEvent.mNai;
+        final NetworkCapabilities networkCapabilities =
+                new NetworkCapabilities(nai.networkCapabilities);
+        clearNetworkCapabilitiesUids(networkCapabilities);
         final ConnectivityReport report =
                 new ConnectivityReport(
                         reportEvent.mNai.network,
                         reportEvent.mTimestampMillis,
                         nai.linkProperties,
-                        nai.networkCapabilities,
+                        networkCapabilities,
                         extras);
         final List<IConnectivityDiagnosticsCallback> results =
                 getMatchingPermissionedCallbacks(nai);
@@ -7824,13 +7827,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void handleDataStallSuspected(
             @NonNull NetworkAgentInfo nai, long timestampMillis, int detectionMethod,
             @NonNull PersistableBundle extras) {
+        final NetworkCapabilities networkCapabilities =
+                new NetworkCapabilities(nai.networkCapabilities);
+        clearNetworkCapabilitiesUids(networkCapabilities);
         final DataStallReport report =
                 new DataStallReport(
                         nai.network,
                         timestampMillis,
                         detectionMethod,
                         nai.linkProperties,
-                        nai.networkCapabilities,
+                        networkCapabilities,
                         extras);
         final List<IConnectivityDiagnosticsCallback> results =
                 getMatchingPermissionedCallbacks(nai);
@@ -7854,6 +7860,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 loge("Error invoking onNetworkConnectivityReported", ex);
             }
         }
+    }
+
+    private void clearNetworkCapabilitiesUids(@NonNull NetworkCapabilities nc) {
+        nc.setUids(null);
+        nc.setAdministratorUids(Collections.EMPTY_LIST);
+        nc.setOwnerUid(Process.INVALID_UID);
     }
 
     private List<IConnectivityDiagnosticsCallback> getMatchingPermissionedCallbacks(
