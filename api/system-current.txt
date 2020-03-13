@@ -407,7 +407,6 @@ package android.app {
     field public static final String OPSTR_POST_NOTIFICATION = "android:post_notification";
     field public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
     field public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
-    field public static final String OPSTR_READ_DEVICE_IDENTIFIERS = "android:read_device_identifiers";
     field public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     field public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
