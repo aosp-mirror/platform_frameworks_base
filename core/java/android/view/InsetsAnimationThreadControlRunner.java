@@ -75,6 +75,12 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             t.apply();
             t.close();
         }
+
+        @Override
+        public void releaseSurfaceControlFromRt(SurfaceControl sc) {
+            // Since we don't push the SurfaceParams to the RT we can release directly
+            sc.release();
+        }
     };
 
     @UiThread
