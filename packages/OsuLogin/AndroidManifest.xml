@@ -31,7 +31,8 @@
         <activity android:name="com.android.hotspot2.osulogin.OsuLoginActivity"
                   android:label="@string/action_bar_label"
                   android:theme="@style/AppTheme"
-                  android:configChanges="keyboardHidden|orientation|screenSize">
+                  android:configChanges="keyboardHidden|orientation|screenSize"
+                  android:exported="true">
             <intent-filter>
                 <action android:name="android.net.wifi.action.PASSPOINT_LAUNCH_OSU_VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
