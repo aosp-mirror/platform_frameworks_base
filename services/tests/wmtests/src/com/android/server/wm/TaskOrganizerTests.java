@@ -532,6 +532,9 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final Task task = createTaskInStack(stackController1, 0 /* userId */);
         final ITaskOrganizer organizer = registerMockOrganizer();
 
+        spyOn(task);
+        doReturn(true).when(task).isVisible();
+
         BLASTSyncEngine bse = new BLASTSyncEngine();
 
         BLASTSyncEngine.TransactionReadyListener transactionListener =
@@ -543,6 +546,35 @@ public class TaskOrganizerTests extends WindowTestsBase {
         // Since this task has no windows the sync is trivial and completes immediately.
         verify(transactionListener)
             .transactionReady(anyInt(), any());
+    }
+
+    @Test
+    public void testOverlappingBLASTCallback() throws RemoteException {
+        final ActivityStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+
+        spyOn(task);
+        doReturn(true).when(task).isVisible();
+        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
+        makeWindowVisible(w);
+
+        BLASTSyncEngine bse = new BLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener transactionListener =
+            mock(BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = bse.startSyncSet(transactionListener);
+        assertEquals(true, bse.addToSyncSet(id, task));
+        bse.setReady(id);
+
+        int id2 = bse.startSyncSet(transactionListener);
+        // We should be rejected from the second sync since we are already
+        // in one.
+        assertEquals(false, bse.addToSyncSet(id2, task));
+        w.finishDrawing(null);
+        assertEquals(true, bse.addToSyncSet(id2, task));
+        bse.setReady(id2);
     }
 
     @Test

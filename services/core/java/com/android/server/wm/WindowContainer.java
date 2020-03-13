@@ -2476,9 +2476,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
             int waitingId) {
-        boolean willSync = false;
-        if (!isVisible()) {
-            return willSync;
+        boolean willSync = true;
+
+        // If we are invisible, no need to sync, likewise if we are already engaged in a sync,
+        // we can't support overlapping syncs on a single container yet.
+        if (!isVisible() || mWaitingListener != null) {
+            return false;
         }
         mUsingBLASTSyncTransaction = true;
 
