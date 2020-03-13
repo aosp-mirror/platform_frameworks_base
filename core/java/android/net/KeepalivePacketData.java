@@ -22,7 +22,6 @@ import static android.net.InvalidPacketException.ERROR_INVALID_PORT;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.util.IpUtils;
-import android.os.Parcel;
 import android.util.Log;
 
 import java.net.InetAddress;
@@ -30,7 +29,6 @@ import java.net.InetAddress;
 /**
  * Represents the actual packets that are sent by the
  * {@link android.net.SocketKeepalive} API.
- *
  * @hide
  */
 @SystemApi
@@ -53,6 +51,9 @@ public class KeepalivePacketData {
 
     /** Packet data. A raw byte string of packet data, not including the link-layer header. */
     private final byte[] mPacket;
+
+    // Note: If you add new fields, please modify the parcelling code in the child classes.
+
 
     // This should only be constructed via static factory methods, such as
     // nattKeepalivePacket.
@@ -87,21 +88,4 @@ public class KeepalivePacketData {
         return mPacket.clone();
     }
 
-    /** @hide */
-    public void writeToParcel(Parcel out, int flags) {
-        out.writeString(srcAddress.getHostAddress());
-        out.writeString(dstAddress.getHostAddress());
-        out.writeInt(srcPort);
-        out.writeInt(dstPort);
-        out.writeByteArray(mPacket);
-    }
-
-    /** @hide */
-    protected KeepalivePacketData(Parcel in) {
-        srcAddress = NetworkUtils.numericToInetAddress(in.readString());
-        dstAddress = NetworkUtils.numericToInetAddress(in.readString());
-        srcPort = in.readInt();
-        dstPort = in.readInt();
-        mPacket = in.createByteArray();
-    }
 }
