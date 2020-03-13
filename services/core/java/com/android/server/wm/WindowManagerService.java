@@ -882,7 +882,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     FEATURE_FREEFORM_WINDOW_MANAGEMENT) || Settings.Global.getInt(
                     resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
 
-            mAtmService.mSupportsFreeformWindowManagement = freeformWindowManagement;
+            if (mAtmService.mSupportsFreeformWindowManagement != freeformWindowManagement) {
+                mAtmService.mSupportsFreeformWindowManagement = freeformWindowManagement;
+                synchronized (mGlobalLock) {
+                    // Notify the root window container that the display settings value may change.
+                    mRoot.onSettingsRetrieved();
+                }
+            }
         }
 
         void updateForceResizableTasks() {

@@ -24,6 +24,9 @@ import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIV
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -60,11 +63,35 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
     public void testFreeformWindow() {
         try (SettingsSession freeformWindowSession = new
                 SettingsSession(DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT)) {
-            final boolean freeformWindow = !freeformWindowSession.getSetting();
-            final Uri freeformWindowUri = freeformWindowSession.setSetting(freeformWindow);
+            final boolean curFreeformWindow = freeformWindowSession.getSetting();
+            final boolean newFreeformWindow = !curFreeformWindow;
+            final Uri freeformWindowUri = freeformWindowSession.setSetting(newFreeformWindow);
+            mWm.mAtmService.mSupportsFreeformWindowManagement = curFreeformWindow;
             mWm.mSettingsObserver.onChange(false, freeformWindowUri);
 
-            assertEquals(mWm.mAtmService.mSupportsFreeformWindowManagement, freeformWindow);
+            assertEquals(mWm.mAtmService.mSupportsFreeformWindowManagement, newFreeformWindow);
+        }
+    }
+
+    @Test
+    public void testFreeformWindow_valueChanged_updatesDisplaySettings() {
+        try (SettingsSession freeformWindowSession = new
+                SettingsSession(DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT)) {
+            final boolean curFreeformWindow = freeformWindowSession.getSetting();
+            final boolean newFreeformWindow = !curFreeformWindow;
+            final Uri freeformWindowUri = freeformWindowSession.setSetting(newFreeformWindow);
+            mWm.mAtmService.mSupportsFreeformWindowManagement = curFreeformWindow;
+            clearInvocations(mWm.mRoot);
+            mWm.mSettingsObserver.onChange(false, freeformWindowUri);
+
+            // Changed value should update display settings.
+            verify(mWm.mRoot).onSettingsRetrieved();
+
+            clearInvocations(mWm.mRoot);
+            mWm.mSettingsObserver.onChange(false, freeformWindowUri);
+
+            // Unchanged value should not update display settings.
+            verify(mWm.mRoot, never()).onSettingsRetrieved();
         }
     }
 
@@ -73,7 +100,8 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
         try (SettingsSession forceResizableSession = new
                 SettingsSession(DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES)) {
             final boolean forceResizableMode = !forceResizableSession.getSetting();
-            final Uri forceResizableUri =  forceResizableSession.setSetting(forceResizableMode);
+            final Uri forceResizableUri = forceResizableSession.setSetting(forceResizableMode);
+
             mWm.mSettingsObserver.onChange(false, forceResizableUri);
 
             assertEquals(mWm.mAtmService.mForceResizableActivities, forceResizableMode);
