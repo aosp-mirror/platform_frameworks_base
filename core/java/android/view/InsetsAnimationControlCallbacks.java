@@ -56,4 +56,10 @@ public interface InsetsAnimationControlCallbacks {
      *               apply.
      */
     void applySurfaceParams(SyncRtSurfaceTransactionApplier.SurfaceParams... params);
+
+    /**
+     * Post a message to release the Surface, guaranteed to happen after all
+     * previous calls to applySurfaceParams.
+     */
+    void releaseSurfaceControlFromRt(SurfaceControl sc);
 }
