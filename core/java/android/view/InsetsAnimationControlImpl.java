@@ -180,8 +180,17 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mAnimation.setAlpha(mPendingAlpha);
         if (mFinished) {
             mController.notifyFinished(this, mShownOnFinish);
+            releaseLeashes();
         }
         return mFinished;
+    }
+
+    private void releaseLeashes() {
+        for (int i = mControls.size() - 1; i >= 0; i--) {
+            final InsetsSourceControl c = mControls.valueAt(i);
+            if (c == null) continue;
+            c.release(mController::releaseSurfaceControlFromRt);
+        }
     }
 
     @Override
@@ -191,6 +200,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */);
         mFinished = true;
+
         mShownOnFinish = shown;
     }
 
@@ -207,6 +217,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         mCancelled = true;
         mListener.onCancelled();
+
+        releaseLeashes();
     }
 
     public boolean isCancelled() {
