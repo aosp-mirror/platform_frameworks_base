@@ -35,6 +35,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.R;
 import com.android.internal.widget.CachingIconView;
+import com.android.internal.widget.NotificationExpandButton;
 
 import java.util.ArrayList;
 
@@ -56,7 +57,7 @@ public class NotificationHeaderView extends ViewGroup {
     private OnClickListener mAppOpsListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private LinearLayout mTransferChip;
-    private ImageView mExpandButton;
+    private NotificationExpandButton mExpandButton;
     private CachingIconView mIcon;
     private View mProfileBadge;
     private View mOverlayIcon;
@@ -65,7 +66,6 @@ public class NotificationHeaderView extends ViewGroup {
     private View mAppOps;
     private View mAudiblyAlertedIcon;
     private int mIconColor;
-    private int mOriginalNotificationColor;
     private boolean mExpanded;
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
@@ -324,13 +324,8 @@ public class NotificationHeaderView extends ViewGroup {
         return mIconColor;
     }
 
-    @RemotableViewMethod
-    public void setOriginalNotificationColor(int color) {
-        mOriginalNotificationColor = color;
-    }
-
     public int getOriginalNotificationColor() {
-        return mOriginalNotificationColor;
+        return mExpandButton.getOriginalNotificationColor();
     }
 
     @RemotableViewMethod
@@ -371,7 +366,7 @@ public class NotificationHeaderView extends ViewGroup {
             contentDescriptionId = R.string.expand_button_content_description_collapsed;
         }
         mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
-        mExpandButton.setColorFilter(mOriginalNotificationColor);
+        mExpandButton.setColorFilter(getOriginalNotificationColor());
         mExpandButton.setContentDescription(mContext.getText(contentDescriptionId));
     }
 

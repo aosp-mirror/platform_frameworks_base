@@ -120,7 +120,7 @@ public class MessagingImageMessage extends ImageView implements MessagingMessage
         return true;
     }
 
-    static MessagingMessage createMessage(MessagingLayout layout,
+    static MessagingMessage createMessage(IMessagingLayout layout,
             Notification.MessagingStyle.Message m, ImageResolver resolver) {
         MessagingLinearLayout messagingLinearLayout = layout.getMessagingLinearLayout();
         MessagingImageMessage createdMessage = sInstancePool.acquire();
