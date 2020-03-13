@@ -546,7 +546,6 @@ java_library {
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
-        "//frameworks/opt/net/ike:__subpackages__",
     ],
 }
 
