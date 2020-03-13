@@ -49,8 +49,8 @@ import android.content.pm.Signature;
 import android.content.pm.parsing.component.ComponentParseUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedActivityUtils;
-import android.content.pm.parsing.component.ParsedFeature;
-import android.content.pm.parsing.component.ParsedFeatureUtils;
+import android.content.pm.parsing.component.ParsedAttribution;
+import android.content.pm.parsing.component.ParsedAttributionUtils;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedInstrumentationUtils;
 import android.content.pm.parsing.component.ParsedIntentInfo;
@@ -673,7 +673,7 @@ public class ParsingPackageUtils {
             );
         }
 
-        if (!ParsedFeature.isCombinationValid(pkg.getFeatures())) {
+        if (!ParsedAttribution.isCombinationValid(pkg.getAttributions())) {
             return input.error(
                     INSTALL_PARSE_FAILED_BAD_MANIFEST,
                     "Combination <feature> tags are not valid"
@@ -708,8 +708,9 @@ public class ParsingPackageUtils {
                 return parseOverlay(input, pkg, res, parser);
             case PackageParser.TAG_KEY_SETS:
                 return parseKeySets(input, pkg, res, parser);
-            case PackageParser.TAG_FEATURE:
-                return parseFeature(input, pkg, res, parser);
+            case "feature": // TODO moltmann: Remove
+            case PackageParser.TAG_ATTRIBUTION:
+                return parseAttribution(input, pkg, res, parser);
             case PackageParser.TAG_PERMISSION_GROUP:
                 return parsePermissionGroup(input, pkg, res, parser);
             case PackageParser.TAG_PERMISSION:
@@ -918,13 +919,15 @@ public class ParsingPackageUtils {
         return input.success(pkg);
     }
 
-    private static ParseResult<ParsingPackage> parseFeature(ParseInput input, ParsingPackage pkg,
-            Resources res, XmlResourceParser parser) throws IOException, XmlPullParserException {
-        ParseResult<ParsedFeature> result = ParsedFeatureUtils.parseFeature(res, parser, input);
+    private static ParseResult<ParsingPackage> parseAttribution(ParseInput input,
+            ParsingPackage pkg, Resources res, XmlResourceParser parser)
+            throws IOException, XmlPullParserException {
+        ParseResult<ParsedAttribution> result = ParsedAttributionUtils.parseAttribution(res,
+                parser, input);
         if (result.isError()) {
             return input.error(result);
         }
-        return input.success(pkg.addFeature(result.getResult()));
+        return input.success(pkg.addAttribution(result.getResult()));
     }
 
     private static ParseResult<ParsingPackage> parsePermissionGroup(ParseInput input,

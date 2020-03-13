@@ -7,7 +7,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
-import android.app.AppOpsManager.OpFeatureEntry;
+import android.app.AppOpsManager.AttributedOpEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -18,8 +18,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.LongSparseArray;
-import android.util.LongSparseLongArray;
-import android.util.Pair;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -164,6 +162,6 @@ public class RecentLocationAppsTest {
                 AppOpsManager.OP_FLAG_SELF), new AppOpsManager.NoteOpEvent(time, duration, null));
 
         return new OpEntry(op, AppOpsManager.MODE_ALLOWED, Collections.singletonMap(null,
-                new OpFeatureEntry(op, false, accessEvents, null)));
+                new AttributedOpEntry(op, false, accessEvents, null)));
     }
 }
