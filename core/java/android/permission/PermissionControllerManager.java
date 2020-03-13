@@ -46,6 +46,7 @@ import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Process;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -626,14 +627,26 @@ public final class PermissionControllerManager {
     }
 
     /**
-     * @see PermissionControllerService#onUpdateUserSensitive()
+     * @see PermissionControllerManager#updateUserSensitiveForApp
      * @hide
      */
     public void updateUserSensitive() {
+        updateUserSensitiveForApp(Process.INVALID_UID);
+    }
+
+    /**
+     * @see PermissionControllerService#onUpdateUserSensitiveForApp
+     * @hide
+     */
+    public void updateUserSensitiveForApp(int uid) {
         mRemoteService.postAsync(service -> {
             AndroidFuture<Void> future = new AndroidFuture<>();
-            service.updateUserSensitive(future);
+            service.updateUserSensitiveForApp(uid, future);
             return future;
+        }).whenComplete((res, err) -> {
+            if (err != null) {
+                Log.e(TAG, "Error updating user_sensitive flags for uid " + uid, err);
+            }
         });
     }
 
