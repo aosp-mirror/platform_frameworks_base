@@ -25,6 +25,7 @@ import android.util.SparseArray;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
+import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.extractor.DefaultExtractorInput;
 import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
@@ -431,6 +432,14 @@ public final class MediaParser {
         }
     }
 
+    /** Thrown when an error occurs while parsing a media stream. */
+    public static final class ParsingException extends IOException {
+
+        private ParsingException(ParserException cause) {
+            super(cause);
+        }
+    }
+
     // Public constants.
 
     /**
@@ -768,6 +777,8 @@ public final class MediaParser {
         int result = 0;
         try {
             result = mExtractor.read(mExtractorInput, mPositionHolder);
+        } catch (ParserException e) {
+            throw new ParsingException(e);
         } catch (InterruptedException e) {
             // TODO: Remove this exception replacement once we update the ExoPlayer version.
             throw new InterruptedIOException();
