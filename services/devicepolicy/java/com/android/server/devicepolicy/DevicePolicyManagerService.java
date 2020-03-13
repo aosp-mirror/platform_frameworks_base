@@ -86,6 +86,7 @@ import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
@@ -5874,6 +5875,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void enforceNetworkStackOrProfileOrDeviceOwner(ComponentName who) {
+        if (mContext.checkCallingPermission(PERMISSION_MAINLINE_NETWORK_STACK)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        enforceProfileOrDeviceOwner(who);
+    }
+
     private void enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(ComponentName who) {
         synchronized (getLockObject()) {
             getActiveAdminForCallerLocked(
@@ -6870,7 +6879,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isAlwaysOnVpnLockdownEnabled(ComponentName admin) throws SecurityException {
-        enforceProfileOrDeviceOwner(admin);
+        enforceNetworkStackOrProfileOrDeviceOwner(admin);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
