@@ -44,6 +44,8 @@ import android.widget.LinearLayout;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.Dependency;
@@ -98,6 +100,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final LinearLayout mMediaCarousel;
     private final ArrayList<QSMediaPlayer> mMediaPlayers = new ArrayList<>();
     private final NotificationMediaManager mNotificationMediaManager;
+    private final LocalBluetoothManager mLocalBluetoothManager;
     private final Executor mBackgroundExecutor;
     private LocalMediaManager mLocalMediaManager;
     private MediaDevice mDevice;
@@ -157,7 +160,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             NotificationMediaManager notificationMediaManager,
-            @Background Executor backgroundExecutor
+            @Background Executor backgroundExecutor,
+            @Nullable LocalBluetoothManager localBluetoothManager
     ) {
         super(context, attrs);
         mContext = context;
@@ -165,6 +169,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mDumpManager = dumpManager;
         mNotificationMediaManager = notificationMediaManager;
         mBackgroundExecutor = backgroundExecutor;
+        mLocalBluetoothManager = localBluetoothManager;
 
         setOrientation(VERTICAL);
 
@@ -286,7 +291,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
             // Set up listener for device changes
             // TODO: integrate with MediaTransferManager?
-            mLocalMediaManager = new LocalMediaManager(mContext, null, null);
+            InfoMediaManager imm =
+                    new InfoMediaManager(mContext, null, null, mLocalBluetoothManager);
+            mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager, imm, null);
             mLocalMediaManager.startScan();
             mDevice = mLocalMediaManager.getCurrentConnectedDevice();
             mLocalMediaManager.registerCallback(mDeviceCallback);
