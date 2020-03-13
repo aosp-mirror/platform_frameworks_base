@@ -19,10 +19,8 @@ package android.view.textclassifier;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.view.textclassifier.TextClassifier.EntityType;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
@@ -129,7 +127,6 @@ public final class SelectionEvent implements Parcelable {
     private String mWidgetType = TextClassifier.WIDGET_TYPE_UNKNOWN;
     private @InvocationMethod int mInvocationMethod;
     @Nullable private String mWidgetVersion;
-    private @UserIdInt int mUserId = UserHandle.USER_NULL;
     @Nullable private String mResultId;
     private long mEventTime;
     private long mDurationSinceSessionStart;
@@ -140,7 +137,7 @@ public final class SelectionEvent implements Parcelable {
     private int mEnd;
     private int mSmartStart;
     private int mSmartEnd;
-    private boolean mUseDefaultTextClassifier;
+    @Nullable private SystemTextClassifierMetadata mSystemTcMetadata;
 
     SelectionEvent(
             int start, int end,
@@ -161,6 +158,7 @@ public final class SelectionEvent implements Parcelable {
         mEventType = in.readInt();
         mEntityType = in.readString();
         mWidgetVersion = in.readInt() > 0 ? in.readString() : null;
+        // TODO: remove mPackageName once aiai does not need it
         mPackageName = in.readString();
         mWidgetType = in.readString();
         mInvocationMethod = in.readInt();
@@ -175,8 +173,7 @@ public final class SelectionEvent implements Parcelable {
         mEnd = in.readInt();
         mSmartStart = in.readInt();
         mSmartEnd = in.readInt();
-        mUserId = in.readInt();
-        mUseDefaultTextClassifier = in.readBoolean();
+        mSystemTcMetadata = in.readParcelable(null);
     }
 
     @Override
@@ -189,6 +186,7 @@ public final class SelectionEvent implements Parcelable {
         if (mWidgetVersion != null) {
             dest.writeString(mWidgetVersion);
         }
+        // TODO: remove mPackageName once aiai does not need it
         dest.writeString(mPackageName);
         dest.writeString(mWidgetType);
         dest.writeInt(mInvocationMethod);
@@ -205,8 +203,7 @@ public final class SelectionEvent implements Parcelable {
         dest.writeInt(mEnd);
         dest.writeInt(mSmartStart);
         dest.writeInt(mSmartEnd);
-        dest.writeInt(mUserId);
-        dest.writeBoolean(mUseDefaultTextClassifier);
+        dest.writeParcelable(mSystemTcMetadata, flags);
     }
 
     @Override
@@ -409,45 +406,26 @@ public final class SelectionEvent implements Parcelable {
      */
     @NonNull
     public String getPackageName() {
-        return mPackageName;
+        return mSystemTcMetadata != null ? mSystemTcMetadata.getCallingPackageName() : "";
     }
 
     /**
-     * Sets the id of this event's user.
-     * <p>
-     * Package-private for SystemTextClassifier's use.
-     */
-    void setUserId(@UserIdInt int userId) {
-        mUserId = userId;
-    }
-
-    /**
-     * Returns the id of this event's user.
-     * @hide
-     */
-    @UserIdInt
-    public int getUserId() {
-        return mUserId;
-    }
-
-    /**
-     * Sets whether to use the default text classifier to handle this request.
-     * This will be ignored if it is not the system text classifier to handle this request.
+     * Sets the information about the {@link SystemTextClassifier} that sent this request.
      *
      * @hide
      */
-    void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
-        mUseDefaultTextClassifier = useDefaultTextClassifier;
+    void setSystemTextClassifierMetadata(@Nullable SystemTextClassifierMetadata systemTcMetadata) {
+        mSystemTcMetadata = systemTcMetadata;
     }
 
     /**
-     * Returns whether to use the default text classifier to handle this request. This
-     * will be ignored if it is not the system text classifier to handle this request.
+     * Returns the information about the {@link SystemTextClassifier} that sent this request.
      *
      * @hide
      */
-    public boolean getUseDefaultTextClassifier() {
-        return mUseDefaultTextClassifier;
+    @Nullable
+    public SystemTextClassifierMetadata getSystemTextClassifierMetadata() {
+        return mSystemTcMetadata;
     }
 
     /**
@@ -476,7 +454,7 @@ public final class SelectionEvent implements Parcelable {
         mPackageName = context.getPackageName();
         mWidgetType = context.getWidgetType();
         mWidgetVersion = context.getWidgetVersion();
-        mUserId = context.getUserId();
+        mSystemTcMetadata = context.getSystemTextClassifierMetadata();
     }
 
     /**
@@ -663,10 +641,9 @@ public final class SelectionEvent implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
-                mWidgetVersion, mPackageName, mUserId, mWidgetType, mInvocationMethod, mResultId,
+                mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod, mResultId,
                 mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
-                mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd,
-                mUseDefaultTextClassifier);
+                mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd, mSystemTcMetadata);
     }
 
     @Override
@@ -685,7 +662,6 @@ public final class SelectionEvent implements Parcelable {
                 && Objects.equals(mEntityType, other.mEntityType)
                 && Objects.equals(mWidgetVersion, other.mWidgetVersion)
                 && Objects.equals(mPackageName, other.mPackageName)
-                && mUserId == other.mUserId
                 && Objects.equals(mWidgetType, other.mWidgetType)
                 && mInvocationMethod == other.mInvocationMethod
                 && Objects.equals(mResultId, other.mResultId)
@@ -698,7 +674,7 @@ public final class SelectionEvent implements Parcelable {
                 && mEnd == other.mEnd
                 && mSmartStart == other.mSmartStart
                 && mSmartEnd == other.mSmartEnd
-                && mUseDefaultTextClassifier == other.mUseDefaultTextClassifier;
+                && mSystemTcMetadata == other.mSystemTcMetadata;
     }
 
     @Override
@@ -706,15 +682,14 @@ public final class SelectionEvent implements Parcelable {
         return String.format(Locale.US,
                 "SelectionEvent {absoluteStart=%d, absoluteEnd=%d, eventType=%d, entityType=%s, "
                         + "widgetVersion=%s, packageName=%s, widgetType=%s, invocationMethod=%s, "
-                        + "userId=%d, resultId=%s, eventTime=%d, durationSinceSessionStart=%d, "
+                        + "resultId=%s, eventTime=%d, durationSinceSessionStart=%d, "
                         + "durationSincePreviousEvent=%d, eventIndex=%d,"
                         + "sessionId=%s, start=%d, end=%d, smartStart=%d, smartEnd=%d, "
-                        + "mUseDefaultTextClassifier=%b}",
+                        + "systemTcMetadata=%s}",
                 mAbsoluteStart, mAbsoluteEnd, mEventType, mEntityType,
                 mWidgetVersion, mPackageName, mWidgetType, mInvocationMethod,
-                mUserId, mResultId, mEventTime, mDurationSinceSessionStart,
-                mDurationSincePreviousEvent, mEventIndex,
-                mSessionId, mStart, mEnd, mSmartStart, mSmartEnd, mUseDefaultTextClassifier);
+                mResultId, mEventTime, mDurationSinceSessionStart, mDurationSincePreviousEvent,
+                mEventIndex, mSessionId, mStart, mEnd, mSmartStart, mSmartEnd, mSystemTcMetadata);
     }
 
     public static final @android.annotation.NonNull Creator<SelectionEvent> CREATOR = new Creator<SelectionEvent>() {
