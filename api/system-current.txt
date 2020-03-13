@@ -1900,7 +1900,6 @@ package android.content.pm {
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
-    field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
     field public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 1; // 0x1
     field public static final int RESTRICTION_HIDE_NOTIFICATIONS = 2; // 0x2
@@ -6790,7 +6789,6 @@ package android.provider {
     field public static final String AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE = "autofill_user_data_max_user_data_size";
     field public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH = "autofill_user_data_max_value_length";
     field public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
-    field public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
     field public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
     field public static final String HUSH_GESTURE_USED = "hush_gesture_used";
