@@ -228,6 +228,11 @@ class ControlsProviderLifecycleManager(
         invokeOrQueue({ load(subscriber) }, Message.Load(subscriber))
     }
 
+    fun cancelLoadTimeout() {
+        onLoadCanceller?.run()
+        onLoadCanceller = null
+    }
+
     /**
      * Request a subscription to the [Publisher] returned by [ControlsProviderService.publisherFor]
      *

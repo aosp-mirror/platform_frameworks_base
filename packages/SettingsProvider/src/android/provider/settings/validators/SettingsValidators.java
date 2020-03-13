@@ -207,4 +207,15 @@ public class SettingsValidators {
 
     static final Validator ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR =
             new AccessibilityShortcutTargetListValidator();
+
+    static final Validator NONE_NEGATIVE_LONG_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(String value) {
+            try {
+                return Long.parseLong(value) >= 0;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+    };
 }

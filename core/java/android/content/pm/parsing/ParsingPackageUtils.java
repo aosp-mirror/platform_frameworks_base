@@ -40,6 +40,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
@@ -1659,6 +1660,11 @@ public class ParsingPackageUtils {
             if (classLoaderName != null
                     && !ClassLoaderFactory.isValidClassLoaderName(classLoaderName)) {
                 return input.error("Invalid class loader name: " + classLoaderName);
+            }
+
+            if (sa.hasValue(R.styleable.AndroidManifestApplication_enableGwpAsan)) {
+                pkg.setGwpAsanEnabled(
+                        sa.getBoolean(R.styleable.AndroidManifestApplication_enableGwpAsan, false));
             }
         } finally {
             sa.recycle();

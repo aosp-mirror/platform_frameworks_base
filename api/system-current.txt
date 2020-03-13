@@ -5620,8 +5620,8 @@ package android.media.tv.tuner.frontend {
     method public int getConstellation();
     method public int getGuardInterval();
     method public int getHierarchy();
-    method public int getHpCodeRate();
-    method public int getLpCodeRate();
+    method public int getHighPriorityCodeRate();
+    method public int getLowPriorityCodeRate();
     method public int getPlpGroupId();
     method public int getPlpId();
     method public int getPlpMode();
@@ -5649,20 +5649,20 @@ package android.media.tv.tuner.frontend {
     field public static final int CODERATE_8_9 = 512; // 0x200
     field public static final int CODERATE_AUTO = 1; // 0x1
     field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int CONSTELLATION_16QAM = 4; // 0x4
+    field public static final int CONSTELLATION_256QAM = 16; // 0x10
+    field public static final int CONSTELLATION_64QAM = 8; // 0x8
     field public static final int CONSTELLATION_AUTO = 1; // 0x1
-    field public static final int CONSTELLATION_CONSTELLATION_16QAM = 4; // 0x4
-    field public static final int CONSTELLATION_CONSTELLATION_256QAM = 16; // 0x10
-    field public static final int CONSTELLATION_CONSTELLATION_64QAM = 8; // 0x8
-    field public static final int CONSTELLATION_CONSTELLATION_QPSK = 2; // 0x2
+    field public static final int CONSTELLATION_QPSK = 2; // 0x2
     field public static final int CONSTELLATION_UNDEFINED = 0; // 0x0
+    field public static final int GUARD_INTERVAL_19_128 = 64; // 0x40
+    field public static final int GUARD_INTERVAL_19_256 = 128; // 0x80
+    field public static final int GUARD_INTERVAL_1_128 = 32; // 0x20
+    field public static final int GUARD_INTERVAL_1_16 = 4; // 0x4
+    field public static final int GUARD_INTERVAL_1_32 = 2; // 0x2
+    field public static final int GUARD_INTERVAL_1_4 = 16; // 0x10
+    field public static final int GUARD_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_AUTO = 1; // 0x1
-    field public static final int GUARD_INTERVAL_INTERVAL_19_128 = 64; // 0x40
-    field public static final int GUARD_INTERVAL_INTERVAL_19_256 = 128; // 0x80
-    field public static final int GUARD_INTERVAL_INTERVAL_1_128 = 32; // 0x20
-    field public static final int GUARD_INTERVAL_INTERVAL_1_16 = 4; // 0x4
-    field public static final int GUARD_INTERVAL_INTERVAL_1_32 = 2; // 0x2
-    field public static final int GUARD_INTERVAL_INTERVAL_1_4 = 16; // 0x10
-    field public static final int GUARD_INTERVAL_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_UNDEFINED = 0; // 0x0
     field public static final int HIERARCHY_1_INDEPTH = 64; // 0x40
     field public static final int HIERARCHY_1_NATIVE = 4; // 0x4
@@ -5697,8 +5697,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHierarchy(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriority(boolean);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHpCodeRate(int);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLpCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriorityCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLowPriorityCodeRate(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setMiso(boolean);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpGroupId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpId(int);
@@ -7158,7 +7158,7 @@ package android.net.wifi {
     method @NonNull public java.util.List<android.net.MacAddress> getBlockedClientList();
     method public int getChannel();
     method public int getMaxNumberOfClients();
-    method public int getShutdownTimeoutMillis();
+    method public long getShutdownTimeoutMillis();
     method public boolean isAutoShutdownEnabled();
     method public boolean isClientControlByUserEnabled();
     method @Nullable public android.net.wifi.WifiConfiguration toWifiConfiguration();
@@ -7172,16 +7172,17 @@ package android.net.wifi {
     ctor public SoftApConfiguration.Builder();
     ctor public SoftApConfiguration.Builder(@NonNull android.net.wifi.SoftApConfiguration);
     method @NonNull public android.net.wifi.SoftApConfiguration build();
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder enableClientControlByUser(boolean);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAllowedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAutoShutdownEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBand(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBlockedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBssid(@Nullable android.net.MacAddress);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientList(@NonNull java.util.List<android.net.MacAddress>, @NonNull java.util.List<android.net.MacAddress>);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientControlByUserEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(@IntRange(from=0) int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) long);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
   }
 
@@ -8224,13 +8225,15 @@ package android.os {
     field public static final String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
     field public static final String ACTION_UPDATE_CONVERSATION_ACTIONS = "android.intent.action.UPDATE_CONVERSATION_ACTIONS";
     field public static final String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
-    field public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
+    field @RequiresPermission("android.permission.UPDATE_CONFIG") public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
     field public static final String ACTION_UPDATE_INTENT_FIREWALL = "android.intent.action.UPDATE_INTENT_FIREWALL";
     field public static final String ACTION_UPDATE_LANG_ID = "android.intent.action.UPDATE_LANG_ID";
     field public static final String ACTION_UPDATE_NETWORK_WATCHLIST = "android.intent.action.UPDATE_NETWORK_WATCHLIST";
     field public static final String ACTION_UPDATE_PINS = "android.intent.action.UPDATE_PINS";
     field public static final String ACTION_UPDATE_SMART_SELECTION = "android.intent.action.UPDATE_SMART_SELECTION";
     field public static final String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
+    field public static final String EXTRA_REQUIRED_HASH = "android.os.extra.REQUIRED_HASH";
+    field public static final String EXTRA_VERSION = "android.os.extra.VERSION";
   }
 
   public class Environment {
@@ -9066,18 +9069,6 @@ package android.printservice.recommendation {
 }
 
 package android.provider {
-
-  public class BlockedNumberContract {
-    field public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
-    field public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
-    field public static final String RES_BLOCK_STATUS = "block_status";
-    field public static final int STATUS_BLOCKED_IN_LIST = 1; // 0x1
-    field public static final int STATUS_BLOCKED_NOT_IN_CONTACTS = 5; // 0x5
-    field public static final int STATUS_BLOCKED_PAYPHONE = 4; // 0x4
-    field public static final int STATUS_BLOCKED_RESTRICTED = 2; // 0x2
-    field public static final int STATUS_BLOCKED_UNKNOWN_NUMBER = 3; // 0x3
-    field public static final int STATUS_NOT_BLOCKED = 0; // 0x0
-  }
 
   @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
     field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
@@ -10647,14 +10638,7 @@ package android.telecom {
   }
 
   public final class PhoneAccount implements android.os.Parcelable {
-    field public static final int CAPABILITY_EMERGENCY_CALLS_ONLY = 128; // 0x80
-    field public static final int CAPABILITY_EMERGENCY_PREFERRED = 8192; // 0x2000
-    field public static final int CAPABILITY_EMERGENCY_VIDEO_CALLING = 512; // 0x200
     field public static final int CAPABILITY_MULTI_USER = 32; // 0x20
-    field public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE = "android.telecom.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
-    field public static final String EXTRA_PLAY_CALL_RECORDING_TONE = "android.telecom.extra.PLAY_CALL_RECORDING_TONE";
-    field public static final String EXTRA_SORT_ORDER = "android.telecom.extra.SORT_ORDER";
-    field public static final String EXTRA_SUPPORTS_VIDEO_CALLING_FALLBACK = "android.telecom.extra.SUPPORTS_VIDEO_CALLING_FALLBACK";
   }
 
   public static class PhoneAccount.Builder {
@@ -10740,20 +10724,13 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
-    field public static final String ACTION_CURRENT_TTY_MODE_CHANGED = "android.telecom.action.CURRENT_TTY_MODE_CHANGED";
-    field public static final String ACTION_TTY_PREFERRED_MODE_CHANGED = "android.telecom.action.TTY_PREFERRED_MODE_CHANGED";
     field public static final int CALL_SOURCE_EMERGENCY_DIALPAD = 1; // 0x1
     field public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2; // 0x2
     field public static final int CALL_SOURCE_UNSPECIFIED = 0; // 0x0
     field public static final String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
-    field public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
-    field public static final String EXTRA_CALL_TECHNOLOGY_TYPE = "android.telecom.extra.CALL_TECHNOLOGY_TYPE";
     field public static final String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
-    field public static final String EXTRA_CURRENT_TTY_MODE = "android.telecom.extra.CURRENT_TTY_MODE";
     field public static final String EXTRA_IS_USER_INTENT_EMERGENCY_CALL = "android.telecom.extra.IS_USER_INTENT_EMERGENCY_CALL";
-    field public static final String EXTRA_TTY_PREFERRED_MODE = "android.telecom.extra.TTY_PREFERRED_MODE";
-    field public static final String EXTRA_UNKNOWN_CALL_HANDLE = "android.telecom.extra.UNKNOWN_CALL_HANDLE";
     field public static final int TTY_MODE_FULL = 1; // 0x1
     field public static final int TTY_MODE_HCO = 2; // 0x2
     field public static final int TTY_MODE_OFF = 0; // 0x0
@@ -11331,7 +11308,6 @@ package android.telephony {
   public class ServiceState implements android.os.Parcelable {
     method public void fillInNotifierBundle(@NonNull android.os.Bundle);
     method public int getDataNetworkType();
-    method public int getDataRegistrationState();
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
@@ -11601,7 +11577,7 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
-    method public int getEmergencyNumberDbVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getIsimImpu();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
@@ -11631,7 +11607,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataAllowedInVoiceCall();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionEnabled();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionAllowed();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();

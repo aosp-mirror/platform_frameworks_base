@@ -15,6 +15,16 @@ ArrayReturn: android.app.Notification.MessagingStyle.Message#getMessagesFromBund
     
 ArrayReturn: android.content.ContentProviderOperation#resolveExtrasBackReferences(android.content.ContentProviderResult[], int) parameter #0:
     
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#SphericalCorrections(double[][], double[][]) parameter #0:
+    Method parameter should be Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#SphericalCorrections(double[][], double[][]) parameter #1:
+    Method parameter should be Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#getCorrectionUncertaintiesArray():
+    Method should return Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.location.GnssAntennaInfo.SphericalCorrections#getCorrectionsArray():
+    Method should return Collection<> (or subclass) instead of raw array; was `double[][]`
+ArrayReturn: android.service.autofill.FillResponse.Builder#setAuthentication(android.view.autofill.AutofillId[], android.content.IntentSender, android.widget.RemoteViews, android.service.autofill.InlinePresentation) parameter #0:
+    Method parameter should be Collection<AutofillId> (or subclass) instead of raw array; was `android.view.autofill.AutofillId[]`
 
 
 BroadcastBehavior: android.app.AlarmManager#ACTION_NEXT_ALARM_CLOCK_CHANGED:
@@ -453,8 +463,12 @@ DeprecationMismatch: javax.microedition.khronos.egl.EGL10#eglCreatePixmapSurface
     
 
 
+ExecutorRegistration: android.media.MediaRouter2#setOnGetControllerHintsListener(android.media.MediaRouter2.OnGetControllerHintsListener):
+    Registration methods should have overload that accepts delivery Executor: `setOnGetControllerHintsListener`
+
+
 GenericException: android.content.res.loader.ResourcesProvider#finalize():
-    Methods must not throw generic exceptions (`java.lang.Throwable`)
+    
 
 
 HiddenSuperclass: android.content.res.ColorStateList:
@@ -499,6 +513,30 @@ HiddenSuperclass: android.util.StatsLog:
     
 
 
+IntentBuilderName: android.net.VpnManager#provisionVpnProfile(android.net.PlatformVpnProfile):
+    Methods creating an Intent should be named `create<Foo>Intent()`, was `provisionVpnProfile`
+
+
+KotlinOperator: android.media.AudioMetadata.Map#set(android.media.AudioMetadata.Key<T>, T):
+    Method can be invoked with an indexing operator from Kotlin: `set` (this is usually desirable; just make sure it makes sense for this type of object)
+KotlinOperator: android.media.AudioMetadata.ReadMap#get(android.media.AudioMetadata.Key<T>):
+    Method can be invoked with an indexing operator from Kotlin: `get` (this is usually desirable; just make sure it makes sense for this type of object)
+
+
+MethodNameUnits: android.media.MediaParser.SeekMap#getDurationMicros():
+    Returned time values are strongly encouraged to be in milliseconds unless you need the extra precision, was `getDurationMicros`
+
+
+MinMaxConstant: android.telephony.DataFailCause#MAX_ACCESS_PROBE:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_ACCESS_PROBE
+MinMaxConstant: android.telephony.DataFailCause#MAX_IPV4_CONNECTIONS:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_IPV4_CONNECTIONS
+MinMaxConstant: android.telephony.DataFailCause#MAX_IPV6_CONNECTIONS:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_IPV6_CONNECTIONS
+MinMaxConstant: android.telephony.DataFailCause#MAX_PPP_INACTIVITY_TIMER_EXPIRED:
+    If min/max could change in future, make them dynamic methods: android.telephony.DataFailCause#MAX_PPP_INACTIVITY_TIMER_EXPIRED
+
+
 MissingNullability: android.app.AsyncNotedAppOp#equals(Object) parameter #0:
     
 MissingNullability: android.app.AsyncNotedAppOp#writeToParcel(android.os.Parcel, int) parameter #0:
@@ -506,11 +544,11 @@ MissingNullability: android.app.AsyncNotedAppOp#writeToParcel(android.os.Parcel,
 MissingNullability: android.app.SyncNotedAppOp#equals(Object) parameter #0:
     
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#CHORASMIAN:
-    Missing nullability on field `CHORASMIAN` in class `class android.icu.lang.UCharacter.UnicodeBlock`
+    
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G:
-    Missing nullability on field `CJK_UNIFIED_IDEOGRAPHS_EXTENSION_G` in class `class android.icu.lang.UCharacter.UnicodeBlock`
+    
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#DIVES_AKURU:
-    Missing nullability on field `DIVES_AKURU` in class `class android.icu.lang.UCharacter.UnicodeBlock`
+    
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#EGYPTIAN_HIEROGLYPH_FORMAT_CONTROLS:
     
 MissingNullability: android.icu.lang.UCharacter.UnicodeBlock#ELYMAIC:
@@ -556,14 +594,39 @@ MissingNullability: android.icu.util.VersionInfo#UNICODE_12_0:
 MissingNullability: android.icu.util.VersionInfo#UNICODE_12_1:
     
 MissingNullability: android.icu.util.VersionInfo#UNICODE_13_0:
-    Missing nullability on field `UNICODE_13_0` in class `class android.icu.util.VersionInfo`
+    
 MissingNullability: android.media.MediaMetadataRetriever#getFrameAtTime(long, int, android.media.MediaMetadataRetriever.BitmapParams):
     
 MissingNullability: android.media.MediaMetadataRetriever#getScaledFrameAtTime(long, int, int, int, android.media.MediaMetadataRetriever.BitmapParams):
-
     
 MissingNullability: java.time.chrono.JapaneseEra#REIWA:
-    Missing nullability on field `REIWA` in class `class java.time.chrono.JapaneseEra`
+    
+
+
+NotCloseable: android.media.MediaCodec.GraphicBlock:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.media.MediaCodec.GraphicBlock
+NotCloseable: android.media.MediaCodec.LinearBlock:
+    Classes that release resources (finalize()) should implement AutoClosable and CloseGuard: class android.media.MediaCodec.LinearBlock
+NotCloseable: android.media.MediaParser:
+    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.media.MediaParser
+NotCloseable: android.media.MediaRouter2.RoutingController:
+    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.media.MediaRouter2.RoutingController
+NotCloseable: android.util.CloseGuard:
+    Classes that release resources (close()) should implement AutoClosable and CloseGuard: class android.util.CloseGuard
+NotCloseable: android.view.SurfaceControlViewHost:
+    Classes that release resources (release()) should implement AutoClosable and CloseGuard: class android.view.SurfaceControlViewHost
+
+
+OnNameExpected: android.app.admin.DevicePolicyKeyguardService#dismiss():
+    If implemented by developer, should follow the on<Something> style; otherwise consider marking final
+OnNameExpected: android.service.controls.ControlsProviderService#createPublisherFor(java.util.List<java.lang.String>):
+    Methods implemented by developers should follow the on<Something> style, was `createPublisherFor`
+OnNameExpected: android.service.controls.ControlsProviderService#createPublisherForAllAvailable():
+    Methods implemented by developers should follow the on<Something> style, was `createPublisherForAllAvailable`
+OnNameExpected: android.service.controls.ControlsProviderService#createPublisherForSuggested():
+    If implemented by developer, should follow the on<Something> style; otherwise consider marking final
+OnNameExpected: android.service.controls.ControlsProviderService#performControlAction(String, android.service.controls.actions.ControlAction, java.util.function.Consumer<java.lang.Integer>):
+    Methods implemented by developers should follow the on<Something> style, was `performControlAction`
 
 
 RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
@@ -1189,11 +1252,13 @@ SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(jav
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
     
 SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
+    
 
 
-
+StreamFiles: android.content.res.loader.DirectoryAssetsProvider#DirectoryAssetsProvider(java.io.File):
+    Methods accepting `File` should also accept `FileDescriptor` or streams: constructor android.content.res.loader.DirectoryAssetsProvider(java.io.File)
 StreamFiles: android.content.res.loader.DirectoryResourceLoader#DirectoryResourceLoader(java.io.File):
-    Methods accepting `File` should also accept `FileDescriptor` or streams: constructor android.content.res.loader.DirectoryResourceLoader(java.io.File)
+    
 
 
 Todo: android.hardware.camera2.params.StreamConfigurationMap:

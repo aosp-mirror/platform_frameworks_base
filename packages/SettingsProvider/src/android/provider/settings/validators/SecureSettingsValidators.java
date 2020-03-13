@@ -28,6 +28,7 @@ import static android.provider.settings.validators.SettingsValidators.LOCALE_VAL
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.TILE_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.TTS_LIST_VALIDATOR;
 
@@ -235,7 +236,9 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.AWARE_TAP_PAUSE_TOUCH_COUNT, NON_NEGATIVE_INTEGER_VALIDATOR);
         VALIDATORS.put(Secure.ODI_CAPTIONS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DARK_MODE_DIALOG_SEEN, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Secure.UI_NIGHT_MODE, new InclusiveIntegerRangeValidator(0, 2));
+        VALIDATORS.put(Secure.UI_NIGHT_MODE, NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.DARK_THEME_CUSTOM_START_TIME, NONE_NEGATIVE_LONG_VALIDATOR);
+        VALIDATORS.put(Secure.DARK_THEME_CUSTOM_END_TIME, NONE_NEGATIVE_LONG_VALIDATOR);
         VALIDATORS.put(Secure.GLOBAL_ACTIONS_PANEL_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.AWARE_LOCK_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DISPLAY_DENSITY_FORCED, NON_NEGATIVE_INTEGER_VALIDATOR);
