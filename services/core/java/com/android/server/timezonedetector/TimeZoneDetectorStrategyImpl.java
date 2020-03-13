@@ -276,18 +276,6 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
             return;
         }
 
-        // Special case handling for uninitialized devices. This should only happen once.
-        String newZoneId = bestTelephonySuggestion.suggestion.getZoneId();
-        if (newZoneId != null && !mCallback.isDeviceTimeZoneInitialized()) {
-            String cause = "Device has no time zone set. Attempting to set the device to the best"
-                    + " available suggestion."
-                    + " bestTelephonySuggestion=" + bestTelephonySuggestion
-                    + ", detectionReason=" + detectionReason;
-            Slog.i(LOG_TAG, cause);
-            setDeviceTimeZoneIfRequired(ORIGIN_TELEPHONY, newZoneId, cause);
-            return;
-        }
-
         boolean suggestionGoodEnough =
                 bestTelephonySuggestion.score >= TELEPHONY_SCORE_USAGE_THRESHOLD;
         if (!suggestionGoodEnough) {
@@ -301,6 +289,7 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
 
         // Paranoia: Every suggestion above the SCORE_USAGE_THRESHOLD should have a non-null time
         // zone ID.
+        String newZoneId = bestTelephonySuggestion.suggestion.getZoneId();
         if (newZoneId == null) {
             Slog.w(LOG_TAG, "Empty zone suggestion scored higher than expected. This is an error:"
                     + " bestTelephonySuggestion=" + bestTelephonySuggestion

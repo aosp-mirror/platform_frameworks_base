@@ -128,43 +128,69 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     @Test
-    public void testFirstPlausibleTelephonySuggestionAcceptedWhenTimeZoneUninitialized() {
+    public void testTelephonySuggestionsWhenTimeZoneUninitialized() {
+        assertTrue(TELEPHONY_SCORE_LOW < TELEPHONY_SCORE_USAGE_THRESHOLD);
+        assertTrue(TELEPHONY_SCORE_HIGH >= TELEPHONY_SCORE_USAGE_THRESHOLD);
         SuggestionTestCase testCase = newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
                 QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS, TELEPHONY_SCORE_LOW);
-        TelephonyTimeZoneSuggestion lowQualitySuggestion =
-                testCase.createSuggestion(SLOT_INDEX1, "America/New_York");
+        SuggestionTestCase testCase2 = newTestCase(MATCH_TYPE_NETWORK_COUNTRY_ONLY,
+                QUALITY_SINGLE_ZONE, TELEPHONY_SCORE_HIGH);
 
-        // The device time zone setting is left uninitialized.
         Script script = new Script()
                 .initializeAutoTimeZoneDetection(true);
 
-        // The very first suggestion will be taken.
-        script.suggestTelephonyTimeZone(lowQualitySuggestion)
-                .verifyTimeZoneSetAndReset(lowQualitySuggestion);
+        // A low quality suggestions will not be taken: The device time zone setting is left
+        // uninitialized.
+        {
+            TelephonyTimeZoneSuggestion lowQualitySuggestion =
+                    testCase.createSuggestion(SLOT_INDEX1, "America/New_York");
 
-        // Assert internal service state.
-        QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
-                new QualifiedTelephonyTimeZoneSuggestion(
-                        lowQualitySuggestion, testCase.expectedScore);
-        assertEquals(expectedScoredSuggestion,
-                mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-        assertEquals(expectedScoredSuggestion,
-                mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
+            script.suggestTelephonyTimeZone(lowQualitySuggestion)
+                    .verifyTimeZoneNotSet();
 
-        // Another low quality suggestion will be ignored now that the setting is initialized.
-        TelephonyTimeZoneSuggestion lowQualitySuggestion2 =
-                testCase.createSuggestion(SLOT_INDEX1, "America/Los_Angeles");
-        script.suggestTelephonyTimeZone(lowQualitySuggestion2)
-                .verifyTimeZoneNotSet();
+            // Assert internal service state.
+            QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
+                    new QualifiedTelephonyTimeZoneSuggestion(
+                            lowQualitySuggestion, testCase.expectedScore);
+            assertEquals(expectedScoredSuggestion,
+                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            assertEquals(expectedScoredSuggestion,
+                    mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
+        }
 
-        // Assert internal service state.
-        QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion2 =
-                new QualifiedTelephonyTimeZoneSuggestion(
-                        lowQualitySuggestion2, testCase.expectedScore);
-        assertEquals(expectedScoredSuggestion2,
-                mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
-        assertEquals(expectedScoredSuggestion2,
-                mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
+        // A good quality suggestion will be used.
+        {
+            TelephonyTimeZoneSuggestion goodQualitySuggestion =
+                    testCase2.createSuggestion(SLOT_INDEX1, "Europe/London");
+            script.suggestTelephonyTimeZone(goodQualitySuggestion)
+                    .verifyTimeZoneSetAndReset(goodQualitySuggestion);
+
+            // Assert internal service state.
+            QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
+                    new QualifiedTelephonyTimeZoneSuggestion(
+                            goodQualitySuggestion, testCase2.expectedScore);
+            assertEquals(expectedScoredSuggestion,
+                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            assertEquals(expectedScoredSuggestion,
+                    mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
+        }
+
+        // A low quality suggestion will be accepted, but not used to set the device time zone.
+        {
+            TelephonyTimeZoneSuggestion lowQualitySuggestion2 =
+                    testCase.createSuggestion(SLOT_INDEX1, "America/Los_Angeles");
+            script.suggestTelephonyTimeZone(lowQualitySuggestion2)
+                    .verifyTimeZoneNotSet();
+
+            // Assert internal service state.
+            QualifiedTelephonyTimeZoneSuggestion expectedScoredSuggestion =
+                    new QualifiedTelephonyTimeZoneSuggestion(
+                            lowQualitySuggestion2, testCase.expectedScore);
+            assertEquals(expectedScoredSuggestion,
+                    mTimeZoneDetectorStrategy.getLatestTelephonySuggestion(SLOT_INDEX1));
+            assertEquals(expectedScoredSuggestion,
+                    mTimeZoneDetectorStrategy.findBestTelephonySuggestionForTests());
+        }
     }
 
     /**
