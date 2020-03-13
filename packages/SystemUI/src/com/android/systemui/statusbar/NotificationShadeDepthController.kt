@@ -58,6 +58,7 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     lateinit var root: View
+    private var blurRoot: View? = null
     private var keyguardAnimator: Animator? = null
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
@@ -72,6 +73,7 @@ class NotificationShadeDepthController @Inject constructor(
             return shadeBlurRadius.toFloat()
         }
     })
+    private val zoomInterpolator = Interpolators.ACCELERATE_DECELERATE
     private var shadeBlurRadius = 0
         set(value) {
             if (field == value) return
@@ -84,6 +86,7 @@ class NotificationShadeDepthController @Inject constructor(
             field = value
             scheduleUpdate()
         }
+    private var globalDialogVisibility = 0f
 
     /**
      * Callback that updates the window blur value and is called only once per frame.
@@ -91,9 +94,12 @@ class NotificationShadeDepthController @Inject constructor(
     private val updateBlurCallback = Choreographer.FrameCallback {
         updateScheduled = false
 
-        val blur = max(shadeBlurRadius, wakeAndUnlockBlurRadius)
-        blurUtils.applyBlur(root.viewRootImpl, blur)
-        wallpaperManager.setWallpaperZoomOut(root.windowToken, blurUtils.ratioOfBlurRadius(blur))
+        val blur = max(shadeBlurRadius,
+                max(wakeAndUnlockBlurRadius, blurUtils.blurRadiusOfRatio(globalDialogVisibility)))
+        blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
+        val rawZoom = max(blurUtils.ratioOfBlurRadius(blur), globalDialogVisibility)
+        wallpaperManager.setWallpaperZoomOut(root.windowToken,
+                zoomInterpolator.getInterpolation(rawZoom))
     }
 
     /**
@@ -162,12 +168,21 @@ class NotificationShadeDepthController @Inject constructor(
         shadeSpring.animateToFinalPosition(newBlur.toFloat())
     }
 
-    private fun scheduleUpdate() {
+    private fun scheduleUpdate(viewToBlur: View? = null) {
         if (updateScheduled) {
             return
         }
         updateScheduled = true
+        blurRoot = viewToBlur
         choreographer.postFrameCallback(updateBlurCallback)
+    }
+
+    fun updateGlobalDialogVisibility(visibility: Float, dialogView: View) {
+        if (visibility == globalDialogVisibility) {
+            return
+        }
+        globalDialogVisibility = visibility
+        scheduleUpdate(dialogView)
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
