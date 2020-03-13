@@ -2449,7 +2449,8 @@ public final class DisplayManagerService extends SystemService {
                     }
                 };
                 mDisplayPowerController = new DisplayPowerController(
-                        mContext, callbacks, handler, sensorManager, blanker);
+                        mContext, callbacks, handler, sensorManager, blanker,
+                        mDisplayDevices.get(Display.DEFAULT_DISPLAY));
                 mSensorManager = sensorManager;
             }
 

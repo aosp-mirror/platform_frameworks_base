@@ -200,7 +200,7 @@ class AutomaticBrightnessController {
     // Context-sensitive brightness configurations require keeping track of the foreground app's
     // package name and category, which is done by registering a TaskStackListener to call back to
     // us onTaskStackChanged, and then using the ActivityTaskManager to get the foreground app's
-    // package namd and PackageManager to get its category (so might as well cache them).
+    // package name and PackageManager to get its category (so might as well cache them).
     private String mForegroundAppPackageName;
     private String mPendingForegroundAppPackageName;
     private @ApplicationInfo.Category int mForegroundAppCategory;
@@ -210,6 +210,7 @@ class AutomaticBrightnessController {
     private PackageManager mPackageManager;
     private Context mContext;
 
+    private DisplayDeviceConfig mDisplayDeviceConfig;
     private final Injector mInjector;
 
     AutomaticBrightnessController(Callbacks callbacks, Looper looper,
@@ -218,12 +219,14 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, Context context) {
+            HysteresisLevels screenBrightnessThresholds, Context context, DisplayDeviceConfig
+            displayDeviceConfig) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor, mapper,
                 lightSensorWarmUpTime, brightnessMin, brightnessMax, dozeScaleFactor,
                 lightSensorRate, initialLightSensorRate, brighteningLightDebounceConfig,
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
-                ambientBrightnessThresholds, screenBrightnessThresholds, context);
+                ambientBrightnessThresholds, screenBrightnessThresholds, context,
+                displayDeviceConfig);
     }
 
     @VisibleForTesting
@@ -233,7 +236,8 @@ class AutomaticBrightnessController {
             float dozeScaleFactor, int lightSensorRate, int initialLightSensorRate,
             long brighteningLightDebounceConfig, long darkeningLightDebounceConfig,
             boolean resetAmbientLuxAfterWarmUpConfig, HysteresisLevels ambientBrightnessThresholds,
-            HysteresisLevels screenBrightnessThresholds, Context context) {
+            HysteresisLevels screenBrightnessThresholds, Context context, DisplayDeviceConfig
+            displayDeviceConfig) {
         mInjector = injector;
         mContext = context;
         mCallbacks = callbacks;
@@ -260,7 +264,7 @@ class AutomaticBrightnessController {
         mScreenBrightnessThresholds = screenBrightnessThresholds;
         mShortTermModelValid = true;
         mShortTermModelAnchor = -1;
-
+        mDisplayDeviceConfig = displayDeviceConfig;
         mHandler = new AutomaticBrightnessHandler(looper);
         mAmbientLightRingBuffer =
             new AmbientLightRingBuffer(mNormalLightSensorRate, mAmbientLightHorizon);

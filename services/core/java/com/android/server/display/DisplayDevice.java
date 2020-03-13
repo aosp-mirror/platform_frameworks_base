@@ -36,6 +36,7 @@ abstract class DisplayDevice {
     private final DisplayAdapter mDisplayAdapter;
     private final IBinder mDisplayToken;
     private final String mUniqueId;
+    private DisplayDeviceConfig mDisplayDeviceConfig;
 
     // The display device does not manage these properties itself, they are set by
     // the display manager service.  The display device shouldn't really be looking at these.
@@ -65,6 +66,16 @@ abstract class DisplayDevice {
      */
     public final DisplayAdapter getAdapterLocked() {
         return mDisplayAdapter;
+    }
+
+    /*
+     * Gets the DisplayDeviceConfig for this DisplayDevice.
+     * Returns null for this device but is overridden in LocalDisplayDevice.
+     *
+     * @return The DisplayDeviceConfig.
+     */
+    public DisplayDeviceConfig getDisplayDeviceConfig() {
+        return mDisplayDeviceConfig;
     }
 
     /**
