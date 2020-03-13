@@ -242,8 +242,8 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testAppOpsOnClick() {
-        ExpandableNotificationRow.OnAppOpsClickListener l = mock(
-                ExpandableNotificationRow.OnAppOpsClickListener.class);
+        ExpandableNotificationRow.CoordinateOnClickListener l = mock(
+                ExpandableNotificationRow.CoordinateOnClickListener.class);
         View view = mock(View.class);
 
         mGroupRow.setAppOpsOnClickListener(l);

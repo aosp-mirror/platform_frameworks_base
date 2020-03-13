@@ -110,6 +110,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                 }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
         addAppOpsOnClickListener(row);
+        addFeedbackOnClickListener(row);
     }
 
     protected void resolveHeaderViews() {
@@ -161,6 +162,16 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         if (mMicIcon != null) {
             mMicIcon.setVisibility(appOps.contains(AppOpsManager.OP_RECORD_AUDIO)
                     ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void addFeedbackOnClickListener(ExpandableNotificationRow row) {
+        View.OnClickListener listener = row.getFeedbackOnClickListener();
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setFeedbackOnClickListener(listener);
+        }
+        if (mFeedbackIcon != null) {
+            mFeedbackIcon.setOnClickListener(listener);
         }
     }
 

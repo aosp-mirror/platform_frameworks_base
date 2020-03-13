@@ -54,6 +54,7 @@ import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -266,6 +267,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             } else if (gutsView instanceof PartialConversationInfo) {
                 initializePartialConversationNotificationInfo(row,
                         (PartialConversationInfo) gutsView);
+            } else if (gutsView instanceof FeedbackInfo) {
+                initializeFeedbackInfo(row, (FeedbackInfo) gutsView);
             }
             return true;
         } catch (Exception e) {
@@ -317,6 +320,25 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         };
         if (!row.getEntry().mActiveAppOps.isEmpty()) {
             appOpsInfoView.bindGuts(pmUser, onSettingsClick, sbn, row.getEntry().mActiveAppOps);
+        }
+    }
+
+    /**
+     * Sets up the {@link FeedbackInfo} inside the notification row's guts.
+     *
+     * @param row view to set up the guts for
+     * @param feedbackInfo view to set up/bind within {@code row}
+     */
+    private void initializeFeedbackInfo(
+            final ExpandableNotificationRow row,
+            FeedbackInfo feedbackInfo) {
+        StatusBarNotification sbn = row.getEntry().getSbn();
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
+                userHandle.getIdentifier());
+
+        if (NotificationViewHierarchyManager.showFeedback(row.getEntry())) {
+            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry());
         }
     }
 

@@ -77,6 +77,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private FrameLayout mMenuContainer;
     private NotificationMenuItem mInfoItem;
     private MenuItem mAppOpsItem;
+    private MenuItem mFeedbackItem;
     private MenuItem mSnoozeItem;
     private ArrayList<MenuItem> mLeftMenuItems;
     private ArrayList<MenuItem> mRightMenuItems;
@@ -140,6 +141,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public MenuItem getAppOpsMenuItem(Context context) {
         return mAppOpsItem;
+    }
+
+    @Override
+    public MenuItem getFeedbackMenuItem(Context context) {
+        return mFeedbackItem;
     }
 
     @Override
@@ -265,6 +271,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mSnoozeItem = createSnoozeItem(mContext);
         }
         mAppOpsItem = createAppOpsItem(mContext);
+        mFeedbackItem = createFeedbackItem(mContext);
         NotificationEntry entry = mParent.getEntry();
         int personNotifType = mPeopleNotificationIdentifier
                 .getPeopleNotificationType(entry.getSbn(), entry.getRanking());
@@ -281,6 +288,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         }
         mRightMenuItems.add(mInfoItem);
         mRightMenuItems.add(mAppOpsItem);
+        mRightMenuItems.add(mFeedbackItem);
         mLeftMenuItems.addAll(mRightMenuItems);
 
         populateMenuViews();
@@ -692,6 +700,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         AppOpsInfo appOpsContent = (AppOpsInfo) LayoutInflater.from(context).inflate(
                 R.layout.app_ops_info, null, false);
         MenuItem info = new NotificationMenuItem(context, null, appOpsContent,
+                -1 /*don't show in slow swipe menu */);
+        return info;
+    }
+
+    static MenuItem createFeedbackItem(Context context) {
+        FeedbackInfo feedbackContent = (FeedbackInfo) LayoutInflater.from(context).inflate(
+                R.layout.feedback_info, null, false);
+        MenuItem info = new NotificationMenuItem(context, null, feedbackContent,
                 -1 /*don't show in slow swipe menu */);
         return info;
     }

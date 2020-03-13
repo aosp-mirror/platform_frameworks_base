@@ -293,4 +293,9 @@ public class NotificationEntryBuilder {
         mRankingBuilder.setShortcutInfo(shortcutInfo);
         return this;
     }
+
+    public NotificationEntryBuilder setRankingAdjustment(int rankingAdjustment) {
+        mRankingBuilder.setRankingAdjustment(rankingAdjustment);
+        return this;
+    }
 }
