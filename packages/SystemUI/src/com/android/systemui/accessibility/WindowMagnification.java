@@ -126,7 +126,8 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
     void enableWindowMagnification(int displayId, float scale, float centerX, float centerY) {
         //TODO: b/144080869 support multi-display.
         if (mWindowMagnificationController == null) {
-            mWindowMagnificationController = new WindowMagnificationController(mContext, null,
+            mWindowMagnificationController = new WindowMagnificationController(mContext,
+                    mHandler, null,
                     this);
         }
         mWindowMagnificationController.enableWindowMagnification(scale, centerX, centerY);

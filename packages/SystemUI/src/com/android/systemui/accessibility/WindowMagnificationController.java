@@ -30,7 +30,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
@@ -59,6 +59,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private static final String TAG = "WindowMagnificationController";
     private final Context mContext;
     private final Resources mResources;
+    private final Handler mHandler;
     private final Point mDisplaySize = new Point();
     private final int mDisplayId;
     @Surface.Rotation
@@ -83,8 +84,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private View mBottomDrag;
 
     private final PointF mLastDrag = new PointF();
-    @NonNull private final WindowMagnifierCallback mWindowMagnifierCallback;
+    @NonNull
+    private final WindowMagnifierCallback mWindowMagnifierCallback;
 
+    private final View.OnLayoutChangeListener mMirrorViewLayoutChangeListener;
+    private final View.OnLayoutChangeListener mMirrorSurfaceViewLayoutChangeListener;
+    private final Runnable mMirrorViewRunnable;
     private View mMirrorView;
     private SurfaceView mMirrorSurfaceView;
     private int mMirrorSurfaceMargin;
@@ -96,9 +101,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     @Nullable
     private MirrorWindowControl mMirrorWindowControl;
 
-    WindowMagnificationController(Context context, MirrorWindowControl mirrorWindowControl,
+    WindowMagnificationController(Context context,
+            @NonNull Handler handler,
+            MirrorWindowControl mirrorWindowControl,
             @NonNull WindowMagnifierCallback callback) {
         mContext = context;
+        mHandler = handler;
         mWindowMagnifierCallback = callback;
         Display display = mContext.getDisplay();
         display.getRealSize(mDisplaySize);
@@ -116,6 +124,21 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mMirrorWindowControl.setWindowDelegate(this);
         }
         setInitialStartBounds();
+
+        // Initialize listeners.
+        mMirrorViewRunnable = () -> {
+            if (mMirrorView != null) {
+                mMirrorView.getBoundsOnScreen(mMirrorViewBounds);
+                mWindowMagnifierCallback.onWindowMagnifierBoundsChanged(
+                        mDisplayId, mMirrorViewBounds);
+            }
+        };
+        mMirrorViewLayoutChangeListener =
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) ->
+                        mHandler.post(mMirrorViewRunnable);
+        mMirrorSurfaceViewLayoutChangeListener =
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom)
+                        -> applyTapExcludeRegion();
     }
 
     private void updateDimensions() {
@@ -136,7 +159,13 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
             mMirrorSurface = null;
         }
 
+        if (mMirrorSurfaceView != null) {
+            mMirrorSurfaceView.removeOnLayoutChangeListener(mMirrorSurfaceViewLayoutChangeListener);
+        }
+
         if (mMirrorView != null) {
+            mHandler.removeCallbacks(mMirrorViewRunnable);
+            mMirrorView.removeOnLayoutChangeListener(mMirrorViewLayoutChangeListener);
             mWm.removeView(mMirrorView);
             mMirrorView = null;
         }
@@ -224,12 +253,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         mMirrorSurfaceView = mMirrorView.findViewById(R.id.surface_view);
 
         // Allow taps to go through to the mirror SurfaceView below.
-        mMirrorSurfaceView.addOnLayoutChangeListener(
-                (View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
-                        int oldRight, int oldBottom)
-                        -> {
-                    applyTapExcludeRegion();
-                });
+        mMirrorSurfaceView.addOnLayoutChangeListener(mMirrorSurfaceViewLayoutChangeListener);
 
         mMirrorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -237,14 +261,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        mMirrorView.addOnLayoutChangeListener(
-                (View v, int left, int top, int right, int bottom, int oldLeft, int oldTop,
-                        int oldRight, int oldBottom)
-                        -> AsyncTask.execute(() -> {
-                            mMirrorView.getBoundsOnScreen(mMirrorViewBounds);
-                            mWindowMagnifierCallback.onWindowMagnifierBoundsChanged(mDisplayId,
-                                    mMirrorViewBounds);
-                        }));
+        mMirrorView.addOnLayoutChangeListener(mMirrorViewLayoutChangeListener);
         mWm.addView(mMirrorView, params);
 
         SurfaceHolder holder = mMirrorSurfaceView.getHolder();
@@ -469,7 +486,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     /**
      * Enables window magnification with specified parameters.
      *
-     * @param scale the target scale
+     * @param scale   the target scale
      * @param centerX the screen-relative X coordinate around which to center,
      *                or {@link Float#NaN} to leave unchanged.
      * @param centerY the screen-relative Y coordinate around which to center,
