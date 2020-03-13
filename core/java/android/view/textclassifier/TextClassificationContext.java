@@ -18,10 +18,8 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.view.textclassifier.TextClassifier.WidgetType;
 
 import java.util.Locale;
@@ -33,12 +31,11 @@ import java.util.Objects;
  */
 public final class TextClassificationContext implements Parcelable {
 
-    private final String mPackageName;
+    // NOTE: Modify packageName only in the constructor or in setSystemTextClassifierMetadata()
+    private String mPackageName;
     private final String mWidgetType;
     @Nullable private final String mWidgetVersion;
-    @UserIdInt
-    private int mUserId = UserHandle.USER_NULL;
-    private boolean mUseDefaultTextClassifier;
+    private SystemTextClassifierMetadata mSystemTcMetadata;
 
     private TextClassificationContext(
             String packageName,
@@ -58,42 +55,26 @@ public final class TextClassificationContext implements Parcelable {
     }
 
     /**
-     * Sets the id of this context's user.
-     * <p>
-     * Package-private for SystemTextClassifier's use.
+     * Sets the information about the {@link SystemTextClassifier} that sent this request.
+     *
+     * <p><b>NOTE: </b>This will override the value returned in {@link getPackageName()}.
      * @hide
      */
-    void setUserId(@UserIdInt int userId) {
-        mUserId = userId;
+    void setSystemTextClassifierMetadata(@Nullable SystemTextClassifierMetadata systemTcMetadata) {
+        mSystemTcMetadata = systemTcMetadata;
+        if (mSystemTcMetadata != null) {
+            mPackageName = mSystemTcMetadata.getCallingPackageName();
+        }
     }
 
     /**
-     * Returns the id of this context's user.
-     * @hide
-     */
-    @UserIdInt
-    public int getUserId() {
-        return mUserId;
-    }
-
-    /**
-     * Sets whether to use the default text classifier to handle this request.
-     * This will be ignored if it is not the system text classifier to handle this request.
+     * Returns the information about the {@link SystemTextClassifier} that sent this request.
      *
      * @hide
      */
-    void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
-        mUseDefaultTextClassifier = useDefaultTextClassifier;
-    }
-
-    /**
-     * Returns whether to use the default text classifier to handle this request. This
-     * will be ignored if it is not the system text classifier to handle this request.
-     *
-     * @hide
-     */
-    public boolean getUseDefaultTextClassifier() {
-        return mUseDefaultTextClassifier;
+    @Nullable
+    public SystemTextClassifierMetadata getSystemTextClassifierMetadata() {
+        return mSystemTcMetadata;
     }
 
     /**
@@ -118,8 +99,8 @@ public final class TextClassificationContext implements Parcelable {
     @Override
     public String toString() {
         return String.format(Locale.US, "TextClassificationContext{"
-                + "packageName=%s, widgetType=%s, widgetVersion=%s, userId=%d}",
-                mPackageName, mWidgetType, mWidgetVersion, mUserId);
+                + "packageName=%s, widgetType=%s, widgetVersion=%s, systemTcMetadata=%s}",
+                mPackageName, mWidgetType, mWidgetVersion, mSystemTcMetadata);
     }
 
     /**
@@ -176,16 +157,14 @@ public final class TextClassificationContext implements Parcelable {
         parcel.writeString(mPackageName);
         parcel.writeString(mWidgetType);
         parcel.writeString(mWidgetVersion);
-        parcel.writeInt(mUserId);
-        parcel.writeBoolean(mUseDefaultTextClassifier);
+        parcel.writeParcelable(mSystemTcMetadata, flags);
     }
 
     private TextClassificationContext(Parcel in) {
         mPackageName = in.readString();
         mWidgetType = in.readString();
         mWidgetVersion = in.readString();
-        mUserId = in.readInt();
-        mUseDefaultTextClassifier = in.readBoolean();
+        mSystemTcMetadata = in.readParcelable(null);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<TextClassificationContext> CREATOR =

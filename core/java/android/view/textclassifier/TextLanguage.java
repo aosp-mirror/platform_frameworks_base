@@ -20,12 +20,10 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.icu.util.ULocale;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -227,10 +225,7 @@ public final class TextLanguage implements Parcelable {
 
         private final CharSequence mText;
         private final Bundle mExtra;
-        @Nullable private String mCallingPackageName;
-        @UserIdInt
-        private int mUserId = UserHandle.USER_NULL;
-        private boolean mUseDefaultTextClassifier;
+        @Nullable private SystemTextClassifierMetadata mSystemTcMetadata;
 
         private Request(CharSequence text, Bundle bundle) {
             mText = text;
@@ -246,61 +241,33 @@ public final class TextLanguage implements Parcelable {
         }
 
         /**
-         * Sets the name of the package that is sending this request.
-         * Package-private for SystemTextClassifier's use.
-         * @hide
-         */
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public void setCallingPackageName(@Nullable String callingPackageName) {
-            mCallingPackageName = callingPackageName;
-        }
-
-        /**
          * Returns the name of the package that sent this request.
          * This returns null if no calling package name is set.
          */
         @Nullable
         public String getCallingPackageName() {
-            return mCallingPackageName;
+            return mSystemTcMetadata != null ? mSystemTcMetadata.getCallingPackageName() : null;
         }
 
         /**
-         * Sets the id of the user that sent this request.
-         * <p>
-         * Package-private for SystemTextClassifier's use.
-         * @hide
-         */
-        void setUserId(@UserIdInt int userId) {
-            mUserId = userId;
-        }
-
-        /**
-         * Returns the id of the user that sent this request.
-         * @hide
-         */
-        @UserIdInt
-        public int getUserId() {
-            return mUserId;
-        }
-
-        /**
-         * Sets whether to use the default text classifier to handle this request.
-         * This will be ignored if it is not the system text classifier to handle this request.
+         * Sets the information about the {@link SystemTextClassifier} that sent this request.
          *
          * @hide
          */
-        void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
-            mUseDefaultTextClassifier = useDefaultTextClassifier;
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setSystemTextClassifierMetadata(
+                @Nullable SystemTextClassifierMetadata systemTcMetadata) {
+            mSystemTcMetadata = systemTcMetadata;
         }
 
         /**
-         * Returns whether to use the default text classifier to handle this request. This
-         * will be ignored if it is not the system text classifier to handle this request.
+         * Returns the information about the {@link SystemTextClassifier} that sent this request.
          *
          * @hide
          */
-        public boolean getUseDefaultTextClassifier() {
-            return mUseDefaultTextClassifier;
+        @Nullable
+        public SystemTextClassifierMetadata getSystemTextClassifierMetadata() {
+            return mSystemTcMetadata;
         }
 
         /**
@@ -321,23 +288,17 @@ public final class TextLanguage implements Parcelable {
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeCharSequence(mText);
-            dest.writeString(mCallingPackageName);
-            dest.writeInt(mUserId);
             dest.writeBundle(mExtra);
-            dest.writeBoolean(mUseDefaultTextClassifier);
+            dest.writeParcelable(mSystemTcMetadata, flags);
         }
 
         private static Request readFromParcel(Parcel in) {
             final CharSequence text = in.readCharSequence();
-            final String callingPackageName = in.readString();
-            final int userId = in.readInt();
             final Bundle extra = in.readBundle();
-            final boolean useDefaultTextClassifier = in.readBoolean();
+            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
 
             final Request request = new Request(text, extra);
-            request.setCallingPackageName(callingPackageName);
-            request.setUserId(userId);
-            request.setUseDefaultTextClassifier(useDefaultTextClassifier);
+            request.setSystemTextClassifierMetadata(systemTcMetadata);
             return request;
         }
 

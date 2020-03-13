@@ -20,13 +20,11 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.text.Spannable;
 import android.text.method.MovementMethod;
 import android.text.style.ClickableSpan;
@@ -340,12 +338,9 @@ public final class TextLinks implements Parcelable {
         @Nullable private final LocaleList mDefaultLocales;
         @Nullable private final EntityConfig mEntityConfig;
         private final boolean mLegacyFallback;
-        @Nullable private String mCallingPackageName;
         private final Bundle mExtras;
         @Nullable private final ZonedDateTime mReferenceTime;
-        @UserIdInt
-        private int mUserId = UserHandle.USER_NULL;
-        private boolean mUseDefaultTextClassifier;
+        @Nullable private SystemTextClassifierMetadata mSystemTcMetadata;
 
         private Request(
                 CharSequence text,
@@ -409,62 +404,33 @@ public final class TextLinks implements Parcelable {
         }
 
         /**
-         * Sets the name of the package that is sending this request.
-         * <p>
-         * Package-private for SystemTextClassifier's use.
-         * @hide
-         */
-        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-        public void setCallingPackageName(@Nullable String callingPackageName) {
-            mCallingPackageName = callingPackageName;
-        }
-
-        /**
          * Returns the name of the package that sent this request.
          * This returns {@code null} if no calling package name is set.
          */
         @Nullable
         public String getCallingPackageName() {
-            return mCallingPackageName;
+            return mSystemTcMetadata != null ? mSystemTcMetadata.getCallingPackageName() : null;
         }
 
         /**
-         * Sets the id of the user that sent this request.
-         * <p>
-         * Package-private for SystemTextClassifier's use.
-         * @hide
-         */
-        void setUserId(@UserIdInt int userId) {
-            mUserId = userId;
-        }
-
-        /**
-         * Returns the id of the user that sent this request.
-         * @hide
-         */
-        @UserIdInt
-        public int getUserId() {
-            return mUserId;
-        }
-
-        /**
-         * Sets whether to use the default text classifier to handle this request.
-         * This will be ignored if it is not the system text classifier to handle this request.
+         * Sets the information about the {@link SystemTextClassifier} that sent this request.
          *
          * @hide
          */
-        void setUseDefaultTextClassifier(boolean useDefaultTextClassifier) {
-            mUseDefaultTextClassifier = useDefaultTextClassifier;
+        @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+        public void setSystemTextClassifierMetadata(
+                @Nullable SystemTextClassifierMetadata systemTcMetadata) {
+            mSystemTcMetadata = systemTcMetadata;
         }
 
         /**
-         * Returns whether to use the default text classifier to handle this request. This
-         * will be ignored if it is not the system text classifier to handle this request.
+         * Returns the information about the {@link SystemTextClassifier} that sent this request.
          *
          * @hide
          */
-        public boolean getUseDefaultTextClassifier() {
-            return mUseDefaultTextClassifier;
+        @Nullable
+        public SystemTextClassifierMetadata getSystemTextClassifierMetadata() {
+            return mSystemTcMetadata;
         }
 
         /**
@@ -585,30 +551,24 @@ public final class TextLinks implements Parcelable {
             dest.writeString(mText.toString());
             dest.writeParcelable(mDefaultLocales, flags);
             dest.writeParcelable(mEntityConfig, flags);
-            dest.writeString(mCallingPackageName);
-            dest.writeInt(mUserId);
             dest.writeBundle(mExtras);
             dest.writeString(mReferenceTime == null ? null : mReferenceTime.toString());
-            dest.writeBoolean(mUseDefaultTextClassifier);
+            dest.writeParcelable(mSystemTcMetadata, flags);
         }
 
         private static Request readFromParcel(Parcel in) {
             final String text = in.readString();
             final LocaleList defaultLocales = in.readParcelable(null);
             final EntityConfig entityConfig = in.readParcelable(null);
-            final String callingPackageName = in.readString();
-            final int userId = in.readInt();
             final Bundle extras = in.readBundle();
             final String referenceTimeString = in.readString();
             final ZonedDateTime referenceTime = referenceTimeString == null
                     ? null : ZonedDateTime.parse(referenceTimeString);
-            final boolean useDefaultTextClassifier = in.readBoolean();
+            final SystemTextClassifierMetadata systemTcMetadata = in.readParcelable(null);
 
             final Request request = new Request(text, defaultLocales, entityConfig,
                     /* legacyFallback= */ true, referenceTime, extras);
-            request.setCallingPackageName(callingPackageName);
-            request.setUserId(userId);
-            request.setUseDefaultTextClassifier(useDefaultTextClassifier);
+            request.setSystemTextClassifierMetadata(systemTcMetadata);
             return request;
         }
 
