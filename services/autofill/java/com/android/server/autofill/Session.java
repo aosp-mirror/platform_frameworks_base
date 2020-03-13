@@ -3382,6 +3382,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final List<AutofillId> ids = new ArrayList<>(entryCount);
                 final List<AutofillValue> values = new ArrayList<>(entryCount);
                 boolean waitingDatasetAuth = false;
+                boolean hideHighlight = (entryCount == 1
+                        && dataset.getFieldIds().get(0).equals(mCurrentViewId));
                 for (int i = 0; i < entryCount; i++) {
                     if (dataset.getFieldValues().get(i) == null) {
                         continue;
@@ -3405,7 +3407,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                     if (sDebug) Slog.d(TAG, "autoFillApp(): the buck is on the app: " + dataset);
 
-                    mClient.autofill(id, ids, values);
+                    mClient.autofill(id, ids, values, hideHighlight);
                     if (dataset.getId() != null) {
                         if (mSelectedDatasetIds == null) {
                             mSelectedDatasetIds = new ArrayList<>();
