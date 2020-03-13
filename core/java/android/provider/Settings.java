@@ -6090,10 +6090,7 @@ public final class Settings {
          * device is removed from this mode.
          * <p>
          * Type: int (0 for false, 1 for true)
-         *
-         * @hide
          */
-        @SystemApi
         public static final String SECURE_FRP_MODE = "secure_frp_mode";
 
         /**
