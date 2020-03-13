@@ -18,6 +18,7 @@ package com.android.server.locksettings;
 
 import static android.os.UserHandle.USER_SYSTEM;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
@@ -35,6 +36,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.RebootEscrowListener;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -389,5 +391,24 @@ class RebootEscrowManager {
 
     void setRebootEscrowListener(RebootEscrowListener listener) {
         mRebootEscrowListener = listener;
+    }
+
+    void dump(@NonNull PrintWriter pw) {
+        pw.print("mRebootEscrowWanted=");
+        pw.println(mRebootEscrowWanted);
+
+        pw.print("mRebootEscrowReady=");
+        pw.println(mRebootEscrowReady);
+
+        pw.print("mRebootEscrowListener=");
+        pw.println(mRebootEscrowListener);
+
+        boolean keySet;
+        synchronized (mKeyGenerationLock) {
+            keySet = mPendingRebootEscrowKey != null;
+        }
+
+        pw.print("mPendingRebootEscrowKey is ");
+        pw.println(keySet ? "set" : "not set");
     }
 }
