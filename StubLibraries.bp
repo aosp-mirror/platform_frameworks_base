@@ -57,11 +57,7 @@ stubs_defaults {
     merge_annotations_dirs: [
         "metalava-manual",
     ],
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
+    api_levels_annotations_enabled: false,
     filter_packages: packages_to_document,
 }
 
