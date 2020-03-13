@@ -3359,8 +3359,8 @@
     <!-- Title of the dialog which pops up when the notification is tapped. [CHAR_LIMIT=NONE]-->
     <string name="wifi_disable_mac_randomization_dialog_title">Change privacy setting?</string>
     <!-- Dialog text [CHAR_LIMIT=NONE]-->
-    <string name="wifi_disable_mac_randomization_dialog_message"><xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> may want to connect using your device MAC address, a unique identifier. This may allow your device\u2019s location to be tracked by nearby devices.
-        \n\nIf you continue, <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> will change your privacy setting and try to connect again.</string>
+    <string name="wifi_disable_mac_randomization_dialog_message"> To connect, <xliff:g id="ssid" example="SSID_1">%1$s</xliff:g> needs to use your device MAC address, a unique identifier. Currently, your privacy setting for this network uses a randomized identifier.
+        \n\nThis change may allow your device\u2019s location to be tracked by nearby devices.</string>
     <!-- Text of the button that will disable MAC randomization for the network when tapped. [CHAR_LIMIT=NONE]-->
     <string name="wifi_disable_mac_randomization_dialog_confirm_text">Change setting</string>
     <!-- Toast message which shows up after MAC randomization for the network is disabled. [CHAR_LIMIT=NONE]-->
