@@ -75,7 +75,9 @@ import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -293,7 +295,7 @@ final class UiModeManagerService extends SystemService {
         public void onChange(boolean selfChange, Uri uri) {
             synchronized (mLock) {
                 // setup wizard is done now so we can unblock
-                if (setupWizardCompleteForCurrentUser()) {
+                if (setupWizardCompleteForCurrentUser() && !selfChange) {
                     mSetupWizardComplete = true;
                     getContext().getContentResolver()
                             .unregisterContentObserver(mSetupWizardObserver);
@@ -348,6 +350,9 @@ final class UiModeManagerService extends SystemService {
         IntentFilter batteryFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         context.registerReceiver(mBatteryReceiver, batteryFilter);
 
+        context.registerReceiver(mSettingsRestored,
+                new IntentFilter(Intent.ACTION_SETTING_RESTORED), null, mHandler);
+
         mLocalPowerManager =
                 LocalServices.getService(PowerManagerInternal.class);
         initPowerSave();
@@ -394,6 +399,22 @@ final class UiModeManagerService extends SystemService {
                 false, mDarkThemeObserver, 0);
         mHandler.post(() -> updateSystemProperties());
     }
+
+    private final BroadcastReceiver mSettingsRestored = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            List<String> settings = Arrays.asList(
+                    Secure.UI_NIGHT_MODE, Secure.DARK_THEME_CUSTOM_START_TIME,
+                    Secure.DARK_THEME_CUSTOM_END_TIME);
+            if (settings.contains(intent.getExtras().getCharSequence(Intent.EXTRA_SETTING_NAME))) {
+                synchronized (mLock) {
+                    updateNightModeFromSettingsLocked(context, context.getResources(),
+                            UserHandle.getCallingUserId());
+                    updateConfigurationLocked();
+                }
+            }
+        }
+    };
 
     private void initPowerSave() {
         mPowerSave =

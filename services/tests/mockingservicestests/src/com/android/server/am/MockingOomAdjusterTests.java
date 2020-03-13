@@ -151,6 +151,8 @@ public class MockingOomAdjusterTests {
 
         sService.mConstants = new ActivityManagerConstants(sContext, sService,
                 sContext.getMainThreadHandler());
+        setFieldValue(ActivityManagerService.class, sService, "mContext",
+                sContext);
         ProcessList pr = new ProcessList();
         pr.init(sService, new ActiveUids(sService, false), null);
         setFieldValue(ActivityManagerService.class, sService, "mProcessList",
@@ -982,7 +984,7 @@ public class MockingOomAdjusterTests {
         sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
         doReturn(null).when(sService).getTopAppLocked();
 
-        assertProcStates(app, PROCESS_STATE_FOREGROUND_SERVICE, VISIBLE_APP_ADJ,
+        assertProcStates(app, PROCESS_STATE_BOUND_TOP, VISIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
     }
 

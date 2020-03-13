@@ -3015,6 +3015,7 @@
       <public name="allowNativeHeapPointerTagging" />
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
+      <public name="enableGwpAsan" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">

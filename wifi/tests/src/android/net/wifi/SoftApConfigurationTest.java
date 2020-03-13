@@ -127,8 +127,9 @@ public class SoftApConfigurationTest {
                 .setMaxNumberOfClients(10)
                 .setAutoShutdownEnabled(true)
                 .setShutdownTimeoutMillis(500000)
-                .enableClientControlByUser(true)
-                .setClientList(testBlockedClientList, testAllowedClientList)
+                .setClientControlByUserEnabled(true)
+                .setBlockedClientList(testBlockedClientList)
+                .setAllowedClientList(testAllowedClientList)
                 .build();
         assertThat(original.getPassphrase()).isEqualTo("secretsecret");
         assertThat(original.getSecurityType()).isEqualTo(
@@ -264,7 +265,9 @@ public class SoftApConfigurationTest {
         ArrayList<MacAddress> testBlockedClientList = new ArrayList<>();
         testBlockedClientList.add(testMacAddress_1);
         SoftApConfiguration.Builder configBuilder = new SoftApConfiguration.Builder();
-        configBuilder.setClientList(testBlockedClientList, testAllowedClientList);
+        configBuilder.setBlockedClientList(testBlockedClientList)
+                .setAllowedClientList(testAllowedClientList)
+                .build();
     }
 
     @Test

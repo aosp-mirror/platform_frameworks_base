@@ -24,6 +24,8 @@ import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
+import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
@@ -189,6 +191,24 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         @Override
+        public boolean requestDemux(@NonNull TunerDemuxRequest request,
+                    @NonNull int[] demuxHandle) {
+            if (DEBUG) {
+                Slog.d(TAG, "requestDemux(request=" + request + ")");
+            }
+            return true;
+        }
+
+        @Override
+        public boolean requestDescrambler(@NonNull TunerDescramblerRequest request,
+                    @NonNull int[] descrambleHandle) {
+            if (DEBUG) {
+                Slog.d(TAG, "requestDescrambler(request=" + request + ")");
+            }
+            return true;
+        }
+
+        @Override
         public boolean requestCasSession(
                 @NonNull CasSessionRequest request, @NonNull int[] sessionResourceId) {
             if (DEBUG) {
@@ -210,6 +230,20 @@ public class TunerResourceManagerService extends SystemService {
         public void releaseFrontend(int frontendId) {
             if (DEBUG) {
                 Slog.d(TAG, "releaseFrontend(id=" + frontendId + ")");
+            }
+        }
+
+        @Override
+        public void releaseDemux(int demuxHandle) {
+            if (DEBUG) {
+                Slog.d(TAG, "releaseDemux(demuxHandle=" + demuxHandle + ")");
+            }
+        }
+
+        @Override
+        public void releaseDescrambler(int descramblerHandle) {
+            if (DEBUG) {
+                Slog.d(TAG, "releaseDescrambler(descramblerHandle=" + descramblerHandle + ")");
             }
         }
 

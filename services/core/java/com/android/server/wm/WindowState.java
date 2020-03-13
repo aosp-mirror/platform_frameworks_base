@@ -415,6 +415,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
     final Matrix mTmpMatrix = new Matrix();
+    final float[] mTmpMatrixArray = new float[9];
 
     private final WindowFrames mWindowFrames = new WindowFrames();
 
@@ -445,6 +446,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // wallpaper; if a wallpaper window: the currently applied offset.
     float mWallpaperX = -1;
     float mWallpaperY = -1;
+
+    // If a window showing a wallpaper: the requested zoom out for the
+    // wallpaper; if a wallpaper window: the currently applied zoom.
+    float mWallpaperZoomOut = -1;
+
+    // If a wallpaper window: whether the wallpaper should be scaled when zoomed, if set
+    // to false, mWallpaperZoom will be ignored here and just passed to the WallpaperService.
+    boolean mShouldScaleWallpaper;
 
     // If a window showing a wallpaper: what fraction of the offset
     // range corresponds to a full virtual screen.
@@ -3922,6 +3931,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mWallpaperXStep != -1 || mWallpaperYStep != -1) {
             pw.println(prefix + "mWallpaperXStep=" + mWallpaperXStep
                     + " mWallpaperYStep=" + mWallpaperYStep);
+        }
+        if (mWallpaperZoomOut != -1) {
+            pw.println(prefix + "mWallpaperZoomOut=" + mWallpaperZoomOut);
         }
         if (mWallpaperDisplayOffsetX != Integer.MIN_VALUE
                 || mWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
