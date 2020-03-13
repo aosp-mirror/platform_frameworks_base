@@ -17,6 +17,7 @@
 package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
@@ -199,7 +200,9 @@ public class TextClassificationTest {
                         .setReferenceTime(referenceTime)
                         .setExtras(BUNDLE)
                         .build();
-        reference.setCallingPackageName(packageName);
+        final SystemTextClassifierMetadata systemTcMetadata =
+                new SystemTextClassifierMetadata(packageName, 1, false);
+        reference.setSystemTextClassifierMetadata(systemTcMetadata);
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
@@ -216,5 +219,11 @@ public class TextClassificationTest {
         assertEquals(referenceTime, result.getReferenceTime());
         assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
         assertEquals(packageName, result.getCallingPackageName());
+        final SystemTextClassifierMetadata resultSystemTcMetadata =
+                result.getSystemTextClassifierMetadata();
+        assertNotNull(resultSystemTcMetadata);
+        assertEquals(packageName, resultSystemTcMetadata.getCallingPackageName());
+        assertEquals(1, resultSystemTcMetadata.getUserId());
+        assertFalse(resultSystemTcMetadata.useDefaultTextClassifier());
     }
 }
