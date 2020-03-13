@@ -69,7 +69,7 @@ class ControlViewHolder(
 
         cancelUpdate?.run()
 
-        val (status, template) = cws.control?.let {
+        val (controlStatus, template) = cws.control?.let {
             title.setText(it.getTitle())
             subtitle.setText(it.getSubtitle())
             Pair(it.getStatus(), it.getControlTemplate())
@@ -80,20 +80,28 @@ class ControlViewHolder(
         }
 
         cws.control?.let {
+            layout.setClickable(true)
             layout.setOnLongClickListener(View.OnLongClickListener() {
                 ControlActionCoordinator.longPress(this@ControlViewHolder)
                 true
             })
         }
 
-        val clazz = findBehavior(status, template)
+        val clazz = findBehavior(controlStatus, template)
         if (behavior == null || behavior!!::class != clazz) {
             // Behavior changes can signal a change in template from the app or
             // first time setup
             behavior = clazz.java.newInstance()
             behavior?.initialize(this)
+
+            // let behaviors define their own, if necessary, and clear any existing ones
+            layout.setAccessibilityDelegate(null)
         }
+
         behavior?.bind(cws)
+
+        layout.setContentDescription(
+            "${title.text} ${subtitle.text} ${status.text} ${statusExtra.text}")
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
