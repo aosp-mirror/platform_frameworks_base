@@ -329,8 +329,14 @@ public final class InlineSuggestionFactory {
             @NonNull Runnable onErrorCallback) {
         return new IInlineSuggestionUiCallback.Stub() {
             @Override
-            public void onAutofill() throws RemoteException {
+            public void onClick() throws RemoteException {
                 onAutofillCallback.run();
+                callback.onClick();
+            }
+
+            @Override
+            public void onLongClick() throws RemoteException {
+                callback.onLongClick();
             }
 
             @Override
