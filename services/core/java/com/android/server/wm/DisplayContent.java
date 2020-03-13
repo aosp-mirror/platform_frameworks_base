@@ -656,6 +656,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // When non-null, new stacks get put into this tile.
     TaskTile mLaunchTile = null;
 
+    // Used in performing layout
+    private boolean mTmpWindowsBehindIme;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
@@ -745,6 +748,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     + " mRelayoutCalled=" + w.mRelayoutCalled + " visible=" + w.mToken.isVisible()
                     + " visibleRequested=" + (activity != null && activity.mVisibleRequested)
                     + " parentHidden=" + w.isParentWindowHidden());
+        }
+
+        // Sets mBehindIme for each window. Windows behind IME can get IME insets.
+        w.mBehindIme = mTmpWindowsBehindIme;
+        if (w == mInputMethodWindow) {
+            mTmpWindowsBehindIme = true;
         }
 
         // If this view is GONE, then skip it -- keep the current frame, and let the caller know
@@ -4011,6 +4020,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // behind it.
         mTmpWindow = null;
         mTmpInitial = initial;
+
+        // Used to indicate that we have processed the IME window.
+        mTmpWindowsBehindIme = false;
 
         // First perform layout of any root windows (not attached to another window).
         forAllWindows(mPerformLayout, true /* traverseTopToBottom */);

@@ -29,7 +29,6 @@ import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
-import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
@@ -1503,14 +1502,8 @@ public class DisplayPolicy {
      */
     public void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {
         displayFrames.onBeginLayout();
-        final InsetsState insetsState =
-                mDisplayContent.getInsetsStateController().getRawInsetsState();
-
-        // Reset the frame of IME so that the layout of windows above IME won't get influenced.
-        // Once we layout the IME, frames will be set again on the source.
-        insetsState.getSource(ITYPE_IME).setFrame(0, 0, 0, 0);
-
-        updateInsetsStateForDisplayCutout(displayFrames, insetsState);
+        updateInsetsStateForDisplayCutout(displayFrames,
+                mDisplayContent.getInsetsStateController().getRawInsetsState());
         mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
         mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
 
