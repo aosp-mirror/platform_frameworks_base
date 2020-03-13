@@ -23,6 +23,7 @@ import android.graphics.drawable.Icon;
 import android.text.TextUtils;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -182,24 +183,24 @@ public class NotificationHeaderUtil {
 
     private void sanitizeChild(View child) {
         if (child != null) {
-            NotificationHeaderView header = (NotificationHeaderView) child.findViewById(
+            ViewGroup header = child.findViewById(
                     com.android.internal.R.id.notification_header);
             sanitizeHeader(header);
         }
     }
 
-    private void sanitizeHeader(NotificationHeaderView rowHeader) {
+    private void sanitizeHeader(ViewGroup rowHeader) {
         if (rowHeader == null) {
             return;
         }
         final int childCount = rowHeader.getChildCount();
         View time = rowHeader.findViewById(com.android.internal.R.id.time);
         boolean hasVisibleText = false;
-        for (int i = 1; i < childCount - 1 ; i++) {
+        for (int i = 0; i < childCount; i++) {
             View child = rowHeader.getChildAt(i);
             if (child instanceof TextView
                     && child.getVisibility() != View.GONE
-                    && !mDividers.contains(Integer.valueOf(child.getId()))
+                    && !mDividers.contains(child.getId())
                     && child != time) {
                 hasVisibleText = true;
                 break;
@@ -212,14 +213,14 @@ public class NotificationHeaderUtil {
         time.setVisibility(timeVisibility);
         View left = null;
         View right;
-        for (int i = 1; i < childCount - 1 ; i++) {
+        for (int i = 0; i < childCount; i++) {
             View child = rowHeader.getChildAt(i);
-            if (mDividers.contains(Integer.valueOf(child.getId()))) {
+            if (mDividers.contains(child.getId())) {
                 boolean visible = false;
                 // Lets find the item to the right
-                for (i++; i < childCount - 1; i++) {
+                for (i++; i < childCount; i++) {
                     right = rowHeader.getChildAt(i);
-                    if (mDividers.contains(Integer.valueOf(right.getId()))) {
+                    if (mDividers.contains(right.getId())) {
                         // A divider was found, this needs to be hidden
                         i--;
                         break;
@@ -276,14 +277,18 @@ public class NotificationHeaderUtil {
             if (!mApply) {
                 return;
             }
-            NotificationHeaderView header = row.getContractedNotificationHeader();
-            if (header == null) {
-                // No header found. We still consider this to be the same to avoid weird flickering
+            View contractedChild = row.getPrivateLayout().getContractedChild();
+            if (contractedChild == null) {
+                return;
+            }
+            View ownView = contractedChild.findViewById(mId);
+            if (ownView == null) {
+                // No view found. We still consider this to be the same to avoid weird flickering
                 // when for example showing an undo notification
                 return;
             }
             Object childData = mExtractor == null ? null : mExtractor.extractData(row);
-            mApply = mComparator.compare(mParentView, header.findViewById(mId),
+            mApply = mComparator.compare(mParentView, ownView,
                     mParentData, childData);
         }
 
