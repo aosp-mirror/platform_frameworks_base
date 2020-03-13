@@ -285,14 +285,8 @@ public class ParsedActivity extends ParsedMainComponent {
         dest.writeBundle(this.metaData);
 
         if (windowLayout != null) {
-            dest.writeBoolean(true);
-            dest.writeInt(windowLayout.width);
-            dest.writeFloat(windowLayout.widthFraction);
-            dest.writeInt(windowLayout.height);
-            dest.writeFloat(windowLayout.heightFraction);
-            dest.writeInt(windowLayout.gravity);
-            dest.writeInt(windowLayout.minWidth);
-            dest.writeInt(windowLayout.minHeight);
+            dest.writeInt(1);
+            windowLayout.writeToParcel(dest);
         } else {
             dest.writeBoolean(false);
         }

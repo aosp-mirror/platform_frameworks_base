@@ -37,8 +37,8 @@ import android.graphics.Rect;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.PackageList;
@@ -72,6 +72,10 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
             ComponentName.createRelative("com.android.foo", ".BarActivity");
     private static final ComponentName ALTERNATIVE_COMPONENT =
             ComponentName.createRelative("com.android.foo", ".AlternativeBarActivity");
+    private static final String TEST_WINDOW_LAYOUT_AFFINITY = "135:.Affinity";
+    private static final String TEST_ALTERNATIVE_WINDOW_LAYOUT_AFFINITY =
+            "246:.AlternativeAffinity";
+    private static final String TEST_DIFFERENT_AFFINITY_WITH_SAME_UID = "135:.DifferentAffinity";
 
     private static final int TEST_WINDOWING_MODE = WINDOWING_MODE_FREEFORM;
     private static final Rect TEST_BOUNDS = new Rect(100, 200, 300, 400);
@@ -99,11 +103,12 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         mPersisterQueue = new TestPersisterQueue();
 
-        final File cacheFolder = InstrumentationRegistry.getContext().getCacheDir();
+        final File cacheFolder =
+                InstrumentationRegistry.getInstrumentation().getContext().getCacheDir();
         mFolder = new File(cacheFolder, "launch_params_tests");
         deleteRecursively(mFolder);
 
-        mDisplayUniqueId = "test:" + Integer.toString(sNextUniqueId++);
+        mDisplayUniqueId = "test:" + sNextUniqueId++;
         mTestDisplay = new TestDisplayContent.Builder(mService, 1000, 1500)
                 .setUniqueId(mDisplayUniqueId).build();
         when(mRootWindowContainer.getDisplayContent(eq(mDisplayUniqueId)))
@@ -211,6 +216,61 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityInSameInstance_NoPreviousRecord() {
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityInSameInstance_HasOldPreviousRecord()
+            throws Exception {
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTaskWithDifferentComponent);
+
+        Thread.sleep(1);  // Sleep 1ms so that the timestamp can for sure increase.
+
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testReturnsEmptyLaunchParamsUidInLaunchAffinityMismatch() {
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_DIFFERENT_AFFINITY_WITH_SAME_UID;
+        mResult.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertTrue("Result must be empty.", mResult.isEmpty());
+    }
+
+    @Test
+    public void testReturnsEmptyLaunchParamsWindowLayoutAffinityMismatch() {
+        mTestTask.affinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_ALTERNATIVE_WINDOW_LAYOUT_AFFINITY;
+        mResult.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        mTarget.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertTrue("Result must be empty.", mResult.isEmpty());
+    }
+
+    @Test
     public void testSavesAndRestoresLaunchParamsAcrossInstances() {
         mTarget.saveTask(mTestTask);
         mPersisterQueue.flush();
@@ -221,6 +281,52 @@ public class LaunchParamsPersisterTests extends ActivityTestsBase {
         target.onUnlockUser(TEST_USER_ID);
 
         target.getLaunchParams(mTestTask, null, mResult);
+
+        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityAcrossInstances_NoPreviousRecord() {
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
+
+        assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
+        assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
+        assertEquals(TEST_BOUNDS, mResult.mBounds);
+    }
+
+    @Test
+    public void testUsesRecordWithSameWindowLayoutAffinityAcrossInstances_HasOldPreviousRecord()
+            throws Exception {
+        mTaskWithDifferentComponent.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTaskWithDifferentComponent);
+        mPersisterQueue.flush();
+
+        // Sleep 1s because many file systems only save last modified time as precise as 1s so we
+        // can for sure know the last modified time is different.
+        Thread.sleep(1000);
+
+        mTestTask.mWindowLayoutAffinity = TEST_WINDOW_LAYOUT_AFFINITY;
+        mTarget.saveTask(mTestTask);
+        mPersisterQueue.flush();
+
+        final LaunchParamsPersister target = new LaunchParamsPersister(mPersisterQueue, mSupervisor,
+                mUserFolderGetter);
+        target.onSystemReady();
+        target.onUnlockUser(TEST_USER_ID);
+
+        target.getLaunchParams(mTaskWithDifferentComponent, null, mResult);
 
         assertEquals(mTestDisplay.mDisplayId, mResult.mPreferredDisplayId);
         assertEquals(TEST_WINDOWING_MODE, mResult.mWindowingMode);
