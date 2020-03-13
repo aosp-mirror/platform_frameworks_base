@@ -8942,7 +8942,7 @@ package android.permission {
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
-    method @BinderThread public void onUpdateUserSensitivePermissionFlags();
+    method @BinderThread public void onUpdateUserSensitivePermissionFlags(int, @NonNull Runnable);
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
