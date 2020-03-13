@@ -406,7 +406,7 @@ private class ItemAdapter(
             setText(item.getTitle())
         }
         view.requireViewById<ImageView>(R.id.app_icon).apply {
-            setContentDescription(item.getTitle())
+            setContentDescription(item.appName)
             setImageDrawable(item.icon)
         }
         return view
