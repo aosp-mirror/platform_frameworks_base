@@ -338,6 +338,7 @@ public class ImsUtImplBase {
 
     /**
      * Updates the configuration of the call barring for specified service class with password.
+     * @hide
      */
     public int updateCallBarringWithPassword(int cbType, int action, @Nullable String[] barrList,
             int serviceClass, @NonNull String password) {
