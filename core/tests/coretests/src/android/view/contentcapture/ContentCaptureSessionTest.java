@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.testng.Assert.assertThrows;
 
+import android.graphics.Insets;
 import android.view.View;
 import android.view.ViewStructure;
 import android.view.autofill.AutofillId;
@@ -168,6 +169,11 @@ public class ContentCaptureSessionTest {
 
         @Override
         void internalNotifySessionPaused() {
+            throw new UnsupportedOperationException("should not have been called");
+        }
+
+        @Override
+        void internalNotifyViewInsetsChanged(Insets viewInsets) {
             throw new UnsupportedOperationException("should not have been called");
         }
 
