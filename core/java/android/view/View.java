@@ -29099,8 +29099,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTreeObserver = new ViewTreeObserver(context);
         }
 
+        @Nullable
+        ContentCaptureManager getContentCaptureManager(@NonNull Context context) {
+            if (mContentCaptureManager != null) {
+                return mContentCaptureManager;
+            }
+            mContentCaptureManager = context.getSystemService(ContentCaptureManager.class);
+            return mContentCaptureManager;
+        }
+
+        void delayNotifyContentCaptureInsetsEvent(@NonNull Insets insets) {
+            if (mContentCaptureManager == null) {
+                return;
+            }
+
+            ArrayList<Object> events = ensureEvents(
+                        mContentCaptureManager.getMainContentCaptureSession());
+            events.add(insets);
+        }
+
         private void delayNotifyContentCaptureEvent(@NonNull ContentCaptureSession session,
                 @NonNull View view, boolean appeared) {
+            ArrayList<Object> events = ensureEvents(session);
+            events.add(appeared ? view : view.getAutofillId());
+        }
+
+        @NonNull
+        private ArrayList<Object> ensureEvents(@NonNull ContentCaptureSession session) {
             if (mContentCaptureEvents == null) {
                 // Most of the time there will be just one session, so intial capacity is 1
                 mContentCaptureEvents = new SparseArray<>(1);
@@ -29112,16 +29137,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 events = new ArrayList<>();
                 mContentCaptureEvents.put(sessionId, events);
             }
-            events.add(appeared ? view : view.getAutofillId());
-        }
 
-        @Nullable
-        ContentCaptureManager getContentCaptureManager(@NonNull Context context) {
-            if (mContentCaptureManager != null) {
-                return mContentCaptureManager;
-            }
-            mContentCaptureManager = context.getSystemService(ContentCaptureManager.class);
-            return mContentCaptureManager;
+            return events;
         }
     }
 
