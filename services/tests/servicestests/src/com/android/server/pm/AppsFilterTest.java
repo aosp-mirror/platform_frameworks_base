@@ -31,6 +31,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedProvider;
 import android.os.Build;
@@ -133,6 +134,13 @@ public class AppsFilterTest {
 
         return pkg(packageName)
                 .addActivity(activity);
+    }
+
+    private static ParsingPackage pkgWithInstrumentation(
+            String packageName, String instrumentationTargetPackage) {
+        ParsedInstrumentation instrumentation = new ParsedInstrumentation();
+        instrumentation.setTargetPackage(instrumentationTargetPackage);
+        return pkg(packageName).addInstrumentation(instrumentation);
     }
 
     private static ParsingPackage pkgWithProvider(String packageName, String authority) {
@@ -606,6 +614,25 @@ public class AppsFilterTest {
                 DUMMY_CALLING_UID, withInstallSource(null, null, target.name, false));
 
         assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+    }
+
+    @Test
+    public void testInstrumentation_DoesntFilter() {
+        final AppsFilter appsFilter =
+                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+        appsFilter.onSystemReady();
+
+
+        PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
+                DUMMY_TARGET_UID);
+        PackageSetting instrumentation = simulateAddPackage(appsFilter,
+                pkgWithInstrumentation("com.some.other.package", "com.some.package"),
+                DUMMY_CALLING_UID);
+
+        assertFalse(
+                appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, instrumentation, target, 0));
+        assertFalse(
+                appsFilter.shouldFilterApplication(DUMMY_TARGET_UID, target, instrumentation, 0));
     }
 
     private interface WithSettingBuilder {
