@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.RemoteViews;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * An ImageView for displaying an Icon. Avoids reloading the Icon when possible.
@@ -44,6 +45,7 @@ public class CachingIconView extends ImageView {
     private boolean mInternalSetDrawable;
     private boolean mForceHidden;
     private int mDesiredVisibility;
+    private Consumer<Integer> mOnVisibilityChangedListener;
 
     @UnsupportedAppUsage
     public CachingIconView(Context context, @Nullable AttributeSet attrs) {
@@ -198,6 +200,13 @@ public class CachingIconView extends ImageView {
     private void updateVisibility() {
         int visibility = mDesiredVisibility == VISIBLE && mForceHidden ? INVISIBLE
                 : mDesiredVisibility;
+        if (mOnVisibilityChangedListener != null) {
+            mOnVisibilityChangedListener.accept(visibility);
+        }
         super.setVisibility(visibility);
+    }
+
+    public void setOnVisibilityChangedListener(Consumer<Integer> listener) {
+        mOnVisibilityChangedListener = listener;
     }
 }
