@@ -3093,6 +3093,36 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
     }
 
+    @Override
+    public List<String> getAutoRevokeExemptionRequestedPackages(int userId) {
+        mContext.enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                "Must hold " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+
+        List<String> result = new ArrayList<>();
+        mPackageManagerInt.forEachInstalledPackage(pkg -> {
+            if (pkg.isDontAutoRevokePermmissions()) {
+                result.add(pkg.getPackageName());
+            }
+        }, userId);
+
+        return result;
+    }
+
+    @Override
+    public List<String> getAutoRevokeExemptionGrantedPackages(int userId) {
+        mContext.enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
+                "Must hold " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
+
+        List<String> result = new ArrayList<>();
+        mPackageManagerInt.forEachInstalledPackage(pkg -> {
+            if (pkg.isAllowDontAutoRevokePermmissions()) {
+                result.add(pkg.getPackageName());
+            }
+        }, userId);
+
+        return result;
+    }
+
     private boolean isNewPlatformPermissionForPackage(String perm, AndroidPackage pkg) {
         boolean allowed = false;
         final int NP = PackageParser.NEW_PERMISSIONS.length;
