@@ -1222,13 +1222,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeInt(lockTaskLaunchMode);
         if (windowLayout != null) {
             dest.writeInt(1);
-            dest.writeInt(windowLayout.width);
-            dest.writeFloat(windowLayout.widthFraction);
-            dest.writeInt(windowLayout.height);
-            dest.writeFloat(windowLayout.heightFraction);
-            dest.writeInt(windowLayout.gravity);
-            dest.writeInt(windowLayout.minWidth);
-            dest.writeInt(windowLayout.minHeight);
+            windowLayout.writeToParcel(dest);
         } else {
             dest.writeInt(0);
         }
@@ -1372,8 +1366,8 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
      * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
      */
     public static final class WindowLayout {
-        public WindowLayout(int width, float widthFraction, int height, float heightFraction, int gravity,
-                int minWidth, int minHeight) {
+        public WindowLayout(int width, float widthFraction, int height, float heightFraction,
+                int gravity, int minWidth, int minHeight) {
             this.width = width;
             this.widthFraction = widthFraction;
             this.height = height;
@@ -1392,6 +1386,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
             gravity = source.readInt();
             minWidth = source.readInt();
             minHeight = source.readInt();
+            windowLayoutAffinity = source.readString();
         }
 
         /**
@@ -1458,11 +1453,30 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         public final int minHeight;
 
         /**
+         * Affinity of window layout parameters. Activities with the same UID and window layout
+         * affinity will share the same window dimension record.
+         * @hide
+         */
+        public String windowLayoutAffinity;
+
+        /**
          * Returns if this {@link WindowLayout} has specified bounds.
          * @hide
          */
         public boolean hasSpecifiedSize() {
             return width >= 0 || height >= 0 || widthFraction >= 0 || heightFraction >= 0;
+        }
+
+        /** @hide */
+        public void writeToParcel(Parcel dest) {
+            dest.writeInt(width);
+            dest.writeFloat(widthFraction);
+            dest.writeInt(height);
+            dest.writeFloat(heightFraction);
+            dest.writeInt(gravity);
+            dest.writeInt(minWidth);
+            dest.writeInt(minHeight);
+            dest.writeString(windowLayoutAffinity);
         }
     }
 }
