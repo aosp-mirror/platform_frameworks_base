@@ -424,6 +424,7 @@ public class BubbleStackView extends FrameLayout {
 
     private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
 
+    @Nullable
     private BubbleOverflow mBubbleOverflow;
 
     private boolean mShouldShowUserEducation;
@@ -1387,7 +1388,7 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "onBubbleDragStart: bubble=" + bubble);
         }
 
-        if (bubble.equals(mBubbleOverflow.getIconView())) {
+        if (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView())) {
             return;
         }
 
@@ -1403,7 +1404,8 @@ public class BubbleStackView extends FrameLayout {
 
     /** Called with the coordinates to which an individual bubble has been dragged. */
     public void onBubbleDragged(View bubble, float x, float y) {
-        if (!mIsExpanded || mIsExpansionAnimating || bubble.equals(mBubbleOverflow.getIconView())) {
+        if (!mIsExpanded || mIsExpansionAnimating
+                || (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView()))) {
             return;
         }
 
@@ -1418,7 +1420,8 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "onBubbleDragFinish: bubble=" + bubble);
         }
 
-        if (!mIsExpanded || mIsExpansionAnimating || bubble.equals(mBubbleOverflow.getIconView())) {
+        if (!mIsExpanded || mIsExpansionAnimating
+                || (mBubbleOverflow != null && bubble.equals(mBubbleOverflow.getIconView()))) {
             return;
         }
 
