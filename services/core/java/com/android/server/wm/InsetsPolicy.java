@@ -409,6 +409,13 @@ class InsetsPolicy {
                 t.close();
             }
 
+            // Since we don't push applySurfaceParams to a Handler-queue we don't need
+            // to push release in this case.
+            @Override
+            public void releaseSurfaceControlFromRt(SurfaceControl sc) {
+                sc.release();
+            }
+
             @Override
             public void startAnimation(InsetsAnimationControlImpl controller,
                     WindowInsetsAnimationControlListener listener, int types,
