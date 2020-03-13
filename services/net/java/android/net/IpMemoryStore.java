@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.networkstack.ModuleNetworkStackClient;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -41,7 +42,7 @@ public class IpMemoryStore extends IpMemoryStoreClient {
         super(context);
         mService = new CompletableFuture<>();
         mTailNode = new AtomicReference<CompletableFuture<IIpMemoryStore>>(mService);
-        getNetworkStackClient().fetchIpMemoryStore(
+        getModuleNetworkStackClient(context).fetchIpMemoryStore(
                 new IIpMemoryStoreCallbacks.Stub() {
                     @Override
                     public void onIpMemoryStoreFetched(@NonNull final IIpMemoryStore memoryStore) {
@@ -85,8 +86,8 @@ public class IpMemoryStore extends IpMemoryStoreClient {
     }
 
     @VisibleForTesting
-    protected NetworkStackClient getNetworkStackClient() {
-        return NetworkStackClient.getInstance();
+    protected ModuleNetworkStackClient getModuleNetworkStackClient(Context context) {
+        return ModuleNetworkStackClient.getInstance(context);
     }
 
     /** Gets an instance of the memory store */
