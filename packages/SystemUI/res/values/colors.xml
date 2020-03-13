@@ -225,4 +225,8 @@
     <color name="control_default_background">@color/GM2_grey_900</color>
     <color name="control_list_popup_background">@*android:color/background_floating_material_dark</color>
     <color name="control_spinner_dropdown">@*android:color/foreground_material_dark</color>
+    <color name="control_enabled_light_background">@color/GM2_yellow_200</color>
+    <color name="control_enabled_thermo_heat_background">@color/GM2_red_200</color>
+    <color name="control_enabled_thermo_cool_background">@color/GM2_blue_200</color>
+    <color name="control_enabled_default_background">@color/GM2_blue_200</color>
 </resources>
