@@ -31,7 +31,6 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -151,7 +150,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mNotificationMinHeight;
     private int mNotificationMinHeightLarge;
     private int mNotificationMinHeightMedia;
-    private int mNotificationMinHeightMessaging;
     private int mNotificationMaxHeight;
     private int mIncreasedPaddingBetweenElements;
     private int mNotificationLaunchHeight;
@@ -640,16 +638,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 && expandedView.findViewById(com.android.internal.R.id.media_actions) != null;
         boolean showCompactMediaSeekbar = mMediaManager.getShowCompactMediaSeekbar();
 
-        Class<? extends Notification.Style> style =
-                mEntry.getSbn().getNotification().getNotificationStyle();
-        boolean isMessagingLayout = Notification.MessagingStyle.class.equals(style);
-
         if (customView && beforeP && !mIsSummaryWithChildren) {
             minHeight = beforeN ? mNotificationMinHeightBeforeN : mNotificationMinHeightBeforeP;
         } else if (isMediaLayout && showCompactMediaSeekbar) {
             minHeight = mNotificationMinHeightMedia;
-        } else if (isMessagingLayout) {
-            minHeight = mNotificationMinHeightMessaging;
         } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
             minHeight = mNotificationMinHeightLarge;
         } else {
@@ -1055,19 +1047,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             return mChildrenContainer.getVisibleHeader();
         }
         return getShowingLayout().getVisibleNotificationHeader();
-    }
-
-
-    /**
-     * @return the contracted notification header. This can be different from
-     * {@link #getNotificationHeader()} and also {@link #getVisibleNotificationHeader()} and only
-     * returns the contracted version.
-     */
-    public NotificationHeaderView getContractedNotificationHeader() {
-        if (mIsSummaryWithChildren) {
-            return mChildrenContainer.getHeaderView();
-        }
-        return mPrivateLayout.getContractedNotificationHeader();
     }
 
     public void setLongPressListener(LongPressListener longPressListener) {
@@ -1654,8 +1633,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_min_height_increased);
         mNotificationMinHeightMedia = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_min_height_media);
-        mNotificationMinHeightMessaging = NotificationUtils.getFontScaledHeight(mContext,
-                R.dimen.notification_min_height_messaging);
         mNotificationMaxHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
