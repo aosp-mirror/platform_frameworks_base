@@ -443,7 +443,8 @@ public class StagingManager {
             try {
                 rm.notifyStagedApkSession(originalSession.sessionId, apkSession.sessionId);
             } catch (RemoteException re) {
-                // Cannot happen, the rollback manager is in the same process.
+                Slog.e(TAG, "Failed to notifyStagedApkSession for session: "
+                        + originalSession.sessionId, re);
             }
         }
 
@@ -856,7 +857,8 @@ public class StagingManager {
                                 + session.sessionId);
                     }
                 } catch (RemoteException re) {
-                    // Cannot happen, the rollback manager is in the same process.
+                    Slog.e(TAG, "Failed to notifyStagedSession for session: "
+                            + session.sessionId, re);
                 }
             }
 
