@@ -199,6 +199,7 @@ class Task extends WindowContainer<WindowContainer> {
     private static final String ATTR_MIN_WIDTH = "min_width";
     private static final String ATTR_MIN_HEIGHT = "min_height";
     private static final String ATTR_PERSIST_TASK_VERSION = "persist_task_version";
+    private static final String ATTR_WINDOW_LAYOUT_AFFINITY = "window_layout_affinity";
 
     // Current version of the task record we persist. Used to check if we need to run any upgrade
     // code.
@@ -233,6 +234,8 @@ class Task extends WindowContainer<WindowContainer> {
 
     String affinity;        // The affinity name for this task, or null; may change identity.
     String rootAffinity;    // Initial base affinity, or null; does not change from initial root.
+    String mWindowLayoutAffinity; // Launch param affinity of this task or null. Used when saving
+                                // launch params of this task.
     IVoiceInteractionSession voiceSession;    // Voice interaction session driving task
     IVoiceInteractor voiceInteractor;         // Associated interactor to provide to app
     Intent intent;          // The original intent that started the task. Note that this value can
@@ -1001,6 +1004,8 @@ class Task extends WindowContainer<WindowContainer> {
                 origActivity = new ComponentName(info.packageName, info.name);
             }
         }
+        mWindowLayoutAffinity =
+                info.windowLayout == null ? null : info.windowLayout.windowLayoutAffinity;
 
         final int intentFlags = intent == null ? 0 : intent.getFlags();
         if ((intentFlags & Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0) {
@@ -3410,6 +3415,9 @@ class Task extends WindowContainer<WindowContainer> {
                 pw.println();
             }
         }
+        if (mWindowLayoutAffinity != null) {
+            pw.print(prefix); pw.print("windowLayoutAffinity="); pw.println(mWindowLayoutAffinity);
+        }
         if (voiceSession != null || voiceInteractor != null) {
             pw.print(prefix); pw.print("VOICE: session=0x");
             pw.print(Integer.toHexString(System.identityHashCode(voiceSession)));
@@ -3591,6 +3599,9 @@ class Task extends WindowContainer<WindowContainer> {
         } else if (rootAffinity != null) {
             out.attribute(null, ATTR_ROOT_AFFINITY, rootAffinity != null ? rootAffinity : "@");
         }
+        if (mWindowLayoutAffinity != null) {
+            out.attribute(null, ATTR_WINDOW_LAYOUT_AFFINITY, mWindowLayoutAffinity);
+        }
         out.attribute(null, ATTR_ROOTHASRESET, String.valueOf(rootWasReset));
         out.attribute(null, ATTR_AUTOREMOVERECENTS, String.valueOf(autoRemoveRecents));
         out.attribute(null, ATTR_ASKEDCOMPATMODE, String.valueOf(askedCompatMode));
@@ -3748,6 +3759,7 @@ class Task extends WindowContainer<WindowContainer> {
             String affinity = null;
             String rootAffinity = null;
             boolean hasRootAffinity = false;
+            String windowLayoutAffinity = null;
             boolean rootHasReset = false;
             boolean autoRemoveRecents = false;
             boolean askedCompatMode = false;
@@ -3799,6 +3811,9 @@ class Task extends WindowContainer<WindowContainer> {
                     case ATTR_ROOT_AFFINITY:
                         rootAffinity = attrValue;
                         hasRootAffinity = true;
+                        break;
+                    case ATTR_WINDOW_LAYOUT_AFFINITY:
+                        windowLayoutAffinity = attrValue;
                         break;
                     case ATTR_ROOTHASRESET:
                         rootHasReset = Boolean.parseBoolean(attrValue);
@@ -3955,6 +3970,7 @@ class Task extends WindowContainer<WindowContainer> {
                     realActivitySuspended, userSetupComplete, minWidth, minHeight, null /*stack*/);
             task.mLastNonFullscreenBounds = lastNonFullscreenBounds;
             task.setBounds(lastNonFullscreenBounds);
+            task.mWindowLayoutAffinity = windowLayoutAffinity;
 
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 task.addChild(activities.get(activityNdx));
