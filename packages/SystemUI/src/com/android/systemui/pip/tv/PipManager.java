@@ -20,8 +20,6 @@ import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
-import static com.android.systemui.pip.PipAnimationController.DURATION_DEFAULT_MS;
-
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityTaskManager;
@@ -136,6 +134,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private String[] mLastPackagesResourceGranted;
     private PipNotification mPipNotification;
     private ParceledListSlice mCustomActions;
+    private int mResizeAnimationDuration;
 
     // Used to calculate the movement bounds
     private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
@@ -238,6 +237,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mInitialized = true;
         mContext = context;
         mPipBoundsHandler = pipBoundsHandler;
+        mResizeAnimationDuration = context.getResources()
+                .getInteger(R.integer.config_pipResizeAnimationDuration);
         mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
@@ -436,7 +437,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mCurrentPipBounds = mPipBounds;
                 break;
         }
-        mPipTaskOrganizer.scheduleAnimateResizePip(mCurrentPipBounds, DURATION_DEFAULT_MS, null);
+        mPipTaskOrganizer.scheduleAnimateResizePip(mCurrentPipBounds, mResizeAnimationDuration,
+                null);
     }
 
     /**
