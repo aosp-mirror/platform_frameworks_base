@@ -1031,7 +1031,7 @@ public class TelephonyManager {
      * or that all steps during multi-SIM change are done. To know those information you still need
      * to listen to SIM_STATE changes or active subscription changes.
      *
-     * See extra of {@link #EXTRA_NUM_OF_ACTIVE_SIM_SUPPORTED} for updated value.
+     * See extra of {@link #EXTRA_ACTIVE_SIM_SUPPORTED_COUNT} for updated value.
      */
     public static final String ACTION_MULTI_SIM_CONFIG_CHANGED =
             "android.telephony.action.MULTI_SIM_CONFIG_CHANGED";
@@ -1041,6 +1041,8 @@ public class TelephonyManager {
      * The number of active SIM supported by current multi-SIM config. It's not related to how many
      * SIM/subscriptions are currently active.
      *
+     * Same value will be returned by {@link #getActiveModemCount()}.
+     *
      * For single SIM mode, it's 1.
      * For DSDS or DSDA mode, it's 2.
      * For triple-SIM mode, it's 3.
@@ -1049,8 +1051,8 @@ public class TelephonyManager {
      *
      * type: integer
      */
-    public static final String EXTRA_NUM_OF_ACTIVE_SIM_SUPPORTED =
-            "android.telephony.extra.NUM_OF_ACTIVE_SIM_SUPPORTED";
+    public static final String EXTRA_ACTIVE_SIM_SUPPORTED_COUNT =
+            "android.telephony.extra.ACTIVE_SIM_SUPPORTED_COUNT";
 
     /**
      * @hide
