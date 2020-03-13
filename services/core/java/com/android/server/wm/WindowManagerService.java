@@ -1007,9 +1007,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void openSurfaceTransaction() {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "openSurfaceTransaction");
-            synchronized (mGlobalLock) {
-                SurfaceControl.openTransaction();
-            }
+            SurfaceControl.openTransaction();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -1022,10 +1020,8 @@ public class WindowManagerService extends IWindowManager.Stub
     void closeSurfaceTransaction(String where) {
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
-            synchronized (mGlobalLock) {
-                SurfaceControl.closeTransaction();
-                mWindowTracing.logState(where);
-            }
+            SurfaceControl.closeTransaction();
+            mWindowTracing.logState(where);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
