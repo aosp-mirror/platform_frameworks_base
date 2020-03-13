@@ -57,6 +57,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.autofill.ui.InlineSuggestionFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
@@ -255,8 +256,12 @@ final class RemoteAugmentedAutofillService
                             mCallbacks.logAugmentedAutofillSelected(sessionId,
                                     dataset.getId());
                             try {
-                                client.autofill(sessionId, dataset.getFieldIds(),
-                                        dataset.getFieldValues());
+                                final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
+                                final int size = fieldIds.size();
+                                final boolean hideHighlight = size == 1
+                                        && fieldIds.get(0).equals(focusedId);
+                                client.autofill(sessionId, fieldIds, dataset.getFieldValues(),
+                                        hideHighlight);
                             } catch (RemoteException e) {
                                 Slog.w(TAG, "Encounter exception autofilling the values");
                             }
