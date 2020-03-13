@@ -19,6 +19,8 @@ package android.media.tv.tunerresourcemanager;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
+import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerLnbRequest;
@@ -148,6 +150,53 @@ interface ITunerResourceManager {
     void shareFrontend(in int selfClientId, in int targetClientId);
 
     /*
+     * This API is used by the Tuner framework to request an available demux from the TunerHAL.
+     *
+     * <p>There are three possible scenarios:
+     * <ul>
+     * <li>If there is demux available, the API would send the handle back.
+     *
+     * <li>If no Demux is available but the current request info can show higher priority than
+     * other uses of demuxes, the API will send
+     * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
+     * handle the resource reclaim on the holder of lower priority and notify the holder of its
+     * resource loss.
+     *
+     * <li>If no demux can be granted, the API would return false.
+     * <ul>
+     *
+     * @param request {@link TunerDemuxRequest} information of the current request.
+     * @param demuxHandle a one-element array to return the granted demux handle.
+     *
+     * @return true if there is demux granted.
+     */
+    boolean requestDemux(in TunerDemuxRequest request, out int[] demuxHandle);
+
+    /*
+     * This API is used by the Tuner framework to request an available descrambler from the
+     * TunerHAL.
+     *
+     * <p>There are three possible scenarios:
+     * <ul>
+     * <li>If there is descrambler available, the API would send the handle back.
+     *
+     * <li>If no Descrambler is available but the current request info can show higher priority than
+     * other uses of Descrambler, the API will send
+     * {@link IResourcesReclaimListener#onReclaimResources()} to the {@link Tuner}. Tuner would
+     * handle the resource reclaim on the holder of lower priority and notify the holder of its
+     * resource loss.
+     *
+     * <li>If no Descrambler can be granted, the API would return false.
+     * <ul>
+     *
+     * @param request {@link TunerDescramblerRequest} information of the current request.
+     * @param descramblerHandle a one-element array to return the granted descrambler handle.
+     *
+     * @return true if there is Descrambler granted.
+     */
+    boolean requestDescrambler(in TunerDescramblerRequest request, out int[] descramblerHandle);
+
+    /*
      * This API is used by the Tuner framework to request an available Cas session. This session
      * needs to be under the CAS system with the id indicated in the {@code request}.
      *
@@ -208,6 +257,24 @@ interface ITunerResourceManager {
      * @param frontendId the id of the released frontend.
      */
     void releaseFrontend(in int frontendId);
+
+    /*
+     * Notifies the TRM that the Demux with the given handle was released.
+     *
+     * <p>Client must call this whenever it releases a demux.
+     *
+     * @param demuxHandle the handle of the released Tuner Demux.
+     */
+    void releaseDemux(in int demuxHandle);
+
+    /*
+     * Notifies the TRM that the Descrambler with the given handle was released.
+     *
+     * <p>Client must call this whenever it releases a descrambler.
+     *
+     * @param demuxHandle the handle of the released Tuner Descrambler.
+     */
+    void releaseDescrambler(in int descramblerHandle);
 
     /*
      * Notifies the TRM that the given Cas session has been released.
