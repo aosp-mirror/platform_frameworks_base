@@ -11984,17 +11984,17 @@ public class DevicePolicyManager {
      * must handle this intent.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with
-     * @param timeoutMs Maximum time the profile is allowed to be off in milliseconds or 0 if
+     * @param timeoutMillis Maximum time the profile is allowed to be off in milliseconds or 0 if
      *        not limited.
      * @throws IllegalStateException if the profile owner doesn't have an activity that handles
      *        {@link #ACTION_CHECK_POLICY_COMPLIANCE}
      * @see #setPersonalAppsSuspended
      */
-    public void setManagedProfileMaximumTimeOff(@NonNull ComponentName admin, long timeoutMs) {
+    public void setManagedProfileMaximumTimeOff(@NonNull ComponentName admin, long timeoutMillis) {
         throwIfParentInstance("setManagedProfileMaximumTimeOff");
         if (mService != null) {
             try {
-                mService.setManagedProfileMaximumTimeOff(admin, timeoutMs);
+                mService.setManagedProfileMaximumTimeOff(admin, timeoutMillis);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
