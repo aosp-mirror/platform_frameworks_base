@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.ui
 
+import android.annotation.ColorRes
 import android.annotation.MainThread
 import android.content.ComponentName
 import android.content.Context
@@ -37,8 +38,11 @@ data class IconState(val disabledResourceId: Int, val enabledResourceId: Int) {
     }
 }
 
-data class RenderInfo(val icon: Drawable, val foreground: Int, val background: Int) {
-
+data class RenderInfo(
+    val icon: Drawable,
+    val foreground: Int,
+    @ColorRes val enabledBackground: Int
+) {
     companion object {
         const val APP_ICON_ID = -1
         private val iconMap = SparseArray<Drawable>()
@@ -72,6 +76,7 @@ data class RenderInfo(val icon: Drawable, val foreground: Int, val background: I
                 icon = iconMap.get(resourceId)
                 if (icon == null) {
                     icon = context.resources.getDrawable(resourceId, null)
+                    icon.mutate()
                     iconMap.put(resourceId, icon)
                 }
             }
@@ -94,12 +99,13 @@ private const val THERMOSTAT_RANGE = DeviceTypes.TYPE_THERMOSTAT * BUCKET_SIZE
 
 private val deviceColorMap = mapOf<Int, Pair<Int, Int>>(
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT) to
-        Pair(R.color.thermo_heat_foreground, R.color.thermo_heat_background),
+        Pair(R.color.thermo_heat_foreground, R.color.control_enabled_thermo_heat_background),
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_COOL) to
-        Pair(R.color.thermo_cool_foreground, R.color.thermo_cool_background),
-    DeviceTypes.TYPE_LIGHT to Pair(R.color.light_foreground, R.color.light_background)
+        Pair(R.color.thermo_cool_foreground, R.color.control_enabled_thermo_cool_background),
+    DeviceTypes.TYPE_LIGHT
+        to Pair(R.color.light_foreground, R.color.control_enabled_light_background)
 ).withDefault {
-        Pair(R.color.control_foreground, R.color.control_background)
+        Pair(R.color.control_foreground, R.color.control_enabled_default_background)
 }
 
 private val deviceIconMap = mapOf<Int, IconState>(
