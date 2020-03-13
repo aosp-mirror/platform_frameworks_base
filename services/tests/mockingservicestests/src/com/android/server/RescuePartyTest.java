@@ -79,6 +79,7 @@ public class RescuePartyTest {
     private static final String CALLING_PACKAGE2 = "com.package.name2";
     private static final String NAMESPACE1 = "namespace1";
     private static final String NAMESPACE2 = "namespace2";
+    private static final String DISABLE_RESCUE_PARTY_FLAG = "disable_rescue_party";
 
     private MockitoSession mSession;
     private HashMap<String, String> mSystemSettingsMap;
@@ -316,6 +317,13 @@ public class RescuePartyTest {
 
     @Test
     public void testExplicitlyEnablingAndDisablingRescue() {
+        // mock the DeviceConfig get call to avoid hitting
+        // android.permission.READ_DEVICE_CONFIG when calling real DeviceConfig.
+        doReturn(true)
+                .when(() -> DeviceConfig.getBoolean(
+                    eq(DeviceConfig.NAMESPACE_CONFIGURATION),
+                    eq(DISABLE_RESCUE_PARTY_FLAG),
+                    eq(false)));
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
         SystemProperties.set(PROP_DISABLE_RESCUE, Boolean.toString(true));
         assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
@@ -324,6 +332,22 @@ public class RescuePartyTest {
         SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
         assertTrue(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
                 PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING));
+    }
+
+    @Test
+    public void testDisablingRescueByDeviceConfigFlag() {
+        doReturn(true)
+                .when(() -> DeviceConfig.getBoolean(
+                    eq(DeviceConfig.NAMESPACE_CONFIGURATION),
+                    eq(DISABLE_RESCUE_PARTY_FLAG),
+                    eq(false)));
+        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(false));
+
+        assertEquals(RescuePartyObserver.getInstance(mMockContext).execute(sFailingPackage,
+                PackageWatchdog.FAILURE_REASON_APP_NOT_RESPONDING), false);
+
+        // Restore the property value initalized in SetUp()
+        SystemProperties.set(RescueParty.PROP_ENABLE_RESCUE, Boolean.toString(true));
     }
 
     @Test
