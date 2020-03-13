@@ -474,6 +474,7 @@ class Task extends WindowContainer<WindowContainer> {
      * taskAppeared callback, and emit a taskRemoved callback when the Task is vanished.
      */
     ITaskOrganizer mTaskOrganizer;
+    private int mLastTaskOrganizerWindowingMode = -1;
 
     /**
      * Last Picture-in-Picture params applicable to the task. Updated when the app
@@ -1929,6 +1930,7 @@ class Task extends WindowContainer<WindowContainer> {
         // TODO: Should also take care of Pip mode changes here.
 
         saveLaunchingStateIfNeeded();
+        updateTaskOrganizerState(false /* forceUpdate */);
     }
 
     /**
@@ -4018,6 +4020,39 @@ class Task extends WindowContainer<WindowContainer> {
     // Called on Binder death.
     void taskOrganizerDied() {
         mTaskOrganizer = null;
+        mLastTaskOrganizerWindowingMode = -1;
+    }
+
+    /**
+     * Called when the task state changes (ie. from windowing mode change) an the task organizer
+     * state should also be updated.
+     *
+     * @param forceUpdate Updates the task organizer to the one currently specified in the task
+     *                    org controller for the task's windowing mode, ignoring the cached
+     *                    windowing mode checks.
+     */
+    void updateTaskOrganizerState(boolean forceUpdate) {
+        if (!isRootTask()) {
+            return;
+        }
+
+        final int windowingMode = getWindowingMode();
+        if (!forceUpdate && windowingMode == mLastTaskOrganizerWindowingMode) {
+            // If our windowing mode hasn't actually changed, then just stick
+            // with our old organizer. This lets us implement the semantic
+            // where SysUI can continue to manage it's old tasks
+            // while CTS temporarily takes over the registration.
+            return;
+        }
+        /*
+         * Different windowing modes may be managed by different task organizers. If
+         * getTaskOrganizer returns null, we still call setTaskOrganizer to
+         * make sure we clear it.
+         */
+        final ITaskOrganizer org =
+                mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
+        setTaskOrganizer(org);
+        mLastTaskOrganizerWindowingMode = windowingMode;
     }
 
     @Override
