@@ -18,6 +18,7 @@ package com.android.server.tv.tunerresourcemanager;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.media.tv.TvInputService;
+import android.platform.test.annotations.Presubmit;
 import android.util.Slog;
 
 import androidx.test.filters.SmallTest;
@@ -36,6 +37,7 @@ import java.nio.charset.StandardCharsets;
  * Tests for {@link UseCasePriorityHints} class.
  */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class UseCasePriorityHintsTest {
     private static final String TAG = "UseCasePriorityHintsTest";

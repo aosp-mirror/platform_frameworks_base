@@ -34,6 +34,7 @@ import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -54,6 +55,7 @@ import java.util.Map;
  * Tests for {@link TunerResourceManagerService} class.
  */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class TunerResourceManagerServiceTest {
     private static final String TAG = "TunerResourceManagerServiceTest";
