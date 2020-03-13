@@ -488,7 +488,8 @@ public abstract class AugmentedAutofillService extends Service {
                 ids.add(pair.first);
                 values.add(pair.second);
             }
-            mClient.autofill(mSessionId, ids, values);
+            final boolean hideHighlight = size == 1 && ids.get(0).equals(mFocusedId);
+            mClient.autofill(mSessionId, ids, values, hideHighlight);
         }
 
         public void setFillWindow(@NonNull FillWindow fillWindow) {
