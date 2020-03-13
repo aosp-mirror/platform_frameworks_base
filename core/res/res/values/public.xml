@@ -3014,6 +3014,8 @@
       <!-- @hide @SystemApi -->
       <public name="minExtensionVersion" />
       <public name="allowNativeHeapPointerTagging" />
+      <public name="requestDontAutoRevokePermissions" />
+      <public name="allowDontAutoRevokePermissions" />
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
       <public name="enableGwpAsan" />
