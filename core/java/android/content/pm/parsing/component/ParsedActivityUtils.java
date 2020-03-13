@@ -17,16 +17,17 @@
 package android.content.pm.parsing.component;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-
 import static android.content.pm.parsing.component.ComponentParseUtils.flag;
 
 import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageParser;
-
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
+import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -42,9 +43,6 @@ import android.view.WindowManager;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -379,6 +377,12 @@ public class ParsedActivityUtils {
             }
         }
 
+        ParseResult<ActivityInfo.WindowLayout> layoutResult = resolveWindowLayout(activity, input);
+        if (layoutResult.isError()) {
+            return input.error(layoutResult);
+        }
+        activity.windowLayout = layoutResult.getResult();
+
         if (!setExported) {
             activity.exported = activity.getIntents().size() > 0;
         }
@@ -480,5 +484,36 @@ public class ParsedActivityUtils {
         } finally {
             sw.recycle();
         }
+    }
+
+    /**
+     * Resolves values in {@link ActivityInfo.WindowLayout}.
+     *
+     * <p>{@link ActivityInfo.WindowLayout#windowLayoutAffinity} has a fallback metadata used in
+     * Android R and some variants of pre-R.
+     */
+    private static ParseResult<ActivityInfo.WindowLayout> resolveWindowLayout(
+            ParsedActivity activity, ParseInput input) {
+        // There isn't a metadata for us to fall back. Whatever is in layout is correct.
+        if (activity.metaData == null || !activity.metaData.containsKey(
+                PackageParser.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY)) {
+            return input.success(activity.windowLayout);
+        }
+
+        // Layout already specifies a value. We should just use that one.
+        if (activity.windowLayout != null && activity.windowLayout.windowLayoutAffinity != null) {
+            return input.success(activity.windowLayout);
+        }
+
+        String windowLayoutAffinity = activity.metaData.getString(
+                PackageParser.METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY);
+        ActivityInfo.WindowLayout layout = activity.windowLayout;
+        if (layout == null) {
+            layout = new ActivityInfo.WindowLayout(-1 /* width */, -1 /* widthFraction */,
+                    -1 /* height */, -1 /* heightFraction */, Gravity.NO_GRAVITY,
+                    -1 /* minWidth */, -1 /* minHeight */);
+        }
+        layout.windowLayoutAffinity = windowLayoutAffinity;
+        return input.success(layout);
     }
 }
