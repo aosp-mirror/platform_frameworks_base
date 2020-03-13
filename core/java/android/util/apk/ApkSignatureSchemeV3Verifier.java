@@ -16,6 +16,8 @@
 
 package android.util.apk;
 
+import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256;
+import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.compareSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getContentDigestAlgorithmJcaDigestAlgorithm;
@@ -209,6 +211,12 @@ public class ApkSignatureSchemeV3Verifier {
             byte[] verityDigest = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
             result.verityRootHash = ApkSigningBlockUtils.parseVerityDigestAndVerifySourceLength(
                     verityDigest, apk.length(), signatureInfo);
+        }
+
+        if (contentDigests.containsKey(CONTENT_DIGEST_CHUNKED_SHA512)) {
+            result.digest = contentDigests.get(CONTENT_DIGEST_CHUNKED_SHA512);
+        } else if (contentDigests.containsKey(CONTENT_DIGEST_CHUNKED_SHA256)) {
+            result.digest = contentDigests.get(CONTENT_DIGEST_CHUNKED_SHA256);
         }
 
         return result;
@@ -568,6 +576,7 @@ public class ApkSignatureSchemeV3Verifier {
         public final VerifiedProofOfRotation por;
 
         public byte[] verityRootHash;
+        public byte[] digest;
 
         public VerifiedSigner(X509Certificate[] certs, VerifiedProofOfRotation por) {
             this.certs = certs;

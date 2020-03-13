@@ -973,7 +973,6 @@ filegroup {
     srcs: [
         "core/java/android/os/incremental/IIncrementalService.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
-        "core/java/android/os/incremental/IncrementalSignature.aidl",
     ],
     path: "core/java",
 }
