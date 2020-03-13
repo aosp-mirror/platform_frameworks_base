@@ -22,6 +22,7 @@ import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_RESUM
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_STARTED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_DISAPPEARED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_INSETS_CHANGED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TEXT_CHANGED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_VIEW_TREE_APPEARING;
@@ -36,6 +37,7 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.graphics.Insets;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -578,6 +580,11 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    void internalNotifyViewInsetsChanged(@NonNull Insets viewInsets) {
+        notifyViewInsetsChanged(mId, viewInsets);
+    }
+
+    @Override
     public void internalNotifyViewTreeEvent(boolean started) {
         notifyViewTreeEvent(mId, started);
     }
@@ -639,6 +646,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     void notifyViewTextChanged(int sessionId, @NonNull AutofillId id, @Nullable CharSequence text) {
         sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_TEXT_CHANGED).setAutofillId(id)
                 .setText(text));
+    }
+
+    /** Public because is also used by ViewRootImpl */
+    public void notifyViewInsetsChanged(int sessionId, @NonNull Insets viewInsets) {
+        sendEvent(new ContentCaptureEvent(sessionId, TYPE_VIEW_INSETS_CHANGED)
+                .setInsets(viewInsets));
     }
 
     /** Public because is also used by ViewRootImpl */
