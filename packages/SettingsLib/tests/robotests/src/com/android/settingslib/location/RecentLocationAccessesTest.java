@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
-import android.app.AppOpsManager.OpFeatureEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -163,6 +162,6 @@ public class RecentLocationAccessesTest {
             AppOpsManager.OP_FLAG_SELF), new AppOpsManager.NoteOpEvent(time, -1, null));
 
         return new OpEntry(op, AppOpsManager.MODE_ALLOWED, Collections.singletonMap(null,
-                new OpFeatureEntry(op, false, accessEvents, null)));
+                new AppOpsManager.AttributedOpEntry(op, false, accessEvents, null)));
     }
 }

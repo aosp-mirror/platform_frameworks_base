@@ -448,14 +448,37 @@ package android.app {
     field public static final int UID_STATE_TOP = 200; // 0xc8
   }
 
-  public static final class AppOpsManager.HistoricalFeatureOps implements android.os.Parcelable {
+  public static final class AppOpsManager.AttributedHistoricalOps implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public String getFeatureId();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
     method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getOpCount();
+    method @Nullable public String getTag();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalFeatureOps> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.AttributedHistoricalOps> CREATOR;
+  }
+
+  public static final class AppOpsManager.AttributedOpEntry implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getLastAccessBackgroundTime(int);
+    method public long getLastAccessForegroundTime(int);
+    method public long getLastAccessTime(int);
+    method public long getLastAccessTime(int, int, int);
+    method public long getLastBackgroundDuration(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastBackgroundProxyInfo(int);
+    method public long getLastDuration(int);
+    method public long getLastDuration(int, int, int);
+    method public long getLastForegroundDuration(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastForegroundProxyInfo(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int, int, int);
+    method public long getLastRejectBackgroundTime(int);
+    method public long getLastRejectForegroundTime(int);
+    method public long getLastRejectTime(int);
+    method public long getLastRejectTime(int, int, int);
+    method public boolean isRunning();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.AttributedOpEntry> CREATOR;
   }
 
   public static final class AppOpsManager.HistoricalOp implements android.os.Parcelable {
@@ -491,7 +514,7 @@ package android.app {
   public static final class AppOpsManager.HistoricalOpsRequest.Builder {
     ctor public AppOpsManager.HistoricalOpsRequest.Builder(long, long);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
-    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFeatureId(@Nullable String);
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setAttributionTag(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFlags(int);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
@@ -500,9 +523,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
-    method @IntRange(from=0) public int getFeatureCount();
-    method @Nullable public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOps(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOpsAt(@IntRange(from=0) int);
+    method @Nullable public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOps(@NonNull String);
+    method @NonNull public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOpsAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getAttributedOpsCount();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
     method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getOpCount();
@@ -523,8 +546,8 @@ package android.app {
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,android.app.AppOpsManager.AttributedOpEntry> getAttributedOpEntries();
     method @Deprecated public long getDuration();
-    method @NonNull public java.util.Map<java.lang.String,android.app.AppOpsManager.OpFeatureEntry> getFeatures();
     method public long getLastAccessBackgroundTime(int);
     method public long getLastAccessForegroundTime(int);
     method public long getLastAccessTime(int);
@@ -554,34 +577,11 @@ package android.app {
 
   public static final class AppOpsManager.OpEventProxyInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public String getFeatureId();
+    method @Nullable public String getAttributionTag();
     method @Nullable public String getPackageName();
     method @IntRange(from=0) public int getUid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEventProxyInfo> CREATOR;
-  }
-
-  public static final class AppOpsManager.OpFeatureEntry implements android.os.Parcelable {
-    method public int describeContents();
-    method public long getLastAccessBackgroundTime(int);
-    method public long getLastAccessForegroundTime(int);
-    method public long getLastAccessTime(int);
-    method public long getLastAccessTime(int, int, int);
-    method public long getLastBackgroundDuration(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastBackgroundProxyInfo(int);
-    method public long getLastDuration(int);
-    method public long getLastDuration(int, int, int);
-    method public long getLastForegroundDuration(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastForegroundProxyInfo(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int, int, int);
-    method public long getLastRejectBackgroundTime(int);
-    method public long getLastRejectForegroundTime(int);
-    method public long getLastRejectTime(int);
-    method public long getLastRejectTime(int, int, int);
-    method public boolean isRunning();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpFeatureEntry> CREATOR;
   }
 
   public static final class AppOpsManager.PackageOps implements android.os.Parcelable {
@@ -688,7 +688,7 @@ package android.app {
   public final class RuntimeAppOpAccessMessage implements android.os.Parcelable {
     ctor public RuntimeAppOpAccessMessage(@IntRange(from=0L) int, @IntRange(from=0L) int, @NonNull String, @Nullable String, @NonNull String, int);
     method public int describeContents();
-    method @Nullable public String getFeatureId();
+    method @Nullable public String getAttributionTag();
     method @NonNull public String getMessage();
     method @NonNull public String getOp();
     method @NonNull public String getPackageName();

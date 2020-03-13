@@ -71,7 +71,7 @@ public class WifiRttManagerTest {
         mMockLooperExecutor = mMockLooper.getNewExecutor();
 
         when(mockContext.getOpPackageName()).thenReturn(packageName);
-        when(mockContext.getFeatureId()).thenReturn(featureId);
+        when(mockContext.getAttributionTag()).thenReturn(featureId);
     }
 
     /**

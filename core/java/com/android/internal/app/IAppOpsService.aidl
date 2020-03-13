@@ -34,14 +34,14 @@ interface IAppOpsService {
     // be kept in sync with frameworks/native/libs/binder/include/binder/IAppOpsService.h
     // and not be reordered
     int checkOperation(int code, int uid, String packageName);
-    int noteOperation(int code, int uid, String packageName, @nullable String featureId,
+    int noteOperation(int code, int uid, String packageName, @nullable String attributionTag,
             boolean shouldCollectAsyncNotedOp, String message);
     int startOperation(IBinder clientId, int code, int uid, String packageName,
-            @nullable String featureId, boolean startIfModeDefault,
+            @nullable String attributionTag, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message);
     @UnsupportedAppUsage
     void finishOperation(IBinder clientId, int code, int uid, String packageName,
-            @nullable String featureId);
+            @nullable String attributionTag);
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
     int permissionToOpCode(String permission);
@@ -52,8 +52,8 @@ interface IAppOpsService {
     // Any new method exposed to native must be added after the last one, do not reorder
 
     int noteProxyOperation(int code, int proxiedUid, String proxiedPackageName,
-            String proxiedFeatureId, int proxyUid, String proxyPackageName,
-            String proxyFeatureId, boolean shouldCollectAsyncNotedOp, String message);
+            String proxiedAttributionTag, int proxyUid, String proxyPackageName,
+            String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message);
 
     // Remaining methods are only used in Java.
     int checkPackage(int uid, String packageName);
@@ -64,10 +64,10 @@ interface IAppOpsService {
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
     @UnsupportedAppUsage
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
-    void getHistoricalOps(int uid, String packageName, String featureId, in List<String> ops,
+    void getHistoricalOps(int uid, String packageName, String attributionTag, in List<String> ops,
             int filter, long beginTimeMillis, long endTimeMillis, int flags,
             in RemoteCallback callback);
-    void getHistoricalOpsFromDiskRaw(int uid, String packageName, String featureId,
+    void getHistoricalOpsFromDiskRaw(int uid, String packageName, String attributionTag,
             in List<String> ops, int filter, long beginTimeMillis, long endTimeMillis, int flags,
             in RemoteCallback callback);
     void offsetHistory(long duration);

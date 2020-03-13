@@ -48,7 +48,7 @@ public class SensorNotificationService extends SystemService
 
     private static final long MILLIS_2010_1_1 = 1262358000000l;
 
-    private static final String FEATURE_ID = "SensorNotificationService";
+    private static final String ATTRIBUTION_TAG = "SensorNotificationService";
 
     private Context mContext;
     private SensorManager mSensorManager;
@@ -59,7 +59,7 @@ public class SensorNotificationService extends SystemService
     private long mLocalGeomagneticFieldUpdateTime = -LOCATION_MIN_TIME;
 
     public SensorNotificationService(Context context) {
-        super(context.createFeatureContext(FEATURE_ID));
+        super(context.createAttributionContext(ATTRIBUTION_TAG));
         mContext = getContext();
     }
 
