@@ -32,6 +32,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.media.InfoMediaManager;
 import com.android.settingslib.media.LocalMediaManager;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.media.MediaOutputSliceConstants;
@@ -106,7 +108,9 @@ public class MediaTransferManager {
     public MediaTransferManager(Context context) {
         mContext = context;
         mActivityStarter = Dependency.get(ActivityStarter.class);
-        mLocalMediaManager = new LocalMediaManager(mContext, null, null);
+        LocalBluetoothManager lbm = Dependency.get(LocalBluetoothManager.class);
+        InfoMediaManager imm = new InfoMediaManager(mContext, null, null, lbm);
+        mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, null);
     }
 
     /**
