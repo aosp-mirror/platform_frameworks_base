@@ -9090,7 +9090,6 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
-    method @NonNull public android.telephony.ServiceState createLocationInfoSanitizedCopy(boolean);
     method public void fillInNotifierBundle(@NonNull android.os.Bundle);
     method public int getDataNetworkType();
     method public boolean getDataRoamingFromRegistration();
