@@ -75,6 +75,7 @@ public final class CellIdentityCdma extends CellIdentity {
         mBasestationId = CellInfo.UNAVAILABLE;
         mLongitude = CellInfo.UNAVAILABLE;
         mLatitude = CellInfo.UNAVAILABLE;
+        mGlobalCellId = null;
     }
 
     /**
@@ -106,6 +107,7 @@ public final class CellIdentityCdma extends CellIdentity {
         } else {
             mLongitude = mLatitude = CellInfo.UNAVAILABLE;
         }
+        updateGlobalCellId();
     }
 
     /** @hide */
@@ -134,6 +136,16 @@ public final class CellIdentityCdma extends CellIdentity {
         return new CellIdentityCdma(CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE,
                 mAlphaLong, mAlphaShort);
+    }
+
+    /** @hide */
+    @Override
+    protected void updateGlobalCellId() {
+        mGlobalCellId = null;
+        if (mNetworkId == CellInfo.UNAVAILABLE || mSystemId == CellInfo.UNAVAILABLE
+                || mBasestationId == CellInfo.UNAVAILABLE) return;
+
+        mGlobalCellId = String.format("%04x%04x%04x", mSystemId, mNetworkId,  mBasestationId);
     }
 
     /**
