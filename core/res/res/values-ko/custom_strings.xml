@@ -2,5 +2,5 @@
 <resources>
     <!-- Strings for Bluetooth service -->
     <!-- toast message informing user that Bluetooth stays on after airplane mode is turned on. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_airplane_mode_toast">비행기 모드에서 블루투스가 켜진 상태로 유지됩니다.</string>
+    <string name="bluetooth_airplane_mode_toast">블루투스는 비행기 모드에서 켜진 상태로 유지됩니다</string>
 </resources>

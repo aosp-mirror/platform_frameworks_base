@@ -2,5 +2,5 @@
 <resources>
     <!-- Strings for Bluetooth service -->
     <!-- toast message informing user that Bluetooth stays on after airplane mode is turned on. [CHAR LIMIT=NONE] -->
-    <string name="bluetooth_airplane_mode_toast">Bluetooth будет работать в режиме полета.</string>
+    <string name="bluetooth_airplane_mode_toast">Bluetooth останется активным во время режима полёта</string>
 </resources>
