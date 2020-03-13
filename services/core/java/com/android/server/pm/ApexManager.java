@@ -301,6 +301,14 @@ public abstract class ApexManager {
     public abstract boolean destroyDeSnapshots(int rollbackId);
 
     /**
+     * Deletes snapshots of the credential encrypted apex data directories for the specified user,
+     * where the rollback id is not included in {@code retainRollbackIds}.
+     *
+     * @return boolean true if the delete was successful
+     */
+    public abstract boolean destroyCeSnapshotsNotSpecified(int userId, int[] retainRollbackIds);
+
+    /**
      * Dumps various state information to the provided {@link PrintWriter} object.
      *
      * @param pw the {@link PrintWriter} object to send information to.
@@ -745,6 +753,17 @@ public abstract class ApexManager {
             }
         }
 
+        @Override
+        public boolean destroyCeSnapshotsNotSpecified(int userId, int[] retainRollbackIds) {
+            try {
+                mApexService.destroyCeSnapshotsNotSpecified(userId, retainRollbackIds);
+                return true;
+            } catch (Exception e) {
+                Slog.e(TAG, e.getMessage(), e);
+                return false;
+            }
+        }
+
         /**
          * Dump information about the packages contained in a particular cache
          * @param packagesCache the cache to print information about.
@@ -960,6 +979,11 @@ public abstract class ApexManager {
         @Override
         public boolean destroyDeSnapshots(int rollbackId) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public boolean destroyCeSnapshotsNotSpecified(int userId, int[] retainRollbackIds) {
+            return true;
         }
 
         @Override

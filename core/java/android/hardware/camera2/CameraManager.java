@@ -486,7 +486,7 @@ public final class CameraManager {
                             "Camera service is currently unavailable");
                     }
                     cameraUser = cameraService.connectDevice(callbacks, cameraId,
-                            mContext.getOpPackageName(), mContext.getFeatureId(), uid);
+                            mContext.getOpPackageName(), mContext.getAttributionTag(), uid);
                 } else {
                     // Use legacy camera implementation for HAL1 devices
                     int id;

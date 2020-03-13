@@ -492,7 +492,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
                     try {
                         result = ActivityTaskManager.getService().startActivityAsUser(
                                 null, getContext().getBasePackageName(),
-                                getContext().getFeatureId(), intent,
+                                getContext().getAttributionTag(), intent,
                                 intent.resolveTypeIfNeeded(getContext().getContentResolver()),
                                 null, null, 0, Intent.FLAG_ACTIVITY_NEW_TASK, null, o.toBundle(),
                                 UserHandle.CURRENT.getIdentifier());

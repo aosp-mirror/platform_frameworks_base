@@ -727,8 +727,9 @@ public class WifiManager {
 
     /**
      *  If Soft Ap client is blocked, this reason code means that client doesn't exist in the
-     *  specified configuration {@link SoftApConfiguration.Builder#setClientList(List, List)}
-     *  and the {@link SoftApConfiguration.Builder#enableClientControlByUser(true)}
+     *  specified configuration {@link SoftApConfiguration.Builder#setBlockedClientList(List)}
+     *  and {@link SoftApConfiguration.Builder#setAllowedClientList(List)}
+     *  and the {@link SoftApConfiguration.Builder#setClientControlByUserEnabled(boolean)}
      *  is configured as well.
      *  @hide
      */
@@ -1352,7 +1353,7 @@ public class WifiManager {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
                     mService.getConfiguredNetworks(mContext.getOpPackageName(),
-                            mContext.getFeatureId());
+                            mContext.getAttributionTag());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1369,7 +1370,7 @@ public class WifiManager {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
                     mService.getPrivilegedConfiguredNetworks(mContext.getOpPackageName(),
-                            mContext.getFeatureId());
+                            mContext.getAttributionTag());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1898,7 +1899,7 @@ public class WifiManager {
             @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
         try {
             return mService.addNetworkSuggestions(
-                    networkSuggestions, mContext.getOpPackageName(), mContext.getFeatureId());
+                    networkSuggestions, mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2680,8 +2681,8 @@ public class WifiManager {
     public boolean startScan(WorkSource workSource) {
         try {
             String packageName = mContext.getOpPackageName();
-            String featureId = mContext.getFeatureId();
-            return mService.startScan(packageName, featureId);
+            String attributionTag = mContext.getAttributionTag();
+            return mService.startScan(packageName, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2713,7 +2714,7 @@ public class WifiManager {
     public WifiInfo getConnectionInfo() {
         try {
             return mService.getConnectionInfo(mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2728,7 +2729,7 @@ public class WifiManager {
     public List<ScanResult> getScanResults() {
         try {
             return mService.getScanResults(mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2759,7 +2760,7 @@ public class WifiManager {
         try {
             return mService.getMatchingScanResults(
                     networkSuggestionsToMatch, scanResults,
-                    mContext.getOpPackageName(), mContext.getFeatureId());
+                    mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3198,7 +3199,7 @@ public class WifiManager {
                     new LocalOnlyHotspotCallbackProxy(this, executor, callback);
             try {
                 String packageName = mContext.getOpPackageName();
-                String featureId = mContext.getFeatureId();
+                String featureId = mContext.getAttributionTag();
                 int returnCode = mService.startLocalOnlyHotspot(proxy, packageName, featureId,
                         config);
                 if (returnCode != LocalOnlyHotspotCallback.REQUEST_REGISTERED) {
@@ -3409,9 +3410,10 @@ public class WifiManager {
      * If the API is called while the tethered soft AP is enabled, the configuration will apply to
      * the current soft AP if the new configuration only includes
      * {@link SoftApConfiguration.Builder#setMaxNumberOfClients(int)}
-     * or {@link SoftApConfiguration.Builder#setShutdownTimeoutMillis(int)}
-     * or {@link SoftApConfiguration.Builder#enableClientControlByUser(boolean)}
-     * or {@link SoftApConfiguration.Builder#setClientList(List, List)}.
+     * or {@link SoftApConfiguration.Builder#setShutdownTimeoutMillis(long)}
+     * or {@link SoftApConfiguration.Builder#setClientControlByUserEnabled(boolean)}
+     * or {@link SoftApConfiguration.Builder#setBlockedClientList(List)}
+     * or {@link SoftApConfiguration.Builder#setAllowedClientList(List)}
      *
      * Otherwise, the configuration changes will be applied when the Soft AP is next started
      * (the framework will not stop/start the AP).
@@ -5889,7 +5891,7 @@ public class WifiManager {
         try {
             mService.registerSuggestionConnectionStatusListener(new Binder(),
                     new SuggestionConnectionStatusListenerProxy(executor, listener),
-                    listener.hashCode(), mContext.getOpPackageName(), mContext.getFeatureId());
+                    listener.hashCode(), mContext.getOpPackageName(), mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

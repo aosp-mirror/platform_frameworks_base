@@ -95,7 +95,7 @@ public class CrossProfileApps {
             mService.startActivityAsUser(
                     mContext.getIApplicationThread(),
                     mContext.getPackageName(),
-                    mContext.getFeatureId(),
+                    mContext.getAttributionTag(),
                     component,
                     targetUser.getIdentifier(),
                     true);
@@ -132,7 +132,7 @@ public class CrossProfileApps {
             mService.startActivityAsUserByIntent(
                     mContext.getIApplicationThread(),
                     mContext.getPackageName(),
-                    mContext.getFeatureId(),
+                    mContext.getAttributionTag(),
                     intent,
                     targetUser.getIdentifier(),
                     callingActivity != null ? callingActivity.getActivityToken() : null);
@@ -159,7 +159,7 @@ public class CrossProfileApps {
     public void startActivity(@NonNull ComponentName component, @NonNull UserHandle targetUser) {
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(), mContext.getFeatureId(), component,
+                    mContext.getPackageName(), mContext.getAttributionTag(), component,
                     targetUser.getIdentifier(), false);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();

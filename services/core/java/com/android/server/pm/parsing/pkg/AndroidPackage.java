@@ -25,7 +25,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.parsing.ParsingPackageRead;
-import android.content.pm.parsing.component.ParsedFeature;
+import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermissionGroup;
 import android.os.Bundle;
@@ -147,7 +147,7 @@ public interface AndroidPackage extends PkgAppInfo, PkgPackageInfo, ParsingPacka
     List<ParsedPermissionGroup> getPermissionGroups();
 
     @NonNull
-    List<ParsedFeature> getFeatures();
+    List<ParsedAttribution> getAttributions();
 
     /**
      * Used to determine the default preferred handler of an {@link Intent}.

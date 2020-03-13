@@ -1297,9 +1297,9 @@ final class UiModeManagerService extends SystemService {
             if (Sandman.shouldStartDockApp(getContext(), homeIntent)) {
                 try {
                     int result = ActivityTaskManager.getService().startActivityWithConfig(
-                            null, getContext().getBasePackageName(), getContext().getFeatureId(),
-                            homeIntent, null, null, null, 0, 0, mConfiguration, null,
-                            UserHandle.USER_CURRENT);
+                            null, getContext().getBasePackageName(),
+                            getContext().getAttributionTag(), homeIntent, null, null, null, 0, 0,
+                            mConfiguration, null, UserHandle.USER_CURRENT);
                     if (ActivityManager.isStartResultSuccessful(result)) {
                         dockAppStarted = true;
                     } else if (result != ActivityManager.START_INTENT_NOT_RESOLVED) {

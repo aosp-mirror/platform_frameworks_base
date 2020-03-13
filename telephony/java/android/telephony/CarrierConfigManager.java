@@ -4202,7 +4202,7 @@ public class CarrierConfigManager {
                 return null;
             }
             return loader.getConfigForSubIdWithFeature(subId, mContext.getOpPackageName(),
-                    mContext.getFeatureId());
+                    mContext.getAttributionTag());
         } catch (RemoteException ex) {
             Rlog.e(TAG, "Error getting config for subId " + subId + ": "
                     + ex.toString());

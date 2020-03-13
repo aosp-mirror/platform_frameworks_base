@@ -721,7 +721,7 @@ public class LauncherApps {
         }
         try {
             mService.startActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(), mContext.getFeatureId(),
+                    mContext.getPackageName(), mContext.getAttributionTag(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
@@ -739,8 +739,8 @@ public class LauncherApps {
             @Nullable Rect sourceBounds, @Nullable Bundle opts) {
         try {
             mService.startSessionDetailsActivityAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(), mContext.getFeatureId(), sessionInfo, sourceBounds,
-                    opts, sessionInfo.getUser());
+                    mContext.getPackageName(), mContext.getAttributionTag(), sessionInfo,
+                    sourceBounds, opts, sessionInfo.getUser());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -760,7 +760,7 @@ public class LauncherApps {
         logErrorForInvalidProfileAccess(user);
         try {
             mService.showAppDetailsAsUser(mContext.getIApplicationThread(),
-                    mContext.getPackageName(), mContext.getFeatureId(),
+                    mContext.getPackageName(), mContext.getAttributionTag(),
                     component, sourceBounds, opts, user);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
