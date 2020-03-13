@@ -771,6 +771,12 @@ public interface ParsingPackageRead extends Parcelable {
     /** @see ApplicationInfo#PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING */
     boolean isAllowNativeHeapPointerTagging();
 
+    /** @see ApplicationInfo#PRIVATE_FLAG2_DONT_AUTO_REVOKE_PERMISSIONS */
+    boolean isDontAutoRevokePermmissions();
+
+    /** @see ApplicationInfo#PRIVATE_FLAG2_ALLOW_DONT_AUTO_REVOKE_PERMISSIONS */
+    boolean isAllowDontAutoRevokePermmissions();
+
     boolean hasPreserveLegacyExternalStorage();
 
     /**

@@ -191,7 +191,11 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setRequestLegacyExternalStorage(boolean requestLegacyExternalStorage);
 
     ParsingPackage setAllowNativeHeapPointerTagging(boolean allowNativeHeapPointerTagging);
-  
+
+    ParsingPackage setDontAutoRevokePermissions(boolean dontAutoRevokePermissions);
+
+    ParsingPackage setAllowDontAutoRevokePermissions(boolean allowDontAutoRevokePermissions);
+
     ParsingPackage setPreserveLegacyExternalStorage(boolean preserveLegacyExternalStorage);
 
     ParsingPackage setRestoreAnyVersion(boolean restoreAnyVersion);
