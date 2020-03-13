@@ -17,8 +17,8 @@
 package com.android.systemui.controls.ui
 
 import android.content.Context
-import android.graphics.BlendMode
 import android.graphics.drawable.ClipDrawable
+import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
@@ -39,6 +39,8 @@ import com.android.systemui.R
 import kotlin.reflect.KClass
 
 private const val UPDATE_DELAY_IN_MILLIS = 3000L
+private const val ALPHA_ENABLED = (255.0 * 0.2).toInt()
+private const val ALPHA_DISABLED = 255
 
 class ControlViewHolder(
     val layout: ViewGroup,
@@ -144,16 +146,21 @@ class ControlViewHolder(
         val ri = RenderInfo.lookup(context, cws.componentName, deviceType, enabled, offset)
 
         val fg = context.getResources().getColorStateList(ri.foreground, context.getTheme())
-        val bg = context.getResources().getColorStateList(ri.background, context.getTheme())
+        val (bg, alpha) = if (enabled) {
+            Pair(ri.enabledBackground, ALPHA_ENABLED)
+        } else {
+            Pair(R.color.control_default_background, ALPHA_DISABLED)
+        }
+
         status.setTextColor(fg)
         statusExtra.setTextColor(fg)
 
         icon.setImageDrawable(ri.icon)
         icon.setImageTintList(fg)
 
-        clipLayer.getDrawable().apply {
-            setTintBlendMode(BlendMode.HUE)
-            setTintList(bg)
+        (clipLayer.getDrawable() as GradientDrawable).apply {
+            setColor(context.getResources().getColor(bg, context.getTheme()))
+            setAlpha(alpha)
         }
     }
 
