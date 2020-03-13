@@ -434,60 +434,64 @@ public final class MediaParser {
     // Public constants.
 
     /**
-     * Sets whether constant bitrate seeking should be enabled for exo.AdtsParser. {@code boolean}
+     * Sets whether constant bitrate seeking should be enabled for ADTS parsing. {@code boolean}
      * expected. Default value is {@code false}.
      */
     public static final String PARAMETER_ADTS_ENABLE_CBR_SEEKING =
-            "exo.AdtsParser.enableCbrSeeking";
+            "android.media.mediaparser.adts.enableCbrSeeking";
     /**
-     * Sets whether constant bitrate seeking should be enabled for exo.AmrParser. {@code boolean}
+     * Sets whether constant bitrate seeking should be enabled for AMR. {@code boolean} expected.
+     * Default value is {@code false}.
+     */
+    public static final String PARAMETER_AMR_ENABLE_CBR_SEEKING =
+            "android.media.mediaparser.amr.enableCbrSeeking";
+    /**
+     * Sets whether the ID3 track should be disabled for FLAC. {@code boolean} expected. Default
+     * value is {@code false}.
+     */
+    public static final String PARAMETER_FLAC_DISABLE_ID3 =
+            "android.media.mediaparser.flac.disableId3";
+    /**
+     * Sets whether MP4 parsing should ignore edit lists. {@code boolean} expected. Default value is
+     * {@code false}.
+     */
+    public static final String PARAMETER_MP4_IGNORE_EDIT_LISTS =
+            "android.media.mediaparser.mp4.ignoreEditLists";
+    /**
+     * Sets whether MP4 parsing should ignore the tfdt box. {@code boolean} expected. Default value
+     * is {@code false}.
+     */
+    public static final String PARAMETER_MP4_IGNORE_TFDT_BOX =
+            "android.media.mediaparser.mp4.ignoreTfdtBox";
+    /**
+     * Sets whether MP4 parsing should treat all video frames as key frames. {@code boolean}
      * expected. Default value is {@code false}.
      */
-    public static final String PARAMETER_AMR_ENABLE_CBR_SEEKING = "exo.AmrParser.enableCbrSeeking";
+    public static final String PARAMETER_MP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES =
+            "android.media.mediaparser.mp4.treatVideoFramesAsKeyframes";
     /**
-     * Sets whether the ID3 track should be disabled for exo.FlacParser. {@code boolean} expected.
-     * Default value is {@code false}.
-     */
-    public static final String PARAMETER_FLAC_DISABLE_ID3 = "exo.FlacParser.disableId3";
-    /**
-     * Sets whether exo.FragmentedMp4Parser should ignore edit lists. {@code boolean} expected.
-     * Default value is {@code false}.
-     */
-    public static final String PARAMETER_FMP4_IGNORE_EDIT_LISTS =
-            "exo.FragmentedMp4Parser.ignoreEditLists";
-    /**
-     * Sets whether exo.FragmentedMp4Parser should ignore the tfdt box. {@code boolean} expected.
-     * Default value is {@code false}.
-     */
-    public static final String PARAMETER_FMP4_IGNORE_TFDT_BOX =
-            "exo.FragmentedMp4Parser.ignoreTfdtBox";
-    /**
-     * Sets whether exo.FragmentedMp4Parser should treat all video frames as key frames. {@code
-     * boolean} expected. Default value is {@code false}.
-     */
-    public static final String PARAMETER_FMP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES =
-            "exo.FragmentedMp4Parser.treatVideoFramesAsKeyframes";
-    /**
-     * Sets whether exo.MatroskaParser should avoid seeking to the cues element. {@code boolean}
+     * Sets whether Matroska parsing should avoid seeking to the cues element. {@code boolean}
      * expected. Default value is {@code false}.
      *
      * <p>If this flag is enabled and the cues element occurs after the first cluster, then the
      * media is treated as unseekable.
      */
     public static final String PARAMETER_MATROSKA_DISABLE_CUES_SEEKING =
-            "exo.MatroskaParser.disableCuesSeeking";
+            "android.media.mediaparser.matroska.disableCuesSeeking";
     /**
-     * Sets whether the ID3 track should be disabled for exo.Mp3Parser. {@code boolean} expected.
+     * Sets whether the ID3 track should be disabled for MP3. {@code boolean} expected. Default
+     * value is {@code false}.
+     */
+    public static final String PARAMETER_MP3_DISABLE_ID3 =
+            "android.media.mediaparser.mp3.disableId3";
+    /**
+     * Sets whether constant bitrate seeking should be enabled for MP3. {@code boolean} expected.
      * Default value is {@code false}.
      */
-    public static final String PARAMETER_MP3_DISABLE_ID3 = "exo.Mp3Parser.disableId3";
+    public static final String PARAMETER_MP3_ENABLE_CBR_SEEKING =
+            "android.media.mediaparser.mp3.enableCbrSeeking";
     /**
-     * Sets whether constant bitrate seeking should be enabled for exo.Mp3Parser. {@code boolean}
-     * expected. Default value is {@code false}.
-     */
-    public static final String PARAMETER_MP3_ENABLE_CBR_SEEKING = "exo.Mp3Parser.enableCbrSeeking";
-    /**
-     * Sets whether exo.Mp3Parser should generate a time-to-byte mapping. {@code boolean} expected.
+     * Sets whether MP3 parsing should generate a time-to-byte mapping. {@code boolean} expected.
      * Default value is {@code false}.
      *
      * <p>Enabling this flag may require to scan a significant portion of the file to compute a seek
@@ -500,18 +504,13 @@ public final class MediaParser {
      * </ul>
      */
     public static final String PARAMETER_MP3_ENABLE_INDEX_SEEKING =
-            "exo.Mp3Parser.enableIndexSeeking";
+            "android.media.mediaparser.mp3.enableIndexSeeking";
     /**
-     * Sets whether exo.Mp4Parser should ignore edit lists. {@code boolean} expected. Default value
-     * is {@code false}.
-     */
-    public static final String PARAMETER_MP4_IGNORE_EDIT_LISTS = "exo.Mp4Parser.ignoreEditLists";
-    /**
-     * Sets the operation mode for exo.TsParser. {@code String} expected. Valid values are {@code
+     * Sets the operation mode for TS parsing. {@code String} expected. Valid values are {@code
      * "single_pmt"}, {@code "multi_pmt"}, and {@code "hls"}. Default value is {@code "single_pmt"}.
      *
-     * <p>The operation modes alter the way exo.TsParser behaves so that it can handle certain kinds
-     * of commonly-occurring malformed media.
+     * <p>The operation modes alter the way TS behaves so that it can handle certain kinds of
+     * commonly-occurring malformed media.
      *
      * <ul>
      *   <li>{@code "single_pmt"}: Only the first found PMT is parsed. Others are ignored, even if
@@ -520,47 +519,48 @@ public final class MediaParser {
      *   <li>{@code "hls"}: Enable {@code "single_pmt"} mode, and ignore continuity counters.
      * </ul>
      */
-    public static final String PARAMETER_TS_MODE = "exo.TsParser.mode";
+    public static final String PARAMETER_TS_MODE = "android.media.mediaparser.ts.mode";
     /**
-     * Sets whether exo.TsParser should treat samples consisting of non-IDR I slices as
-     * synchronization samples (key-frames). {@code boolean} expected. Default value is {@code
-     * false}.
+     * Sets whether TS should treat samples consisting of non-IDR I slices as synchronization
+     * samples (key-frames). {@code boolean} expected. Default value is {@code false}.
      */
     public static final String PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES =
-            "exo.TsParser.allowNonIdrAvcKeyframes";
+            "android.media.mediaparser.ts.allowNonIdrAvcKeyframes";
     /**
-     * Sets whether exo.TsParser should ignore AAC elementary streams. {@code boolean} expected.
+     * Sets whether TS parsing should ignore AAC elementary streams. {@code boolean} expected.
      * Default value is {@code false}.
      */
-    public static final String PARAMETER_TS_IGNORE_AAC_STREAM = "exo.TsParser.ignoreAacStream";
+    public static final String PARAMETER_TS_IGNORE_AAC_STREAM =
+            "android.media.mediaparser.ts.ignoreAacStream";
     /**
-     * Sets whether exo.TsParser should ignore AVC elementary streams. {@code boolean} expected.
+     * Sets whether TS parsing should ignore AVC elementary streams. {@code boolean} expected.
      * Default value is {@code false}.
      */
-    public static final String PARAMETER_TS_IGNORE_AVC_STREAM = "exo.TsParser.ignoreAvcStream";
+    public static final String PARAMETER_TS_IGNORE_AVC_STREAM =
+            "android.media.mediaparser.ts.ignoreAvcStream";
     /**
-     * Sets whether exo.TsParser should ignore splice information streams. {@code boolean} expected.
+     * Sets whether TS parsing should ignore splice information streams. {@code boolean} expected.
      * Default value is {@code false}.
      */
     public static final String PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM =
-            "exo.TsParser.ignoreSpliceInfoStream";
+            "android.media.mediaparser.ts.ignoreSpliceInfoStream";
     /**
-     * Sets whether exo.TsParser should split AVC stream into access units based on slice headers.
+     * Sets whether TS parsing should split AVC stream into access units based on slice headers.
      * {@code boolean} expected. Default value is {@code false}.
      *
      * <p>This flag should be left disabled if the stream contains access units delimiters in order
      * to avoid unnecessary computational costs.
      */
     public static final String PARAMETER_TS_DETECT_ACCESS_UNITS =
-            "exo.TsParser.ignoreDetectAccessUnits";
+            "android.media.mediaparser.ts.ignoreDetectAccessUnits";
     /**
-     * Sets whether exo.TsParser should handle HDMV DTS audio streams. {@code boolean} expected.
+     * Sets whether TS parsing should handle HDMV DTS audio streams. {@code boolean} expected.
      * Default value is {@code false}.
      *
      * <p>Enabling this flag will disable the detection of SCTE subtitles.
      */
     public static final String PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS =
-            "exo.TsParser.enableHdmvDtsAudioStreams";
+            "android.media.mediaparser.ts.enableHdmvDtsAudioStreams";
 
     // Private constants.
 
@@ -1174,15 +1174,14 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_ADTS_ENABLE_CBR_SEEKING, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_AMR_ENABLE_CBR_SEEKING, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_FLAC_DISABLE_ID3, Boolean.class);
-        expectedTypeByParameterName.put(PARAMETER_FMP4_IGNORE_EDIT_LISTS, Boolean.class);
-        expectedTypeByParameterName.put(PARAMETER_FMP4_IGNORE_TFDT_BOX, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP4_IGNORE_EDIT_LISTS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_MP4_IGNORE_TFDT_BOX, Boolean.class);
         expectedTypeByParameterName.put(
-                PARAMETER_FMP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES, Boolean.class);
+                PARAMETER_MP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_MATROSKA_DISABLE_CUES_SEEKING, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_MP3_DISABLE_ID3, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_MP3_ENABLE_CBR_SEEKING, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_MP3_ENABLE_INDEX_SEEKING, Boolean.class);
-        expectedTypeByParameterName.put(PARAMETER_MP4_IGNORE_EDIT_LISTS, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_TS_MODE, String.class);
         expectedTypeByParameterName.put(PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_TS_IGNORE_AAC_STREAM, Boolean.class);
