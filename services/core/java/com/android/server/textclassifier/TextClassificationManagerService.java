@@ -41,6 +41,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
+import android.view.textclassifier.SystemTextClassifierMetadata;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationConstants;
 import android.view.textclassifier.TextClassificationContext;
@@ -179,12 +180,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             TextSelection.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Objects.requireNonNull(request);
+        Objects.requireNonNull(request.getSystemTextClassifierMetadata());
 
         handleRequest(
-                request.getUserId(),
-                request.getCallingPackageName(),
+                request.getSystemTextClassifierMetadata(),
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                request.getUseDefaultTextClassifier(),
                 service -> service.onSuggestSelection(sessionId, request, callback),
                 "onSuggestSelection",
                 callback);
@@ -196,12 +197,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             TextClassification.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Objects.requireNonNull(request);
+        Objects.requireNonNull(request.getSystemTextClassifierMetadata());
 
         handleRequest(
-                request.getUserId(),
-                request.getCallingPackageName(),
+                request.getSystemTextClassifierMetadata(),
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                request.getUseDefaultTextClassifier(),
                 service -> service.onClassifyText(sessionId, request, callback),
                 "onClassifyText",
                 callback);
@@ -213,12 +214,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             TextLinks.Request request, ITextClassifierCallback callback)
             throws RemoteException {
         Objects.requireNonNull(request);
+        Objects.requireNonNull(request.getSystemTextClassifierMetadata());
 
         handleRequest(
-                request.getUserId(),
-                request.getCallingPackageName(),
+                request.getSystemTextClassifierMetadata(),
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                request.getUseDefaultTextClassifier(),
                 service -> service.onGenerateLinks(sessionId, request, callback),
                 "onGenerateLinks",
                 callback);
@@ -229,12 +230,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             @Nullable TextClassificationSessionId sessionId, SelectionEvent event)
             throws RemoteException {
         Objects.requireNonNull(event);
+        Objects.requireNonNull(event.getSystemTextClassifierMetadata());
 
         handleRequest(
-                event.getUserId(),
-                /* callingPackageName= */ null,
+                event.getSystemTextClassifierMetadata(),
+                /* verifyCallingPackage= */ false,
                 /* attemptToBind= */ false,
-                event.getUseDefaultTextClassifier(),
                 service -> service.onSelectionEvent(sessionId, event),
                 "onSelectionEvent",
                 NO_OP_CALLBACK);
@@ -246,18 +247,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             TextClassifierEvent event) throws RemoteException {
         Objects.requireNonNull(event);
 
-        final int userId = event.getEventContext() == null
-                ? UserHandle.getCallingUserId()
-                : event.getEventContext().getUserId();
-        final boolean useDefaultTextClassifier =
-                event.getEventContext() != null
-                        ? event.getEventContext().getUseDefaultTextClassifier()
-                        : true;
+        final TextClassificationContext eventContext = event.getEventContext();
+        final SystemTextClassifierMetadata systemTcMetadata =
+                eventContext != null ? eventContext.getSystemTextClassifierMetadata() : null;
+
         handleRequest(
-                userId,
-                /* callingPackageName= */ null,
+                systemTcMetadata,
+                /* verifyCallingPackage= */ false,
                 /* attemptToBind= */ false,
-                useDefaultTextClassifier,
                 service -> service.onTextClassifierEvent(sessionId, event),
                 "onTextClassifierEvent",
                 NO_OP_CALLBACK);
@@ -269,12 +266,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             TextLanguage.Request request,
             ITextClassifierCallback callback) throws RemoteException {
         Objects.requireNonNull(request);
+        Objects.requireNonNull(request.getSystemTextClassifierMetadata());
 
         handleRequest(
-                request.getUserId(),
-                request.getCallingPackageName(),
+                request.getSystemTextClassifierMetadata(),
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                request.getUseDefaultTextClassifier(),
                 service -> service.onDetectLanguage(sessionId, request, callback),
                 "onDetectLanguage",
                 callback);
@@ -286,12 +283,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             ConversationActions.Request request,
             ITextClassifierCallback callback) throws RemoteException {
         Objects.requireNonNull(request);
+        Objects.requireNonNull(request.getSystemTextClassifierMetadata());
 
         handleRequest(
-                request.getUserId(),
-                request.getCallingPackageName(),
+                request.getSystemTextClassifierMetadata(),
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ true,
-                request.getUseDefaultTextClassifier(),
                 service -> service.onSuggestConversationActions(sessionId, request, callback),
                 "onSuggestConversationActions",
                 callback);
@@ -303,13 +300,12 @@ public final class TextClassificationManagerService extends ITextClassifierServi
             throws RemoteException {
         Objects.requireNonNull(sessionId);
         Objects.requireNonNull(classificationContext);
+        Objects.requireNonNull(classificationContext.getSystemTextClassifierMetadata());
 
-        final int userId = classificationContext.getUserId();
         handleRequest(
-                userId,
-                classificationContext.getPackageName(),
+                classificationContext.getSystemTextClassifierMetadata(),
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ false,
-                classificationContext.getUseDefaultTextClassifier(),
                 service -> {
                     service.onCreateTextClassificationSession(classificationContext, sessionId);
                     mSessionCache.put(sessionId, classificationContext);
@@ -333,11 +329,13 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                     textClassificationContext != null
                             ? textClassificationContext.useDefaultTextClassifier
                             : true;
+            final SystemTextClassifierMetadata sysTcMetadata = new SystemTextClassifierMetadata(
+                    "", userId, useDefaultTextClassifier);
+
             handleRequest(
-                    userId,
-                    /* callingPackageName= */ null,
+                    sysTcMetadata,
+                    /* verifyCallingPackage= */ false,
                     /* attemptToBind= */ false,
-                    useDefaultTextClassifier,
                     service -> {
                         service.onDestroyTextClassificationSession(sessionId);
                         mSessionCache.remove(sessionId);
@@ -412,10 +410,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     }
 
     private void handleRequest(
-            @UserIdInt int userId,
-            @Nullable String callingPackageName,
+            @Nullable SystemTextClassifierMetadata sysTcMetadata,
+            boolean verifyCallingPackage,
             boolean attemptToBind,
-            boolean useDefaultTextClassifier,
             @NonNull ThrowingConsumer<ITextClassifierService> textClassifierServiceConsumer,
             @NonNull String methodName,
             @NonNull ITextClassifierCallback callback) throws RemoteException {
@@ -423,8 +420,17 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         Objects.requireNonNull(methodName);
         Objects.requireNonNull(callback);
 
+        final int userId =
+                sysTcMetadata == null ? UserHandle.getCallingUserId() : sysTcMetadata.getUserId();
+        final String callingPackageName =
+                sysTcMetadata == null ? null : sysTcMetadata.getCallingPackageName();
+        final boolean useDefaultTextClassifier =
+                sysTcMetadata == null ? true : sysTcMetadata.useDefaultTextClassifier();
+
         try {
-            validateCallingPackage(callingPackageName);
+            if (verifyCallingPackage) {
+                validateCallingPackage(callingPackageName);
+            }
             validateUser(userId);
         } catch (Exception e) {
             throw new RemoteException("Invalid request: " + e.getMessage(), e,
@@ -636,8 +642,10 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         public final boolean useDefaultTextClassifier;
 
         StrippedTextClassificationContext(TextClassificationContext textClassificationContext) {
-            userId = textClassificationContext.getUserId();
-            useDefaultTextClassifier = textClassificationContext.getUseDefaultTextClassifier();
+            SystemTextClassifierMetadata sysTcMetadata =
+                    textClassificationContext.getSystemTextClassifierMetadata();
+            userId = sysTcMetadata.getUserId();
+            useDefaultTextClassifier = sysTcMetadata.useDefaultTextClassifier();
         }
     }
 
