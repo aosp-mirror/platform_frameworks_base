@@ -146,8 +146,8 @@ public class WifiRttManager {
 
         Binder binder = new Binder();
         try {
-            mService.startRanging(binder, mContext.getOpPackageName(), mContext.getFeatureId(),
-                    workSource, request, new IRttCallback.Stub() {
+            mService.startRanging(binder, mContext.getOpPackageName(),
+                    mContext.getAttributionTag(), workSource, request, new IRttCallback.Stub() {
                         @Override
                         public void onRangingFailure(int status) throws RemoteException {
                             clearCallingIdentity();

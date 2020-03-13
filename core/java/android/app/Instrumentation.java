@@ -1720,11 +1720,10 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
-            int result = ActivityTaskManager.getService()
-                .startActivity(whoThread, who.getBasePackageName(), who.getFeatureId(), intent,
-                        intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target != null ? target.mEmbeddedID : null,
-                        requestCode, 0, null, options);
+            int result = ActivityTaskManager.getService().startActivity(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    intent.resolveTypeIfNeeded(who.getContentResolver()), token,
+                    target != null ? target.mEmbeddedID : null, requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -1793,9 +1792,9 @@ public class Instrumentation {
                 intents[i].prepareToLeaveProcess(who);
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
-            int result = ActivityTaskManager.getService()
-                .startActivities(whoThread, who.getBasePackageName(), who.getFeatureId(), intents,
-                        resolvedTypes, token, options, userId);
+            int result = ActivityTaskManager.getService().startActivities(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intents, resolvedTypes,
+                    token, options, userId);
             checkStartActivityResult(result, intents[0]);
             return result;
         } catch (RemoteException e) {
@@ -1860,10 +1859,10 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
-            int result = ActivityTaskManager.getService()
-                .startActivity(whoThread, who.getBasePackageName(), who.getFeatureId(), intent,
-                        intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, target, requestCode, 0, null, options);
+            int result = ActivityTaskManager.getService().startActivity(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    intent.resolveTypeIfNeeded(who.getContentResolver()), token, target,
+                    requestCode, 0, null, options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -1927,11 +1926,10 @@ public class Instrumentation {
         try {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
-            int result = ActivityTaskManager.getService()
-                .startActivityAsUser(whoThread, who.getBasePackageName(), who.getFeatureId(),
-                        intent, intent.resolveTypeIfNeeded(who.getContentResolver()),
-                        token, resultWho,
-                        requestCode, 0, null, options, user.getIdentifier());
+            int result = ActivityTaskManager.getService().startActivityAsUser(whoThread,
+                    who.getBasePackageName(), who.getAttributionTag(), intent,
+                    intent.resolveTypeIfNeeded(who.getContentResolver()), token, resultWho,
+                    requestCode, 0, null, options, user.getIdentifier());
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
@@ -2022,7 +2020,7 @@ public class Instrumentation {
             intent.migrateExtraStreamToClipData();
             intent.prepareToLeaveProcess(who);
             int result = appTask.startActivity(whoThread.asBinder(), who.getBasePackageName(),
-                    who.getFeatureId(), intent,
+                    who.getAttributionTag(), intent,
                     intent.resolveTypeIfNeeded(who.getContentResolver()), options);
             checkStartActivityResult(result, intent);
         } catch (RemoteException e) {
