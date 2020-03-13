@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManagerInternal;
 import android.graphics.Rect;
 import android.os.Environment;
@@ -87,8 +89,16 @@ class LaunchParamsPersister {
      * launching activity of tasks) to {@link PersistableLaunchParams} that stores launch metadata
      * that are stable across reboots.
      */
-    private final SparseArray<ArrayMap<ComponentName, PersistableLaunchParams>> mMap =
+    private final SparseArray<ArrayMap<ComponentName, PersistableLaunchParams>> mLaunchParamsMap =
             new SparseArray<>();
+
+    /**
+     * A map from {@link android.content.pm.ActivityInfo.WindowLayout#windowLayoutAffinity} to
+     * activity's component name for reverse queries from window layout affinities to activities.
+     * Used to decide if we should use another activity's record with the same affinity.
+     */
+    private final ArrayMap<String, ArraySet<ComponentName>> mWindowLayoutAffinityMap =
+            new ArrayMap<>();
 
     LaunchParamsPersister(PersisterQueue persisterQueue, ActivityStackSupervisor supervisor) {
         this(persisterQueue, supervisor, Environment::getDataSystemCeDirectory);
@@ -112,7 +122,7 @@ class LaunchParamsPersister {
     }
 
     void onCleanupUser(int userId) {
-        mMap.remove(userId);
+        mLaunchParamsMap.remove(userId);
     }
 
     private void loadLaunchParams(int userId) {
@@ -128,7 +138,7 @@ class LaunchParamsPersister {
         final File[] paramsFiles = launchParamsFolder.listFiles();
         final ArrayMap<ComponentName, PersistableLaunchParams> map =
                 new ArrayMap<>(paramsFiles.length);
-        mMap.put(userId, map);
+        mLaunchParamsMap.put(userId, map);
 
         for (File paramsFile : paramsFiles) {
             if (!paramsFile.isFile()) {
@@ -179,10 +189,12 @@ class LaunchParamsPersister {
                         continue;
                     }
 
-                    params.restoreFromXml(parser);
+                    params.restore(paramsFile, parser);
                 }
 
                 map.put(name, params);
+                addComponentNameToLaunchParamAffinityMapIfNotNull(
+                        name, params.mWindowLayoutAffinity);
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to restore launch params for " + name, e);
                 filesToDelete.add(paramsFile);
@@ -204,18 +216,16 @@ class LaunchParamsPersister {
         final ComponentName name = task.realActivity;
         final int userId = task.mUserId;
         PersistableLaunchParams params;
-        ArrayMap<ComponentName, PersistableLaunchParams> map = mMap.get(userId);
+        ArrayMap<ComponentName, PersistableLaunchParams> map = mLaunchParamsMap.get(userId);
         if (map == null) {
             map = new ArrayMap<>();
-            mMap.put(userId, map);
+            mLaunchParamsMap.put(userId, map);
         }
 
-        params = map.get(name);
-        if (params == null) {
-            params = new PersistableLaunchParams();
-            map.put(name, params);
-        }
+        params = map.computeIfAbsent(name, componentName -> new PersistableLaunchParams());
         final boolean changed = saveTaskToLaunchParam(task, display, params);
+
+        addComponentNameToLaunchParamAffinityMapIfNotNull(name, params.mWindowLayoutAffinity);
 
         if (changed) {
             mPersisterQueue.updateLastOrAddItem(
@@ -243,19 +253,63 @@ class LaunchParamsPersister {
             params.mBounds.setEmpty();
         }
 
+        String launchParamAffinity = task.mWindowLayoutAffinity;
+        changed |= Objects.equals(launchParamAffinity, params.mWindowLayoutAffinity);
+        params.mWindowLayoutAffinity = launchParamAffinity;
+
+        if (changed) {
+            params.mTimestamp = System.currentTimeMillis();
+        }
+
         return changed;
+    }
+
+    private void addComponentNameToLaunchParamAffinityMapIfNotNull(
+            ComponentName name, String launchParamAffinity) {
+        if (launchParamAffinity == null) {
+            return;
+        }
+        mWindowLayoutAffinityMap.computeIfAbsent(launchParamAffinity, affinity -> new ArraySet<>())
+                .add(name);
     }
 
     void getLaunchParams(Task task, ActivityRecord activity, LaunchParams outParams) {
         final ComponentName name = task != null ? task.realActivity : activity.mActivityComponent;
         final int userId = task != null ? task.mUserId : activity.mUserId;
+        final String windowLayoutAffinity;
+        if (task != null) {
+            windowLayoutAffinity = task.mWindowLayoutAffinity;
+        } else {
+            ActivityInfo.WindowLayout layout = activity.info.windowLayout;
+            windowLayoutAffinity = layout == null ? null : layout.windowLayoutAffinity;
+        }
 
         outParams.reset();
-        Map<ComponentName, PersistableLaunchParams> map = mMap.get(userId);
+        Map<ComponentName, PersistableLaunchParams> map = mLaunchParamsMap.get(userId);
         if (map == null) {
             return;
         }
-        final PersistableLaunchParams persistableParams = map.get(name);
+
+        // First use its own record as a reference.
+        PersistableLaunchParams persistableParams = map.get(name);
+        // Next we'll compare these params against all existing params with the same affinity and
+        // use the newest one.
+        if (windowLayoutAffinity != null
+                && mWindowLayoutAffinityMap.get(windowLayoutAffinity) != null) {
+            ArraySet<ComponentName> candidates = mWindowLayoutAffinityMap.get(windowLayoutAffinity);
+            for (int i = 0; i < candidates.size(); ++i) {
+                ComponentName candidate = candidates.valueAt(i);
+                final PersistableLaunchParams candidateParams = map.get(candidate);
+                if (candidateParams == null) {
+                    continue;
+                }
+
+                if (persistableParams == null
+                        || candidateParams.mTimestamp > persistableParams.mTimestamp) {
+                    persistableParams = candidateParams;
+                }
+            }
+        }
 
         if (persistableParams == null) {
             return;
@@ -272,10 +326,10 @@ class LaunchParamsPersister {
 
     void removeRecordForPackage(String packageName) {
         final List<File> fileToDelete = new ArrayList<>();
-        for (int i = 0; i < mMap.size(); ++i) {
-            int userId = mMap.keyAt(i);
+        for (int i = 0; i < mLaunchParamsMap.size(); ++i) {
+            int userId = mLaunchParamsMap.keyAt(i);
             final File launchParamsFolder = getLaunchParamFolder(userId);
-            ArrayMap<ComponentName, PersistableLaunchParams> map = mMap.valueAt(i);
+            ArrayMap<ComponentName, PersistableLaunchParams> map = mLaunchParamsMap.valueAt(i);
             for (int j = map.size() - 1; j >= 0; --j) {
                 final ComponentName name = map.keyAt(j);
                 if (name.getPackageName().equals(packageName)) {
@@ -409,6 +463,7 @@ class LaunchParamsPersister {
         private static final String ATTR_WINDOWING_MODE = "windowing_mode";
         private static final String ATTR_DISPLAY_UNIQUE_ID = "display_unique_id";
         private static final String ATTR_BOUNDS = "bounds";
+        private static final String ATTR_WINDOW_LAYOUT_AFFINITY = "window_layout_affinity";
 
         /** The bounds within the parent container. */
         final Rect mBounds = new Rect();
@@ -419,14 +474,29 @@ class LaunchParamsPersister {
         /** The windowing mode to be in. */
         int mWindowingMode;
 
+        /**
+         * Last {@link android.content.pm.ActivityInfo.WindowLayout#windowLayoutAffinity} of the
+         * window.
+         */
+        @Nullable String mWindowLayoutAffinity;
+
+        /**
+         * Timestamp from {@link System#currentTimeMillis()} when this record is captured, or last
+         * modified time when the record is restored from storage.
+         */
+        long mTimestamp;
+
         void saveToXml(XmlSerializer serializer) throws IOException {
             serializer.attribute(null, ATTR_DISPLAY_UNIQUE_ID, mDisplayUniqueId);
             serializer.attribute(null, ATTR_WINDOWING_MODE,
                     Integer.toString(mWindowingMode));
             serializer.attribute(null, ATTR_BOUNDS, mBounds.flattenToString());
+            if (mWindowLayoutAffinity != null) {
+                serializer.attribute(null, ATTR_WINDOW_LAYOUT_AFFINITY, mWindowLayoutAffinity);
+            }
         }
 
-        void restoreFromXml(XmlPullParser parser) {
+        void restore(File xmlFile, XmlPullParser parser) {
             for (int i = 0; i < parser.getAttributeCount(); ++i) {
                 final String attrValue = parser.getAttributeValue(i);
                 switch (parser.getAttributeName(i)) {
@@ -443,16 +513,28 @@ class LaunchParamsPersister {
                         }
                         break;
                     }
+                    case ATTR_WINDOW_LAYOUT_AFFINITY:
+                        mWindowLayoutAffinity = attrValue;
+                        break;
                 }
             }
+
+            // The modified time could be a few seconds later than the timestamp when the record is
+            // captured, which is a good enough estimate to the capture time after a reboot or a
+            // user switch.
+            mTimestamp = xmlFile.lastModified();
         }
 
         @Override
         public String toString() {
             final StringBuilder builder = new StringBuilder("PersistableLaunchParams{");
-            builder.append("windowingMode=" + mWindowingMode);
+            builder.append(" windowingMode=" + mWindowingMode);
             builder.append(" displayUniqueId=" + mDisplayUniqueId);
             builder.append(" bounds=" + mBounds);
+            if (mWindowLayoutAffinity != null) {
+                builder.append(" launchParamsAffinity=" + mWindowLayoutAffinity);
+            }
+            builder.append(" timestamp=" + mTimestamp);
             builder.append(" }");
             return builder.toString();
         }
