@@ -61,21 +61,22 @@ public class AuthCredentialPatternView extends AuthCredentialView {
 
             if (pattern.size() < LockPatternUtils.MIN_PATTERN_REGISTER_FAIL) {
                 // Pattern size is less than the minimum, do not count it as a failed attempt.
-                onPatternChecked(false /* matched */, 0 /* timeoutMs */);
+                onPatternVerified(null /* attestation */, 0 /* timeoutMs */);
                 return;
             }
 
             try (LockscreenCredential credential = LockscreenCredential.createPattern(pattern)) {
-                mPendingLockCheck = LockPatternChecker.checkCredential(
+                mPendingLockCheck = LockPatternChecker.verifyCredential(
                         mLockPatternUtils,
                         credential,
+                        mOperationId,
                         mEffectiveUserId,
-                        this::onPatternChecked);
+                        this::onPatternVerified);
             }
         }
 
-        private void onPatternChecked(boolean matched, int timeoutMs) {
-            AuthCredentialPatternView.this.onCredentialChecked(matched, timeoutMs);
+        private void onPatternVerified(byte[] attestation, int timeoutMs) {
+            AuthCredentialPatternView.this.onCredentialVerified(attestation, timeoutMs);
             if (timeoutMs > 0) {
                 mLockPatternView.setEnabled(false);
             } else {
