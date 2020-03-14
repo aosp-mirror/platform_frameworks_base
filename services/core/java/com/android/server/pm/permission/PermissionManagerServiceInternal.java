@@ -189,7 +189,9 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
     /** Sets the whitelisted, restricted permissions for the given package. */
     public abstract void setWhitelistedRestrictedPermissions(
             @NonNull String packageName, @NonNull List<String> permissions,
-            @PackageManager.PermissionWhitelistFlags int flags, @NonNull int userId);
+            @PackageManager.PermissionWhitelistFlags int flags, int userId);
+    public abstract void setAutoRevokeWhitelisted(
+            @NonNull String packageName, boolean whitelisted, int userId);
 
     /**
      * Update permissions when a package changed.

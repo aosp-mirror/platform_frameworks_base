@@ -16,6 +16,10 @@
 
 package android.content.pm;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
+import static android.app.AppOpsManager.MODE_IGNORED;
+
 import android.Manifest;
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
@@ -1456,6 +1460,8 @@ public class PackageInstaller {
         /** {@hide} */
         public List<String> whitelistedRestrictedPermissions;
         /** {@hide} */
+        public int autoRevokePermissionsMode = MODE_DEFAULT;
+        /** {@hide} */
         public String installerPackageName;
         /** {@hide} */
         public boolean isMultiPackage;
@@ -1498,6 +1504,7 @@ public class PackageInstaller {
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
             whitelistedRestrictedPermissions = source.createStringArrayList();
+            autoRevokePermissionsMode = source.readInt();
             installerPackageName = source.readString();
             isMultiPackage = source.readBoolean();
             isStaged = source.readBoolean();
@@ -1528,6 +1535,7 @@ public class PackageInstaller {
             ret.volumeUuid = volumeUuid;
             ret.grantedRuntimePermissions = grantedRuntimePermissions;
             ret.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
+            ret.autoRevokePermissionsMode = autoRevokePermissionsMode;
             ret.installerPackageName = installerPackageName;
             ret.isMultiPackage = isMultiPackage;
             ret.isStaged = isStaged;
@@ -1688,6 +1696,22 @@ public class PackageInstaller {
                 whitelistedRestrictedPermissions = (permissions != null)
                         ? new ArrayList<>(permissions) : null;
             }
+        }
+
+        /**
+         * Sets whether permissions should be auto-revoked if this package is unused for an
+         * extended periodd of time.
+         *
+         * It's disabled by default but generally the installer should enable it for most packages,
+         * excluding only those where doing so might cause breakage that cannot be easily addressed
+         * by simply re-requesting the permission(s).
+         *
+         * If user explicitly enabled or disabled it via settings, this call is ignored.
+         *
+         * @param shouldAutoRevoke whether permissions should be auto-revoked.
+         */
+        public void setAutoRevokePermissionsMode(boolean shouldAutoRevoke) {
+            autoRevokePermissionsMode = shouldAutoRevoke ? MODE_ALLOWED : MODE_IGNORED;
         }
 
         /**
@@ -1932,6 +1956,7 @@ public class PackageInstaller {
             pw.printPair("volumeUuid", volumeUuid);
             pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
             pw.printPair("whitelistedRestrictedPermissions", whitelistedRestrictedPermissions);
+            pw.printPair("autoRevokePermissions", autoRevokePermissionsMode);
             pw.printPair("installerPackageName", installerPackageName);
             pw.printPair("isMultiPackage", isMultiPackage);
             pw.printPair("isStaged", isStaged);
@@ -1964,6 +1989,7 @@ public class PackageInstaller {
             dest.writeString(volumeUuid);
             dest.writeStringArray(grantedRuntimePermissions);
             dest.writeStringList(whitelistedRestrictedPermissions);
+            dest.writeInt(autoRevokePermissionsMode);
             dest.writeString(installerPackageName);
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
@@ -2085,6 +2111,8 @@ public class PackageInstaller {
         public String[] grantedRuntimePermissions;
         /** {@hide}*/
         public List<String> whitelistedRestrictedPermissions;
+        /** {@hide}*/
+        public int autoRevokePermissionsMode = MODE_DEFAULT;
         /** {@hide} */
         public int installFlags;
         /** {@hide} */
@@ -2147,6 +2175,7 @@ public class PackageInstaller {
             referrerUri = source.readParcelable(null);
             grantedRuntimePermissions = source.readStringArray();
             whitelistedRestrictedPermissions = source.createStringArrayList();
+            autoRevokePermissionsMode = source.readInt();
 
             installFlags = source.readInt();
             isMultiPackage = source.readBoolean();
@@ -2371,6 +2400,24 @@ public class PackageInstaller {
                 return new ArraySet<>(whitelistedRestrictedPermissions);
             }
             return Collections.emptySet();
+        }
+
+        /**
+         * Get the status of whether permission auto-revocation should be allowed, ignored, or
+         * deferred to manifest data.
+         *
+         * @see android.app.AppOpsManager#MODE_ALLOWED
+         * @see android.app.AppOpsManager#MODE_IGNORED
+         * @see android.app.AppOpsManager#MODE_DEFAULT
+         *
+         * @return the status of auto-revoke for this package
+         *
+         * @hide
+         */
+        @TestApi
+        @SystemApi
+        public int getAutoRevokePermissionsMode() {
+            return autoRevokePermissionsMode;
         }
 
         /**
@@ -2660,6 +2707,7 @@ public class PackageInstaller {
             dest.writeParcelable(referrerUri, flags);
             dest.writeStringArray(grantedRuntimePermissions);
             dest.writeStringList(whitelistedRestrictedPermissions);
+            dest.writeInt(autoRevokePermissionsMode);
             dest.writeInt(installFlags);
             dest.writeBoolean(isMultiPackage);
             dest.writeBoolean(isStaged);
