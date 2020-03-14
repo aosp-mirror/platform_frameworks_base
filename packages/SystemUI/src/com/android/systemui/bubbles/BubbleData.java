@@ -207,12 +207,13 @@ public class BubbleData {
 
         // Preserve new order for next repack, which sorts by last updated time.
         bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
-        setSelectedBubbleInternal(bubble);
         mOverflowBubbles.remove(bubble);
-
         bubble.inflate(
-                b -> notificationEntryUpdated(bubble, /* suppressFlyout */
-                        false, /* showInShade */ true),
+                b -> {
+                    notificationEntryUpdated(bubble, /* suppressFlyout */
+                            false, /* showInShade */ true);
+                    setSelectedBubbleInternal(bubble);
+                },
                 mContext, stack, factory);
         dispatchPendingChanges();
     }
