@@ -268,13 +268,18 @@ public class BubbleDataTest extends SysuiTestCase {
         sendUpdatedEntryAtTime(mEntryB2, 5000);
         mBubbleData.setListener(mListener);
 
-        // Test
         sendUpdatedEntryAtTime(mEntryC1, 6000);
         verifyUpdateReceived();
-
-        // Verify
         assertBubbleRemoved(mBubbleA1, BubbleController.DISMISS_AGED);
-        assertThat(mBubbleData.getOverflowBubbles()).isEqualTo(ImmutableList.of(mBubbleA1));
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
+
+        Bubble bubbleA1 = mBubbleData.getOrCreateBubble(mEntryA1);
+        bubbleA1.markUpdatedAt(7000L);
+        mBubbleData.notificationEntryUpdated(bubbleA1, false /* suppressFlyout*/,
+                true /* showInShade */);
+        verifyUpdateReceived();
+        assertBubbleRemoved(mBubbleA2, BubbleController.DISMISS_AGED);
+        assertOverflowChangedTo(ImmutableList.of(mBubbleA2));
     }
 
     /**
@@ -929,6 +934,11 @@ public class BubbleDataTest extends SysuiTestCase {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertThat(update.expandedChanged).named("expandedChanged").isTrue();
         assertThat(update.expanded).named("expanded").isEqualTo(expected);
+    }
+
+    private void assertOverflowChangedTo(ImmutableList<Bubble> bubbles) {
+        BubbleData.Update update = mUpdateCaptor.getValue();
+        assertThat(update.overflowBubbles).isEqualTo(bubbles);
     }
 
 
