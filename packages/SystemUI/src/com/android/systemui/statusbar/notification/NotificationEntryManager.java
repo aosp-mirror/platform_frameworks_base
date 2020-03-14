@@ -841,7 +841,7 @@ public class NotificationEntryManager implements
 
     private void dumpEntry(PrintWriter pw, String indent, int i, NotificationEntry e) {
         pw.print(indent);
-        pw.println("  [" + i + "] key=" + e.getKey() + " icon=" + e.icon);
+        pw.println("  [" + i + "] key=" + e.getKey() + " icon=" + e.getIcons().getStatusBarIcon());
         StatusBarNotification n = e.getSbn();
         pw.print(indent);
         pw.println("      pkg=" + n.getPackageName() + " id=" + n.getId() + " importance="

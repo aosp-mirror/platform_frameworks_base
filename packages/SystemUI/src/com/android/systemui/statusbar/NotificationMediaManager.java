@@ -263,11 +263,11 @@ public class NotificationMediaManager implements Dumpable {
         synchronized (mEntryManager) {
             NotificationEntry entry = mEntryManager
                     .getActiveNotificationUnfiltered(mMediaNotificationKey);
-            if (entry == null || entry.expandedIcon == null) {
+            if (entry == null || entry.getIcons().getShelfIcon() == null) {
                 return null;
             }
 
-            return entry.expandedIcon.getSourceIcon();
+            return entry.getIcons().getShelfIcon().getSourceIcon();
         }
     }
 
