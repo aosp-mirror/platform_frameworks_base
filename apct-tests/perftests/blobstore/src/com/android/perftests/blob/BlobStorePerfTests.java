@@ -121,8 +121,9 @@ public class BlobStorePerfTests {
     }
 
     private DummyBlobData prepareDataBlob(int fileSizeInMb) throws Exception {
-        final DummyBlobData blobData = new DummyBlobData(mContext,
-                fileSizeInMb * 1024 * 1024 /* bytes */);
+        final DummyBlobData blobData = new DummyBlobData.Builder(mContext)
+                .setFileSize(fileSizeInMb * 1024 * 1024 /* bytes */)
+                .build();
         blobData.prepare();
         return blobData;
     }

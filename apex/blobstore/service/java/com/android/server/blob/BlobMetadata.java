@@ -38,6 +38,7 @@ import static com.android.server.blob.BlobStoreUtils.getPackageResources;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.blob.BlobHandle;
+import android.app.blob.LeaseInfo;
 import android.content.Context;
 import android.content.res.ResourceId;
 import android.content.res.Resources;
@@ -279,6 +280,25 @@ class BlobMetadata {
             }
         }
         return false;
+    }
+
+    @Nullable
+    LeaseInfo getLeaseInfo(@NonNull String packageName, int uid) {
+        synchronized (mMetadataLock) {
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                final Leasee leasee = mLeasees.valueAt(i);
+                if (leasee.uid == uid && leasee.packageName.equals(packageName)) {
+                    final int descriptionResId = leasee.descriptionResEntryName == null
+                            ? Resources.ID_NULL
+                            : BlobStoreUtils.getDescriptionResourceId(
+                                    mContext, leasee.descriptionResEntryName, leasee.packageName,
+                                    UserHandle.getUserId(leasee.uid));
+                    return new LeaseInfo(packageName, leasee.expiryTimeMillis,
+                            descriptionResId, leasee.description);
+                }
+            }
+        }
+        return null;
     }
 
     void forEachLeasee(Consumer<Leasee> consumer) {
