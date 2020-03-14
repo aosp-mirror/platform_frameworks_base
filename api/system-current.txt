@@ -236,6 +236,7 @@ package android {
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
+    field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
     field public static final String WIFI_SET_DEVICE_MOBILITY_STATE = "android.permission.WIFI_SET_DEVICE_MOBILITY_STATE";
     field public static final String WIFI_UPDATE_USABILITY_STATS_SCORE = "android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE";
@@ -2131,6 +2132,7 @@ package android.content.pm {
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
     method public boolean getAllocateAggressive();
     method @Deprecated public boolean getAllowDowngrade();
+    method public int getAutoRevokePermissionsMode();
     method public boolean getDontKillApp();
     method public boolean getEnableRollback();
     method @Nullable public String[] getGrantedRuntimePermissions();
