@@ -17,6 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 
 /**
  * Callback interface for dialog views. These should be implemented by the controller (e.g.
@@ -44,8 +45,9 @@ public interface AuthDialogCallback {
     /**
      * Invoked when the dialog is dismissed
      * @param reason
+     * @param credentialAttestation the HAT received from LockSettingsService upon verification
      */
-    void onDismissed(@DismissedReason int reason);
+    void onDismissed(@DismissedReason int reason, @Nullable byte[] credentialAttestation);
 
     /**
      * Invoked when the "try again" button is clicked
