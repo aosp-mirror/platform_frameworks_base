@@ -47,6 +47,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -107,21 +108,21 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     /**
      * Default alpha value for most scrims.
      */
-    public static final float SCRIM_ALPHA = 0.2f;
+    protected static final float KEYGUARD_SCRIM_ALPHA = 0.2f;
     /**
      * Scrim opacity when the phone is about to wake-up.
      */
     public static final float WAKE_SENSOR_SCRIM_ALPHA = 0.6f;
     /**
-     * A scrim varies its opacity based on a busyness factor, for example
-     * how many notifications are currently visible.
+     * The default scrim under the shade and dialogs.
+     * This should not be lower than 0.54, otherwise we won't pass GAR.
      */
     public static final float BUSY_SCRIM_ALPHA = 0.75f;
 
     /**
-     * The most common scrim, the one under the keyguard.
+     * Same as above, but when blur is supported.
      */
-    protected static final float SCRIM_BEHIND_ALPHA_KEYGUARD = SCRIM_ALPHA;
+    public static final float BLUR_SCRIM_ALPHA = 0.54f;
 
     static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
@@ -146,7 +147,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
     private GradientColors mColors;
     private boolean mNeedsDrawableColorUpdate;
 
-    private float mScrimBehindAlphaKeyguard = SCRIM_BEHIND_ALPHA_KEYGUARD;
+    private float mScrimBehindAlphaKeyguard = KEYGUARD_SCRIM_ALPHA;
+    private final float mDefaultScrimAlpha;
 
     // Assuming the shade is expanded during initialization
     private float mExpansionFraction = 1f;
@@ -192,9 +194,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             AlarmManager alarmManager, KeyguardStateController keyguardStateController,
             DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor, SysuiColorExtractor sysuiColorExtractor,
-            DockManager dockManager) {
+            DockManager dockManager, BlurUtils blurUtils) {
 
         mScrimStateListener = lightBarController::setScrimState;
+        mDefaultScrimAlpha = blurUtils.supportsBlursOnWindows()
+                ? BLUR_SCRIM_ALPHA : BUSY_SCRIM_ALPHA;
 
         mKeyguardStateController = keyguardStateController;
         mDarkenWhileDragging = !mKeyguardStateController.canDismissLockScreen();
@@ -236,6 +240,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             states[i].init(mScrimInFront, mScrimBehind, mScrimForBubble, mDozeParameters,
                     mDockManager);
             states[i].setScrimBehindAlphaKeyguard(mScrimBehindAlphaKeyguard);
+            states[i].setDefaultScrimAlpha(mDefaultScrimAlpha);
         }
 
         mScrimBehind.setDefaultFocusHighlightEnabled(false);
@@ -483,7 +488,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             // Darken scrim as you pull down the shade when unlocked
             float behindFraction = getInterpolatedFraction();
             behindFraction = (float) Math.pow(behindFraction, 0.8f);
-            mBehindAlpha = behindFraction * BUSY_SCRIM_ALPHA;
+            mBehindAlpha = behindFraction * mDefaultScrimAlpha;
             mInFrontAlpha = 0;
         } else if (mState == ScrimState.KEYGUARD || mState == ScrimState.PULSING) {
             // Either darken of make the scrim transparent when you
@@ -491,7 +496,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             float interpolatedFract = getInterpolatedFraction();
             float alphaBehind = mState.getBehindAlpha();
             if (mDarkenWhileDragging) {
-                mBehindAlpha = MathUtils.lerp(BUSY_SCRIM_ALPHA, alphaBehind,
+                mBehindAlpha = MathUtils.lerp(mDefaultScrimAlpha, alphaBehind,
                         interpolatedFract);
                 mInFrontAlpha = mState.getFrontAlpha();
             } else {
@@ -967,7 +972,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
 
         pw.print("  mTracking=");
         pw.println(mTracking);
-
+        pw.print("  mDefaultScrimAlpha=");
+        pw.println(mDefaultScrimAlpha);
         pw.print("  mExpansionFraction=");
         pw.println(mExpansionFraction);
     }
