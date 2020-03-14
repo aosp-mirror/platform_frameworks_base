@@ -149,6 +149,10 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         t.setLayer(mInputSurface, layer);
     }
 
+    void reparent(SurfaceControl.Transaction t, WindowContainer wc) {
+        t.reparent(mInputSurface, wc.getSurfaceControl());
+    }
+
     void disposeChannelsLw() {
         mService.mInputManager.unregisterInputChannel(mServerChannel);
         mClientChannel.dispose();

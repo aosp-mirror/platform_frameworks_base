@@ -413,6 +413,8 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_ENTER:
+                mMenuController.showMenu(MENU_STATE_FULL, mMotionHelper.getBounds(),
+                        mMovementBounds, false /* allowMenuTimeout */, false /* willResizeMenu */);
             case MotionEvent.ACTION_HOVER_MOVE: {
                 if (!shouldDeliverToMenu && !mSendingHoverAccessibilityEvents) {
                     sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
@@ -421,6 +423,7 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
+                mMenuController.hideMenu();
                 if (!shouldDeliverToMenu && mSendingHoverAccessibilityEvents) {
                     sendAccessibilityHoverEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
                     mSendingHoverAccessibilityEvents = false;
@@ -538,9 +541,6 @@ public class PipTouchHandler {
                     mSavedSnapFraction = -1f;
                 }
             } else {
-                // If resizing is not allowed, then the PiP should be frozen until the transition
-                // ends as well
-                setTouchEnabled(false);
                 mSavedSnapFraction = -1f;
             }
         }
@@ -714,6 +714,8 @@ public class PipTouchHandler {
                 }
             } else if (mTouchState.isDoubleTap()) {
                 // Expand to fullscreen if this is a double tap
+                // the PiP should be frozen until the transition ends
+                setTouchEnabled(false);
                 mMotionHelper.expandPip();
             } else if (mMenuState != MENU_STATE_FULL) {
                 if (!mTouchState.isWaitingForDoubleTap()) {
