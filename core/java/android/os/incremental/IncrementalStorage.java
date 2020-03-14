@@ -20,8 +20,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -180,11 +178,12 @@ public final class IncrementalStorage {
             if (id == null && metadata == null) {
                 throw new IOException("File ID and metadata cannot both be null");
             }
+            validateV4Signature(v4signatureBytes);
             final IncrementalNewFileParams params = new IncrementalNewFileParams();
             params.size = size;
             params.metadata = (metadata == null ? new byte[0] : metadata);
             params.fileId = idToBytes(id);
-            params.signature = parseV4Signature(v4signatureBytes);
+            params.signature = v4signatureBytes;
             int res = mService.makeFile(mId, path, params);
             if (res != 0) {
                 throw new IOException("makeFile() failed with errno " + -res);
@@ -415,27 +414,23 @@ public final class IncrementalStorage {
         return new UUID(msb, lsb);
     }
 
-    private static final int INCFS_HASH_SHA256 = 1;
     private static final int INCFS_MAX_HASH_SIZE = 32; // SHA256
     private static final int INCFS_MAX_ADD_DATA_SIZE = 128;
 
     /**
      * Deserialize and validate v4 signature bytes.
      */
-    private static IncrementalSignature parseV4Signature(@Nullable byte[] v4signatureBytes)
+    private static void validateV4Signature(@Nullable byte[] v4signatureBytes)
             throws IOException {
         if (v4signatureBytes == null || v4signatureBytes.length == 0) {
-            return null;
+            return;
         }
 
         final V4Signature signature;
-        try (DataInputStream input = new DataInputStream(
-                new ByteArrayInputStream(v4signatureBytes))) {
-            try {
-                signature = V4Signature.readFrom(input);
-            } catch (IOException e) {
-                throw new IOException("Failed to read v4 signature:", e);
-            }
+        try {
+            signature = V4Signature.readFrom(v4signatureBytes);
+        } catch (IOException e) {
+            throw new IOException("Failed to read v4 signature:", e);
         }
 
         if (!signature.isVersionSupported()) {
@@ -443,25 +438,27 @@ public final class IncrementalStorage {
                     + " is not supported");
         }
 
-        final byte[] rootHash = signature.verityRootHash;
-        final byte[] additionalData = signature.v3Digest;
-        final byte[] pkcs7Signature = signature.pkcs7SignatureBlock;
+        final V4Signature.HashingInfo hashingInfo = V4Signature.HashingInfo.fromByteArray(
+                signature.hashingInfo);
+        final V4Signature.SigningInfo signingInfo = V4Signature.SigningInfo.fromByteArray(
+                signature.signingInfo);
 
-        if (rootHash.length != INCFS_MAX_HASH_SIZE) {
-            throw new IOException("rootHash has to be " + INCFS_MAX_HASH_SIZE + " bytes");
+        if (hashingInfo.hashAlgorithm != V4Signature.HASHING_ALGORITHM_SHA256) {
+            throw new IOException("Unsupported hashAlgorithm: " + hashingInfo.hashAlgorithm);
         }
-        if (additionalData.length > INCFS_MAX_ADD_DATA_SIZE) {
+        if (hashingInfo.log2BlockSize != V4Signature.LOG2_BLOCK_SIZE_4096_BYTES) {
+            throw new IOException("Unsupported log2BlockSize: " + hashingInfo.log2BlockSize);
+        }
+        if (hashingInfo.salt != null && hashingInfo.salt.length > 0) {
+            throw new IOException("Unsupported salt: " + hashingInfo.salt);
+        }
+        if (hashingInfo.rawRootHash.length != INCFS_MAX_HASH_SIZE) {
+            throw new IOException("rawRootHash has to be " + INCFS_MAX_HASH_SIZE + " bytes");
+        }
+        if (signingInfo.additionalData.length > INCFS_MAX_ADD_DATA_SIZE) {
             throw new IOException(
                     "additionalData has to be at most " + INCFS_MAX_ADD_DATA_SIZE + " bytes");
         }
-
-        IncrementalSignature result = new IncrementalSignature();
-        result.hashAlgorithm = INCFS_HASH_SHA256;
-        result.rootHash = rootHash;
-        result.additionalData = additionalData;
-        result.signature = pkcs7Signature;
-
-        return result;
     }
 
     /**
