@@ -51,6 +51,7 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
+import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
@@ -229,7 +230,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     @Inject
     public PipManager(Context context, BroadcastDispatcher broadcastDispatcher,
-            PipBoundsHandler pipBoundsHandler) {
+            PipBoundsHandler pipBoundsHandler,
+            PipSurfaceTransactionHelper surfaceTransactionHelper) {
         if (mInitialized) {
             return;
         }
@@ -239,7 +241,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mPipBoundsHandler = pipBoundsHandler;
         mResizeAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
-        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler);
+        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler,
+                surfaceTransactionHelper);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mActivityTaskManager = ActivityTaskManager.getService();
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
