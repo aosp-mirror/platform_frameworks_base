@@ -77,10 +77,10 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.AttributedOpEntry;
 import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.Mode;
 import android.app.AppOpsManager.OpEntry;
-import android.app.AppOpsManager.AttributedOpEntry;
 import android.app.AppOpsManager.OpFlags;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
@@ -3374,18 +3374,22 @@ public class AppOpsService extends IAppOpsService.Stub {
         synchronized (this) {
             Op op = getOpLocked(code, uid, resolvedPackageName, attributionTag, bypass, true);
             if (op == null) {
+                Slog.e(TAG, "Operation not found: uid=" + uid + " pkg=" + packageName + "("
+                        + attributionTag + ") op=" + AppOpsManager.opToName(code));
                 return;
             }
             final AttributedOp attributedOp = op.mAttributions.get(attributionTag);
             if (attributedOp == null) {
+                Slog.e(TAG, "Attribution not found: uid=" + uid + " pkg=" + packageName + "("
+                        + attributionTag + ") op=" + AppOpsManager.opToName(code));
                 return;
             }
 
-            try {
+            if (attributedOp.isRunning()) {
                 attributedOp.finished(clientId);
-            } catch (IllegalStateException e) {
-                Slog.e(TAG, "Operation not started: uid=" + uid + " pkg="
-                        + packageName + " op=" + AppOpsManager.opToName(code), e);
+            } else {
+                Slog.e(TAG, "Operation not started: uid=" + uid + " pkg=" + packageName + "("
+                        + attributionTag + ") op=" + AppOpsManager.opToName(code));
             }
         }
     }
