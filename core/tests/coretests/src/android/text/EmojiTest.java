@@ -83,12 +83,27 @@ public class EmojiTest {
                         {0x1FA70, 0x1FA73},
                         {0x1FA78, 0x1FA7A},
                         {0x1FA80, 0x1FA82},
-                        {0x1FA90, 0x1FA95}
+                        {0x1FA90, 0x1FA95},
+                },
+                {       // EMOJI 13
+                        {0x1F6D6, 0x1F6D7},
+                        {0x1F6FB, 0x1F6FC},
+                        {0x1F90C, 0x1F90C},
+                        {0x1F972, 0x1F972},
+                        {0x1F977, 0x1F978},
+                        {0x1F9A3, 0x1F9A4},
+                        {0x1F9AB, 0x1F9AD},
+                        {0x1F9CB, 0x1F9CB},
+                        {0x1FA74, 0x1FA74},
+                        {0x1FA83, 0x1FA86},
+                        {0x1FA96, 0x1FAA8},
+                        {0x1FAB0, 0x1FAB6},
+                        {0x1FAC0, 0x1FAC2},
+                        {0x1FAD0, 0x1FAD6},
                 }
         };
 
         final Bidi icuBidi = new Bidi(0 /* maxLength */, 0 /* maxRunCount */);
-        icuBidi.setCustomClassifier(new AndroidBidi.EmojiBidiOverride());
 
         for (int version = 0; version < data.length; version++) {
             for (int row = 0; row < data[version].length; row++) {
@@ -125,6 +140,15 @@ public class EmojiTest {
                 {       // EMOJI 11
                         {0x1F9B5, 0x1F9B6},
                         {0x1F9B8, 0x1F9B9}
+                },
+                {       // EMOJI 12
+                        {0x1F90F, 0x1F90F},
+                        {0x1F9BB, 0x1F9BB},
+                        {0x1F9CD, 0x1F9CF},
+                },
+                {       // EMOJI 13
+                        {0x1F90C, 0x1F90C},
+                        {0x1F977, 0x1F977}
                 }
         };
         for (int version = 0; version < data.length; version++) {
