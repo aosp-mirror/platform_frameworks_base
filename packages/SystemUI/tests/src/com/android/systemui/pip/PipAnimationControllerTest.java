@@ -58,7 +58,8 @@ public class PipAnimationControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        mPipAnimationController = new PipAnimationController(mContext);
+        mPipAnimationController = new PipAnimationController(
+                mContext, new PipSurfaceTransactionHelper(mContext));
         MockitoAnnotations.initMocks(this);
     }
 
