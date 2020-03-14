@@ -45,11 +45,11 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.blob.AccessorInfo;
 import android.app.blob.BlobHandle;
 import android.app.blob.BlobInfo;
 import android.app.blob.IBlobStoreManager;
 import android.app.blob.IBlobStoreSession;
+import android.app.blob.LeaseInfo;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -454,17 +454,17 @@ public class BlobStoreManagerService extends SystemService {
                 return packageResources;
             };
             getUserBlobsLocked(userId).forEach((blobHandle, blobMetadata) -> {
-                final ArrayList<AccessorInfo> accessorInfos = new ArrayList<>();
+                final ArrayList<LeaseInfo> leaseInfos = new ArrayList<>();
                 blobMetadata.forEachLeasee(leasee -> {
                     final int descriptionResId = leasee.descriptionResEntryName == null
                             ? Resources.ID_NULL
                             : getDescriptionResourceId(resourcesGetter.apply(leasee.packageName),
                                     leasee.descriptionResEntryName, leasee.packageName);
-                    accessorInfos.add(new AccessorInfo(leasee.packageName, leasee.expiryTimeMillis,
+                    leaseInfos.add(new LeaseInfo(leasee.packageName, leasee.expiryTimeMillis,
                             descriptionResId, leasee.description));
                 });
                 blobInfos.add(new BlobInfo(blobMetadata.getBlobId(),
-                        blobHandle.getExpiryTimeMillis(), blobHandle.getLabel(), accessorInfos));
+                        blobHandle.getExpiryTimeMillis(), blobHandle.getLabel(), leaseInfos));
             });
         }
         return blobInfos;
@@ -479,6 +479,31 @@ public class BlobStoreManagerService extends SystemService {
                 return blobMetadata.getBlobId() == blobId;
             });
             writeBlobsInfoAsync();
+        }
+    }
+
+    private List<BlobHandle> getLeasedBlobsInternal(int callingUid,
+            @NonNull String callingPackage) {
+        final ArrayList<BlobHandle> leasedBlobs = new ArrayList<>();
+        forEachBlobInUser(blobMetadata -> {
+            if (blobMetadata.isALeasee(callingPackage, callingUid)) {
+                leasedBlobs.add(blobMetadata.getBlobHandle());
+            }
+        }, UserHandle.getUserId(callingUid));
+        return leasedBlobs;
+    }
+
+    private LeaseInfo getLeaseInfoInternal(BlobHandle blobHandle,
+            int callingUid, @NonNull String callingPackage) {
+        synchronized (mBlobsLock) {
+            final BlobMetadata blobMetadata = getUserBlobsLocked(UserHandle.getUserId(callingUid))
+                    .get(blobHandle);
+            if (blobMetadata == null || !blobMetadata.isAccessAllowedForCaller(
+                    callingPackage, callingUid)) {
+                throw new SecurityException("Caller not allowed to access " + blobHandle
+                        + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
+            }
+            return blobMetadata.getLeaseInfo(callingPackage, callingUid);
         }
     }
 
@@ -1267,6 +1292,12 @@ public class BlobStoreManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
+                throw new SecurityException("Caller not allowed to open blob; "
+                        + "callingUid=" + callingUid + ", callingPackage=" + packageName);
+            }
+
             try {
                 acquireLeaseInternal(blobHandle, descriptionResId, description,
                         leaseExpiryTimeMillis, callingUid, packageName);
@@ -1283,6 +1314,12 @@ public class BlobStoreManagerService extends SystemService {
 
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
+
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
+                throw new SecurityException("Caller not allowed to open blob; "
+                        + "callingUid=" + callingUid + ", callingPackage=" + packageName);
+            }
 
             releaseLeaseInternal(blobHandle, callingUid, packageName);
         }
@@ -1317,6 +1354,36 @@ public class BlobStoreManagerService extends SystemService {
             }
 
             deleteBlobInternal(blobId, callingUid);
+        }
+
+        @Override
+        @NonNull
+        public List<BlobHandle> getLeasedBlobs(@NonNull String packageName) {
+            Objects.requireNonNull(packageName, "packageName must not be null");
+
+            final int callingUid = Binder.getCallingUid();
+            verifyCallingPackage(callingUid, packageName);
+
+            return getLeasedBlobsInternal(callingUid, packageName);
+        }
+
+        @Override
+        @Nullable
+        public LeaseInfo getLeaseInfo(@NonNull BlobHandle blobHandle, @NonNull String packageName) {
+            Objects.requireNonNull(blobHandle, "blobHandle must not be null");
+            blobHandle.assertIsValid();
+            Objects.requireNonNull(packageName, "packageName must not be null");
+
+            final int callingUid = Binder.getCallingUid();
+            verifyCallingPackage(callingUid, packageName);
+
+            if (Process.isIsolated(callingUid) || mPackageManagerInternal.isInstantApp(
+                    packageName, UserHandle.getUserId(callingUid))) {
+                throw new SecurityException("Caller not allowed to open blob; "
+                        + "callingUid=" + callingUid + ", callingPackage=" + packageName);
+            }
+
+            return getLeaseInfoInternal(blobHandle, callingUid, packageName);
         }
 
         @Override
