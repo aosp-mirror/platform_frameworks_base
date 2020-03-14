@@ -699,6 +699,9 @@
     <!-- margin on the top when the icon is centered for group conversations -->
     <dimen name="conversation_icon_margin_top_centered">5dp</dimen>
 
+    <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
+    <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
+
     <!-- margin at the end of messaging group icons when not conversations -->
     <dimen name="messaging_layout_margin_end">12dp</dimen>
 

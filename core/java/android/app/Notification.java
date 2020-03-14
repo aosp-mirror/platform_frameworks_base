@@ -7515,9 +7515,11 @@ public class Notification implements Parcelable
                     p,
                     bindResult);
             addExtras(mBuilder.mN.extras);
-            // also update the end margin if there is an image
-            contentView.setViewLayoutMarginEnd(R.id.notification_messaging,
-                    bindResult.getIconMarginEnd());
+            if (!CONVERSATION_LAYOUT_ENABLED) {
+                // also update the end margin if there is an image
+                contentView.setViewLayoutMarginEnd(R.id.notification_messaging,
+                        bindResult.getIconMarginEnd());
+            }
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.isColorized(p) ? mBuilder.getPrimaryTextColor(p)
                             : mBuilder.resolveContrastColor(p));
