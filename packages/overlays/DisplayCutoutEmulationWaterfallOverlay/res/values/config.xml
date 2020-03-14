@@ -16,6 +16,9 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
+    <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
+    <string translatable="false" name="config_mainBuiltInDisplayCutoutRectApproximation"></string>
+
     <!-- Height of the status bar in portrait. The height should be
          Max((status bar content height + waterfall top size), top cutout size) -->
     <dimen name="status_bar_height_portrait">28dp</dimen>
