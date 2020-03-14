@@ -44,52 +44,62 @@ import java.lang.annotation.RetentionPolicy;
 public class ImsUtImplBase {
     /**
      * Bar all incoming calls. (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_ALL_INCOMING = 1;
 
     /**
      * Bar all outgoing calls. (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_ALL_OUTGOING = 2;
 
     /**
      * Bar all outgoing international calls. (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_OUTGOING_INTL = 3;
 
     /**
      * Bar all outgoing international calls, excluding those to the home PLMN country
      * (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_OUTGOING_INTL_EXCL_HOME = 4;
 
     /**
      * Bar all incoming calls when roaming (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BLOCKING_INCOMING_WHEN_ROAMING = 5;
 
     /**
      * Enable Anonymous Communication Rejection (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_ANONYMOUS_INCOMING = 6;
 
     /**
      * Bar all incoming and outgoing calls. (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_ALL = 7;
 
     /**
      * Bar all outgoing service requests, including calls. (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_OUTGOING_ALL_SERVICES = 8;
 
     /**
      * Bar all incoming service requests, including calls. (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_INCOMING_ALL_SERVICES = 9;
 
     /**
      * Bar specific incoming calls. (See 3GPP TS 24.611)
+     * @hide
      */
     public static final int CALL_BARRING_SPECIFIC_INCOMING_CALLS = 10;
 
@@ -104,6 +114,7 @@ public class ImsUtImplBase {
 
     /**
      * Constant used to denote an invalid return value.
+     * @hide
      */
     public static final int INVALID_RESULT = -1;
 
