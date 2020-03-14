@@ -1492,13 +1492,6 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
-    public NotificationHeaderView getContractedNotificationHeader() {
-        if (mContractedChild != null) {
-            return mContractedWrapper.getNotificationHeader();
-        }
-        return null;
-    }
-
     public NotificationHeaderView getVisibleNotificationHeader() {
         NotificationViewWrapper wrapper = getVisibleWrapper(mVisibleType);
         return wrapper == null ? null : wrapper.getNotificationHeader();

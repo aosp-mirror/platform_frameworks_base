@@ -86,6 +86,7 @@ import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
@@ -1198,7 +1199,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // Whether the admin explicitly requires personal apps to be suspended
         boolean mSuspendPersonalApps = false;
         // Maximum time the profile owned by this admin can be off.
-        long mProfileMaximumTimeOff = 0;
+        long mProfileMaximumTimeOffMillis = 0;
         // Time by which the profile should be turned on according to System.currentTimeMillis().
         long mProfileOffDeadline = 0;
 
@@ -1439,10 +1440,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (mSuspendPersonalApps) {
                 writeAttributeValueToXml(out, TAG_SUSPEND_PERSONAL_APPS, mSuspendPersonalApps);
             }
-            if (mProfileMaximumTimeOff != 0) {
-                writeAttributeValueToXml(out, TAG_PROFILE_MAXIMUM_TIME_OFF, mProfileMaximumTimeOff);
+            if (mProfileMaximumTimeOffMillis != 0) {
+                writeAttributeValueToXml(out, TAG_PROFILE_MAXIMUM_TIME_OFF,
+                        mProfileMaximumTimeOffMillis);
             }
-            if (mProfileMaximumTimeOff != 0) {
+            if (mProfileMaximumTimeOffMillis != 0) {
                 writeAttributeValueToXml(out, TAG_PROFILE_OFF_DEADLINE, mProfileOffDeadline);
             }
             if (!TextUtils.isEmpty(mAlwaysOnVpnPackage)) {
@@ -1691,7 +1693,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     mSuspendPersonalApps = Boolean.parseBoolean(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_PROFILE_MAXIMUM_TIME_OFF.equals(tag)) {
-                    mProfileMaximumTimeOff =
+                    mProfileMaximumTimeOffMillis =
                             Long.parseLong(parser.getAttributeValue(null, ATTR_VALUE));
                 } else if (TAG_PROFILE_OFF_DEADLINE.equals(tag)) {
                     mProfileOffDeadline =
@@ -1929,8 +1931,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 pw.println(mCrossProfilePackages);
             pw.print("mSuspendPersonalApps=");
                 pw.println(mSuspendPersonalApps);
-            pw.print("mProfileMaximumTimeOff=");
-                pw.println(mProfileMaximumTimeOff);
+            pw.print("mProfileMaximumTimeOffMillis=");
+                pw.println(mProfileMaximumTimeOffMillis);
             pw.print("mProfileOffDeadline=");
                 pw.println(mProfileOffDeadline);
             pw.print("mAlwaysOnVpnPackage=");
@@ -5874,6 +5876,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void enforceNetworkStackOrProfileOrDeviceOwner(ComponentName who) {
+        if (mContext.checkCallingPermission(PERMISSION_MAINLINE_NETWORK_STACK)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        enforceProfileOrDeviceOwner(who);
+    }
+
     private void enforceDeviceOwnerOrProfileOwnerOnOrganizationOwnedDevice(ComponentName who) {
         synchronized (getLockObject()) {
             getActiveAdminForCallerLocked(
@@ -6870,7 +6880,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isAlwaysOnVpnLockdownEnabled(ComponentName admin) throws SecurityException {
-        enforceProfileOrDeviceOwner(admin);
+        enforceNetworkStackOrProfileOrDeviceOwner(admin);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         return mInjector.binderWithCleanCallingIdentity(
@@ -7786,7 +7796,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Set whether auto time is enabled on the device.
      */
     @Override
-    public void setAutoTime(ComponentName who, boolean enabled) {
+    public void setAutoTimeEnabled(ComponentName who, boolean enabled) {
         if (!mHasFeature) {
             return;
         }
@@ -7807,7 +7817,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Returns whether auto time is used on the device or not.
      */
     @Override
-    public boolean getAutoTime(ComponentName who) {
+    public boolean getAutoTimeEnabled(ComponentName who) {
         if (!mHasFeature) {
             return false;
         }
@@ -7821,7 +7831,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Set whether auto time zone is enabled on the device.
      */
     @Override
-    public void setAutoTimeZone(ComponentName who, boolean enabled) {
+    public void setAutoTimeZoneEnabled(ComponentName who, boolean enabled) {
         if (!mHasFeature) {
             return;
         }
@@ -7842,7 +7852,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Returns whether auto time zone is used on the device or not.
      */
     @Override
-    public boolean getAutoTimeZone(ComponentName who) {
+    public boolean getAutoTimeZoneEnabled(ComponentName who) {
         if (!mHasFeature) {
             return false;
         }
@@ -15716,18 +15726,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         boolean shouldSaveSettings = false;
         if (profileOwner.mProfileOffDeadline != 0
-                && (profileOwner.mProfileMaximumTimeOff == 0 || unlocked)) {
+                && (profileOwner.mProfileMaximumTimeOffMillis == 0 || unlocked)) {
             // There is a deadline but either there is no policy or the profile is unlocked -> clear
             // the deadline.
             Slog.i(LOG_TAG, "Profile off deadline is reset to zero");
             profileOwner.mProfileOffDeadline = 0;
             shouldSaveSettings = true;
         } else if (profileOwner.mProfileOffDeadline == 0
-                && (profileOwner.mProfileMaximumTimeOff != 0 && !unlocked)) {
+                && (profileOwner.mProfileMaximumTimeOffMillis != 0 && !unlocked)) {
             // There profile is locked and there is a policy, but the deadline is not set -> set the
             // deadline.
             Slog.i(LOG_TAG, "Profile off deadline is set.");
-            profileOwner.mProfileOffDeadline = now + profileOwner.mProfileMaximumTimeOff;
+            profileOwner.mProfileOffDeadline = now + profileOwner.mProfileMaximumTimeOffMillis;
             shouldSaveSettings = true;
         }
 
@@ -15828,7 +15838,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setManagedProfileMaximumTimeOff(ComponentName who, long timeoutMs) {
+    public void setManagedProfileMaximumTimeOff(ComponentName who, long timeoutMillis) {
         final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
@@ -15837,10 +15847,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // DO shouldn't be able to use this method.
             enforceProfileOwnerOfOrganizationOwnedDevice(admin);
             enforceHandlesCheckPolicyComplianceIntent(userId, admin.info.getPackageName());
-            if (admin.mProfileMaximumTimeOff == timeoutMs) {
+            if (admin.mProfileMaximumTimeOffMillis == timeoutMillis) {
                 return;
             }
-            admin.mProfileMaximumTimeOff = timeoutMs;
+            admin.mProfileMaximumTimeOffMillis = timeoutMillis;
             saveSettingsLocked(userId);
         }
 
@@ -15850,7 +15860,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_MANAGED_PROFILE_MAXIMUM_TIME_OFF)
                 .setAdmin(who)
-                .setTimePeriod(timeoutMs)
+                .setTimePeriod(timeoutMillis)
                 .write();
     }
 
@@ -15874,7 +15884,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     false /* parent */);
             // DO shouldn't be able to use this method.
             enforceProfileOwnerOfOrganizationOwnedDevice(admin);
-            return admin.mProfileMaximumTimeOff;
+            return admin.mProfileMaximumTimeOffMillis;
         }
     }
 

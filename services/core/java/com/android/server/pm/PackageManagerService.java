@@ -24,6 +24,8 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.SET_HARMFUL_APP_WARNINGS;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.Intent.ACTION_MAIN;
 import static android.content.Intent.CATEGORY_DEFAULT;
 import static android.content.Intent.CATEGORY_HOME;
@@ -11514,8 +11516,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             "Static shared libs cannot declare permission groups");
                 }
 
-                // Static shared libs cannot declare features
-                if (!pkg.getFeatures().isEmpty()) {
+                // Static shared libs cannot declare attributions
+                if (!pkg.getAttributions().isEmpty()) {
                     throw new PackageManagerException(
                             "Static shared libs cannot declare features");
                 }
@@ -24358,6 +24360,24 @@ public class PackageManagerService extends IPackageManager.Stub
 
     public void deleteCompilerPackageStats(String pkgName) {
         mCompilerStats.deletePackageStats(pkgName);
+    }
+
+    @Override
+    public boolean isAutoRevokeWhitelisted(String packageName) {
+        int mode = mInjector.getAppOpsManager().checkOpNoThrow(
+                AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+                Binder.getCallingUid(), packageName);
+        if (mode == MODE_ALLOWED) {
+            return false;
+        } else if (mode == MODE_IGNORED) {
+            return true;
+        } else {
+            synchronized (mLock) {
+                boolean manifestWhitelisted =
+                        mPackages.get(packageName).isAllowDontAutoRevokePermmissions();
+                return manifestWhitelisted;
+            }
+        }
     }
 
     @Override

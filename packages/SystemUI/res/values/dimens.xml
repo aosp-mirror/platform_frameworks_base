@@ -124,9 +124,6 @@
     <!-- Increased height of a collapsed media notification in the status bar -->
     <dimen name="notification_min_height_media">160dp</dimen>
 
-    <!-- Increased height of a collapsed messaging notification in the status bar -->
-    <dimen name="notification_min_height_messaging">118dp</dimen>
-
     <!-- Height of a small notification in the status bar which was used before android N -->
     <dimen name="notification_min_height_legacy">64dp</dimen>
 
@@ -1234,7 +1231,7 @@
     <dimen name="control_height">106dp</dimen>
     <dimen name="control_padding">12dp</dimen>
     <dimen name="control_padding_adjustment">4dp</dimen>
-    <dimen name="control_status_normal">12sp</dimen>
+    <dimen name="control_status_normal">14sp</dimen>
     <dimen name="control_status_expanded">18sp</dimen>
     <dimen name="control_base_item_margin">2dp</dimen>
     <dimen name="control_status_padding">3dp</dimen>

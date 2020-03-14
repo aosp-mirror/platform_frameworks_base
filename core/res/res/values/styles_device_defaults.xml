@@ -146,7 +146,7 @@ easier.
         <item name="textAppearance">@style/TextAppearance.DeviceDefault.Notification</item>
     </style>
     <style name="Widget.DeviceDefault.Notification.MessagingName" parent="Widget.Material.Notification.MessagingName">
-        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Notification.MessagingName</item>
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Notification.Title</item>
     </style>
     <style name="Widget.DeviceDefault.PreferenceFrameLayout" parent="Widget.Material.PreferenceFrameLayout"/>
     <style name="Widget.DeviceDefault.ProgressBar.Inverse" parent="Widget.Material.ProgressBar.Inverse"/>
@@ -289,9 +289,6 @@ easier.
     </style>
     <style name="TextAppearance.DeviceDefault.Notification.Title" parent="TextAppearance.Material.Notification.Title">
         <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
-    </style>
-    <style name="TextAppearance.DeviceDefault.Notification.MessagingName" parent="TextAppearance.DeviceDefault.Notification.Title">
-        <item name="textSize">16sp</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Notification.Reply" parent="TextAppearance.Material.Notification.Reply">
         <item name="fontFamily">@string/config_bodyFontFamily</item>

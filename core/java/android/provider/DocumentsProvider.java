@@ -1081,7 +1081,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             // signed with platform signature can hold MANAGE_DOCUMENTS, we are going to check for
             // MANAGE_DOCUMENTS or associated URI permission here instead
             final Uri rootUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
-            enforceWritePermissionInner(rootUri, getCallingPackage(), getCallingFeatureId(),
+            enforceWritePermissionInner(rootUri, getCallingPackage(), getCallingAttributionTag(),
                     null);
 
             final String rootId = DocumentsContract.getRootId(rootUri);
@@ -1103,8 +1103,8 @@ public abstract class DocumentsProvider extends ContentProvider {
         enforceTree(documentUri);
 
         if (METHOD_IS_CHILD_DOCUMENT.equals(method)) {
-            enforceReadPermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
+            enforceReadPermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
 
             final Uri childUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
             final String childAuthority = childUri.getAuthority();
@@ -1116,8 +1116,8 @@ public abstract class DocumentsProvider extends ContentProvider {
                             && isChildDocument(documentId, childId));
 
         } else if (METHOD_CREATE_DOCUMENT.equals(method)) {
-            enforceWritePermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
+            enforceWritePermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
 
             final String mimeType = extras.getString(Document.COLUMN_MIME_TYPE);
             final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
@@ -1131,8 +1131,8 @@ public abstract class DocumentsProvider extends ContentProvider {
             out.putParcelable(DocumentsContract.EXTRA_URI, newDocumentUri);
 
         } else if (METHOD_CREATE_WEB_LINK_INTENT.equals(method)) {
-            enforceWritePermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
+            enforceWritePermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
 
             final Bundle options = extras.getBundle(DocumentsContract.EXTRA_OPTIONS);
             final IntentSender intentSender = createWebLinkIntent(documentId, options);
@@ -1140,8 +1140,8 @@ public abstract class DocumentsProvider extends ContentProvider {
             out.putParcelable(DocumentsContract.EXTRA_RESULT, intentSender);
 
         } else if (METHOD_RENAME_DOCUMENT.equals(method)) {
-            enforceWritePermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
+            enforceWritePermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
 
             final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
             final String newDocumentId = renameDocument(documentId, displayName);
@@ -1165,8 +1165,8 @@ public abstract class DocumentsProvider extends ContentProvider {
             }
 
         } else if (METHOD_DELETE_DOCUMENT.equals(method)) {
-            enforceWritePermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
+            enforceWritePermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
             deleteDocument(documentId);
 
             // Document no longer exists, clean up any grants.
@@ -1176,9 +1176,9 @@ public abstract class DocumentsProvider extends ContentProvider {
             final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
             final String targetId = DocumentsContract.getDocumentId(targetUri);
 
-            enforceReadPermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
-            enforceWritePermissionInner(targetUri, getCallingPackage(), getCallingFeatureId(),
+            enforceReadPermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
+            enforceWritePermissionInner(targetUri, getCallingPackage(), getCallingAttributionTag(),
                     null);
 
             final String newDocumentId = copyDocument(documentId, targetId);
@@ -1202,11 +1202,11 @@ public abstract class DocumentsProvider extends ContentProvider {
             final Uri targetUri = extras.getParcelable(DocumentsContract.EXTRA_TARGET_URI);
             final String targetId = DocumentsContract.getDocumentId(targetUri);
 
-            enforceWritePermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
-            enforceReadPermissionInner(parentSourceUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
-            enforceWritePermissionInner(targetUri, getCallingPackage(), getCallingFeatureId(),
+            enforceWritePermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
+            enforceReadPermissionInner(parentSourceUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
+            enforceWritePermissionInner(targetUri, getCallingPackage(), getCallingAttributionTag(),
                     null);
 
             final String newDocumentId = moveDocument(documentId, parentSourceId, targetId);
@@ -1228,10 +1228,10 @@ public abstract class DocumentsProvider extends ContentProvider {
             final Uri parentSourceUri = extras.getParcelable(DocumentsContract.EXTRA_PARENT_URI);
             final String parentSourceId = DocumentsContract.getDocumentId(parentSourceUri);
 
-            enforceReadPermissionInner(parentSourceUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
-            enforceWritePermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                    null);
+            enforceReadPermissionInner(parentSourceUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
+            enforceWritePermissionInner(documentUri, getCallingPackage(),
+                    getCallingAttributionTag(), null);
             removeDocument(documentId, parentSourceId);
 
             // It's responsibility of the provider to revoke any grants, as the document may be
@@ -1240,8 +1240,8 @@ public abstract class DocumentsProvider extends ContentProvider {
             final boolean isTreeUri = isTreeUri(documentUri);
 
             if (isTreeUri) {
-                enforceReadPermissionInner(documentUri, getCallingPackage(), getCallingFeatureId(),
-                        null);
+                enforceReadPermissionInner(documentUri, getCallingPackage(),
+                        getCallingAttributionTag(), null);
             } else {
                 getContext().enforceCallingPermission(Manifest.permission.MANAGE_DOCUMENTS, null);
             }

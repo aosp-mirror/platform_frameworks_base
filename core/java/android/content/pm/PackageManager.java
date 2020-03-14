@@ -3411,12 +3411,13 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_AUTO_REVOKED = 1 << 17;
 
     /**
-     * Permission flags: Reserved for use by the permission controller.
-     *
+     * Permission flags: Reserved for use by the permission controller. The platform and any
+     * packages besides the permission controller should not assume any definition about these
+     * flags.
      * @hide
      */
     @SystemApi
-    public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = 1 << 28 | 1 << 29
+    public static final int FLAGS_PERMISSION_RESERVED_PERMISSION_CONTROLLER = 1 << 28 | 1 << 29
             | 1 << 30 | 1 << 31;
 
     /**
@@ -7831,6 +7832,15 @@ public abstract class PackageManager {
     public void sendDeviceCustomizationReadyBroadcast() {
         throw new UnsupportedOperationException(
             "sendDeviceCustomizationReadyBroadcast not implemented in subclass");
+    }
+
+    /**
+     * @return whether this package is whitelisted from having its runtime permission be
+     *         auto-revoked if unused for an extended period of time.
+     */
+    public boolean isAutoRevokeWhitelisted() {
+        throw new UnsupportedOperationException(
+                "isAutoRevokeWhitelisted not implemented in subclass");
     }
 
     /**

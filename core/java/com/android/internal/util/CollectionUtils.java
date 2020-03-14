@@ -16,6 +16,8 @@
 
 package com.android.internal.util;
 
+import static java.util.Collections.emptySet;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.ArrayMap;
@@ -67,7 +69,7 @@ public class CollectionUtils {
      */
     public static @NonNull <T> Set<T> filter(@Nullable Set<T> set,
             java.util.function.Predicate<? super T> predicate) {
-        if (set == null || set.size() == 0) return Collections.emptySet();
+        if (set == null || set.size() == 0) return emptySet();
         ArraySet<T> result = null;
         if (set instanceof ArraySet) {
             ArraySet<T> arraySet = (ArraySet<T>) set;
@@ -123,7 +125,7 @@ public class CollectionUtils {
      */
     public static @NonNull <I, O> Set<O> map(@Nullable Set<I> cur,
             Function<? super I, ? extends O> f) {
-        if (isEmpty(cur)) return Collections.emptySet();
+        if (isEmpty(cur)) return emptySet();
         ArraySet<O> result = new ArraySet<>();
         if (cur instanceof ArraySet) {
             ArraySet<I> arraySet = (ArraySet<I>) cur;
@@ -182,7 +184,7 @@ public class CollectionUtils {
      * @see Collections#emptySet
      */
     public static @NonNull <T> Set<T> emptyIfNull(@Nullable Set<T> cur) {
-        return cur == null ? Collections.emptySet() : cur;
+        return cur == null ? emptySet() : cur;
     }
 
     /**
@@ -325,9 +327,9 @@ public class CollectionUtils {
      */
     public static @NonNull <T> Set<T> addAll(@Nullable Set<T> cur, @Nullable Collection<T> val) {
         if (isEmpty(val)) {
-            return cur != null ? cur : Collections.emptySet();
+            return cur != null ? cur : emptySet();
         }
-        if (cur == null || cur == Collections.emptySet()) {
+        if (cur == null || cur == emptySet()) {
             cur = new ArraySet<>();
         }
         cur.addAll(val);
@@ -338,7 +340,7 @@ public class CollectionUtils {
      * @see #add(List, Object)
      */
     public static @NonNull <T> Set<T> add(@Nullable Set<T> cur, T val) {
-        if (cur == null || cur == Collections.emptySet()) {
+        if (cur == null || cur == emptySet()) {
             cur = new ArraySet<>();
         }
         cur.add(val);
@@ -390,7 +392,14 @@ public class CollectionUtils {
      * @return a list that will not be affected by mutations to the given original list.
      */
     public static @NonNull <T> Set<T> copyOf(@Nullable Set<T> cur) {
-        return isEmpty(cur) ? Collections.emptySet() : new ArraySet<>(cur);
+        return isEmpty(cur) ? emptySet() : new ArraySet<>(cur);
+    }
+
+    /**
+     * @return a {@link Set} representing the given collection.
+     */
+    public static @NonNull <T> Set<T> toSet(@Nullable Collection<T> cur) {
+        return isEmpty(cur) ? emptySet() : new ArraySet<>(cur);
     }
 
     /**

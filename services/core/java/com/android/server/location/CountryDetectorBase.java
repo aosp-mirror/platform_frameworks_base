@@ -31,7 +31,7 @@ import android.os.Handler;
  * @hide
  */
 public abstract class CountryDetectorBase {
-    private static final String FEATURE_ID = "CountryDetector";
+    private static final String ATTRIBUTION_TAG = "CountryDetector";
 
     protected final Handler mHandler;
     protected final Context mContext;
@@ -39,7 +39,7 @@ public abstract class CountryDetectorBase {
     protected Country mDetectedCountry;
 
     public CountryDetectorBase(Context context) {
-        mContext = context.createFeatureContext(FEATURE_ID);
+        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mHandler = new Handler();
     }
 

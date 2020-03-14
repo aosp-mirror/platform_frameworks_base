@@ -546,7 +546,6 @@ java_library {
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
-        "//frameworks/opt/net/ike:__subpackages__",
     ],
 }
 
@@ -694,6 +693,7 @@ filegroup {
         "core/java/android/annotation/CallbackExecutor.java",
         "core/java/android/annotation/CheckResult.java",
         "core/java/android/annotation/CurrentTimeMillisLong.java",
+        "core/java/android/annotation/Hide.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/LongDef.java",
@@ -750,6 +750,18 @@ filegroup {
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/com/android/internal/util/TokenBucket.java",
         "core/java/android/net/shared/*.java",
+    ],
+}
+
+filegroup {
+    name: "framework-services-net-module-wifi-shared-srcs",
+    srcs: [
+        "core/java/android/net/DhcpResults.java",
+        "core/java/android/net/shared/Inet4AddressUtils.java",
+        "core/java/android/net/shared/InetAddressUtils.java",
+        "core/java/android/net/util/IpUtils.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/util/Preconditions.java",
     ],
 }
 
@@ -1241,7 +1253,6 @@ filegroup {
         "core/java/android/net/InterfaceConfiguration.java",
         "core/java/android/os/BasicShellCommandHandler.java",
         "core/java/android/util/BackupUtils.java",
-        "core/java/android/util/LocalLog.java",
         "core/java/android/util/Rational.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",

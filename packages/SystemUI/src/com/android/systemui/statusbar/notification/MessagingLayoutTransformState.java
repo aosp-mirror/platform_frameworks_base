@@ -21,9 +21,9 @@ import android.util.Pools;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.internal.widget.IMessagingLayout;
 import com.android.internal.widget.MessagingGroup;
 import com.android.internal.widget.MessagingImageMessage;
-import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.internal.widget.MessagingMessage;
 import com.android.internal.widget.MessagingPropertyAnimator;
@@ -41,7 +41,7 @@ public class MessagingLayoutTransformState extends TransformState {
     private static Pools.SimplePool<MessagingLayoutTransformState> sInstancePool
             = new Pools.SimplePool<>(40);
     private MessagingLinearLayout mMessageContainer;
-    private MessagingLayout mMessagingLayout;
+    private IMessagingLayout mMessagingLayout;
     private HashMap<MessagingGroup, MessagingGroup> mGroupMap = new HashMap<>();
     private float mRelativeTranslationOffset;
 
@@ -266,8 +266,9 @@ public class MessagingLayoutTransformState extends TransformState {
             transformView(transformationAmount, to, child, otherChild, false, /* sameAsAny */
                     useLinearTransformation);
             boolean otherIsIsolated = otherGroup.getIsolatedMessage() == otherChild;
-            if (transformationAmount == 0.0f && otherIsIsolated) {
-                ownGroup.setTransformingImages(true);
+            if (transformationAmount == 0.0f
+                    && (otherIsIsolated || otherGroup.isSingleLine())) {
+                ownGroup.setClippingDisabled(true);
             }
             if (otherChild == null) {
                 child.setTranslationY(previousTranslation);
@@ -291,11 +292,20 @@ public class MessagingLayoutTransformState extends TransformState {
         if (useLinearTransformation) {
             ownState.setDefaultInterpolator(Interpolators.LINEAR);
         }
-        ownState.setIsSameAsAnyView(sameAsAny);
+        ownState.setIsSameAsAnyView(sameAsAny && !isGone(otherView));
         if (to) {
             if (otherView != null) {
                 TransformState otherState = TransformState.createFrom(otherView, mTransformInfo);
-                ownState.transformViewTo(otherState, transformationAmount);
+                if (!isGone(otherView)) {
+                    ownState.transformViewTo(otherState, transformationAmount);
+                } else {
+                    if (!isGone(ownView)) {
+                        ownState.disappear(transformationAmount, null);
+                    }
+                    // We still want to transform vertically if the view is gone,
+                    // since avatars serve as anchors for the rest of the layout transition
+                    ownState.transformViewVerticalTo(otherState, transformationAmount);
+                }
                 otherState.recycle();
             } else {
                 ownState.disappear(transformationAmount, null);
@@ -303,7 +313,16 @@ public class MessagingLayoutTransformState extends TransformState {
         } else {
             if (otherView != null) {
                 TransformState otherState = TransformState.createFrom(otherView, mTransformInfo);
-                ownState.transformViewFrom(otherState, transformationAmount);
+                if (!isGone(otherView)) {
+                    ownState.transformViewFrom(otherState, transformationAmount);
+                } else {
+                    if (!isGone(ownView)) {
+                        ownState.appear(transformationAmount, null);
+                    }
+                    // We still want to transform vertically if the view is gone,
+                    // since avatars serve as anchors for the rest of the layout transition
+                    ownState.transformViewVerticalFrom(otherState, transformationAmount);
+                }
                 otherState.recycle();
             } else {
                 ownState.appear(transformationAmount, null);
@@ -337,6 +356,9 @@ public class MessagingLayoutTransformState extends TransformState {
     }
 
     private boolean isGone(View view) {
+        if (view == null) {
+            return true;
+        }
         if (view.getVisibility() == View.GONE) {
             return true;
         }
@@ -408,7 +430,7 @@ public class MessagingLayoutTransformState extends TransformState {
                 ownGroup.getMessageContainer().setTranslationY(0);
                 ownGroup.getSenderView().setTranslationY(0);
             }
-            ownGroup.setTransformingImages(false);
+            ownGroup.setClippingDisabled(false);
             ownGroup.updateClipRect();
         }
     }
