@@ -378,6 +378,17 @@ public final class SystemUiDeviceConfigFlags {
             "nav_bar_handle_show_over_lockscreen";
 
     /**
+     * (int) Timeout threshold, in millisecond, that Sharesheet waits for direct share targets.
+     */
+    public static final String SHARE_SHEET_DIRECT_SHARE_TIMEOUT =
+            "share_sheet_direct_share_timeout";
+
+    /**
+     * (boolean) Whether append direct share on Sharesheet is enabled.
+     */
+    public static final String APPEND_DIRECT_SHARE_ENABLED = "append_direct_share_enabled";
+
+    /**
      * (boolean) Whether to enable user-drag resizing for PIP.
      */
     public static final String PIP_USER_RESIZE = "pip_user_resize";
