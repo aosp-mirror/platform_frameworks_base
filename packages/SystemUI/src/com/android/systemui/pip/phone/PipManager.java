@@ -42,6 +42,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
+import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -210,7 +211,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             FloatingContentCoordinator floatingContentCoordinator,
             DeviceConfigProxy deviceConfig,
             PipBoundsHandler pipBoundsHandler,
-            PipSnapAlgorithm pipSnapAlgorithm) {
+            PipSnapAlgorithm pipSnapAlgorithm,
+            PipSurfaceTransactionHelper surfaceTransactionHelper) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -224,7 +226,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
         mPipBoundsHandler = pipBoundsHandler;
-        mPipTaskOrganizer = new PipTaskOrganizer(mContext, mPipBoundsHandler);
+        mPipTaskOrganizer = new PipTaskOrganizer(context, pipBoundsHandler,
+                surfaceTransactionHelper);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mInputConsumerController = InputConsumerController.getPipInputConsumer();
         mMediaController = new PipMediaController(context, mActivityManager, broadcastDispatcher);
