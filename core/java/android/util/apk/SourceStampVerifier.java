@@ -43,6 +43,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -77,6 +78,24 @@ public abstract class SourceStampVerifier {
 
     /** Hidden constructor to prevent instantiation. */
     private SourceStampVerifier() {}
+
+    /** Verifies SourceStamp present in a list of APKs. */
+    public static SourceStampVerificationResult verify(List<String> apkFiles) {
+        Certificate stampCertificate = null;
+        for (String apkFile : apkFiles) {
+            SourceStampVerificationResult sourceStampVerificationResult = verify(apkFile);
+            if (!sourceStampVerificationResult.isPresent()
+                    || !sourceStampVerificationResult.isVerified()) {
+                return sourceStampVerificationResult;
+            }
+            if (stampCertificate != null
+                    && !stampCertificate.equals(sourceStampVerificationResult.getCertificate())) {
+                return SourceStampVerificationResult.notVerified();
+            }
+            stampCertificate = sourceStampVerificationResult.getCertificate();
+        }
+        return SourceStampVerificationResult.verified(stampCertificate);
+    }
 
     /** Verifies SourceStamp present in the provided APK. */
     public static SourceStampVerificationResult verify(String apkFile) {
