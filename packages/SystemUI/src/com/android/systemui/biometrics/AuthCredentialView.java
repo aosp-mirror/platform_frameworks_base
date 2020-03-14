@@ -42,7 +42,7 @@ import com.android.systemui.R;
 
 /**
  * Abstract base class for Pin, Pattern, or Password authentication, for
- * {@link BiometricPrompt.Builder#setDeviceCredentialAllowed(boolean)}
+ * {@link BiometricPrompt.Builder#setAllowedAuthenticators(int)}}
  */
 public abstract class AuthCredentialView extends LinearLayout {
 
@@ -70,11 +70,12 @@ public abstract class AuthCredentialView extends LinearLayout {
     protected Callback mCallback;
     protected AsyncTask<?, ?, ?> mPendingLockCheck;
     protected int mUserId;
+    protected long mOperationId;
     protected int mEffectiveUserId;
     protected ErrorTimer mErrorTimer;
 
     interface Callback {
-        void onCredentialMatched();
+        void onCredentialMatched(byte[] attestation);
     }
 
     protected static class ErrorTimer extends CountDownTimer {
@@ -146,6 +147,10 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     void setUserId(int userId) {
         mUserId = userId;
+    }
+
+    void setOperationId(long operationId) {
+        mOperationId = operationId;
     }
 
     void setEffectiveUserId(int effectiveUserId) {
@@ -245,10 +250,13 @@ public abstract class AuthCredentialView extends LinearLayout {
 
     protected void onErrorTimeoutFinish() {}
 
-    protected void onCredentialChecked(boolean matched, int timeoutMs) {
+    protected void onCredentialVerified(byte[] attestation, int timeoutMs) {
+
+        final boolean matched = attestation != null;
+
         if (matched) {
             mClearErrorRunnable.run();
-            mCallback.onCredentialMatched();
+            mCallback.onCredentialMatched(attestation);
         } else {
             if (timeoutMs > 0) {
                 mHandler.removeCallbacks(mClearErrorRunnable);
