@@ -426,7 +426,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         // THEN the dismissed entry still appears in the notification set
         assertEquals(
                 new ArraySet<>(singletonList(entry1)),
-                new ArraySet<>(mCollection.getActiveNotifs()));
+                new ArraySet<>(mCollection.getAllNotifs()));
     }
 
     @Test
@@ -454,7 +454,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         mNoMan.retractNotif(notif2.sbn, REASON_CANCEL);
         assertEquals(
                 new ArraySet<>(List.of(entry1, entry2, entry3)),
-                new ArraySet<>(mCollection.getActiveNotifs()));
+                new ArraySet<>(mCollection.getAllNotifs()));
 
         // WHEN the summary is dismissed by the user
         mCollection.dismissNotification(entry1, defaultStats(entry1));
@@ -462,7 +462,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         // THEN the summary is removed, but both children stick around
         assertEquals(
                 new ArraySet<>(List.of(entry2, entry3)),
-                new ArraySet<>(mCollection.getActiveNotifs()));
+                new ArraySet<>(mCollection.getAllNotifs()));
         assertEquals(NOT_DISMISSED, entry2.getDismissState());
         assertEquals(NOT_DISMISSED, entry3.getDismissState());
     }
@@ -830,7 +830,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mExtender3).shouldExtendLifetime(entry2, REASON_CLICK);
 
         // THEN the entry is not removed
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
 
         // THEN the entry properly records all extenders that returned true
         assertEquals(Arrays.asList(mExtender1, mExtender2), entry2.mLifetimeExtenders);
@@ -851,7 +851,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // GIVEN a notification gets lifetime-extended by one of them
         mNoMan.retractNotif(notif2.sbn, REASON_APP_CANCEL);
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
         clearInvocations(mExtender1, mExtender2, mExtender3);
 
         // WHEN the last active extender expires (but new ones become active)
@@ -866,7 +866,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mExtender3).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
 
         // THEN the entry is not removed
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
 
         // THEN the entry properly records all extenders that returned true
         assertEquals(Arrays.asList(mExtender1, mExtender3), entry2.mLifetimeExtenders);
@@ -888,7 +888,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // GIVEN a notification gets lifetime-extended by a couple of them
         mNoMan.retractNotif(notif2.sbn, REASON_APP_CANCEL);
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
         clearInvocations(mExtender1, mExtender2, mExtender3);
 
         // WHEN one (but not all) of the extenders expires
@@ -896,7 +896,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         mExtender2.callback.onEndLifetimeExtension(mExtender2, entry2);
 
         // THEN the entry is not removed
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
 
         // THEN we don't re-query the extenders
         verify(mExtender1, never()).shouldExtendLifetime(entry2, REASON_APP_CANCEL);
@@ -923,7 +923,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // GIVEN a notification gets lifetime-extended by a couple of them
         mNoMan.retractNotif(notif2.sbn, REASON_UNKNOWN);
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
         clearInvocations(mExtender1, mExtender2, mExtender3);
 
         // WHEN all of the active extenders expire
@@ -933,7 +933,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         mExtender1.callback.onEndLifetimeExtension(mExtender1, entry2);
 
         // THEN the entry removed
-        assertFalse(mCollection.getActiveNotifs().contains(entry2));
+        assertFalse(mCollection.getAllNotifs().contains(entry2));
         verify(mCollectionListener).onEntryRemoved(entry2, REASON_UNKNOWN);
     }
 
@@ -953,7 +953,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // GIVEN a notification gets lifetime-extended by a couple of them
         mNoMan.retractNotif(notif2.sbn, REASON_UNKNOWN);
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
         clearInvocations(mExtender1, mExtender2, mExtender3);
 
         // WHEN the notification is reposted
@@ -964,7 +964,7 @@ public class NotifCollectionTest extends SysuiTestCase {
         verify(mExtender2).cancelLifetimeExtension(entry2);
 
         // THEN the notification is still present
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -983,7 +983,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // GIVEN a notification gets lifetime-extended by a couple of them
         mNoMan.retractNotif(notif2.sbn, REASON_UNKNOWN);
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
         clearInvocations(mExtender1, mExtender2, mExtender3);
 
         // WHEN a lifetime extender makes a reentrant call during cancelLifetimeExtension()
@@ -1012,7 +1012,7 @@ public class NotifCollectionTest extends SysuiTestCase {
 
         // GIVEN a notification gets lifetime-extended by a couple of them
         mNoMan.retractNotif(notif2.sbn, REASON_UNKNOWN);
-        assertTrue(mCollection.getActiveNotifs().contains(entry2));
+        assertTrue(mCollection.getAllNotifs().contains(entry2));
         clearInvocations(mExtender1, mExtender2, mExtender3);
 
         // WHEN the notification is reposted

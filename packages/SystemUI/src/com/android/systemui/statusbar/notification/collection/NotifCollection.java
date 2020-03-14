@@ -172,8 +172,8 @@ public class NotifCollection implements Dumpable {
         mBuildListener = buildListener;
     }
 
-    /** @see NotifPipeline#getActiveNotifs() */
-    Collection<NotificationEntry> getActiveNotifs() {
+    /** @see NotifPipeline#getAllNotifs() */
+    Collection<NotificationEntry> getAllNotifs() {
         Assert.isMainThread();
         return mReadOnlyNotificationSet;
     }
@@ -279,7 +279,7 @@ public class NotifCollection implements Dumpable {
             // system process is dead if we're here.
         }
 
-        final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());
+        final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
         for (int i = entries.size() - 1; i >= 0; i--) {
             NotificationEntry entry = entries.get(i);
             if (!shouldDismissOnClearAll(entry, userId)) {
@@ -675,7 +675,7 @@ public class NotifCollection implements Dumpable {
 
     @Override
     public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
-        final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());
+        final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
 
         pw.println("\t" + TAG + " unsorted/unfiltered notifications:");
         if (entries.size() == 0) {

@@ -70,6 +70,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -284,8 +285,7 @@ public class NotificationMediaManager implements Dumpable {
         boolean metaDataChanged = false;
 
         synchronized (mEntryManager) {
-            Set<NotificationEntry> allNotifications =
-                    mEntryManager.getPendingAndActiveNotifications();
+            Collection<NotificationEntry> allNotifications = mEntryManager.getAllNotifs();
 
             // Promote the media notification with a controller in 'playing' state, if any.
             NotificationEntry mediaNotification = null;

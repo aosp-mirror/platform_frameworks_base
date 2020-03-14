@@ -29,6 +29,7 @@ import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -56,9 +57,9 @@ import com.android.systemui.util.leak.LeakDetector;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,6 +105,10 @@ public class NotificationEntryManager implements
      * (e.g. {@link NotificationListenerService#REASON_CANCEL})
      */
     public static final int UNDEFINED_DISMISS_REASON = 0;
+
+    private final Set<NotificationEntry> mAllNotifications = new ArraySet<>();
+    private final Set<NotificationEntry> mReadOnlyAllNotifications =
+            Collections.unmodifiableSet(mAllNotifications);
 
     /** Pending notifications are ones awaiting inflation */
     @VisibleForTesting
@@ -468,6 +473,8 @@ public class NotificationEntryManager implements
                     entry.removeRow();
                 }
 
+                mAllNotifications.remove(entry);
+
                 // Let's remove the children if this was a summary
                 handleGroupSummaryRemoved(key);
                 removeVisibleNotification(key);
@@ -548,6 +555,7 @@ public class NotificationEntryManager implements
                 notification,
                 ranking,
                 mFgsFeatureController.isForegroundServiceDismissalEnabled());
+        mAllNotifications.add(entry);
 
         mLeakDetector.trackInstance(entry);
 
@@ -709,15 +717,6 @@ public class NotificationEntryManager implements
     }
 
     /**
-     * @return all notifications we're currently aware of (both pending and active notifications)
-     */
-    public Set<NotificationEntry> getPendingAndActiveNotifications() {
-        Set<NotificationEntry> allNotifs = new HashSet<>(mPendingNotifications.values());
-        allNotifs.addAll(mSortedAndFiltered);
-        return allNotifs;
-    }
-
-    /**
      * Use this method to retrieve a notification entry that has been prepared for presentation.
      * Note that the notification may be filtered out and never shown to the user.
      *
@@ -859,6 +858,15 @@ public class NotificationEntryManager implements
      */
     public List<NotificationEntry> getVisibleNotifications() {
         return mReadOnlyNotifications;
+    }
+
+    /**
+     * Returns a collections containing ALL notifications we know about, including ones that are
+     * hidden or for other users. See {@link CommonNotifCollection#getAllNotifs()}.
+     */
+    @Override
+    public Collection<NotificationEntry> getAllNotifs() {
+        return mReadOnlyAllNotifications;
     }
 
     /** @return A count of the active notifications */

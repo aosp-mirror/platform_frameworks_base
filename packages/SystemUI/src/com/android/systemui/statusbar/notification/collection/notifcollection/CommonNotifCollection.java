@@ -20,6 +20,8 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+import java.util.Collection;
+
 /**
  * A notification collection that manages the list of {@link NotificationEntry}s that will be
  * rendered.
@@ -34,4 +36,13 @@ public interface CommonNotifCollection {
      * or deleted.
      */
     void addCollectionListener(NotifCollectionListener listener);
+
+    /**
+     * Returns the list of all known notifications, i.e. the notifications that are currently posted
+     * to the phone. In general, this tracks closely to the list maintained by NotificationManager,
+     * but it can diverge slightly due to lifetime extenders.
+     *
+     * The returned collection is read-only, unsorted, unfiltered, and ungrouped.
+     */
+    Collection<NotificationEntry> getAllNotifs();
 }
