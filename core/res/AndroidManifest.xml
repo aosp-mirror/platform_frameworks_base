@@ -3760,6 +3760,12 @@
     <permission android:name="android.permission.WHITELIST_RESTRICTED_PERMISSIONS"
                 android:protectionLevel="signature|installer" />
 
+    <!-- @SystemApi Allows an application to an exempt an app from having its permission be
+        auto-revoked when unused for an extended period of time.
+        @hide -->
+    <permission android:name="android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS"
+        android:protectionLevel="signature|installer" />
+
     <!-- @hide Allows an application to observe permission changes. -->
     <permission android:name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"
         android:protectionLevel="signature|privileged" />
