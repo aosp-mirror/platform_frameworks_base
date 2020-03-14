@@ -1209,9 +1209,10 @@ Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int6
     return Status::ok();
 }
 
-Status StatsService::registerNativePullAtomCallback(int32_t atomTag, int64_t coolDownNs,
-                                    int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
-                                    const shared_ptr<IPullAtomCallback>& pullerCallback) {
+Status StatsService::registerNativePullAtomCallback(
+        int32_t atomTag, int64_t coolDownMillis, int64_t timeoutMillis,
+        const std::vector<int32_t>& additiveFields,
+        const shared_ptr<IPullAtomCallback>& pullerCallback) {
     if (!checkPermission(kPermissionRegisterPullAtom)) {
         return exception(
                 EX_SECURITY,
@@ -1220,7 +1221,8 @@ Status StatsService::registerNativePullAtomCallback(int32_t atomTag, int64_t coo
     }
     VLOG("StatsService::registerNativePullAtomCallback called.");
     int32_t uid = AIBinder_getCallingUid();
-    mPullerManager->RegisterPullAtomCallback(uid, atomTag, coolDownNs, timeoutNs, additiveFields,
+    mPullerManager->RegisterPullAtomCallback(uid, atomTag, MillisToNano(coolDownMillis),
+                                             MillisToNano(timeoutMillis), additiveFields,
                                              pullerCallback);
     return Status::ok();
 }
