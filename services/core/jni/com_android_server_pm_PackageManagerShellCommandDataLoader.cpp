@@ -172,26 +172,25 @@ static bool readChunk(int fd, std::vector<uint8_t>& data) {
 
 BlockHeader readHeader(std::span<uint8_t>& data);
 
-static inline int32_t readBEInt32(borrowed_fd fd) {
+static inline int32_t readLEInt32(borrowed_fd fd) {
     int32_t result;
     ReadFully(fd, &result, sizeof(result));
-    result = int32_t(be32toh(result));
+    result = int32_t(le32toh(result));
     return result;
 }
 
 static inline std::vector<char> readBytes(borrowed_fd fd) {
-    int32_t size = readBEInt32(fd);
+    int32_t size = readLEInt32(fd);
     std::vector<char> result(size);
     ReadFully(fd, result.data(), size);
     return result;
 }
 
 static inline int32_t skipIdSigHeaders(borrowed_fd fd) {
-    readBEInt32(fd);        // version
-    readBytes(fd);          // verityRootHash
-    readBytes(fd);          // v3Digest
-    readBytes(fd);          // pkcs7SignatureBlock
-    return readBEInt32(fd); // size of the verity tree
+    readLEInt32(fd);        // version
+    readBytes(fd);          // hashingInfo
+    readBytes(fd);          // signingInfo
+    return readLEInt32(fd); // size of the verity tree
 }
 
 static inline IncFsSize verityTreeSizeForFile(IncFsSize fileSize) {
