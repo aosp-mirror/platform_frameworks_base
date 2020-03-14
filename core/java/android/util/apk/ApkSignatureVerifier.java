@@ -168,7 +168,7 @@ public class ApkSignatureVerifier {
     /**
      * Verifies the provided APK using V4 schema.
      *
-     * @param verifyFull whether to verify all contents of this APK or just collect certificates.
+     * @param verifyFull whether to verify (V4 vs V3) or just collect certificates.
      * @return the certificates associated with each signer.
      * @throws SignatureNotFoundException if there are no V4 signatures in the APK
      * @throws PackageParserException     if there was a problem collecting certificates
@@ -178,29 +178,33 @@ public class ApkSignatureVerifier {
             throws SignatureNotFoundException, PackageParserException {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, verifyFull ? "verifyV4" : "certsOnlyV4");
         try {
-            Certificate[] certs = ApkSignatureSchemeV4Verifier.extractCertificates(apkPath);
-            Certificate[][] signerCerts = new Certificate[][]{certs};
+            ApkSignatureSchemeV4Verifier.VerifiedSigner vSigner =
+                    ApkSignatureSchemeV4Verifier.extractCertificates(apkPath);
+            Certificate[][] signerCerts = new Certificate[][]{vSigner.certs};
             Signature[] signerSigs = convertToSignatures(signerCerts);
 
             if (verifyFull) {
-                // v4 is an add-on and requires v2/v3 signature to validate against its certificates
-                final PackageParser.SigningDetails nonstreaming = verifyV3AndBelowSignatures(
-                        apkPath, minSignatureSchemeVersion, false);
-                if (nonstreaming.signatureSchemeVersion <= SignatureSchemeVersion.JAR) {
+                // v4 is an add-on and requires v3 signature to validate against its certificates
+                ApkSignatureSchemeV3Verifier.VerifiedSigner nonstreaming =
+                        ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
+                Certificate[][] nonstreamingCerts = new Certificate[][]{nonstreaming.certs};
+                Signature[] nonstreamingSigs = convertToSignatures(nonstreamingCerts);
+
+                if (nonstreamingSigs.length != signerSigs.length) {
                     throw new SecurityException(
-                            "V4 signing block can only be verified along with V2 and above.");
-                }
-                if (nonstreaming.signatures.length == 0
-                        || nonstreaming.signatures.length != signerSigs.length) {
-                    throw new SecurityException("Invalid number of signatures in "
-                            + nonstreaming.signatureSchemeVersion);
+                            "Invalid number of certificates: " + nonstreaming.certs.length);
                 }
 
                 for (int i = 0, size = signerSigs.length; i < size; ++i) {
-                    if (!nonstreaming.signatures[i].equals(signerSigs[i])) {
-                        throw new SecurityException("V4 signature certificate does not match "
-                                + nonstreaming.signatureSchemeVersion);
+                    if (!nonstreamingSigs[i].equals(signerSigs[i])) {
+                        throw new SecurityException("V4 signature certificate does not match V3");
                     }
+                }
+
+                // TODO(b/151240006): add support for v2 digest and make it mandatory.
+                if (!ArrayUtils.isEmpty(vSigner.v3Digest) && !ArrayUtils.equals(vSigner.v3Digest,
+                        nonstreaming.digest, vSigner.v3Digest.length)) {
+                    throw new SecurityException("V3 digest in V4 signature does not match V3");
                 }
             }
 
