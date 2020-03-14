@@ -435,10 +435,11 @@ public final class PermissionChecker {
         final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
         final int opMode = (forDataDelivery)
                 ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, attributionTag, message)
-                : appOpsManager.unsafeCheckOpNoThrow(op, uid, packageName);
+                : appOpsManager.unsafeCheckOpRawNoThrow(op, uid, packageName);
 
         switch (opMode) {
-            case AppOpsManager.MODE_ALLOWED: {
+            case AppOpsManager.MODE_ALLOWED:
+            case AppOpsManager.MODE_FOREGROUND: {
                 return PERMISSION_GRANTED;
             }
             case AppOpsManager.MODE_DEFAULT: {
@@ -467,12 +468,14 @@ public final class PermissionChecker {
         final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
         final int opMode = (forDataDelivery)
                 ? appOpsManager.noteProxyOpNoThrow(op, packageName, uid, attributionTag, message)
-                : appOpsManager.unsafeCheckOpNoThrow(op, uid, packageName);
+                : appOpsManager.unsafeCheckOpRawNoThrow(op, uid, packageName);
 
-        if (opMode == AppOpsManager.MODE_ALLOWED) {
-            return PERMISSION_GRANTED;
-        } else {
-            return PERMISSION_SOFT_DENIED;
+        switch (opMode) {
+            case AppOpsManager.MODE_ALLOWED:
+            case AppOpsManager.MODE_FOREGROUND:
+                return PERMISSION_GRANTED;
+            default:
+                return PERMISSION_SOFT_DENIED;
         }
     }
 }
