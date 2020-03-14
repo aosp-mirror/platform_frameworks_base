@@ -1382,6 +1382,7 @@ public class AppOpsManager {
             "android:auto_revoke_permissions_if_unused";
 
     /** @hide Auto-revoke app permissions if app is unused for an extended period */
+    @SystemApi
     public static final String OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER =
             "android:auto_revoke_managed_by_installer";
 

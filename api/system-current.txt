@@ -391,6 +391,7 @@ package android.app {
     field public static final String OPSTR_AUDIO_NOTIFICATION_VOLUME = "android:audio_notification_volume";
     field public static final String OPSTR_AUDIO_RING_VOLUME = "android:audio_ring_volume";
     field public static final String OPSTR_AUDIO_VOICE_VOLUME = "android:audio_voice_volume";
+    field public static final String OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER = "android:auto_revoke_managed_by_installer";
     field public static final String OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED = "android:auto_revoke_permissions_if_unused";
     field public static final String OPSTR_BIND_ACCESSIBILITY_SERVICE = "android:bind_accessibility_service";
     field public static final String OPSTR_CHANGE_WIFI_STATE = "android:change_wifi_state";
