@@ -127,11 +127,14 @@ public class ApplicationExitInfoTest {
         mAms.mAtmInternal = spy(mAms.mActivityTaskManager.getAtmInternal());
         mAms.mPackageManagerInt = mPackageManagerInt;
         doReturn(new ComponentName("", "")).when(mPackageManagerInt).getSystemUiServiceComponent();
+        // Remove stale instance of PackageManagerInternal if there is any
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
     }
 
     @After
     public void tearDown() {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
         mHandlerThread.quit();
     }
 
