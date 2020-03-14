@@ -103,14 +103,16 @@ public class AuthCredentialPasswordView extends AuthCredentialView
                 return;
             }
 
-            mPendingLockCheck = LockPatternChecker.checkCredential(mLockPatternUtils,
-                    password, mEffectiveUserId, this::onCredentialChecked);
+            mPendingLockCheck = LockPatternChecker.verifyCredential(mLockPatternUtils,
+                    password, mOperationId, mEffectiveUserId, this::onCredentialVerified);
         }
     }
 
     @Override
-    protected void onCredentialChecked(boolean matched, int timeoutMs) {
-        super.onCredentialChecked(matched, timeoutMs);
+    protected void onCredentialVerified(byte[] attestation, int timeoutMs) {
+        super.onCredentialVerified(attestation, timeoutMs);
+
+        final boolean matched = attestation != null;
 
         if (matched) {
             mImm.hideSoftInputFromWindow(getWindowToken(), 0 /* flags */);

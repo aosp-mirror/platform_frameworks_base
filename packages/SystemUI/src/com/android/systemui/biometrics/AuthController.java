@@ -20,6 +20,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
@@ -99,7 +100,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
                 try {
                     if (mReceiver != null) {
-                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                        mReceiver.onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                                null /* credentialAttestation */);
                         mReceiver = null;
                     }
                 } catch (RemoteException e) {
@@ -124,7 +126,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                         mCurrentDialog = null;
                         if (mReceiver != null) {
                             mReceiver.onDialogDismissed(
-                                    BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                                    BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                                    null /* credentialAttestation */);
                             mReceiver = null;
                         }
                     }
@@ -162,35 +165,42 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     @Override
-    public void onDismissed(@DismissedReason int reason) {
+    public void onDismissed(@DismissedReason int reason, @Nullable byte[] credentialAttestation) {
         switch (reason) {
             case AuthDialogCallback.DISMISSED_USER_CANCELED:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                        credentialAttestation);
                 break;
 
             case AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_NEGATIVE);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_NEGATIVE,
+                        credentialAttestation);
                 break;
 
             case AuthDialogCallback.DISMISSED_BUTTON_POSITIVE:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED,
+                        credentialAttestation);
                 break;
 
             case AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED:
                 sendResultAndCleanUp(
-                        BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
+                        BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED,
+                        credentialAttestation);
                 break;
 
             case AuthDialogCallback.DISMISSED_ERROR:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_ERROR);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_ERROR,
+                        credentialAttestation);
                 break;
 
             case AuthDialogCallback.DISMISSED_BY_SYSTEM_SERVER:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_SERVER_REQUESTED,
+                        credentialAttestation);
                 break;
 
             case AuthDialogCallback.DISMISSED_CREDENTIAL_AUTHENTICATED:
-                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED);
+                sendResultAndCleanUp(BiometricPrompt.DISMISSED_REASON_CREDENTIAL_CONFIRMED,
+                        credentialAttestation);
                 break;
 
             default:
@@ -199,13 +209,14 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         }
     }
 
-    private void sendResultAndCleanUp(@DismissedReason int reason) {
+    private void sendResultAndCleanUp(@DismissedReason int reason,
+            @Nullable byte[] credentialAttestation) {
         if (mReceiver == null) {
             Log.e(TAG, "sendResultAndCleanUp: Receiver is null");
             return;
         }
         try {
-            mReceiver.onDialogDismissed(reason);
+            mReceiver.onDialogDismissed(reason, credentialAttestation);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception", e);
         }
@@ -251,13 +262,15 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
 
     @Override
     public void showAuthenticationDialog(Bundle bundle, IBiometricServiceReceiverInternal receiver,
-            int biometricModality, boolean requireConfirmation, int userId, String opPackageName) {
+            int biometricModality, boolean requireConfirmation, int userId, String opPackageName,
+            long operationId) {
         final int authenticators = Utils.getAuthenticators(bundle);
 
         if (DEBUG) {
             Log.d(TAG, "showAuthenticationDialog, authenticators: " + authenticators
                     + ", biometricModality: " + biometricModality
-                    + ", requireConfirmation: " + requireConfirmation);
+                    + ", requireConfirmation: " + requireConfirmation
+                    + ", operationId: " + operationId);
         }
         SomeArgs args = SomeArgs.obtain();
         args.arg1 = bundle;
@@ -266,6 +279,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         args.arg3 = requireConfirmation;
         args.argi2 = userId;
         args.arg4 = opPackageName;
+        args.arg5 = operationId;
 
         boolean skipAnimation = false;
         if (mCurrentDialog != null) {
@@ -354,6 +368,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
         final boolean requireConfirmation = (boolean) args.arg3;
         final int userId = args.argi2;
         final String opPackageName = (String) args.arg4;
+        final long operationId = (long) args.arg5;
 
         // Create a new dialog but do not replace the current one yet.
         final AuthDialog newDialog = buildDialog(
@@ -362,7 +377,8 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 userId,
                 type,
                 opPackageName,
-                skipAnimation);
+                skipAnimation,
+                operationId);
 
         if (newDialog == null) {
             Log.e(TAG, "Unsupported type: " + type);
@@ -429,7 +445,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     }
 
     protected AuthDialog buildDialog(Bundle biometricPromptBundle, boolean requireConfirmation,
-            int userId, int type, String opPackageName, boolean skipIntro) {
+            int userId, int type, String opPackageName, boolean skipIntro, long operationId) {
         return new AuthContainerView.Builder(mContext)
                 .setCallback(this)
                 .setBiometricPromptBundle(biometricPromptBundle)
@@ -437,6 +453,7 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
                 .setUserId(userId)
                 .setOpPackageName(opPackageName)
                 .setSkipIntro(skipIntro)
+                .setOperationId(operationId)
                 .build(type);
     }
 }

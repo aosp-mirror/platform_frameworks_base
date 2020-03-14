@@ -78,7 +78,9 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_AUTHENTICATED);
-        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED));
+        verify(mCallback).onDismissed(
+                eq(AuthDialogCallback.DISMISSED_BIOMETRIC_AUTHENTICATED),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
@@ -87,7 +89,9 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_USER_CANCELED);
-        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_USER_CANCELED));
+        verify(mCallback).onDismissed(
+                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
@@ -96,7 +100,9 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_BUTTON_NEGATIVE);
-        verify(mCallback).onDismissed(eq(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE));
+        verify(mCallback).onDismissed(
+                eq(AuthDialogCallback.DISMISSED_BUTTON_NEGATIVE),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
@@ -114,7 +120,9 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
         mAuthContainer.mBiometricCallback.onAction(
                 AuthBiometricView.Callback.ACTION_ERROR);
-        verify(mCallback).onDismissed(AuthDialogCallback.DISMISSED_ERROR);
+        verify(mCallback).onDismissed(
+                eq(AuthDialogCallback.DISMISSED_ERROR),
+                eq(null) /* credentialAttestation */);
     }
 
     @Test
@@ -219,7 +227,8 @@ public class AuthContainerViewTest extends SysuiTestCase {
 
         @Override
         public void animateAway(int reason) {
-            mConfig.mCallback.onDismissed(reason);
+            // TODO: Credential attestation should be testable/tested
+            mConfig.mCallback.onDismissed(reason, null /* credentialAttestation */);
         }
     }
 
