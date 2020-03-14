@@ -1978,7 +1978,7 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's main front and back cameras can stream
      * concurrently as described in  {@link
-     * android.hardware.camera2.CameraManager#getConcurrentStreamingCameraIds()}
+     * android.hardware.camera2.CameraManager#getConcurrentCameraIds()}
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_CONCURRENT = "android.hardware.camera.concurrent";
