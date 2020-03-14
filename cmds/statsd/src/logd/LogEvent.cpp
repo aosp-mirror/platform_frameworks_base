@@ -350,17 +350,19 @@ bool LogEvent::write(const AttributionNodeInternal& node) {
     return false;
 }
 
-void LogEvent::parseInt32(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseInt32(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     int32_t value = readNextValue<int32_t>();
     addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-void LogEvent::parseInt64(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseInt64(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     int64_t value = readNextValue<int64_t>();
     addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-void LogEvent::parseString(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseString(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     int32_t numBytes = readNextValue<int32_t>();
     if ((uint32_t)numBytes > mRemainingLen) {
         mValid = false;
@@ -371,20 +373,23 @@ void LogEvent::parseString(int32_t* pos, int32_t depth, bool* last) {
     mBuf += numBytes;
     mRemainingLen -= numBytes;
     addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-void LogEvent::parseFloat(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseFloat(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     float value = readNextValue<float>();
     addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-void LogEvent::parseBool(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseBool(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     // cast to int32_t because FieldValue does not support bools
     int32_t value = (int32_t)readNextValue<uint8_t>();
     addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-void LogEvent::parseByteArray(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseByteArray(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     int32_t numBytes = readNextValue<int32_t>();
     if ((uint32_t)numBytes > mRemainingLen) {
         mValid = false;
@@ -395,9 +400,10 @@ void LogEvent::parseByteArray(int32_t* pos, int32_t depth, bool* last) {
     mBuf += numBytes;
     mRemainingLen -= numBytes;
     addToValues(pos, depth, value, last);
+    parseAnnotations(numAnnotations);
 }
 
-void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations) {
     int32_t numPairs = readNextValue<uint8_t>();
 
     for (pos[1] = 1; pos[1] <= numPairs; pos[1]++) {
@@ -405,56 +411,79 @@ void LogEvent::parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last) {
 
         // parse key
         pos[2] = 1;
-        parseInt32(pos, 2, last);
+        parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
 
         // parse value
         last[2] = true;
-        uint8_t typeId = getTypeId(readNextValue<uint8_t>());
-        switch (typeId) {
+
+        uint8_t typeInfo = readNextValue<uint8_t>();
+        switch (getTypeId(typeInfo)) {
             case INT32_TYPE:
                 pos[2] = 2; // pos[2] determined by index of type in KeyValuePair in atoms.proto
-                parseInt32(pos, 2, last);
+                parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
             case INT64_TYPE:
                 pos[2] = 3;
-                parseInt64(pos, 2, last);
+                parseInt64(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
             case STRING_TYPE:
                 pos[2] = 4;
-                parseString(pos, 2, last);
+                parseString(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
             case FLOAT_TYPE:
                 pos[2] = 5;
-                parseFloat(pos, 2, last);
+                parseFloat(pos, /*depth=*/2, last, /*numAnnotations=*/0);
                 break;
             default:
                 mValid = false;
         }
     }
 
+    parseAnnotations(numAnnotations);
+
     pos[1] = pos[2] = 1;
     last[1] = last[2] = false;
 }
 
-void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last) {
+void LogEvent::parseAttributionChain(int32_t* pos, int32_t depth, bool* last,
+                                     uint8_t numAnnotations) {
     int32_t numNodes = readNextValue<uint8_t>();
     for (pos[1] = 1; pos[1] <= numNodes; pos[1]++) {
         last[1] = (pos[1] == numNodes);
 
         // parse uid
         pos[2] = 1;
-        parseInt32(pos, 2, last);
+        parseInt32(pos, /*depth=*/2, last, /*numAnnotations=*/0);
 
         // parse tag
         pos[2] = 2;
         last[2] = true;
-        parseString(pos, 2, last);
+        parseString(pos, /*depth=*/2, last, /*numAnnotations=*/0);
     }
+
+    parseAnnotations(numAnnotations);
 
     pos[1] = pos[2] = 1;
     last[1] = last[2] = false;
 }
 
+// TODO(b/151109630): store annotation information within LogEvent
+void LogEvent::parseAnnotations(uint8_t numAnnotations) {
+    for (uint8_t i = 0; i < numAnnotations; i++) {
+        /*uint8_t annotationId = */ readNextValue<uint8_t>();
+        uint8_t annotationType = readNextValue<uint8_t>();
+        switch (annotationType) {
+            case BOOL_TYPE:
+                /*bool annotationValue = */ readNextValue<uint8_t>();
+                break;
+            case INT32_TYPE:
+                /*int32_t annotationValue =*/ readNextValue<int32_t>();
+                break;
+            default:
+                mValid = false;
+        }
+    }
+}
 
 // This parsing logic is tied to the encoding scheme used in StatsEvent.java and
 // stats_event.c
@@ -475,6 +504,7 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
     typeInfo = readNextValue<uint8_t>();
     if (getTypeId(typeInfo) != INT64_TYPE) mValid = false;
     mElapsedTimestampNs = readNextValue<int64_t>();
+    parseAnnotations(getNumAnnotations(typeInfo)); // atom-level annotations
     numElements--;
 
     typeInfo = readNextValue<uint8_t>();
@@ -484,37 +514,36 @@ bool LogEvent::parseBuffer(uint8_t* buf, size_t len) {
 
 
     for (pos[0] = 1; pos[0] <= numElements && mValid; pos[0]++) {
+        last[0] = (pos[0] == numElements);
+
         typeInfo = readNextValue<uint8_t>();
         uint8_t typeId = getTypeId(typeInfo);
 
-        last[0] = (pos[0] == numElements);
-
         // TODO(b/144373276): handle errors passed to the socket
-        // TODO(b/144373257): parse annotations
         switch(typeId) {
             case BOOL_TYPE:
-                parseBool(pos, 0, last);
+                parseBool(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case INT32_TYPE:
-                parseInt32(pos, 0, last);
+                parseInt32(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case INT64_TYPE:
-                parseInt64(pos, 0, last);
+                parseInt64(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case FLOAT_TYPE:
-                parseFloat(pos, 0, last);
+                parseFloat(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case BYTE_ARRAY_TYPE:
-                parseByteArray(pos, 0, last);
+                parseByteArray(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case STRING_TYPE:
-                parseString(pos, 0, last);
+                parseString(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case KEY_VALUE_PAIRS_TYPE:
-                parseKeyValuePairs(pos, 0, last);
+                parseKeyValuePairs(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             case ATTRIBUTION_CHAIN_TYPE:
-                parseAttributionChain(pos, 0, last);
+                parseAttributionChain(pos, /*depth=*/0, last, getNumAnnotations(typeInfo));
                 break;
             default:
                 mValid = false;
@@ -531,7 +560,7 @@ uint8_t LogEvent::getTypeId(uint8_t typeInfo) {
 }
 
 uint8_t LogEvent::getNumAnnotations(uint8_t typeInfo) {
-    return (typeInfo >> 4) & 0x0F;
+    return (typeInfo >> 4) & 0x0F; // num annotations in upper 4 bytes
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
