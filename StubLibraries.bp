@@ -145,7 +145,6 @@ droidstubs {
     api_tag_name: "SYSTEM",
     api_filename: "system-api.txt",
     private_api_filename: "system-private.txt",
-    private_dex_api_filename: "system-private-dex.txt",
     removed_api_filename: "system-removed.txt",
     removed_dex_api_filename: "system-removed-dex.txt",
     arg_files: [
