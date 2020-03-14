@@ -3723,7 +3723,7 @@ public class ConnectivityServiceTest {
         mCm.requestNetwork(nr, networkCallback, timeoutMs);
 
         // pass timeout and validate that UNAVAILABLE is called
-        networkCallback.expectCallback(CallbackEntry.UNAVAILABLE, null);
+        networkCallback.expectCallback(CallbackEntry.UNAVAILABLE, (Network) null);
 
         // create a network satisfying request - validate that request not triggered
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
@@ -3814,7 +3814,7 @@ public class ConnectivityServiceTest {
             // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
             testFactory.triggerUnfulfillable(requests.get(newRequestId));
 
-            networkCallback.expectCallback(CallbackEntry.UNAVAILABLE, null);
+            networkCallback.expectCallback(CallbackEntry.UNAVAILABLE, (Network) null);
             testFactory.waitForRequests();
 
             // unregister network callback - a no-op (since already freed by the
