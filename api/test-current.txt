@@ -933,6 +933,7 @@ package android.content.pm {
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
+    method public int getAutoRevokePermissionsMode();
     method public int getRollbackDataPolicy();
     method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
   }

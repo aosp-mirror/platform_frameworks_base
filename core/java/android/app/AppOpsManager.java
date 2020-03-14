@@ -1071,9 +1071,17 @@ public class AppOpsManager {
     /** @hide Auto-revoke app permissions if app is unused for an extended period */
     public static final int OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED = 97;
 
+    /**
+     * Whether {@link #OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED} is allowed to be changed by
+     * the installer
+     *
+     * @hide
+     */
+    public static final int OP_AUTO_REVOKE_MANAGED_BY_INSTALLER = 98;
+
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 98;
+    public static final int _NUM_OP = 99;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -1463,6 +1471,7 @@ public class AppOpsManager {
             OP_LOADER_USAGE_STATS,
             OP_ACCESS_CALL_AUDIO,
             OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+            OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
     };
 
     /**
@@ -1572,6 +1581,7 @@ public class AppOpsManager {
             OP_LOADER_USAGE_STATS,              // LOADER_USAGE_STATS
             OP_ACCESS_CALL_AUDIO,               // ACCESS_CALL_AUDIO
             OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, //AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            OP_AUTO_REVOKE_MANAGED_BY_INSTALLER, //OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
     };
 
     /**
@@ -1887,6 +1897,7 @@ public class AppOpsManager {
             android.Manifest.permission.LOADER_USAGE_STATS,
             Manifest.permission.ACCESS_CALL_AUDIO,
             null, // no permission for OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            null, // no permission for OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
     };
 
     /**
@@ -2202,6 +2213,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // LOADER_USAGE_STATS
             AppOpsManager.MODE_DEFAULT, // ACCESS_CALL_AUDIO
             AppOpsManager.MODE_DEFAULT, // OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            AppOpsManager.MODE_ALLOWED, // OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
     };
 
     /**
