@@ -1381,6 +1381,10 @@ public class AppOpsManager {
     public static final String OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED =
             "android:auto_revoke_permissions_if_unused";
 
+    /** @hide Auto-revoke app permissions if app is unused for an extended period */
+    public static final String OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER =
+            "android:auto_revoke_managed_by_installer";
+
     /** @hide Communicate cross-profile within the same profile group. */
     @SystemApi
     public static final String OPSTR_INTERACT_ACROSS_PROFILES = "android:interact_across_profiles";
@@ -1686,6 +1690,7 @@ public class AppOpsManager {
             OPSTR_LOADER_USAGE_STATS,
             OPSTR_ACCESS_CALL_AUDIO,
             OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+            OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER,
     };
 
     /**
@@ -1791,6 +1796,7 @@ public class AppOpsManager {
             "LOADER_USAGE_STATS",
             "ACCESS_CALL_AUDIO",
             "AUTO_REVOKE_PERMISSIONS_IF_UNUSED",
+            "AUTO_REVOKE_MANAGED_BY_INSTALLER",
     };
 
     /**
@@ -2004,6 +2010,7 @@ public class AppOpsManager {
             null, // LOADER_USAGE_STATS
             null, // ACCESS_CALL_AUDIO
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
     };
 
     /**
@@ -2109,6 +2116,7 @@ public class AppOpsManager {
             null, // LOADER_USAGE_STATS
             null, // ACCESS_CALL_AUDIO
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
     };
 
     /**
@@ -2322,6 +2330,7 @@ public class AppOpsManager {
             false, // LOADER_USAGE_STATS
             false, // ACCESS_CALL_AUDIO
             false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
+            false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
     };
 
     /**
