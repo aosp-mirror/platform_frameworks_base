@@ -677,7 +677,7 @@
 
     <style name="TextAppearance.Control.Status">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
-        <item name="android:textSize">@dimen/control_text_size</item>
+        <item name="android:textSize">@dimen/control_status_normal</item>
         <item name="android:textColor">@color/control_primary_text</item>
     </style>
 

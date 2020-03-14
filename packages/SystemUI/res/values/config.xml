@@ -468,6 +468,9 @@
     <!-- On debuggable builds, alert the user if SystemUI PSS goes over this number (in kb) -->
     <integer name="watch_heap_limit">256000</integer>
 
+    <!-- Animation duration for resizing of PIP when entering/exiting. -->
+    <integer name="config_pipResizeAnimationDuration">425</integer>
+
     <!-- Allow dragging the PIP to a location to close it -->
     <bool name="config_pipEnableDismissDragToEdge">true</bool>
 

@@ -3004,6 +3004,7 @@
       <public name="animatedImageDrawable"/>
       <public name="htmlDescription"/>
       <public name="preferMinimalPostProcessing"/>
+      <!-- @removed -->
       <public name="featureId" />
       <public name="supportsInlineSuggestions" />
       <public name="crossProfile" />
@@ -3013,6 +3014,8 @@
       <!-- @hide @SystemApi -->
       <public name="minExtensionVersion" />
       <public name="allowNativeHeapPointerTagging" />
+      <public name="requestDontAutoRevokePermissions" />
+      <public name="allowDontAutoRevokePermissions" />
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
       <public name="enableGwpAsan" />

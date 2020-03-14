@@ -670,7 +670,7 @@ public class UserLifecycleTests {
     private void startApp(int userId, String packageName) throws RemoteException {
         final Context context = InstrumentationRegistry.getContext();
         final WaitResult result = ActivityTaskManager.getService().startActivityAndWait(null,
-                context.getPackageName(), context.getFeatureId(),
+                context.getPackageName(), context.getAttributionTag(),
                 context.getPackageManager().getLaunchIntentForPackage(packageName), null, null,
                 null, 0, 0, null, null, userId);
         attestTrue("User " + userId + " failed to start " + packageName,

@@ -478,7 +478,7 @@ public class WallpaperManager {
             try {
                 Bundle params = new Bundle();
                 ParcelFileDescriptor pfd = mService.getWallpaperWithFeature(
-                        context.getOpPackageName(), context.getFeatureId(), this, FLAG_SYSTEM,
+                        context.getOpPackageName(), context.getAttributionTag(), this, FLAG_SYSTEM,
                         params, userId);
 
                 if (pfd != null) {
@@ -1069,7 +1069,7 @@ public class WallpaperManager {
             try {
                 Bundle outParams = new Bundle();
                 return sGlobals.mService.getWallpaperWithFeature(mContext.getOpPackageName(),
-                        mContext.getFeatureId(), null, which, outParams, userId);
+                        mContext.getAttributionTag(), null, which, outParams, userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (SecurityException e) {

@@ -353,8 +353,12 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     @Override
     public void setHeaderVisibleAmount(float headerVisibleAmount) {
         super.setHeaderVisibleAmount(headerVisibleAmount);
-        mNotificationHeader.setAlpha(headerVisibleAmount);
-        mHeaderTranslation = (1.0f - headerVisibleAmount) * mFullHeaderTranslation;
+        float headerTranslation = 0f;
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setAlpha(headerVisibleAmount);
+            headerTranslation = (1.0f - headerVisibleAmount) * mFullHeaderTranslation;
+        }
+        mHeaderTranslation = headerTranslation;
         mView.setTranslationY(mHeaderTranslation);
     }
 
