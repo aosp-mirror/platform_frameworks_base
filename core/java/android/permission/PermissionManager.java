@@ -44,7 +44,6 @@ import com.android.internal.annotations.Immutable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -297,54 +296,6 @@ public final class PermissionManager {
             executor.execute(() -> callback.accept(true));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Gets the map of:
-     *
-     *  packageName -> [permissionName]
-     *
-     * Of packages that have permissions that specified {@code allowDontAutoRevokeWhenUnused=true}
-     * in their {@code uses-permission} requests.
-     *
-     * @return the map of values for current user
-     * @hide
-     */
-    @SystemApi
-    @NonNull
-    @RequiresPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
-    @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getAutoRevokeExemptionRequestedPermissions() {
-        try {
-            return mPermissionManager.getAutoRevokeExemptionRequestedPermissions(
-                    mContext.getUser().getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Gets the map of:
-     *
-     *  packageName -> [permissionName]
-     *
-     * Of packages that have permissions that specified {@code dontAutoRevokeWhenUnused=true}
-     * in their {@code uses-permission} requests.
-     *
-     * @return the map of values for current user
-     * @hide
-     */
-    @SystemApi
-    @NonNull
-    @RequiresPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY)
-    @SuppressWarnings("unchecked")
-    public Map<String, List<String>> getAutoRevokeExemptionGrantedPermissions() {
-        try {
-            return mPermissionManager.getAutoRevokeExemptionGrantedPermissions(
-                    mContext.getUser().getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 

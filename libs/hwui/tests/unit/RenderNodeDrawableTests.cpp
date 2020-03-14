@@ -1169,20 +1169,6 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaRecordingCanvas, drawVectorDrawable) {
     class VectorDrawableTestCanvas : public TestCanvasBase {
     public:
         VectorDrawableTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
-        void onDrawBitmapRect(const SkBitmap& bitmap, const SkRect* src, const SkRect& dst,
-                              const SkPaint* paint, SrcRectConstraint constraint) override {
-            const int index = mDrawCounter++;
-            switch (index) {
-                case 0:
-                    EXPECT_EQ(dst, SkRect::MakeWH(CANVAS_WIDTH, CANVAS_HEIGHT));
-                    break;
-                case 1:
-                    EXPECT_EQ(dst, SkRect::MakeWH(CANVAS_WIDTH / 2, CANVAS_HEIGHT));
-                    break;
-                default:
-                    ADD_FAILURE();
-            }
-        }
         void onDrawImageRect(const SkImage*, const SkRect* src, const SkRect& dst,
                               const SkPaint* paint, SrcRectConstraint constraint) override {
             const int index = mDrawCounter++;

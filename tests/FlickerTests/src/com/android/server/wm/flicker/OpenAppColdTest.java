@@ -88,7 +88,7 @@ public class OpenAppColdTest extends NonRotationTestBase {
             checkResults(result -> LayersTraceSubject.assertThat(result)
                     .showsLayer("Wallpaper")
                     .then()
-                    .replaceVisibleLayer("Wallpaper", "Screenshot")
+                    .replaceVisibleLayer("Wallpaper", SCREENSHOT_LAYER)
                     .then()
                     .showsLayer(mTestApp.getPackage())
                     .forAllEntries());

@@ -40,11 +40,6 @@ applications that come with the platform
         <permission name="android.permission.CRYPT_KEEPER"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.captiveportallogin">
-        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
-        <permission name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"/>
-    </privapp-permissions>
-
     <privapp-permissions package="com.android.cellbroadcastreceiver">
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
@@ -168,6 +163,7 @@ applications that come with the platform
         <permission name="android.permission.REBOOT"/>
         <permission name="android.permission.REGISTER_CALL_PROVIDER"/>
         <permission name="android.permission.REGISTER_SIM_SUBSCRIPTION"/>
+        <permission name="android.permission.REGISTER_STATS_PULL_ATOM"/>
         <permission name="android.permission.SEND_RESPOND_VIA_MESSAGE"/>
         <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SHUTDOWN"/>

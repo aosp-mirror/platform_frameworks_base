@@ -115,7 +115,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         @Override
         public void onActivityUnpinned() {
-            final Pair<ComponentName, Integer> topPipActivityInfo = PipUtils.getTopPinnedActivity(
+            final Pair<ComponentName, Integer> topPipActivityInfo = PipUtils.getTopPipActivity(
                     mContext, mActivityManager);
             final ComponentName topActivity = topPipActivityInfo.first;
             mMenuController.onActivityUnpinned();
@@ -236,6 +236,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
+
+        // Ensure that we have the display info in case we get calls to update the bounds before the
+        // listener calls back
+        final DisplayInfo displayInfo = new DisplayInfo();
+        context.getDisplay().getDisplayInfo(displayInfo);
+        mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
 
         try {
             ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(

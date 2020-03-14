@@ -105,7 +105,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
 
 
         TaskOrganizerState(ITaskOrganizer organizer, int windowingMode,
-                TaskOrganizerState replacing) {
+                @Nullable TaskOrganizerState replacing) {
             mOrganizer = organizer;
             mDeathRecipient = new DeathRecipient(organizer, windowingMode);
             try {
@@ -203,10 +203,27 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
+                if (getTaskOrganizer(windowingMode) != null) {
+                    Slog.w(TAG, "Task organizer already exists for windowing mode: "
+                            + windowingMode);
+                }
+                final TaskOrganizerState previousState =
+                        mTaskOrganizersForWindowingMode.get(windowingMode);
                 final TaskOrganizerState state = new TaskOrganizerState(organizer, windowingMode,
-                        mTaskOrganizersForWindowingMode.get(windowingMode));
+                        previousState);
                 mTaskOrganizersForWindowingMode.put(windowingMode, state);
                 mTaskOrganizerStates.put(organizer.asBinder(), state);
+
+                if (previousState == null) {
+                    // Only in the case where this is the root task organizer for the given
+                    // windowing mode, we add report all existing tasks in that mode to the new
+                    // task organizer.
+                    mService.mRootWindowContainer.forAllTasks((task) -> {
+                        if (task.getWindowingMode() == windowingMode) {
+                            task.updateTaskOrganizerState(true /* forceUpdate */);
+                        }
+                    });
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -553,18 +570,28 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
             WindowContainerTransaction.Change c) {
         int effects = sanitizeAndApplyChange(wc, c);
 
+        final Task tr = wc.asTask();
+
         final SurfaceControl.Transaction t = c.getBoundsChangeTransaction();
         if (t != null) {
-            Task tr = (Task) wc;
             tr.setMainWindowSizeChangeTransaction(t);
         }
 
         Rect enterPipBounds = c.getEnterPipBounds();
         if (enterPipBounds != null) {
-            Task tr = (Task) wc;
             mService.mStackSupervisor.updatePictureInPictureMode(tr,
                     enterPipBounds, true);
         }
+
+        final int windowingMode = c.getWindowingMode();
+        if (windowingMode > -1) {
+            tr.setWindowingMode(windowingMode);
+        }
+        final int childWindowingMode = c.getActivityWindowingMode();
+        if (childWindowingMode > -1) {
+            tr.setActivityWindowingMode(childWindowingMode);
+        }
+
         return effects;
     }
 

@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.graphics.Insets;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.view.View;
@@ -439,6 +440,19 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     abstract void internalNotifyViewTextChanged(@NonNull AutofillId id,
             @Nullable CharSequence text);
+
+    /**
+     * Notifies the Intelligence Service that the insets of a view have changed.
+     */
+    public final void notifyViewInsetsChanged(@NonNull Insets viewInsets) {
+        Preconditions.checkNotNull(viewInsets);
+
+        if (!isContentCaptureEnabled()) return;
+
+        internalNotifyViewInsetsChanged(viewInsets);
+    }
+
+    abstract void internalNotifyViewInsetsChanged(@NonNull Insets viewInsets);
 
     /** @hide */
     public abstract void internalNotifyViewTreeEvent(boolean started);

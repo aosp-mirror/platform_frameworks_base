@@ -3877,6 +3877,30 @@
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
 
+  <java-symbol type="string" name="conversation_single_line_name_display" />
+  <java-symbol type="string" name="conversation_title_fallback_one_to_one" />
+  <java-symbol type="string" name="conversation_title_fallback_group_chat" />
+  <java-symbol type="id" name="conversation_icon" />
+  <java-symbol type="id" name="conversation_icon_badge" />
+  <java-symbol type="id" name="expand_button_container" />
+  <java-symbol type="id" name="messaging_group_content_container" />
+  <java-symbol type="id" name="expand_button_and_content_container" />
+  <java-symbol type="id" name="conversation_header" />
+  <java-symbol type="id" name="conversation_face_pile_bottom_background" />
+  <java-symbol type="id" name="conversation_face_pile_bottom" />
+  <java-symbol type="id" name="conversation_face_pile_top" />
+  <java-symbol type="id" name="conversation_face_pile" />
+  <java-symbol type="id" name="conversation_text" />
+  <java-symbol type="dimen" name="conversation_expand_button_top_margin_expanded" />
+  <java-symbol type="dimen" name="conversation_expand_button_expanded_size" />
+  <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
+  <java-symbol type="dimen" name="conversation_badge_side_margin" />
+  <java-symbol type="dimen" name="conversation_icon_size_badged" />
+  <java-symbol type="dimen" name="conversation_icon_size_centered" />
+  <java-symbol type="dimen" name="conversation_icon_margin_top_centered" />
+  <java-symbol type="layout" name="notification_template_material_conversation" />
+  <java-symbol type="layout" name="conversation_face_pile_layout" />
+
   <!-- Intent resolver and share sheet -->
   <java-symbol type="color" name="resolver_tabs_active_color" />
   <java-symbol type="color" name="resolver_tabs_inactive_color" />
@@ -3927,4 +3951,6 @@
 
   <java-symbol type="string" name="config_customMediaKeyDispatcher" />
   <java-symbol type="string" name="config_customSessionPolicyProvider" />
+  <!-- The max scale for the wallpaper when it's zoomed in -->
+  <java-symbol type="dimen" name="config_wallpaperMaxScale"/>
 </resources>

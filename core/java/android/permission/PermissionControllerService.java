@@ -218,11 +218,14 @@ public abstract class PermissionControllerService extends Service {
      * Called by system to update the
      * {@link PackageManager}{@code .FLAG_PERMISSION_USER_SENSITIVE_WHEN_*} flags for permissions.
      * <p>
-     * This is typically when creating a new user or upgrading either system or
-     * permission controller package.
+     *
+     * If uid is -1, updates the permission flags for all packages.
+     *
+     * Typically called by the system when a new app is installed or updated or when creating a
+     * new user or upgrading either system or permission controller package.
      */
     @BinderThread
-    public void onUpdateUserSensitivePermissionFlags() {
+    public void onUpdateUserSensitivePermissionFlags(int uid, @NonNull Runnable callback) {
         throw new AbstractMethodError("Must be overridden in implementing class");
     }
 
@@ -459,11 +462,14 @@ public abstract class PermissionControllerService extends Service {
             }
 
             @Override
-            public void updateUserSensitive(AndroidFuture callback) {
+            public void updateUserSensitiveForApp(int uid, @NonNull AndroidFuture callback) {
                 Preconditions.checkNotNull(callback, "callback cannot be null");
 
-                onUpdateUserSensitivePermissionFlags();
-                callback.complete(null);
+                try {
+                    onUpdateUserSensitivePermissionFlags(uid, () -> callback.complete(null));
+                } catch (Exception e) {
+                    callback.completeExceptionally(e);
+                }
             }
 
             @Override

@@ -218,15 +218,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
     private List<String> requestedPermissions = emptyList();
-
-    @NonNull
-    @DataClass.ParcelWith(ForInternedStringList.class)
-    private List<String> autoRevokeExemptionRequestedPermissions = emptyList();
-
-    @NonNull
-    @DataClass.ParcelWith(ForInternedStringList.class)
-    private List<String> autoRevokeExemptionGrantedPermissions = emptyList();
-
     @NonNull
     @DataClass.ParcelWith(ForInternedStringList.class)
     private List<String> implicitPermissions = emptyList();
@@ -584,20 +575,6 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public ParsingPackageImpl addRequestedPermission(String permission) {
         this.requestedPermissions = CollectionUtils.add(this.requestedPermissions,
                 TextUtils.safeIntern(permission));
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl addAutoRevokeExemptionRequestedPermission(String permission) {
-        this.autoRevokeExemptionRequestedPermissions = CollectionUtils.add(
-                this.autoRevokeExemptionRequestedPermissions, TextUtils.safeIntern(permission));
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl addAutoRevokeExemptionGrantedPermission(String permission) {
-        this.autoRevokeExemptionGrantedPermissions = CollectionUtils.add(
-                this.autoRevokeExemptionGrantedPermissions, TextUtils.safeIntern(permission));
         return this;
     }
 
@@ -1483,19 +1460,10 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         return adoptPermissions;
     }
 
+    @NonNull
     @Override
     public List<String> getRequestedPermissions() {
-        return CollectionUtils.emptyIfNull(requestedPermissions);
-    }
-
-    @Override
-    public List<String> getAutoRevokeExemptionRequestedPermissions() {
-        return CollectionUtils.emptyIfNull(autoRevokeExemptionRequestedPermissions);
-    }
-
-    @Override
-    public List<String> getAutoRevokeExemptionGrantedPermissions() {
-        return CollectionUtils.emptyIfNull(autoRevokeExemptionGrantedPermissions);
+        return requestedPermissions;
     }
 
     @NonNull

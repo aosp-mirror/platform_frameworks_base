@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.graphics.Insets;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
@@ -112,6 +113,11 @@ public final class ContentCaptureEvent implements Parcelable {
      */
     public static final int TYPE_SESSION_PAUSED = 8;
 
+    /**
+     * Called when the view's insets are changed. The new insets associated with the
+     * event may then be retrieved by calling {@link #getInsets()}
+     */
+    public static final int TYPE_VIEW_INSETS_CHANGED = 9;
 
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
@@ -122,7 +128,8 @@ public final class ContentCaptureEvent implements Parcelable {
             TYPE_VIEW_TREE_APPEARED,
             TYPE_CONTEXT_UPDATED,
             TYPE_SESSION_PAUSED,
-            TYPE_SESSION_RESUMED
+            TYPE_SESSION_RESUMED,
+            TYPE_VIEW_INSETS_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType{}
@@ -136,6 +143,7 @@ public final class ContentCaptureEvent implements Parcelable {
     private @Nullable CharSequence mText;
     private int mParentSessionId = NO_SESSION_ID;
     private @Nullable ContentCaptureContext mClientContext;
+    private @Nullable Insets mInsets;
 
     /** @hide */
     public ContentCaptureEvent(int sessionId, int type, long eventTime) {
@@ -242,6 +250,13 @@ public final class ContentCaptureEvent implements Parcelable {
         return this;
     }
 
+    /** @hide */
+    @NonNull
+    public ContentCaptureEvent setInsets(@NonNull Insets insets) {
+        mInsets = insets;
+        return this;
+    }
+
     /**
      * Gets the type of the event.
      *
@@ -302,6 +317,16 @@ public final class ContentCaptureEvent implements Parcelable {
     @Nullable
     public CharSequence getText() {
         return mText;
+    }
+
+    /**
+     * Gets the rectangle of the insets associated with the event. Valid insets will only be
+     * returned if the type of the event is {@link #TYPE_VIEW_INSETS_CHANGED}, otherwise they
+     * will be null.
+     */
+    @Nullable
+    public Insets getInsets() {
+        return mInsets;
     }
 
     /**
@@ -369,7 +394,9 @@ public final class ContentCaptureEvent implements Parcelable {
         }
         if (mClientContext != null) {
             pw.print(", context="); mClientContext.dump(pw); pw.println();
-
+        }
+        if (mInsets != null) {
+            pw.print(", insets="); pw.println(mInsets);
         }
     }
 
@@ -401,6 +428,9 @@ public final class ContentCaptureEvent implements Parcelable {
         if (mClientContext != null) {
             string.append(", context=").append(mClientContext);
         }
+        if (mInsets != null) {
+            string.append(", insets=").append(mInsets);
+        }
         return string.append(']').toString();
     }
 
@@ -423,6 +453,9 @@ public final class ContentCaptureEvent implements Parcelable {
         }
         if (mType == TYPE_SESSION_STARTED || mType == TYPE_CONTEXT_UPDATED) {
             parcel.writeParcelable(mClientContext, flags);
+        }
+        if (mType == TYPE_VIEW_INSETS_CHANGED) {
+            parcel.writeParcelable(mInsets, flags);
         }
     }
 
@@ -454,6 +487,9 @@ public final class ContentCaptureEvent implements Parcelable {
             }
             if (type == TYPE_SESSION_STARTED || type == TYPE_CONTEXT_UPDATED) {
                 event.setClientContext(parcel.readParcelable(null));
+            }
+            if (type == TYPE_VIEW_INSETS_CHANGED) {
+                event.setInsets(parcel.readParcelable(null));
             }
             return event;
         }
@@ -488,6 +524,8 @@ public final class ContentCaptureEvent implements Parcelable {
                 return "VIEW_TREE_APPEARED";
             case TYPE_CONTEXT_UPDATED:
                 return "CONTEXT_UPDATED";
+            case TYPE_VIEW_INSETS_CHANGED:
+                return "VIEW_INSETS_CHANGED";
             default:
                 return "UKNOWN_TYPE: " + type;
         }

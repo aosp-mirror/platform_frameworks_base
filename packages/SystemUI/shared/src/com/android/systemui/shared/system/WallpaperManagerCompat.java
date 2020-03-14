@@ -18,7 +18,11 @@ package com.android.systemui.shared.system;
 
 import android.app.WallpaperManager;
 import android.content.Context;
+import android.os.IBinder;
 
+/**
+ * @see WallpaperManager
+ */
 public class WallpaperManagerCompat {
     private final WallpaperManager mWallpaperManager;
 
@@ -26,7 +30,10 @@ public class WallpaperManagerCompat {
         mWallpaperManager = context.getSystemService(WallpaperManager.class);
     }
 
-    public void setWallpaperZoomOut(float zoom) {
-        mWallpaperManager.setWallpaperZoomOut(zoom);
+    /**
+     * @see WallpaperManager#setWallpaperZoomOut(IBinder, float)
+     */
+    public void setWallpaperZoomOut(IBinder windowToken, float zoom) {
+        mWallpaperManager.setWallpaperZoomOut(windowToken, zoom);
     }
 }

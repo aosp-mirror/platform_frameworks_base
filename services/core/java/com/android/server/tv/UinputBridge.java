@@ -28,7 +28,7 @@ import java.io.IOException;
 public final class UinputBridge {
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private long mPtr;
-    private IBinder mToken = null;
+    private IBinder mToken;
 
     private static native long nativeOpen(String name, String uniqueId, int width, int height,
                                           int maxPointers);
@@ -38,6 +38,25 @@ public final class UinputBridge {
     private static native void nativeSendPointerDown(long ptr, int pointerId, int x, int y);
     private static native void nativeSendPointerUp(long ptr, int pointerId);
     private static native void nativeSendPointerSync(long ptr);
+
+    /** Opens a gamepad - will support gamepad key and axis sending */
+    private static native long nativeGamepadOpen(String name, String uniqueId);
+
+    /** Marks the specified key up/down for a gamepad */
+    private static native void nativeSendGamepadKey(long ptr, int keyIndex, boolean down);
+
+    /**
+     * Gamepads pre-define the following axes:
+     *   - Left joystick X, axis == ABS_X == 0, range [0, 254]
+     *   - Left joystick Y, axis == ABS_Y == 1, range [0, 254]
+     *   - Right joystick X, axis == ABS_RX == 3, range [0, 254]
+     *   - Right joystick Y, axis == ABS_RY == 4, range [0, 254]
+     *   - Left trigger, axis == ABS_Z == 2, range [0, 254]
+     *   - Right trigger, axis == ABS_RZ == 5, range [0, 254]
+     *   - DPad X, axis == ABS_HAT0X == 0x10, range [-1, 1]
+     *   - DPad Y, axis == ABS_HAT0Y == 0x11, range [-1, 1]
+     */
+    private static native void nativeSendGamepadAxisValue(long ptr, int axis, int value);
 
     public UinputBridge(IBinder token, String name, int width, int height, int maxPointers)
                         throws IOException {
@@ -58,12 +77,31 @@ public final class UinputBridge {
         mCloseGuard.open("close");
     }
 
+    /** Constructor used by static factory methods */
+    private UinputBridge(IBinder token, long ptr) {
+        mPtr = ptr;
+        mToken = token;
+        mCloseGuard.open("close");
+    }
+
+    /** Opens a UinputBridge that supports gamepad buttons and axes. */
+    public static UinputBridge openGamepad(IBinder token, String name)
+            throws IOException {
+        if (token == null) {
+            throw new IllegalArgumentException("Token cannot be null");
+        }
+        long ptr = nativeGamepadOpen(name, token.toString());
+        if (ptr == 0) {
+            throw new IOException("Could not open uinput device " + name);
+        }
+
+        return new UinputBridge(token, ptr);
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            if (mCloseGuard != null) {
-                mCloseGuard.warnIfOpen();
-            }
+            mCloseGuard.warnIfOpen();
             close(mToken);
         } finally {
             mToken = null;
@@ -119,7 +157,35 @@ public final class UinputBridge {
         if (isTokenValid(token)) {
             nativeSendPointerSync(mPtr);
         }
+    }
 
+    /** Send a gamepad key
+     *  @param keyIndex - the index of the w3-spec key
+     *  @param down - is the key pressed ?
+     */
+    public void sendGamepadKey(IBinder token, int keyIndex, boolean down) {
+        if (isTokenValid(token)) {
+            nativeSendGamepadKey(mPtr, keyIndex, down);
+        }
+    }
+
+    /** Send a gamepad axis value.
+     *   - Left joystick X, axis == ABS_X == 0, range [0, 254]
+     *   - Left joystick Y, axis == ABS_Y == 1, range [0, 254]
+     *   - Right joystick X, axis == ABS_RX == 3, range [0, 254]
+     *   - Right joystick Y, axis == ABS_RY == 4, range [0, 254]
+     *   - Left trigger, axis == ABS_Z == 2, range [0, 254]
+     *   - Right trigger, axis == ABS_RZ == 5, range [0, 254]
+     *   - DPad X, axis == ABS_HAT0X == 0x10, range [-1, 1]
+     *   - DPad Y, axis == ABS_HAT0Y == 0x11, range [-1, 1]
+     *
+     * @param axis is the axis index
+     * @param value is the value to set for that axis
+     */
+    public void sendGamepadAxisValue(IBinder token, int axis, int value) {
+        if (isTokenValid(token)) {
+            nativeSendGamepadAxisValue(mPtr, axis, value);
+        }
     }
 
     public void clear(IBinder token) {

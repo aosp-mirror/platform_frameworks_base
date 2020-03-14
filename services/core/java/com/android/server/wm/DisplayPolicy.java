@@ -440,10 +440,12 @@ public class DisplayPolicy {
                     updateDreamingSleepToken(msg.arg1 != 0);
                     break;
                 case MSG_REQUEST_TRANSIENT_BARS:
-                    WindowState targetBar = (msg.arg1 == MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS)
-                            ? mStatusBar : mNavigationBar;
-                    if (targetBar != null) {
-                        requestTransientBars(targetBar);
+                    synchronized (mLock) {
+                        WindowState targetBar = (msg.arg1 == MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS)
+                                ? mStatusBar : mNavigationBar;
+                        if (targetBar != null) {
+                            requestTransientBars(targetBar);
+                        }
                     }
                     break;
                 case MSG_DISPOSE_INPUT_CONSUMER:
@@ -499,15 +501,20 @@ public class DisplayPolicy {
                 new SystemGesturesPointerEventListener.Callbacks() {
                     @Override
                     public void onSwipeFromTop() {
-                        if (mStatusBar != null) {
-                            requestTransientBars(mStatusBar);
+                        synchronized (mLock) {
+                            if (mStatusBar != null) {
+                                requestTransientBars(mStatusBar);
+                            }
                         }
                     }
 
                     @Override
                     public void onSwipeFromBottom() {
-                        if (mNavigationBar != null && mNavigationBarPosition == NAV_BAR_BOTTOM) {
-                            requestTransientBars(mNavigationBar);
+                        synchronized (mLock) {
+                            if (mNavigationBar != null
+                                    && mNavigationBarPosition == NAV_BAR_BOTTOM) {
+                                requestTransientBars(mNavigationBar);
+                            }
                         }
                     }
 
@@ -517,12 +524,13 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                        }
-                        final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
-                                || mNavigationBarPosition == NAV_BAR_RIGHT;
-                        if (mNavigationBar != null && sideAllowed
-                                && !mSystemGestures.currentGestureStartedInRegion(excludedRegion)) {
-                            requestTransientBars(mNavigationBar);
+                            final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
+                                    || mNavigationBarPosition == NAV_BAR_RIGHT;
+                            if (mNavigationBar != null && sideAllowed
+                                    && !mSystemGestures.currentGestureStartedInRegion(
+                                            excludedRegion)) {
+                                requestTransientBars(mNavigationBar);
+                            }
                         }
                         excludedRegion.recycle();
                     }
@@ -533,12 +541,13 @@ public class DisplayPolicy {
                         synchronized (mLock) {
                             mDisplayContent.calculateSystemGestureExclusion(
                                     excludedRegion, null /* outUnrestricted */);
-                        }
-                        final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
-                                || mNavigationBarPosition == NAV_BAR_LEFT;
-                        if (mNavigationBar != null && sideAllowed
-                                && !mSystemGestures.currentGestureStartedInRegion(excludedRegion)) {
-                            requestTransientBars(mNavigationBar);
+                            final boolean sideAllowed = mNavigationBarAlwaysShowOnSideGesture
+                                    || mNavigationBarPosition == NAV_BAR_LEFT;
+                            if (mNavigationBar != null && sideAllowed
+                                    && !mSystemGestures.currentGestureStartedInRegion(
+                                            excludedRegion)) {
+                                requestTransientBars(mNavigationBar);
+                            }
                         }
                         excludedRegion.recycle();
                     }
@@ -3156,47 +3165,46 @@ public class DisplayPolicy {
     }
 
     private void requestTransientBars(WindowState swipeTarget) {
-        synchronized (mLock) {
-            if (!mService.mPolicy.isUserSetupComplete()) {
-                // Swipe-up for navigation bar is disabled during setup
+        if (!mService.mPolicy.isUserSetupComplete()) {
+            // Swipe-up for navigation bar is disabled during setup
+            return;
+        }
+        if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
+            if (swipeTarget == mNavigationBar
+                    && !getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)) {
+                // Don't show status bar when swiping on already visible navigation bar
                 return;
             }
-            if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-                if (swipeTarget == mNavigationBar
-                        && !getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)) {
-                    // Don't show status bar when swiping on already visible navigation bar
-                    return;
-                }
-                final InsetsControlTarget controlTarget =
-                        swipeTarget.getControllableInsetProvider().getControlTarget();
+            final InsetsSourceProvider provider = swipeTarget.getControllableInsetProvider();
+            final InsetsControlTarget controlTarget = provider != null
+                    ? provider.getControlTarget() : null;
 
-                // No transient mode on lockscreen (in notification shade window).
-                if (controlTarget == null || controlTarget == getNotificationShade()) {
+            // No transient mode on lockscreen (in notification shade window).
+            if (controlTarget == null || controlTarget == getNotificationShade()) {
+                return;
+            }
+            if (controlTarget.canShowTransient()) {
+                mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
+                        new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+            } else {
+                controlTarget.showInsets(Type.systemBars(), false);
+            }
+        } else {
+            boolean sb = mStatusBarController.checkShowTransientBarLw();
+            boolean nb = mNavigationBarController.checkShowTransientBarLw()
+                    && !isNavBarEmpty(mLastSystemUiFlags);
+            if (sb || nb) {
+                // Don't show status bar when swiping on already visible navigation bar
+                if (!nb && swipeTarget == mNavigationBar) {
+                    if (DEBUG) Slog.d(TAG, "Not showing transient bar, wrong swipe target");
                     return;
                 }
-                if (controlTarget.canShowTransient()) {
-                    mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
-                            new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
-                } else {
-                    controlTarget.showInsets(Type.systemBars(), false);
-                }
-            } else {
-                boolean sb = mStatusBarController.checkShowTransientBarLw();
-                boolean nb = mNavigationBarController.checkShowTransientBarLw()
-                        && !isNavBarEmpty(mLastSystemUiFlags);
-                if (sb || nb) {
-                    // Don't show status bar when swiping on already visible navigation bar
-                    if (!nb && swipeTarget == mNavigationBar) {
-                        if (DEBUG) Slog.d(TAG, "Not showing transient bar, wrong swipe target");
-                        return;
-                    }
-                    if (sb) mStatusBarController.showTransient();
-                    if (nb) mNavigationBarController.showTransient();
-                    updateSystemUiVisibilityLw();
-                }
+                if (sb) mStatusBarController.showTransient();
+                if (nb) mNavigationBarController.showTransient();
+                updateSystemUiVisibilityLw();
             }
-            mImmersiveModeConfirmation.confirmCurrentPrompt();
         }
+        mImmersiveModeConfirmation.confirmCurrentPrompt();
     }
 
     private void disposeInputConsumer(InputConsumer inputConsumer) {

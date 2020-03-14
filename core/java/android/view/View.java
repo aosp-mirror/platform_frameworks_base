@@ -3318,7 +3318,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag indicating that the view is autofilled
      *
      * @see #isAutofilled()
-     * @see #setAutofilled(boolean)
+     * @see #setAutofilled(boolean, boolean)
      */
     private static final int PFLAG3_IS_AUTOFILLED = 0x10000;
 
@@ -3428,6 +3428,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                         1        PFLAG4_CONTENT_CAPTURE_IMPORTANCE_CACHED_VALUE
      *                         11       PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK
      *                        1         PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS
+     *                       1          PFLAG4_AUTOFILL_HIDE_HIGHLIGHT
      * |-------|-------|-------|-------|
      */
 
@@ -3469,6 +3470,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see #OPTIONAL_FITS_SYSTEM_WINDOWS
      */
     static final int PFLAG4_FRAMEWORK_OPTIONAL_FITS_SYSTEM_WINDOWS = 0x000000100;
+
+    /**
+     * Flag indicating the field should not have yellow highlight when autofilled.
+     */
+    private static final int PFLAG4_AUTOFILL_HIDE_HIGHLIGHT = 0x100;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -9170,6 +9176,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @hide
+     */
+    public boolean hideAutofillHighlight() {
+        return (mPrivateFlags4 & PFLAG4_AUTOFILL_HIDE_HIGHLIGHT) != 0;
+    }
+
+    /**
      * Gets the {@link View}'s current autofill value.
      *
      * <p>By default returns {@code null}, but subclasses should override it and return an
@@ -11227,6 +11240,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * @return {@code true} if any {@link WindowInsetsAnimation.Callback} is registered on the view
+     *         or view tree of the sub-hierarchy {@code false} otherwise.
+     * @hide
+     */
+    public boolean hasWindowInsetsAnimationCallback() {
+        return getListenerInfo().mWindowInsetsAnimationCallback != null;
+    }
+
+    /**
      * Dispatches {@link WindowInsetsAnimation.Callback#onPrepare(WindowInsetsAnimation)}
      * when Window Insets animation is being prepared.
      * @param animation current animation
@@ -11741,7 +11763,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     @TestApi
-    public void setAutofilled(boolean isAutofilled) {
+    public void setAutofilled(boolean isAutofilled, boolean hideHighlight) {
         boolean wasChanged = isAutofilled != isAutofilled();
 
         if (wasChanged) {
@@ -11749,6 +11771,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mPrivateFlags3 |= PFLAG3_IS_AUTOFILLED;
             } else {
                 mPrivateFlags3 &= ~PFLAG3_IS_AUTOFILLED;
+            }
+
+            if (hideHighlight) {
+                mPrivateFlags4 |= PFLAG4_AUTOFILL_HIDE_HIGHLIGHT;
+            } else {
+                mPrivateFlags4 &= ~PFLAG4_AUTOFILL_HIDE_HIGHLIGHT;
             }
 
             invalidate();
@@ -20569,6 +20597,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             state.mStartActivityRequestWhoSaved = mStartActivityRequestWho;
             state.mIsAutofilled = isAutofilled();
+            state.mHideHighlight = hideAutofillHighlight();
             state.mAutofillViewId = mAutofillViewId;
             return state;
         }
@@ -20645,7 +20674,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mStartActivityRequestWho = baseState.mStartActivityRequestWhoSaved;
             }
             if ((baseState.mSavedData & BaseSavedState.IS_AUTOFILLED) != 0) {
-                setAutofilled(baseState.mIsAutofilled);
+                setAutofilled(baseState.mIsAutofilled, baseState.mHideHighlight);
             }
             if ((baseState.mSavedData & BaseSavedState.AUTOFILL_ID) != 0) {
                 // It can happen that views have the same view id and the restoration path will not
@@ -24078,12 +24107,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Draw {@link View#isAutofilled()} highlight over view if the view is autofilled.
+     * Draw {@link View#isAutofilled()} highlight over view if the view is autofilled, unless
+     * {@link #PFLAG4_AUTOFILL_HIDE_HIGHLIGHT} is enabled.
      *
      * @param canvas The canvas to draw on
      */
     private void drawAutofilledHighlight(@NonNull Canvas canvas) {
-        if (isAutofilled()) {
+        if (isAutofilled() && !hideAutofillHighlight()) {
             Drawable autofilledHighlight = getAutofilledDrawable();
 
             if (autofilledHighlight != null) {
@@ -28526,6 +28556,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int mSavedData;
         String mStartActivityRequestWhoSaved;
         boolean mIsAutofilled;
+        boolean mHideHighlight;
         int mAutofillViewId;
 
         /**
@@ -28549,6 +28580,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mSavedData = source.readInt();
             mStartActivityRequestWhoSaved = source.readString();
             mIsAutofilled = source.readBoolean();
+            mHideHighlight = source.readBoolean();
             mAutofillViewId = source.readInt();
         }
 
@@ -28568,6 +28600,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             out.writeInt(mSavedData);
             out.writeString(mStartActivityRequestWhoSaved);
             out.writeBoolean(mIsAutofilled);
+            out.writeBoolean(mHideHighlight);
             out.writeInt(mAutofillViewId);
         }
 
@@ -29066,8 +29099,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mTreeObserver = new ViewTreeObserver(context);
         }
 
+        @Nullable
+        ContentCaptureManager getContentCaptureManager(@NonNull Context context) {
+            if (mContentCaptureManager != null) {
+                return mContentCaptureManager;
+            }
+            mContentCaptureManager = context.getSystemService(ContentCaptureManager.class);
+            return mContentCaptureManager;
+        }
+
+        void delayNotifyContentCaptureInsetsEvent(@NonNull Insets insets) {
+            if (mContentCaptureManager == null) {
+                return;
+            }
+
+            ArrayList<Object> events = ensureEvents(
+                        mContentCaptureManager.getMainContentCaptureSession());
+            events.add(insets);
+        }
+
         private void delayNotifyContentCaptureEvent(@NonNull ContentCaptureSession session,
                 @NonNull View view, boolean appeared) {
+            ArrayList<Object> events = ensureEvents(session);
+            events.add(appeared ? view : view.getAutofillId());
+        }
+
+        @NonNull
+        private ArrayList<Object> ensureEvents(@NonNull ContentCaptureSession session) {
             if (mContentCaptureEvents == null) {
                 // Most of the time there will be just one session, so intial capacity is 1
                 mContentCaptureEvents = new SparseArray<>(1);
@@ -29079,16 +29137,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 events = new ArrayList<>();
                 mContentCaptureEvents.put(sessionId, events);
             }
-            events.add(appeared ? view : view.getAutofillId());
-        }
 
-        @Nullable
-        ContentCaptureManager getContentCaptureManager(@NonNull Context context) {
-            if (mContentCaptureManager != null) {
-                return mContentCaptureManager;
-            }
-            mContentCaptureManager = context.getSystemService(ContentCaptureManager.class);
-            return mContentCaptureManager;
+            return events;
         }
     }
 

@@ -822,7 +822,7 @@ public abstract class PackageManagerInternal {
 
     /**
      * Perform the given action for each installed package for a user.
-     * Note that packages lock will be held while performing the actions.
+     * Note that packages lock will be held while performin the actions.
      */
     public abstract void forEachInstalledPackage(
             @NonNull Consumer<AndroidPackage> actionLocked, @UserIdInt int userId);

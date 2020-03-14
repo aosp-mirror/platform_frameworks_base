@@ -82,25 +82,34 @@ public abstract class SourceStampVerifier {
     public static SourceStampVerificationResult verify(String apkFile) {
         try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
             return verify(apk);
-        } catch (Exception e) {
-            // Any exception in the SourceStamp verification returns a non-verified SourceStamp
-            // outcome without affecting the outcome of any of the other signature schemes.
-            return SourceStampVerificationResult.notVerified();
+        } catch (IOException e) {
+            // Any exception in reading the APK returns a non-present SourceStamp outcome
+            // without affecting the outcome of any of the other signature schemes.
+            return SourceStampVerificationResult.notPresent();
         }
     }
 
-    private static SourceStampVerificationResult verify(RandomAccessFile apk)
-            throws IOException, SignatureNotFoundException {
-        byte[] sourceStampCertificateDigest = getSourceStampCertificateDigest(apk);
-        if (sourceStampCertificateDigest == null) {
-            // SourceStamp certificate hash file not found, which means that there is not
-            // SourceStamp present.
+    private static SourceStampVerificationResult verify(RandomAccessFile apk) {
+        byte[] sourceStampCertificateDigest;
+        try {
+            sourceStampCertificateDigest = getSourceStampCertificateDigest(apk);
+            if (sourceStampCertificateDigest == null) {
+                // SourceStamp certificate hash file not found, which means that there is not
+                // SourceStamp present.
+                return SourceStampVerificationResult.notPresent();
+            }
+        } catch (IOException e) {
             return SourceStampVerificationResult.notPresent();
         }
-        SignatureInfo signatureInfo =
-                ApkSigningBlockUtils.findSignature(apk, SOURCE_STAMP_BLOCK_ID);
-        Map<Integer, byte[]> apkContentDigests = getApkContentDigests(apk);
-        return verify(signatureInfo, apkContentDigests, sourceStampCertificateDigest);
+
+        try {
+            SignatureInfo signatureInfo =
+                    ApkSigningBlockUtils.findSignature(apk, SOURCE_STAMP_BLOCK_ID);
+            Map<Integer, byte[]> apkContentDigests = getApkContentDigests(apk);
+            return verify(signatureInfo, apkContentDigests, sourceStampCertificateDigest);
+        } catch (IOException | SignatureNotFoundException e) {
+            return SourceStampVerificationResult.notVerified();
+        }
     }
 
     private static SourceStampVerificationResult verify(

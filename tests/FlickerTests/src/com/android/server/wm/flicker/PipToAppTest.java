@@ -18,7 +18,6 @@ package com.android.server.wm.flicker;
 
 import static com.android.server.wm.flicker.CommonTransitions.exitPipModeToApp;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.PipAppHelper;
@@ -37,40 +36,15 @@ import org.junit.runners.Parameterized;
 @LargeTest
 @RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class PipToAppTest extends NonRotationTestBase {
-
-    static final String sPipWindowTitle = "PipMenuActivity";
-
+public class PipToAppTest extends PipTestBase {
     public PipToAppTest(String beginRotationName, int beginRotation) {
         super(beginRotationName, beginRotation);
-
-        this.mTestApp = new PipAppHelper(InstrumentationRegistry.getInstrumentation());
     }
 
     @Before
     public void runTransition() {
         run(exitPipModeToApp((PipAppHelper) mTestApp, mUiDevice, mBeginRotation)
                 .includeJankyRuns().build());
-    }
-
-    @Test
-    public void checkVisibility_pipWindowBecomesVisible() {
-        checkResults(result -> WmTraceSubject.assertThat(result)
-                .skipUntilFirstAssertion()
-                .showsAppWindowOnTop(sPipWindowTitle)
-                .then()
-                .hidesAppWindow(sPipWindowTitle)
-                .forAllEntries());
-    }
-
-    @Test
-    public void checkVisibility_pipLayerBecomesVisible() {
-        checkResults(result -> LayersTraceSubject.assertThat(result)
-                .skipUntilFirstAssertion()
-                .showsLayer(sPipWindowTitle)
-                .then()
-                .hidesLayer(sPipWindowTitle)
-                .forAllEntries());
     }
 
     @Test

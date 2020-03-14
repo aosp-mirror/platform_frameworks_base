@@ -206,7 +206,7 @@ package android {
     field public static final String REVIEW_ACCESSIBILITY_SERVICES = "android.permission.REVIEW_ACCESSIBILITY_SERVICES";
     field public static final String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
-    field public static final String SECURE_ELEMENT_PRIVILEGED = "android.permission.SECURE_ELEMENT_PRIVILEGED";
+    field public static final String SECURE_ELEMENT_PRIVILEGED_OPERATION = "android.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION";
     field public static final String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
     field public static final String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
@@ -345,7 +345,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getPackageImportance(String);
     method @NonNull public java.util.Collection<java.util.Locale> getSupportedLocales();
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public int getUidImportance(int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean isProfileForeground(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.FORCE_STOP_PACKAGES) public void killProcessesWhenImperceptible(@NonNull int[], @NonNull String);
     method @RequiresPermission(android.Manifest.permission.KILL_UID) public void killUid(int, String);
     method public void registerHomeVisibilityObserver(@NonNull android.app.HomeVisibilityObserver);
@@ -1380,7 +1379,6 @@ package android.app.role {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean addRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void clearRoleHoldersAsUser(@NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method @Nullable public String getDefaultSmsPackage(int);
     method @NonNull @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public java.util.List<java.lang.String> getHeldRolesFromController(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHolders(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHoldersAsUser(@NonNull String, @NonNull android.os.UserHandle);
@@ -2223,7 +2221,7 @@ package android.content.pm {
     field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
-    field public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = -268435456; // 0xf0000000
+    field public static final int FLAGS_PERMISSION_RESERVED_PERMISSION_CONTROLLER = -268435456; // 0xf0000000
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_AUTO_REVOKED = 131072; // 0x20000
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
@@ -5628,8 +5626,8 @@ package android.media.tv.tuner.frontend {
     method public int getConstellation();
     method public int getGuardInterval();
     method public int getHierarchy();
-    method public int getHpCodeRate();
-    method public int getLpCodeRate();
+    method public int getHighPriorityCodeRate();
+    method public int getLowPriorityCodeRate();
     method public int getPlpGroupId();
     method public int getPlpId();
     method public int getPlpMode();
@@ -5657,20 +5655,20 @@ package android.media.tv.tuner.frontend {
     field public static final int CODERATE_8_9 = 512; // 0x200
     field public static final int CODERATE_AUTO = 1; // 0x1
     field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int CONSTELLATION_16QAM = 4; // 0x4
+    field public static final int CONSTELLATION_256QAM = 16; // 0x10
+    field public static final int CONSTELLATION_64QAM = 8; // 0x8
     field public static final int CONSTELLATION_AUTO = 1; // 0x1
-    field public static final int CONSTELLATION_CONSTELLATION_16QAM = 4; // 0x4
-    field public static final int CONSTELLATION_CONSTELLATION_256QAM = 16; // 0x10
-    field public static final int CONSTELLATION_CONSTELLATION_64QAM = 8; // 0x8
-    field public static final int CONSTELLATION_CONSTELLATION_QPSK = 2; // 0x2
+    field public static final int CONSTELLATION_QPSK = 2; // 0x2
     field public static final int CONSTELLATION_UNDEFINED = 0; // 0x0
+    field public static final int GUARD_INTERVAL_19_128 = 64; // 0x40
+    field public static final int GUARD_INTERVAL_19_256 = 128; // 0x80
+    field public static final int GUARD_INTERVAL_1_128 = 32; // 0x20
+    field public static final int GUARD_INTERVAL_1_16 = 4; // 0x4
+    field public static final int GUARD_INTERVAL_1_32 = 2; // 0x2
+    field public static final int GUARD_INTERVAL_1_4 = 16; // 0x10
+    field public static final int GUARD_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_AUTO = 1; // 0x1
-    field public static final int GUARD_INTERVAL_INTERVAL_19_128 = 64; // 0x40
-    field public static final int GUARD_INTERVAL_INTERVAL_19_256 = 128; // 0x80
-    field public static final int GUARD_INTERVAL_INTERVAL_1_128 = 32; // 0x20
-    field public static final int GUARD_INTERVAL_INTERVAL_1_16 = 4; // 0x4
-    field public static final int GUARD_INTERVAL_INTERVAL_1_32 = 2; // 0x2
-    field public static final int GUARD_INTERVAL_INTERVAL_1_4 = 16; // 0x10
-    field public static final int GUARD_INTERVAL_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_UNDEFINED = 0; // 0x0
     field public static final int HIERARCHY_1_INDEPTH = 64; // 0x40
     field public static final int HIERARCHY_1_NATIVE = 4; // 0x4
@@ -5705,8 +5703,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHierarchy(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriority(boolean);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHpCodeRate(int);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLpCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriorityCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLowPriorityCodeRate(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setMiso(boolean);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpGroupId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpId(int);
@@ -8951,13 +8949,11 @@ package android.permission {
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
-    method @BinderThread public void onUpdateUserSensitivePermissionFlags();
+    method @BinderThread public void onUpdateUserSensitivePermissionFlags(int, @NonNull Runnable);
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
   public final class PermissionManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getAutoRevokeExemptionGrantedPermissions();
-    method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getAutoRevokeExemptionRequestedPermissions();
     method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, android.Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS}) public int getRuntimePermissionsVersion();
     method @NonNull public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS) public void grantDefaultPermissionsToEnabledCarrierApps(@NonNull String[], @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -9391,7 +9387,6 @@ package android.provider {
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
-    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES = "theme_customization_overlay_packages";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
@@ -9438,9 +9433,7 @@ package android.provider {
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
     field public static final String APN_SET_ID = "apn_set_id";
     field public static final int CARRIER_EDITED = 4; // 0x4
-    field @NonNull public static final android.net.Uri DPC_URI;
     field public static final String EDITED_STATUS = "edited";
-    field public static final int INVALID_APN_ID = -1; // 0xffffffff
     field public static final String MAX_CONNECTIONS = "max_conns";
     field public static final String MODEM_PERSIST = "modem_cognitive";
     field public static final String MTU = "mtu";
@@ -9600,7 +9593,7 @@ package android.provider {
 package android.se.omapi {
 
   public final class Reader {
-    method @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED) public boolean reset();
+    method @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION) public boolean reset();
   }
 
 }
@@ -9809,7 +9802,7 @@ package android.service.autofill {
 
   public static final class Dataset.Builder {
     ctor public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setFieldInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
   }
 
   public abstract class InlineSuggestionRenderService extends android.app.Service {
@@ -11318,7 +11311,6 @@ package android.telephony {
   public class ServiceState implements android.os.Parcelable {
     method public void fillInNotifierBundle(@NonNull android.os.Bundle);
     method public int getDataNetworkType();
-    method public int getDataRegistrationState();
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
@@ -11551,7 +11543,6 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method public int addDevicePolicyOverrideApn(@NonNull android.content.Context, @NonNull android.telephony.data.ApnSetting);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int changeIccLockPassword(@NonNull String, @NonNull String);
     method public int checkCarrierPrivilegesForPackage(String);
@@ -11584,7 +11575,6 @@ package android.telephony {
     method @Deprecated public boolean getDataEnabled();
     method @Deprecated public boolean getDataEnabled(int);
     method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
-    method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
@@ -11633,7 +11623,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isVideoCallingEnabled();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean matchesCurrentSimOperator(@NonNull String, int, @Nullable String);
-    method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method public boolean needsOtaServiceProvisioning();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyUserActivity();
@@ -13207,6 +13196,7 @@ package android.view.contentcapture {
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
     method @Nullable public java.util.List<android.view.autofill.AutofillId> getIds();
+    method @Nullable public android.graphics.Insets getInsets();
     method @Nullable public CharSequence getText();
     method public int getType();
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
@@ -13217,6 +13207,7 @@ package android.view.contentcapture {
     field public static final int TYPE_SESSION_RESUMED = 7; // 0x7
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
     field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
+    field public static final int TYPE_VIEW_INSETS_CHANGED = 9; // 0x9
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
     field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4

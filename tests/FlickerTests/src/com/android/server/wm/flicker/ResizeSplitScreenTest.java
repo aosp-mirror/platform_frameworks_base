@@ -20,10 +20,13 @@ import static com.android.server.wm.flicker.CommonTransitions.resizeSplitScreen;
 import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
 import static com.android.server.wm.flicker.WindowUtils.getDockedStackDividerInset;
 import static com.android.server.wm.flicker.WindowUtils.getNavigationBarHeight;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.exitSplitScreen;
+import static com.android.server.wm.flicker.helpers.AutomationUtils.isInSplitScreen;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import android.graphics.Rect;
+import android.support.test.uiautomator.UiDevice;
 import android.util.Rational;
 
 import androidx.test.InstrumentationRegistry;
@@ -32,6 +35,7 @@ import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -182,5 +186,14 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
         checkResults(result -> WmTraceSubject.assertThat(result)
                 .showsAboveAppWindow(DOCKED_STACK_DIVIDER)
                 .forAllEntries());
+    }
+
+    @AfterClass
+    public static void teardown() {
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+
+        if (isInSplitScreen(device)) {
+            exitSplitScreen(device);
+        }
     }
 }

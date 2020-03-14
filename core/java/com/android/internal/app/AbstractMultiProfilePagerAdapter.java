@@ -452,7 +452,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             mEmptyStateView = rootView.findViewById(R.id.resolver_empty_state);
         }
 
-        private ViewGroup getEmptyStateView() {
+        protected ViewGroup getEmptyStateView() {
             return mEmptyStateView;
         }
     }

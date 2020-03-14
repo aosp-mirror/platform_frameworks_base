@@ -3135,7 +3135,7 @@ package android.service.autofill {
 
   public static final class Dataset.Builder {
     ctor public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setFieldInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
   }
 
   public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
@@ -4971,7 +4971,7 @@ package android.view {
     method public void resetRtlProperties();
     method public boolean restoreFocusInCluster(int);
     method public boolean restoreFocusNotInCluster();
-    method public void setAutofilled(boolean);
+    method public void setAutofilled(boolean, boolean);
     method public final void setFocusedInCluster();
     method public void setIsRootNamespace(boolean);
     method public final void setShowingLayoutBounds(boolean);
@@ -5085,6 +5085,7 @@ package android.view.contentcapture {
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
     method @Nullable public java.util.List<android.view.autofill.AutofillId> getIds();
+    method @Nullable public android.graphics.Insets getInsets();
     method @Nullable public CharSequence getText();
     method public int getType();
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
@@ -5095,6 +5096,7 @@ package android.view.contentcapture {
     field public static final int TYPE_SESSION_RESUMED = 7; // 0x7
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
     field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
+    field public static final int TYPE_VIEW_INSETS_CHANGED = 9; // 0x9
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
     field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4
