@@ -40,8 +40,10 @@ open class BlurUtils @Inject constructor(
 ) : Dumpable {
     private val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     private val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
-    private val blurSysProp = SystemProperties
+    private val blurSupportedSysProp = SystemProperties
             .getBoolean("ro.surface_flinger.supports_background_blur", false)
+    private val blurDisabledSysProp = SystemProperties
+            .getBoolean("persist.sys.sf.disable_blurs", false)
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
@@ -97,7 +99,7 @@ open class BlurUtils @Inject constructor(
      * @return {@code true} when supported.
      */
     open fun supportsBlursOnWindows(): Boolean {
-        return blurSysProp && ActivityManager.isHighEndGfx()
+        return blurSupportedSysProp && !blurDisabledSysProp && ActivityManager.isHighEndGfx()
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
@@ -106,7 +108,8 @@ open class BlurUtils @Inject constructor(
             it.increaseIndent()
             it.println("minBlurRadius: $minBlurRadius")
             it.println("maxBlurRadius: $maxBlurRadius")
-            it.println("blurSysProp: $blurSysProp")
+            it.println("blurSupportedSysProp: $blurSupportedSysProp")
+            it.println("blurDisabledSysProp: $blurDisabledSysProp")
             it.println("supportsBlursOnWindows: ${supportsBlursOnWindows()}")
         }
     }
