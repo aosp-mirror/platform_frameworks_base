@@ -94,6 +94,7 @@ import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowProcessController;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -141,6 +142,8 @@ public class MockingOomAdjusterTests {
         sPackageManagerInternal = mock(PackageManagerInternal.class);
         doReturn(new ComponentName("", "")).when(sPackageManagerInternal)
                 .getSystemUiServiceComponent();
+        // Remove stale instance of PackageManagerInternal if there is any
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, sPackageManagerInternal);
 
         sService = mock(ActivityManagerService.class);
@@ -170,6 +173,11 @@ public class MockingOomAdjusterTests {
         sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList,
                 mock(ActiveUids.class));
         sService.mOomAdjuster.mAdjSeq = 10000;
+    }
+
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
     }
 
     private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {

@@ -232,14 +232,15 @@ private:
      */
     LogEvent(const LogEvent&);
 
-    void parseInt32(int32_t* pos, int32_t depth, bool* last);
-    void parseInt64(int32_t* pos, int32_t depth, bool* last);
-    void parseString(int32_t* pos, int32_t depth, bool* last);
-    void parseFloat(int32_t* pos, int32_t depth, bool* last);
-    void parseBool(int32_t* pos, int32_t depth, bool* last);
-    void parseByteArray(int32_t* pos, int32_t depth, bool* last);
-    void parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last);
-    void parseAttributionChain(int32_t* pos, int32_t depth, bool* last);
+    void parseInt32(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseInt64(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseString(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseFloat(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseBool(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseByteArray(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseKeyValuePairs(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseAttributionChain(int32_t* pos, int32_t depth, bool* last, uint8_t numAnnotations);
+    void parseAnnotations(uint8_t numAnnotations);
 
     /**
      * The below three variables are only valid during the execution of

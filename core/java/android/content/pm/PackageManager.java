@@ -1978,7 +1978,7 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device's main front and back cameras can stream
      * concurrently as described in  {@link
-     * android.hardware.camera2.CameraManager#getConcurrentStreamingCameraIds()}
+     * android.hardware.camera2.CameraManager#getConcurrentCameraIds()}
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CAMERA_CONCURRENT = "android.hardware.camera.concurrent";
@@ -4574,6 +4574,53 @@ public abstract class PackageManager {
             @NonNull String permName, @PermissionWhitelistFlags int whitelistFlags) {
         return false;
     }
+
+    /**
+     * Marks an application exempt from having its permissions be automatically revoked when
+     * the app is unused for an extended period of time.
+     *
+     * Only the installer on record that installed the given package, or a holder of
+     * {@code WHITELIST_AUTO_REVOKE_PERMISSIONS} is allowed to call this.
+     *
+     * Packages start in whitelisted state, and it is the installer's responsibility to
+     * un-whitelist the packages it installs, unless auto-revoking permissions from that package
+     * would cause breakages beyond having to re-request the permission(s).
+     *
+     * @param packageName The app for which to set exemption.
+     * @param whitelisted Whether the app should be whitelisted.
+     *
+     * @return whether any change took effect.
+     *
+     * @see #isAutoRevokeWhitelisted
+     *
+     * @throws SecurityException if you you have no access to modify this.
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS,
+            conditional = true)
+    public boolean setAutoRevokeWhitelisted(@NonNull String packageName, boolean whitelisted) {
+        return false;
+    }
+
+    /**
+     * Checks whether an application is exempt from having its permissions be automatically revoked
+     * when the app is unused for an extended period of time.
+     *
+     * Only the installer on record that installed the given package, or a holder of
+     * {@code WHITELIST_AUTO_REVOKE_PERMISSIONS} is allowed to call this.
+     * @param packageName The app for which to set exemption.
+     *
+     * @return Whether the app is whitelisted.
+     *
+     * @see #setAutoRevokeWhitelisted
+     *
+     * @throws SecurityException if you you have no access to this.
+     */
+    @RequiresPermission(value = Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS,
+            conditional = true)
+    public boolean isAutoRevokeWhitelisted(@NonNull String packageName) {
+        return false;
+    }
+
 
     /**
      * Gets whether you should show UI with rationale for requesting a permission.

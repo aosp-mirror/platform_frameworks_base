@@ -2884,12 +2884,12 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * generated according to the documented
      * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each device
      * which has its Id present in the set returned by
-     * {@link android.hardware.camera2.CameraManager#getConcurrentStreamingCameraIds}.
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds}.
      * Clients can use the array as a quick reference to find an appropriate camera stream
      * combination.
      * The mandatory stream combination array will be {@code null} in case the device is not a part
      * of at least one set of combinations returned by
-     * {@link android.hardware.camera2.CameraManager#getConcurrentStreamingCameraIds}.</p>
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds}.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey

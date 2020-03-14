@@ -69,8 +69,10 @@ import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -85,6 +87,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -467,8 +470,23 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
         if (installationPath == null) {
             throw new IllegalArgumentException("Installation path is null, package not found");
         }
-        SourceStampVerificationResult sourceStampVerificationResult =
-                SourceStampVerifier.verify(installationPath.getAbsolutePath());
+
+        SourceStampVerificationResult sourceStampVerificationResult;
+        if (installationPath.isDirectory()) {
+            try {
+                List<String> apkFiles =
+                        Files.list(installationPath.toPath())
+                                .map(path -> path.toAbsolutePath().toString())
+                                .collect(Collectors.toList());
+                sourceStampVerificationResult = SourceStampVerifier.verify(apkFiles);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Could not read APK directory");
+            }
+        } else {
+            sourceStampVerificationResult =
+                    SourceStampVerifier.verify(installationPath.getAbsolutePath());
+        }
+
         appInstallMetadata.setIsStampPresent(sourceStampVerificationResult.isPresent());
         appInstallMetadata.setIsStampVerified(sourceStampVerificationResult.isVerified());
         // A verified stamp is set to be trusted.

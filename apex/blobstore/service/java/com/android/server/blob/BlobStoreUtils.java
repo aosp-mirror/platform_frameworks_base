@@ -47,4 +47,13 @@ class BlobStoreUtils {
             @NonNull String resourceEntryName, @NonNull String packageName) {
         return resources.getIdentifier(resourceEntryName, DESC_RES_TYPE_STRING, packageName);
     }
+
+    @IdRes
+    static int getDescriptionResourceId(@NonNull Context context,
+            @NonNull String resourceEntryName, @NonNull String packageName, int userId) {
+        final Resources resources = getPackageResources(context, packageName, userId);
+        return resources == null
+                ? Resources.ID_NULL
+                : getDescriptionResourceId(resources, resourceEntryName, packageName);
+    }
 }

@@ -32,21 +32,21 @@ public final class BlobInfo implements Parcelable {
     private final long mId;
     private final long mExpiryTimeMs;
     private final CharSequence mLabel;
-    private final List<AccessorInfo> mAccessors;
+    private final List<LeaseInfo> mLeaseInfos;
 
     public BlobInfo(long id, long expiryTimeMs, CharSequence label,
-            List<AccessorInfo> accessors) {
+            List<LeaseInfo> leaseInfos) {
         mId = id;
         mExpiryTimeMs = expiryTimeMs;
         mLabel = label;
-        mAccessors = accessors;
+        mLeaseInfos = leaseInfos;
     }
 
     private BlobInfo(Parcel in) {
         mId = in.readLong();
         mExpiryTimeMs = in.readLong();
         mLabel = in.readCharSequence();
-        mAccessors = in.readArrayList(null /* classloader */);
+        mLeaseInfos = in.readArrayList(null /* classloader */);
     }
 
     public long getId() {
@@ -61,8 +61,8 @@ public final class BlobInfo implements Parcelable {
         return mLabel;
     }
 
-    public List<AccessorInfo> getAccessors() {
-        return Collections.unmodifiableList(mAccessors);
+    public List<LeaseInfo> getLeases() {
+        return Collections.unmodifiableList(mLeaseInfos);
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class BlobInfo implements Parcelable {
         dest.writeLong(mId);
         dest.writeLong(mExpiryTimeMs);
         dest.writeCharSequence(mLabel);
-        dest.writeList(mAccessors);
+        dest.writeList(mLeaseInfos);
     }
 
     @Override
@@ -83,7 +83,7 @@ public final class BlobInfo implements Parcelable {
                 + "id: " + mId + ","
                 + "expiryMs: " + mExpiryTimeMs + ","
                 + "label: " + mLabel + ","
-                + "accessors: " + AccessorInfo.toShortString(mAccessors) + ","
+                + "leases: " + LeaseInfo.toShortString(mLeaseInfos) + ","
                 + "}";
     }
 
