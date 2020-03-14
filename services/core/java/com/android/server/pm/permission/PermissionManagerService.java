@@ -19,6 +19,8 @@ package com.android.server.pm.permission;
 import static android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
@@ -53,6 +55,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.app.admin.DeviceAdminInfo;
@@ -217,6 +220,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     /** Default permission policy to provide proper behaviour out-of-the-box */
     private final DefaultPermissionGrantPolicy mDefaultPermissionGrantPolicy;
 
+    /** App ops manager */
+    private final AppOpsManager mAppOpsManager;
+
     /**
      * Built-in permissions. Read from system configuration files. Mapping is from
      * UID to permission name.
@@ -356,6 +362,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         mUserManagerInt = LocalServices.getService(UserManagerInternal.class);
         mSettings = new PermissionSettings(mLock);
+        mAppOpsManager = context.getSystemService(AppOpsManager.class);
 
         mHandlerThread = new ServiceThread(TAG,
                 Process.THREAD_PRIORITY_BACKGROUND, true /*allowIo*/);
@@ -1196,6 +1203,77 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         return true;
+    }
+
+    @Override
+    public boolean setAutoRevokeWhitelisted(
+            @NonNull String packageName, boolean whitelisted, int userId) {
+        Objects.requireNonNull(packageName);
+
+        final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
+        final int callingUid = Binder.getCallingUid();
+
+        if (!checkAutoRevokeAccess(pkg, callingUid)) {
+            return false;
+        }
+
+        if (mAppOpsManager
+                .checkOpNoThrow(AppOpsManager.OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
+                        callingUid, packageName)
+                != MODE_ALLOWED) {
+            // Whitelist user set - don't override
+            return false;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mAppOpsManager.setMode(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
+                    callingUid, packageName,
+                    whitelisted ? MODE_IGNORED : MODE_ALLOWED);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+        return true;
+    }
+
+    private boolean checkAutoRevokeAccess(AndroidPackage pkg, int callingUid) {
+        if (pkg == null) {
+            return false;
+        }
+
+        final boolean isCallerPrivileged = mContext.checkCallingOrSelfPermission(
+                Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS)
+                == PackageManager.PERMISSION_GRANTED;
+        final boolean isCallerInstallerOnRecord =
+                mPackageManagerInt.isCallerInstallerOfRecord(pkg, callingUid);
+
+        if (!isCallerPrivileged && !isCallerInstallerOnRecord) {
+            throw new SecurityException("Caller must either hold "
+                    + Manifest.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS
+                    + " or be the installer on record");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isAutoRevokeWhitelisted(@NonNull String packageName, int userId) {
+        Objects.requireNonNull(packageName);
+
+        final AndroidPackage pkg = mPackageManagerInt.getPackage(packageName);
+        final int callingUid = Binder.getCallingUid();
+
+        if (!checkAutoRevokeAccess(pkg, callingUid)) {
+            return false;
+        }
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            return mAppOpsManager.checkOpNoThrow(
+                    AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, callingUid, packageName)
+                    == MODE_IGNORED;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     @Override
@@ -4375,6 +4453,12 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 List<String> permissions, int flags, int userId) {
             PermissionManagerService.this.setWhitelistedRestrictedPermissionsInternal(
                     packageName, permissions, flags, userId);
+        }
+        @Override
+        public void setAutoRevokeWhitelisted(
+                @NonNull String packageName, boolean whitelisted, int userId) {
+            PermissionManagerService.this.setAutoRevokeWhitelisted(
+                    packageName, whitelisted, userId);
         }
         @Override
         public void updatePermissions(@NonNull String packageName, @Nullable AndroidPackage pkg) {

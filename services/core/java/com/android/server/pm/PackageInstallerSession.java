@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
@@ -166,6 +167,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
     private static final String TAG_WHITELISTED_RESTRICTED_PERMISSION =
             "whitelisted-restricted-permission";
+    private static final String TAG_AUTO_REVOKE_PERMISSIONS_MODE =
+            "auto-revoke-permissions-mode";
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
@@ -623,6 +626,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
             info.grantedRuntimePermissions = params.grantedRuntimePermissions;
             info.whitelistedRestrictedPermissions = params.whitelistedRestrictedPermissions;
+            info.autoRevokePermissionsMode = params.autoRevokePermissionsMode;
             info.installFlags = params.installFlags;
             info.isMultiPackage = params.isMultiPackage;
             info.isStaged = params.isStaged;
@@ -2889,6 +2893,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private static void writeAutoRevokePermissionsMode(@NonNull XmlSerializer out, int mode)
+            throws IOException {
+        out.startTag(null, TAG_AUTO_REVOKE_PERMISSIONS_MODE);
+        writeIntAttribute(out, ATTR_MODE, mode);
+        out.endTag(null, TAG_AUTO_REVOKE_PERMISSIONS_MODE);
+    }
+
 
     private static File buildAppIconFile(int sessionId, @NonNull File sessionsDir) {
         return new File(sessionsDir, "app_icon." + sessionId + ".png");
@@ -2969,6 +2980,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeGrantedRuntimePermissionsLocked(out, params.grantedRuntimePermissions);
             writeWhitelistedRestrictedPermissionsLocked(out,
                     params.whitelistedRestrictedPermissions);
+            writeAutoRevokePermissionsMode(out, params.autoRevokePermissionsMode);
 
             // Persist app icon if changed since last written
             File appIconFile = buildAppIconFile(sessionId, sessionsDir);
@@ -3112,6 +3124,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // depth.
         List<String> grantedRuntimePermissions = new ArrayList<>();
         List<String> whitelistedRestrictedPermissions = new ArrayList<>();
+        int autoRevokePermissionsMode = MODE_DEFAULT;
         List<Integer> childSessionIds = new ArrayList<>();
         List<InstallationFile> files = new ArrayList<>();
         int outerDepth = in.getDepth();
@@ -3127,6 +3140,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (TAG_WHITELISTED_RESTRICTED_PERMISSION.equals(in.getName())) {
                 whitelistedRestrictedPermissions.add(readStringAttribute(in, ATTR_NAME));
 
+            }
+            if (TAG_AUTO_REVOKE_PERMISSIONS_MODE.equals(in.getName())) {
+                autoRevokePermissionsMode = readIntAttribute(in, ATTR_MODE);
             }
             if (TAG_CHILD_SESSION.equals(in.getName())) {
                 childSessionIds.add(readIntAttribute(in, ATTR_SESSION_ID, SessionInfo.INVALID_ID));
@@ -3149,6 +3165,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (whitelistedRestrictedPermissions.size() > 0) {
             params.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
         }
+
+        params.autoRevokePermissionsMode = autoRevokePermissionsMode;
 
         int[] childSessionIdsArray;
         if (childSessionIds.size() > 0) {
