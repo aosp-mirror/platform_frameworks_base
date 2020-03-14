@@ -78,10 +78,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private final Rect mBounds = new Rect();
 
     /** The bounds within which PIP's top-left coordinate is allowed to move. */
-    private Rect mMovementBounds = new Rect();
+    private final Rect mMovementBounds = new Rect();
 
     /** The region that all of PIP must stay within. */
-    private Rect mFloatingAllowedArea = new Rect();
+    private final Rect mFloatingAllowedArea = new Rect();
 
     /**
      * Bounds that are animated using the physics animator.
@@ -89,7 +89,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private final Rect mAnimatedBounds = new Rect();
 
     /** The destination bounds to which PIP is animating. */
-    private Rect mAnimatingToBounds = new Rect();
+    private final Rect mAnimatingToBounds = new Rect();
 
     /** Coordinator instance for resolving conflicts with other floating content. */
     private FloatingContentCoordinator mFloatingContentCoordinator;
@@ -120,7 +120,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 new PhysicsAnimator.SpringConfig(
                         SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
-    private final Consumer<Rect> mUpdateBoundsCallback = (toBounds) -> mBounds.set(toBounds);
+    private final Consumer<Rect> mUpdateBoundsCallback = mBounds::set;
 
     public PipMotionHelper(Context context, IActivityTaskManager activityTaskManager,
             PipTaskOrganizer pipTaskOrganizer, PipMenuActivityController menuController,
@@ -437,7 +437,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * {@link FloatingContentCoordinator.FloatingContent#getFloatingBoundsOnScreen()}.
      */
     private void setAnimatingToBounds(Rect bounds) {
-        mAnimatingToBounds = bounds;
+        mAnimatingToBounds.set(bounds);
         mFloatingContentCoordinator.onContentMoved(this);
     }
 
