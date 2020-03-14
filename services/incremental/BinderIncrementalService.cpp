@@ -178,15 +178,9 @@ static std::tuple<int, incfs::FileId, incfs::NewFileParams> toMakeFileParams(
     nfp.size = params.size;
     nfp.metadata = {(const char*)params.metadata.data(), (IncFsSize)params.metadata.size()};
     if (!params.signature) {
-        nfp.verification = {};
+        nfp.signature = {};
     } else {
-        nfp.verification.hashAlgorithm = IncFsHashAlgortithm(params.signature->hashAlgorithm);
-        nfp.verification.rootHash = {(const char*)params.signature->rootHash.data(),
-                                     (IncFsSize)params.signature->rootHash.size()};
-        nfp.verification.additionalData = {(const char*)params.signature->additionalData.data(),
-                                           (IncFsSize)params.signature->additionalData.size()};
-        nfp.verification.signature = {(const char*)params.signature->signature.data(),
-                                      (IncFsSize)params.signature->signature.size()};
+        nfp.signature = {(const char*)params.signature->data(), (IncFsSize)params.signature->size()};
     }
     return {0, id, nfp};
 }
