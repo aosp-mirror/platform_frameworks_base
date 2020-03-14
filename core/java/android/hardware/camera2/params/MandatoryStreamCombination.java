@@ -721,7 +721,7 @@ public final class MandatoryStreamCombination {
         /**
           * Retrieve a list of all available mandatory concurrent stream combinations.
           * This method should only be called for devices which are listed in combinations returned
-          * by CameraManager.getConcurrentStreamingCameraIds.
+          * by CameraManager.getConcurrentCameraIds.
           *
           * @return a non-modifiable list of supported mandatory concurrent stream combinations.
           */
