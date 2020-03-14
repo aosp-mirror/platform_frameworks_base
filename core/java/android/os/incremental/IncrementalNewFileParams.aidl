@@ -16,8 +16,6 @@
 
 package android.os.incremental;
 
-import android.os.incremental.IncrementalSignature;
-
 /**
  * All the parameters to create a new file on IncFS
  * FileId is a 16 byte-long identifier.
@@ -27,5 +25,5 @@ parcelable IncrementalNewFileParams {
     long size;
     byte[] fileId;
     byte[] metadata;
-    @nullable IncrementalSignature signature;
+    @nullable byte[] signature;
 }
