@@ -21,6 +21,7 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IdRes;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -513,6 +514,50 @@ public class BlobStoreManager {
     public void deleteBlob(@NonNull BlobInfo blobInfo) throws IOException {
         try {
             mService.deleteBlob(blobInfo.getId());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the {@link BlobHandle BlobHandles} corresponding to the data blobs that
+     * the calling app has acquired a lease on using {@link #acquireLease(BlobHandle, int)} or
+     * one of it's other variants.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public List<BlobHandle> getLeasedBlobs() throws IOException {
+        try {
+            return mService.getLeasedBlobs(mContext.getOpPackageName());
+        } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
+            throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return {@link LeaseInfo} representing a lease acquired using
+     * {@link #acquireLease(BlobHandle, int)} or one of it's other variants,
+     * or {@code null} if there is no lease acquired.
+     *
+     * @throws SecurityException when the blob represented by the {@code blobHandle} does not
+     *                           exist or the caller does not have access to it.
+     * @throws IllegalArgumentException when {@code blobHandle} is invalid.
+     *
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public LeaseInfo getLeaseInfo(@NonNull BlobHandle blobHandle) throws IOException {
+        try {
+            return mService.getLeaseInfo(blobHandle, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);

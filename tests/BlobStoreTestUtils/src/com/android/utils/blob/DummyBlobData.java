@@ -38,38 +38,75 @@ import java.util.concurrent.TimeUnit;
 public class DummyBlobData {
     private static final long DEFAULT_SIZE_BYTES = 10 * 1024L * 1024L;
 
-    private final Context mContext;
     private final Random mRandom;
     private final File mFile;
     private final long mFileSize;
-    private final String mLabel;
+    private final CharSequence mLabel;
 
     byte[] mFileDigest;
     long mExpiryTimeMs;
 
-    public DummyBlobData(Context context) {
-        this(context, new Random(0), "blob_" + System.nanoTime());
+    public DummyBlobData(Builder builder) {
+        mRandom = new Random(builder.getRandomSeed());
+        mFile = new File(builder.getContext().getFilesDir(), builder.getFileName());
+        mFileSize = builder.getFileSize();
+        mLabel = builder.getLabel();
     }
 
-    public DummyBlobData(Context context, long fileSize) {
-        this(context, fileSize, new Random(0), "blob_" + System.nanoTime(), "Test label");
-    }
+    public static class Builder {
+        private final Context mContext;
+        private int mRandomSeed = 0;
+        private long mFileSize = DEFAULT_SIZE_BYTES;
+        private CharSequence mLabel = "Test label";
+        private String mFileName = "blob_" + System.nanoTime();
 
-    public DummyBlobData(Context context, Random random, String fileName) {
-        this(context, DEFAULT_SIZE_BYTES, random, fileName, "Test label");
-    }
+        public Builder(Context context) {
+            mContext = context;
+        }
 
-    public DummyBlobData(Context context, Random random, String fileName, String label) {
-        this(context, DEFAULT_SIZE_BYTES, random, fileName, label);
-    }
+        public Context getContext() {
+            return mContext;
+        }
 
-    public DummyBlobData(Context context, long fileSize, Random random, String fileName,
-            String label) {
-        mContext = context;
-        mRandom = random;
-        mFile = new File(mContext.getFilesDir(), fileName);
-        mFileSize = fileSize;
-        mLabel = label;
+        public Builder setRandomSeed(int randomSeed) {
+            mRandomSeed = randomSeed;
+            return this;
+        }
+
+        public int getRandomSeed() {
+            return mRandomSeed;
+        }
+
+        public Builder setFileSize(int fileSize) {
+            mFileSize = fileSize;
+            return this;
+        }
+
+        public long getFileSize() {
+            return mFileSize;
+        }
+
+        public Builder setLabel(CharSequence label) {
+            mLabel = label;
+            return this;
+        }
+
+        public CharSequence getLabel() {
+            return mLabel;
+        }
+
+        public Builder setFileName(String fileName) {
+            mFileName = fileName;
+            return this;
+        }
+
+        public String getFileName() {
+            return mFileName;
+        }
+
+        public DummyBlobData build() {
+            return new DummyBlobData(this);
+        }
     }
 
     public void prepare() throws Exception {

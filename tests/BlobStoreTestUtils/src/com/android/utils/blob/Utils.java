@@ -16,7 +16,13 @@
 
 package com.android.utils.blob;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import android.app.blob.BlobHandle;
 import android.app.blob.BlobStoreManager;
+import android.app.blob.LeaseInfo;
+import android.content.Context;
+import android.content.res.Resources;
 import android.os.ParcelFileDescriptor;
 
 import java.io.FileInputStream;
@@ -55,5 +61,77 @@ public class Utils {
                 session.openWrite(offsetBytes, lengthBytes))) {
             copy(in, out, lengthBytes);
         }
+    }
+
+    public static void assertLeasedBlobs(BlobStoreManager blobStoreManager,
+            BlobHandle... expectedBlobHandles) throws IOException {
+        assertThat(blobStoreManager.getLeasedBlobs()).containsExactly(expectedBlobHandles);
+    }
+
+    public static void assertNoLeasedBlobs(BlobStoreManager blobStoreManager)
+            throws IOException {
+        assertThat(blobStoreManager.getLeasedBlobs()).isEmpty();
+    }
+
+    public static void acquireLease(Context context,
+            BlobHandle blobHandle, CharSequence description) throws IOException {
+        final BlobStoreManager blobStoreManager = (BlobStoreManager) context.getSystemService(
+                Context.BLOB_STORE_SERVICE);
+        blobStoreManager.acquireLease(blobHandle, description);
+
+        final LeaseInfo leaseInfo = blobStoreManager.getLeaseInfo(blobHandle);
+        assertLeaseInfo(leaseInfo, context.getPackageName(), 0,
+                Resources.ID_NULL, description);
+    }
+
+    public static void acquireLease(Context context,
+            BlobHandle blobHandle, int descriptionResId) throws IOException {
+        final BlobStoreManager blobStoreManager = (BlobStoreManager) context.getSystemService(
+                Context.BLOB_STORE_SERVICE);
+        blobStoreManager.acquireLease(blobHandle, descriptionResId);
+
+        final LeaseInfo leaseInfo = blobStoreManager.getLeaseInfo(blobHandle);
+        assertLeaseInfo(leaseInfo, context.getPackageName(), 0,
+                descriptionResId, context.getString(descriptionResId));
+    }
+
+    public static void acquireLease(Context context,
+            BlobHandle blobHandle, CharSequence description,
+            long expiryTimeMs) throws IOException {
+        final BlobStoreManager blobStoreManager = (BlobStoreManager) context.getSystemService(
+                Context.BLOB_STORE_SERVICE);
+        blobStoreManager.acquireLease(blobHandle, description, expiryTimeMs);
+
+        final LeaseInfo leaseInfo = blobStoreManager.getLeaseInfo(blobHandle);
+        assertLeaseInfo(leaseInfo, context.getPackageName(), expiryTimeMs,
+                Resources.ID_NULL, description);
+    }
+
+    public static void acquireLease(Context context,
+            BlobHandle blobHandle, int descriptionResId,
+            long expiryTimeMs) throws IOException {
+        final BlobStoreManager blobStoreManager = (BlobStoreManager) context.getSystemService(
+                Context.BLOB_STORE_SERVICE);
+        blobStoreManager.acquireLease(blobHandle, descriptionResId, expiryTimeMs);
+
+        final LeaseInfo leaseInfo = blobStoreManager.getLeaseInfo(blobHandle);
+        assertLeaseInfo(leaseInfo, context.getPackageName(), expiryTimeMs,
+                descriptionResId, context.getString(descriptionResId));
+    }
+
+    public static void releaseLease(Context context,
+            BlobHandle blobHandle) throws IOException {
+        final BlobStoreManager blobStoreManager = (BlobStoreManager) context.getSystemService(
+                Context.BLOB_STORE_SERVICE);
+        blobStoreManager.releaseLease(blobHandle);
+        assertThat(blobStoreManager.getLeaseInfo(blobHandle)).isNull();
+    }
+
+    private static void assertLeaseInfo(LeaseInfo leaseInfo, String packageName,
+            long expiryTimeMs, int descriptionResId, CharSequence description) {
+        assertThat(leaseInfo.getPackageName()).isEqualTo(packageName);
+        assertThat(leaseInfo.getExpiryTimeMillis()).isEqualTo(expiryTimeMs);
+        assertThat(leaseInfo.getDescriptionResId()).isEqualTo(descriptionResId);
+        assertThat(leaseInfo.getDescription()).isEqualTo(description);
     }
 }
