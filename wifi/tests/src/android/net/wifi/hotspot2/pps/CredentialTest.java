@@ -18,6 +18,7 @@ package android.net.wifi.hotspot2.pps;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.net.wifi.EAPConstants;
@@ -550,5 +551,69 @@ public class CredentialTest {
     @Test
     public void validateTwoCertificateDifferent() {
         assertFalse(Credential.isX509CertificateEquals(FakeKeys.CA_CERT0, FakeKeys.CA_CERT1));
+    }
+
+    /**
+     * Verify that unique identifiers are the same for objects with the same credentials
+     */
+    @Test
+    public void testUniqueIdSameCredentialTypes() throws Exception {
+        assertEquals(createCredentialWithSimCredential().getUniqueId(),
+                createCredentialWithSimCredential().getUniqueId());
+        assertEquals(createCredentialWithCertificateCredential().getUniqueId(),
+                createCredentialWithCertificateCredential().getUniqueId());
+        assertEquals(createCredentialWithUserCredential().getUniqueId(),
+                createCredentialWithUserCredential().getUniqueId());
+    }
+
+    /**
+     * Verify that unique identifiers are different for each credential
+     */
+    @Test
+    public void testUniqueIdDifferentForDifferentCredentialTypes() throws Exception {
+        Credential simCred = createCredentialWithSimCredential();
+        Credential certCred = createCredentialWithCertificateCredential();
+        Credential userCred = createCredentialWithUserCredential();
+
+        assertNotEquals(simCred.getUniqueId(), userCred.getUniqueId());
+        assertNotEquals(simCred.getUniqueId(), certCred.getUniqueId());
+        assertNotEquals(certCred.getUniqueId(), userCred.getUniqueId());
+    }
+
+    /**
+     * Verify that unique identifiers are different for a credential with different values
+     */
+    @Test
+    public void testUniqueIdDifferentForSimCredentialsWithDifferentValues() throws Exception {
+        Credential simCred1 = createCredentialWithSimCredential();
+        Credential simCred2 = createCredentialWithSimCredential();
+        simCred2.getSimCredential().setImsi("567890*");
+
+        assertNotEquals(simCred1.getUniqueId(), simCred2.getUniqueId());
+    }
+
+    /**
+     * Verify that unique identifiers are different for a credential with different values
+     */
+    @Test
+    public void testUniqueIdDifferentForUserCredentialsWithDifferentValues() throws Exception {
+        Credential userCred1 = createCredentialWithUserCredential();
+        Credential userCred2 = createCredentialWithUserCredential();
+        userCred2.getUserCredential().setUsername("anotheruser");
+
+        assertNotEquals(userCred1.getUniqueId(), userCred2.getUniqueId());
+    }
+
+    /**
+     * Verify that unique identifiers are different for a credential with different values
+     */
+    @Test
+    public void testUniqueIdDifferentForCertCredentialsWithDifferentValues() throws Exception {
+        Credential certCred1 = createCredentialWithCertificateCredential();
+        Credential certCred2 = createCredentialWithCertificateCredential();
+        certCred2.getCertCredential().setCertSha256Fingerprint(
+                MessageDigest.getInstance("SHA-256").digest(FakeKeys.CA_CERT0.getEncoded()));
+
+        assertNotEquals(certCred1.getUniqueId(), certCred2.getUniqueId());
     }
 }
