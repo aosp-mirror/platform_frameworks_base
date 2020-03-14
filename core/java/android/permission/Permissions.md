@@ -49,6 +49,10 @@ The purpose of install time permissions is to control access to APIs where it do
 to involve the user. This can be either because the API is not sensitive, or because additional
 checks exist.
 
+Another benefit of install time permissions is that is becomes very easy to monitor which apps can
+access certain APIs. E.g. by checking which apps have the `android.permission.INTERNET` permission
+you can list all apps that are allowed to use APIs that can send data to the internet.
+
 #### Defining a permission
 
 Any package can define a permission. For that it simply adds an entry in the manifest file
@@ -591,8 +595,9 @@ User 0:
 ### Permission restricted components
 
 As [publicly documented](https://developer.android.com/guide/topics/permissions/overview#permission_enforcement)
-it is possible to restrict starting an activity/binding to a service by using permission. It is
-a common pattern to
+it is possible to restrict starting an activity/binding to a service by using permission.
+
+It is a common pattern to
 
 - define a permission in the platform as `signature`
 - protect a service in an app by this permission using the `android:permission` attribute of the
@@ -604,6 +609,75 @@ accessibility services.
 
 This does not work for app-op or runtime permissions as the way to check these permissions is
 more complex than install time permissions.
+
+#### End-to-end A service only the system can bind to
+
+Make sure to set the `android:permission` flag for this service. As developers can forget this it is
+a good habit to check this before binding to the service. This makes sure that the services are
+implemented correctly and no random app can bind to the service.
+
+The result is that the permission is granted only to the system. It is not granted to the service's
+package, but this has no negative side-effects.
+
+##### Permission definition
+
+frameworks/base/core/res/AndroidManifest.xml:
+
+```xml
+<manifest>
+[...]
+    <permission android:name="android.permission.BIND_MY_SERVICE"
+        android:label="@string/permlab_bindMyService"
+        android:description="@string/permdesc_bindMyService"
+        android:protectionLevel="signature" />
+[...]
+</manifest>
+```
+
+##### Service definition
+
+Manifest of the service providing the functionality:
+
+```xml
+<manifest>
+        <service android:name="com.my.ServiceImpl"
+                 android:permission="android.permission.BIND_MY_SERVICE">
+            <!-- add an intent filter so that the system can find this package -->
+            <intent-filter>
+                <action android:name="android.my.Service" />
+            </intent-filter>
+        </service>
+</manifest>
+```
+
+##### System server code binding to service
+
+```kotlin
+val serviceConnections = mutableListOf<ServiceConnection>()
+
+val potentialServices = context.packageManager.queryIntentServicesAsUser(
+        Intent("android.my.Service"), GET_SERVICES or GET_META_DATA, userId)
+
+for (val ri in potentialServices) {
+    val serviceComponent = ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name)
+
+    if (android.Manifest.permission.BIND_MY_SERVICE != ri.serviceInfo.permission) {
+        Slog.w(TAG, "$serviceComponent is not protected by " +
+                "${android.Manifest.permission.BIND_MY_SERVICE}")
+        continue
+    }
+
+    val newConnection = object : ServiceConnection {
+        ...
+    }
+
+    val wasBound = context.bindServiceAsUser(Intent().setComponent(serviceComponent),
+            serviceConnection, BIND_AUTO_CREATE, UserHandle.of(userId))
+    if (wasBound) {
+        serviceConnections.add(newConnection)
+    }
+}
+```
 
 ## Permissions for system apps
 
