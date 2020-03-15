@@ -786,7 +786,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         List<String> mLockTaskPackages = new ArrayList<>();
 
         // List of packages protected by device owner
-        List<String> mProtectedPackages = new ArrayList<>();
+        List<String> mUserControlDisabledPackages = new ArrayList<>();
 
         // Bitfield of feature flags to be enabled during LockTask mode.
         // We default on the power button menu, in order to be consistent with pre-P behaviour.
@@ -3541,8 +3541,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.endTag(null, TAG_OWNER_INSTALLED_CA_CERT);
             }
 
-            for (int i = 0, size = policy.mProtectedPackages.size(); i < size; i++) {
-                String packageName = policy.mProtectedPackages.get(i);
+            for (int i = 0, size = policy.mUserControlDisabledPackages.size(); i < size; i++) {
+                String packageName = policy.mUserControlDisabledPackages.get(i);
                 out.startTag(null, TAG_PROTECTED_PACKAGES);
                 out.attribute(null, ATTR_NAME, packageName);
                 out.endTag(null, TAG_PROTECTED_PACKAGES);
@@ -3667,7 +3667,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             policy.mAdminMap.clear();
             policy.mAffiliationIds.clear();
             policy.mOwnerInstalledCaCerts.clear();
-            policy.mProtectedPackages.clear();
+            policy.mUserControlDisabledPackages.clear();
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                    && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
                 if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
@@ -3769,7 +3769,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 } else if (TAG_OWNER_INSTALLED_CA_CERT.equals(tag)) {
                     policy.mOwnerInstalledCaCerts.add(parser.getAttributeValue(null, ATTR_ALIAS));
                 } else if (TAG_PROTECTED_PACKAGES.equals(tag)) {
-                    policy.mProtectedPackages.add(parser.getAttributeValue(null, ATTR_NAME));
+                    policy.mUserControlDisabledPackages.add(
+                            parser.getAttributeValue(null, ATTR_NAME));
                 } else if (TAG_APPS_SUSPENDED.equals(tag)) {
                     policy.mAppsSuspended =
                             Boolean.parseBoolean(parser.getAttributeValue(null, ATTR_VALUE));
@@ -3804,7 +3805,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         updateMaximumTimeToLockLocked(userHandle);
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userHandle);
         updateLockTaskFeaturesLocked(policy.mLockTaskFeatures, userHandle);
-        updateProtectedPackagesLocked(policy.mProtectedPackages);
+        updateUserControlDisabledPackagesLocked(policy.mUserControlDisabledPackages);
         if (policy.mStatusBarDisabled) {
             setStatusBarDisabledInternal(policy.mStatusBarDisabled, userHandle);
         }
@@ -3830,7 +3831,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void updateProtectedPackagesLocked(List<String> packages) {
+    private void updateUserControlDisabledPackagesLocked(List<String> packages) {
         mInjector.getPackageManagerInternal().setDeviceOwnerProtectedPackages(packages);
     }
 
@@ -8830,8 +8831,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         policy.mLockTaskPackages.clear();
         updateLockTaskPackagesLocked(policy.mLockTaskPackages, userId);
         policy.mLockTaskFeatures = DevicePolicyManager.LOCK_TASK_FEATURE_NONE;
-        policy.mProtectedPackages.clear();
-        updateProtectedPackagesLocked(policy.mProtectedPackages);
+        policy.mUserControlDisabledPackages.clear();
+        updateUserControlDisabledPackagesLocked(policy.mUserControlDisabledPackages);
         saveSettingsLocked(userId);
 
         try {
@@ -9584,7 +9585,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             pw.println();
             pw.increaseIndent();
             pw.print("mPasswordOwner="); pw.println(policy.mPasswordOwner);
-            pw.print("mProtectedPackages="); pw.println(policy.mProtectedPackages);
+            pw.print("mUserControlDisabledPackages=");
+            pw.println(policy.mUserControlDisabledPackages);
             pw.print("mAppsSuspended="); pw.println(policy.mAppsSuspended);
             pw.decreaseIndent();
         }
@@ -15559,39 +15561,39 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public void setProtectedPackages(ComponentName who, List<String> packages) {
+    public void setUserControlDisabledPackages(ComponentName who, List<String> packages) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         Preconditions.checkNotNull(packages, "packages is null");
 
         enforceDeviceOwner(who);
         synchronized (getLockObject()) {
             final int userHandle = mInjector.userHandleGetCallingUserId();
-            setProtectedPackagesLocked(userHandle, packages);
+            setUserControlDisabledPackagesLocked(userHandle, packages);
             DevicePolicyEventLogger
-                    .createEvent(DevicePolicyEnums.SET_PACKAGES_PROTECTED)
+                    .createEvent(DevicePolicyEnums.SET_USER_CONTROL_DISABLED_PACKAGES)
                     .setAdmin(who)
                     .setStrings(packages.toArray(new String[packages.size()]))
                     .write();
         }
     }
 
-    private void setProtectedPackagesLocked(int userHandle, List<String> packages) {
+    private void setUserControlDisabledPackagesLocked(int userHandle, List<String> packages) {
         final DevicePolicyData policy = getUserData(userHandle);
-        policy.mProtectedPackages = packages;
+        policy.mUserControlDisabledPackages = packages;
 
         // Store the settings persistently.
         saveSettingsLocked(userHandle);
-        updateProtectedPackagesLocked(packages);
+        updateUserControlDisabledPackagesLocked(packages);
     }
 
     @Override
-    public List<String> getProtectedPackages(ComponentName who) {
+    public List<String> getUserControlDisabledPackages(ComponentName who) {
         Preconditions.checkNotNull(who, "ComponentName is null");
 
         enforceDeviceOwner(who);
         final int userHandle = mInjector.binderGetCallingUserHandle().getIdentifier();
         synchronized (getLockObject()) {
-            final List<String> packages = getUserData(userHandle).mProtectedPackages;
+            final List<String> packages = getUserData(userHandle).mUserControlDisabledPackages;
             return packages == null ? Collections.EMPTY_LIST : packages;
         }
     }
