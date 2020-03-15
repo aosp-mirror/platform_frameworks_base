@@ -1332,6 +1332,40 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertNotEquals(initialConf, wpc.getRequestedOverrideConfiguration());
     }
 
+    @Test
+    public void testActivityDestroyDoesntChangeProcessOverride() {
+        final ActivityRecord firstActivity =
+                createActivityOnDisplay(true /* defaultDisplay */, null /* process */);
+        final WindowProcessController wpc = firstActivity.app;
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, firstActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+
+        final ActivityRecord secondActivity =
+                createActivityOnDisplay(false /* defaultDisplay */, wpc);
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, secondActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+
+        final ActivityRecord thirdActivity =
+                createActivityOnDisplay(false /* defaultDisplay */, wpc);
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+
+        secondActivity.destroyImmediately(true, "");
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+
+        firstActivity.destroyImmediately(true, "");
+
+        assertTrue(wpc.registeredForActivityConfigChanges());
+        assertEquals(0, thirdActivity.getMergedOverrideConfiguration()
+                .diff(wpc.getRequestedOverrideConfiguration()));
+    }
+
     /**
      * Creates an activity on display. For non-default display request it will also create a new
      * display with custom DisplayInfo.

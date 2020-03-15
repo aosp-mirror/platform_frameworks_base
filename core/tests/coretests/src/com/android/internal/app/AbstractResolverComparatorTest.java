@@ -98,6 +98,11 @@ public class AbstractResolverComparatorTest {
 
             @Override
             void handleResultMessage(Message message) {}
+
+            @Override
+            List<ComponentName> getTopComponentNames(int topK) {
+                return null;
+            }
         };
         return testComparator;
     }

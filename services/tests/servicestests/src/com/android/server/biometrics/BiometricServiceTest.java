@@ -182,7 +182,8 @@ public class BiometricServiceTest {
                 eq(0),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
     }
 
     @Test
@@ -264,7 +265,8 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(false) /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
     }
 
     @Test
@@ -391,7 +393,8 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
 
         // Hardware authenticated
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
@@ -406,7 +409,8 @@ public class BiometricServiceTest {
 
         // SystemUI sends callback with dismissed reason
         mBiometricService.mInternalReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED);
+                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRM_NOT_REQUIRED,
+                null /* credentialAttestation */);
         waitForIdle();
         // HAT sent to keystore
         verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
@@ -438,7 +442,8 @@ public class BiometricServiceTest {
                 eq(0 /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
     }
 
     @Test
@@ -460,7 +465,8 @@ public class BiometricServiceTest {
 
         // SystemUI sends confirm, HAT is sent to keystore and client is notified.
         mBiometricService.mInternalReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED);
+                BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED,
+                null /* credentialAttestation */);
         waitForIdle();
         verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
         verify(mReceiver1).onAuthenticationSucceeded(
@@ -567,7 +573,8 @@ public class BiometricServiceTest {
                 anyInt(),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                anyString());
+                anyString(),
+                anyLong() /* sessionId */);
     }
 
     @Test
@@ -627,8 +634,8 @@ public class BiometricServiceTest {
         verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
 
         // SystemUI animation completed, client is notified, auth session is over
-        mBiometricService.mInternalReceiver
-                .onDialogDismissed(BiometricPrompt.DISMISSED_REASON_ERROR);
+        mBiometricService.mInternalReceiver.onDialogDismissed(
+                BiometricPrompt.DISMISSED_REASON_ERROR, null /* credentialAttestation */);
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
@@ -667,7 +674,8 @@ public class BiometricServiceTest {
                 eq(0 /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
     }
 
     @Test
@@ -825,8 +833,8 @@ public class BiometricServiceTest {
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 false /* requireConfirmation */, null /* authenticators */);
 
-        mBiometricService.mInternalReceiver
-                .onDialogDismissed(BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+        mBiometricService.mInternalReceiver.onDialogDismissed(
+                BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
         verify(mReceiver1).onError(
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT),
@@ -854,7 +862,7 @@ public class BiometricServiceTest {
                 BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
                 0 /* vendorCode */);
         mBiometricService.mInternalReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_NEGATIVE);
+                BiometricPrompt.DISMISSED_REASON_NEGATIVE, null /* credentialAttestation */);
         waitForIdle();
 
         verify(mBiometricService.mAuthenticators.get(0).impl,
@@ -880,7 +888,7 @@ public class BiometricServiceTest {
                 BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
                 0 /* vendorCode */);
         mBiometricService.mInternalReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
 
         verify(mBiometricService.mAuthenticators.get(0).impl,
@@ -903,7 +911,7 @@ public class BiometricServiceTest {
                 true /* requireConfirmation */,
                 new byte[69] /* HAT */);
         mBiometricService.mInternalReceiver.onDialogDismissed(
-                BiometricPrompt.DISMISSED_REASON_USER_CANCEL);
+                BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
 
         // doesn't send cancel to HAL
@@ -1160,7 +1168,8 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
 
         // Requesting strong and credential, when credential is setup
         resetReceiver();
@@ -1179,7 +1188,8 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_NONE /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
 
         // Un-downgrading the authenticator allows successful strong auth
         for (BiometricService.AuthenticatorWrapper wrapper : mBiometricService.mAuthenticators) {
@@ -1201,7 +1211,8 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_FINGERPRINT /* biometricModality */),
                 anyBoolean() /* requireConfirmation */,
                 anyInt() /* userId */,
-                eq(TEST_PACKAGE_NAME));
+                eq(TEST_PACKAGE_NAME),
+                anyLong() /* sessionId */);
     }
 
     @Test(expected = IllegalStateException.class)

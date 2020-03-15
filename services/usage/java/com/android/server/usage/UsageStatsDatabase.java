@@ -98,8 +98,7 @@ public class UsageStatsDatabase {
 
     // Persist versioned backup files.
     // Should be false, except when testing new versions
-    // STOPSHIP: b/139937606 this should be false on launch
-    static final boolean KEEP_BACKUP_DIR = true;
+    static final boolean KEEP_BACKUP_DIR = false;
 
     private static final String TAG = "UsageStatsDatabase";
     private static final boolean DEBUG = UsageStatsService.DEBUG;
@@ -412,6 +411,7 @@ public class UsageStatsDatabase {
         }
 
         if (mBackupsDir.exists() && !KEEP_BACKUP_DIR) {
+            mUpgradePerformed = true; // updated here to ensure that data is cleaned up
             deleteDirectory(mBackupsDir);
         }
     }

@@ -20,6 +20,44 @@ java_library_static {
     ],
 }
 
+// Version of services.net for usage by the wifi mainline module.
+// Note: This is compiled against module_current.
+// TODO(b/145825329): This should be moved to networkstack-client,
+// with dependencies moved to frameworks/libs/net right.
+java_library {
+    name: "services.net-module-wifi",
+    srcs: [
+        ":framework-services-net-module-wifi-shared-srcs",
+        ":net-module-utils-srcs",
+        "java/android/net/ip/IpClientCallbacks.java",
+        "java/android/net/ip/IpClientManager.java",
+        "java/android/net/ip/IpClientUtil.java",
+        "java/android/net/util/KeepalivePacketDataUtil.java",
+        "java/android/net/util/NetworkConstants.java",
+        "java/android/net/IpMemoryStore.java",
+        "java/android/net/NetworkMonitorManager.java",
+        "java/android/net/TcpKeepalivePacketData.java",
+    ],
+    sdk_version: "module_current",
+    libs: [
+        "unsupportedappusage",
+    ],
+    static_libs: [
+        "dnsresolver_aidl_interface-V2-java",
+        "netd_aidl_interface-unstable-java",
+        "netlink-client",
+        "networkstack-client",
+        "net-utils-services-common",
+    ],
+    apex_available: [
+        "com.android.wifi",
+    ],
+    visibility: [
+        "//frameworks/opt/net/wifi/service",
+        "//frameworks/opt/net/wifi/tests/wifitests",
+    ],
+}
+
 filegroup {
     name: "services-tethering-shared-srcs",
     srcs: [

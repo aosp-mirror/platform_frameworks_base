@@ -106,4 +106,12 @@ interface IPermissionManager {
             int importanceToResetTimer, int importanceToKeepSessionAlive);
 
     void stopOneTimePermissionSession(String packageName, int userId);
+
+    List<String> getAutoRevokeExemptionRequestedPackages(int userId);
+
+    List<String> getAutoRevokeExemptionGrantedPackages(int userId);
+
+    boolean setAutoRevokeWhitelisted(String packageName, boolean whitelisted, int userId);
+
+    boolean isAutoRevokeWhitelisted(String packageName, int userId);
 }

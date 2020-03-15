@@ -597,7 +597,20 @@ package android.app.backup {
 package android.app.blob {
 
   public class BlobStoreManager {
+    method @Nullable public android.app.blob.LeaseInfo getLeaseInfo(@NonNull android.app.blob.BlobHandle) throws java.io.IOException;
+    method @NonNull public java.util.List<android.app.blob.BlobHandle> getLeasedBlobs() throws java.io.IOException;
     method public void waitForIdle(long) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException;
+  }
+
+  public final class LeaseInfo implements android.os.Parcelable {
+    ctor public LeaseInfo(@NonNull String, long, @IdRes int, @Nullable CharSequence);
+    method public int describeContents();
+    method @Nullable public CharSequence getDescription();
+    method @IdRes public int getDescriptionResId();
+    method public long getExpiryTimeMillis();
+    method @NonNull public String getPackageName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.blob.LeaseInfo> CREATOR;
   }
 
 }
@@ -920,6 +933,7 @@ package android.content.pm {
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
+    method public int getAutoRevokePermissionsMode();
     method public int getRollbackDataPolicy();
     method @NonNull public java.util.Set<java.lang.String> getWhitelistedRestrictedPermissions();
   }
@@ -4672,17 +4686,6 @@ package android.telephony.ims.stub {
     method public int updateClir(int);
     method public int updateColp(boolean);
     method public int updateColr(int);
-    field public static final int CALL_BARRING_ALL = 7; // 0x7
-    field public static final int CALL_BARRING_ALL_INCOMING = 1; // 0x1
-    field public static final int CALL_BARRING_ALL_OUTGOING = 2; // 0x2
-    field public static final int CALL_BARRING_ANONYMOUS_INCOMING = 6; // 0x6
-    field public static final int CALL_BARRING_INCOMING_ALL_SERVICES = 9; // 0x9
-    field public static final int CALL_BARRING_OUTGOING_ALL_SERVICES = 8; // 0x8
-    field public static final int CALL_BARRING_OUTGOING_INTL = 3; // 0x3
-    field public static final int CALL_BARRING_OUTGOING_INTL_EXCL_HOME = 4; // 0x4
-    field public static final int CALL_BARRING_SPECIFIC_INCOMING_CALLS = 10; // 0xa
-    field public static final int CALL_BLOCKING_INCOMING_WHEN_ROAMING = 5; // 0x5
-    field public static final int INVALID_RESULT = -1; // 0xffffffff
   }
 
 }
