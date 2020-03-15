@@ -19,7 +19,7 @@
 
     <application android:label="@string/app_name">
         <uses-library android:name="android.test.runner" />
-        <service android:name=".SampleMediaRoute2ProviderService"
+        <service android:name=".StubMediaRoute2ProviderService"
                  android:exported="true">
             <intent-filter>
                 <action android:name="android.media.MediaRoute2ProviderService" />
