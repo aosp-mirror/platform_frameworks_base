@@ -24,7 +24,7 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedFeature;
+import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermission;
@@ -77,7 +77,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage addProvider(ParsedProvider parsedProvider);
 
-    ParsingPackage addFeature(ParsedFeature permission);
+    ParsingPackage addAttribution(ParsedAttribution attribution);
 
     ParsingPackage addReceiver(ParsedActivity parsedReceiver);
 
@@ -191,7 +191,11 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setRequestLegacyExternalStorage(boolean requestLegacyExternalStorage);
 
     ParsingPackage setAllowNativeHeapPointerTagging(boolean allowNativeHeapPointerTagging);
-  
+
+    ParsingPackage setDontAutoRevokePermissions(boolean dontAutoRevokePermissions);
+
+    ParsingPackage setAllowDontAutoRevokePermissions(boolean allowDontAutoRevokePermissions);
+
     ParsingPackage setPreserveLegacyExternalStorage(boolean preserveLegacyExternalStorage);
 
     ParsingPackage setRestoreAnyVersion(boolean restoreAnyVersion);
@@ -235,6 +239,8 @@ public interface ParsingPackage extends ParsingPackageRead {
     ParsingPackage setDescriptionRes(int descriptionRes);
 
     ParsingPackage setEnabled(boolean enabled);
+
+    ParsingPackage setGwpAsanEnabled(Boolean enableGwpAsan);
 
     ParsingPackage setCrossProfile(boolean crossProfile);
 

@@ -35,7 +35,7 @@ oneway interface IBiometricServiceReceiverInternal {
     // Notifies that a biometric has been acquired.
     void onAcquired(int acquiredInfo, String message);
     // Notifies that the SystemUI dialog has been dismissed.
-    void onDialogDismissed(int reason);
+    void onDialogDismissed(int reason, in byte[] credentialAttestation);
     // Notifies that the user has pressed the "try again" button on SystemUI
     void onTryAgainPressed();
     // Notifies that the user has pressed the "use password" button on SystemUI

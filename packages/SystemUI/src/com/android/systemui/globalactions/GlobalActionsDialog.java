@@ -100,6 +100,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -162,6 +163,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IActivityManager mIActivityManager;
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
+    private final NotificationShadeDepthController mDepthController;
     private final BlurUtils mBlurUtils;
 
     private ArrayList<Action> mItems;
@@ -207,8 +209,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             KeyguardStateController keyguardStateController, UserManager userManager,
             TrustManager trustManager, IActivityManager iActivityManager,
             @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
-            BlurUtils blurUtils, SysuiColorExtractor colorExtractor,
-            IStatusBarService statusBarService,
+            NotificationShadeDepthController depthController, SysuiColorExtractor colorExtractor,
+            IStatusBarService statusBarService, BlurUtils blurUtils,
             NotificationShadeWindowController notificationShadeWindowController,
             ControlsUiController controlsUiController, IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
@@ -229,7 +231,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mIActivityManager = iActivityManager;
         mTelecomManager = telecomManager;
         mMetricsLogger = metricsLogger;
-        mBlurUtils = blurUtils;
+        mDepthController = depthController;
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -237,6 +239,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
         mControlsListingController = controlsListingController;
+        mBlurUtils = blurUtils;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -437,9 +440,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         : null;
 
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, panelViewController,
-                mBlurUtils, mSysuiColorExtractor, mStatusBarService,
+                mDepthController, mSysuiColorExtractor, mStatusBarService,
                 mNotificationShadeWindowController,
-                shouldShowControls() ? mControlsUiController : null);
+                shouldShowControls() ? mControlsUiController : null, mBlurUtils);
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
         dialog.setKeyguardShowing(mKeyguardShowing);
 
@@ -1570,24 +1573,27 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private ResetOrientationData mResetOrientationData;
         private boolean mHadTopUi;
         private final NotificationShadeWindowController mNotificationShadeWindowController;
+        private final NotificationShadeDepthController mDepthController;
         private final BlurUtils mBlurUtils;
 
         private ControlsUiController mControlsUiController;
         private ViewGroup mControlsView;
 
         ActionsDialog(Context context, MyAdapter adapter,
-                GlobalActionsPanelPlugin.PanelViewController plugin, BlurUtils blurUtils,
+                GlobalActionsPanelPlugin.PanelViewController plugin,
+                NotificationShadeDepthController depthController,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
-                ControlsUiController controlsUiController) {
+                ControlsUiController controlsUiController, BlurUtils blurUtils) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
-            mBlurUtils = blurUtils;
+            mDepthController = depthController;
             mColorExtractor = sysuiColorExtractor;
             mStatusBarService = statusBarService;
             mNotificationShadeWindowController = notificationShadeWindowController;
             mControlsUiController = controlsUiController;
+            mBlurUtils = blurUtils;
 
             // Window initialization
             Window window = getWindow();
@@ -1696,7 +1702,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
             if (mBackgroundDrawable == null) {
                 mBackgroundDrawable = new ScrimDrawable();
-                mScrimAlpha = ScrimController.BUSY_SCRIM_ALPHA;
+                mScrimAlpha = mBlurUtils.supportsBlursOnWindows()
+                        ? ScrimController.BLUR_SCRIM_ALPHA : ScrimController.BUSY_SCRIM_ALPHA;
             }
             getWindow().setBackgroundDrawable(mBackgroundDrawable);
         }
@@ -1792,8 +1799,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         float animatedValue = animation.getAnimatedFraction();
                         int alpha = (int) (animatedValue * mScrimAlpha * 255);
                         mBackgroundDrawable.setAlpha(alpha);
-                        mBlurUtils.applyBlur(mGlobalActionsLayout.getViewRootImpl(),
-                                mBlurUtils.radiusForRatio(animatedValue));
+                        mDepthController.updateGlobalDialogVisibility(animatedValue,
+                                mGlobalActionsLayout);
                     })
                     .start();
             if (mControlsUiController != null) {
@@ -1822,8 +1829,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         float animatedValue = 1f - animation.getAnimatedFraction();
                         int alpha = (int) (animatedValue * mScrimAlpha * 255);
                         mBackgroundDrawable.setAlpha(alpha);
-                        mBlurUtils.applyBlur(mGlobalActionsLayout.getViewRootImpl(),
-                                mBlurUtils.radiusForRatio(animatedValue));
+                        mDepthController.updateGlobalDialogVisibility(animatedValue,
+                                mGlobalActionsLayout);
                     })
                     .start();
             dismissPanel();

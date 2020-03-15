@@ -28,7 +28,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.ServiceInfo;
 import android.content.pm.parsing.component.ParsedActivity;
-import android.content.pm.parsing.component.ParsedFeature;
+import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedPermission;
@@ -80,7 +80,7 @@ public interface ParsingPackageRead extends Parcelable {
     List<ConfigurationInfo> getConfigPreferences();
 
     @NonNull
-    List<ParsedFeature> getFeatures();
+    List<ParsedAttribution> getAttributions();
 
     /**
      * @see PackageInfo#featureGroups
@@ -771,6 +771,12 @@ public interface ParsingPackageRead extends Parcelable {
     /** @see ApplicationInfo#PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING */
     boolean isAllowNativeHeapPointerTagging();
 
+    /** @see ApplicationInfo#PRIVATE_FLAG2_DONT_AUTO_REVOKE_PERMISSIONS */
+    boolean isDontAutoRevokePermmissions();
+
+    /** @see ApplicationInfo#PRIVATE_FLAG2_ALLOW_DONT_AUTO_REVOKE_PERMISSIONS */
+    boolean isAllowDontAutoRevokePermmissions();
+
     boolean hasPreserveLegacyExternalStorage();
 
     /**
@@ -839,6 +845,13 @@ public interface ParsingPackageRead extends Parcelable {
 
     @Nullable
     Set<String> getMimeGroups();
+
+    /**
+     * @see ApplicationInfo#enableGwpAsan
+     * @see R.styleable#AndroidManifest_enableGwpAsan
+     */
+    @Nullable
+    public Boolean isGwpAsanEnabled();
 
     // TODO(b/135203078): Hide and enforce going through PackageInfoUtils
     ApplicationInfo toAppInfoWithoutState();

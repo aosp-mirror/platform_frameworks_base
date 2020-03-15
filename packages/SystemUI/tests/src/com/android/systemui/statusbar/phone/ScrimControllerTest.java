@@ -50,6 +50,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dock.DockManager;
+import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
@@ -101,6 +102,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     private SysuiColorExtractor mSysuiColorExtractor;
     @Mock
     private DockManager mDockManager;
+    @Mock
+    private BlurUtils mBlurUtils;
 
 
     private static class AnimatorListener implements Animator.AnimatorListener {
@@ -215,7 +218,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParamenters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor, mSysuiColorExtractor,
-                mDockManager);
+                mDockManager, mBlurUtils);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mScrimInFront, mScrimForBubble);
         mScrimController.setAnimatorListener(mAnimatorListener);

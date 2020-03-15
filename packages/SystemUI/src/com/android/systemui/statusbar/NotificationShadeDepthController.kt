@@ -19,6 +19,7 @@ package com.android.systemui.statusbar
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
+import android.app.WallpaperManager
 import android.view.Choreographer
 import android.view.View
 import androidx.dynamicanimation.animation.FloatPropertyCompat
@@ -30,7 +31,6 @@ import com.android.systemui.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.io.FileDescriptor
@@ -43,13 +43,13 @@ import kotlin.math.max
  * Controller responsible for statusbar window blur.
  */
 @Singleton
-class NotificationShadeWindowBlurController @Inject constructor(
+class NotificationShadeDepthController @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val blurUtils: BlurUtils,
     private val biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
-    private val notificationShadeWindowController: NotificationShadeWindowController,
     private val choreographer: Choreographer,
+    private val wallpaperManager: WallpaperManager,
     dumpManager: DumpManager
 ) : PanelExpansionListener, Dumpable {
     companion object {
@@ -58,20 +58,22 @@ class NotificationShadeWindowBlurController @Inject constructor(
     }
 
     lateinit var root: View
+    private var blurRoot: View? = null
     private var keyguardAnimator: Animator? = null
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
     private var shadeExpansion = 1.0f
     private val shadeSpring = SpringAnimation(this, object :
-            FloatPropertyCompat<NotificationShadeWindowBlurController>("shadeBlurRadius") {
-        override fun setValue(rect: NotificationShadeWindowBlurController?, value: Float) {
+            FloatPropertyCompat<NotificationShadeDepthController>("shadeBlurRadius") {
+        override fun setValue(rect: NotificationShadeDepthController?, value: Float) {
             shadeBlurRadius = value.toInt()
         }
 
-        override fun getValue(rect: NotificationShadeWindowBlurController?): Float {
+        override fun getValue(rect: NotificationShadeDepthController?): Float {
             return shadeBlurRadius.toFloat()
         }
     })
+    private val zoomInterpolator = Interpolators.ACCELERATE_DECELERATE
     private var shadeBlurRadius = 0
         set(value) {
             if (field == value) return
@@ -84,12 +86,7 @@ class NotificationShadeWindowBlurController @Inject constructor(
             field = value
             scheduleUpdate()
         }
-    private var incomingNotificationBlurRadius = 0
-        set(value) {
-            if (field == value) return
-            field = value
-            scheduleUpdate()
-        }
+    private var globalDialogVisibility = 0f
 
     /**
      * Callback that updates the window blur value and is called only once per frame.
@@ -97,13 +94,12 @@ class NotificationShadeWindowBlurController @Inject constructor(
     private val updateBlurCallback = Choreographer.FrameCallback {
         updateScheduled = false
 
-        var notificationBlur = 0
-        if (statusBarStateController.state == StatusBarState.KEYGUARD) {
-            notificationBlur = (incomingNotificationBlurRadius * shadeExpansion).toInt()
-        }
-
-        val blur = max(max(shadeBlurRadius, wakeAndUnlockBlurRadius), notificationBlur)
-        blurUtils.applyBlur(root.viewRootImpl, blur)
+        val blur = max(shadeBlurRadius,
+                max(wakeAndUnlockBlurRadius, blurUtils.blurRadiusOfRatio(globalDialogVisibility)))
+        blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
+        val rawZoom = max(blurUtils.ratioOfBlurRadius(blur), globalDialogVisibility)
+        wallpaperManager.setWallpaperZoomOut(root.windowToken,
+                zoomInterpolator.getInterpolation(rawZoom))
     }
 
     /**
@@ -123,7 +119,7 @@ class NotificationShadeWindowBlurController @Inject constructor(
                 interpolator = Interpolators.DECELERATE_QUINT
                 addUpdateListener { animation: ValueAnimator ->
                     wakeAndUnlockBlurRadius =
-                            blurUtils.radiusForRatio(animation.animatedValue as Float)
+                            blurUtils.blurRadiusOfRatio(animation.animatedValue as Float)
                 }
                 addListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
@@ -163,7 +159,7 @@ class NotificationShadeWindowBlurController @Inject constructor(
 
         var newBlur = 0
         if (statusBarStateController.state == StatusBarState.SHADE) {
-            newBlur = blurUtils.radiusForRatio(expansion)
+            newBlur = blurUtils.blurRadiusOfRatio(expansion)
         }
 
         if (shadeBlurRadius == newBlur) {
@@ -172,16 +168,25 @@ class NotificationShadeWindowBlurController @Inject constructor(
         shadeSpring.animateToFinalPosition(newBlur.toFloat())
     }
 
-    private fun scheduleUpdate() {
+    private fun scheduleUpdate(viewToBlur: View? = null) {
         if (updateScheduled) {
             return
         }
         updateScheduled = true
+        blurRoot = viewToBlur
         choreographer.postFrameCallback(updateBlurCallback)
     }
 
+    fun updateGlobalDialogVisibility(visibility: Float, dialogView: View) {
+        if (visibility == globalDialogVisibility) {
+            return
+        }
+        globalDialogVisibility = visibility
+        scheduleUpdate(dialogView)
+    }
+
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
-        IndentingPrintWriter(pw, "  ").use {
+        IndentingPrintWriter(pw, "  ").let {
             it.println("StatusBarWindowBlurController:")
             it.increaseIndent()
             it.println("shadeBlurRadius: $shadeBlurRadius")

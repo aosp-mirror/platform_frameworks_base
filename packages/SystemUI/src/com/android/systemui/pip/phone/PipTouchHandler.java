@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Size;
 import android.view.IPinnedStackController;
 import android.view.InputEvent;
@@ -148,8 +149,11 @@ public class PipTouchHandler {
 
         @Override
         public void onPipDismiss() {
-            MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext,
-                    PipUtils.getTopPinnedActivity(mContext, mActivityManager));
+            Pair<ComponentName, Integer> topPipActivity = PipUtils.getTopPipActivity(mContext,
+                    mActivityManager);
+            if (topPipActivity.first != null) {
+                MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext, topPipActivity);
+            }
             mMotionHelper.dismissPip();
         }
 
@@ -653,7 +657,7 @@ public class PipTouchHandler {
                 // Check if the user dragged or flung the PiP offscreen to dismiss it
                 if (mMotionHelper.shouldDismissPip() || isFlingToBot) {
                     MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
-                            PipUtils.getTopPinnedActivity(mContext, mActivityManager));
+                            PipUtils.getTopPipActivity(mContext, mActivityManager));
                     mMotionHelper.animateDismiss(
                             vel.x, vel.y,
                             PipTouchHandler.this::updateDismissFraction /* updateAction */);

@@ -45,6 +45,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -183,7 +184,8 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
             String callingFeatureId,
             Intent intent,
             @UserIdInt int userId,
-            IBinder callingActivity) throws RemoteException {
+            IBinder callingActivity,
+            Bundle options) throws RemoteException {
         Objects.requireNonNull(callingPackage);
         Objects.requireNonNull(intent);
         Objects.requireNonNull(intent.getComponent(), "The intent must have a Component set");
@@ -226,7 +228,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                         launchIntent,
                         callingActivity,
                         /* startFlags= */ 0,
-                        /* options= */ null,
+                        options,
                         userId);
         logStartActivityByIntent(callingPackage);
     }

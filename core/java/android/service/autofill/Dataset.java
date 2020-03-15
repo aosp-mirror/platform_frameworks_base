@@ -232,22 +232,6 @@ public final class Dataset implements Parcelable {
          * Creates a new builder.
          *
          * @param presentation The presentation used to visualize this dataset.
-         * @param inlinePresentation The {@link InlinePresentation} used to visualize this dataset
-         *              as inline suggestions. If the dataset supports inline suggestions,
-         *              this should not be null.
-         */
-        public Builder(@NonNull RemoteViews presentation,
-                @NonNull InlinePresentation inlinePresentation) {
-            Preconditions.checkNotNull(presentation, "presentation must be non-null");
-            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
-            mPresentation = presentation;
-            mInlinePresentation = inlinePresentation;
-        }
-
-        /**
-         * Creates a new builder.
-         *
-         * @param presentation The presentation used to visualize this dataset.
          */
         public Builder(@NonNull RemoteViews presentation) {
             Preconditions.checkNotNull(presentation, "presentation must be non-null");
@@ -279,6 +263,22 @@ public final class Dataset implements Parcelable {
          * {@link #setValue(AutofillId, AutofillValue, Pattern, RemoteViews)}.
          */
         public Builder() {
+        }
+
+        /**
+         * Sets the {@link InlinePresentation} used to visualize this dataset as inline suggestions.
+         * If the dataset supports inline suggestions this should not be null.
+         *
+         * @throws IllegalStateException if {@link #build()} was already called.
+         *
+         * @return this builder.
+         */
+        public @NonNull Builder setInlinePresentation(
+                @NonNull InlinePresentation inlinePresentation) {
+            throwIfDestroyed();
+            Preconditions.checkNotNull(inlinePresentation, "inlinePresentation must be non-null");
+            mInlinePresentation = inlinePresentation;
+            return this;
         }
 
         /**
@@ -600,7 +600,7 @@ public final class Dataset implements Parcelable {
          */
         @SystemApi
         @TestApi
-        public @NonNull Builder setInlinePresentation(@NonNull AutofillId id,
+        public @NonNull Builder setFieldInlinePresentation(@NonNull AutofillId id,
                 @Nullable AutofillValue value, @Nullable Pattern filter,
                 @NonNull InlinePresentation inlinePresentation) {
             throwIfDestroyed();
@@ -700,7 +700,7 @@ public final class Dataset implements Parcelable {
             final Builder builder = presentation != null
                     ? inlinePresentation == null
                             ? new Builder(presentation)
-                            : new Builder(presentation, inlinePresentation)
+                            : new Builder(presentation).setInlinePresentation(inlinePresentation)
                     : inlinePresentation == null
                             ? new Builder()
                             : new Builder(inlinePresentation);

@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.content.pm.DataLoaderType.INCREMENTAL;
 import static android.content.pm.DataLoaderType.STREAMING;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
@@ -166,6 +167,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
     private static final String TAG_WHITELISTED_RESTRICTED_PERMISSION =
             "whitelisted-restricted-permission";
+    private static final String TAG_AUTO_REVOKE_PERMISSIONS_MODE =
+            "auto-revoke-permissions-mode";
     private static final String ATTR_SESSION_ID = "sessionId";
     private static final String ATTR_USER_ID = "userId";
     private static final String ATTR_INSTALLER_PACKAGE_NAME = "installerPackageName";
@@ -557,11 +560,41 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    public SessionInfo generateInfo() {
-        return generateInfo(true);
+    /**
+     * Returns {@code true} if the {@link SessionInfo} object should be produced with potentially
+     * sensitive data scrubbed from its fields.
+     *
+     * @param callingUid the uid of the caller; the recipient of the {@link SessionInfo} that may
+     *                   need to be scrubbed
+     */
+    private boolean shouldScrubData(int callingUid) {
+        return !(callingUid < Process.FIRST_APPLICATION_UID || getInstallerUid() == callingUid);
     }
 
-    public SessionInfo generateInfo(boolean includeIcon) {
+    /**
+     * Generates a {@link SessionInfo} object for the provided uid. This may result in some fields
+     * that may contain sensitive info being filtered.
+     *
+     * @param includeIcon true if the icon should be included in the object
+     * @param callingUid the uid of the caller; the recipient of the {@link SessionInfo} that may
+     *                   need to be scrubbed
+     * @see #shouldScrubData(int)
+     */
+    public SessionInfo generateInfoForCaller(boolean includeIcon, int callingUid) {
+        return generateInfoInternal(includeIcon, shouldScrubData(callingUid));
+    }
+
+    /**
+     * Generates a {@link SessionInfo} object to ensure proper hiding of sensitive fields.
+     *
+     * @param includeIcon true if the icon should be included in the object
+     * @see #generateInfoForCaller(boolean, int)
+     */
+    public SessionInfo generateInfoScrubbed(boolean includeIcon) {
+        return generateInfoInternal(includeIcon, true /*scrubData*/);
+    }
+
+    private SessionInfo generateInfoInternal(boolean includeIcon, boolean scrubData) {
         final SessionInfo info = new SessionInfo();
         synchronized (mLock) {
             info.sessionId = sessionId;
@@ -584,11 +617,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.appLabel = params.appLabel;
 
             info.installLocation = params.installLocation;
-            info.originatingUri = params.originatingUri;
+            if (!scrubData) {
+                info.originatingUri = params.originatingUri;
+            }
             info.originatingUid = params.originatingUid;
-            info.referrerUri = params.referrerUri;
+            if (!scrubData) {
+                info.referrerUri = params.referrerUri;
+            }
             info.grantedRuntimePermissions = params.grantedRuntimePermissions;
             info.whitelistedRestrictedPermissions = params.whitelistedRestrictedPermissions;
+            info.autoRevokePermissionsMode = params.autoRevokePermissionsMode;
             info.installFlags = params.installFlags;
             info.isMultiPackage = params.isMultiPackage;
             info.isStaged = params.isStaged;
@@ -2664,7 +2702,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final boolean isNewInstall = extras == null || !extras.getBoolean(Intent.EXTRA_REPLACING);
         if (success && isNewInstall && mPm.mInstallerService.okToSendBroadcasts()
                 && (params.installFlags & PackageManager.INSTALL_DRY_RUN) == 0) {
-            mPm.sendSessionCommitBroadcast(generateInfo(), userId);
+            mPm.sendSessionCommitBroadcast(generateInfoScrubbed(true /*icon*/), userId);
         }
 
         mCallback.onSessionFinished(this, success);
@@ -2855,6 +2893,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private static void writeAutoRevokePermissionsMode(@NonNull XmlSerializer out, int mode)
+            throws IOException {
+        out.startTag(null, TAG_AUTO_REVOKE_PERMISSIONS_MODE);
+        writeIntAttribute(out, ATTR_MODE, mode);
+        out.endTag(null, TAG_AUTO_REVOKE_PERMISSIONS_MODE);
+    }
+
 
     private static File buildAppIconFile(int sessionId, @NonNull File sessionsDir) {
         return new File(sessionsDir, "app_icon." + sessionId + ".png");
@@ -2935,6 +2980,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             writeGrantedRuntimePermissionsLocked(out, params.grantedRuntimePermissions);
             writeWhitelistedRestrictedPermissionsLocked(out,
                     params.whitelistedRestrictedPermissions);
+            writeAutoRevokePermissionsMode(out, params.autoRevokePermissionsMode);
 
             // Persist app icon if changed since last written
             File appIconFile = buildAppIconFile(sessionId, sessionsDir);
@@ -3078,6 +3124,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // depth.
         List<String> grantedRuntimePermissions = new ArrayList<>();
         List<String> whitelistedRestrictedPermissions = new ArrayList<>();
+        int autoRevokePermissionsMode = MODE_DEFAULT;
         List<Integer> childSessionIds = new ArrayList<>();
         List<InstallationFile> files = new ArrayList<>();
         int outerDepth = in.getDepth();
@@ -3093,6 +3140,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (TAG_WHITELISTED_RESTRICTED_PERMISSION.equals(in.getName())) {
                 whitelistedRestrictedPermissions.add(readStringAttribute(in, ATTR_NAME));
 
+            }
+            if (TAG_AUTO_REVOKE_PERMISSIONS_MODE.equals(in.getName())) {
+                autoRevokePermissionsMode = readIntAttribute(in, ATTR_MODE);
             }
             if (TAG_CHILD_SESSION.equals(in.getName())) {
                 childSessionIds.add(readIntAttribute(in, ATTR_SESSION_ID, SessionInfo.INVALID_ID));
@@ -3115,6 +3165,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (whitelistedRestrictedPermissions.size() > 0) {
             params.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
         }
+
+        params.autoRevokePermissionsMode = autoRevokePermissionsMode;
 
         int[] childSessionIdsArray;
         if (childSessionIds.size() > 0) {

@@ -213,6 +213,16 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRegisterTaskOrganizerWithExistingTasks() throws RemoteException {
+        final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stack, 0 /* userId */);
+        stack.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        final ITaskOrganizer organizer = registerMockOrganizer(WINDOWING_MODE_PINNED);
+        verify(organizer, times(1)).taskAppeared(any());
+    }
+
+    @Test
     public void testTaskTransaction() {
         removeGlobalMinSizeRestriction();
         final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)
@@ -238,6 +248,32 @@ public class TaskOrganizerTests extends WindowTestsBase {
         t.setBounds(info.stackToken, new Rect(10, 10, 100, 100));
         mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
         assertEquals(newBounds, stack.getBounds());
+    }
+
+    @Test
+    public void testSetWindowingMode() {
+        final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+            .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+
+        t.setWindowingMode(stack.mRemoteToken, WINDOWING_MODE_FULLSCREEN);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+
+        assertEquals(WINDOWING_MODE_FULLSCREEN, stack.getWindowingMode());
+    }
+
+    @Test
+    public void testSetActivityWindowingMode() {
+        final ActivityRecord record = makePipableActivity();
+        final ActivityStack stack = record.getStack();
+        final WindowContainerTransaction t = new WindowContainerTransaction();
+
+        t.setWindowingMode(stack.mRemoteToken, WINDOWING_MODE_PINNED);
+        t.setActivityWindowingMode(stack.mRemoteToken, WINDOWING_MODE_FULLSCREEN);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+
+        assertEquals(WINDOWING_MODE_FULLSCREEN, record.getWindowingMode());
+        assertEquals(WINDOWING_MODE_PINNED, stack.getWindowingMode());
     }
 
     @Test

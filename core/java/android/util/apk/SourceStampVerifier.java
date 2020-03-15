@@ -43,6 +43,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -78,29 +79,56 @@ public abstract class SourceStampVerifier {
     /** Hidden constructor to prevent instantiation. */
     private SourceStampVerifier() {}
 
+    /** Verifies SourceStamp present in a list of APKs. */
+    public static SourceStampVerificationResult verify(List<String> apkFiles) {
+        Certificate stampCertificate = null;
+        for (String apkFile : apkFiles) {
+            SourceStampVerificationResult sourceStampVerificationResult = verify(apkFile);
+            if (!sourceStampVerificationResult.isPresent()
+                    || !sourceStampVerificationResult.isVerified()) {
+                return sourceStampVerificationResult;
+            }
+            if (stampCertificate != null
+                    && !stampCertificate.equals(sourceStampVerificationResult.getCertificate())) {
+                return SourceStampVerificationResult.notVerified();
+            }
+            stampCertificate = sourceStampVerificationResult.getCertificate();
+        }
+        return SourceStampVerificationResult.verified(stampCertificate);
+    }
+
     /** Verifies SourceStamp present in the provided APK. */
     public static SourceStampVerificationResult verify(String apkFile) {
         try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
             return verify(apk);
-        } catch (Exception e) {
-            // Any exception in the SourceStamp verification returns a non-verified SourceStamp
-            // outcome without affecting the outcome of any of the other signature schemes.
-            return SourceStampVerificationResult.notVerified();
+        } catch (IOException e) {
+            // Any exception in reading the APK returns a non-present SourceStamp outcome
+            // without affecting the outcome of any of the other signature schemes.
+            return SourceStampVerificationResult.notPresent();
         }
     }
 
-    private static SourceStampVerificationResult verify(RandomAccessFile apk)
-            throws IOException, SignatureNotFoundException {
-        byte[] sourceStampCertificateDigest = getSourceStampCertificateDigest(apk);
-        if (sourceStampCertificateDigest == null) {
-            // SourceStamp certificate hash file not found, which means that there is not
-            // SourceStamp present.
+    private static SourceStampVerificationResult verify(RandomAccessFile apk) {
+        byte[] sourceStampCertificateDigest;
+        try {
+            sourceStampCertificateDigest = getSourceStampCertificateDigest(apk);
+            if (sourceStampCertificateDigest == null) {
+                // SourceStamp certificate hash file not found, which means that there is not
+                // SourceStamp present.
+                return SourceStampVerificationResult.notPresent();
+            }
+        } catch (IOException e) {
             return SourceStampVerificationResult.notPresent();
         }
-        SignatureInfo signatureInfo =
-                ApkSigningBlockUtils.findSignature(apk, SOURCE_STAMP_BLOCK_ID);
-        Map<Integer, byte[]> apkContentDigests = getApkContentDigests(apk);
-        return verify(signatureInfo, apkContentDigests, sourceStampCertificateDigest);
+
+        try {
+            SignatureInfo signatureInfo =
+                    ApkSigningBlockUtils.findSignature(apk, SOURCE_STAMP_BLOCK_ID);
+            Map<Integer, byte[]> apkContentDigests = getApkContentDigests(apk);
+            return verify(signatureInfo, apkContentDigests, sourceStampCertificateDigest);
+        } catch (IOException | SignatureNotFoundException e) {
+            return SourceStampVerificationResult.notVerified();
+        }
     }
 
     private static SourceStampVerificationResult verify(

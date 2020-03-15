@@ -230,12 +230,12 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Cursor query(String callingPkg, @Nullable String featureId, Uri uri,
+        public Cursor query(String callingPkg, @Nullable String attributionTag, Uri uri,
                 @Nullable String[] projection, @Nullable Bundle queryArgs,
                 @Nullable ICancellationSignal cancellationSignal) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, featureId, uri, null)
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 // The caller has no access to the data, so return an empty cursor with
                 // the columns in the requested order. The caller may ask for an invalid
@@ -253,7 +253,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 // columns. We then use the column names to return an empty cursor.
                 Cursor cursor;
                 final Pair<String, String> original = setCallingPackage(
-                        new Pair<>(callingPkg, featureId));
+                        new Pair<>(callingPkg, attributionTag));
                 try {
                     cursor = mInterface.query(
                             uri, projection, queryArgs,
@@ -272,7 +272,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "query");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.query(
                         uri, projection, queryArgs,
@@ -308,15 +308,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Uri insert(String callingPkg, @Nullable String featureId, Uri uri,
+        public Uri insert(String callingPkg, @Nullable String attributionTag, Uri uri,
                 ContentValues initialValues, Bundle extras) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, featureId, uri, null)
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 final Pair<String, String> original = setCallingPackage(
-                        new Pair<>(callingPkg, featureId));
+                        new Pair<>(callingPkg, attributionTag));
                 try {
                     return rejectInsert(uri, initialValues);
                 } finally {
@@ -325,7 +325,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "insert");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return maybeAddUserId(mInterface.insert(uri, initialValues, extras), userId);
             } catch (RemoteException e) {
@@ -337,17 +337,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int bulkInsert(String callingPkg, @Nullable String featureId, Uri uri,
+        public int bulkInsert(String callingPkg, @Nullable String attributionTag, Uri uri,
                 ContentValues[] initialValues) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, featureId, uri, null)
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "bulkInsert");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.bulkInsert(uri, initialValues);
             } catch (RemoteException e) {
@@ -359,8 +359,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public ContentProviderResult[] applyBatch(String callingPkg, @Nullable String featureId,
-                String authority, ArrayList<ContentProviderOperation> operations)
+        public ContentProviderResult[] applyBatch(String callingPkg,
+                @Nullable String attributionTag, String authority,
+                ArrayList<ContentProviderOperation> operations)
                 throws OperationApplicationException {
             validateIncomingAuthority(authority);
             int numOperations = operations.size();
@@ -377,13 +378,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                     operations.set(i, operation);
                 }
                 if (operation.isReadOperation()) {
-                    if (enforceReadPermission(callingPkg, featureId, uri, null)
+                    if (enforceReadPermission(callingPkg, attributionTag, uri, null)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
                 }
                 if (operation.isWriteOperation()) {
-                    if (enforceWritePermission(callingPkg, featureId, uri, null)
+                    if (enforceWritePermission(callingPkg, attributionTag, uri, null)
                             != AppOpsManager.MODE_ALLOWED) {
                         throw new OperationApplicationException("App op not allowed", 0);
                     }
@@ -391,7 +392,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "applyBatch");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 ContentProviderResult[] results = mInterface.applyBatch(authority,
                         operations);
@@ -413,16 +414,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int delete(String callingPkg, @Nullable String featureId, Uri uri, Bundle extras) {
+        public int delete(String callingPkg, @Nullable String attributionTag, Uri uri,
+                Bundle extras) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, featureId, uri, null)
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "delete");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.delete(uri, extras);
             } catch (RemoteException e) {
@@ -434,17 +436,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int update(String callingPkg, @Nullable String featureId, Uri uri,
+        public int update(String callingPkg, @Nullable String attributionTag, Uri uri,
                 ContentValues values, Bundle extras) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            if (enforceWritePermission(callingPkg, featureId, uri, null)
+            if (enforceWritePermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "update");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.update(uri, values, extras);
             } catch (RemoteException e) {
@@ -456,15 +458,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public ParcelFileDescriptor openFile(String callingPkg, @Nullable String featureId,
+        public ParcelFileDescriptor openFile(String callingPkg, @Nullable String attributionTag,
                 Uri uri, String mode, ICancellationSignal cancellationSignal, IBinder callerToken)
                 throws FileNotFoundException {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, featureId, uri, mode, callerToken);
+            enforceFilePermission(callingPkg, attributionTag, uri, mode, callerToken);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openFile");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.openFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
@@ -477,15 +479,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String featureId,
+        public AssetFileDescriptor openAssetFile(String callingPkg, @Nullable String attributionTag,
                 Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, featureId, uri, mode, null);
+            enforceFilePermission(callingPkg, attributionTag, uri, mode, null);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openAssetFile");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.openAssetFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
@@ -498,13 +500,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Bundle call(String callingPkg, @Nullable String featureId, String authority,
+        public Bundle call(String callingPkg, @Nullable String attributionTag, String authority,
                 String method, @Nullable String arg, @Nullable Bundle extras) {
             validateIncomingAuthority(authority);
             Bundle.setDefusable(extras, true);
             Trace.traceBegin(TRACE_TAG_DATABASE, "call");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.call(authority, method, arg, extras);
             } catch (RemoteException e) {
@@ -532,15 +534,15 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
         @Override
         public AssetFileDescriptor openTypedAssetFile(String callingPkg,
-                @Nullable String featureId, Uri uri, String mimeType, Bundle opts,
+                @Nullable String attributionTag, Uri uri, String mimeType, Bundle opts,
                 ICancellationSignal cancellationSignal) throws FileNotFoundException {
             Bundle.setDefusable(opts, true);
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
-            enforceFilePermission(callingPkg, featureId, uri, "r", null);
+            enforceFilePermission(callingPkg, attributionTag, uri, "r", null);
             Trace.traceBegin(TRACE_TAG_DATABASE, "openTypedAssetFile");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.openTypedAssetFile(
                         uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
@@ -558,17 +560,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public Uri canonicalize(String callingPkg, @Nullable String featureId, Uri uri) {
+        public Uri canonicalize(String callingPkg, @Nullable String attributionTag, Uri uri) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, featureId, uri, null)
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "canonicalize");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return maybeAddUserId(mInterface.canonicalize(uri), userId);
             } catch (RemoteException e) {
@@ -580,26 +582,26 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public void canonicalizeAsync(String callingPkg, @Nullable String featureId, Uri uri,
+        public void canonicalizeAsync(String callingPkg, @Nullable String attributionTag, Uri uri,
                 RemoteCallback callback) {
             final Bundle result = new Bundle();
             result.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
-                    canonicalize(callingPkg, featureId, uri));
+                    canonicalize(callingPkg, attributionTag, uri));
             callback.sendResult(result);
         }
 
         @Override
-        public Uri uncanonicalize(String callingPkg, String featureId,  Uri uri) {
+        public Uri uncanonicalize(String callingPkg, String attributionTag,  Uri uri) {
             uri = validateIncomingUri(uri);
             int userId = getUserIdFromUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, featureId, uri, null)
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "uncanonicalize");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return maybeAddUserId(mInterface.uncanonicalize(uri), userId);
             } catch (RemoteException e) {
@@ -611,17 +613,17 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public boolean refresh(String callingPkg, String featureId, Uri uri, Bundle extras,
+        public boolean refresh(String callingPkg, String attributionTag, Uri uri, Bundle extras,
                 ICancellationSignal cancellationSignal) throws RemoteException {
             uri = validateIncomingUri(uri);
             uri = getUriWithoutUserId(uri);
-            if (enforceReadPermission(callingPkg, featureId, uri, null)
+            if (enforceReadPermission(callingPkg, attributionTag, uri, null)
                     != AppOpsManager.MODE_ALLOWED) {
                 return false;
             }
             Trace.traceBegin(TRACE_TAG_DATABASE, "refresh");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.refresh(uri, extras,
                         CancellationSignal.fromTransport(cancellationSignal));
@@ -632,13 +634,13 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         }
 
         @Override
-        public int checkUriPermission(String callingPkg, @Nullable String featureId, Uri uri,
+        public int checkUriPermission(String callingPkg, @Nullable String attributionTag, Uri uri,
                 int uid, int modeFlags) {
             uri = validateIncomingUri(uri);
             uri = maybeGetUriWithoutUserId(uri);
             Trace.traceBegin(TRACE_TAG_DATABASE, "checkUriPermission");
             final Pair<String, String> original = setCallingPackage(
-                    new Pair<>(callingPkg, featureId));
+                    new Pair<>(callingPkg, attributionTag));
             try {
                 return mInterface.checkUriPermission(uri, uid, modeFlags);
             } catch (RemoteException e) {
@@ -649,47 +651,50 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
         }
 
-        private void enforceFilePermission(String callingPkg, @Nullable String featureId, Uri uri,
-                String mode, IBinder callerToken) throws FileNotFoundException, SecurityException {
+        private void enforceFilePermission(String callingPkg, @Nullable String attributionTag,
+                Uri uri, String mode, IBinder callerToken)
+                throws FileNotFoundException, SecurityException {
             if (mode != null && mode.indexOf('w') != -1) {
-                if (enforceWritePermission(callingPkg, featureId, uri, callerToken)
+                if (enforceWritePermission(callingPkg, attributionTag, uri, callerToken)
                         != AppOpsManager.MODE_ALLOWED) {
                     throw new FileNotFoundException("App op not allowed");
                 }
             } else {
-                if (enforceReadPermission(callingPkg, featureId, uri, callerToken)
+                if (enforceReadPermission(callingPkg, attributionTag, uri, callerToken)
                         != AppOpsManager.MODE_ALLOWED) {
                     throw new FileNotFoundException("App op not allowed");
                 }
             }
         }
 
-        private int enforceReadPermission(String callingPkg, @Nullable String featureId, Uri uri,
-                IBinder callerToken)
+        private int enforceReadPermission(String callingPkg, @Nullable String attributionTag,
+                Uri uri, IBinder callerToken)
                 throws SecurityException {
-            final int mode = enforceReadPermissionInner(uri, callingPkg, featureId, callerToken);
+            final int mode = enforceReadPermissionInner(uri, callingPkg, attributionTag,
+                    callerToken);
             if (mode != MODE_ALLOWED) {
                 return mode;
             }
 
-            return noteProxyOp(callingPkg, featureId, mReadOp);
+            return noteProxyOp(callingPkg, attributionTag, mReadOp);
         }
 
-        private int enforceWritePermission(String callingPkg, String featureId, Uri uri,
+        private int enforceWritePermission(String callingPkg, String attributionTag, Uri uri,
                 IBinder callerToken)
                 throws SecurityException {
-            final int mode = enforceWritePermissionInner(uri, callingPkg, featureId, callerToken);
+            final int mode = enforceWritePermissionInner(uri, callingPkg, attributionTag,
+                    callerToken);
             if (mode != MODE_ALLOWED) {
                 return mode;
             }
 
-            return noteProxyOp(callingPkg, featureId, mWriteOp);
+            return noteProxyOp(callingPkg, attributionTag, mWriteOp);
         }
 
-        private int noteProxyOp(String callingPkg, String featureId, int op) {
+        private int noteProxyOp(String callingPkg, String attributionTag, int op) {
             if (op != AppOpsManager.OP_NONE) {
                 int mode = mAppOpsManager.noteProxyOp(op, callingPkg, Binder.getCallingUid(),
-                        featureId, null);
+                        attributionTag, null);
                 return mode == MODE_DEFAULT ? MODE_IGNORED : mode;
             }
 
@@ -711,19 +716,19 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * associated with that permission.
      */
     private int checkPermissionAndAppOp(String permission, String callingPkg,
-            @Nullable String featureId, IBinder callerToken) {
+            @Nullable String attributionTag, IBinder callerToken) {
         if (getContext().checkPermission(permission, Binder.getCallingPid(), Binder.getCallingUid(),
                 callerToken) != PERMISSION_GRANTED) {
             return MODE_ERRORED;
         }
 
-        return mTransport.noteProxyOp(callingPkg, featureId,
+        return mTransport.noteProxyOp(callingPkg, attributionTag,
                 AppOpsManager.permissionToOpCode(permission));
     }
 
     /** {@hide} */
     protected int enforceReadPermissionInner(Uri uri, String callingPkg,
-            @Nullable String featureId, IBinder callerToken) throws SecurityException {
+            @Nullable String attributionTag, IBinder callerToken) throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -737,7 +742,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getReadPermission();
             if (componentPerm != null) {
-                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, featureId,
+                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, attributionTag,
                         callerToken);
                 if (mode == MODE_ALLOWED) {
                     return MODE_ALLOWED;
@@ -757,8 +762,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getReadPermission();
                     if (pathPerm != null && pp.match(path)) {
-                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg, featureId,
-                                callerToken);
+                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg,
+                                attributionTag, callerToken);
                         if (mode == MODE_ALLOWED) {
                             return MODE_ALLOWED;
                         } else {
@@ -807,7 +812,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
     /** {@hide} */
     protected int enforceWritePermissionInner(Uri uri, String callingPkg,
-            @Nullable String featureId, IBinder callerToken) throws SecurityException {
+            @Nullable String attributionTag, IBinder callerToken) throws SecurityException {
         final Context context = getContext();
         final int pid = Binder.getCallingPid();
         final int uid = Binder.getCallingUid();
@@ -821,8 +826,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         if (mExported && checkUser(pid, uid, context)) {
             final String componentPerm = getWritePermission();
             if (componentPerm != null) {
-                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg, featureId,
-                        callerToken);
+                final int mode = checkPermissionAndAppOp(componentPerm, callingPkg,
+                        attributionTag, callerToken);
                 if (mode == MODE_ALLOWED) {
                     return MODE_ALLOWED;
                 } else {
@@ -841,8 +846,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
                 for (PathPermission pp : pps) {
                     final String pathPerm = pp.getWritePermission();
                     if (pathPerm != null && pp.match(path)) {
-                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg, featureId,
-                                callerToken);
+                        final int mode = checkPermissionAndAppOp(pathPerm, callingPkg,
+                                attributionTag, callerToken);
                         if (mode == MODE_ALLOWED) {
                             return MODE_ALLOWED;
                         } else {
@@ -943,22 +948,30 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /**
-     * Return the feature in the package of the caller that initiated the request being
+     * Return the attribution tag of the caller that initiated the request being
      * processed on the current thread. Returns {@code null} if not currently processing
-     * a request of the request is for the default feature.
+     * a request of the request is for the default attribution.
      * <p>
      * This will always return {@code null} when processing
      * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
      *
      * @see #getCallingPackage
      */
-    public final @Nullable String getCallingFeatureId() {
+    public final @Nullable String getCallingAttributionTag() {
         final Pair<String, String> pkg = mCallingPackage.get();
         if (pkg != null) {
             return pkg.second;
         }
 
         return null;
+    }
+
+    /**
+     * @removed
+     */
+    @Deprecated
+    public final @Nullable String getCallingFeatureId() {
+        return getCallingAttributionTag();
     }
 
     /**

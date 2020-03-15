@@ -840,6 +840,27 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean setAutoRevokeWhitelisted(
+            @NonNull String packageName, boolean whitelisted) {
+        try {
+            final int userId = getUserId();
+            return mPermissionManager.setAutoRevokeWhitelisted(packageName, whitelisted, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean isAutoRevokeWhitelisted(@NonNull String packageName) {
+        try {
+            final int userId = getUserId();
+            return mPermissionManager.isAutoRevokeWhitelisted(packageName, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public boolean removeWhitelistedRestrictedPermission(@NonNull String packageName,
             @NonNull String permName, @PermissionWhitelistFlags int flags) {
         try {
@@ -3332,6 +3353,15 @@ public class ApplicationPackageManager extends PackageManager {
     public void sendDeviceCustomizationReadyBroadcast() {
         try {
             mPM.sendDeviceCustomizationReadyBroadcast();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public boolean isAutoRevokeWhitelisted() {
+        try {
+            return mPM.isAutoRevokeWhitelisted(mContext.getPackageName());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

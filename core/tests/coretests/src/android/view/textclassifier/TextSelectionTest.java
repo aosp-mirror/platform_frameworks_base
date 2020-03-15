@@ -17,6 +17,8 @@
 package android.view.textclassifier;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import android.os.Bundle;
 import android.os.LocaleList;
@@ -82,7 +84,9 @@ public class TextSelectionTest {
                         .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
                         .setExtras(BUNDLE)
                         .build();
-        reference.setCallingPackageName(packageName);
+        final SystemTextClassifierMetadata systemTcMetadata =
+                new SystemTextClassifierMetadata(packageName, 1, false);
+        reference.setSystemTextClassifierMetadata(systemTcMetadata);
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
@@ -96,5 +100,11 @@ public class TextSelectionTest {
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
         assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
         assertEquals(packageName, result.getCallingPackageName());
+        final SystemTextClassifierMetadata resultSystemTcMetadata =
+                result.getSystemTextClassifierMetadata();
+        assertNotNull(resultSystemTcMetadata);
+        assertEquals(packageName, resultSystemTcMetadata.getCallingPackageName());
+        assertEquals(1, resultSystemTcMetadata.getUserId());
+        assertFalse(resultSystemTcMetadata.useDefaultTextClassifier());
     }
 }

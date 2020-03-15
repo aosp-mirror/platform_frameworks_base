@@ -121,15 +121,10 @@ typedef const std::function<void(std::string)>& fail_fn_t;
 static pid_t gSystemServerPid = 0;
 
 static constexpr const char* kPropFuse = "persist.sys.fuse";
-static constexpr const char* kZygoteClassName = "com/android/internal/os/Zygote";
-
+static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
 static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
-
-static constexpr const char* kZygoteInitClassName = "com/android/internal/os/ZygoteInit";
-static jclass gZygoteInitClass;
-static jmethodID gCreateSystemServerClassLoader;
 
 static bool gIsSecurityEnforced = true;
 
@@ -356,10 +351,14 @@ static const std::array<const std::string, MOUNT_EXTERNAL_COUNT> ExternalStorage
 
 // Must match values in com.android.internal.os.Zygote.
 enum RuntimeFlags : uint32_t {
-  DEBUG_ENABLE_JDWP = 1,
-  PROFILE_FROM_SHELL = 1 << 15,
-  MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
-  MEMORY_TAG_LEVEL_TBI = 1 << 19,
+    DEBUG_ENABLE_JDWP = 1,
+    PROFILE_FROM_SHELL = 1 << 15,
+    MEMORY_TAG_LEVEL_MASK = (1 << 19) | (1 << 20),
+    MEMORY_TAG_LEVEL_TBI = 1 << 19,
+    GWP_ASAN_LEVEL_MASK = (1 << 21) | (1 << 22),
+    GWP_ASAN_LEVEL_NEVER = 0 << 21,
+    GWP_ASAN_LEVEL_LOTTERY = 1 << 21,
+    GWP_ASAN_LEVEL_ALWAYS = 2 << 21,
 };
 
 enum UnsolicitedZygoteMessageTypes : uint32_t {
@@ -1741,6 +1740,18 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
   }
   android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
 
+  bool forceEnableGwpAsan = false;
+  switch (runtime_flags & RuntimeFlags::GWP_ASAN_LEVEL_MASK) {
+      default:
+      case RuntimeFlags::GWP_ASAN_LEVEL_NEVER:
+          break;
+      case RuntimeFlags::GWP_ASAN_LEVEL_ALWAYS:
+          forceEnableGwpAsan = true;
+          [[fallthrough]];
+      case RuntimeFlags::GWP_ASAN_LEVEL_LOTTERY:
+          android_mallopt(M_INITIALIZE_GWP_ASAN, &forceEnableGwpAsan, sizeof(forceEnableGwpAsan));
+  }
+
   if (NeedsNoRandomizeWorkaround()) {
     // Work around ARM kernel ASLR lossage (http://b/5817320).
     int old_personality = personality(0xffffffff);
@@ -1778,15 +1789,6 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks, runtime_flags);
     if (env->ExceptionCheck()) {
       fail_fn("Error calling post fork system server hooks.");
-    }
-
-    // Prefetch the classloader for the system server. This is done early to
-    // allow a tie-down of the proper system server selinux domain.
-    env->CallStaticVoidMethod(gZygoteInitClass, gCreateSystemServerClassLoader);
-    if (env->ExceptionCheck()) {
-      // Be robust here. The Java code will attempt to create the classloader
-      // at a later point (but may not have rights to use AoT artifacts).
-      env->ExceptionClear();
     }
 
     // TODO(oth): Remove hardcoded label here (b/117874058).
@@ -2466,13 +2468,6 @@ int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 
-  gZygoteInitClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteInitClassName));
-  gCreateSystemServerClassLoader = GetStaticMethodIDOrDie(env, gZygoteInitClass,
-                                                          "createSystemServerClassLoader",
-                                                          "()V");
-
-  RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
-
-  return JNI_OK;
+  return RegisterMethodsOrDie(env, "com/android/internal/os/Zygote", gMethods, NELEM(gMethods));
 }
 }  // namespace android

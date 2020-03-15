@@ -36,7 +36,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * Uses an {@link AppPredictor} to sort Resolver targets. If the AppPredictionService appears to be
@@ -157,6 +159,15 @@ class AppPredictionServiceResolverComparator extends AbstractResolverComparator 
         }
         int consecutiveSumOfRanks = (mTargetRanks.size() - 1) * (mTargetRanks.size()) / 2;
         return 1.0f - (((float) rank) / consecutiveSumOfRanks);
+    }
+
+    @Override
+    List<ComponentName> getTopComponentNames(int topK) {
+        return mTargetRanks.entrySet().stream()
+                .sorted(Entry.comparingByValue())
+                .limit(topK)
+                .map(Entry::getKey)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -31,9 +31,7 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
-import android.view.InsetsController.LayoutInsetsDuringAnimation;
 import android.view.InsetsState.InternalInsetsSide;
-import android.view.InsetsState.InternalInsetsType;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation.Bounds;
@@ -49,7 +47,8 @@ import java.util.ArrayList;
  * @hide
  */
 @VisibleForTesting
-public class InsetsAnimationControlImpl implements WindowInsetsAnimationController  {
+public class InsetsAnimationControlImpl implements WindowInsetsAnimationController,
+        InsetsAnimationControlRunner {
 
     private final Rect mTmpFrame = new Rect();
 
@@ -84,8 +83,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            boolean fade, @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
-            @AnimationType int animationType) {
+            boolean fade, @AnimationType int animationType) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
@@ -105,7 +103,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mAnimation.setAlpha(getCurrentAlpha());
         mAnimationType = animationType;
         mController.startAnimation(this, listener, types, mAnimation,
-                new Bounds(mHiddenInsets, mShownInsets), layoutInsetsDuringAnimation);
+                new Bounds(mHiddenInsets, mShownInsets));
     }
 
     @Override
@@ -133,11 +131,8 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return mTypes;
     }
 
-    boolean controlsInternalType(@InternalInsetsType int type) {
-        return InsetsState.toInternalType(mTypes).contains(type);
-    }
-
-    @AnimationType int getAnimationType() {
+    @Override
+    public @AnimationType int getAnimationType() {
         return mAnimationType;
     }
 
@@ -185,8 +180,17 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mAnimation.setAlpha(mPendingAlpha);
         if (mFinished) {
             mController.notifyFinished(this, mShownOnFinish);
+            releaseLeashes();
         }
         return mFinished;
+    }
+
+    private void releaseLeashes() {
+        for (int i = mControls.size() - 1; i >= 0; i--) {
+            final InsetsSourceControl c = mControls.valueAt(i);
+            if (c == null) continue;
+            c.release(mController::releaseSurfaceControlFromRt);
+        }
     }
 
     @Override
@@ -196,6 +200,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */);
         mFinished = true;
+
         mShownOnFinish = shown;
     }
 
@@ -205,24 +210,32 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return mAnimation.getFraction();
     }
 
-    public void onCancelled() {
+    @Override
+    public void cancel() {
         if (mFinished) {
             return;
         }
         mCancelled = true;
         mListener.onCancelled();
+
+        releaseLeashes();
     }
 
     public boolean isCancelled() {
         return mCancelled;
     }
 
-    WindowInsetsAnimation getAnimation() {
+    @Override
+    public WindowInsetsAnimation getAnimation() {
         return mAnimation;
     }
 
     WindowInsetsAnimationControlListener getListener() {
         return mListener;
+    }
+
+    SparseArray<InsetsSourceControl> getControls() {
+        return mControls;
     }
 
     private Insets calculateInsets(InsetsState state, Rect frame,

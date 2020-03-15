@@ -235,6 +235,7 @@ package android {
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
+    field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
     field public static final String WIFI_SET_DEVICE_MOBILITY_STATE = "android.permission.WIFI_SET_DEVICE_MOBILITY_STATE";
     field public static final String WIFI_UPDATE_USABILITY_STATS_SCORE = "android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE";
@@ -448,14 +449,37 @@ package android.app {
     field public static final int UID_STATE_TOP = 200; // 0xc8
   }
 
-  public static final class AppOpsManager.HistoricalFeatureOps implements android.os.Parcelable {
+  public static final class AppOpsManager.AttributedHistoricalOps implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public String getFeatureId();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
     method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getOpCount();
+    method @Nullable public String getTag();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalFeatureOps> CREATOR;
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.AttributedHistoricalOps> CREATOR;
+  }
+
+  public static final class AppOpsManager.AttributedOpEntry implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getLastAccessBackgroundTime(int);
+    method public long getLastAccessForegroundTime(int);
+    method public long getLastAccessTime(int);
+    method public long getLastAccessTime(int, int, int);
+    method public long getLastBackgroundDuration(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastBackgroundProxyInfo(int);
+    method public long getLastDuration(int);
+    method public long getLastDuration(int, int, int);
+    method public long getLastForegroundDuration(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastForegroundProxyInfo(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int);
+    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int, int, int);
+    method public long getLastRejectBackgroundTime(int);
+    method public long getLastRejectForegroundTime(int);
+    method public long getLastRejectTime(int);
+    method public long getLastRejectTime(int, int, int);
+    method public boolean isRunning();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.AttributedOpEntry> CREATOR;
   }
 
   public static final class AppOpsManager.HistoricalOp implements android.os.Parcelable {
@@ -491,7 +515,7 @@ package android.app {
   public static final class AppOpsManager.HistoricalOpsRequest.Builder {
     ctor public AppOpsManager.HistoricalOpsRequest.Builder(long, long);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
-    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFeatureId(@Nullable String);
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setAttributionTag(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFlags(int);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
@@ -500,9 +524,9 @@ package android.app {
 
   public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
     method public int describeContents();
-    method @IntRange(from=0) public int getFeatureCount();
-    method @Nullable public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOps(@NonNull String);
-    method @NonNull public android.app.AppOpsManager.HistoricalFeatureOps getFeatureOpsAt(@IntRange(from=0) int);
+    method @Nullable public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOps(@NonNull String);
+    method @NonNull public android.app.AppOpsManager.AttributedHistoricalOps getAttributedOpsAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getAttributedOpsCount();
     method @Nullable public android.app.AppOpsManager.HistoricalOp getOp(@NonNull String);
     method @NonNull public android.app.AppOpsManager.HistoricalOp getOpAt(@IntRange(from=0) int);
     method @IntRange(from=0) public int getOpCount();
@@ -523,8 +547,8 @@ package android.app {
 
   public static final class AppOpsManager.OpEntry implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public java.util.Map<java.lang.String,android.app.AppOpsManager.AttributedOpEntry> getAttributedOpEntries();
     method @Deprecated public long getDuration();
-    method @NonNull public java.util.Map<java.lang.String,android.app.AppOpsManager.OpFeatureEntry> getFeatures();
     method public long getLastAccessBackgroundTime(int);
     method public long getLastAccessForegroundTime(int);
     method public long getLastAccessTime(int);
@@ -554,34 +578,11 @@ package android.app {
 
   public static final class AppOpsManager.OpEventProxyInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @Nullable public String getFeatureId();
+    method @Nullable public String getAttributionTag();
     method @Nullable public String getPackageName();
     method @IntRange(from=0) public int getUid();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpEventProxyInfo> CREATOR;
-  }
-
-  public static final class AppOpsManager.OpFeatureEntry implements android.os.Parcelable {
-    method public int describeContents();
-    method public long getLastAccessBackgroundTime(int);
-    method public long getLastAccessForegroundTime(int);
-    method public long getLastAccessTime(int);
-    method public long getLastAccessTime(int, int, int);
-    method public long getLastBackgroundDuration(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastBackgroundProxyInfo(int);
-    method public long getLastDuration(int);
-    method public long getLastDuration(int, int, int);
-    method public long getLastForegroundDuration(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastForegroundProxyInfo(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int);
-    method @Nullable public android.app.AppOpsManager.OpEventProxyInfo getLastProxyInfo(int, int, int);
-    method public long getLastRejectBackgroundTime(int);
-    method public long getLastRejectForegroundTime(int);
-    method public long getLastRejectTime(int);
-    method public long getLastRejectTime(int, int, int);
-    method public boolean isRunning();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.app.AppOpsManager.OpFeatureEntry> CREATOR;
   }
 
   public static final class AppOpsManager.PackageOps implements android.os.Parcelable {
@@ -688,7 +689,7 @@ package android.app {
   public final class RuntimeAppOpAccessMessage implements android.os.Parcelable {
     ctor public RuntimeAppOpAccessMessage(@IntRange(from=0L) int, @IntRange(from=0L) int, @NonNull String, @Nullable String, @NonNull String, int);
     method public int describeContents();
-    method @Nullable public String getFeatureId();
+    method @Nullable public String getAttributionTag();
     method @NonNull public String getMessage();
     method @NonNull public String getOp();
     method @NonNull public String getPackageName();
@@ -1371,7 +1372,6 @@ package android.app.role {
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void addRoleHolderAsUser(@NonNull String, @NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public boolean addRoleHolderFromController(@NonNull String, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void clearRoleHoldersAsUser(@NonNull String, int, @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method @Nullable public String getDefaultSmsPackage(int);
     method @NonNull @RequiresPermission("com.android.permissioncontroller.permission.MANAGE_ROLES_FROM_CONTROLLER") public java.util.List<java.lang.String> getHeldRolesFromController(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHolders(@NonNull String);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public java.util.List<java.lang.String> getRoleHoldersAsUser(@NonNull String, @NonNull android.os.UserHandle);
@@ -2133,6 +2133,7 @@ package android.content.pm {
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
     method public boolean getAllocateAggressive();
     method @Deprecated public boolean getAllowDowngrade();
+    method public int getAutoRevokePermissionsMode();
     method public boolean getDontKillApp();
     method public boolean getEnableRollback();
     method @Nullable public String[] getGrantedRuntimePermissions();
@@ -2216,7 +2217,7 @@ package android.content.pm {
     field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
-    field public static final int FLAGS_PERMISSION_RESERVED_PERMISSIONCONTROLLER = -268435456; // 0xf0000000
+    field public static final int FLAGS_PERMISSION_RESERVED_PERMISSION_CONTROLLER = -268435456; // 0xf0000000
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_AUTO_REVOKED = 131072; // 0x20000
     field public static final int FLAG_PERMISSION_GRANTED_BY_DEFAULT = 32; // 0x20
@@ -5620,8 +5621,8 @@ package android.media.tv.tuner.frontend {
     method public int getConstellation();
     method public int getGuardInterval();
     method public int getHierarchy();
-    method public int getHpCodeRate();
-    method public int getLpCodeRate();
+    method public int getHighPriorityCodeRate();
+    method public int getLowPriorityCodeRate();
     method public int getPlpGroupId();
     method public int getPlpId();
     method public int getPlpMode();
@@ -5649,20 +5650,20 @@ package android.media.tv.tuner.frontend {
     field public static final int CODERATE_8_9 = 512; // 0x200
     field public static final int CODERATE_AUTO = 1; // 0x1
     field public static final int CODERATE_UNDEFINED = 0; // 0x0
+    field public static final int CONSTELLATION_16QAM = 4; // 0x4
+    field public static final int CONSTELLATION_256QAM = 16; // 0x10
+    field public static final int CONSTELLATION_64QAM = 8; // 0x8
     field public static final int CONSTELLATION_AUTO = 1; // 0x1
-    field public static final int CONSTELLATION_CONSTELLATION_16QAM = 4; // 0x4
-    field public static final int CONSTELLATION_CONSTELLATION_256QAM = 16; // 0x10
-    field public static final int CONSTELLATION_CONSTELLATION_64QAM = 8; // 0x8
-    field public static final int CONSTELLATION_CONSTELLATION_QPSK = 2; // 0x2
+    field public static final int CONSTELLATION_QPSK = 2; // 0x2
     field public static final int CONSTELLATION_UNDEFINED = 0; // 0x0
+    field public static final int GUARD_INTERVAL_19_128 = 64; // 0x40
+    field public static final int GUARD_INTERVAL_19_256 = 128; // 0x80
+    field public static final int GUARD_INTERVAL_1_128 = 32; // 0x20
+    field public static final int GUARD_INTERVAL_1_16 = 4; // 0x4
+    field public static final int GUARD_INTERVAL_1_32 = 2; // 0x2
+    field public static final int GUARD_INTERVAL_1_4 = 16; // 0x10
+    field public static final int GUARD_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_AUTO = 1; // 0x1
-    field public static final int GUARD_INTERVAL_INTERVAL_19_128 = 64; // 0x40
-    field public static final int GUARD_INTERVAL_INTERVAL_19_256 = 128; // 0x80
-    field public static final int GUARD_INTERVAL_INTERVAL_1_128 = 32; // 0x20
-    field public static final int GUARD_INTERVAL_INTERVAL_1_16 = 4; // 0x4
-    field public static final int GUARD_INTERVAL_INTERVAL_1_32 = 2; // 0x2
-    field public static final int GUARD_INTERVAL_INTERVAL_1_4 = 16; // 0x10
-    field public static final int GUARD_INTERVAL_INTERVAL_1_8 = 8; // 0x8
     field public static final int GUARD_INTERVAL_UNDEFINED = 0; // 0x0
     field public static final int HIERARCHY_1_INDEPTH = 64; // 0x40
     field public static final int HIERARCHY_1_NATIVE = 4; // 0x4
@@ -5697,8 +5698,8 @@ package android.media.tv.tuner.frontend {
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHierarchy(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriority(boolean);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHpCodeRate(int);
-    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLpCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriorityCodeRate(int);
+    method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setLowPriorityCodeRate(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setMiso(boolean);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpGroupId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setPlpId(int);
@@ -7158,7 +7159,7 @@ package android.net.wifi {
     method @NonNull public java.util.List<android.net.MacAddress> getBlockedClientList();
     method public int getChannel();
     method public int getMaxNumberOfClients();
-    method public int getShutdownTimeoutMillis();
+    method public long getShutdownTimeoutMillis();
     method public boolean isAutoShutdownEnabled();
     method public boolean isClientControlByUserEnabled();
     method @Nullable public android.net.wifi.WifiConfiguration toWifiConfiguration();
@@ -7172,16 +7173,17 @@ package android.net.wifi {
     ctor public SoftApConfiguration.Builder();
     ctor public SoftApConfiguration.Builder(@NonNull android.net.wifi.SoftApConfiguration);
     method @NonNull public android.net.wifi.SoftApConfiguration build();
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder enableClientControlByUser(boolean);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAllowedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setAutoShutdownEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBand(int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBlockedClientList(@NonNull java.util.List<android.net.MacAddress>);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setBssid(@Nullable android.net.MacAddress);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientList(@NonNull java.util.List<android.net.MacAddress>, @NonNull java.util.List<android.net.MacAddress>);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientControlByUserEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(@IntRange(from=0) int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
-    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) int);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) long);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setSsid(@Nullable String);
   }
 
@@ -8224,13 +8226,15 @@ package android.os {
     field public static final String ACTION_UPDATE_CARRIER_PROVISIONING_URLS = "android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS";
     field public static final String ACTION_UPDATE_CONVERSATION_ACTIONS = "android.intent.action.UPDATE_CONVERSATION_ACTIONS";
     field public static final String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
-    field public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
+    field @RequiresPermission("android.permission.UPDATE_CONFIG") public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB = "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
     field public static final String ACTION_UPDATE_INTENT_FIREWALL = "android.intent.action.UPDATE_INTENT_FIREWALL";
     field public static final String ACTION_UPDATE_LANG_ID = "android.intent.action.UPDATE_LANG_ID";
     field public static final String ACTION_UPDATE_NETWORK_WATCHLIST = "android.intent.action.UPDATE_NETWORK_WATCHLIST";
     field public static final String ACTION_UPDATE_PINS = "android.intent.action.UPDATE_PINS";
     field public static final String ACTION_UPDATE_SMART_SELECTION = "android.intent.action.UPDATE_SMART_SELECTION";
     field public static final String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
+    field public static final String EXTRA_REQUIRED_HASH = "android.os.extra.REQUIRED_HASH";
+    field public static final String EXTRA_VERSION = "android.os.extra.VERSION";
   }
 
   public class Environment {
@@ -8940,11 +8944,13 @@ package android.permission {
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
-    method @BinderThread public void onUpdateUserSensitivePermissionFlags();
+    method @BinderThread public void onUpdateUserSensitivePermissionFlags(int, @NonNull Runnable);
     field public static final String SERVICE_INTERFACE = "android.permission.PermissionControllerService";
   }
 
   public final class PermissionManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionGrantedPackages();
+    method @NonNull @RequiresPermission(android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY) public java.util.Set<java.lang.String> getAutoRevokeExemptionRequestedPackages();
     method @IntRange(from=0) @RequiresPermission(anyOf={android.Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY, android.Manifest.permission.UPGRADE_RUNTIME_PERMISSIONS}) public int getRuntimePermissionsVersion();
     method @NonNull public java.util.List<android.permission.PermissionManager.SplitPermissionInfo> getSplitPermissions();
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS) public void grantDefaultPermissionsToEnabledCarrierApps(@NonNull String[], @NonNull android.os.UserHandle, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
@@ -9066,18 +9072,6 @@ package android.printservice.recommendation {
 }
 
 package android.provider {
-
-  public class BlockedNumberContract {
-    field public static final String METHOD_NOTIFY_EMERGENCY_CONTACT = "notify_emergency_contact";
-    field public static final String METHOD_SHOULD_SYSTEM_BLOCK_NUMBER = "should_system_block_number";
-    field public static final String RES_BLOCK_STATUS = "block_status";
-    field public static final int STATUS_BLOCKED_IN_LIST = 1; // 0x1
-    field public static final int STATUS_BLOCKED_NOT_IN_CONTACTS = 5; // 0x5
-    field public static final int STATUS_BLOCKED_PAYPHONE = 4; // 0x4
-    field public static final int STATUS_BLOCKED_RESTRICTED = 2; // 0x2
-    field public static final int STATUS_BLOCKED_UNKNOWN_NUMBER = 3; // 0x3
-    field public static final int STATUS_NOT_BLOCKED = 0; // 0x0
-  }
 
   @Deprecated public static final class ContactsContract.MetadataSync implements android.provider.BaseColumns android.provider.ContactsContract.MetadataSyncColumns {
     field @Deprecated public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/contact_metadata";
@@ -9390,7 +9384,6 @@ package android.provider {
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
     field public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS = "lock_screen_show_notifications";
     field public static final String ODI_CAPTIONS_ENABLED = "odi_captions_enabled";
-    field public static final String SECURE_FRP_MODE = "secure_frp_mode";
     field public static final String THEME_CUSTOMIZATION_OVERLAY_PACKAGES = "theme_customization_overlay_packages";
     field public static final String USER_SETUP_COMPLETE = "user_setup_complete";
     field public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10; // 0xa
@@ -9437,9 +9430,7 @@ package android.provider {
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
     field public static final String APN_SET_ID = "apn_set_id";
     field public static final int CARRIER_EDITED = 4; // 0x4
-    field @NonNull public static final android.net.Uri DPC_URI;
     field public static final String EDITED_STATUS = "edited";
-    field public static final int INVALID_APN_ID = -1; // 0xffffffff
     field public static final String MAX_CONNECTIONS = "max_conns";
     field public static final String MODEM_PERSIST = "modem_cognitive";
     field public static final String MTU = "mtu";
@@ -9808,7 +9799,7 @@ package android.service.autofill {
 
   public static final class Dataset.Builder {
     ctor public Dataset.Builder(@NonNull android.service.autofill.InlinePresentation);
-    method @NonNull public android.service.autofill.Dataset.Builder setInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
+    method @NonNull public android.service.autofill.Dataset.Builder setFieldInlinePresentation(@NonNull android.view.autofill.AutofillId, @Nullable android.view.autofill.AutofillValue, @Nullable java.util.regex.Pattern, @NonNull android.service.autofill.InlinePresentation);
   }
 
   public abstract class InlineSuggestionRenderService extends android.app.Service {
@@ -11317,7 +11308,6 @@ package android.telephony {
   public class ServiceState implements android.os.Parcelable {
     method public void fillInNotifierBundle(@NonNull android.os.Bundle);
     method public int getDataNetworkType();
-    method public int getDataRegistrationState();
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
@@ -11551,7 +11541,6 @@ package android.telephony {
   }
 
   public class TelephonyManager {
-    method public int addDevicePolicyOverrideApn(@NonNull android.content.Context, @NonNull android.telephony.data.ApnSetting);
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int changeIccLockPassword(@NonNull String, @NonNull String);
     method public int checkCarrierPrivilegesForPackage(String);
@@ -11584,10 +11573,9 @@ package android.telephony {
     method @Deprecated public boolean getDataEnabled();
     method @Deprecated public boolean getDataEnabled(int);
     method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
-    method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
-    method public int getEmergencyNumberDbVersion();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getIsimImpu();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
@@ -11617,7 +11605,7 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataAllowedInVoiceCall();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionEnabled();
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionAllowed();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
@@ -11634,7 +11622,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isVideoCallingEnabled();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean matchesCurrentSimOperator(@NonNull String, int, @Nullable String);
-    method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method public boolean needsOtaServiceProvisioning();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyOtaEmergencyNumberDbInstalled();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyUserActivity();
@@ -12993,17 +12980,6 @@ package android.telephony.ims.stub {
     method public int updateClir(int);
     method public int updateColp(boolean);
     method public int updateColr(int);
-    field public static final int CALL_BARRING_ALL = 7; // 0x7
-    field public static final int CALL_BARRING_ALL_INCOMING = 1; // 0x1
-    field public static final int CALL_BARRING_ALL_OUTGOING = 2; // 0x2
-    field public static final int CALL_BARRING_ANONYMOUS_INCOMING = 6; // 0x6
-    field public static final int CALL_BARRING_INCOMING_ALL_SERVICES = 9; // 0x9
-    field public static final int CALL_BARRING_OUTGOING_ALL_SERVICES = 8; // 0x8
-    field public static final int CALL_BARRING_OUTGOING_INTL = 3; // 0x3
-    field public static final int CALL_BARRING_OUTGOING_INTL_EXCL_HOME = 4; // 0x4
-    field public static final int CALL_BARRING_SPECIFIC_INCOMING_CALLS = 10; // 0xa
-    field public static final int CALL_BLOCKING_INCOMING_WHEN_ROAMING = 5; // 0x5
-    field public static final int INVALID_RESULT = -1; // 0xffffffff
   }
 
 }
@@ -13208,6 +13184,7 @@ package android.view.contentcapture {
     method public long getEventTime();
     method @Nullable public android.view.autofill.AutofillId getId();
     method @Nullable public java.util.List<android.view.autofill.AutofillId> getIds();
+    method @Nullable public android.graphics.Insets getInsets();
     method @Nullable public CharSequence getText();
     method public int getType();
     method @Nullable public android.view.contentcapture.ViewNode getViewNode();
@@ -13218,6 +13195,7 @@ package android.view.contentcapture {
     field public static final int TYPE_SESSION_RESUMED = 7; // 0x7
     field public static final int TYPE_VIEW_APPEARED = 1; // 0x1
     field public static final int TYPE_VIEW_DISAPPEARED = 2; // 0x2
+    field public static final int TYPE_VIEW_INSETS_CHANGED = 9; // 0x9
     field public static final int TYPE_VIEW_TEXT_CHANGED = 3; // 0x3
     field public static final int TYPE_VIEW_TREE_APPEARED = 5; // 0x5
     field public static final int TYPE_VIEW_TREE_APPEARING = 4; // 0x4

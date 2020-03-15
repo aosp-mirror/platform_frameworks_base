@@ -636,7 +636,6 @@ public final class RoleManager {
      * @hide
      */
     @Nullable
-    @SystemApi
     public String getDefaultSmsPackage(@UserIdInt int userId) {
         try {
             return mService.getDefaultSmsPackage(userId);

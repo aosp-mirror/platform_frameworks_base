@@ -1037,18 +1037,7 @@ public final class Credential implements Parcelable {
      * @return a Unique identifier for a Credential object
      */
     public int getUniqueId() {
-        int usedCredential;
-
-        // Initialize usedCredential based on the credential type of the profile
-        if (mUserCredential != null) {
-            usedCredential = 0;
-        } else if (mCertCredential != null) {
-            usedCredential = 1;
-        } else {
-            usedCredential = 2;
-        }
-
-        return Objects.hash(usedCredential, mRealm);
+        return Objects.hash(mUserCredential, mCertCredential, mSimCredential, mRealm);
     }
 
     @Override

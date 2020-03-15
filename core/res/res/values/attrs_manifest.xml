@@ -1541,6 +1541,28 @@
         <flag name="microphone" value="0x80" />
     </attr>
 
+    <!-- Enable sampled memory bug detection in this process.
+         When enabled, a very small, random subset of native
+         memory allocations are protected with guard pages, providing an
+         ASan-like error report in case of a memory corruption bug.
+
+         GWP-ASan is a recursive acronym. It stands for “GWP-ASan Will Provide Allocation SANity”.
+         See the <a href="http://llvm.org/docs/GwpAsan.html">LLVM documentation</a>
+         for more information about this feature.
+
+         <p>This tag can be applied to any tag that allows
+         {@link android.R.styleable#AndroidManifestProcess process} tag:
+         {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
+         a default setting for all application components), or with the
+         {@link android.R.styleable#AndroidManifestProvider provider},
+         {@link android.R.styleable#AndroidManifestService service},
+         {@link android.R.styleable#AndroidManifestReceiver receiver},
+         {@link android.R.styleable#AndroidManifestActivity activity} tag.
+         When multiple components run in the same process,
+         the first component to start determines the behavior of the entire process.
+
+         The default value is {@code false}. -->
+    <attr name="enableGwpAsan" format="boolean" />
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1552,7 +1574,7 @@
          <code>com.google.app.<em>appname</em></code>
 
          <p>Inside of the manifest tag, may appear the following tags
-         in any order: {@link #AndroidManifestFeature feature},
+         in any order: {@link #AndroidManifestAttribution attribution},
          {@link #AndroidManifestPermission permission},
          {@link #AndroidManifestPermissionGroup permission-group},
          {@link #AndroidManifestPermissionTree permission-tree},
@@ -1806,31 +1828,51 @@
 
              The default value is {@code true}. -->
         <attr name="allowNativeHeapPointerTagging" format="boolean" />
+
+        <attr name="enableGwpAsan" />
+
+        <!-- If {@code true} allow requesting that its permissions don't get automatically
+             revoked when the app is unused for an extended amount of time.
+
+             The default value is {@code false}. -->
+        <attr name="requestDontAutoRevokePermissions" format="boolean" />
+
+        <!-- If {@code true} its permissions shouldn't get automatically
+             revoked when the app is unused for an extended amount of time.
+
+             This implies {@code requestDontAutoRevokePermissions=true}
+
+             The default value is {@code false}. -->
+        <attr name="allowDontAutoRevokePermissions" format="boolean" />
     </declare-styleable>
 
-    <!-- The <code>feature</code> tag declares a feature. A feature is a logical part of an app.
-    E.g. photo sharing app might include a direct messaging component. To tag certain code as
-    belonging to a feature, use a context created via
-    {@link android.content.Context#createFeatureContext(String)} for any interaction with the
+    <!-- An attribution is a logical part of an app and is identified by a tag.
+    E.g. a photo sharing app might include a direct messaging component. To tag certain code as
+    belonging to an attribution, use a context created via
+    {@link android.content.Context#createAttributionContext(String)} for any interaction with the
     system.
 
     <p>This appears as a child tag of the root {@link #AndroidManifest manifest} tag.
 
-    <p>In case this feature inherits from another feature, this tag can contain one or multiple
-    {@link #AndroidManifestFeatureInheritFrom inherit-from} tags. -->
-    <declare-styleable name="AndroidManifestFeature" parent="AndroidManifest">
-        <!-- Required identifier for a feature. Can be passed to
-        {@link android.content.Context#createFeatureContext} to create a context for this feature
-        -->
+    <p>In case this attribution inherits from another attribution, this tag can contain one or
+    multiple {@link #AndroidManifestAttributionInheritFrom inherit-from} tags. -->
+    <declare-styleable name="AndroidManifestAttribution" parent="AndroidManifest">
+        <!-- TODO moltmann: Remove -->
         <attr name="featureId" format="string" />
-        <!-- Required user visible label for a feature. -->
+        <!-- Required identifier for a attribution. Can be passed to
+        {@link android.content.Context#createAttributionContext} to create a context tagged with
+        this attribution
+        -->
+        <attr name="tag" format="string" />
+        <!-- Required user visible label for a attribution. -->
         <attr name="label" format="string" />
     </declare-styleable>
 
     <!-- Declares previously declared features this feature inherits from. -->
-    <declare-styleable name="AndroidManifestFeatureInheritFrom" parent="AndroidManifestFeature">
-        <!-- Identifier of the feature this feature inherits from -->
-        <attr name="featureId" format="string" />
+    <declare-styleable name="AndroidManifestAttributionInheritFrom"
+                       parent="AndroidManifestAttribution">
+        <!-- Identifier of the attribution this attribution inherits from -->
+        <attr name="tag" format="string" />
     </declare-styleable>
 
     <!-- The <code>permission</code> tag declares a security permission that can be
@@ -2312,6 +2354,7 @@
     <declare-styleable name="AndroidManifestProcess" parent="AndroidManifestProcesses">
         <!-- Required name of the process that is allowed -->
         <attr name="process" />
+        <attr name="enableGwpAsan" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied

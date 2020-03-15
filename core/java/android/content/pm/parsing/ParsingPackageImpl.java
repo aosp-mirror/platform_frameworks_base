@@ -30,9 +30,10 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
+import android.content.pm.ProcessInfo;
 import android.content.pm.parsing.component.ParsedActivity;
+import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedComponent;
-import android.content.pm.parsing.component.ParsedFeature;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
@@ -243,7 +244,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     protected List<ParsedProvider> providers = emptyList();
 
     @NonNull
-    private List<ParsedFeature> features = emptyList();
+    private List<ParsedAttribution> attributions = emptyList();
 
     @NonNull
     protected List<ParsedPermission> permissions = emptyList();
@@ -404,7 +405,13 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private boolean hasFragileUserData;
     private boolean cantSaveState;
     private boolean allowNativeHeapPointerTagging;
+    private boolean dontAutoRevokePermissions;
+    private boolean allowDontAutoRevokePermissions;
     private boolean preserveLegacyExternalStorage;
+
+    @Nullable
+    @DataClass.ParcelWith(ForBoolean.class)
+    protected Boolean enableGwpAsan = null;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -620,8 +627,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl addFeature(ParsedFeature feature) {
-        this.features = CollectionUtils.add(this.features, feature);
+    public ParsingPackageImpl addAttribution(ParsedAttribution attribution) {
+        this.attributions = CollectionUtils.add(this.attributions, attribution);
         return this;
     }
 
@@ -904,7 +911,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.volumeUuid = volumeUuid;
         appInfo.zygotePreloadName = zygotePreloadName;
         appInfo.crossProfile = isCrossProfile();
-
+        appInfo.setGwpAsanEnabled(enableGwpAsan);
         appInfo.setBaseCodePath(baseCodePath);
         appInfo.setBaseResourcePath(baseCodePath);
         appInfo.setCodePath(codePath);
@@ -990,7 +997,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeTypedList(this.receivers);
         dest.writeTypedList(this.services);
         dest.writeTypedList(this.providers);
-        dest.writeTypedList(this.features);
+        dest.writeTypedList(this.attributions);
         dest.writeTypedList(this.permissions);
         dest.writeTypedList(this.permissionGroups);
         dest.writeTypedList(this.instrumentations);
@@ -1084,8 +1091,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBoolean(this.hasFragileUserData);
         dest.writeBoolean(this.cantSaveState);
         dest.writeBoolean(this.allowNativeHeapPointerTagging);
+        dest.writeBoolean(this.dontAutoRevokePermissions);
+        dest.writeBoolean(this.allowDontAutoRevokePermissions);
         dest.writeBoolean(this.preserveLegacyExternalStorage);
         dest.writeArraySet(this.mimeGroups);
+        sForBoolean.parcel(this.enableGwpAsan, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1149,7 +1159,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.receivers = in.createTypedArrayList(ParsedActivity.CREATOR);
         this.services = in.createTypedArrayList(ParsedService.CREATOR);
         this.providers = in.createTypedArrayList(ParsedProvider.CREATOR);
-        this.features = in.createTypedArrayList(ParsedFeature.CREATOR);
+        this.attributions = in.createTypedArrayList(ParsedAttribution.CREATOR);
         this.permissions = in.createTypedArrayList(ParsedPermission.CREATOR);
         this.permissionGroups = in.createTypedArrayList(ParsedPermissionGroup.CREATOR);
         this.instrumentations = in.createTypedArrayList(ParsedInstrumentation.CREATOR);
@@ -1241,8 +1251,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.hasFragileUserData = in.readBoolean();
         this.cantSaveState = in.readBoolean();
         this.allowNativeHeapPointerTagging = in.readBoolean();
+        this.dontAutoRevokePermissions = in.readBoolean();
+        this.allowDontAutoRevokePermissions = in.readBoolean();
         this.preserveLegacyExternalStorage = in.readBoolean();
         this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
+        this.enableGwpAsan = sForBoolean.unparcel(in);
     }
 
     public static final Parcelable.Creator<ParsingPackageImpl> CREATOR =
@@ -1509,8 +1522,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
 
     @NonNull
     @Override
-    public List<ParsedFeature> getFeatures() {
-        return features;
+    public List<ParsedAttribution> getAttributions() {
+        return attributions;
     }
 
     @NonNull
@@ -1965,6 +1978,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    @Nullable
+    public Boolean isGwpAsanEnabled() {
+        return enableGwpAsan;
+    }
+
+    @Override
     public boolean isPartiallyDirectBootAware() {
         return partiallyDirectBootAware;
     }
@@ -2007,6 +2026,16 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public boolean isAllowNativeHeapPointerTagging() {
         return allowNativeHeapPointerTagging;
+    }
+
+    @Override
+    public boolean isDontAutoRevokePermmissions() {
+        return dontAutoRevokePermissions;
+    }
+
+    @Override
+    public boolean isAllowDontAutoRevokePermmissions() {
+        return allowDontAutoRevokePermissions;
     }
 
     @Override
@@ -2420,6 +2449,12 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public ParsingPackageImpl setGwpAsanEnabled(@Nullable Boolean value) {
+        enableGwpAsan = value;
+        return this;
+    }
+
+    @Override
     public ParsingPackageImpl setPartiallyDirectBootAware(boolean value) {
         partiallyDirectBootAware = value;
         return this;
@@ -2470,6 +2505,18 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setAllowNativeHeapPointerTagging(boolean value) {
         allowNativeHeapPointerTagging = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setDontAutoRevokePermissions(boolean value) {
+        dontAutoRevokePermissions = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setAllowDontAutoRevokePermissions(boolean value) {
+        allowDontAutoRevokePermissions = value;
         return this;
     }
 

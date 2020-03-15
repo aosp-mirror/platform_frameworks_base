@@ -28,6 +28,7 @@
 #include <androidfw/ZipFileRO.h>
 #include <androidfw/ZipUtils.h>
 #include <binder/BinderService.h>
+#include <binder/Nullable.h>
 #include <binder/ParcelFileDescriptor.h>
 #include <binder/Status.h>
 #include <sys/stat.h>
@@ -1083,7 +1084,7 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
         return false;
     }
     FileSystemControlParcel fsControlParcel;
-    fsControlParcel.incremental = std::make_unique<IncrementalFileSystemControlParcel>();
+    fsControlParcel.incremental = aidl::make_nullable<IncrementalFileSystemControlParcel>();
     fsControlParcel.incremental->cmd.reset(base::unique_fd(::dup(ifs.control.cmd)));
     fsControlParcel.incremental->pendingReads.reset(
             base::unique_fd(::dup(ifs.control.pendingReads)));
@@ -1154,7 +1155,7 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
         // Create new lib file without signature info
         incfs::NewFileParams libFileParams{};
         libFileParams.size = uncompressedLen;
-        libFileParams.verification.hashAlgorithm = INCFS_HASH_NONE;
+        libFileParams.signature = {};
         // Metadata of the new lib file is its relative path
         IncFsSpan libFileMetadata;
         libFileMetadata.data = targetLibPath.c_str();

@@ -40,8 +40,10 @@ open class BlurUtils @Inject constructor(
 ) : Dumpable {
     private val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     private val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
-    private val blurSysProp = SystemProperties
+    private val blurSupportedSysProp = SystemProperties
             .getBoolean("ro.surface_flinger.supports_background_blur", false)
+    private val blurDisabledSysProp = SystemProperties
+            .getBoolean("persist.sys.sf.disable_blurs", false)
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
@@ -50,11 +52,22 @@ open class BlurUtils @Inject constructor(
     /**
      * Translates a ratio from 0 to 1 to a blur radius in pixels.
      */
-    fun radiusForRatio(ratio: Float): Int {
+    fun blurRadiusOfRatio(ratio: Float): Int {
         if (ratio == 0f) {
             return 0
         }
         return MathUtils.lerp(minBlurRadius.toFloat(), maxBlurRadius.toFloat(), ratio).toInt()
+    }
+
+    /**
+     * Translates a blur radius in pixels to a ratio between 0 to 1.
+     */
+    fun ratioOfBlurRadius(blur: Int): Float {
+        if (blur == 0) {
+            return 0f
+        }
+        return MathUtils.map(minBlurRadius.toFloat(), maxBlurRadius.toFloat(),
+                0f /* maxStart */, 1f /* maxStop */, blur.toFloat())
     }
 
     /**
@@ -86,7 +99,7 @@ open class BlurUtils @Inject constructor(
      * @return {@code true} when supported.
      */
     open fun supportsBlursOnWindows(): Boolean {
-        return blurSysProp && ActivityManager.isHighEndGfx()
+        return blurSupportedSysProp && !blurDisabledSysProp && ActivityManager.isHighEndGfx()
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
@@ -95,7 +108,8 @@ open class BlurUtils @Inject constructor(
             it.increaseIndent()
             it.println("minBlurRadius: $minBlurRadius")
             it.println("maxBlurRadius: $maxBlurRadius")
-            it.println("blurSysProp: $blurSysProp")
+            it.println("blurSupportedSysProp: $blurSupportedSysProp")
+            it.println("blurDisabledSysProp: $blurDisabledSysProp")
             it.println("supportsBlursOnWindows: ${supportsBlursOnWindows()}")
         }
     }

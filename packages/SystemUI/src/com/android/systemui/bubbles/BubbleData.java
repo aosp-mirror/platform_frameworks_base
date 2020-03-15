@@ -207,12 +207,13 @@ public class BubbleData {
 
         // Preserve new order for next repack, which sorts by last updated time.
         bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
-        setSelectedBubbleInternal(bubble);
         mOverflowBubbles.remove(bubble);
-
         bubble.inflate(
-                b -> notificationEntryUpdated(bubble, /* suppressFlyout */
-                        false, /* showInShade */ true),
+                b -> {
+                    notificationEntryUpdated(bubble, /* suppressFlyout */
+                            false, /* showInShade */ true);
+                    setSelectedBubbleInternal(bubble);
+                },
                 mContext, stack, factory);
         dispatchPendingChanges();
     }
@@ -225,6 +226,14 @@ public class BubbleData {
     Bubble getOrCreateBubble(NotificationEntry entry) {
         Bubble bubble = getBubbleWithKey(entry.getKey());
         if (bubble == null) {
+            for (int i = 0; i < mOverflowBubbles.size(); i++) {
+                Bubble b = mOverflowBubbles.get(i);
+                if (b.getKey().equals(entry.getKey())) {
+                    mOverflowBubbles.remove(b);
+                    mPendingBubbles.add(b);
+                    return b;
+                }
+            }
             // Check for it in pending
             for (int i = 0; i < mPendingBubbles.size(); i++) {
                 Bubble b = mPendingBubbles.get(i);

@@ -11,21 +11,32 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package android.os.incremental;
+package com.android.internal.widget;
 
-/** {@hide} */
-parcelable IncrementalSignature {
-    /*
-     * Stable AIDL doesn't support constants, but here's the possible values
-     *   const int HASH_ALGO_NONE = 0;
-     *   const int HASH_ALGO_SHA256 = 1;
-    */
+import android.content.Context;
 
-    int hashAlgorithm = 0;
-    byte[] rootHash;
-    byte[] additionalData;
-    byte[] signature;
+import java.util.ArrayList;
+
+/**
+ * An interface for a MessagingLayout
+ */
+public interface IMessagingLayout {
+
+    /**
+     * @return the layout containing the messages
+     */
+    MessagingLinearLayout getMessagingLinearLayout();
+
+    /**
+     * @return the context of this view
+     */
+    Context getContext();
+
+    /**
+     * @return the list of messaging groups
+     */
+    ArrayList<MessagingGroup> getMessagingGroups();
 }
