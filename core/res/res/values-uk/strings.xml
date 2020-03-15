@@ -199,6 +199,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Натисніть, щоб переглянути доступ до геоданих."</string>
     <string name="country_detector" msgid="7023275114706088854">"Визначення країни"</string>
     <string name="location_service" msgid="2439187616018455546">"Служби локації"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Сервіс GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Сервіс \"Сповіщення датчика\""</string>
     <string name="twilight_service" msgid="8964898045693187224">"Сервіс \"Сутінки\""</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"З вашого пристрою буде стерто всі дані"</string>
@@ -255,10 +256,8 @@
       <item quantity="many">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунд.</item>
       <item quantity="other">Знімок екрана для звіту про помилки буде зроблено через <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Знімок екрана зі звітом про помилку зроблено"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Не вдалося зробити знімок екрана зі звітом про помилку"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Беззвуч. режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Звук ВИМК."</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Звук УВІМК."</string>
@@ -426,14 +425,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"отр. дост. до додат. команд пров. місцезн."</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Додаток отримуватиме доступ до додаткових команд постачальника геоданих. Можливе втручання додатка в роботу GPS чи інших джерел геоданих."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"отримувати доступ до даних про точне місцезнаходження лише в активному режимі"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Цей додаток може отримувати дані про ваше точне місцезнаходження від Служб локації, коли ви його використовуєте. Для цього на вашому пристрої має бути ввімкнено Служби локації. Це може підвищити використання заряду акумулятора."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"отримувати доступ до даних про приблизне місцезнаходження лише в активному режимі"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Цей додаток може отримувати дані про ваше приблизне місцезнаходження від Служб локації, коли ви його використовуєте. Для цього на вашому пристрої має бути ввімкнено Служби локації."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"доступ до геоданих у фоновому режимі"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Цей додаток може будь-коли отримувати дані про ваше місцезнаходження, навіть якщо ви його не використовуєте."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"змінювати налаштув-ня звуку"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Дозволяє програмі змінювати загальні налаштування звуку, як-от гучність і динамік, який використовується для виводу сигналу."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"запис-ти аудіо"</string>
@@ -446,6 +442,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Цей додаток може будь-коли робити фотографії та записувати відео за допомогою камери."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Дозволити додатку або сервісу отримувати доступ до системних камер, робити фото й записувати відео"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Цей пріоритетний | системний додаток може будь-коли робити фото й записувати відео, використовуючи камеру системи. Додатку потрібен дозвіл android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволити додатку або сервісу отримувати зворотні виклики щодо відкриття чи закриття камер."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Цей додаток для підпису може отримувати зворотні виклики, коли будь-яка камера відкривається (з указанням пакета додатка) чи закривається."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролювати вібросигнал"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Надає додатку доступ до стану вібрації."</string>
@@ -459,13 +457,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дозволяє додатку маршрутизувати виклики через систему, щоб було зручніше телефонувати."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Переглядати виклики через систему й керувати ними."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Додаток може переглядати поточні виклики на пристрої та керувати ними. Це стосується такої інформації, як номери та стан викликів."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"продовжувати виклик з іншого додатка"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Додаток може продовжувати виклик, початий в іншому додатку."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"переглядати номери телефону"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Надає додаткам доступ до номерів телефону на пристрої."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"залишати екран автомобіля ввімкненим"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"не доп.перехід пристр.в реж.сну"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"не допускати перехід пристрою Android TV в режим сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"Вимкнення режиму сну"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дозволяє додатку залишати екран автомобіля ввімкненим."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дозволяє програмі не допускати перехід планшетного ПК у режим сну."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Дозволяє додатку не допускати перехід пристрою Android TV в режим сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дозволяє програмі не допускати перехід телефону в режим сну."</string>
@@ -1302,7 +1306,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобільна мережа не має доступу до Інтернету"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Мережа не має доступу до Інтернету"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Немає доступу до приватного DNS-сервера"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Підключено"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"Підключення до мережі <xliff:g id="NETWORK_SSID">%1$s</xliff:g> обмежено"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Натисніть, щоб усе одно підключитися"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Пристрій перейшов на мережу <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1678,8 +1681,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Використовувати швидке ввімкнення?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Якщо цей засіб увімкнено, ви можете активувати спеціальні можливості, утримуючи обидві кнопки гучності протягом трьох секунд."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Надати сервісу <xliff:g id="SERVICE">%1$s</xliff:g> повний доступ до вашого пристрою?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Якщо ви ввімкнете сервіс <xliff:g id="SERVICE">%1$s</xliff:g>, дані на пристрої не захищатимуться екраном блокування."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Повний доступ доречний для додатків, які надають спеціальні можливості, але його не варто відкривати для більшості інших додатків."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Перегляд і контроль екрана"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Цей сервіс може переглядати всі дані на екрані й показувати вміст над іншими додатками."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Переглянути й виконати дії"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Цей сервіс може відстежувати вашу взаємодію з додатком чи апаратним датчиком, а також взаємодіяти з додатками від вашого імені."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволити"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Заборонити"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Натисніть функцію, щоб почати використовувати її:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Виберіть додатки, які хочете використовувати з кнопкою спеціальних можливостей"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Виберіть додатки, які хочете використовувати з клавішами гучності"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сервіс <xliff:g id="SERVICE_NAME">%s</xliff:g> вимкнено"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редагувати засоби"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Скасувати"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Вимкнути ярлик"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Використовувати ярлик"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія кольорів"</string>
@@ -1920,8 +1936,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Без категорії"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ви вказуєте пріоритет цих сповіщень."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Важливе з огляду на учасників."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Користувацьке сповіщення додатка"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> створити нового користувача з обліковим записом <xliff:g id="ACCOUNT">%2$s</xliff:g> (користувач із таким обліковим записом уже існує)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Дозволити додатку <xliff:g id="APP">%1$s</xliff:g> створити нового користувача з обліковим записом <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Додати мову"</string>
@@ -2097,16 +2112,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Меню спеціальних можливостей"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Смуга із субтитрами для додатка <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" додано в сегмент з обмеженнями"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Особисте"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Робоче"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Особистий перегляд"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Робочий перегляд"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Не можна надсилати дані робочим додаткам"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Не можна надсилати дані особистим додаткам"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Ваш ІТ-адміністратор заблокував обмін даними між особистими й робочими додатками"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Увімкніть робочі додатки"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Щоб отримати доступ до робочих додатків і контактів, увімкніть ці додатки"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Ваш ІТ-адміністратор заблокував обмін даними між особистим і робочим профілями"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Немає доступу до робочих додатків"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Ваш ІТ-адміністратор не дозволив переглядати особистий контент в робочих додатках"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Немає доступу до особистих додатків"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Ваш ІТ-адміністратор не дозволив переглядати робочий контент в особистих додатках"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Увімкніть робочий профіль, щоб ділитися контентом"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Увімкніть робочий профіль, щоб переглядати контент"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Немає доступних додатків"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Немає додатків"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Увімкнути робочий профіль"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Увімкнути"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Записувати й відтворювати звук під час викликів"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Дозволяє цьому додатку записувати й відтворювати звук під час викликів, коли його вибрано додатком для дзвінків за умовчанням."</string>
 </resources>

@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"သင့်တည်နေရာပြ ဆက်တင်များကို ကြည့်ရန် တို့ပါ။"</string>
     <string name="country_detector" msgid="7023275114706088854">"နိုင်ငံ ရှာဖွေစနစ်"</string>
     <string name="location_service" msgid="2439187616018455546">"တည်နေရာဝန်ဆောင်မှု"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS ဝန်ဆောင်မှု"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"အာရုံခံကိရိယာ အကြောင်းကြားချက် ဝန်ဆောင်မှု"</string>
     <string name="twilight_service" msgid="8964898045693187224">"နေဝင်ဆည်းဆာ ဝန်ဆောင်မှု"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"သင့်ကိရိယာအား ပယ်ဖျက်လိမ့်မည်"</string>
@@ -249,10 +250,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> စက္ကန့်အတွင်း ချွတ်ယွင်းချက် အစီရင်ခံရန်အတွက် မျက်နှာပြင်ဓာတ်ပုံ ရိုက်ပါမည်။</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> စက္ကန့်အတွင်း ချွတ်ယွင်းချက် အစီရင်ခံရန်အတွက် မျက်နှာပြင်ဓာတ်ပုံ ရိုက်ပါမည်။</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ချွတ်ယွင်းချက်အစီရင်ခံချက်နှင့်အတူ ဖန်သားပြင်ဓာတ်ပုံရိုက်ထားသည်"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ချွတ်ယွင်းချက်အစီရင်ခံချက်နှင့်အတူ ဖန်သားပြင်ဓာတ်ပုံရိုက်၍မရခဲ့ပါ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"အသံတိတ်စနစ်"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"အသံပိတ်ထားသည်"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"အသံဖွင့်ထားသည်"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"တည်နေရာပံ့ပိုးမှုညွှန်ကြားချက်အပိုအား ဝင်ရောက်ကြည့်ခြင်း"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"အက်ပ်အား တည်နေရာ စီမံပေးရေး ညွှန်ကြားချက် အပိုများကို ရယူခွင့်ပြုသည်။ သို့ဖြစ်၍ အက်ပ်သည် GPS သို့မဟုတ် အခြား တည်နေရာ ရင်းမြစ်ကို သုံးကြသူတို့၏ လုပ်ငန်းများကို ဝင်စွက်ခွင့် ပြုနိုင်သည်။"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"မျက်နှာစာတွင်သာ တည်နေရာအတိအကျ အသုံးပြုခြင်း"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"အက်ပ်ကို အသုံးပြုနေစဉ် ဤအက်ပ်သည် တည်နေရာဝန်ဆောင်မှုများမှနေ၍ သင့်တည်နေရာအတိအကျကို ရယူနိုင်သည်။ အက်ပ်က တည်နေရာရရှိနိုင်ရန် သင့်စက်အတွက် တည်နေရာဝန်ဆောင်မှုများကို ဖွင့်ထားရပါမည်။ ၎င်းသည် ဘက်ထရီအသုံးပြုမှု ပိုများနိုင်သည်။"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"မျက်နှာစာတွင်သာ ခန့်မှန်းခြေ တည်နေရာ အသုံးပြုခြင်း"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"အက်ပ်ကို အသုံးပြုနေစဉ် ဤအက်ပ်သည် တည်နေရာဝန်ဆောင်မှုများမှနေ၍ သင့်တည်နေရာခန့်မှန်းခြေကို ရယူနိုင်သည်။ အက်ပ်က တည်နေရာရရှိနိုင်ရန် သင့်စက်အတွက် တည်နေရာဝန်ဆောင်မှုများကို ဖွင့်ထားရပါမည်။"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"နောက်ခံတွင် တည်နေရာကို အသုံးပြုရန်"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"အက်ပ်ကို အသုံးပြုနေခြင်းမရှိသည့်အခါတွင်ပင် ဤအက်ပ်သည် သင့်တည်နေရာကို အချိန်မရွေး အသုံးပြုနိုင်သည်။"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"သင့်အသံအပြင်အဆင်အားပြောင်းခြင်း"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"အပလီကေးရှင်းအား အသံအတိုးအကျယ်နှင့် အထွက်ကို မည်သည့်စပီကာကို သုံးရန်စသည်ဖြင့် စက်တစ်ခုလုံးနှင့်ဆိုင်သော အသံဆိုင်ရာ ဆက်တင်များ ပြင်ဆင်ခွင့် ပြုရန်"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"အသံဖမ်းခြင်း"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ဤအက်ပ်သည် ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်ပါသည်။"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ဓာတ်ပုံနှင့် ဗီဒီယိုများရိုက်ရန်အတွက် စနစ်ကင်မရာများကို အက်ပ် သို့မဟုတ် ဝန်‌ဆောင်မှုအား အသုံးပြုခွင့်ပေးခြင်း"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ခွင့်ပြုချက်ရှိသည့် | ဤစနစ်အက်ပ်သည် စနစ်ကင်မရာကို အသုံးပြု၍ ဓာတ်ပုံနှင့် ဗီဒီယိုများကို အချိန်မရွေး ရိုက်ကူးနိုင်သည်။ အက်ပ်ကလည်း android.permission.CAMERA ခွင့်ပြုချက် ရှိရပါမည်"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ကင်မရာစက်များ ပွင့်နေခြင်း သို့မဟုတ် ပိတ်နေခြင်းနှင့် ပတ်သက်ပြီး ပြန်လည်ခေါ်ဆိုမှုများ ရယူရန် အပလီကေးရှင်း သို့မဟုတ် ဝန်ဆောင်မှုကို ခွင့်ပြုခြင်း။"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"(မည်သည့် အပလီကေးရှင်းပက်ကေ့ဂျ်ကြောင့်) ကင်မရာစက်တစ်ခုခု ပွင့်နေသည့်အခါ သို့မဟုတ် ပိတ်နေသည့်အခါ ဤအထူးသီးသန့်အက်ပ်က ပြန်လည်ခေါ်ဆိုမှုများ ရယူနိုင်သည်။"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"တုန်ခုန်မှုအား ထိန်းချုပ်ခြင်း"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"အက်ပ်အား တုန်ခါစက်ကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"အက်ပ်ကို တုန်ခါမှုအခြေအနေအား သုံးခွင့်ပေးပါ။"</string>
@@ -453,13 +451,17 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"ခေါ်ဆိုမှု အတွေ့အကြုံ ပိုမိုကောင်းမွန်လာစေရန်အတွက် အက်ပ်၏ ခေါ်ဆိုမှုအား စနစ်မှတစ်ဆင့် ဖြတ်သန်းရန် ခွင့်ပြုပါသည်။"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"စနစ်မှတစ်ဆင့် ခေါ်ဆိုမှုများကို ကြည့်ရှုထိန်းချုပ်ပါ။"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"စက်ပစ္စည်းပေါ်ရှိ လက်ရှိခေါ်ဆိုမှုများကို အက်ပ်အား ကြည့်ရှုထိန်းချုပ်ခွင့်ပြုသည်။ ၎င်းတွင် ခေါ်ဆိုမှုနံပါတ်များနှင့် ခေါ်ဆိုမှုအခြေအနေများကဲ့သို့သော အခြေအနေများ ပါဝင်သည်။"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"အသံဖမ်းခွင့် ကန့်သတ်ချက်မှ ဖယ်ရှားပါ"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"အသံဖမ်းခွင့် ကန့်သတ်ချက်မှ အက်ပ်ကို ဖယ်ရှားပါ"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"အခြားအက်ပ်မှ ဖုန်းခေါ်ဆိုမှုကို ဆက်လက်ပြုလုပ်ပါ"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"အခြားအက်ပ်တွင် စတင်ထားသည့် ဖုန်းခေါ်ဆိုမှုကို ဆက်လက်ပြုလုပ်ရန် ဤအက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ဖုန်းနံပါတ်များကို ဖတ်ရန်"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"အက်ပ်ကို စက်ပစ္စည်း၏ ဖုန်းနံပါတ်များအား အသုံးပြုခွင့်ပေးပါ။"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ကားဖန်သားပြင်ကို ဖွင့်ထားပါ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"တက်ပလက်အား ပိတ်ခြင်းမှ ကာကွယ်ခြင်း"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"သင်၏ Android TV စက်ပစ္စည်း နားခြင်းမရှိစေရန် ပြုလုပ်ခြင်း"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ဖုန်းအနားယူခြင်းမပြုလုပ်စေရန်"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ကားဖန်သားပြင် ဖွင့်ထားနိုင်စေရန် အက်ပ်ကို ခွင့်ပြုပေးပါ။"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"အက်ပ်အား တက်ဘလက်ကို အနားမယူနိုင်အောင် ဟန့်တားခွင့် ပြုသည်။"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"သင့် Android TV စက်ပစ္စည်း နားခြင်း မရှိစေရန်အတွက် အက်ပ်အား လုပ်ဆောင်ခွင့်ပြုသည်။"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"အက်ပ်အား ဖုန်းကို အနားမယူနိုင်အောင် ဟန့်တားခွင့် ပြုသည်။"</string>
@@ -1262,7 +1264,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"မိုဘိုင်းကွန်ရက်တွင် အင်တာနက်ချိတ်ဆက်မှု မရှိပါ"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ကွန်ရက်တွင် အင်တာနက်အသုံးပြုခွင့် မရှိပါ"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"သီးသန့် ဒီအန်အက်စ် (DNS) ဆာဗာကို သုံး၍မရပါ။"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"ချိတ်ဆက်ထားသည်"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> တွင် ချိတ်ဆက်မှုကို ကန့်သတ်ထားသည်"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"မည်သို့ပင်ဖြစ်စေ ချိတ်ဆက်ရန် တို့ပါ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> သို့ ပြောင်းလိုက်ပြီ"</string>
@@ -1634,8 +1635,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ကို သင့်စက်အား အပြည့်အဝထိန်းချုပ်ခွင့် ပေးလိုပါသလား။"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> ဖွင့်လိုက်ပါက သင်၏စက်သည် ဒေတာအသွင်ဝှက်ခြင်း ပိုကောင်းမွန်စေရန် သင့်ဖန်သားပြင်လော့ခ်ကို သုံးမည်မဟုတ်ပါ။"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"အများသုံးစွဲနိုင်မှု လိုအပ်ချက်များအတွက် အထောက်အကူပြုသည့် အက်ပ်များကို အပြည့်အဝထိန်းချုပ်ခြင်းသည် သင့်လျော်သော်လည်း အက်ပ်အများစုအတွက် မသင့်လျော်ပါ။"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"မျက်နှာပြင်ကို ကြည့်ရှုပြီး ထိန်းချုပ်ပါ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"၎င်းသည် မျက်နှာပြင်ပေါ်ရှိ အကြောင်းအရာများအားလုံးကို ဖတ်နိုင်ပြီး အခြားအက်ပ်များအပေါ်တွင် ထိုအကြောင်းအရာကို ဖော်ပြနိုင်သည်။"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"လုပ်ဆောင်ချက်များကို ကြည့်ရှုလုပ်ဆောင်ပါ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"၎င်းသည် အက်ပ်တစ်ခု သို့မဟုတ် အာရုံခံကိရိယာကို အသုံးပြု၍ သင့်ပြန်လှန်တုံ့ပြန်မှုများကို မှတ်သားနိုင်ပြီး သင့်ကိုယ်စား အက်ပ်များနှင့် ပြန်လှန်တုံ့ပြန်နိုင်သည်။"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ခွင့်ပြု"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ပယ်ရန်"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ဝန်ဆောင်မှုကို စတင်အသုံးပြုရန် တို့ပါ−"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"အများသုံးစွဲနိုင်မှု ခလုတ်ဖြင့် အသုံးပြုရန် အက်ပ်များကို ရွေးပါ"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"အသံခလုတ် ဖြတ်လမ်းလင့်ခ်ဖြင့် အသုံးပြုရန် အက်ပ်များကို ရွေးပါ"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ကို ပိတ်ထားသည်"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ဖြတ်လမ်းများကို တည်းဖြတ်ရန်"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"မလုပ်တော့"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ပြီးပြီ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ဖြတ်လမ်းလင့်ခ်ကို ပိတ်ရန်"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ဖြတ်လမ်းလင့်ခ်ကို သုံးရန်"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"အရောင် ပြောင်းပြန်လှန်ခြင်း"</string>
@@ -1856,8 +1870,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"အမျိုးအစားမခွဲရသေးပါ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ဤသတိပေးချက်များ၏ အရေးပါမှုကိုသတ်မှတ်ပြီးပါပြီ။"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ပါဝင်သည့်လူများကြောင့် အရေးပါပါသည်။"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"စိတ်ကြိုက်အက်ပ် အကြောင်းကြားချက်"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား (ဤအကောင့်ဖြင့် အသုံးပြုသူ ရှိနှင့်ပြီးဖြစ်သည်) ။"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ဖြင့်အသုံးပြုသူအသစ်ကို <xliff:g id="APP">%1$s</xliff:g> အား ဖန်တီးခွင့်ပြုလိုပါသလား ။"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ဘာသာစကားတစ်ခု ထည့်ပါ"</string>
@@ -2029,16 +2042,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"အများသုံးစွဲနိုင်မှု မီနူး"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>၏ ခေါင်းစီး ဘား။"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ကို တားမြစ်ထားသော သိမ်းဆည်းမှုအတွင်းသို့ ထည့်ပြီးပါပြီ"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ကိုယ်ပိုင်"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"အလုပ်"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ပုဂ္ဂိုလ်ရေးဆိုင်ရာ မြင်ကွင်း"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"အလုပ် မြင်ကွင်း"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"အလုပ်သုံးအက်ပ်များနှင့် မျှဝေ၍ မရပါ"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ကိုယ်ပိုင်သုံးအက်ပ်များနှင့် မျှဝေ၍ မရပါ"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"သင့်အိုင်တီ စီမံခန့်ခွဲသူက ကိုယ်ပိုင်သုံးနှင့် အလုပ်သုံးအက်ပ်များအကြား မျှဝေခြင်းကို ပိတ်ထားသည်"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"အလုပ်သုံးအက်ပ်များကို ဖွင့်ပါ"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"အလုပ်သုံးအက်ပ်နှင့် အဆက်အသွယ်များကို သုံးရန် အလုပ်သုံးအက်ပ်များကို ဖွင့်ပါ"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"သင့် အိုင်တီစီမံခန့်ခွဲသူသည် ပုဂ္ဂိုလ်ရေးဆိုင်ရာနှင့် အလုပ် ပရိုဖိုင်များအကြား မျှဝေခြင်းကို ပိတ်ထားသည်"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"အလုပ်သုံးအက်ပ်များကို ဖွင့်၍မရပါ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"သင့် အိုင်တီစီမံခန့်ခွဲသူသည် အလုပ်သုံးအက်ပ်များတွင် ပုဂ္ဂိုလ်ရေးဆိုင်ရာ အကြောင်းအရာကို ကြည့်ခွင့်မပြုပါ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"ပုဂ္ဂိုလ်ရေးဆိုင်ရာ အက်ပ်များကို သုံးခွင့်မရှိပါ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"သင့် အိုင်တီ စီမံခန့်ခွဲသူသည် ပုဂ္ဂိုလ်ရေးဆိုင်ရာအက်ပ်များတွင် အလုပ်သုံး အကြောင်းအရာကို ကြည့်ခွင့်မပြုပါ"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"အကြောင်းအရာမျှဝေရန် အလုပ်ပရိုဖိုင်ကို ဖွင့်ပါ"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"အကြောင်းအရာကို ကြည့်ရန် အလုပ်ပရိုဖိုင်ကို ဖွင့်ပါ"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"မည်သည့်အက်ပ်မျှ မရှိပါ"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"မည်သည့်အက်ပ်ကိုမျှ မတွေ့ပါ"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"အလုပ်သုံးအနေအထားကို ဖွင့်ပါ"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ဖွင့်ရန်"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ဤအက်ပ်အား မူလ dialer အပလီကေးရှင်းအဖြစ် သတ်မှတ်ထားစဉ် ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း ပြုလုပ်ရန် ခွင့်ပြုပါ။"</string>
 </resources>

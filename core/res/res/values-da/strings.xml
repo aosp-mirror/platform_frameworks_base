@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Tryk for at se dine placeringsindstillinger."</string>
     <string name="country_detector" msgid="7023275114706088854">"Landeregistrering"</string>
     <string name="location_service" msgid="2439187616018455546">"Placeringstjeneste"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS-tjeneste"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Tjenesten Sensor Notification"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Tjenesten Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Enheden slettes"</string>
@@ -249,10 +250,8 @@
       <item quantity="one">Der tages et screenshot til fejlrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekund.</item>
       <item quantity="other">Der tages et screenshot til fejlrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Der er taget et screenshot af fejlrapporten"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Der kunne ikke tages et screenshot af fejlrapporten"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Lydløs"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Lyden er slået FRA"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Lyden er TIL"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillader, at appen kan få adgang til yderligere kommandoer for placeringsudbydere. Dette kan gøre det muligt for appen at forstyrre GPS-funktionen eller andre placeringskilder."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"få kun adgang til nøjagtig placering i forgrunden"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Denne app kan finde din nøjagtige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering. Dette kan øge batteriforbruget."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"få kun adgang til omtrentlig placering i forgrunden"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Denne app kan finde din omtrentlige placering via placeringstjenester, når appen er i brug. Placeringstjenester skal være aktiveret på din enhed, før appen kan finde din placering."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"adgang til placering i baggrunden"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Denne app kan til enhver tid få adgang til din placering, selv når den ikke er i brug."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"skifte dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"optage lyd"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Med denne app kan du tage billeder og optage video med kameraet når som helst."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Giv en app eller tjeneste adgang til systemkameraer for at tage billeder og optage video"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Denne privilegerede app | systemapp kan tage billeder og optage video med kameraet når som helst. Appen skal også have tilladelsen android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillad, at en app eller tjeneste modtager tilbagekald om kameraenheder, der åbnes eller lukkes."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Denne signaturapp kan modtage tilbagekald, når en kameraenhed åbnes (efter app-pakke) eller lukkes."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"administrere vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillader, at appen kan administrere vibratoren."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Tillader, at appen bruger vibration."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Tillader appen at dirigere sine opkald gennem systemet for at forbedre opkaldsoplevelsen."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"se og styre opkald via systemet."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Tillader, at appen kan se og styre igangværende opkald på enheden. Dette omfatter oplysninger såsom telefonnumre og status for opkaldene."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"fortsætte et opkald fra en anden app"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Tillader, at appen fortsætter et opkald, der blev startet i en anden app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"læse telefonnumre"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Tillader, at appen får adgang til telefonnumrene på denne enhed."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hold bilens skærm tændt"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"afholde tabletcomputeren fra at gå i dvale"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"undgå, at din Android TV-enhed ikke går i dvale"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"afholde telefonen fra at gå i dvale"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Tillader, at appen holder bilens skærm tændt."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tillader, at appen kan forhindre tabletten i at gå i dvale."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Tillader, at appen kan forhindre din Android TV-enhed i at gå i dvale."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Tillader, at appen kan forhindre, at telefonen går i dvale."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilnetværket har ingen internetadgang"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Netværket har ingen internetadgang"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Der er ikke adgang til den private DNS-server"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Der er oprettet forbindelse"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har begrænset forbindelse"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Tryk for at oprette forbindelse alligevel"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Der blev skiftet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vil du skrue højere op end det anbefalede lydstyrkeniveau?\n\nDu kan skade hørelsen ved at lytte til meget høj musik over længere tid."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vil du bruge genvejen til Hjælpefunktioner?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når genvejen er aktiveret, kan du starte en hjælpefunktion ved at trykke på begge lydstyrkeknapper i tre sekunder."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vil du give <xliff:g id="SERVICE">%1$s</xliff:g> fuld kontrol over din enhed?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Hvis du aktiverer <xliff:g id="SERVICE">%1$s</xliff:g>, vil enheden ikke benytte skærmlåsen til at forbedre datakrypteringen."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Fuld kontrol er velegnet til apps, der hjælper dig med hjælpefunktioner, men ikke de fleste apps."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og styre skærm"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan læse alt indhold på skærmen og vise indhold oven på andre apps."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og udfør handlinger"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan spore dine interaktioner med en app eller en hardwaresensor og interagere med apps på dine vegne."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillad"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Afvis"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tryk på en funktion for at bruge den:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Vælg, hvilke apps du vil bruge med knappen Hjælpefunktioner"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Vælg, hvilke apps du vil bruge med genvejen via lydstyrkeknapperne"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> er blevet deaktiveret"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediger genveje"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Annuller"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Udfør"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Deaktiver genvej"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Brug genvej"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ombytning af farver"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Uden kategori"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Du angiver, hvor vigtige disse notifikationer er."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Dette er vigtigt på grund af de personer, det handler om."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Tilpasset appnotifikation"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Vil du give <xliff:g id="APP">%1$s</xliff:g> tilladelse til at oprette en ny bruger med <xliff:g id="ACCOUNT">%2$s</xliff:g> (der findes allerede en bruger med denne konto)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Vil du give <xliff:g id="APP">%1$s</xliff:g> tilladelse til at oprette en nye bruger med <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Tilføj et sprog"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menuen Hjælpefunktioner"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Titellinje for <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> er blevet placeret i samlingen BEGRÆNSET"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personlig"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Arbejde"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visningen Personligt"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visningen Arbejde"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Der kan ikke deles med arbejdsapps"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Der kan ikke deles med personlige apps"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Din it-administrator har blokeret deling mellem personlige apps og arbejdsapps"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Aktivér arbejdsapps"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Aktivér arbejdsapps for at få adgang til arbejdsapps og -kontakter"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Din it-administrator har blokeret deling mellem personlige apps og arbejdsprofiler"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Du har ikke adgang til arbejdsapps"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Din it-administrator har ikke givet dig tilladelse til at se personligt indhold i arbejdsapps"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Du har ikke adgang til personlige apps"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Din it-administrator har ikke givet dig tilladelse til at se arbejdsindhold i personlige apps"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Aktivér arbejdsprofilen for at dele indhold"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Aktivér arbejdsprofilen for at se indhold"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Ingen tilgængelige apps"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Vi kunne ikke finde nogen apps"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Aktivér arbejdsprofil"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktivér"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Optage eller afspille lyd i telefonopkald"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Tillader, at denne app kan optage og afspille lyd i telefonopkald, når den er angivet som standardapp til opkald."</string>
 </resources>

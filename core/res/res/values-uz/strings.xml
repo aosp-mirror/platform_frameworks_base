@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Joylashuv sozlamalarini koʻrish uchun bosing."</string>
     <string name="country_detector" msgid="7023275114706088854">"Mamlakatni aniqlash"</string>
     <string name="location_service" msgid="2439187616018455546">"Joylashuvni aniqlash xizmati"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS xizmati"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensorli bildirishnoma xizmati"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight xizmati"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_1">%d</xliff:g> soniyadan so‘ng olinadi.</item>
       <item quantity="one">Xatoliklar hisoboti uchun skrinshot <xliff:g id="NUMBER_0">%d</xliff:g> soniyadan so‘ng olinadi.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Xatoliklar hisoboti bilan skrinshot olindi"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Xatoliklar hisoboti bilan skrinshot olinmadi"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Ovozsiz rejim"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Tovush o‘chirilgan"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"YONIQ"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"qo‘shimcha manzillarga kirish buyruqlari"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"aniq joylashuv axborotini olishga faqat old fonda ruxsat"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Bu ilova ishlayotganida u joylashuvni aniqlash xizmatidan aniq joylashuv axborotini olishi mumkin. Ilova joylashuv axborotidan foydalana olishi uchun qurilmangizda joylashuvni aniqlash xizmati yoqilishi kerak. Bunda batareya quvvati tezroq sarflanishi mumkin."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"taxminiy joylashuv axborotini olishga faqat old fonda ruxsat"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Bu ilova ishlayotganida u joylashuvni aniqlash xizmatidan taxminiy joylashuv axborotini olishi mumkin. Ilova joylashuv axborotidan foydalana olishi uchun qurilmangizda joylashuvni aniqlash xizmati yoqilishi kerak."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"fonda joylashuv axborotidan foydalanish"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Bu ilova ishlamayotganida ham istalgan vaqt joylashuv axborotidan foydalanishi mumkin."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"audio sozlamalaringizni o‘zgartirish"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Ilovalarga tovush va ovoz chiqarish uchun foydalaniladigan karnay kabi global audio sozlamalarini o‘zgartirish uchun ruxsat beradi."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ovoz yozib olish"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Bu ilova xohlagan vaqtda kamera orqali suratga olishi va video yozib olishi mumkin."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Ilova yoki xizmatga tizim kamerasi orqali surat va videolar olishga ruxsat berish"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Bu imtiyozli | tizim ilovasi istalgan vaqtda tizim kamerasi orqali surat va videolar olishi mumkin. Ilovada android.permission.CAMERA ruxsati ham yoqilgan boʻlishi talab qilinadi"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Ilova yoki xizmatga kamera qurilmalari ochilayotgani yoki yopilayotgani haqida qayta chaqiruvlar qabul qilishi uchun ruxsat berish."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Bu imzo ilovasi har qanday kamera qurilmasi ochilayotganda (istalgan ilova paketi tarafidan) yoki yopilayotganda qayta chaqiruvlar qabul qilishi mumkin."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"tebranishni boshqarish"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ilovaga tebranish holatini aniqlash ruxsatini beradi."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Ilova aloqa sifatini yaxshilash maqsadida chaqiruvlarni tizim orqali yo‘naltirishi mumkin."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"tizim orqali chaqiruvlarni tekshirish va boshqarish."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Ilovaga qurilmadagi amaldagi chaqiruvlarni tekshirish va boshqarish imkonini beradi. Shuningdek, chaqiruvlar holati va kiruvchi-chiquvchi chaqiruv raqamlari axborotiga ham ruxsat beradi."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"chaqiruvni boshqa ilovada davom ettirish"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Ilovaga boshqa ilovada boshlangan chaqiruvni davom ettirish imkon beradi"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"telefon raqamlarini o‘qish"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Ilovaga qurilmaning telefon raqamlaridan foydalanishiga ruxsat beradi."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"avtomobil ekranini yoniq holatda saqlab turish"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"planshetni uyquga ketishiga yo‘l qo‘ymaslik"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV qurilmasining uyqu rejimiga kirishining oldini olish"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"telefonni uxlashiga yo‘l qo‘ymaslik"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Ilova avtomobil ekranini yoniq holatda saqlaydi."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Ilova planshetning uyqu rejimiga o‘tib qolishining oldini olishi mumkin."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Ilovaga Android TV qurilmangizning uyqu rejimiga oʻtishining oldini olish huquqini beradi."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Ilova telefonning uyqu rejimiga o‘tib qolishining oldini olishi mumkin."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobil tarmoq internetga ulanmagan"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Tarmoq internetga ulanmagan"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Xususiy DNS server ishlamayapti"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Ulandi"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nomli tarmoqda aloqa cheklangan"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Baribir ulash uchun bosing"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> tarmog‘iga ulanildi"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Tovush balandligi tavsiya etilgan darajadan ham yuqori qilinsinmi?\n\nUzoq vaqt davomida baland ovozda tinglash eshitish qobiliyatingizga salbiy ta’sir ko‘rsatishi mumkin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Tezkor ishga tushirishdan foydalanilsinmi?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala tovush tugmasini 3 soniya bosib turing."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> xizmatiga qurilmangizni boshqarish uchun toʻliq ruxsat berilsinmi?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Agar <xliff:g id="SERVICE">%1$s</xliff:g> xizmatini yoqsangiz, qurilmangiz maʼlumotlarni shifrlashni kuchaytirish uchun ekran qulfidan foydalanmaydi."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Toʻliq nazorat maxsus imkoniyatlar bilan ishlovchi ilovalar uchun mos, lekin barcha ilovalar uchun emas."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekranni ochish va boshqarish"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandagi barcha kontentni oʻqishi va kontentni boshqa ilovalar ustida ochishi mumkin."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Harakatlarni koʻrish va bajarish"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ilova yoki qurilma sensori bilan munosabatlaringizni kuzatishi hamda sizning nomingizdan ilovalar bilan ishlashi mumkin."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ruxsat"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rad etish"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Funksiyadan foydalanish uchun ustiga bosing:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Maxsus imkoniyatlar tugmasi bilan foydalanish uchun ilovalarni tanlang"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Tovush balandligi tugmasi bilan foydalanish uchun ilovalarni tanlang"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> faolsizlantirildi"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Bekor qilish"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tezkor ishga tushirishdan foydalanish"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ranglarni akslantirish"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Turkumlanmagan"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Siz ushbu bildirishnomalarning muhimligini belgilagansiz."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Bu odamlar siz uchun muhim."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Maxsus ilova bildirishnomasi"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi (bunday hisobdagi foydalanuvchi allaqachon mavjud) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> ilovasiga <xliff:g id="ACCOUNT">%2$s</xliff:g> hisobi bilan yangi foydalanuvchi yaratishiga ruxsat berilsinmi ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Til qoʻshish"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Maxsus imkoniyatlar menyusi"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> taglavhalar paneli."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> cheklangan turkumga joylandi"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Shaxsiy"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Ish"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Shaxsiy rejim"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ishchi rejim"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Ishga oid ilovalarga ulashilmaydi"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Shaxsiy ilovalarga ulashilmaydi"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Shaxsiy va ishga oid ilovalararo axborot ulashish AT administratori tomonidan taqiqlangan"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Ishga oid ilovalarni yoqish"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Ishga oid ilova va kontaktlarni ochish uchun ishga oid ilovalarni yoqing"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Shaxsiy va ishga oid profillararo axborot ulashish AT administratori tomonidan taqiqlangan"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Ishga oid ilovalardan foydalanish imkonsiz"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"AT administratori ishga oid ilovalarda shaxsiy maʼlumotlarni ochishni taqiqlagan"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Shaxsiy ilovalardan foydalanish imkonsiz"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"AT administratori shaxsiy ilovalarda ishga oid kontentni ochishni taqiqlagan"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Kontentni ulashish uchun ishchi profilni yoqing"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Kontentni ochish uchun ishchi profilni yoqing"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Mos ilova topilmadi"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Hech qanday ilova topilmadi"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Ish rejimini yoqish"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Yoqish"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Telefondagi suhbatlarni yozib olish va ularni ijro qilish"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Bu ilova chaqiruvlar uchun asosiy ilova sifatida tayinlanganda u telefon chaqiruvlarida suhbatlarni yozib olish va shu audiolarni ijro etish imkonini beradi."</string>
 </resources>

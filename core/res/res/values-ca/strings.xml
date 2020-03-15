@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Toca per veure la configuració d\'ubicació."</string>
     <string name="country_detector" msgid="7023275114706088854">"Detector de país"</string>
     <string name="location_service" msgid="2439187616018455546">"Servei d\'ubicació"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Servei GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servei de notificacions de sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servei Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"El contingut del dispositiu s\'esborrarà"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a <xliff:g id="NUMBER_1">%d</xliff:g> segons.</item>
       <item quantity="one">Es farà una captura de pantalla de l\'informe d\'errors d\'aquí a <xliff:g id="NUMBER_0">%d</xliff:g> segon.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"S\'ha fet la captura de pantalla amb l\'informe d\'errors"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"No s\'ha pogut fer la captura de pantalla amb l\'informe d\'errors"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mode silenciós"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"So desactivat"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"El so està activat"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"accedir a ordres del proveïdor d\'ubicació addicionals"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"accedeix a la ubicació exacta només en primer pla"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aquesta aplicació pot obtenir la teva ubicació exacta a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació, i això pot fer que l\'ús de la bateria augmenti."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"accedeix a la ubicació aproximada només en primer pla"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aquesta aplicació pot obtenir la teva ubicació aproximada a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"accedir a la ubicació en segon pla"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aquesta aplicació pot accedir a la ubicació en qualsevol moment, encara que no s\'estigui utilitzant."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"gravar àudio"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Aquesta aplicació pot fer fotos i gravar vídeos amb la càmera en qualsevol moment."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Permet que una aplicació o un servei tinguin accés a les càmeres del sistema per fer fotos i vídeos"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Aquesta aplicació del sistema pot fer fotos i gravar vídeos amb una càmera del sistema en qualsevol moment. L\'aplicació també ha de tenir el permís android.permission.CAMERA per accedir-hi"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permet que una aplicació o un servei pugui rebre crides de retorn sobre els dispositius de càmera que s\'obren o es tanquen."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Aquesta aplicació de signatures pot rebre crides de retorn quan s’obre o es tanca un dispositiu de càmera (segons el paquet d’aplicació)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet que l\'aplicació accedeixi a l\'estat de vibració."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permet que l\'aplicació encamini les trucades a través del sistema per millorar-ne l\'experiència."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"consulta i controla les trucades a través del sistema."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Permet que l\'aplicació consulti i controli les trucades en curs al dispositiu. Inclou informació com ara l\'estat i els números de les trucades."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"Continua una trucada d\'una altra aplicació"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permet que l\'aplicació continuï una trucada que s\'havia iniciat en una altra aplicació."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"llegir els números de telèfon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Permet que l\'aplicació accedeixi als números de telèfon del dispositiu."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"mantén la pantalla del cotxe encesa"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"evita que la tauleta entri en mode de repòs"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"evita que el dispositiu Android TV activi el mode en repòs"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"impedir que el telèfon entri en mode de repòs"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permet que l\'aplicació mantingui la pantalla del cotxe encesa."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permet que l\'aplicació impedeixi que la tauleta entri en repòs."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Permet que l\'aplicació impedeixi que el dispositiu Android TV entri en repòs."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permet que l\'aplicació impedeixi que el telèfon entri en repòs."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"La xarxa mòbil no té accés a Internet"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"La xarxa no té accés a Internet"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"No es pot accedir al servidor DNS privat"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Connectat"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> té una connectivitat limitada"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Toca per connectar igualment"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Actualment en ús: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vols apujar el volum per sobre del nivell recomanat?\n\nSi escoltes música a un volum alt durant períodes llargs, pots danyar-te l\'oïda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vols fer servir la drecera d\'accessibilitat?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si la drecera està activada, prem els dos botons de volum durant 3 segons per iniciar una funció d\'accessibilitat."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vols permetre que <xliff:g id="SERVICE">%1$s</xliff:g> controli el teu dispositiu per complet?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si actives <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositiu no farà servir el bloqueig de pantalla per millorar l\'encriptació de dades."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total és adequat per a les aplicacions que t\'ajuden amb l\'accessibilitat, però no per a la majoria de les aplicacions."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Veure i controlar la pantalla"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pot llegir tot el contingut de la pantalla i mostrar contingut sobre altres aplicacions."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Mostra i duu a terme accions"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pot fer un seguiment de les teves interaccions amb una aplicació o un sensor de maquinari, i interaccionar amb aplicacions en nom teu."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permet"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denega"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una funció per començar a utilitzar-la:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Tria les aplicacions que vols fer servir amb el botó d\'accessibilitat"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Tria les aplicacions que vols fer servir amb la drecera per a tecles de volum"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> s\'ha desactivat"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edita les dreceres"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancel·la"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fet"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactiva la drecera"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilitza la drecera"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversió dels colors"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sense classificar"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Has definit la importància d\'aquestes notificacions."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Aquest missatge és important per les persones implicades."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificació d\'aplicació personalitzada"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Ja hi ha un usuari amb aquest compte.)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Concedeixes permís a <xliff:g id="APP">%1$s</xliff:g> per crear un usuari amb el compte <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Afegeix un idioma"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menú d\'accessibilitat"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de títol de l\'aplicació <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> s\'ha transferit al segment RESTRINGIT"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Feina"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visualització personal"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visualització de treball"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"No es pot compartir amb les aplicacions de treball"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"No es pot compartir amb les aplicacions personals"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"L\'administrador de TI ha bloquejat la compartició entre aplicacions personals i de treball"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Activa les aplicacions de treball"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Activa les aplicacions de treball per accedir a aquestes aplicacions i als contactes de feina"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"L\'administrador de TI ha bloquejat la compartició entre perfils personals i de treball"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"No es pot accedir a les aplicacions de treball"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"L\'administrador de TI no et permet veure el contingut personal a les aplicacions de treball"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"No es pot accedir a les aplicacions personals"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"L\'administrador de TI no et permet veure el contingut de feina a les aplicacions personals"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Activa el perfil de treball per compartir contingut"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Activa el perfil de treball per veure contingut"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"No hi ha cap aplicació disponible"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"No hem trobat cap aplicació"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Activa el perfil de treball"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activa"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Gravar o reproduir àudio en trucades"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permet que l\'aplicació gravi o reprodueixi àudio en trucades si està assignada com a aplicació de marcador predeterminada."</string>
 </resources>

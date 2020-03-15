@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"আপনার লোকেশন সেটিংস দেখার জন্য ট্যাপ করুন।"</string>
     <string name="country_detector" msgid="7023275114706088854">"দেশ শনাক্তকারী"</string>
     <string name="location_service" msgid="2439187616018455546">"লোকেশন পরিষেবা"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS পরিষেবা"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"সেন্সর বিজ্ঞপ্তি পরিষেবা"</string>
     <string name="twilight_service" msgid="8964898045693187224">"গোধূলি পরিষেবা"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপনার ডিভাইসটি মুছে ফেলা হবে"</string>
@@ -249,10 +250,8 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে ত্রুটির প্রতিবেদনের জন্য স্ক্রিনশট নেওয়া হচ্ছে৷</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> সেকেন্ডের মধ্যে ত্রুটির প্রতিবেদনের জন্য স্ক্রিনশট নেওয়া হচ্ছে৷</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"সমস্যা সংক্রান্ত রিপোর্টের স্ক্রিনশট নেওয়া হয়েছে"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"সমস্যার সংক্রান্ত রিপোর্টের স্ক্রিনশট নেওয়া যায়নি"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"নীরব মোড"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"শব্দ বন্ধ করা আছে"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"শব্দ চালু করা আছে"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"অতিরিক্ত লোকেশন প্রদানকারী কমান্ডগুলি অ্যাক্সেস করে"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"লোকেশনের সাথে সম্পর্কিত তথ্য প্রদানকারীর অতিরিক্ত কম্যান্ডগুলিকে অ্যাপ্লিকেশানটিকে মঞ্জুর করে৷ এটি অ্যাপ্লিকেশানটিকে GPS অথবা অন্যান্য লোকেশন নির্ণয়ের সাথে সম্পর্কিত উৎসগুলির ক্রিয়াপ্রণালীর নিয়ন্ত্রণকে মঞ্জুর করতে পারে৷"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"শুধুমাত্র অ্যাপটি খোলা থাকলে আপনার যথাযথ লোকেশন অ্যাক্সেস করা"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"এই অ্যাপটি ব্যবহার করার সময় আপনি লোকেশন পরিষেবাগুলি থেকে আপনার যথাযথ লোকেশন পেতে পারেন। আপনার লোকেশন পেতে আপনার ডিভাইসের লোকেশন পরিষেবা চালু করতে হবে। এটি ব্যাটারির ব্যবহার বাড়িয়ে তুলতে পারে।"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"শুধুমাত্র অ্যাপটি খোলা থাকলে আপনার আনুমানিক লোকেশন অ্যাক্সেস করা"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"এই অ্যাপটি ব্যবহার করার সময় আপনি লোকেশন পরিষেবাগুলি থেকে আপনার আনুমানিক লোকেশন পেতে পারেন। আপনার লোকেশন পেতে আপনার ডিভাইসের লোকেশন পরিষেবা চালু করতে হবে।"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ব্যাকগ্রাউন্ডে লোকেশন অ্যাক্সেস করা"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"অ্যাপটি ব্যবহার না করার সময়ও এই অ্যাপটি যেকোনও সময় লোকেশন অ্যাক্সেস করতে পারে।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"আপনার অডিও সেটিংস পরিবর্তন করে"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ভলিউম এবং যেখানে স্পিকার আউটপুট হিসাবে ব্যবহৃত হয় সেই সব ক্ষেত্রে গ্লোবাল অডিও সেটিংসের সংশোধন করতে অ্যাপ্লিকেশনটিকে মঞ্জুর করে৷"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"অডিও রেকর্ড"</string>
@@ -440,6 +436,10 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"এই অ্যাপটি যে কোনো সময় ক্যামেরা ব্যবহার করে ছবি তুলতে বা ভিডিও রেকর্ড করতে পারে৷"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"সিস্টেম ক্যামেরা ব্যবহার করে ফটো এবং ভিডিও নেওয়ার জন্য অ্যাপ্লিকেশন বা পরিষেবা অ্যাক্সেসের অনুমতি দিন"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"এই প্রিভিলিজ | সিস্টেম অ্যাপটি যেকোনও সময়ে সিস্টেম ক্যামেরা ব্যবহার করে ছবি তুলতে এবং ভিডিও রেকর্ড করতে পারবে। এর জন্য অ্যাপের Android.permission.CAMERA -এর অনুমতি প্রয়োজন"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ভাইব্রেশন নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"অ্যাপ্লিকেশানকে কম্পক নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ভাইব্রেট করার স্থিতি অ্যাক্সেস করার অনুমতি দিন।"</string>
@@ -453,13 +453,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"কল করার অভিজ্ঞতা উন্নত করার জন্য অ্যাপকে সিস্টেমের মাধ্যমে তার কলগুলি রুট করতে দেয়।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"সিস্টেমের মাধ্যমে কল দেখা এবং নিয়ন্ত্রণ করা।"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ডিভাইসে চালু আছে এমন কল দেখতে এবং নিয়ন্ত্রণ করতে অ্যাপকে অনুমতি দেয়। কল করা হচ্ছে যে নম্বরে সেটি এবং কলের স্ট্যাটাস কী সেই সব তথ্য এতে অন্তর্ভুক্ত।"</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"অন্য কোনও অ্যাপ দিয়ে করে থাকা কল চালিয়ে যান"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"অন্য কোনও অ্যাপ দিয়ে কল করলে এই অ্যাপটিকে সেটি চালিয়ে যেতে দেয়।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ফোন নম্বরগুলি পড়া হোক"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"অ্যাপটিকে এই ডিভাইসের ফোন নম্বরগুলি অ্যাক্সেস করতে দেয়।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"গাড়ির স্ক্রিন চালু রাখা আছে"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ঘুমানো থেকে ট্যাবলেটকে প্রতিরোধ করে"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"আপনার Android TV ডিভাইসকে স্লিপ মোডে চলে যাওয়া থেকে আটকান"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ঘুমানো থেকে ফোনটিকে প্রতিরোধ করে"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"গাড়ির স্ক্রিন চালু রাখতে অ্যাপকে অনুমতি দেয়।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"অ্যাপ্লিকেশানকে ট্যাবলেট নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"অ্যাপটিকে আপনার Android TV ডিভাইস স্লিপ মোডে চলে যাওয়া থেকে আটকানোর অনুমতি দেয়।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"অ্যাপ্লিকেশানকে ফোনকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
@@ -1262,7 +1268,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"মোবাইল নেটওয়ার্কে কোনও ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"নেটওয়ার্কে কোনও ইন্টারনেট অ্যাক্সেস নেই"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"ব্যক্তিগত ডিএনএস সার্ভার অ্যাক্সেস করা যাবে না"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"কানেক্ট করা হয়েছে"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>-এর সীমিত কানেক্টিভিটি আছে"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"তবুও কানেক্ট করতে ট্যাপ করুন"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> এ পাল্টানো হয়েছে"</string>
@@ -1634,8 +1639,28 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"প্রস্তাবিত স্তরের চেয়ে বেশি উঁচুতে ভলিউম বাড়াবেন?\n\nউঁচু ভলিউমে বেশি সময় ধরে কিছু শুনলে আপনার শ্রবনশক্তির ক্ষতি হতে পারে।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"অ্যাক্সেসযোগ্যতা শর্টকাট ব্যবহার করবেন?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"শর্টকাট চালু করা থাকাকালীন দুটি ভলিউম বোতাম একসাথে ৩ সেকেন্ড টিপে ধরে রাখলে একটি অ্যাকসেসিবিলিটি ফিচার চালু হবে।"</string>
+    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
+    <skip />
+    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
+    <skip />
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"যে অ্যাপগুলি আপনাকে অ্যাক্সেসিবিলিটির প্রয়োজন মেটাতে সাহায্য করে সেই অ্যাপগুলির জন্য সম্পূর্ণ নিয়ন্ত্রণের বিষয়টি উপযুক্ত, কিন্তু তা বলে সমস্ত অ্যাপের জন্য নয়।"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"স্ক্রিন দেখে নিয়ন্ত্রণ করা"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"এটি স্ক্রিনের সমস্ত কন্টেন্ট পড়তে এবং অন্য অ্যাপেও কন্টেন্ট ডিসপ্লে করতে পারে।"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"দেখুন এবং কাজটি করুন"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"এটি কোনও একটি অ্যাপের সাথে অথবা হার্ডওয়্যার সেন্সরের সাথে আপনার ইন্টার‍্যাকশন ট্র্যাক করতে এবং আপনার হয়ে বিভিন্ন অ্যাপের সাথে ইন্টার‍্যাক্ট করতে পারে।"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"অনুমতি দিন"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"খারিজ করুন"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
+    <skip />
+    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"শর্টকাট এডিট করুন"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"বাতিল করুন"</string>
+    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
+    <skip />
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"শর্টকাট বন্ধ করুন"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"শর্টকাট ব্যবহার করুন"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"রঙ উল্টানো"</string>
@@ -1856,8 +1881,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"বিভাগ নির্ধারিত নয়"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"আপনি এই বিজ্ঞপ্তিগুলির গুরুত্ব সেট করেছেন।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"লোকজন জড়িত থাকার কারণে এটি গুরুত্বপূর্ণ।"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"কাস্টম অ্যাপ বিজ্ঞপ্তি"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g>-এ (একজন ব্যবহারকারী এই অ্যাকাউন্টে আগে থেকেই রয়েছেন) একজন নতুন ব্যবহারকারী তৈরি করার অনুমতি <xliff:g id="APP">%1$s</xliff:g>-কে দেবেন?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g>-এ একজন নতুন ব্যবহারকারী তৈরি করার অনুমতি <xliff:g id="APP">%1$s</xliff:g>-কে দেবেন?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"একটি ভাষা যোগ করুন"</string>
@@ -2029,16 +2053,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"অ্যাক্সেসিবিলিটি মেনু"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>-এর ক্যাপশন বার।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> সীমাবদ্ধ গ্রুপে অন্তর্ভুক্ত করা হয়েছে"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ব্যক্তিগত"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"অফিস"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ব্যক্তিগত ভিউ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"অফিসের ভিউ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"অফিস অ্যাপের সাথে শেয়ার করা যাচ্ছে না"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ব্যক্তিগত অ্যাপের সাথে শেয়ার করা যাচ্ছে না"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"আপনার IT অ্যাডমিন ব্যক্তিগত ও অফিস অ্যাপের মধ্যে শেয়ার করা ব্লক করে রেখেছেন"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"অফিসের অ্যাপ চালু করুন"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"অফিসের অ্যাপ ও পরিচিতি অ্যাক্সেস করার জন্য অফিসের অ্যাপ চালু করুন"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"আপনার আইটি অ্যাডমিন ব্যক্তিগত ও অফিস অ্যাপের মধ্যে শেয়ার করা ব্লক করে রেখেছেন"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"অফিসের অ্যাপ অ্যাক্সেস করা যাচ্ছে না"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"আপনার আইটি অ্যাডমিন আপনাকে অফিস অ্যাপে ব্যক্তিগত কন্টেন্ট দেখতে দেয় না"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"ব্যক্তিগত অ্যাপ অ্যাক্সেস করা যাচ্ছে না"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"আপনার আইটি অ্যাডমিন আপনাকে ব্যক্তিগত অ্যাপে অফিসের কন্টেন্ট দেখতে দেয় না"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"কন্টেন্ট শেয়ার করার জন্য অফিসের প্রোফাইল চালু করুন"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"কন্টেন্ট দেখার জন্য অফিসের প্রোফাইল চালু করুন"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"কোনও অ্যাপ উপলভ্য নেই"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"কোনও অ্যাপ খুঁজে পাওয়া যায়নি"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"অফিস প্রোফাইল চালু করুন"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"চালু করুন"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"টেলিফোন কলে অডিও রেকর্ড বা প্লে করুন"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ডিফল্ট ডায়ালার অ্যাপ্লিকেশন হিসেবে বেছে নেওয়া হলে, টেলিফোন কলে অডিও রেকর্ড বা প্লে করার জন্য এই অ্যাপকে অনুমতি দেয়।"</string>
 </resources>

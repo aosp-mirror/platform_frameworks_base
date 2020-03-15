@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"ನಿಮ್ಮ ಸ್ಥಳ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ನೋಡಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="country_detector" msgid="7023275114706088854">"ಕಂಟ್ರಿ ಡಿಟೆಕ್ಟರ್"</string>
     <string name="location_service" msgid="2439187616018455546">"ಸ್ಥಳ ಸೇವೆ"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS ಸೇವೆ"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"ಸೆನ್ಸರ್ ಅಧಿಸೂಚನೆ ಸೇವೆ"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ಟ್ವಿಲೈಟ್ ಸೇವೆ"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
@@ -249,10 +250,8 @@
       <item quantity="one">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
       <item quantity="other">ಬಗ್ ವರದಿ ಮಾಡಲು <xliff:g id="NUMBER_1">%d</xliff:g> ಸೆಕೆಂಡುಗಳಲ್ಲಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗುತ್ತಿದೆ.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ಬಗ್ ವರದಿಯ ಜೊತೆಗೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲಾಗಿದೆ"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ಬಗ್ ವರದಿಯ ಜೊತೆಗೆ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ತೆಗೆದುಕೊಳ್ಳಲು ವಿಫಲವಾಗಿದೆ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ಶಾಂತ ಮೋಡ್"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ಶಬ್ಧ ಆಫ್ ಆಗಿದೆ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ಶಬ್ಧ ಆನ್ ಆಗಿದೆ"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ಹೆಚ್ಚುವರಿ ಸ್ಥಳ ಪೂರೈಕೆದಾರರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ಹೆಚ್ಚಿನ ಸ್ಥಳ ಪೂರೈಕೆದಾರ ಆದೇಶಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು GPS ಅಥವಾ ಇತರ ಸ್ಥಳ ಮೂಲಗಳ ಕಾರ್ಯಾಚರಣೆಯಲ್ಲಿ ಮಧ್ಯ ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸಬಹುದು."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ಮುನ್ನೆಲೆಯಲ್ಲಿ ಮಾತ್ರ ನಿಖರವಾದ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ಈ ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ನಿಮ್ಮ ನಿಖರವಾದ ಸ್ಥಳವನ್ನು, ಸ್ಥಳ ಸೇವೆಗಳಿಂದ ಪಡೆಯಬಹುದು. ಆ್ಯಪ್ ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಸಾಧನಕ್ಕಾಗಿ ಸ್ಥಳ ಸೇವೆಗಳನ್ನು ಆನ್ ಮಾಡಬೇಕು. ಇದು ಬ್ಯಾಟರಿ ಬಳಕೆಯನ್ನು ಹೆಚ್ಚಿಸಬಹುದು."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ಮುನ್ನೆಲೆಯಲ್ಲಿ ಮಾತ್ರ ಅಂದಾಜು ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ಈ ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿರುವಾಗ ನಿಮ್ಮ ಅಂದಾಜು ಸ್ಥಳವನ್ನು, ಸ್ಥಳ ಸೇವೆಗಳಿಂದ ಪಡೆಯಬಹುದು. ಆ್ಯಪ್ ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪಡೆಯಲು ನಿಮ್ಮ ಸಾಧನಕ್ಕಾಗಿ ಸ್ಥಳ ಸೇವೆಗಳನ್ನು ಆನ್ ಮಾಡಬೇಕು."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ಹಿನ್ನೆಲೆಯಲ್ಲಿ ಸ್ಥಳವನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ಈ ಆ್ಯಪ್ ಬಳಕೆಯಲ್ಲಿಲ್ಲದಿರುವಾಗಲೂ ಸಹ ಸ್ಥಳವನ್ನು ಯಾವುದೇ ಸಮಯದಲ್ಲಾದರೂ ಪ್ರವೇಶಿಸಬಹುದು."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ನಿಮ್ಮ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಿ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ವಾಲ್ಯೂಮ್ ರೀತಿಯ ಮತ್ತು ಔಟ್‍‍ಪುಟ್‍‍ಗಾಗಿ ಯಾವ ಸ್ಪೀಕರ್ ಬಳಸಬೇಕು ಎಂಬ ರೀತಿಯ ಜಾಗತಿಕ ಆಡಿಯೊ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ಆಡಿಯೊ ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
@@ -440,6 +436,10 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಯಾವ ಸಮಯದಲ್ಲಾದರೂ ಕ್ಯಾಮರಾ ಬಳಸಿಕೊಂಡು ಚಿತ್ರಗಳು ಮತ್ತು ವಿಡಿಯೋಗಳನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ಫೋಟೋಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಲು ಸಿಸ್ಟಂ ಕ್ಯಾಮರಾಗಳಿಗೆ ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸೇವಾ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ಈ ವಿಶೇಷ | ಸಿಸ್ಟಂ ಆ್ಯಪ್ ಯಾವುದೇ ಸಮಯದಲ್ಲಾದರೂ ಸಿಸ್ಟಂ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸಿಕೊಂಡು ಫೋಟೋಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಬಹುದು ಮತ್ತು ವೀಡಿಯೋಗಳನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು. ಆ್ಯಪ್‌ಗೆ android.permission.CAMERA ಅನುಮತಿಯ ಅಗತ್ಯವಿರುತ್ತದೆ"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ವೈಬ್ರೇಷನ್‌‌ ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ವೈಬ್ರೇಟರ್‌ ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ವೈಬ್ರೇಟರ್ ಸ್ಥಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -453,13 +453,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"ಕರೆಯ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ನ ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ಸಿಸ್ಟಂ ಮೂಲಕ ಕರೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ಸಾಧನದಲ್ಲಿನ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಕರೆಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಮತ್ತು ನಿಯಂತ್ರಿಸಲು ಆ್ಯಪ್ ಅನುಮತಿಸುತ್ತದೆ. ಕರೆಗಳಿಗೆ ಸಂಬಂಧಿಸಿದ ಕರೆ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಕರೆ ಮಾಡಿದ ರಾಜ್ಯದಂತಹ ಮಾಹಿತಿಯನ್ನು ಇದು ಒಳಗೊಂಡಿರುತ್ತದೆ."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ ಮೂಲಕ ಕರೆಯನ್ನು ಮುಂದುವರಿಸಿ"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಪ್ರಾರಂಭವಾದ ಕರೆಯನ್ನು ಮುಂದುವರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡಿ."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ಫೋನ್‌ ಸಂಖ್ಯೆಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ಸಾಧನದ ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ಪ್ರವೇಶ ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ಕಾರ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್‌ನಲ್ಲೇ ಇರಿಸಿ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ಟ್ಯಾಬ್ಲೆಟ್ ನಿದ್ರಾವಸ್ಥೆಯನ್ನು ತಡೆಯಿರಿ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ನಿಮ್ಮ Android TV ಸಾಧನವು ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಯಿರಿ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ಫೋನ್ ಆಫ್ ಆಗುವುದರಿಂದ ತಡೆಯಿರಿ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ಕಾರ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್‌ನಲ್ಲೇ ಇರಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ಟ್ಯಾಬ್ಲೆಟ್‌ ನಿದ್ರೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"ನಿಮ್ಮ Android TV ಸಾಧನವು ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ಫೋನ್‌ ನಿದ್ರೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -1262,7 +1268,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ನೆಟ್‌ವರ್ಕ್‌ ಇಂಟರ್ನೆಟ್‌ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿಲ್ಲ"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"ಖಾಸಗಿ DNS ಸರ್ವರ್ ಅನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ಸೀಮಿತ ಸಂಪರ್ಕ ಕಲ್ಪಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿದೆ"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ಹೇಗಾದರೂ ಸಂಪರ್ಕಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
@@ -1634,8 +1639,28 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ವಾಲ್ಯೂಮ್‌ ಅನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾದ ಮಟ್ಟಕ್ಕಿಂತಲೂ ಹೆಚ್ಚು ಮಾಡುವುದೇ?\n\nದೀರ್ಘ ಅವಧಿಯವರೆಗೆ ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದರಿಂದ ನಿಮ್ಮ ಆಲಿಸುವಿಕೆ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟು ಮಾಡಬಹುದು."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ಪ್ರವೇಶಿಸುವಿಕೆ ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸುವುದೇ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ಶಾರ್ಟ್‌ಕಟ್ ಆನ್ ಆಗಿರುವಾಗ, ಎರಡೂ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳನ್ನು 3 ಸೆಕೆಂಡುಗಳ ಕಾಲ ಒತ್ತಿದರೆ ಪ್ರವೇಶಿಸುವಿಕೆ ವೈಶಿಷ್ಟ್ಯವೊಂದು ಪ್ರಾರಂಭವಾಗುತ್ತದೆ."</string>
+    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
+    <skip />
+    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
+    <skip />
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ಪ್ರವೇಶಿಸುವಿಕೆಯ ಅವಶ್ಯಕತೆಗಳಿಗೆ ಸಹಾಯ ಮಾಡುವ ಆ್ಯಪ್‌ಗಳಿಗೆ ಪೂರ್ಣ ನಿಯಂತ್ರಣ ನೀಡುವುದು ಸೂಕ್ತವಾಗಿರುತ್ತದೆ, ಆದರೆ ಬಹುತೇಕ ಆ್ಯಪ್‌ಗಳಿಗೆ ಇದು ಸೂಕ್ತವಲ್ಲ."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ಪರದೆಯನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ಇದು ಪರದೆಯ ಮೇಲಿನ ಎಲ್ಲಾ ವಿಷಯವನ್ನು ಓದಬಹುದು ಮತ್ತು ಇತರ ಆ್ಯಪ್‌ಗಳ ಮೇಲೆ ವಿಷಯವನ್ನು ಪ್ರದರ್ಶಿಸಬಹುದು."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ಕ್ರಿಯೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ಇದು ಆ್ಯಪ್ ಅಥವಾ ಹಾರ್ಡ್‌ವೇರ್ ಸೆನ್ಸರ್‌ನ ಜೊತೆಗಿನ ನಿಮ್ಮ ಸಂವಹನಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದು, ಮತ್ತು ನಿಮ್ಮ ಪರವಾಗಿ ಆ್ಯಪ್‌ಗಳ ಜೊತೆ ಸಂವಹನ ನಡೆಸಬಹುದು."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ಅನುಮತಿಸಿ"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ನಿರಾಕರಿಸಿ"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
+    <skip />
+    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ಶಾರ್ಟ್‌ಕಟ್‌‍ಗಳನ್ನು ಎಡಿಟ್ ಮಾಡಿ"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ರದ್ದುಗೊಳಿಸಿ"</string>
+    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
+    <skip />
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ಶಾರ್ಟ್‌ಕಟ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸಿ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ಬಣ್ಣ ವಿಲೋಮ"</string>
@@ -1856,8 +1881,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ವರ್ಗೀಕರಿಸದಿರುವುದು"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ನೀವು ಈ ಅಧಿಸೂಚನೆಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಿರುವಿರಿ."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ಜನರು ತೊಡಗಿಕೊಂಡಿರುವ ಕಾರಣ ಇದು ಅತ್ಯಂತ ಪ್ರಮುಖವಾಗಿದೆ."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ಕಸ್ಟಮ್ ಆ್ಯಪ್ ಅಧಿಸೂಚನೆ"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (ಈ ಖಾತೆಯ ಬಳಕೆದಾರರು ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದ್ದಾರೆ) ಮೂಲಕ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸಬೇಕೆ ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> ಮೂಲಕ ಹೊಸ ಬಳಕೆದಾರರನ್ನು ರಚಿಸಲು <xliff:g id="APP">%1$s</xliff:g> ಗೆ ಅನುಮತಿಸುವುದೇ ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ಭಾಷೆ ಸೇರಿಸಿ"</string>
@@ -2029,16 +2053,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ಪ್ರವೇಶಿಸುವಿಕೆ ಮೆನು"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಆ್ಯಪ್‌ನ ಶೀರ್ಷಿಕೆಯ ಪಟ್ಟಿ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ಅನ್ನು ನಿರ್ಬಂಧಿತ ಬಕೆಟ್‌ಗೆ ಹಾಕಲಾಗಿದೆ"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ವೈಯಕ್ತಿಕ"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ಕೆಲಸ"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ವೈಯಕ್ತಿಕ ವೀಕ್ಷಣೆ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ಕೆಲಸದ ವೀಕ್ಷಣೆ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ಕೆಲಸದ ಆ್ಯಪ್‌ಗಳೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳೊಂದಿಗೆ ಹಂಚಿಕೊಳ್ಳಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"ನಿಮ್ಮ ಐಟಿ ನಿರ್ವಾಹಕರು, ವೈಯಕ್ತಿಕ ಮತ್ತು ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳ ನಡುವೆ ಹಂಚಿಕೊಳ್ಳುವುದನ್ನು ನಿರ್ಬಂಧಿಸಿದ್ದಾರೆ"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಿ"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು, ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಿ"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು, ವೈಯಕ್ತಿಕ ಮತ್ತು ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್‌ಗಳ ನಡುವೆ ಹಂಚಿಕೊಳ್ಳುವುದನ್ನು ನಿರ್ಬಂಧಿಸಿದ್ದಾರೆ"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು, ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳಲ್ಲಿರುವ ವೈಯಕ್ತಿಕ ವಿಷಯವನ್ನು ನೋಡಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"ನಿಮ್ಮ IT ನಿರ್ವಾಹಕರು, ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳಲ್ಲಿರುವ ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ವಿಷಯವನ್ನು ನೋಡಲು ನಿಮಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"ವಿಷಯವನ್ನು ಹಂಚಿಕೊಳ್ಳಲು ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"ವಿಷಯವನ್ನು ವೀಕ್ಷಿಸಲು ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ಯಾವುದೇ ಆ್ಯಪ್‌ಗಳು ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ನಮಗೆ ಯಾವುದೇ ಆ್ಯಪ್‌ಗಳನ್ನು ಹುಡುಕಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ಆನ್ ಮಾಡಿ"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ಫೋನ್ ಕರೆಗಳಲ್ಲಿ ಆಡಿಯೊವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ ಅಥವಾ ಪ್ಲೇ ಮಾಡಿ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ಡೀಫಾಲ್ಟ್ ಡಯಲರ್ ಅಪ್ಲಿಕೇಶನ್ ರೀತಿ ಬಳಸಿದಾಗ ಫೋನ್ ಕರೆಗಳಲ್ಲಿ ಆಡಿಯೊವನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಲು ಅಥವಾ ಪ್ಲೇ ಮಾಡಲು ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನುಮತಿಸಿ."</string>
 </resources>

@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"ចុច​ដើម្បី​មើល​ការកំណត់​ទីតាំង​របស់អ្នក។"</string>
     <string name="country_detector" msgid="7023275114706088854">"ឧបករណ៍​សម្គាល់​ប្រទេស"</string>
     <string name="location_service" msgid="2439187616018455546">"សេវាកម្ម​ទីតាំង"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"សេវាកម្ម GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"សេវាកម្ម​ជូនដំណឹង​ឧបករណ៍​ចាប់សញ្ញា"</string>
     <string name="twilight_service" msgid="8964898045693187224">"សេវាកម្ម​ព្រលប់"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ឧបករណ៍របស់អ្នកនឹងត្រូវបានលុប"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">នឹងថតរូបអេក្រង់សម្រាប់របាយការណ៍កំហុសក្នុងរយៈពេល <xliff:g id="NUMBER_1">%d</xliff:g> វិនាទីទៀត។</item>
       <item quantity="one">នឹងថតរូបអេក្រង់សម្រាប់របាយការណ៍កំហុសក្នុងរយៈពេល <xliff:g id="NUMBER_0">%d</xliff:g> វិនាទីទៀត។</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"បានថតរូបថត​អេក្រង់ដែលមាន​របាយការណ៍អំពីបញ្ហា"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"មិនអាចថត​រូបថតអេក្រង់​ដែលមានរបាយការណ៍​អំពីបញ្ហាបានទេ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"របៀប​ស្ងាត់"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"បិទ​សំឡេង"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"បើក​សំឡេង"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​ក្រុមហ៊ុន​ផ្ដល់​ទីតាំង"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ឲ្យ​កម្មវិធី​ចូល​ដំណើរការ​ពាក្យ​បញ្ជា​កម្មវិធី​ផ្ដល់​​ទីតាំង​បន្ថែម។ វា​អាច​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ប្រតិបត្តិការ​ជីភីអេស ឬ​ប្រភព​ទីតាំង​ផ្សេង។"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ចូល​ប្រើ​ទីតាំង​ជាក់លាក់​តែ​នៅផ្ទៃ​ខាងមុខ​ប៉ុណ្ណោះ"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"កម្មវិធីនេះ​អាចទទួលបាន​ទីតាំង​ជាក់លាក់​របស់អ្នក​ពីសេវាកម្ម​ទីតាំង នៅពេល​ស្ថិតនៅក្នុង​ការប្រើប្រាស់។ ត្រូវតែបើក​សេវាកម្មទីតាំង​សម្រាប់ឧបករណ៍​របស់អ្នក ទើបកម្មវិធីនេះអាច​ទទួលបានទីតាំង។ ការធ្វើបែបនេះ​អាចបង្កើន​ការប្រើប្រាស់ថ្ម។"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ចូលប្រើ​ទីតាំង​ប្រហាក់ប្រហែល​តែនៅផ្ទៃ​ខាងមុខប៉ុណ្ណោះ"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"កម្មវិធីនេះ​អាចទទួលបាន​ទីតាំង​ប្រហាក់ប្រហែល​របស់អ្នកពី​សេវាកម្ម​ទីតាំង នៅពេលស្ថិត​នៅក្នុង​ការប្រើប្រាស់។ ត្រូវតែបើក​សេវាកម្មទីតាំង​សម្រាប់ឧបករណ៍​របស់អ្នក ទើបកម្មវិធីនេះអាច​ទទួលបានទីតាំង។"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ចូល​ប្រើ​ទីតាំង​នៅ​ផ្ទៃខាងក្រោយ"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"កម្មវិធីនេះ​អាចចូលប្រើទីតាំង​បានគ្រប់ពេល ទោះបីជា​នៅពេល​មិនស្ថិតនៅក្នុង​ការប្រើប្រាស់​ក៏ដោយ។"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ប្ដូរ​ការ​កំណត់​អូឌីយូ​របស់​អ្នក"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​សំឡេង​សកល ដូច​ជា​កម្រិត​សំឡេង និង​អូប៉ាល័រ​ដែល​បាន​ប្រើ​សម្រាប់​លទ្ធផល។"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ថត​សំឡេង"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​ថត​វីដេអូ​ ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ចូលប្រើកាមេរ៉ា​ប្រព័ន្ធ ដើម្បីថតរូប និង​ថតវីដេអូ"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"កម្មវិធីប្រព័ន្ធ​ដែលមានសិទ្ធិអនុញ្ញាត​នេះអាចថត​រូប និង​ថតវីដេអូ​ ដោយប្រើកាមេរ៉ា​ប្រព័ន្ធបាន​គ្រប់ពេល។ តម្រូវឱ្យមាន​ការអនុញ្ញាត android.permission.CAMERA ដើម្បីឱ្យ​កម្មវិធីអាចធ្វើ​សកម្មភាព​បានផងដែរ"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ទទួលការហៅត្រឡប់វិញអំពី​កាមេរ៉ាដែលកំពុងបិទ ឬបើក។"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"កម្មវិធីពិសេសនេះ​អាចទទួលការហៅត្រឡប់វិញបាន នៅពេលកំពុងបិទ ឬបើកកាមេរ៉ា (ដោយកញ្ចប់កម្មវិធី)។"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ពិនិត្យ​ការ​ញ័រ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"អនុញ្ញាតឱ្យ​កម្មវិធី​ចូលប្រើ​ស្ថានភាពកម្មវិធី​ញ័រ។"</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​នេះ​បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​របស់វា​តាមរយៈ​ប្រព័ន្ធ ​ដើម្បី​ធ្វើ​ឲ្យ​ការ​ហៅ​ទូរសព្ទ​ប្រសើរ​ជាង​មុន។"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"មើល និង​គ្រប់គ្រង​ការហៅទូរសព្ទ​តាមរយៈប្រព័ន្ធ។"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"អនុញ្ញាត​ឱ្យកម្មវិធី​មើល និងគ្រប់គ្រង​ការហៅទូរសព្ទ​ដែល​កំពុង​ដំណើរការ​នៅលើ​ឧបករណ៍។ សកម្មភាព​នេះរួមមាន​ព័ត៌មាន​ដូចជា លេខទូរសព្ទ​សម្រាប់ការ​ហៅទូរសព្ទ និង​ស្ថានភាព​នៃការហៅទូរសព្ទជាដើម។"</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"បន្ត​ការ​ហៅ​ទូរសព្ទ​ពី​កម្មវិធី​ផ្សេង​"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​បន្ត​ការ​ហៅ​ទូរសព្ទ​ ដែល​បាន​ចាប់ផ្តើម​នៅក្នុង​កម្មវិធី​ផ្សេង​។"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"អាន​លេខ​ទូរសព្ទ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"អនុញ្ញាត​ឲ្យ​កម្មវិធីនេះ​ចូលប្រើប្រាស់​លេខទូរសព្ទ​របស់​ឧបករណ៍​នេះ។"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"បន្តបើក​អេក្រង់​រថយន្ត"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ការពារ​​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ទប់ស្កាត់មិនឱ្យ​ឧបករណ៍ Android TV របស់អ្នកដេក"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ការ​ពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"អនុញ្ញាតឱ្យ​កម្មវិធី​បន្តបើក​អេក្រង់​រថយន្ត។"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ឲ្យ​​កម្មវិធី​ការពារ​កុំព្យូទ័រ​បន្ទះ​មិន​ឲ្យ​ដេក។"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"អនុញ្ញាត​ឱ្យកម្មវិធី​ទប់ស្កាត់មិនឱ្យ​ឧបករណ៍ Android TV របស់អ្នកដេក។"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ឲ្យ​កម្មវិធី​ការពារ​ទូរស័ព្ទ​មិន​ឲ្យ​ដេក។"</string>
@@ -1264,7 +1268,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"បណ្ដាញ​ទូរសព្ទ​ចល័ត​មិនមានការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"បណ្ដាញ​មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"មិនអាច​ចូលប្រើ​ម៉ាស៊ីនមេ DNS ឯកជន​បានទេ"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"បានភ្ជាប់"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មានការតភ្ជាប់​មានកម្រិត"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"មិន​អី​ទេ ចុច​​ភ្ជាប់​ចុះ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1636,8 +1639,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"អនុញ្ញាតឱ្យ <xliff:g id="SERVICE">%1$s</xliff:g> មានសិទ្ធិគ្រប់គ្រងឧបករណ៍​របស់អ្នក​ទាំងស្រុងឬ?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"បើ​អ្នក​បើក <xliff:g id="SERVICE">%1$s</xliff:g> ឧបករណ៍របស់​អ្នកនឹង​មិន​ប្រើ​ការចាក់សោអេក្រង់របស់​អ្នក​ ដើម្បី​បង្កើន​ប្រសិទ្ធភាពការ​អ៊ីនគ្រីប​ទិន្នន័យ​ទេ។"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ការគ្រប់គ្រង​ទាំងស្រុងមានលក្ខណៈ​សមស្របសម្រាប់​កម្មវិធី ដែលជួយអ្នក​ទាក់ទងនឹងការប្រើមុខងារភាពងាយស្រួល ប៉ុន្តែមិនសមស្របសម្រាប់​កម្មវិធីភាគច្រើនទេ។"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ការគ្រប់គ្រងអេក្រង់​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"មើល និង​ធ្វើសកម្មភាព"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬឧបករណ៍ចាប់​សញ្ញាហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"បដិសេធ"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ចុចមុខងារណាមួយ ដើម្បចាប់ផ្ដើមប្រើ៖"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"ជ្រើសរើស​កម្មវិធី​ ដើម្បីប្រើ​ជាមួយប៊ូតុង​ភាពងាយស្រួល"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"ជ្រើសរើស​កម្មវិធី​ ដើម្បីប្រើ​ជាមួយផ្លូវកាត់គ្រាប់ចុច​កម្រិតសំឡេង"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"បានបិទ <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"កែ​ផ្លូវកាត់"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"បោះបង់"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"រួចរាល់"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
@@ -1858,8 +1874,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"មិន​​បែងចែក​ប្រភេទ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"អ្នកបានកំណត់សារៈសំខាន់នៃការជូនដំណឹងទាំងនេះ"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"វាមានសារៈសំខាន់ដោយសារតែមនុស្សដែលពាក់ព័ន្ធ"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ការជូន​ដំណឹងកម្មវិធី​ផ្ទាល់ខ្លួន"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> (អ្នកប្រើប្រាស់ដែលមានគណនីនេះមានរួចហើយ) ដែរឬទេ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"អនុញ្ញាតឱ្យ <xliff:g id="APP">%1$s</xliff:g> បង្កើតអ្នកប្រើប្រាស់​ថ្មីដោយប្រើ <xliff:g id="ACCOUNT">%2$s</xliff:g> ដែរឬទេ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"បន្ថែមភាសា"</string>
@@ -2031,16 +2046,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ម៉ឺនុយ​ភាពងាយស្រួល"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"របារពណ៌នា​អំពី <xliff:g id="APP_NAME">%1$s</xliff:g>។"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ត្រូវបានដាក់​ទៅក្នុងធុង​ដែលបានដាក់កំហិត"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ផ្ទាល់ខ្លួន"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ការងារ"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ទិដ្ឋភាពផ្ទាល់ខ្លួន"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ទិដ្ឋភាព​ការងារ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"មិនអាច​ចែករំលែក​ជាមួយ​កម្មវិធី​ការងារ​បានទេ"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"មិនអាច​ចែករំលែក​ជាមួយ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​បានទប់ស្កាត់​ការចែករំលែក​រវាង​កម្មវិធី​ការងារ និង​ផ្ទាល់ខ្លួន"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"បើក​កម្មវិធី​ការងារ"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"បើក​កម្មវិធី​ការងារ ដើម្បី​ចូល​ប្រើ​ទំនាក់ទំនង និងកម្មវិធី​ការងារ"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​បានទប់ស្កាត់​ការចែករំលែក​រវាង​កម្រងព័ត៌មាន​ការងារ និង​ផ្ទាល់ខ្លួន"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"មិន​អាច​ចូល​ប្រើ​កម្មវិធី​ការងារបានទេ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិន​អនុញ្ញាតឱ្យអ្នកមើល​ខ្លឹមសារផ្ទាល់ខ្លួននៅក្នុងកម្មវិធីការងារទេ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"មិន​អាចចូលប្រើកម្មវិធី​ផ្ទាល់ខ្លួនបានទេ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិន​អនុញ្ញាតឱ្យអ្នកមើល​ខ្លឹមសារការងារនៅក្នុងកម្មវិធីផ្ទាល់ខ្លួនទេ"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"បើកកម្រងព័ត៌មាន​ការងារ ដើម្បីចែករំលែកខ្លឹមសារ"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"បើកកម្រងព័ត៌មាន​ការងារ ដើម្បីមើលខ្លឹមសារ"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"មិនមាន​កម្មវិធី​ដែល​អាចប្រើ​បានទេ"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"យើង​រកមិនឃើញ​កម្មវិធី​ណាមួយទេ"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"បើក​កម្រងព័ត៌មាន​ការងារ"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"បើក"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ថត ឬចាក់សំឡេង​នៅក្នុង​ការហៅទូរសព្ទ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"នៅពេលកំណត់​ជាកម្មវិធីផ្ទាំងចុច​ហៅទូរសព្ទលំនាំដើម សូមអនុញ្ញាត​ឱ្យកម្មវិធីនេះថត ឬចាក់សំឡេង​នៅក្នុង​ការហៅទូរសព្ទ។"</string>
 </resources>

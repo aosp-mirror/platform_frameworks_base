@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"タップすると位置情報の設定が表示されます。"</string>
     <string name="country_detector" msgid="7023275114706088854">"国の検出"</string>
     <string name="location_service" msgid="2439187616018455546">"位置情報サービス"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS サービス"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"センサー通知サービス"</string>
     <string name="twilight_service" msgid="8964898045693187224">"トワイライト サービス"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
@@ -249,10 +250,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"バグレポートのスクリーンショットを取得しました"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"バグレポートのスクリーンショットを取得できませんでした"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"マナーモード"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"サウンドOFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"サウンドON"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"位置情報提供者の追加コマンドアクセス"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"このアプリは、使用中に、位置情報サービスからデバイスの正確な位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。この場合、電池使用量が増えることがあります。"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"フォアグラウンドでのみおおよその位置情報にアクセス"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"このアプリは、使用中に、位置情報サービスからデバイスのおおよその位置情報を取得できます。アプリが位置情報を取得するには、デバイスで位置情報サービスがオンになっている必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"バックグラウンドでの位置情報へのアクセス"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"このアプリは、使用中でない場合でも、常に位置情報にアクセスできます。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"録音"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"権限を付与されたこのシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"この署名アプリを使用すると、カメラデバイスが（なんらかのアプリ パッケージによって）起動するとき、または終了するときにコールバックを受け取ることができます。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"通話環境の改善のために、システム経由での通話転送をアプリに許可します。"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"システム経由の通話の表示と操作。"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"デバイスで進行中の通話の表示と操作をアプリに許可します。通話の電話番号や状態などの情報も含まれます。"</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"別のアプリでの通話の続行"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"別のアプリで通話を続行することをこのアプリに許可します。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"電話番号の読み取り"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"デバイスの電話番号へのアクセスをアプリに許可します。"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"車の画面を常にオンにする"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"タブレットのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV デバイスのスリープの無効化"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"デバイスのスリープを無効にする"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"車の画面を常にオンにすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"タブレットのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Android TV デバイスのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"モバイル デバイスのスリープを無効にすることをアプリに許可します。"</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"モバイル ネットワークがインターネットに接続されていません"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ネットワークがインターネットに接続されていません"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"プライベート DNS サーバーにアクセスできません"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"接続しました"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> の接続が制限されています"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"接続するにはタップしてください"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"「<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>」に切り替えました"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ユーザー補助機能のショートカットの使用"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ショートカットが ON の場合、両方の音量ボタンを 3 秒ほど長押しするとユーザー補助機能が起動します。"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"アプリやハードウェア センサーの操作を記録したり、自動的にアプリを操作したりできます。"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"許可"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"許可しない"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"ユーザー補助機能ボタンで使用するアプリを選択"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"音量キーのショートカットで使用するアプリを選択"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"キャンセル"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ショートカットを OFF にする"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色反転"</string>
@@ -1776,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"カテゴリなし"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"このような通知の重要度を設定します。"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"関係するユーザーのため、この設定は重要です。"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"カスタムアプリ通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？（このアカウントのユーザーはすでに存在します）"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？"</string>
     <string name="language_selection_title" msgid="52674936078683285">"言語を追加"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ユーザー補助機能メニュー"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"個人用"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"仕事用"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人用ビュー"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"仕事用ビュー"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"仕事用アプリと共有できません"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"個人用アプリと共有できません"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"IT 管理者が個人用アプリと仕事用アプリの間の共有をブロックしました"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"仕事用アプリを ON にする"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"仕事用のアプリや連絡先にアクセスするには、仕事用アプリを ON にしてください"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"IT 管理者が個人用プロファイルと仕事用プロファイルの間の共有をブロックしました"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"仕事用アプリにアクセスできません"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"IT 管理者は個人用コンテンツを仕事用アプリで表示することを許可していません"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"個人用アプリにアクセスできません"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"IT 管理者は仕事用コンテンツを個人用アプリで表示することを許可していません"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"コンテンツを共有するには、仕事用プロファイルをオンにしてください"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"コンテンツを表示するには、仕事用プロファイルをオンにしてください"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"利用できるアプリはありません"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"アプリが見つかりませんでした"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"仕事用に切り替え"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"オンにする"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"通話中に録音または音声の再生を行う"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"デフォルトの電話アプリケーションとして割り当てられている場合、このアプリに通話中の録音または音声の再生を許可します。"</string>
 </resources>

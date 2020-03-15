@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"点按即可查看您的位置信息设置。"</string>
     <string name="country_detector" msgid="7023275114706088854">"国家/地区检测器"</string>
     <string name="location_service" msgid="2439187616018455546">"位置信息服务"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS 服务"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"传感器通知服务"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight 服务"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"系统将清空您的设备"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">系统将在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒后对错误报告进行截屏。</item>
       <item quantity="one">系统将在 <xliff:g id="NUMBER_0">%d</xliff:g> 秒后对错误报告进行截屏。</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"已截取错误报告的屏幕截图"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"无法截取错误报告的屏幕截图"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"静音模式"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"声音已关闭"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"声音已开启"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"获取额外的位置信息提供程序命令"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"允许该应用使用其他的位置信息提供程序命令。此权限使该应用可以干扰GPS或其他位置信息源的运作。"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"只能在前台获取精确的位置信息"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"当您使用此应用时，此应用可以通过位置信息服务获取您的确切位置信息。您必须开启设备的位置信息服务，此应用才能获取位置信息。这可能会增加耗电量。"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"只有在前台运行时才能获取大致位置信息"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"当您使用此应用时，此应用可以通过位置信息服务获取您的大致位置信息。您必须开启设备的位置信息服务，此应用才能获取位置信息。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"在后台使用位置信息"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"即使您并未使用此应用，此应用也可以随时访问位置信息。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"更改您的音频设置"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"允许该应用修改全局音频设置，例如音量和用于输出的扬声器。"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"录音"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"此应用可随时使用相机拍摄照片和录制视频。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"要拍照或录制视频，请允许应用或服务访问系统相机"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"获取访问权限后，这个系统应用就随时可以使用系统相机拍照及录制视频。另外，应用还需要获取 android.permission.CAMERA 权限"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允许应用或服务接收与打开或关闭摄像头设备有关的回调。"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"此签名应用可在任何摄像头设备（被某些应用软件包）打开或关闭时接收相应回调。"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制振动"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允许应用控制振动器。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允许该应用访问振动器状态。"</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"允许该应用通过系统转接来电，以改善通话体验。"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"查看并控制通过系统拨打的电话。"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"允许应用查看并控制设备上正在进行的通话，其中包括通话号码和通话状态等信息。"</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"继续进行来自其他应用的通话"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"允许该应用继续进行在其他应用中发起的通话。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"读取电话号码"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"允许该应用访问设备上的电话号码。"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"使车载显示屏保持开启状态"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"阻止平板电脑进入休眠状态"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"阻止 Android TV 设备进入休眠状态"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"防止手机休眠"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"允许该应用使车载显示屏保持开启状态。"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"允许应用阻止平板电脑进入休眠状态。"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"允许应用阻止 Android TV 设备进入休眠状态。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"允许应用阻止手机进入休眠状态。"</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"此移动网络无法访问互联网"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"此网络无法访问互联网"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"无法访问私人 DNS 服务器"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"已连接"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 的连接受限"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"点按即可继续连接"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"已切换至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"启用这项快捷方式后，同时按下两个音量按钮 3 秒钟即可启动无障碍功能。"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要允许<xliff:g id="SERVICE">%1$s</xliff:g>完全控制您的设备吗？"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果您开启<xliff:g id="SERVICE">%1$s</xliff:g>，您的设备将无法使用屏幕锁定功能来增强数据加密效果。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"对于能满足您的无障碍功能需求的应用，可授予其完全控制权限；但对大部分应用来说，都不适合授予此权限。"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看和控制屏幕"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"此功能可以读出屏幕上的所有内容，并在其他应用上层显示内容。"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及执行操作"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"此功能可以跟踪您与应用或硬件传感器的互动，并代表您与应用互动。"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"允许"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"拒绝"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"点按相应功能即可开始使用："</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"选择可通过“无障碍”按钮使用的应用"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"选择可通过音量键快捷方式使用的应用"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"已关闭<xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"修改快捷方式"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"取消"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"关闭快捷方式"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快捷方式"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"颜色反转"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"未分类"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"这些通知的重要程度由您来设置。"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"这条通知涉及特定的人，因此被归为重要通知。"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"自定义应用通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g>（目前已有用户使用此帐号）创建新用户吗？"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"允许<xliff:g id="APP">%1$s</xliff:g>使用 <xliff:g id="ACCOUNT">%2$s</xliff:g> 创建新用户吗？"</string>
     <string name="language_selection_title" msgid="52674936078683285">"添加语言"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"无障碍功能菜单"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>的标题栏。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> 已被放入受限存储分区"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"个人"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"工作"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"个人视图"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"工作视图"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"无法与工作应用共享数据"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"无法与个人应用共享数据"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"您的 IT 管理员已禁止在个人应用和工作应用之间共享数据"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"打开工作应用"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"打开工作应用以访问工作应用和联系人"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"您的 IT 管理员已禁止个人资料和工作资料之间的共享"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"无法访问工作应用"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"您的 IT 管理员不允许您在工作应用中查看个人内容"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"无法访问个人应用"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"您的 IT 管理员不允许您在个人应用中查看工作内容"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"若想共享内容，请开启工作资料"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"若想查看内容，请开启工作资料"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"没有可用的应用"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"系统找不到任何应用"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"打开工作资料"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"开启"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"录制或播放电话通话音频"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"允许此应用在被指定为默认拨号器应用时录制或播放电话通话音频。"</string>
 </resources>

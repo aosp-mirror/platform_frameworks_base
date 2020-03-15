@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"നിങ്ങളുടെ ലൊക്കേഷൻ ക്രമീകരണം കാണാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="country_detector" msgid="7023275114706088854">"രാജ്യം കണ്ടെത്താനുള്ള സംവിധാനം"</string>
     <string name="location_service" msgid="2439187616018455546">"ലൊക്കേഷൻ സേവനം"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS സേവനം"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"സെൻസർ അറിയിപ്പ് സേവനം"</string>
     <string name="twilight_service" msgid="8964898045693187224">"സന്ധ്യാസമയത്തെ സേവനം"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_1">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
       <item quantity="one">ബഗ് റിപ്പോർട്ടിനായി <xliff:g id="NUMBER_0">%d</xliff:g> സെക്കൻഡിൽ സ്ക്രീൻഷോട്ട് എടുക്കുന്നു.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ബഗ് റിപ്പോർട്ടിന്റെ സ്ക്രീൻഷോട്ട് എടുത്തു"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ബഗ് റിപ്പോർട്ടിന്റെ സ്ക്രീൻഷോട്ട് എടുക്കാനായില്ല"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"നിശബ്‌ദ മോഡ്"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ശബ്‌ദം ഓഫാണ്"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ശബ്‌ദം ഓണാണ്"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യുക"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ലൊക്കേഷൻ ദാതാവിന്റെ അധിക കമാൻഡുകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഇത് GPS-ന്റെയോ മറ്റ് ലൊക്കേഷൻ ഉറവിടങ്ങളുടെയോ പ്രവർത്തനത്തിൽ ഇടപെടാൻ അപ്ലിക്കേഷനെ അനുവദിക്കാനിടയുണ്ട്."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ഫോർഗ്രൗണ്ടിൽ മാത്രം കൃത്യമായ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ആപ്പ് ഉപയോഗത്തിലിരിക്കുമ്പോൾ ലൊക്കേഷൻ സേവനങ്ങളിൽ നിന്ന് നിങ്ങളുടെ കൃത്യമായ ലൊക്കേഷൻ ഈ ആപ്പിന് നേടാനാവും. ആപ്പിന് ലൊക്കേഷൻ ലഭിക്കാൻ നിങ്ങളുടെ ഉപകരണത്തിനുള്ള ലൊക്കേഷൻ സേവനങ്ങൾ ഓണാക്കേണ്ടതുണ്ട്. ഇത് ബാറ്ററി ഉപയോഗം വർദ്ധിപ്പിച്ചേക്കാം."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"ഫോർഗ്രൗണ്ടിൽ മാത്രം ഏകദേശ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ആപ്പ് ഉപയോഗത്തിലിരിക്കുമ്പോൾ ലൊക്കേഷൻ സേവനങ്ങളിൽ നിന്ന് നിങ്ങളുടെ ഏകദേശ ലൊക്കേഷൻ ഈ ആപ്പിന് നേടാനാവും. ആപ്പിന് ലൊക്കേഷൻ ലഭിക്കാൻ നിങ്ങളുടെ ഉപകരണത്തിനുള്ള ലൊക്കേഷൻ സേവനങ്ങൾ ഓണാക്കേണ്ടതുണ്ട്."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"പശ്ചാത്തലത്തിൽ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യുക"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ആപ്പ് ഉപയോഗത്തിലല്ലെങ്കിൽ പോലും ഈ ആപ്പിന് ഏത് സമയത്തും ലൊക്കേഷൻ ആക്സസ് ചെയ്യാം."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"നിങ്ങളുടെ ഓഡിയോ ക്രമീകരണങ്ങൾ മാറ്റുക"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"വോളിയവും ഔട്ട്പുട്ടിനായി ഉപയോഗിച്ച സ്‌പീക്കറും പോലുള്ള ആഗോള ഓഡിയോ ക്രമീകരണങ്ങൾ പരിഷ്‌ക്കരിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുക"</string>
@@ -440,6 +436,10 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ഏതുസമയത്തും ക്യാമറ ഉപയോഗിച്ചുകൊണ്ട് ചിത്രങ്ങൾ എടുക്കാനും വീഡിയോകൾ റെക്കോർഡുചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കാൻ, സിസ്‌റ്റം ക്യാമറ ആക്‌സസ് ചെയ്യുന്നതിന് ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"സിസ്‌റ്റം ക്യാമറ ഉപയോഗിച്ച് ഏത് സമയത്തും ചിത്രങ്ങളെടുക്കാനും വീഡിയോകൾ റെക്കോർഡ് ചെയ്യാനും ഈ വിശേഷാധികാര | സിസ്‌റ്റം ആപ്പിന് കഴിയും. ആപ്പിലും android.permission.CAMERA അനുമതി ഉണ്ടായിരിക്കണം"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"വൈബ്രേറ്റ് ചെയ്യൽ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
@@ -453,13 +453,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"കോളിംഗ് അനുഭവം ‌മെച്ചപ്പെടുത്തുന്നതിനായി തങ്ങളുടെ ‌കോളുകൾ സിസ്റ്റത്തിലേയ്ക്ക് വഴിതിരിച്ചുവിടാൻ ആപ്പുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"സിസ്‌റ്റത്തിലൂടെ കോളുകൾ കാണുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ഉപകരണത്തിൽ നിലവിലുള്ള കോളുകൾ കാണാനും നിയന്തിക്കാനും ആപ്പിനെ അനുവദിക്കുന്നു. കോളുകൾക്കുള്ള നമ്പറുകളും അവയുടെ നിലയും പോലെയുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"മറ്റൊരു ആപ്പിൽ നിന്നുള്ള കോൾ തുടരുക"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ഉപകരണത്തിന്റെ ഫോൺ നമ്പറുകൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"കാറിലെ സ്ക്രീൻ ഓണാക്കി വയ്ക്കുക"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ഉറങ്ങുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"നിങ്ങളുടെ Android ടിവി ഉറങ്ങുന്നതിൽ നിന്ന് തടയുക"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ഉറങ്ങുന്നതിൽ നിന്ന് ഫോണിനെ തടയുക"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"കാറിലെ സ്ക്രീൻ ഓണാക്കി വയ്ക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ടാബ്‌ലെറ്റ് സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"നിങ്ങളുടെ Android ടിവിയെ ഉറങ്ങുന്നതിൽ നിന്ന് തടയാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ഫോൺ സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
@@ -1262,7 +1268,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"മൊബെെൽ നെറ്റ്‌വർക്കിന് ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"നെറ്റ്‌വർക്കിന് ഇന്റർനെറ്റ് ആക്‌സസ് ഇല്ല"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"സ്വകാര്യ DNS സെർവർ ആക്‌സസ് ചെയ്യാനാവില്ല"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"കണക്‌റ്റ് ചെയ്‌തു"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> എന്നതിന് പരിമിതമായ കണക്റ്റിവിറ്റി ഉണ്ട്"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ഏതുവിധേനയും കണക്‌റ്റ് ചെയ്യാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> എന്നതിലേക്ക് മാറി"</string>
@@ -1634,8 +1639,28 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"മുകളിൽക്കൊടുത്തിരിക്കുന്ന ശുപാർശചെയ്‌ത ലെവലിലേക്ക് വോളിയം വർദ്ധിപ്പിക്കണോ?\n\nഉയർന്ന വോളിയത്തിൽ ദീർഘനേരം കേൾക്കുന്നത് നിങ്ങളുടെ ശ്രവണ ശേഷിയെ ദോഷകരമായി ബാധിക്കാം."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ഉപയോഗസഹായി കുറുക്കുവഴി ഉപയോഗിക്കണോ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"കുറുക്കുവഴി ഓണായിരിക്കുമ്പോൾ, രണ്ട് വോളിയം ബട്ടണുകളും 3 സെക്കൻഡ് നേരത്തേക്ക് അമർത്തുന്നത് ഉപയോഗസഹായി ഫീച്ചർ ആരംഭിക്കും."</string>
+    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
+    <skip />
+    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
+    <skip />
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ഉപയോഗസഹായി ആവശ്യങ്ങൾക്കായി നിങ്ങളെ സഹായിക്കുന്ന ആപ്പുകൾക്ക് പൂർണ്ണ നിയന്ത്രണം അനുയോജ്യമാണെങ്കിലും മിക്ക ആപ്പുകൾക്കും അനുയോജ്യമല്ല."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"സ്‌ക്രീൻ കാണുക, നിയന്ത്രിക്കുക"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ഇതിന് സ്‌ക്രീനിലെ എല്ലാ ഉള്ളടക്കവും വായിക്കാനും മറ്റ് ആപ്പുകളിൽ ഉള്ളടക്കം പ്രദർശിപ്പിക്കാനുമാവും."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"കാണുക, പ്രവർത്തനങ്ങൾ നിർവഹിക്കുക"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ഇതിന് ഒരു ആപ്പുമായോ ഹാർഡ്‌വെയർ സെൻസറുമായോ ഉള്ള നിങ്ങളുടെ ആശയവിനിമയങ്ങൾ ട്രാക്ക് ചെയ്യാനും നിങ്ങളുടെ പേരിൽ ആശയവിനിമയം നടത്താനും കഴിയും."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"അനുവദിക്കൂ"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"നിരസിക്കുക"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
+    <skip />
+    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"കുറുക്കുവഴികൾ തിരുത്തുക"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"റദ്ദാക്കുക"</string>
+    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
+    <skip />
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"കുറുക്കുവഴി ‌ഓഫാക്കുക"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"കുറുക്കുവഴി ഉപയോഗിക്കുക"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"വർണ്ണ വിപര്യയം"</string>
@@ -1856,8 +1881,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"വർഗ്ഗീകരിച്ചിട്ടില്ലാത്ത"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ഉൾപ്പെട്ടിട്ടുള്ള ആളുകളെ കണക്കിലെടുക്കുമ്പോള്‍ ഇത് പ്രധാനപ്പെട്ടതാണ്‌."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ഇഷ്ടാനുസൃത ആപ്പ് അറിയിപ്പുകൾ"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് (ഈ അക്കൗണ്ട് ഉപയോഗിക്കുന്ന ഒരു ഉപയോക്താവ് നിലവിലുണ്ട്) ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> എന്ന അക്കൗണ്ട് ഉപയോഗിച്ച് പുതിയ ഉപയോക്താവിനെ സൃഷ്‌ടിക്കാൻ <xliff:g id="APP">%1$s</xliff:g> എന്നതിനെ അനുവദിക്കണോ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ഒരു ഭാഷ ചേർക്കുക"</string>
@@ -2029,16 +2053,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ഉപയോഗസഹായി മെനു"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരമായത്"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"വ്യക്തിപര കാഴ്‌ച"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ഔദ്യോഗിക കാഴ്‌ച"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"വ്യക്തിപരമാക്കിയ ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"വ്യക്തിപരമാക്കിയ ആപ്പുകളുടെയും ഔദ്യോഗിക ആപ്പുകളുടെയും ഇടയിലുള്ള പങ്കിടൽ നിങ്ങളുടെ ഐടി അഡ്മിൻ ബ്ലോക്ക് ചെയ്തു"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ഔദ്യോഗിക ആപ്പുകൾ ഓണാക്കുക"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ഔദ്യോഗിക ആപ്പുകൾ, കോൺടാക്റ്റുകൾ എന്നിവ ആക്സസ് ചെയ്യാൻ ഔദ്യോഗിക ആപ്പുകൾ ഓണാക്കുക"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"വ്യക്തിപരവും ഔദ്യോഗികവുമായ പ്രൊഫെെലുകൾക്കിടയിലെ പങ്കിടലിനെ ഐടി അഡ്‌മിൻ ബ്ലോക്ക് ചെയ്‌തു"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"ഔദ്യോഗിക ആപ്പുകൾ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"ഔദ്യോഗിക ആപ്പുകളിൽ വ്യക്തിപര ഉള്ളടക്കം കാണാൻ ഐടി അഡ്‌മിൻ നിങ്ങളെ അനുവദിക്കുന്നില്ല"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"വ്യക്തിപര ആപ്പുകൾ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"വ്യക്തിപര ആപ്പുകളിൽ ഔദ്യോഗിക ഉള്ളടക്കം കാണാൻ ഐടി അഡ്‌മിൻ നിങ്ങളെ അനുവദിക്കുന്നില്ല"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"ഉള്ളടക്കം പങ്കിടാൻ ഔദ്യോഗിക പ്രൊഫെെൽ ഓണാക്കുക"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"ഉള്ളടക്കം കാണാൻ ഔദ്യോഗിക പ്രൊഫെെൽ ഓണാക്കുക"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ആപ്പുകളൊന്നും ലഭ്യമല്ല"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ഞങ്ങൾക്ക് ആപ്പുകളൊന്നും കണ്ടെത്താൻ കഴിഞ്ഞില്ല"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ഓണാക്കുക"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യുക അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യുക"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ഡിഫോൾട്ട് ഡയലർ ആപ്പായി അസെെൻ ചെയ്യുന്ന സമയത്ത്, ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യാൻ അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യാൻ ഈ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
 </resources>

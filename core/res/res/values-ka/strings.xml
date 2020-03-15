@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"შეეხეთ თქვენი მდებარეობის პარამეტრების სანახავად."</string>
     <string name="country_detector" msgid="7023275114706088854">"ქვეყნის დეტექტორი"</string>
     <string name="location_service" msgid="2439187616018455546">"მდებარეობის სერვისი"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS სერვისი"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"სენსორის შეტყობინების სერვისი"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight სერვისი"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"თქვენი მოწყობილობა წაიშლება"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">ხარვეზის შესახებ ანგარიშის ეკრანის ანაბეჭდის გადაღება მოხდება <xliff:g id="NUMBER_1">%d</xliff:g> წამში.</item>
       <item quantity="one">ხარვეზის შესახებ ანგარიშის ეკრანის ანაბეჭდის გადაღება მოხდება <xliff:g id="NUMBER_0">%d</xliff:g> წამში.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"სისტემის ხარვეზის ანგარიშის ეკრანის ანაბეჭდი გადაღებულია"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"სისტემის ხარვეზის ანგარიშის ეკრანის ანაბეჭდის გადაღება ვერ მოხერხდა"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ჩუმი რეჟიმი"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ხმა გამორთულია"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ხმა ჩართულია"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"მდებარეობის პროვაიდერის დამატებით ბრძანებებზე წვდომა"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"აპს შეეძლება წვდომა ჰქონდეს მდებარეობის სერვისის დამატებით ბრძანებებზე. შესაძლოა აპმა ეს გამოიყენოს GPS-ისა და მდებარეობის სხვა წყაროების მუშაობის პროცესში ჩარევისთვის."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ზუსტ მდებარეობაზე წვდომა მხოლოდ წინა პლანზე"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ამ აპს, მისი გამოყენების პროცესში, შეუძლია თქვენი ზუსტი მდებარეობის შესახებ ინფორმაციის მიღება მდებარეობის სერვისებიდან. იმისთვის, რომ აპმა მდებარეობის შესახებ ინფორმაცია მიიღოს, თქვენს მოწყობილობაზე ჩართული უნდა იყოს მდებარეობის სერვისები. ამან შეიძლება ბატარეის მოხმარება გაზარდოს."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"მიახლოებით მდებარეობაზე წვდომა მხოლოდ წინა პლანზე"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ამ აპს, მისი გამოყენების პროცესში, შეუძლია თქვენი მიახლოებითი მდებარეობის შესახებ ინფორმაციის მიღება მდებარეობის სერვისებიდან. იმისთვის, რომ აპმა მდებარეობის შესახებ ინფორმაცია მიიღოს, თქვენს მოწყობილობაზე ჩართული უნდა იყოს მდებარეობის სერვისები."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"მდებარეობაზე წვდომა ფონურ რეჟიმში"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ამ აპს შეუძლია წვდომა მდებარეობაზე ნებისმიერ დროს, მაშინაც კი, როცა არ გამოიყენება."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"თქვენი აუდიო პარამეტრების შეცვლა"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"აპს შეეძლება აუდიოს გლობალური პარამეტრების შეცვლა. მაგ.: ხმის სიმაღლე და რომელი დინამიკი გამოიყენება სიგნალის გამოსტანად."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"აუდიოს ჩაწერა"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ამ აპს ნებისმიერ დროს შეუძლია კამერით სურათების გადაღება და ვიდეოების ჩაწერა."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ნება დაერთოს აპლიკაციას ან სერვისს, ჰქონდეს წვდომა სისტემის კამერებზე სურათების და ვიდეოების გადასაღებად"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ამ პრივილეგირებულ | სისტემის აპს შეუძლია ფოტოების გადაღება და ვიდეოების ჩაწერა ნებისმიერ დროს სისტემის კამერის გამოყენებით. საჭიროა, რომ აპს ჰქოდეს android.permission.CAMERA ნებართვაც"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ნება დაერთოს აპლიკაციას ან სერვისს, მიიღოს გადმორეკვები კამერის მოწყობილობის გახსნის ან დახურვისას."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ამ მინაწერის აპს შეუძლია მიიღოს გადმორეკვები, როდესაც რომელიმე კამერის მოწყობილობა იხსნება (რომელიმე აპლიკაციის პაკეტით) ან იხურება."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ვიბრაციის კონტროლი"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ნებას რთავს აპს, ჰქონდეს წვდომა ვიბრაციის მდგომარეობაზე."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"დარეკვის ხარისხის გაუმჯობესების მიზნით, აპს ზარების სისტემის მეშვეობით მარშრუტიზაციის საშუალებას აძლევს."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ზარების ნახვა და გაკონტროლება სისტემის მეშვეობით."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"საშუალებას აძლევს აპს, იხილოს და გააკონტროლოს მიმდინარე ზარები მოწყობილობაზე. აღნიშნული მოიცავს ისეთ ინფორმაციას, როგორიცაა ზარებთან დაკავშირებული აბონენტების ნომრები და ზარების მდგომარეობა."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ზარის სხვა აპიდან გაგრძელება"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ნებას რთავს აპს, გააგრძელოს ზარი, რომელიც სხვა აპშია წამოწყებული."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ტელეფონის ნომრების წაკითხვა"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"აპს მოწყობილობის ტელეფონის ნომრებზე წვდომის საშუალებას მისცემს."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ჩართული ჰქონდეს მანქანის ეკრანი"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"დაიცავით ტაბლეტი დაძინებისგან"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"არ მისცეთ დაძინების საშუალება Android TV მოწყობილობას"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ტელეფონის ძილის რეჟიმში გადასვლის აღკვეთა"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ნებას რთავს აპს, ჩართული ჰქონდეს მანქანის ეკრანი."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"აპს შეეძლება ხელი შეუშალოს ტაბლეტის დაძინებას."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"ნებას რთავს აპს, ხელი შეუშალოს Android TV მოწყობილობას დაძინებაში."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"აპს შეეძლება ხელი შეუშალოს ტელეფონის დაძინებას."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"მობილურ ქსელს არ აქვს ინტერნეტზე წვდომა"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ქსელს არ აქვს ინტერნეტზე წვდომა"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"პირად DNS სერვერზე წვდომა შეუძლებელია"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"დაკავშირებულია"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>-ის კავშირები შეზღუდულია"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"შეეხეთ, თუ მაინც გსურთ დაკავშირება"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"ახლა გამოიყენება <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"გსურთ ხმის რეკომენდებულ დონეზე მაღლა აწევა?\n\nხანგრძლივად ხმამაღლა მოსმენით შესაძლოა სმენადობა დაიზიანოთ."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"გსურთ მარტივი წვდომის მალსახმობის გამოყენება?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"თუ მალსახმობი ჩართულია, ხმის ორივე ღილაკზე 3 წამის განმავლობაში დაჭერით მარტივი წვდომის ფუნქცია ჩაირთვება."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"დართავთ ნებას <xliff:g id="SERVICE">%1$s</xliff:g>-ს, სრულად მართოს თქვენი მოწყობილობა?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>-ს თუ ჩართავთ, მონაცემთა დაშიფვრის გასაძლიერებლად თქვენი მოწყობილობა ეკრანის დაბლოკვას არ გამოიყენებს."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"სრული კონტროლი გამოსადეგია აპებისთვის, რომლებიც მარტივი წვდომის საჭიროებისას გეხმარებათ, მაგრამ არა აპების უმრავლესობისთვის."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ეკრანის ნახვა და მართვა"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"მას შეუძლია წაიკითხოს ეკრანზე არსებული მთელი კონტენტი და აჩვენოს კონტენტი სხვა აპებში."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"მოქმედებების ნახვა და შესრულება"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"მას შეუძლია თვალი მიადევნოს თქვენს ინტერაქციებს აპის ან აპარატურის სენსორის საშუალებით, ასევე, თქვენი სახელით აწარმოოს აპებთან ინტერაქცია."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"დაშვება"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"უარყოფა"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"შეეხეთ ფუნქციას მისი გამოყენების დასაწყებად:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"აირჩიეთ აპები, რომელთა გამოყენებაც გსურთ მარტივი წვდომის ღილაკით"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"აირჩიეთ აპები, რომელთა გამოყენებაც გსურთ ხმის ღილაკის მალსახმობით"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> გამორთულია"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"მალსახმობების რედაქტირება"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"გაუქმება"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"მზადაა"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"მალსახმობის გამორთვა"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"მალსახმობის გამოყენება"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ფერთა ინვერსია"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"კატეგორიის გარეშე"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ამ შეტყობინებების მნიშვნელობის დონე განისაზღვრა თქვენ მიერ."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"მნიშვნელოვანია ჩართული მომხმარებლების გამო."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"აპის მორგებული შეტყობინება"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"მიეცეს უფლება <xliff:g id="APP">%1$s</xliff:g>-ს <xliff:g id="ACCOUNT">%2$s</xliff:g>-ის მეშვეობით ახალი მომხმარებელი შექმნას (ამ ანგარიშის მქონე მომხმარებელი უკვე არსებობს)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"მიეცეს უფლება <xliff:g id="APP">%1$s</xliff:g>-ს <xliff:g id="ACCOUNT">%2$s</xliff:g>-ის მეშვეობით ახალი მომხმარებელი შექმნას?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ენის დამატება"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"მარტივი წვდომის მენიუ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის სუბტიტრების ზოლი."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> მოთავსდა კალათაში „შეზღუდული“"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"პირადი"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"სამსახური"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"პირადი ხედი"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"სამსახურის ხედი"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"სამსახურის აპებით გაზიარება შეუძლებელია"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"პირადი აპებით გაზიარება შეუძლებელია"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"თქვენმა IT ადმინისტრატორმა დაბლოკა გაზიარება პირად და სამსახურის აპებს შორის"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"სამსახურის აპების ჩართვა"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"სამსახურის აპებსა და კონტაქტებზე წვდომისთვის ჩართეთ სამსახურის აპები"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"თქვენმა IT ადმინისტრატორმა დაბლოკა გაზიარება პირად და სამსახურის პროფილებს შორის"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"სამსახურის აპებზე წვდომა ვერ ხერხდება"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"თქვენი IT ადმინისტრატორი არ გაძლევთ სამსახურის აპებიდან პირადი კონტენტის ნახვის უფლებას"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"პირად აპებზე წვდომა ვერ ხერხდება"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"თქვენი IT ადმინისტრატორი არ გაძლევთ პირადი აპებიდან სამსახურის კონტენტის ნახვის უფლებას"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"კონტენტის გასაზიარებლად ჩართეთ სამსახურის პროფილი"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"კონტენტის სანახავად ჩართეთ სამსახურის პროფილი"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ხელმისაწვდომი აპები არ არის"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"აპები ვერ მოიძებნა"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"სამსახურზე გადართვა"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ჩართვა"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"სატელეფონო ზარებში აუდიოს ჩაწერა ან დაკვრა"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ნაგულისხმევ დასარეკ აპლიკაციად არჩევის შემთხვევაში, ნებას რთავს აპს ჩაიწეროს ან დაუკრას აუდიო სატელეფონო ზარებში."</string>
 </resources>

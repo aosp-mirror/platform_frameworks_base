@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"ଆପଣଙ୍କର ଲୋକେସନ୍ ସେଟିଂସ୍ ଦେଖିବା ପାଇଁ ଟାପ୍ କରନ୍ତୁ।"</string>
     <string name="country_detector" msgid="7023275114706088854">"କଣ୍ଟ୍ରି ଡିଟେକ୍ଟର୍"</string>
     <string name="location_service" msgid="2439187616018455546">"ଲୋକେସନ୍ ସର୍ଭିସ୍"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS ସର୍ଭିସ୍"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"ସେନ୍ସର୍ ନୋଟିଫିକେସନ୍ ସର୍ଭିସ୍"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ଟ୍ୱିଲାଇଟ୍ ସର୍ଭିସ୍"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ଆପଣଙ୍କ ଡିଭାଇସ୍‍ ବର୍ତ୍ତମାନ ଲିଭାଯିବ"</string>
@@ -249,10 +250,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> ସେକେଣ୍ଡରେ ବଗ୍‍ ରିପୋର୍ଟ ପାଇଁ ସ୍କ୍ରୀନଶଟ୍‍ ନେଉଛି।</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> ସେକେଣ୍ଡରେ ବଗ୍‍ ରିପୋର୍ଟ ପାଇଁ ସ୍କ୍ରୀନଶଟ୍‍ ନେଉଛି।</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ବଗ୍ ରିପୋର୍ଟ ସହ ସ୍କ୍ରିନସଟ୍ ନିଆଯାଇଛି"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ବଗ୍ ରିପୋର୍ଟ ସହ ସ୍କ୍ରିନସଟ୍ ନେବାରେ ବିଫଳ ହୋଇଛି"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ସାଇଲେଣ୍ଟ ମୋଡ୍"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ସାଉଣ୍ଡ ଅଫ୍ ଅଛି"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ସାଉଣ୍ଡ ଅନ୍ ଅଛି"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"ଅତିରିକ୍ତ ଲୋକେସନ୍ ପ୍ରଦାନକାରୀ କମାଣ୍ଡକୁ ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ଅତିରିକ୍ତ ଲୋକେସନ୍‍ ପ୍ରଦାନକାରୀ କମାଣ୍ଡ ଆକ୍ସେସ୍‌ କରିବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦିଏ। GPS କିମ୍ବା ଅନ୍ୟ ଲୋକେସନ୍‍ ସୋର୍ସଗୁଡିକରେ ଆପ୍‍ଟି ପ୍ରଭାବ ପକାଇପାରେ।"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"କେବଳ ସମ୍ମୁଖଭାଗରେ ସଠିକ୍‍ ଲୋକେଶନ୍‍ର ଆକ୍ସେସ୍‍ କରନ୍ତୁ"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"ଏହି ଆପ୍ ବ୍ୟବହାରରେ ଥିବା ସମୟରେ ଲୋକେସନ୍ ସେବାଗୁଡ଼ିକରୁ ଆପଣଙ୍କର ସଠିକ୍ ଲୋକେସନ୍ ପାଇପାରିବ। ଆପକୁ ଲୋକେସନ୍ ମିଳିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ୍ ସେବାଗୁଡ଼ିକ ନିଶ୍ଚିତ ଭାବରେ ଚାଲୁ କରାଯିବା ଆବଶ୍ୟକ। ଏହା ବ୍ୟାଟେରୀର ବ୍ୟବହାରକୁ ବଢ଼ାଇପାରେ।"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"କେବଳ ସମ୍ମୁଖପଟରେ ହାରାହାରି ଲୋକେସନ୍ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"ଏହି ଆପ୍ ବ୍ୟବହାରରେ ଥିବା ସମୟରେ ଲୋକେସନ୍ ସେବାଗୁଡ଼ିକରୁ ଆପଣଙ୍କର ଆନୁମାନିକ ଲୋକେସନ୍ ପାଇପାରିବ। ଆପକୁ ଲୋକେସନ୍ ମିଳିବା ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସର ଲୋକେସନ୍ ସେବାଗୁଡ଼ିକ ନିଶ୍ଚିତ ଭାବରେ ଚାଲୁ କରାଯିବା ଆବଶ୍ୟକ।"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ୍‌ରେ ଲୋକେସନ୍ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"ଏହି ଆପ୍ ବ୍ୟବହାରରେ ଥିବା ବେଳେ ମଧ୍ୟ, ଯେ କୌଣସି ସମୟରେ ଲୋକେସନକୁ ଆକ୍ସେସ୍ କରିପାରିବ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ଆପଣଙ୍କ ଅଡିଓ ସେଟିଙ୍ଗକୁ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ଆପ୍‌କୁ ଗ୍ଲୋବାଲ୍ ଅଡିଓ ସେଟିଙ୍ଗ, ଯେପରିକି ଭଲ୍ୟୁମ୍‌କୁ ସଂଶୋଧିତ କରିବାକୁ ଏବଂ ଆଉଟପୁଟ୍ ପାଇଁ ସ୍ପିକର୍‌ ବ୍ୟବହାର କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
@@ -440,6 +436,10 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ଏହି ଆପ୍‍ ଯେକୌଣସି ସମୟରେ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଫଟୋ ଉଠାଇପାରେ ଏବଂ ଭିଡିଓ ରେକର୍ଡ କରିପାରେ।"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ଛବି ଏବଂ ଭିଡିଓଗୁଡ଼ିକୁ ନେବା ପାଇଁ ସିଷ୍ଟମ୍ କ୍ୟାମେରା‌ଗୁଡ଼ିକୁ କୌଣସି ଆପ୍ଲିକେସନ୍ କିମ୍ବା ସେବା ଆକ୍ସେସ୍ ଅନୁମତି ଦିଅନ୍ତୁ"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ଏହି ପ୍ରମୁଖ | ସିଷ୍ଟମ୍ ଆପ୍ ଯେକୌଣସି ସମୟରେ ଏକ ସିଷ୍ଟମ୍ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଛବିଗୁଡ଼ିକ ନେଇପାରେ ଏବଂ ଭିଡିଓଗୁଡ଼ିକ ରେକର୍ଡ କରିପାରେ। ଆପ୍ ମଧ୍ୟ android.permission.CAMERA ଅନୁମତି ଆବଶ୍ୟକ କରେ"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"କମ୍ପନ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ଆପ୍‍କୁ, ଭାଇବ୍ରେଟର୍‍ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ଭାଇବ୍ରେଟର୍ ସ୍ଥିତି ଆକ୍ସେସ୍ କରିବାକୁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
@@ -453,13 +453,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"କଲ୍‍ କରିବାର ଅନୁଭୂତି ବଢ଼ାଇବାକୁ ସିଷ୍ଟମ୍‍ ଜରିଆରେ ଆପର କଲ୍‍ଗୁଡ଼ିକୁ ରୁଟ୍‍ କରିବାକୁ ଏହାକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ସିଷ୍ଟମ୍‍ ମାଧ୍ୟମରେ କଲ୍‍ଗୁଡ଼ିକୁ ଦେଖିଥାଏ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିଥାଏ।"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ଆପ୍‍କୁ ଡିଭାଇସ୍‍‍ରେ ଚାଲୁଥିବା କଲ୍‍ଗୁଡ଼ିକୁ ଦେଖିବାକୁ ଏବଂ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ। ଏଥିରେ କଲ୍‍ଗୁଡ଼ିକ ପାଇଁ କଲ୍‍ ନମ୍ବର୍‍ ଏବଂ କଲ୍‍ଗୁଡ଼ିକର ସ୍ଥିତି ପରି ସୂଚନା ଅନ୍ତର୍ଭୁକ୍ତ ଅଛି।"</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ଅନ୍ୟ ଏକ ଆପ୍‌ରୁ କଲ୍‌କୁ ଜାରି ରଖନ୍ତୁ"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ଅନ୍ୟ ଆପ୍‌ରେ ଆରମ୍ଭ ହୋଇଥିବା ଗୋଟିଏ କଲ୍‌କୁ ଜାରି ରଖିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ଫୋନ୍‍ ନମ୍ବର ପଢ଼େ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ଏହି ଡିଭାଇସର ଫୋନ୍‍ ନମ୍ବର ଆକ୍ସେସ୍‍ କରିବାକୁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"କାର ସ୍କ୍ରିନକୁ ଚାଲୁ ରଖନ୍ତୁ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ଟାବଲେଟ୍‌କୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌କୁ ଯିବାକୁ ରୋକନ୍ତୁ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ସ୍ଲିପିଂରୁ ଆପଣଙ୍କର Android ଟିଭି ଡିଭାଇସ୍‌କୁ ପ୍ରତିରୋଧ କରନ୍ତୁ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ଫୋନକୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌କୁ ଯିବାକୁ ରୋକନ୍ତୁ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"କାର ସ୍କ୍ରିନକୁ ଚାଲୁ ରଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ଆପ୍‍କୁ, ଟାବଲେଟ୍‍ଟିକୁ ସ୍ଲୀପ୍‍ ମୋଡ୍‍କୁ ଯିବାରେ ପ୍ରତିରୋଧ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"ଏହି ଆପ୍ ଆପଣଙ୍କର Android ଟିଭି ଡିଭାଇସ୍‌କୁ ସ୍ଲିପ୍ ମୋଡ୍‍କୁ ଯିବାରେ ପ୍ରତିରୋଧ କରିବା ପାଇଁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ଆପ୍‍କୁ, ଫୋନ୍‌ଟିକୁ ସ୍ଲୀପ୍‍ ମୋଡ୍‍କୁ ଯିବାରେ ପ୍ରତିରୋଧ କରିବାକୁ ଦେଇଥାଏ।"</string>
@@ -1262,7 +1268,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"ମୋବାଇଲ୍ ନେଟ୍‌ୱାର୍କରେ ଇଣ୍ଟର୍ନେଟ୍ ଆକ୍ସେସ୍ ନାହିଁ"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ନେଟ୍‌ୱାର୍କରେ ଇଣ୍ଟର୍ନେଟ୍ ଆକ୍ସେସ୍ ନାହିଁ"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"ବ୍ୟକ୍ତିଗତ DNS ସର୍ଭର୍ ଆକ୍ସେସ୍ କରିହେବ ନାହିଁ"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"ସଂଯୁକ୍ତ ହୋଇଛି"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g>ର ସୀମିତ ସଂଯୋଗ ଅଛି"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ତଥାପି ଯୋଗାଯୋଗ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>କୁ ବଦଳାଗଲା"</string>
@@ -1634,8 +1639,28 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ସର୍ଟକଟ୍ ଚାଲୁ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍ ବଟନ୍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଏକ ଆକ୍ସେସବିଲିଟି ଫିଚର୍ ଆରମ୍ଭ ହେବ।"</string>
+    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
+    <skip />
+    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
+    <skip />
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ଯେଉଁ ଆପ୍ସ ଆପଣଙ୍କୁ ଆକ୍ସେସିବିଲିଟୀ ଆବଶ୍ୟକତାରେ ସହାୟତା କରେ, ସେହି ଆପ୍ସ ପାଇଁ ସମ୍ପୂର୍ଣ୍ଣ ନିୟନ୍ତ୍ରଣ ଉପଯୁକ୍ତ ଅଟେ, କିନ୍ତୁ ଅଧିକାଂଶ ଆପ୍ସ ପାଇଁ ଉପଯୁକ୍ତ ନୁହେଁ।"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ଭ୍ୟୁ ଏବଂ ସ୍କ୍ରିନ୍‍ ନିୟନ୍ତ୍ରଣ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ଏହା ସ୍କ୍ରିନ୍‍ର ସମସ୍ତ ବିଷୟବସ୍ତୁ ପଢ଼ିପାରେ ଏବଂ ଅନ୍ୟ ଆପ୍ସରେ ବିଷୟବସ୍ତୁ ପ୍ରଦର୍ଶନ କରିପାରେ।"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ଦେଖନ୍ତୁ ଏବଂ କାର୍ଯ୍ୟ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ଏହା କୌଣସି ଆପ୍‍ କିମ୍ବା ହାର୍ଡୱେର୍‍ ସେନ୍ସର୍‍ ସହ ଆପଣଙ୍କର ପାରସ୍ପରିକ ଆଦାନପ୍ରଦାନକୁ ଟ୍ରାକ୍‍ କରିପାରେ ଏବଂ ଆପଣଙ୍କ ତରଫରୁ ଆପ୍ସ ସହ ପରିଚିତ ହୋଇପାରେ।"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ଅନୁମତି"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ପ୍ରତ୍ୟାଖ୍ୟାନ"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
+    <skip />
+    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ସର୍ଟକଟଗୁଡ଼ିକୁ ସମ୍ପାଦନ କରନ୍ତୁ"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ବାତିଲ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
+    <skip />
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ଶର୍ଟକଟ୍‍ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ରଙ୍ଗ ବଦଳାଇବାର ସୁବିଧା"</string>
@@ -1856,8 +1881,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ଅବର୍ଗୀକୃତ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକର ପ୍ରମୁଖତା ଆପଣ ସେଟ୍‍ କରନ୍ତି।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ସମ୍ପୃକ୍ତ ଲୋକଙ୍କ କାରଣରୁ ଏହା ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ଅଟେ।"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"କଷ୍ଟମ୍ ଆପ୍ ବିଜ୍ଞପ୍ତି"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ (ପୂର୍ବରୁ ଏହି ଆକାଉଣ୍ଟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନାମରେ ଅଛି) ଅନୁମତି ଦେବେ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ଏକ ଭାଷା ଯୋଡ଼ନ୍ତୁ"</string>
@@ -2029,16 +2053,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ଆକ୍ସେସିବିଲିଟୀ ମେନୁ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>ର କ୍ୟାପ୍ସନ୍ ବାର୍।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>କୁ ପ୍ରତିବନ୍ଧିତ ବକେଟରେ ରଖାଯାଇଛି"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ବ୍ୟକ୍ତିଗତ"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"କାର୍ଯ୍ୟ"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ବ୍ୟକ୍ତିଗତ ଭ୍ୟୁ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଭ୍ୟୁ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକ ସହ ସେୟାର୍ କରିପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକ ସହ ସେୟାର୍ କରିପାରିବ ନାହିଁ"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"ଆପଣଙ୍କର IT ଆଡମିନ୍ ବ୍ୟକ୍ତିଗତ ଏବଂ କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକ ମଧ୍ୟରେ ସେୟାରିଂ ବ୍ଲକ୍ କରିଛନ୍ତି"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକୁ ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପ୍ ଏବଂ ଯୋଗାଯୋଗଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିବା ପାଇଁ କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକୁ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ବ୍ୟକ୍ତିଗତ ଏବଂ ୱାର୍କ ପ୍ରୋଫାଇଲଗୁଡ଼ିକ ମଧ୍ୟରେ ସେୟାରିଂ ବ୍ଲକ୍ କରିଛନ୍ତି"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଆପଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିପାରିବେ ନାହିଁ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଆପଗୁଡ଼ିକରେ ବ୍ୟକ୍ତିଗତ ବିଷୟବସ୍ତୁ ଦେଖିବାକୁ ଦିଅନ୍ତି ନାହିଁ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିପାରିବେ ନାହିଁ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକରେ କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ବିଷୟବସ୍ତୁ ଦେଖିବାକୁ ଦିଅନ୍ତି ନାହିଁ"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"ବିଷୟବସ୍ତୁ ସେୟାର୍ କରିବାକୁ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"ବିଷୟବସ୍ତୁ ଦେଖିବାକୁ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"କୌଣସି ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ଆମେ କୌଣସି ଆପ୍ ପାଇଲୁ ନାହିଁ"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"କାର୍ଯ୍ୟସ୍ଥଳୀ ପ୍ରୋଫାଇଲରେ ସ୍ୱିଚ୍ କରନ୍ତୁ"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ଟେଲିଫୋନି କଲଗୁଡ଼ିକରେ ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ ବା ଚଲାନ୍ତୁ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ଏହି ଆପ୍ ଡିଫଲ୍ଟ ଡାଏଲର୍ ଆପ୍ଲିକେସନ୍ ଭାବରେ ଆସାଇନ୍ ହୋଇଥିଲେ ଟେଲିଫୋନି କଲଗୁଡ଼ିକରେ ଅଡିଓ ରେକର୍ଡ କରିବା ବା ଚଲାଇବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
 </resources>

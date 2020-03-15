@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Nhấn để xem các tùy chọn cài đặt vị trí của bạn."</string>
     <string name="country_detector" msgid="7023275114706088854">"Trình phát hiện quốc gia"</string>
     <string name="location_service" msgid="2439187616018455546">"Dịch vụ vị trí"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Dịch vụ GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Dịch vụ Thông báo của cảm biến"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Dịch vụ Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Thiết bị của bạn sẽ bị xóa"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_1">%d</xliff:g> giây.</item>
       <item quantity="one">Sẽ chụp ảnh màn hình để báo cáo lỗi sau <xliff:g id="NUMBER_0">%d</xliff:g> giây.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Đã chụp được ảnh màn hình báo cáo lỗi"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Không chụp được ảnh màn hình báo cáo lỗi"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Chế độ im lặng"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Âm thanh TẮT"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Âm thanh BẬT"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"truy cập vào các lệnh của nhà cung cấp vị trí bổ sung"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Cho phép ứng dụng truy cập vào các lệnh của nhà cung cấp vị trí bổ sung. Điều này có thể cho phép ứng dụng can thiệp vào hoạt động của Hệ thống định vị toàn cầu (GPS) hoặc các nguồn vị trí khác."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"chỉ truy cập vị trí chính xác trong nền trước"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Khi bạn dùng ứng dụng này, ứng dụng có thể nhận được thông tin vị trí chính xác của bạn từ dịch vụ vị trí. Bạn phải bật dịch vụ vị trí trên thiết bị của mình thì ứng dụng mới nhận được thông tin vị trí. Việc này có thể làm tăng mức sử dụng pin."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"chỉ truy cập thông tin vị trí gần đúng khi ứng dụng mở trên màn hình"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Khi bạn dùng ứng dụng này, ứng dụng có thể nhận được thông tin vị trí gần đúng của bạn từ dịch vụ vị trí. Bạn phải bật dịch vụ vị trí trên thiết bị của mình thì ứng dụng mới nhận được thông tin vị trí."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"truy cập vào vị trí trong nền"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Ứng dụng này có thể truy cập vào thông tin vị trí bất cứ lúc nào, ngay cả khi bạn không dùng ứng dụng đó."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"thay đổi cài đặt âm thanh của bạn"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Cho phép ứng dụng sửa đổi cài đặt âm thanh chung chẳng hạn như âm lượng và loa nào được sử dụng cho thiết bị ra."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ghi âm"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Ứng dụng này có thể chụp ảnh và quay video bằng máy ảnh bất cứ lúc nào."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Cho phép một ứng dụng hoặc dịch vụ truy cập vào máy ảnh hệ thống để chụp ảnh và quay video"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Ứng dụng hệ thống/đặc quyền này có thể dùng máy ảnh hệ thống để chụp ảnh và quay video bất cứ lúc nào. Ngoài ra, ứng dụng này cũng cần có quyền android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Cho phép một ứng dụng hoặc dịch vụ nhận lệnh gọi lại khi các thiết bị máy ảnh đang được mở/đóng."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Ứng dụng chữ ký này có thể nhận các lệnh gọi lại khi có bất kỳ thiết bị máy ảnh nào đang được mở (bằng gói ứng dụng) hoặc đóng."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Cho phép ứng dụng truy cập vào trạng thái bộ rung."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Cho phép ứng dụng định tuyến cuộc gọi thông qua hệ thống nhằm cải thiện trải nghiệm gọi điện."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"xem và kiểm soát cuộc gọi thông qua hệ thống."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Cho phép ứng dụng xem và kiểm soát cuộc gọi đến trên thiết bị. Ứng dụng sẽ xem và kiểm soát các thông tin như số điện thoại của các cuộc gọi và trạng thái cuộc gọi."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"tiếp tục cuộc gọi từ một ứng dụng khác"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Cho phép ứng dụng tiếp tục cuộc gọi được bắt đầu trong một ứng dụng khác."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"đọc số điện thoại"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Cho phép ứng dụng truy cập số điện thoại của thiết bị."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"duy trì trạng thái bật của màn hình ô tô"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ngăn máy tính bảng chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ngăn thiết bị Android TV chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ngăn điện thoại chuyển sang chế độ ngủ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Cho phép ứng dụng này duy trì trạng thái bật của màn hình ô tô."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Cho phép ứng dụng ngăn máy tính bảng chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Cho phép ứng dụng ngăn thiết bị Android TV chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Cho phép ứng dụng ngăn điện thoại chuyển sang chế độ ngủ."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mạng di động không có quyền truy cập Internet"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Mạng không có quyền truy cập Internet"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Không thể truy cập máy chủ DNS riêng tư"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Đã kết nối"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> có khả năng kết nối giới hạn"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Nhấn để tiếp tục kết nối"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Đã chuyển sang <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bạn tăng âm lượng lên quá mức khuyên dùng?\n\nViệc nghe ở mức âm lượng cao trong thời gian dài có thể gây tổn thương thính giác của bạn."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Sử dụng phím tắt Hỗ trợ tiếp cận?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Khi phím tắt này đang bật, thao tác nhấn cả hai nút âm lượng trong 3 giây sẽ mở tính năng hỗ trợ tiếp cận."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Cho phép <xliff:g id="SERVICE">%1$s</xliff:g> toàn quyền kiểm soát thiết bị của bạn?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Nếu bạn bật <xliff:g id="SERVICE">%1$s</xliff:g>, thiết bị của bạn sẽ không dùng phương thức khóa màn hình để tăng cường mã hóa dữ liệu."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Bạn chỉ nên cấp toàn quyền kiểm soát cho những ứng dụng trợ giúp mình khi cần hỗ trợ tiếp cận, chứ không nên cấp cho hầu hết các ứng dụng."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Xem và điều khiển màn hình"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dịch vụ này có thể đọc toàn bộ nội dung trên màn hình và hiển thị nội dung trên các ứng dụng khác."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Xem và thực hiện hành động"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Dịch vụ này có thể theo dõi các hoạt động tương tác của bạn với một ứng dụng hoặc bộ cảm biến phần cứng, cũng như có thể thay mặt bạn tương tác với các ứng dụng."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Cho phép"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Từ chối"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Nhấn vào một tính năng để bắt đầu sử dụng:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Chọn ứng dụng để dùng với nút hỗ trợ tiếp cận"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Chọn ứng dụng để dùng với phím tắt là phím âm lượng"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> đã bị tắt"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Chỉnh sửa phím tắt"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Hủy"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Xong"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tắt phím tắt"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Sử dụng phím tắt"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Đảo màu"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Chưa được phân loại"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Bạn đặt tầm quan trọng của các thông báo này."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Thông báo này quan trọng vì những người có liên quan."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Thông báo tùy chỉnh cho ứng dụng"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g> (đã tồn tại người dùng có tài khoản này)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Cho phép <xliff:g id="APP">%1$s</xliff:g> tạo người dùng mới bằng <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Thêm ngôn ngữ"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Trình đơn Hỗ trợ tiếp cận"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Thanh phụ đề của <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Đã đưa <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> vào bộ chứa BỊ HẠN CHẾ"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Cá nhân"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Cơ quan"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Chế độ xem cá nhân"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Chế độ xem công việc"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Không thể chia sẻ với các ứng dụng công việc"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Không thể chia sẻ với các ứng dụng cá nhân"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Quản trị viên CNTT của bạn đã chặn hoạt động chia sẻ giữa các ứng dụng cá nhân và công việc"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Bật các ứng dụng công việc"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Bật ứng dụng công việc để truy cập vào phần những người liên hệ và ứng dụng công việc"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Quản trị viên CNTT của bạn đã chặn hoạt động chia sẻ giữa các hồ sơ cá nhân và công việc"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Không thể truy cập vào các ứng dụng công việc"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Quản trị viên CNTT của bạn không cho phép bạn xem nội dung cá nhân trong các ứng dụng công việc"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Không thể truy cập vào các ứng dụng cá nhân"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Quản trị viên CNTT của bạn không cho phép bạn xem nội dung công việc trong các ứng dụng cá nhân"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Bật hồ sơ công việc để chia sẻ nội dung"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Bật hồ sơ công việc để xem nội dung"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Không có ứng dụng nào"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Chúng tôi không tìm thấy bất kỳ ứng dụng nào"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Bật hồ sơ công việc"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Bật"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Cho phép ứng dụng này ghi âm hoặc phát âm thanh trong cuộc gọi điện thoại khi được chỉ định làm ứng dụng trình quay số mặc định."</string>
 </resources>

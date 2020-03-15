@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Puudutage oma asukohaseadete nägemiseks."</string>
     <string name="country_detector" msgid="7023275114706088854">"Riigi tuvastaja"</string>
     <string name="location_service" msgid="2439187616018455546">"Asukohateenus"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS-teenus"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Anduri märguande teenus"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Teenus Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Seade kustutatakse"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_1">%d</xliff:g> sekundi pärast.</item>
       <item quantity="one">Veaaruande jaoks ekraanipildi jäädvustamine <xliff:g id="NUMBER_0">%d</xliff:g> sekundi pärast.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Veaaruandega koos jäädvustati ekraanipilt"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Ekraanipildi jäädvustamine koos veaaruandega ebaõnnestus"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Hääletu režiim"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Heli on VÄLJAS"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Heli on SEES"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"juurdepääs asukohapakkuja lisakäskudele"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Võimaldab rakendusel juurde pääseda asukohapakkuja erikäskudele. See võib lubada rakendusel mõjutada GPS-i või muude asukohaallikate tööd."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"juurdepääs täpsele asukohale ainult esiplaanil"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"See rakendus saab rakenduse kasutamise ajal asukohateenuste kaudu teada teie täpse asukoha. Selleks et rakendus saaks asukohateavet, peavad asukohateenused olema seadmes sisse lülitatud. See võib suurendada akukasutust."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"juurdepääs ligikaudsele asukohale ainult esiplaanil"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"See rakendus saab rakenduse kasutamise ajal asukohateenuste kaudu teada teie ligikaudse asukoha. Selleks et rakendus saaks asukohateavet, peavad asukohateenused olema seadmes sisse lülitatud."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"juurdepääs asukohale taustal"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"See rakendus pääseb alati asukohateabele juurde (ka siis, kui te rakendust ei kasuta)."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"muuda heliseadeid"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Võimaldab rakendusel muuta üldiseid heliseadeid, näiteks helitugevust ja seda, millist kõlarit kasutatakse väljundiks."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"salvesta heli"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"See rakendus saab mis tahes ajal kaameraga pildistada ja videoid salvestada."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Rakendusel või teenusel lubatakse süsteemi kaameratele juurde pääseda, et pilte ja videoid jäädvustada"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"See privileegidega | süsteemirakendus saab süsteemi kaameraga alati pilte ja videoid jäädvustada. Rakendusel peab olema ka luba android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Lubab rakendusel või teenusel kaameraseadmete avamise või sulgemise kohta tagasikutseid vastu võtta."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"See allkirjarakendus saab mis tahes kaameraseadme avamisel (vastava rakendusepaketiga) või sulgemisel tagasikutseid vastu võtta."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"juhtige vibreerimist"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Võimaldab rakendusel juhtida vibreerimist."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Võimaldab rakendusel juurde pääseda vibreerimise olekule."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Võimaldab rakendusel kõnesid süsteemi kaudu marsruutida, et helistamiskogemust täiustada."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"süsteemi kaudu kõnede vaatamine ja juhtimine."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Lubab rakendusel seadmes vaadata ja juhtida käimasolevaid kõnesid. See hõlmab sellist teavet nagu kõnede numbrid ja olek."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"jätka kõnet teises rakenduses"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Lubab rakendusel jätkata kõnet, mida alustati teises rakenduses."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lugeda telefoninumbreid"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Rakendusel lubatakse juurde pääseda seadme telefoninumbritele."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hoida auto ekraani sisselülitatuna"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"tahvelarvuti uinumise vältimine"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"takistada Android TV seadme unerežiimi lülitumist"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"väldi telefoni uinumist"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Lubab rakendusel auto ekraani sisselülitatuna hoida."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Võimaldab rakendusel vältida tahvelarvuti uinumist."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Võimaldab rakendusel takistada Android TV seadme unerežiimi aktiveerumist."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Võimaldab rakendusel vältida telefoni uinumist."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobiilsidevõrgul puudub Interneti-ühendus"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Võrgul puudub Interneti-ühendus"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Privaatsele DNS-serverile ei pääse juurde"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Ühendatud"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"Võrgu <xliff:g id="NETWORK_SSID">%1$s</xliff:g> ühendus on piiratud"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Puudutage, kui soovite siiski ühenduse luua"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Lülitati võrgule <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Kas suurendada helitugevuse taset üle soovitatud taseme?\n\nPikaajaline valju helitugevusega kuulamine võib kuulmist kahjustada."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Kas kasutada juurdepääsetavuse otseteed?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kui otsetee on sisse lülitatud, käivitab mõlema helitugevuse nupu kolm sekundit all hoidmine juurdepääsetavuse funktsiooni."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Kas anda teenusele <xliff:g id="SERVICE">%1$s</xliff:g> teie seadme üle täielik kontroll?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Kui lülitate sisse teenuse <xliff:g id="SERVICE">%1$s</xliff:g>, ei kasuta seade andmete krüpteerimise täiustamiseks ekraanilukku."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Täielik haldusõigus sobib rakendustele, mis pakuvad juurdepääsufunktsioone. Enamiku rakenduste puhul seda ei soovitata."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekraanikuva vaatamine ja haldamine"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"See saab lugeda kogu ekraanil kuvatud sisu ja kuvada sisu rakenduste peal."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Toimingute vaatamine ja tegemine"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"See saab jälgida teie suhtlust rakenduse või riistvaraanduriga ja teie eest rakendustega suhelda."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Luba"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Keela"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Puudutage funktsiooni, et selle kasutamist alustada."</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Valige rakendused, mida juurdepääsetavuse nupuga kasutada"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Valige rakendused, mida helitugevuse klahvi otseteega kasutada"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> on välja lülitatud"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Muuda otseteid"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Tühista"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Valmis"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Lülita otsetee välja"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Kasuta otseteed"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Värvide ümberpööramine"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Kategoriseerimata"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Teie määrasite nende märguannete tähtsuse."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"See on tähtis osalevate inimeste tõttu."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Rakenduse kohandatud märguanne"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g> (selle kontoga kasutaja on juba olemas)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Kas lubada rakendusel <xliff:g id="APP">%1$s</xliff:g> luua uus kasutaja kontoga <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Keele lisamine"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Juurdepääsetavuse menüü"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> pealkirjariba."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> on lisatud salve PIIRANGUTEGA"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Isiklik"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Töö"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Isiklik vaade"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Töövaade"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Töörakendustega ei saa jagada"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Isiklike rakendustega ei saa jagada"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Teie IT-administraator blokeeris isiklike ja töörakenduste vahel jagamise"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Lülita sisse töörakendused"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Lülitage sisse töörakendused, et töörakendustele ja -kontaktidele juurde pääseda"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"IT-administraator blokeeris isiklike ja tööprofiilide vahel jagamise"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Ei pääse töörakendustele juurde"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"IT-administraator ei luba teil isiklikku sisu töörakendustes vaadata"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Isiklikele rakendustele ei pääse juurde"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"IT-administraator ei luba teil tööga seotud sisu isiklikes rakendustes vaadata"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Sisu jagamiseks lülitage tööprofiil sisse"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Sisu vaatamiseks lülitage tööprofiil sisse"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Ühtegi rakendust pole saadaval"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Me ei leidnud ühtegi rakendust"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Lülita sisse tööprofiil"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Lülita sisse"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Telefonikõnede heli salvestamine ja esitamine"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Kui see rakendus on määratud helistamise vaikerakenduseks, lubatakse sellel salvestada ja esitada telefonikõnede heli."</string>
 </resources>
