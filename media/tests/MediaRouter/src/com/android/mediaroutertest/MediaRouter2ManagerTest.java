@@ -22,16 +22,16 @@ import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 import static android.media.MediaRoute2ProviderService.REASON_REJECTED;
 import static android.media.MediaRoute2ProviderService.REQUEST_ID_NONE;
 
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.FEATURE_SAMPLE;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.FEATURE_SPECIAL;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID1;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID2;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID5_TO_TRANSFER_TO;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID_FIXED_VOLUME;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID_SPECIAL_FEATURE;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_ID_VARIABLE_VOLUME;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.ROUTE_NAME2;
-import static com.android.mediaroutertest.SampleMediaRoute2ProviderService.VOLUME_MAX;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.FEATURE_SAMPLE;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.FEATURE_SPECIAL;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID1;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID2;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID5_TO_TRANSFER_TO;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_FIXED_VOLUME;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_SPECIAL_FEATURE;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_VARIABLE_VOLUME;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_NAME2;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.VOLUME_MAX;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -115,7 +115,7 @@ public class MediaRouter2ManagerTest {
         // unregister callbacks
         clearCallbacks();
 
-        SampleMediaRoute2ProviderService instance = SampleMediaRoute2ProviderService.getInstance();
+        StubMediaRoute2ProviderService instance = StubMediaRoute2ProviderService.getInstance();
         if (instance != null) {
             instance.setProxy(null);
         }
@@ -161,8 +161,8 @@ public class MediaRouter2ManagerTest {
 
         MediaRoute2Info routeToRemove = routes.get(ROUTE_ID2);
 
-        SampleMediaRoute2ProviderService sInstance =
-                SampleMediaRoute2ProviderService.getInstance();
+        StubMediaRoute2ProviderService sInstance =
+                StubMediaRoute2ProviderService.getInstance();
         assertNotNull(sInstance);
         sInstance.removeRoute(ROUTE_ID2);
         assertTrue(removedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
@@ -413,12 +413,12 @@ public class MediaRouter2ManagerTest {
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
         MediaRoute2Info volRoute = routes.get(ROUTE_ID_VARIABLE_VOLUME);
 
-        SampleMediaRoute2ProviderService instance = SampleMediaRoute2ProviderService.getInstance();
+        StubMediaRoute2ProviderService instance = StubMediaRoute2ProviderService.getInstance();
         assertNotNull(instance);
 
         final List<Long> requestIds = new ArrayList<>();
         final CountDownLatch onSetRouteVolumeLatch = new CountDownLatch(1);
-        instance.setProxy(new SampleMediaRoute2ProviderService.Proxy() {
+        instance.setProxy(new StubMediaRoute2ProviderService.Proxy() {
             @Override
             public void onSetRouteVolume(String routeId, int volume, long requestId) {
                 requestIds.add(requestId);
