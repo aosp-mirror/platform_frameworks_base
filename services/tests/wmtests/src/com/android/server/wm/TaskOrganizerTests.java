@@ -32,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -565,6 +566,38 @@ public class TaskOrganizerTests extends WindowTestsBase {
         w.finishDrawing(null);
         verify(transactionListener)
             .transactionReady(anyInt(), any());
+    }
+
+    @Test
+    public void testBLASTCallbackWithChildWindow() {
+        final ActivityStack stackController1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task = createTaskInStack(stackController1, 0 /* userId */);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
+        final WindowState child = createWindow(w, TYPE_APPLICATION, "Other Window");
+
+        w.mActivityRecord.setVisible(true);
+        makeWindowVisible(w, child);
+
+        BLASTSyncEngine bse = new BLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener transactionListener =
+            mock(BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = bse.startSyncSet(transactionListener);
+        assertEquals(true, bse.addToSyncSet(id, task));
+        bse.setReady(id);
+        w.finishDrawing(null);
+
+        // Since we have a child window we still shouldn't be done.
+        verify(transactionListener, never())
+            .transactionReady(anyInt(), any());
+        reset(transactionListener);
+
+        child.finishDrawing(null);
+        // Ah finally! Done
+        verify(transactionListener)
+                .transactionReady(anyInt(), any());
     }
 
     class StubOrganizer extends ITaskOrganizer.Stub {
