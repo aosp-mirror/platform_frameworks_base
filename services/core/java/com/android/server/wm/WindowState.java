@@ -680,6 +680,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     int mFrameRateSelectionPriority = RefreshRatePolicy.LAYER_PRIORITY_UNSET;
 
+    /**
+     * BLASTSyncEngine ID corresponding to a sync-set for all
+     * our children. We add our children to this set in Sync,
+     * but we save it and don't mark it as ready until finishDrawing
+     * this way we have a two way latch between all our children finishing
+     * and drawing ourselves.
+     */
+    private int mLocalSyncId = -1;
+
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
     /**
@@ -5687,10 +5696,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
             int waitingId) {
-        // TODO(b/148871522): Support child window
         mWaitingListener = waitingListener;
         mWaitingSyncId = waitingId;
         mUsingBLASTSyncTransaction = true;
+
+        mLocalSyncId = mBLASTSyncEngine.startSyncSet(this);
+        addChildrenToSyncSet(mLocalSyncId);
 
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
@@ -5705,11 +5716,21 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
-        if (postDrawTransaction == null) {
-            postDrawTransaction = new SurfaceControl.Transaction();
+        if (postDrawTransaction != null) {
+            mBLASTSyncTransaction.merge(postDrawTransaction);
         }
-        postDrawTransaction.merge(mBLASTSyncTransaction);
-        mWaitingListener.transactionReady(mWaitingSyncId, postDrawTransaction);
+
+        // If localSyncId is >0 then we are syncing with children and will
+        // invoke transaction ready from our own #transactionReady callback
+        // we just need to signal our side of the sync (setReady). But if we
+        // have no sync operation at this level transactionReady will never
+        // be invoked and we need to invoke it ourself.
+        if (mLocalSyncId >= 0) {
+            mBLASTSyncEngine.setReady(mLocalSyncId);
+        } else {
+            mWaitingListener.transactionReady(mWaitingSyncId, mBLASTSyncTransaction);
+        }
+
         mUsingBLASTSyncTransaction = false;
 
         mWaitingSyncId = 0;
