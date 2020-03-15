@@ -1705,7 +1705,7 @@ public final class ActiveServices {
                     if (acceptances > 0 ||  rejections > 0) {
                         FrameworkStatsLog.write(
                                 FrameworkStatsLog.FOREGROUND_SERVICE_APP_OP_SESSION_ENDED,
-                                mProcessRecord.uid, AppOpsManager.opToLoggingId(op),
+                                mProcessRecord.uid, op,
                                 modeToEnum(mAppOpModes.get(op)),
                                 acceptances, rejections
                         );

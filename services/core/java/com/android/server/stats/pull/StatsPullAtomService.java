@@ -2901,7 +2901,7 @@ public class StatsPullAtomService extends SystemService {
                         e.setAtomId(atomTag);
                         e.writeInt(uid);
                         e.writeString(packageOps.getPackageName());
-                        e.writeInt(op.getLoggingOpCode());
+                        e.writeInt(op.getOpCode());
                         e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
                         e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
                         e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
@@ -3044,7 +3044,7 @@ public class StatsPullAtomService extends SystemService {
         if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
             e.writeString(attributionTag);
         }
-        e.writeInt(op.getLoggingOpCode());
+        e.writeInt(op.getOpCode());
         e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
         e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
         e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
