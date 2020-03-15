@@ -2461,6 +2461,19 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         mWaitingSyncId = -1;
     }
 
+    /**
+     * Returns true if any of the children elected to participate in the Sync
+     */
+    boolean addChildrenToSyncSet(int localId) {
+        boolean willSync = false;
+
+        for (int i = 0; i < mChildren.size(); i++) {
+            final WindowContainer child = mChildren.get(i);
+            willSync |= mBLASTSyncEngine.addToSyncSet(localId, child);
+        }
+        return willSync;
+    }
+
     boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
             int waitingId) {
         boolean willSync = false;
@@ -2469,16 +2482,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
         mUsingBLASTSyncTransaction = true;
 
-        int localId = mBLASTSyncEngine.startSyncSet(this);
-        for (int i = 0; i < mChildren.size(); i++) {
-            final WindowContainer child = mChildren.get(i);
-            willSync = mBLASTSyncEngine.addToSyncSet(localId, child) | willSync;
-        }
-
         // Make sure to set these before we call setReady in case the sync was a no-op
         mWaitingSyncId = waitingId;
         mWaitingListener = waitingListener;
 
+        int localId = mBLASTSyncEngine.startSyncSet(this);
+        willSync |= addChildrenToSyncSet(localId);
         mBLASTSyncEngine.setReady(localId);
 
         return willSync;
