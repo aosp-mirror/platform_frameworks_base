@@ -1701,7 +1701,7 @@ public final class ActiveServices {
                     if (acceptances > 0 ||  rejections > 0) {
                         FrameworkStatsLog.write(
                                 FrameworkStatsLog.FOREGROUND_SERVICE_APP_OP_SESSION_ENDED,
-                                mProcessRecord.uid, opToEnum(op),
+                                mProcessRecord.uid, AppOpsManager.opToLoggingId(op),
                                 modeToEnum(mAppOpModes.get(op)),
                                 acceptances, rejections
                         );
@@ -1722,22 +1722,6 @@ public final class ActiveServices {
                 default: return FrameworkStatsLog
                         .FOREGROUND_SERVICE_APP_OP_SESSION_ENDED__APP_OP_MODE__MODE_UNKNOWN;
             }
-        }
-    }
-
-    /** Maps AppOp op value to atoms.proto enum. */
-    private static int opToEnum(int op) {
-        switch (op) {
-            case AppOpsManager.OP_COARSE_LOCATION: return FrameworkStatsLog
-                    .FOREGROUND_SERVICE_APP_OP_SESSION_ENDED__APP_OP_NAME__OP_COARSE_LOCATION;
-            case AppOpsManager.OP_FINE_LOCATION: return FrameworkStatsLog
-                    .FOREGROUND_SERVICE_APP_OP_SESSION_ENDED__APP_OP_NAME__OP_FINE_LOCATION;
-            case AppOpsManager.OP_CAMERA: return FrameworkStatsLog
-                    .FOREGROUND_SERVICE_APP_OP_SESSION_ENDED__APP_OP_NAME__OP_CAMERA;
-            case AppOpsManager.OP_RECORD_AUDIO: return FrameworkStatsLog
-                    .FOREGROUND_SERVICE_APP_OP_SESSION_ENDED__APP_OP_NAME__OP_RECORD_AUDIO;
-            default: return FrameworkStatsLog
-                    .FOREGROUND_SERVICE_APP_OP_SESSION_ENDED__APP_OP_NAME__OP_NONE;
         }
     }
 
