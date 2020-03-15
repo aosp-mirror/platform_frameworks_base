@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ამ აპს შეუძლია თქვენი ფიზიკური აქტივობის ამოცნობა."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"სურათებისა და ვიდეოების გადაღება"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ამ აპს ნებისმიერ დროს შეუძლია კამერით სურათების გადაღება და ვიდეოების ჩაწერა."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ნება დაერთოს აპლიკაციას ან სერვისს, მიიღოს გადმორეკვები კამერის მოწყობილობის გახსნის ან დახურვისას."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ამ მინაწერის აპს შეუძლია მიიღოს გადმორეკვები, როდესაც რომელიმე კამერის მოწყობილობა იხსნება (რომელიმე აპლიკაციის პაკეტით) ან იხურება."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ვიბრაციის კონტროლი"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"პირდაპირი დარეკვა ტელეფონის ნომრებზე"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ნებას რთავს აპს, გააგრძელოს ზარი, რომელიც სხვა აპშია წამოწყებული."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ტელეფონის ნომრების წაკითხვა"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"აპს მოწყობილობის ტელეფონის ნომრებზე წვდომის საშუალებას მისცემს."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ჩართული ჰქონდეს მანქანის ეკრანი"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"დაიცავით ტაბლეტი დაძინებისგან"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ტელევიზორის დაცვა დაძინებისაგან"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ტელეფონის ძილის რეჟიმში გადასვლის აღკვეთა"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ნებას რთავს აპს, ჩართული ჰქონდეს მანქანის ეკრანი."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"აპს შეეძლება ხელი შეუშალოს ტაბლეტის დაძინებას."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"ნებას რთავს აპლიკაციას დაიცვას ტელევიზორი დაძინებისაგან."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"აპს შეეძლება ხელი შეუშალოს ტელეფონის დაძინებას."</string>

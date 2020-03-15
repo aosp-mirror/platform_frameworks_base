@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ứng dụng này có thể nhận dạng hoạt động thể chất của bạn."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"chụp ảnh và quay video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ứng dụng này có thể chụp ảnh và quay video bằng máy ảnh bất cứ lúc nào."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Cho phép một ứng dụng hoặc dịch vụ nhận lệnh gọi lại khi các thiết bị máy ảnh đang được mở/đóng."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Ứng dụng chữ ký này có thể nhận các lệnh gọi lại khi có bất kỳ thiết bị máy ảnh nào đang được mở (bằng gói ứng dụng) hoặc đóng."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kiểm soát rung"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"gọi trực tiếp số điện thoại"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Cho phép ứng dụng tiếp tục cuộc gọi được bắt đầu trong một ứng dụng khác."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"đọc số điện thoại"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Cho phép ứng dụng truy cập số điện thoại của thiết bị."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"duy trì trạng thái bật của màn hình ô tô"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ngăn máy tính bảng chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ngăn TV chuyển sang chế độ ngủ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ngăn điện thoại chuyển sang chế độ ngủ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Cho phép ứng dụng này duy trì trạng thái bật của màn hình ô tô."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Cho phép ứng dụng ngăn máy tính bảng chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Cho phép ứng dụng ngăn TV chuyển sang chế độ ngủ."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Cho phép ứng dụng ngăn điện thoại chuyển sang chế độ ngủ."</string>

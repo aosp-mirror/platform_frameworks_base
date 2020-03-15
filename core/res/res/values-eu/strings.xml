@@ -89,7 +89,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Ezin duzu egin larrialdi-deirik Wi-Fi bidez"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertak"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Dei-desbideratzea"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Larrialdi-deiak soilik jasotzeko modua"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Larrialdi-zerbitzuen deiak jasotzeko modua"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Datu-konexioaren egoera"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS mezuak"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Erantzungailuko mezuak"</string>
@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak ariketa fisikoa hauteman dezake."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikazioak edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Eman baimena aplikazio edo zerbitzuari jakinarazpenak jasotzeko kamerak ireki edo ixten direnean."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Kamera ireki edo itxi dela (eta zer aplikazio-paketerekin) dioten jakinarazpenak jaso ditzake sinatzeko aplikazio honek."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"deitu zuzenean telefono-zenbakietara"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Beste aplikazio batean hasitako dei bat jarraitzea baimentzen dio aplikazioari."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"irakurri telefono-zenbakiak"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Gailuaren telefono-zenbakiak atzitzeko baimena ematen die aplikazioei."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"mantendu piztuta autoko pantaila"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"eragotzi tableta inaktibo ezartzea"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"eragotzi telebista inaktibo geratzea"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"eragotzi telefonoa inaktibo ezartzea"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Autoko pantaila piztuta mantentzeko baimena ematen dio aplikazioari."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tableta inaktibo ezartzea galaraztea baimentzen die aplikazioei."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Telebista inaktibo ezar dadin eragoztea baimentzen die aplikazioei."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Telefonoa inaktibo ezartzea galaraztea baimentzen die aplikazioei."</string>
@@ -486,9 +490,9 @@
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"onartu Wi-Fi Multicast harrera"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez tableta soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Wi-Fi sareko gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1253281508485111166">"Wifi-sareko gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telebista soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="8296627590220222740">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez telefonoa soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
-    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"atzitu Bluetooth ezarpenak"</string>
+    <string name="permlab_bluetoothAdmin" msgid="6490373569441946064">"atzitu Bluetooth-aren ezarpenak"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="5370837055438574863">"Tokiko Bluetooth tableta konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetoothAdmin" product="tv" msgid="1822785266335294155">"Tokiko Bluetooth telebista konfiguratzea eta urruneko gailuak hautematea eta haiekin parekatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetoothAdmin" product="default" msgid="7381341743021234863">"Tokiko Bluetooth telefonoa konfiguratzea eta urruneko gailuak detektatzea eta haiekin parekatzea baimentzen die aplikazioei."</string>
@@ -498,7 +502,7 @@
     <string name="permdesc_changeWimaxState" product="tablet" msgid="4011097664859480108">"Tableta WiMAX sareetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_changeWimaxState" product="tv" msgid="6876948244710106021">"Telebista WiMAX sareetara konektatzea edo haietatik deskonektatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="1551666203780202101">"Telefonoa WiMAX sareetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_bluetooth" msgid="586333280736937209">"partekatu Bluetooth gailuekin"</string>
+    <string name="permlab_bluetooth" msgid="586333280736937209">"partekatu Bluetooth bidezko gailuekin"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3053222571491402635">"Tabletaren Bluetooth konfigurazioa ikusteko eta parekatutako gailuekin konexioak egiteko eta onartzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3546625329740068213">"Telebistaren Bluetooth konexioaren konfigurazioa ikustea eta parekatutako gailuekin konexioak sortzea eta onartzea baimentzen die aplikazioei."</string>
     <string name="permdesc_bluetooth" product="default" msgid="2779606714091276746">"Telefonoaren Bluetooth konfigurazioa ikusteko eta parekatutako gailuekin konexioak egiteko eta onartzeko baimena ematen die aplikazioei."</string>
@@ -522,7 +526,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Argazki-bilduma aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"multimedia-edukien bildumako kokapena irakurri"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Multimedia-edukien bildumako kokapena irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Egiaztatu zu zarela"</string>
+    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Egiaztatu zeu zarela"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Hardware biometrikoa ez dago erabilgarri"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Utzi da autentifikazioa"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Ez da ezagutu"</string>
@@ -1517,7 +1521,7 @@
     <string name="sync_do_nothing" msgid="4528734662446469646">"Ez egin ezer, oraingoz"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Aukeratu kontu bat"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Gehitu kontu bat"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Gehitu kontua"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Gehitu kontu bat"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Handitu"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Txikitu"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"Eduki sakatuta <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1604,7 +1608,7 @@
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefonoa"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Konektatu bozgorailuak oinarrira"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
-    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Aurikularrak"</string>
+    <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Entzungailuak"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistema"</string>
     <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Bluetooth bidezko audioa"</string>

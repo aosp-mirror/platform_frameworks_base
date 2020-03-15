@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"이 앱에서 내 신체 활동을 확인할 수 있습니다."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"사진과 동영상 찍기"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"이 앱은 언제든지 카메라를 사용하여 사진을 촬영하고 동영상을 녹화할 수 있습니다."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"애플리케이션 또는 서비스에서 카메라 기기 열림 또는 닫힘에 대한 콜백을 수신하도록 허용"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"이 서명 앱은 사용되는 애플리케이션 패키지와 관련 없이 카메라 기기가 열릴 때나 닫힐 때 콜백을 수신할 수 있습니다."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"진동 제어"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"전화번호 자동 연결"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"다른 앱에서 수신한 전화를 계속하려면 앱을 허용합니다."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"전화번호 읽기"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"앱에서 기기의 전화번호에 액세스하도록 허용합니다."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"차량 화면 켜진 상태로 유지"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"태블릿이 절전 모드로 전환되지 않도록 설정"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"TV의 절전 모드 전환 방지"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"휴대전화가 절전 모드로 전환되지 않도록 설정"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"앱에서 차량 화면을 켜진 상태로 유지하도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"앱이 태블릿의 절전 모드 전환을 막도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"앱이 TV가 절전 모드로 전환되는 것을 방지할 수 있도록 허용합니다."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"앱이 휴대전화의 절전 모드 전환을 막도록 허용합니다."</string>

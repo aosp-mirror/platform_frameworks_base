@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം ഈ ആപ്പിന് തിരിച്ചറിയാനാവും."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ഏതുസമയത്തും ക്യാമറ ഉപയോഗിച്ചുകൊണ്ട് ചിത്രങ്ങൾ എടുക്കാനും വീഡിയോകൾ റെക്കോർഡുചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>
@@ -450,9 +454,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ഉപകരണത്തിന്റെ ഫോൺ നമ്പറുകൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"കാറിലെ സ്ക്രീൻ ഓണാക്കി വയ്ക്കുക"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ഉറങ്ങുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ടിവിയെ നിർജ്ജീവമാകുന്നതിൽ നിന്ന് തടയുക"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ഉറങ്ങുന്നതിൽ നിന്ന് ഫോണിനെ തടയുക"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"കാറിലെ സ്ക്രീൻ ഓണാക്കി വയ്ക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ടാബ്‌ലെറ്റ് സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"ടിവി നിർജ്ജീവമാകുന്നത് തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ഫോൺ സുഷുപ്തിയിലാകുന്നതിൽ നിന്നും തടയുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
