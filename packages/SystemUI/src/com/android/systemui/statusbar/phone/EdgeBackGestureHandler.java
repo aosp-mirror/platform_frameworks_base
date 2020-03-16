@@ -44,6 +44,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
+import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
@@ -99,8 +100,10 @@ public class EdgeBackGestureHandler implements DisplayListener,
     private final Region mExcludeRegion = new Region();
     private final Region mUnrestrictedExcludeRegion = new Region();
 
-    // The edge width where touch down is allowed
-    private int mEdgeWidth;
+    // The left side edge width where touch down is allowed
+    private int mEdgeWidthLeft;
+    // The right side edge width where touch down is allowed
+    private int mEdgeWidthRight;
     // The bottom gesture area height
     private int mBottomGestureHeight;
     // The slop to distinguish between horizontal and vertical motion
@@ -126,6 +129,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
     private int mLeftInset;
     private int mRightInset;
     private int mSysUiFlags;
+
+    private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
     private final NavigationEdgeBackPlugin.BackCallback mBackCallback =
             new NavigationEdgeBackPlugin.BackCallback() {
@@ -174,13 +179,17 @@ public class EdgeBackGestureHandler implements DisplayListener,
         mLongPressTimeout = Math.min(MAX_LONG_PRESS_TIMEOUT,
                 ViewConfiguration.getLongPressTimeout());
 
+        mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
+                mContext.getMainThreadHandler(), mContext, () -> updateCurrentUserResources(res));
+
         updateCurrentUserResources(res);
         sysUiFlagContainer.addCallback(sysUiFlags -> mSysUiFlags = sysUiFlags);
     }
 
     public void updateCurrentUserResources(Resources res) {
-        mEdgeWidth = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.config_backGestureInset);
+        mEdgeWidthLeft = mGestureNavigationSettingsObserver.getLeftSensitivity(res);
+        mEdgeWidthRight = mGestureNavigationSettingsObserver.getRightSensitivity(res);
+
         mBottomGestureHeight = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.navigation_bar_gesture_height);
     }
@@ -236,6 +245,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
         }
 
         if (!mIsEnabled) {
+            mGestureNavigationSettingsObserver.unregister();
             mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             mPluginManager.removePluginListener(this);
 
@@ -248,6 +258,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
             }
 
         } else {
+            mGestureNavigationSettingsObserver.register();
             updateDisplaySize();
             mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
                     mContext.getMainThreadHandler());
@@ -321,7 +332,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
 
     private boolean isWithinTouchRegion(int x, int y) {
         // Disallow if too far from the edge
-        if (x > mEdgeWidth + mLeftInset && x < (mDisplaySize.x - mEdgeWidth - mRightInset)) {
+        if (x > mEdgeWidthLeft + mLeftInset
+                && x < (mDisplaySize.x - mEdgeWidthRight - mRightInset)) {
             return false;
         }
 
@@ -364,7 +376,7 @@ public class EdgeBackGestureHandler implements DisplayListener,
         if (action == MotionEvent.ACTION_DOWN) {
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
-            mIsOnLeftEdge = ev.getX() <= mEdgeWidth + mLeftInset;
+            mIsOnLeftEdge = ev.getX() <= mEdgeWidthLeft + mLeftInset;
             mInRejectedExclusion = false;
             mAllowGesture = !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
@@ -461,7 +473,8 @@ public class EdgeBackGestureHandler implements DisplayListener,
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
         pw.println("  mIsAttached=" + mIsAttached);
-        pw.println("  mEdgeWidth=" + mEdgeWidth);
+        pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
+        pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
     }
 
     @Override
