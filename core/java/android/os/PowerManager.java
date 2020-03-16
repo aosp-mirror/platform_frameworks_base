@@ -2221,33 +2221,6 @@ public final class PowerManager {
             = "android.os.action.POWER_SAVE_TEMP_WHITELIST_CHANGED";
 
     /**
-     * Intent that is broadcast when the state of {@link #isPowerSaveMode()} is about to change.
-     * This broadcast is only sent to registered receivers.
-     *
-     * @deprecated This is sent at the same time as {@link #ACTION_POWER_SAVE_MODE_CHANGED} so it
-     * does not provide advanced warning. As such it will be removed in future Android versions.
-     * Use {@link #ACTION_POWER_SAVE_MODE_CHANGED} and {@link #isPowerSaveMode()} instead.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
-            publicAlternatives = "Use {@link #ACTION_POWER_SAVE_MODE_CHANGED} instead.")
-    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
-    @Deprecated
-    public static final String ACTION_POWER_SAVE_MODE_CHANGING
-            = "android.os.action.POWER_SAVE_MODE_CHANGING";
-
-    /**
-     * @deprecated Use {@link #isPowerSaveMode()} instead.
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
-            publicAlternatives = "Use {@link #isPowerSaveMode()} instead.")
-    @Deprecated
-    public static final String EXTRA_POWER_SAVE_MODE = "mode";
-
-    /**
      * Constant for PreIdleTimeout normal mode (default mode, not short nor extend timeout) .
      * @hide
      */

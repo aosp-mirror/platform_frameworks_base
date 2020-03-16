@@ -497,12 +497,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
             // Send the broadcasts and notify the listeners. We only do this when the battery saver
             // mode changes, but not when only the screen state changes.
-            Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGING)
-                    .putExtra(PowerManager.EXTRA_POWER_SAVE_MODE, isEnabled())
-                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-
-            intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
+            Intent intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
