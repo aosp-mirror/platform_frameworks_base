@@ -2332,8 +2332,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void enforceModifyAudioRoutingPermission() {
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Missing MODIFY_AUDIO_ROUTING permission");
         }
@@ -4608,6 +4607,117 @@ public class AudioService extends IAudioService.Stub
 
     private void onObserveDevicesForAllStreams() {
         observeDevicesForStreams(-1);
+    }
+
+    /**
+     * @see AudioManager#setDeviceVolumeBehavior(AudioDeviceAttributes, int)
+     * @param device the audio device to be affected
+     * @param deviceVolumeBehavior one of the device behaviors
+     */
+    public void setDeviceVolumeBehavior(@NonNull AudioDeviceAttributes device,
+            @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior, @Nullable String pkgName) {
+        // verify permissions
+        enforceModifyAudioRoutingPermission();
+        // verify arguments
+        Objects.requireNonNull(device);
+        AudioManager.enforceValidVolumeBehavior(deviceVolumeBehavior);
+        if (pkgName == null) {
+            pkgName = "";
+        }
+        // translate Java device type to native device type (for the devices masks for full / fixed)
+        final int type;
+        switch (device.getType()) {
+            case AudioDeviceInfo.TYPE_HDMI:
+                type = AudioSystem.DEVICE_OUT_HDMI;
+                break;
+            case AudioDeviceInfo.TYPE_HDMI_ARC:
+                type = AudioSystem.DEVICE_OUT_HDMI_ARC;
+                break;
+            case AudioDeviceInfo.TYPE_LINE_DIGITAL:
+                type = AudioSystem.DEVICE_OUT_SPDIF;
+                break;
+            case AudioDeviceInfo.TYPE_AUX_LINE:
+                type = AudioSystem.DEVICE_OUT_LINE;
+                break;
+            default:
+                // unsupported for now
+                throw new IllegalArgumentException("Unsupported device type " + device.getType());
+        }
+        // update device masks based on volume behavior
+        switch (deviceVolumeBehavior) {
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE:
+                mFullVolumeDevices.remove(type);
+                mFixedVolumeDevices.remove(type);
+                break;
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED:
+                mFullVolumeDevices.remove(type);
+                mFixedVolumeDevices.add(type);
+                break;
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL:
+                mFullVolumeDevices.add(type);
+                mFixedVolumeDevices.remove(type);
+                break;
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE:
+            case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE:
+                throw new IllegalArgumentException("Absolute volume unsupported for now");
+        }
+        // log event and caller
+        sDeviceLogger.log(new AudioEventLogger.StringEvent(
+                "Volume behavior " + deviceVolumeBehavior
+                        + " for dev=0x" + Integer.toHexString(type) + " by pkg:" + pkgName));
+        // make sure we have a volume entry for this device, and that volume is updated according
+        // to volume behavior
+        checkAddAllFixedVolumeDevices(type, "setDeviceVolumeBehavior:" + pkgName);
+    }
+
+    /**
+     * @see AudioManager#getDeviceVolumeBehavior(AudioDeviceAttributes)
+     * @param device the audio output device type
+     * @return the volume behavior for the device
+     */
+    public @AudioManager.DeviceVolumeBehavior int getDeviceVolumeBehavior(
+            @NonNull AudioDeviceAttributes device) {
+        // verify permissions
+        enforceModifyAudioRoutingPermission();
+        // translate Java device type to native device type (for the devices masks for full / fixed)
+        final int type;
+        switch (device.getType()) {
+            case AudioDeviceInfo.TYPE_HEARING_AID:
+                type = AudioSystem.DEVICE_OUT_HEARING_AID;
+                break;
+            case AudioDeviceInfo.TYPE_BLUETOOTH_A2DP:
+                type = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
+                break;
+            case AudioDeviceInfo.TYPE_HDMI:
+                type = AudioSystem.DEVICE_OUT_HDMI;
+                break;
+            case AudioDeviceInfo.TYPE_HDMI_ARC:
+                type = AudioSystem.DEVICE_OUT_HDMI_ARC;
+                break;
+            case AudioDeviceInfo.TYPE_LINE_DIGITAL:
+                type = AudioSystem.DEVICE_OUT_SPDIF;
+                break;
+            case AudioDeviceInfo.TYPE_AUX_LINE:
+                type = AudioSystem.DEVICE_OUT_LINE;
+                break;
+            default:
+                // unsupported for now
+                throw new IllegalArgumentException("Unsupported device type " + device.getType());
+        }
+        if ((mFullVolumeDevices.contains(type))) {
+            return AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL;
+        }
+        if ((mFixedVolumeDevices.contains(type))) {
+            return AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED;
+        }
+        if ((mAbsVolumeMultiModeCaseDevices.contains(type))) {
+            return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE;
+        }
+        if (type == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
+                && mDeviceBroker.isAvrcpAbsoluteVolumeSupported()) {
+            return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
+        }
+        return AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE;
     }
 
     /*package*/ static final int CONNECTION_STATE_DISCONNECTED = 0;
