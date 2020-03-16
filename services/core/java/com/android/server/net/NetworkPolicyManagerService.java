@@ -75,7 +75,7 @@ import static android.net.NetworkTemplate.MATCH_MOBILE;
 import static android.net.NetworkTemplate.MATCH_WIFI;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.TrafficStats.MB_IN_BYTES;
-import static android.net.netstats.provider.AbstractNetworkStatsProvider.QUOTA_UNLIMITED;
+import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 import static android.os.Trace.TRACE_TAG_NETWORK;
 import static android.provider.Settings.Global.NETPOLICY_OVERRIDE_ENABLED;
 import static android.provider.Settings.Global.NETPOLICY_QUOTA_ENABLED;

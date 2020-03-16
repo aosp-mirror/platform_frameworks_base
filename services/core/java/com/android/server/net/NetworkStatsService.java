@@ -103,7 +103,7 @@ import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
-import android.net.netstats.provider.NetworkStatsProviderCallback;
+import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.BestClock;
 import android.os.Binder;
 import android.os.DropBoxManager;
@@ -558,7 +558,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
-        invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.setAlert(mGlobalAlertBytes));
+        invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetAlert(mGlobalAlertBytes));
     }
 
     @Override
@@ -1376,7 +1376,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         Trace.traceBegin(TRACE_TAG_NETWORK, "provider.requestStatsUpdate");
         final int registeredCallbackCount = mStatsProviderCbList.getRegisteredCallbackCount();
         mStatsProviderSem.drainPermits();
-        invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.requestStatsUpdate(0 /* unused */));
+        invokeForAllStatsProviderCallbacks(
+                (cb) -> cb.mProvider.onRequestStatsUpdate(0 /* unused */));
         try {
             mStatsProviderSem.tryAcquire(registeredCallbackCount,
                     MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
@@ -1551,7 +1552,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @Override
         public void setStatsProviderLimitAsync(@NonNull String iface, long quota) {
             Slog.v(TAG, "setStatsProviderLimitAsync(" + iface + "," + quota + ")");
-            invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.setLimit(iface, quota));
+            invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetLimit(iface, quota));
         }
     }
 
@@ -1820,12 +1821,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      *
      * @param tag a human readable identifier of the custom network stats provider.
      * @param provider the {@link INetworkStatsProvider} binder corresponding to the
-     *                 {@link android.net.netstats.provider.AbstractNetworkStatsProvider} to be
-     *                 registered.
+     *                 {@link NetworkStatsProvider} to be registered.
      *
-     * @return a binder interface of
-     *         {@link android.net.netstats.provider.NetworkStatsProviderCallback}, which can be
-     *         used to report events to the system.
+     * @return a {@link INetworkStatsProviderCallback} binder
+     *         interface, which can be used to report events to the system.
      */
     public @NonNull INetworkStatsProviderCallback registerNetworkStatsProvider(
             @NonNull String tag, @NonNull INetworkStatsProvider provider) {
@@ -1931,7 +1930,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void onStatsUpdated(int token, @Nullable NetworkStats ifaceStats,
+        public void notifyStatsUpdated(int token, @Nullable NetworkStats ifaceStats,
                 @Nullable NetworkStats uidStats) {
             // TODO: 1. Use token to map ifaces to correct NetworkIdentity.
             //       2. Store the difference and store it directly to the recorder.
@@ -1943,12 +1942,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void onAlertReached() throws RemoteException {
+        public void notifyAlertReached() throws RemoteException {
             mAlertObserver.limitReached(LIMIT_GLOBAL_ALERT, null /* unused */);
         }
 
         @Override
-        public void onLimitReached() {
+        public void notifyLimitReached() {
             Log.d(TAG, mTag + ": onLimitReached");
             LocalServices.getService(NetworkPolicyManagerInternal.class)
                     .onStatsProviderLimitReached(mTag);
