@@ -699,6 +699,9 @@
     <!-- margin on the top when the icon is centered for group conversations -->
     <dimen name="conversation_icon_margin_top_centered">5dp</dimen>
 
+    <!-- margin at the end of messaging group icons when not conversations -->
+    <dimen name="messaging_layout_margin_end">12dp</dimen>
+
     <!-- Padding between text and sender when singleline -->
     <dimen name="messaging_group_singleline_sender_padding_end">4dp</dimen>
 
