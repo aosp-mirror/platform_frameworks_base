@@ -6288,7 +6288,6 @@ package android.net {
     method @Nullable public android.net.Network getNetwork();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
-    method public void onBandwidthUpdateRequested();
     method public void onNetworkUnwanted();
     method public void onRemoveKeepalivePacketFilter(int);
     method public void onSaveAcceptUnvalidated(boolean);
@@ -6302,23 +6301,17 @@ package android.net {
     method public void sendNetworkScore(int);
     method public void sendSocketKeepaliveEvent(int, int);
     method public void setConnected();
-    method @Deprecated public void setLegacyExtraInfo(@Nullable String);
-    method @Deprecated public void setLegacySubtype(int, @NonNull String);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
-    field public final int providerId;
   }
 
   public final class NetworkAgentConfig implements android.os.Parcelable {
     method public int describeContents();
     method public int getLegacyType();
     method @NonNull public String getLegacyTypeName();
-    method @Nullable public String getSubscriberId();
     method public boolean isExplicitlySelected();
-    method public boolean isNat64DetectionEnabled();
     method public boolean isPartialConnectivityAcceptable();
-    method public boolean isProvisioningNotificationEnabled();
     method public boolean isUnvalidatedConnectivityAcceptable();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkAgentConfig> CREATOR;
@@ -6327,18 +6320,14 @@ package android.net {
   public static class NetworkAgentConfig.Builder {
     ctor public NetworkAgentConfig.Builder();
     method @NonNull public android.net.NetworkAgentConfig build();
-    method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
-    method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
     method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setPartialConnectivityAcceptable(boolean);
-    method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setUnvalidatedConnectivityAcceptable(boolean);
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    method public boolean deduceRestrictedCapability();
     method @NonNull public java.util.List<java.lang.Integer> getAdministratorUids();
     method @Nullable public String getSSID();
     method @NonNull public int[] getTransportTypes();
@@ -6363,27 +6352,9 @@ package android.net {
     field public final android.net.WifiKey wifiKey;
   }
 
-  public class NetworkPolicyManager {
-    method @NonNull public android.telephony.SubscriptionPlan[] getSubscriptionPlans(int, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void registerSubscriptionCallback(@NonNull android.net.NetworkPolicyManager.SubscriptionCallback);
-    method public void setSubscriptionOverride(int, int, int, long, @NonNull String);
-    method public void setSubscriptionPlans(int, @NonNull android.telephony.SubscriptionPlan[], @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void unregisterSubscriptionCallback(@NonNull android.net.NetworkPolicyManager.SubscriptionCallback);
-    field public static final int SUBSCRIPTION_OVERRIDE_CONGESTED = 2; // 0x2
-    field public static final int SUBSCRIPTION_OVERRIDE_UNMETERED = 1; // 0x1
-  }
-
-  public static class NetworkPolicyManager.SubscriptionCallback {
-    ctor public NetworkPolicyManager.SubscriptionCallback();
-    method public void onSubscriptionOverride(int, int, int);
-    method public void onSubscriptionPlansChanged(int, @NonNull android.telephony.SubscriptionPlan[]);
-  }
-
   public class NetworkProvider {
     ctor public NetworkProvider(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void declareNetworkRequestUnfulfillable(@NonNull android.net.NetworkRequest);
-    method @Nullable public android.os.Messenger getMessenger();
-    method @NonNull public String getName();
     method public int getProviderId();
     method public void onNetworkRequested(@NonNull android.net.NetworkRequest, int, int);
     method public void onRequestWithdrawn(@NonNull android.net.NetworkRequest);
