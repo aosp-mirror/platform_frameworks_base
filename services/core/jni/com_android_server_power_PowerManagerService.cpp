@@ -178,6 +178,92 @@ bool processPowerHalReturn(bool isOk, const char* functionName) {
     return isOk;
 }
 
+enum class HalSupport {
+    UNKNOWN = 0,
+    ON,
+    OFF,
+};
+
+static void setPowerBoostWithHandle(sp<IPowerAidl> handle, Boost boost, int32_t durationMs) {
+    // Android framework only sends boost upto DISPLAY_UPDATE_IMMINENT.
+    // Need to increase the array size if more boost supported.
+    static std::array<std::atomic<HalSupport>,
+                      static_cast<int32_t>(Boost::DISPLAY_UPDATE_IMMINENT) + 1>
+            boostSupportedArray = {HalSupport::UNKNOWN};
+
+    // Quick return if boost is not supported by HAL
+    if (boost > Boost::DISPLAY_UPDATE_IMMINENT ||
+        boostSupportedArray[static_cast<int32_t>(boost)] == HalSupport::OFF) {
+        ALOGV("Skipped setPowerBoost %s because HAL doesn't support it", toString(boost).c_str());
+        return;
+    }
+
+    if (boostSupportedArray[static_cast<int32_t>(boost)] == HalSupport::UNKNOWN) {
+        bool isSupported = false;
+        handle->isBoostSupported(boost, &isSupported);
+        boostSupportedArray[static_cast<int32_t>(boost)] =
+            isSupported ? HalSupport::ON : HalSupport::OFF;
+        if (!isSupported) {
+            ALOGV("Skipped setPowerBoost %s because HAL doesn't support it",
+                  toString(boost).c_str());
+            return;
+        }
+    }
+
+    auto ret = handle->setBoost(boost, durationMs);
+    processPowerHalReturn(ret.isOk(), "setPowerBoost");
+}
+
+static void setPowerBoost(Boost boost, int32_t durationMs) {
+    std::unique_lock<std::mutex> lock(gPowerHalMutex);
+    if (connectPowerHalLocked() != HalVersion::AIDL) {
+        ALOGV("Power HAL AIDL not available");
+        return;
+    }
+    sp<IPowerAidl> handle = gPowerHalAidl_;
+    lock.unlock();
+    setPowerBoostWithHandle(handle, boost, durationMs);
+}
+
+static void setPowerModeWithHandle(sp<IPowerAidl> handle, Mode mode, bool enabled) {
+    // Android framework only sends mode upto DISPLAY_INACTIVE.
+    // Need to increase the array if more mode supported.
+    static std::array<std::atomic<HalSupport>, static_cast<int32_t>(Mode::DISPLAY_INACTIVE) + 1>
+            modeSupportedArray = {HalSupport::UNKNOWN};
+
+    // Quick return if mode is not supported by HAL
+    if (mode > Mode::DISPLAY_INACTIVE ||
+        modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::OFF) {
+        ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
+        return;
+    }
+
+    if (modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::UNKNOWN) {
+        bool isSupported = false;
+        handle->isModeSupported(mode, &isSupported);
+        modeSupportedArray[static_cast<int32_t>(mode)] =
+            isSupported ? HalSupport::ON : HalSupport::OFF;
+        if (!isSupported) {
+            ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
+            return;
+        }
+    }
+
+    auto ret = handle->setMode(mode, enabled);
+    processPowerHalReturn(ret.isOk(), "setPowerMode");
+}
+
+static void setPowerMode(Mode mode, bool enabled) {
+    std::unique_lock<std::mutex> lock(gPowerHalMutex);
+    if (connectPowerHalLocked() != HalVersion::AIDL) {
+        ALOGV("Power HAL AIDL not available");
+        return;
+    }
+    sp<IPowerAidl> handle = gPowerHalAidl_;
+    lock.unlock();
+    setPowerModeWithHandle(handle, mode, enabled);
+}
+
 static void sendPowerHint(PowerHint hintId, uint32_t data) {
     std::unique_lock<std::mutex> lock(gPowerHalMutex);
     switch (connectPowerHalLocked()) {
@@ -201,14 +287,28 @@ static void sendPowerHint(PowerHint hintId, uint32_t data) {
             if (hintId == PowerHint::INTERACTION) {
                 sp<IPowerAidl> handle = gPowerHalAidl_;
                 lock.unlock();
-                auto ret = handle->setBoost(Boost::INTERACTION, data);
-                processPowerHalReturn(ret.isOk(), "setBoost");
+                setPowerBoostWithHandle(handle, Boost::INTERACTION, data);
                 break;
             } else if (hintId == PowerHint::LAUNCH) {
                 sp<IPowerAidl> handle = gPowerHalAidl_;
                 lock.unlock();
-                auto ret = handle->setMode(Mode::LAUNCH, static_cast<bool>(data));
-                processPowerHalReturn(ret.isOk(), "setMode");
+                setPowerModeWithHandle(handle, Mode::LAUNCH, static_cast<bool>(data));
+                break;
+            } else if (hintId == PowerHint::LOW_POWER) {
+                sp<IPowerAidl> handle = gPowerHalAidl_;
+                lock.unlock();
+                setPowerModeWithHandle(handle, Mode::LOW_POWER, static_cast<bool>(data));
+                break;
+            } else if (hintId == PowerHint::SUSTAINED_PERFORMANCE) {
+                sp<IPowerAidl> handle = gPowerHalAidl_;
+                lock.unlock();
+                setPowerModeWithHandle(handle, Mode::SUSTAINED_PERFORMANCE,
+                                       static_cast<bool>(data));
+                break;
+            } else if (hintId == PowerHint::VR_MODE) {
+                sp<IPowerAidl> handle = gPowerHalAidl_;
+                lock.unlock();
+                setPowerModeWithHandle(handle, Mode::VR, static_cast<bool>(data));
                 break;
             } else {
                 ALOGE("Unsupported power hint: %s.", toString(hintId).c_str());
@@ -221,87 +321,6 @@ static void sendPowerHint(PowerHint hintId, uint32_t data) {
         }
     }
     SurfaceComposerClient::notifyPowerHint(static_cast<int32_t>(hintId));
-}
-
-enum class HalSupport {
-    UNKNOWN = 0,
-    ON,
-    OFF,
-};
-
-static void setPowerBoost(Boost boost, int32_t durationMs) {
-    // Android framework only sends boost upto DISPLAY_UPDATE_IMMINENT.
-    // Need to increase the array size if more boost supported.
-    static std::array<std::atomic<HalSupport>,
-                      static_cast<int32_t>(Boost::DISPLAY_UPDATE_IMMINENT) + 1>
-        boostSupportedArray = {HalSupport::UNKNOWN};
-
-    // Quick return if boost is not supported by HAL
-    if (boost > Boost::DISPLAY_UPDATE_IMMINENT ||
-        boostSupportedArray[static_cast<int32_t>(boost)] == HalSupport::OFF) {
-        ALOGV("Skipped setPowerBoost %s because HAL doesn't support it", toString(boost).c_str());
-        return;
-    }
-
-    std::unique_lock<std::mutex> lock(gPowerHalMutex);
-    if (connectPowerHalLocked() != HalVersion::AIDL) {
-        ALOGV("Power HAL AIDL not available");
-        return;
-    }
-    sp<IPowerAidl> handle = gPowerHalAidl_;
-    lock.unlock();
-
-    if (boostSupportedArray[static_cast<int32_t>(boost)] == HalSupport::UNKNOWN) {
-        bool isSupported = false;
-        handle->isBoostSupported(boost, &isSupported);
-        boostSupportedArray[static_cast<int32_t>(boost)] =
-            isSupported ? HalSupport::ON : HalSupport::OFF;
-        if (!isSupported) {
-            ALOGV("Skipped setPowerBoost %s because HAL doesn't support it",
-                  toString(boost).c_str());
-            return;
-        }
-    }
-
-    auto ret = handle->setBoost(boost, durationMs);
-    processPowerHalReturn(ret.isOk(), "setPowerBoost");
-}
-
-static void setPowerMode(Mode mode, bool enabled) {
-    // Android framework only sends mode upto DISPLAY_INACTIVE.
-    // Need to increase the array if more mode supported.
-    static std::array<std::atomic<HalSupport>,
-                      static_cast<int32_t>(Mode::DISPLAY_INACTIVE) + 1>
-        modeSupportedArray = {HalSupport::UNKNOWN};
-
-    // Quick return if mode is not supported by HAL
-    if (mode > Mode::DISPLAY_INACTIVE ||
-        modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::OFF) {
-        ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
-        return;
-    }
-
-    std::unique_lock<std::mutex> lock(gPowerHalMutex);
-    if (connectPowerHalLocked() != HalVersion::AIDL) {
-        ALOGV("Power HAL AIDL not available");
-        return;
-    }
-    sp<IPowerAidl> handle = gPowerHalAidl_;
-    lock.unlock();
-
-    if (modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::UNKNOWN) {
-        bool isSupported = false;
-        handle->isModeSupported(mode, &isSupported);
-        modeSupportedArray[static_cast<int32_t>(mode)] =
-            isSupported ? HalSupport::ON : HalSupport::OFF;
-        if (!isSupported) {
-            ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
-            return;
-        }
-    }
-
-    auto ret = handle->setMode(mode, enabled);
-    processPowerHalReturn(ret.isOk(), "setPowerMode");
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {
@@ -426,8 +445,7 @@ static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean
         case HalVersion::AIDL: {
             sp<IPowerAidl> handle = gPowerHalAidl_;
             lock.unlock();
-            auto ret = handle->setMode(Mode::INTERACTIVE, enable);
-            processPowerHalReturn(ret.isOk(), "setMode");
+            setPowerModeWithHandle(handle, Mode::INTERACTIVE, enable);
             return;
         }
         default: {
@@ -481,8 +499,9 @@ static void nativeSetFeature(JNIEnv* /* env */, jclass /* clazz */, jint feature
             return;
         }
         case HalVersion::AIDL: {
-            auto ret = gPowerHalAidl_->setMode(Mode::DOUBLE_TAP_TO_WAKE, static_cast<bool>(data));
-            processPowerHalReturn(ret.isOk(), "setMode");
+            sp<IPowerAidl> handle = gPowerHalAidl_;
+            lock.unlock();
+            setPowerModeWithHandle(handle, Mode::DOUBLE_TAP_TO_WAKE, static_cast<bool>(data));
             return;
         }
         default: {
