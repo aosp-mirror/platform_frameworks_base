@@ -6423,7 +6423,6 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
     field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
     field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
-    field @Nullable public static final String IFACE_ALL;
     field public static final String IFACE_VT = "vt_data0";
     field public static final int METERED_NO = 0; // 0x0
     field public static final int METERED_YES = 1; // 0x1
