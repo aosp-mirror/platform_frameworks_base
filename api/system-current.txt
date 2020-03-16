@@ -5496,7 +5496,7 @@ package android.media.tv.tuner.frontend {
   public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder(@NonNull android.content.Context);
     method public int getAnnex();
-    method public long getFec();
+    method public long getInnerFec();
     method public int getModulation();
     method public int getOuterFec();
     method public int getSpectralInversion();
@@ -5524,7 +5524,7 @@ package android.media.tv.tuner.frontend {
   public static class DvbcFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder> {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
-    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFec(long);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setInnerFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setOuterFec(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setSpectralInversion(int);
@@ -5790,9 +5790,9 @@ package android.media.tv.tuner.frontend {
     method public int getAgc();
     method @NonNull public android.media.tv.tuner.frontend.FrontendStatus.Atsc3PlpInfo[] getAtsc3PlpInfo();
     method public int getBer();
-    method public long getFec();
     method public int getFreqOffset();
     method public int getHierarchy();
+    method public long getInnerFec();
     method @NonNull public boolean[] getLayerErrors();
     method public int getLnbVoltage();
     method public int getMer();
