@@ -24,6 +24,7 @@ import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorith
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.util.Pair;
+import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
 import libcore.io.IoUtils;
@@ -69,6 +70,8 @@ import java.util.zip.ZipEntry;
  */
 public abstract class SourceStampVerifier {
 
+    private static final String TAG = "SourceStampVerifier";
+
     private static final int APK_SIGNATURE_SCHEME_V2_BLOCK_ID = 0x7109871a;
     private static final int APK_SIGNATURE_SCHEME_V3_BLOCK_ID = 0xf05368c0;
     private static final int SOURCE_STAMP_BLOCK_ID = 0x2b09189e;
@@ -99,28 +102,31 @@ public abstract class SourceStampVerifier {
 
     /** Verifies SourceStamp present in the provided APK. */
     public static SourceStampVerificationResult verify(String apkFile) {
+        StrictJarFile apkJar = null;
         try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
-            return verify(apk);
-        } catch (IOException e) {
-            // Any exception in reading the APK returns a non-present SourceStamp outcome
-            // without affecting the outcome of any of the other signature schemes.
-            return SourceStampVerificationResult.notPresent();
-        }
-    }
-
-    private static SourceStampVerificationResult verify(RandomAccessFile apk) {
-        byte[] sourceStampCertificateDigest;
-        try {
-            sourceStampCertificateDigest = getSourceStampCertificateDigest(apk);
+            apkJar =
+                    new StrictJarFile(
+                            apkFile,
+                            /* verify= */ false,
+                            /* signatureSchemeRollbackProtectionsEnforced= */ false);
+            byte[] sourceStampCertificateDigest = getSourceStampCertificateDigest(apkJar);
             if (sourceStampCertificateDigest == null) {
                 // SourceStamp certificate hash file not found, which means that there is not
                 // SourceStamp present.
                 return SourceStampVerificationResult.notPresent();
             }
+            return verify(apk, sourceStampCertificateDigest);
         } catch (IOException e) {
+            // Any exception in reading the APK returns a non-present SourceStamp outcome
+            // without affecting the outcome of any of the other signature schemes.
             return SourceStampVerificationResult.notPresent();
+        } finally {
+            closeApkJar(apkJar);
         }
+    }
 
+    private static SourceStampVerificationResult verify(
+            RandomAccessFile apk, byte[] sourceStampCertificateDigest) {
         try {
             SignatureInfo signatureInfo =
                     ApkSigningBlockUtils.findSignature(apk, SOURCE_STAMP_BLOCK_ID);
@@ -283,22 +289,17 @@ public abstract class SourceStampVerifier {
         return apkContentDigests;
     }
 
-    private static byte[] getSourceStampCertificateDigest(RandomAccessFile apk) throws IOException {
-        StrictJarFile apkJar =
-                new StrictJarFile(
-                        apk.getFD(),
-                        /* verify= */ false,
-                        /* signatureSchemeRollbackProtectionsEnforced= */ false);
-        ZipEntry zipEntry = apkJar.findEntry(SOURCE_STAMP_CERTIFICATE_HASH_ZIP_ENTRY_NAME);
-        if (zipEntry == null) {
-            // SourceStamp certificate hash file not found, which means that there is not
-            // SourceStamp present.
-            return null;
-        }
+    private static byte[] getSourceStampCertificateDigest(StrictJarFile apkJar) throws IOException {
         InputStream inputStream = null;
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
+            ZipEntry zipEntry = apkJar.findEntry(SOURCE_STAMP_CERTIFICATE_HASH_ZIP_ENTRY_NAME);
+            if (zipEntry == null) {
+                // SourceStamp certificate hash file not found, which means that there is not
+                // SourceStamp present.
+                return null;
+            }
             inputStream = apkJar.getInputStream(zipEntry);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
             // Trying to read the certificate digest, which should be less than 1024 bytes.
             byte[] buffer = new byte[1024];
@@ -326,5 +327,16 @@ public abstract class SourceStampVerifier {
             result.put(second);
         }
         return result.array();
+    }
+
+    private static void closeApkJar(StrictJarFile apkJar) {
+        try {
+            if (apkJar == null) {
+                return;
+            }
+            apkJar.close();
+        } catch (IOException e) {
+            Slog.e(TAG, "Could not close APK jar", e);
+        }
     }
 }
