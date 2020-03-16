@@ -58,7 +58,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CO
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -1479,12 +1478,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "%s.  Aborting.", attrs.token);
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-            } else if (rootType == TYPE_DREAM) {
-                if (token.windowType != TYPE_DREAM) {
-                    ProtoLog.w(WM_ERROR, "Attempted to add Dream window with bad token "
-                            + "%s.  Aborting.", attrs.token);
-                    return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
-                }
             } else if (rootType == TYPE_ACCESSIBILITY_OVERLAY) {
                 if (token.windowType != TYPE_ACCESSIBILITY_OVERLAY) {
                     ProtoLog.w(WM_ERROR,
@@ -1717,11 +1710,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (rootType == TYPE_WALLPAPER) {
             ProtoLog.w(WM_ERROR, "Attempted to add wallpaper window with unknown token "
-                    + "%s.  Aborting.", tokenForLog);
-            return false;
-        }
-        if (rootType == TYPE_DREAM) {
-            ProtoLog.w(WM_ERROR, "Attempted to add Dream window with unknown token "
                     + "%s.  Aborting.", tokenForLog);
             return false;
         }
