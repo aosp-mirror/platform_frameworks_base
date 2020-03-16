@@ -1006,7 +1006,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 256L, 2L, 256L, 2L);
+                .insertEntry(TEST_IFACE, 256L, 2L, 256L, 2L);
         when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START, CYCLE_END))
                 .thenReturn(stats.getTotalBytes());
 
@@ -1198,11 +1198,11 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addEntry(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
@@ -1226,9 +1226,9 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(960), 0, 0, 0, 0);
-            stats.addEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
@@ -1260,7 +1260,7 @@ public class NetworkPolicyManagerServiceTest {
         // bring up wifi network with metered policy
         state = new NetworkState[] { buildWifi() };
         stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
+                .insertEntry(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
             when(mConnManager.getAllNetworkState()).thenReturn(state);
@@ -1692,7 +1692,7 @@ public class NetworkPolicyManagerServiceTest {
         final int CYCLE_DAY = 15;
 
         final NetworkStats stats = new NetworkStats(0L, 1);
-        stats.addEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
                 2999, 1, 2000, 1, 0);
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
                 .thenReturn(stats.getTotalBytes());
@@ -1716,7 +1716,7 @@ public class NetworkPolicyManagerServiceTest {
         reset(mStatsService);
 
         // Increase the usage.
-        stats.addEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
                 1000, 1, 999, 1, 0);
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
                 .thenReturn(stats.getTotalBytes());
