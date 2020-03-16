@@ -34,6 +34,7 @@ import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.function.Consumer;
 
 /**
  * A Tile. Right now this acts as a proxy for manipulating non-child stacks. Eventually, this
@@ -138,6 +139,12 @@ public class TaskTile extends ActivityStack {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer child = mChildren.get(i);
             child.onConfigurationChanged(child.getParent().getConfiguration());
+        }
+    }
+
+    void forAllTileActivities(Consumer<ActivityRecord> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).forAllActivities(callback, true /* traverseTopToBottom */);
         }
     }
 

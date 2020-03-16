@@ -30,7 +30,6 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
 import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
@@ -108,6 +107,8 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
      * presentations based on the contents of the split regions.
      */
     private void handleTaskInfoChanged(RunningTaskInfo info) {
+        final boolean secondaryWasHomeOrRecents = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
+                || mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS;
         final boolean primaryWasEmpty = mPrimary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryWasEmpty = mSecondary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         if (info.token.asBinder() == mPrimary.token.asBinder()) {
@@ -117,8 +118,15 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
         }
         final boolean primaryIsEmpty = mPrimary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryIsEmpty = mSecondary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
+        final boolean secondaryIsHomeOrRecents = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
+                || mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS;
         if (DEBUG) {
             Log.d(TAG, "onTaskInfoChanged " + mPrimary + "  " + mSecondary);
+        }
+        if (primaryIsEmpty == primaryWasEmpty && secondaryWasEmpty == secondaryIsEmpty
+                && secondaryWasHomeOrRecents == secondaryIsHomeOrRecents) {
+            // No relevant changes
+            return;
         }
         if (primaryIsEmpty || secondaryIsEmpty) {
             // At-least one of the splits is empty which means we are currently transitioning
@@ -146,8 +154,7 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
                 }
                 mDivider.startEnterSplit();
             }
-        } else if (mSecondary.topActivityType == ACTIVITY_TYPE_HOME
-                || mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS) {
+        } else if (secondaryIsHomeOrRecents) {
             // Both splits are populated but the secondary split has a home/recents stack on top,
             // so enter minimized mode.
             mDivider.ensureMinimizedSplit();

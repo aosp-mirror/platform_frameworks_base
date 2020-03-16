@@ -273,10 +273,12 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             }
 
             // Update all the adjusted-for-ime states
-            mView.setAdjustedForIme(mTargetShown, mTargetShown
-                    ? DisplayImeController.ANIMATION_DURATION_SHOW_MS
-                    : DisplayImeController.ANIMATION_DURATION_HIDE_MS);
-            setAdjustedForIme(mTargetShown);
+            if (!mPaused) {
+                mView.setAdjustedForIme(mTargetShown, mTargetShown
+                        ? DisplayImeController.ANIMATION_DURATION_SHOW_MS
+                        : DisplayImeController.ANIMATION_DURATION_HIDE_MS);
+            }
+            setAdjustedForIme(mTargetShown && !mPaused);
         }
 
         @Override
@@ -390,6 +392,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 mTargetPrimaryDim = mTargetSecondaryDim = 0.f;
                 updateImeAdjustState();
                 startAsyncAnimation();
+                if (mAnimation != null) {
+                    mAnimation.end();
+                }
             });
         }
 
@@ -605,15 +610,17 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                     + mHomeStackResizable + "->" + homeStackResizable + " split:" + inSplitMode());
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
+        final boolean minimizedChanged = mMinimized != minimized;
         // Update minimized state
-        if (mMinimized != minimized) {
+        if (minimizedChanged) {
             mMinimized = minimized;
         }
         // Always set this because we could be entering split when mMinimized is already true
         wct.setFocusable(mSplits.mPrimary.token, !mMinimized);
 
         // Update home-stack resizability
-        if (mHomeStackResizable != homeStackResizable) {
+        final boolean homeResizableChanged = mHomeStackResizable != homeStackResizable;
+        if (homeResizableChanged) {
             mHomeStackResizable = homeStackResizable;
             if (inSplitMode()) {
                 WindowManagerProxy.applyHomeTasksMinimized(
@@ -629,7 +636,10 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             if (mMinimized) {
                 mImePositionProcessor.pause(displayId);
             }
-            mView.setMinimizedDockStack(minimized, getAnimDuration(), homeStackResizable);
+            if (minimizedChanged || homeResizableChanged) {
+                // This conflicts with IME adjustment, so only call it when things change.
+                mView.setMinimizedDockStack(minimized, getAnimDuration(), homeStackResizable);
+            }
             if (!mMinimized) {
                 // afterwards so it can end any animations started in view
                 mImePositionProcessor.resume(displayId);
