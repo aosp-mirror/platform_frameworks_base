@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"اپنے مقام کی ترتیبات دیکھنے کے لیے تھپتھپائیں۔"</string>
     <string name="country_detector" msgid="7023275114706088854">"ملک کا ڈیٹیکٹر"</string>
     <string name="location_service" msgid="2439187616018455546">"مقام کی سروس"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"‏GNSS سروس"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"سینسر نوٹیفکیشن سروس"</string>
     <string name="twilight_service" msgid="8964898045693187224">"شفقی سروس"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"آپ کا آلہ صاف کر دیا جائے گا"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">بگ رپورٹ کیلئے <xliff:g id="NUMBER_1">%d</xliff:g> سیکنڈز میں اسکرین شاٹ لیا جائے گا۔</item>
       <item quantity="one">بگ رپورٹ کیلئے <xliff:g id="NUMBER_0">%d</xliff:g> سیکنڈ میں اسکرین شاٹ لیا جائے گا۔</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"بگ رپورٹ کے ساتھ لیا گیا اسکرین شاٹ"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"بگ رپورٹ کے ساتھ اسکرین شاٹ لینے میں ناکام"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"خاموش وضع"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"آواز آف ہے"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"آواز آن ہے"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"‏ایپ کو اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کرنے کی اجازت دیتی ہے۔ یہ ایپ کو GPS یا دوسرے مقام کے مآخذ کے عمل کے ساتھ مداخلت کرنے کی اجازت دے سکتی ہے۔"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"صرف پیش منظر میں درست مقام تک رسائی حاصل کریں"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"یہ ایپ جب استعمال میں ہوتی ہے تو مقام کی سروسز سے آپ کا درست مقام حاصل کر سکتی ہے۔ ایپ کی مدد سے مقام تک پہنچنے کے لیے آپ کے آلے میں مقام سروسز کا آن ہونا ضروری ہے۔ اس سے بیٹری کے استعمال میں اضافہ ہو سکتا ہے۔"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"صرف پیش منظر میں تخمینی مقام تک رسائی"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"یہ ایپ جب استعمال میں ہوتی ہے تو مقام کی سروسز سے آپ کا تخمینی مقام حاصل کر سکتی ہے۔ ایپ کی مدد سے مقام تک پہنچنے کے لیے آپ کے آلے میں مقام سروسز کا آن ہونا ضروری ہے۔"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"پس منظر میں مقام کی رسائی حاصل کریں"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"یہ ایپ استعمال میں نہ ہونے کے با وجود کسی بھی وقت مقام تک رسائی حاصل کر سکتی ہے۔"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"اپنے آڈیو کی ترتیبات کو تبدیل کریں"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ایپ کو مجموعی آڈیو ترتیبات جیسے والیوم اور آؤٹ پٹ کیلئے جو اسپیکر استعمال ہوتا ہے اس میں ترمیم کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"آڈیو ریکارڈ کریں"</string>
@@ -440,6 +436,10 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"یہ ایپ کسی بھی وقت کیمرا استعمال کرتے ہوئے تصاویر لے سکتی ہے اور ویڈیوز ریکارڈ کر سکتی ہے۔"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ایپلیکیشن یا سروس کو سسٹم کے کیمرے تک رسائی حاصل کرنے کی اجازت دیتا ہے تاکہ وہ تصاویر لیں اور ویڈیوز ریکارڈ کریں۔"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"‏یہ مراعات یافتہ سسٹم ایپ کسی بھی وقت ایک سسٹم کیمرا استعمال کرتے ہوئے تصاویر اور ویڈیوز ریکارڈ کر سکتی ہے۔ ایپ کے پاس android.permission.CAMERA کے ليے بھی اجازت ہونا ضروری ہے۔"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ارتعاش کو کنٹرول کریں"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ایپ کو وائبریٹر اسٹیٹ تک رسائی حاصل کرنے کی اجازت دیتا ہے۔"</string>
@@ -453,13 +453,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"کالںگ کا تجربہ بہتر بنانے کے لیے سسٹم کے ذریعہ ایپ کو کالز روٹ کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"سسٹم کے ذریعے کالز دیکھیں اور کنٹرول کریں۔"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ایپ کو آلہ پر جاری کالز دیکھنے اور کنٹرول کرنے کی اجازت دیں۔ اس میں کالز کیلئے کال نمبرز اور کالز کی حالت جیسی معلومات شامل ہیں۔"</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"دوسری ایپ کی کال جاری رکھیں"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ایپ کو دوسری ایپ میں شروع کردہ کال کو جاری رکھنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"فون نمبرز پڑھیں"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ایپ کو آلہ کے فون نمبرز تک رسائی کرنے دیتا ہے۔"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"کار کی اسکرین آن رکھیں"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ٹیبلیٹ کو سلیپ وضع میں جانے سے روکیں"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"‏اپنے Android TV کو سلیپ وضع میں جانے سے روکیں"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"فون کو سلیپ وضع میں جانے سے روکیں"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ایپ کو کار کی اسکرین آن رکھنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ایپ کو ٹیبلیٹ کو سلیپ وضع میں جانے سے روکنے کی اجازت دیتا ہے"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"‏ایپ کو آپ کے Android TV آلہ کو سلیپ وضع میں جانے سے روکنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ایپ کو فون کو سلیپ وضع میں جانے سے روکنے کی اجازت دیتا ہے"</string>
@@ -1262,7 +1268,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"موبائل نیٹ ورک کو انٹرنیٹ تک رسائی حاصل نہیں ہے"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"نیٹ ورک کو انٹرنیٹ تک رسائی حاصل نہیں ہے"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"‏نجی DNS سرور تک رسائی حاصل نہیں کی جا سکی"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"منسلک ہے"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> کی کنیکٹوٹی محدود ہے"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"بہر حال منسلک کرنے کے لیے تھپتھپائیں"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> پر سوئچ ہو گیا"</string>
@@ -1634,8 +1639,28 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"والیوم کو تجویز کردہ سطح سے زیادہ کریں؟\n\nزیادہ وقت تک اونچی آواز میں سننے سے آپ کی سماعت کو نقصان پہنچ سکتا ہے۔"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ایکسیسبیلٹی شارٹ کٹ استعمال کریں؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"شارٹ کٹ آن ہونے پر، 3 سیکنڈ تک دونوں والیوم بٹنز کو دبانے سے ایک ایکسیسبیلٹی خصوصیت شروع ہو جائے گی۔"</string>
+    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
+    <skip />
+    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
+    <skip />
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"مکمل کنٹرول ان ایپس کے لیے مناسب ہے جو ایکسیسبیلٹی کی ضروریات میں آپ کی مدد کرتی ہیں، لیکن زیادہ تر ایپس کیلئے مناسب نہیں۔"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"اسکرین کو دیکھیں اور کنٹرول کریں"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"یہ تمام مواد کو اسکرین پر پڑھ اور دیگر ایپس پر مواد کو ڈسپلے کر سکتا ہے۔"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"کارروائیاں دیکھیں اور انجام دیں"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"یہ آپ کے تعاملات کو ایپ یا ہارڈویئر سینسر کے ذریعے ٹریک کر سکتا ہے، اور آپ کی طرف سے ایپ کے ساتھ تعمل کر سکتا ہے۔"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"اجازت دیں"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مسترد کریں"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
+    <skip />
+    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"شارٹ کٹس میں ترمیم کریں"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"منسوخ کریں"</string>
+    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
+    <skip />
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"شارٹ کٹ آف کریں"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"شارٹ کٹ استعمال کریں"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"رنگوں کی تقلیب"</string>
@@ -1856,8 +1881,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"غیر زمرہ بند"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ان اطلاعات کی اہمیت آپ مقرر کرتے ہیں۔"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"اس میں موجود لوگوں کی وجہ سے یہ اہم ہے۔"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"حسب ضرورت ایپ کی اطلاع"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> کو <xliff:g id="ACCOUNT">%2$s</xliff:g> کے ساتھ ایک نیا صارف بنانے کی اجازت دیں (اس اکاؤنٹ کے ساتھ ایک صارف پہلے سے موجود ہے) ؟"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> کے ساتھ نئے صارف کو تخلیق کرنے کے لیے <xliff:g id="APP">%1$s</xliff:g> کو اجازت دیں ؟"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ایک زبان شامل کریں"</string>
@@ -2029,16 +2053,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ایکسیسبیلٹی مینو"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> کی کیپشن بار۔"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> کو پابند کردہ بکٹ میں رکھ دیا گیا ہے"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ذاتی"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"دفتر"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ذاتی ملاحظہ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"دفتری ملاحظہ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ورک ایپس کے ساتھ اشتراک نہیں کر سکتے"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ذاتی ایپس کے ساتھ اشتراک نہیں کر سکتے"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"‏آپ کے IT منتظم نے ذاتی اور ورک ایپس کے درمیان اشتراک کرنے کو مسدود کر دیا"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ورک ایپس آن کریں"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ورک ایپس اور رابطوں تک رسائی حاصل کرنے کے لیے ورک ایپس آن کریں"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"‏آپ کے IT منتظم نے ذاتی اور دفتری پروفائلز کے درمیان اشتراک کرنے کو مسدود کر دیا"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"دفتری ایپس تک رسائی حاصل نہیں کی جا سکتی"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"‏آپ کا IT منتظم آپ کو دفتری ایپس میں ذاتی مواد دیکھنے کی اجازت نہیں دیتا ہے"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"ذاتی ایپس تک رسائی حاصل نہیں کی جا سکتی"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"‏آپ کا IT منتظم آپ کو ذاتی ایپس میں دفتری مواد دیکھنے کی اجازت نہیں دیتا ہے"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"مواد کا اشتراک کرنے کے لیے دفتری پروفائل آن کریں"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"مواد دیکھنے کے ليے دفتری پروفائل آن کریں"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"کوئی ایپ دستیاب نہیں"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"ہمیں کوئی ایپ نہیں مل سکی"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"ورک کا سوئچ آن کریں"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"آن کریں"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ٹیلیفون کالز میں آڈیو ریکارڈ کریں یا چلائیں"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"اس ایپ کو، جب ڈیفالٹ ڈائلر ایپلیکیشن کے بطور تفویض کیا جاتا ہے، تو ٹیلیفون کالز میں آڈیو ریکارڈ کرنے یا چلانے کی اجازت دیتا ہے۔"</string>
 </resources>

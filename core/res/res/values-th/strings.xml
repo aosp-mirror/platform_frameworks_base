@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"แตะเพื่อดูการตั้งค่าตำแหน่ง"</string>
     <string name="country_detector" msgid="7023275114706088854">"เครื่องมือหาตำแหน่งประเทศ"</string>
     <string name="location_service" msgid="2439187616018455546">"บริการตำแหน่ง"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"บริการ GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"บริการแจ้งเตือนเกี่ยวกับเซ็นเซอร์"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"ระบบจะลบข้อมูลในอุปกรณ์ของคุณ"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที</item>
       <item quantity="one">จะจับภาพหน้าจอสำหรับรายงานข้อบกพร่องใน <xliff:g id="NUMBER_0">%d</xliff:g> วินาที</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"ถ่ายภาพหน้าจอด้วยรายงานข้อบกพร่องแล้ว"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"ถ่ายภาพหน้าจอด้วยรายงานข้อบกพร่องไม่สำเร็จ"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"โหมดปิดเสียง"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ปิดเสียงไว้"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"เปิดเสียงแล้ว"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"เข้าถึงคำสั่งของโปรแกรมแจ้งตำแหน่งพิเศษ"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"อนุญาตให้แอปเข้าถึงคำสั่งของผู้ให้บริการตำแหน่งเพิ่มเติม ซึ่งอาจทำให้แอปสามารถแทรกแซงการทำงานของ GPS หรือต้นทางของตำแหน่งอื่นๆ ได้"</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"เข้าถึงตำแหน่งที่แม่นยำเมื่ออยู่เบื้องหน้าเท่านั้น"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"แอปนี้เข้าถึงตำแหน่งที่แม่นยำของคุณได้จากบริการตำแหน่งขณะที่มีการใช้งาน โดยแอปจะเข้าถึงตำแหน่งได้ก็ต่อเมื่อคุณเปิดบริการตำแหน่งของอุปกรณ์ไว้ อาจมีการใช้งานแบตเตอรี่เพิ่มมากขึ้น"</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"เข้าถึงตำแหน่งโดยประมาณเมื่ออยู่เบื้องหน้าเท่านั้น"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"แอปนี้เข้าถึงตำแหน่งโดยประมาณของคุณได้จากบริการตำแหน่งขณะที่มีการใช้งาน โดยแอปจะเข้าถึงตำแหน่งได้ก็ต่อเมื่อคุณเปิดบริการตำแหน่งของอุปกรณ์ไว้"</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"เข้าถึงตำแหน่งในเบื้องหลัง"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"แอปนี้เข้าถึงตำแหน่งได้ทุกเมื่อแม้จะไม่ได้ใช้แอปอยู่"</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"เปลี่ยนการตั้งค่าเสียงของคุณ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"อนุญาตให้แอปพลิเคชันปรับเปลี่ยนการตั้งค่าเสียงทั้งหมดได้ เช่น ระดับเสียงและลำโพงที่จะใช้งาน"</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"บันทึกเสียง"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"แอปนี้สามารถถ่ายภาพและวิดีโอด้วยกล้องได้ทุกเมื่อ"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"อนุญาตให้แอปพลิเคชันหรือบริการเข้าถึงกล้องของระบบเพื่อถ่ายภาพและวิดีโอ"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"แอปของระบบ | ที่ได้รับสิทธิ์นี้จะถ่ายภาพและบันทึกวิดีโอโดยใช้กล้องของระบบได้ทุกเมื่อ แอปต้องมีสิทธิ์ android.permission.CAMERA ด้วย"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"อนุญาตให้แอปพลิเคชันหรือบริการได้รับโค้ดเรียกกลับเมื่อมีการเปิดหรือปิดอุปกรณ์กล้อง"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"แอปลายเซ็นนี้จะได้รับโค้ดเรียกกลับเมื่อมีการปิดหรือเปิดอุปกรณ์กล้อง (แพ็กเกจแอปพลิเคชันที่เปิด)"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"อนุญาตให้แอปพลิเคชันควบคุมการสั่นเตือน"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"อนุญาตให้แอปเข้าถึงสถานะการสั่น"</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"อนุญาตให้แอปกำหนดเส้นทางการโทรของแอปผ่านระบบเพื่อปรับปรุงประสบการณ์ในการโทร"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ดูและจัดการการติดต่อผ่านระบบ"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"อนุญาตให้แอปดูและจัดการการติดต่อในอุปกรณ์ ซึ่งรวมถึงข้อมูลอย่างเช่น หมายเลขที่ใช้ในการติดต่อและสถานะการติดต่อ"</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ต่อสายจากแอปอื่น"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"อนุญาตให้แอปต่อสายที่เริ่มจากแอปอื่น"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"อ่านหมายเลขโทรศัพท์"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"อนุญาตให้แอปเข้าถึงหมายเลขโทรศัพท์ของอุปกรณ์นี้"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"เปิดหน้าจอในรถไว้"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ป้องกันไม่ให้อุปกรณ์ Android TV เข้าสู่โหมดสลีป"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ป้องกันไม่ให้โทรศัพท์เข้าโหมดสลีป"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"อนุญาตให้แอปเปิดหน้าจอในรถไว้"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้แท็บเล็ตเข้าสู่โหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"อนุญาตให้แอปป้องกันไม่ให้อุปกรณ์ Android TV เข้าสู่โหมดสลีป"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"อนุญาตให้แอปพลิเคชันป้องกันไม่ให้โทรศัพท์เข้าสู่โหมดสลีป"</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"เครือข่ายมือถือไม่มีการเข้าถึงอินเทอร์เน็ต"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"เครือข่ายไม่มีการเข้าถึงอินเทอร์เน็ต"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"เข้าถึงเซิร์ฟเวอร์ DNS ไม่ได้"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"เชื่อมต่อแล้ว"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> มีการเชื่อมต่อจำกัด"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"แตะเพื่อเชื่อมต่อ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"เปลี่ยนเป็น <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"นี่เป็นการเพิ่มระดับเสียงเกินระดับที่แนะนำ\n\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ใช้ทางลัดการช่วยเหลือพิเศษไหม"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มนาน 3 วินาทีจะเริ่มฟีเจอร์การช่วยเหลือพิเศษ"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"อนุญาตให้ <xliff:g id="SERVICE">%1$s</xliff:g> ควบคุมอุปกรณ์อย่างเต็มที่ไหม"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"หากคุณเปิด <xliff:g id="SERVICE">%1$s</xliff:g> อุปกรณ์ของคุณจะไม่ใช้ล็อกหน้าจอเพื่อปรับปรุงการเข้ารหัสข้อมูล"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"การควบคุมอย่างเต็มที่เหมาะสำหรับแอปที่ช่วยคุณในเรื่องความต้องการความช่วยเหลือพิเศษแต่ไม่เหมาะสำหรับแอปส่วนใหญ่"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ดูและควบคุมหน้าจอ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"การควบคุมนี้อ่านเนื้อหาทั้งหมดบนหน้าจอและแสดงเนื้อหาทับแอปอื่นๆ"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ดูและดำเนินการ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"การกระทำนี้ติดตามการโต้ตอบของคุณกับแอปหรือกับเซ็นเซอร์ของฮาร์ดแวร์ และจะโต้ตอบกับแอปต่างๆ แทนคุณ"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"อนุญาต"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ปฏิเสธ"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"แตะฟีเจอร์เพื่อเริ่มใช้"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"เลือกแอปที่จะใช้กับปุ่มการช่วยเหลือพิเศษ"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"เลือกแอปที่จะใช้กับทางลัดปุ่มปรับระดับเสียง"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"ปิด <xliff:g id="SERVICE_NAME">%s</xliff:g> แล้ว"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"แก้ไขทางลัด"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ยกเลิก"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"เสร็จ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ปิดทางลัด"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ใช้ทางลัด"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"การกลับสี"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ไม่จัดอยู่ในหมวดหมู่ใดๆ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"คุณตั้งค่าความสำคัญของการแจ้งเตือนเหล่านี้"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ข้อความนี้สำคัญเนื่องจากบุคคลที่เกี่ยวข้อง"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"การแจ้งเตือนที่กำหนดเองของแอป"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม (มีผู้ใช้ที่มีบัญชีนี้อยู่แล้ว)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม"</string>
     <string name="language_selection_title" msgid="52674936078683285">"เพิ่มภาษา"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"เมนูการช่วยเหลือพิเศษ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"แถบคำบรรยาย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"ใส่ <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ในที่เก็บข้อมูลที่ถูกจำกัดแล้ว"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ส่วนตัว"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"งาน"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"มุมมองส่วนตัว"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ดูงาน"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"แชร์ด้วยแอปงานไม่ได้"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"แชร์ด้วยแอปส่วนตัวไม่ได้"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"ผู้ดูแลระบบไอทีบล็อกการแชร์ระหว่างแอปส่วนตัวและแอปงาน"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"เปิดแอปงาน"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"เปิดแอปงานเพื่อเข้าถึงแอปงานและรายชื่อติดต่อ"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"ผู้ดูแลระบบไอทีบล็อกการแชร์ระหว่างโปรไฟล์ส่วนตัวและโปรไฟล์งาน"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"เข้าถึงแอปงานไม่ได้"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"ผู้ดูแลระบบไอทีไม่อนุญาตให้คุณดูเนื้อหาส่วนตัวในแอปงาน"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"เข้าถึงแอปส่วนตัวไม่ได้"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"ผู้ดูแลระบบไอทีไม่อนุญาตให้คุณดูเนื้อหางานในแอปส่วนตัว"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"เปิดโปรไฟล์งานเพื่อแชร์เนื้อหา"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"เปิดโปรไฟล์งานเพื่อดูเนื้อหา"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ไม่มีแอป"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"เราไม่พบแอปใดเลย"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"เปิดโปรไฟล์งาน"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"เปิด"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"บันทึกหรือเปิดเสียงในสายโทรศัพท์"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"อนุญาตให้แอปนี้ (เมื่อกำหนดให้เป็นแอปโทรออกเริ่มต้น) บันทึกหรือเปิดเสียงในสายโทรศัพท์ได้"</string>
 </resources>

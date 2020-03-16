@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Məkan ayarlarınıza baxmaq üçün toxunun."</string>
     <string name="country_detector" msgid="7023275114706088854">"Ölkə Aşkarlayıcısı"</string>
     <string name="location_service" msgid="2439187616018455546">"Məkan Xidməti"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS Xidməti"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensor Bildiriş Xidməti"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Alaqaranlıq Xidməti"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Cihazınız təmizlənəcəkdir"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Baq hesabatı üçün <xliff:g id="NUMBER_1">%d</xliff:g> saniyədə sktinşot çəkilir.</item>
       <item quantity="one">Baq hesabatı üçün <xliff:g id="NUMBER_0">%d</xliff:g> saniyədə skrinşot çəkilir.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Xəta hesabatı ilə ekran şəkli çəkildi"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Xəta hesabatı ilə ekran şəkli çəkmək alınmadı."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Səssiz rejim"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Səs qapalıdır"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Səs Aktivdir"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"əlavə məkan provayderi əmrlərinə çıxış"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tətbiqə ekstra məkan provayder əmrlərinə girişə imkan verir. Bu, tətbiqə GPS və ya digər lokal mənbələrlə əməliyyata müdaxiləyə imkan verə bilər."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"yalnız ön planda dəqiq məkana daxil olun"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Bu tətbiq istifadə olunan zaman məkan xidmətlərindən dəqiq məkanınızı əldə edə bilər. Tətbiq tərəfindən məkanın əldə edilməsi üçün cihazınızda məkan xidmətləri aktiv olmalıdır. Bu zaman batareya istifadəsi arta bilər."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"yalnız ön planda təqribi məkana giriş"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Bu tətbiq istifadə olunan zaman məkan xidmətlərindən təqribi məkanınızı əldə edə bilər. Tətbiq tərəfindən məkanın əldə edilməsi üçün cihazınızda məkan xidmətləri aktiv olmalıdır."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"arxa fonda məkan girişi"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Bu tətbiq istənilən vaxt, hətta tətbiq istifadə olunmadıqda belə, məkana giriş edə bilər."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"səs yaz"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Bu tətbiq istədiyiniz zaman kameranı istifadə edərək şəkil çəkə və video qeydə ala bilər."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Şəkil və video çəkmək üçün tətbiq və ya xidmətlərin sistem kameralarına girişinə icazə verin"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Bu icazəli | sistem tətbiqi istənilən vaxt sistem kamerasından istifadə edərək şəkil və videolar çəkə bilər. Tətbiqdə saxlanılması üçün android.permission.CAMERA icazəsini tələb edir"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tətbiqə və ya xidmətə kamera cihazlarının açılması və ya bağlanması haqqında geri zənglər qəbul etməyə icazə verin."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Hər hansı kamera cihazı açıldıqda (hansı tətbiq paketi tərəfindən) və ya bağlandıqda bu imza tətbiqi geri zənglər qəbul edə bilər."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"vibrasiyaya nəzarət edir"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tətbiqə vibratoru idarə etmə icazəsi verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Tətbiqə vibrasiya vəziyyətinə daxil olmaq imkanı verir."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Tətbiqə, zəng təcrübəsini yaxşılaşdırmaq üçün, zəngləri sistem üzərindən yönləndirməyə icazə verilir."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"zənglərə sistemdə baxın və nəzarət edin."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Tətbiqin cihazda davam edən zəngləri görməsinə və nəzarət etməsinə icazə verin. Bura zəng edən nömrələr və zənglərin statusu haqqında məlumat daxildir."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"zəngə digər tətbiqdən davam edin"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Tətbiqə digər tətbiqdə başlayan zəngə davam etmək icazəsi verilir."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"telefon nömrələrini oxuyun"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Tətbiqə cihazın telefon nömrələrinə daxil olmağa icazə verir."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"avtomobilin ekranını aktiv saxlamaq"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"planşetin yuxu rejiminin qarşısını almaq"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV-nin yuxu rejiminə keçməsinə icazə verməyin"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"telefonun yuxu rejiminə keçməsini əngəllə"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Tətbiqə avtomobilin ekranını aktiv saxlamaq icazəsi verir."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tətbiqə planşetin yuxu rejimini qadağan etməyə imkan verir."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Tətbiqə Android TV cihazında yuxu sessiyasını deaktiv etmək icazəsi verir."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Tətbiqə telefonun yuxu rejimini qadağan etmək imkanı verir."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobil şəbəkənin internetə girişi yoxdur"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Şəbəkənin internetə girişi yoxdur"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Özəl DNS serverinə giriş mümkün deyil"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Qoşuldu"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> bağlantını məhdudlaşdırdı"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"İstənilən halda klikləyin"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> şəbəkə növünə keçirildi"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Səsin həcmi tövsiyə olunan səviyyədən artıq olsun?\n\nYüksək səsi uzun zaman dinləmək eşitmə qabiliyyətinizə zərər vura bilər."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Əlçatımlılıq Qısayolu istifadə edilsin?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Qısayol aktiv olduqda, hər iki səs düyməsinə 3 saniyə basıb saxlamaqla əlçatımlılıq funksiyası başladılacaq."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> xidmətinin cihaza tam nəzarət etməsinə icazə verilsin?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> aktiv olarsa, cihazınız data şifrələnməsini genişləndirmək üçün ekran kilidini istifadə etməyəcək."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Tam nəzarət əlçatımlılıq ehtiyaclarınızı ödəyən bəzi tətbiqlər üçün uyğundur."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Baxış və nəzarət ekranı"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandakı bütün kontenti oxuya və digər tətbiqlərdəki kontenti göstərə bilər."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Əməliyyatlara baxın və icra edin"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"O, tətbiq və ya avadanlıq sensoru ilə interaktivliyinizi izləyir və əvəzinizdən tətbiqlərlə qarşılıqlı əlaqəyə girir."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"İcazə verin"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"İmtina edin"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Funksiyanı istifadə etmək üçün onun üzərinə toxunun:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Əlçatımlılıq düyməsi ilə istifadə etmək üçün tətbiqləri seçin"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Səs düyməsi qısayolu ilə istifadə etmək üçün tətbiqləri seçin"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> deaktiv edilib"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Qısayolları redaktə edin"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Ləğv edin"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Hazırdır"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Qısayolu Deaktiv edin"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Qısayol İstifadə edin"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Rəng İnversiyası"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Kateqoriyasız"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Bildirişlərin əhəmiyyətini Siz ayarlaryırsınız."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"İnsanlar cəlb olunduğu üçün bu vacibdir."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Fərdi tətbiq bildirişi"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> tətbiqinə <xliff:g id="ACCOUNT">%2$s</xliff:g> (artıq bu hesabı olan İstifadəçi mövcuddur) ilə yeni İstifadəçi yaratmağa icazə verilsin?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> tətbiqinə <xliff:g id="ACCOUNT">%2$s</xliff:g> ilə yeni İstifadəçi yartmağa icazə verilsin?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Dil əlavə edin"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Əlçatımlılıq Menyusu"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> başlıq paneli."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> MƏHDUDLAŞDIRILMIŞ səbətinə yerləşdirilib"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Şəxsi"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"İş"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Şəxsi məzmuna baxış"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"İş məzmununa baxış"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"İş tətbiqləri ilə paylaşmaq olmur"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Şəxsi tətbiqlərlə paylaşmaq olmur"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"İT admininiz şəxsi və iş tətbiqləri arasında paylaşımı bloklayıb"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"İş tətbiqlərini aktiv edin"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"İş tətbiqləri və kontaktlara giriş üçün iş tətbiqlərini aktiv edin"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"İT admininiz şəxsi və iş profilləri arasında paylaşımı bloklayıb"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"İş tətbiqlərinə giriş mümkün deyil"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"İT admininiz iş tətbiqlərində şəxsi məzmuna baxmanıza icazə vermir"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Fərdi tətbiqlərə giriş mümkün deyil"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"İT admininiz şəxsi tətbiqlərdə iş məzmununa baxmanıza icazə vermir"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Məzmunu paylaşmaq üçün iş profilini aktiv edin"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Məzmuna baxmaq üçün iş profilini aktiv edin"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Heç bir tətbiq əlçatan deyil"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Heç bir tətbiq tapılmadı"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"İş profilini aktiv edin"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktiv edin"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Telefon zənglərində audio yazmaq və ya oxutmaq"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Defolt nömrəyığan tətbiq kimi təyin edildikdə, bu tətbiqə telefon zənglərində audio yazmaq və ya oxutmaq üçün icazə verir."</string>
 </resources>

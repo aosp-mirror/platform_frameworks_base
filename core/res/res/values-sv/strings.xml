@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Tryck för att se dina platsinställningar."</string>
     <string name="country_detector" msgid="7023275114706088854">"Country Detector"</string>
     <string name="location_service" msgid="2439187616018455546">"Location Service"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS-tjänst"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensor Notification Service"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight Service"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Enheten kommer att rensas"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_1">%d</xliff:g> sekunder.</item>
       <item quantity="one">Tar en skärmdump till felrapporten om <xliff:g id="NUMBER_0">%d</xliff:g> sekund.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Skärmdump med felrapport har tagits"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Det gick inte att ta en skärmdump med felrapport"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Tyst läge"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Ljudet är AV"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Ljudet är PÅ"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"få åtkomst till extra kommandon för platsleverantör"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Tillåter att appen får åtkomst till extra kommandon för platsleverantör. Detta kan innebära att appen tillåts störa funktionen för GPS eller andra platskällor."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"endast åtkomst till exakt plats i förgrunden"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Den här appen kan få åtkomst till din exakta plats från platstjänster när appen används. Platstjänster för enheten måste vara aktiverat för att appen ska få åtkomst till plats. Detta kan öka batteriförbrukningen."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"endast åtkomst till ungefärlig plats i förgrunden"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Den här appen kan få åtkomst till din ungefärliga plats från platstjänster när appen används. Platstjänster för enheten måste vara aktiverat för att appen ska få åtkomst till plats."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"få åtkomst till platsinformation i bakgrunden"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Den här appen har platsåtkomst hela tiden, även när appen inte används."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ändra dina ljudinställningar"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"spela in ljud"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Appen kan ta kort och spela in video med kameran när som helst."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Ge en app eller tjänst behörighet att ta bilder och spela in videor med systemets kameror"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Denna systemapp | med behörighet kan ta bilder och spela in videor med systemets kamera när som helst. Appen måste även ha behörigheten android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillåt att en app eller tjänst får återanrop när en kameraenhet öppnas eller stängs."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Den här signerade appen kan få återanrop när en kameraenhet öppnas (efter applikationspaket) eller stängs."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"styra vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillåter att appen styr vibrationen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Appen beviljas åtkomst till vibrationsstatus."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Appen tillåts att dirigera samtal via systemet för att förbättra samtalsupplevelsen."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"visa och styra samtal via systemet."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Tillåter att appen kan visa och styra pågående samtal på enheten. Detta omfattar information som telefonnummer för samtal och samtalens status."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"fortsätta ett samtal från en annan app"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Tillåter att appen fortsätter ett samtal som har startats i en annan app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"läsa telefonnummer"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Appen beviljas åtkomst till enhetens telefonnummer."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"låta bilens skärm vara på"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"förhindra att surfplattan går in i viloläge"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"förhindra att Android TV-enheten försätts i viloläge"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"förhindra att telefonen sätts i viloläge"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Tillåter appen att låta bilens skärm vara på."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Tillåter att appen förhindrar att surfplattan går in i viloläge."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Tillåter att appen förhindrar att Android TV-enheten försätts i viloläge."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Tillåter att appen förhindrar att mobilen går in i viloläge."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilnätverket har ingen internetanslutning"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Nätverket har ingen internetanslutning"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Det går inte att komma åt den privata DNS-servern."</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Ansluten"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har begränsad anslutning"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Tryck för att ansluta ändå"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Byte av nätverk till <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vill du höja volymen över den rekommenderade nivån?\n\nAtt lyssna med stark volym långa stunder åt gången kan skada hörseln."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vill du använda Aktivera tillgänglighet snabbt?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"När kortkommandot har aktiverats startar du en tillgänglighetsfunktion genom att trycka ned båda volymknapparna i tre sekunder."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vill du tillåta att <xliff:g id="SERVICE">%1$s</xliff:g> får fullständig kontroll över enheten?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Om du aktiverar <xliff:g id="SERVICE">%1$s</xliff:g> används inte skärmlåset för att förbättra datakryptering på enheten."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Fullständig kontroll lämpar sig för appar med tillgänglighetsfunktioner, men är inte lämplig för de flesta appar."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Visa och styra skärmen"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan läsa allt innehåll på skärmen och visa innehåll över andra appar."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Visa och vidta åtgärder"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan registrera din användning av en app eller maskinvarusensor och interagera med appar åt dig."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillåt"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Neka"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tryck på funktioner som du vill aktivera:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Välj vilka appar du vill använda med hjälp av tillgänglighetsknappen"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Välj vilka appar du vill använda med hjälp av kortkommandot för volymknapparna"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> har inaktiverats"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Redigera genvägar"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Avbryt"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Inaktivera kortkommandot"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Använd kortkommandot"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverterade färger"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Okategoriserad"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Du anger hur viktiga aviseringarna är."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Detta är viktigt på grund av personerna som deltar."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Anpassad appavisering"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g> (det finns redan en användare med det här kontot)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Tillåter du att <xliff:g id="APP">%1$s</xliff:g> skapar en ny användare för <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Lägg till ett språk"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Tillgänglighetsmenyn"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Textningsfält för <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> har placerats i hinken RESTRICTED"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Privat"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig vy"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Jobbvy"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Det går inte att dela med jobbappar"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Det går inte att dela med personliga appar"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"IT-administratören har blockerat delning mellan personliga och jobbappar"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Aktivera jobbappar"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Aktivera jobbappar om du vill få åtkomst till jobbrelaterade appar och kontakter"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"IT-administratören har blockerat delning mellan personliga profiler och jobbprofiler"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Ingen åtkomst till jobbappar"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"IT-administratören låter dig inte visa personligt innehåll i jobbappar"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Ingen åtkomst till personliga appar"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"IT-administratören låter dig inte visa jobbinnehåll i personliga appar"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Aktivera jobbprofilen för att dela innehåll"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Aktivera jobbprofilen för att visa innehåll"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Det finns inga tillgängliga appar"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Vi hittade inga appar"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Aktivera jobbprofil"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktivera"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Spela in och spela upp ljud i telefonsamtal"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Tillåter appen att spela in och spela upp ljud i telefonsamtal när den har angetts som standardapp för uppringningsfunktionen."</string>
 </resources>

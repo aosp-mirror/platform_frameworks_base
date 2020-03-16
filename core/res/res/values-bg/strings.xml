@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Докоснете, за да видите настройките за местоположението."</string>
     <string name="country_detector" msgid="7023275114706088854">"Инструмент за установяване на държавата"</string>
     <string name="location_service" msgid="2439187616018455546">"Услуга за местоположението"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Услуга за GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Услуга за известия за сензорите"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Услуга Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Данните на устройството ви ще бъдат изтрити"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Екранната снимка за сигнала за програмна грешка ще бъде направена след <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
       <item quantity="one">Екранната снимка за сигнала за програмна грешка ще бъде направена след <xliff:g id="NUMBER_0">%d</xliff:g> секунда.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Екранната снимка със сигнал за програмна грешка бе направена"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Правенето на екранна снимка със сигнал за програмна грешка не бе успешно"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Тих режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Звукът е ИЗКЛЮЧЕН"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Звукът е ВКЛЮЧЕН"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"достъп до допълнителни команди на доставчика на местоположение"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Разрешава на приложението достъп до допълнителни команди на доставчика на местоположение. Това може да позволи на приложението да смущава работата на GPS или на другите източници на местоположение."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"достъп до точното местоположение само на преден план"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Това приложение може да получава данни за точното ви местоположение от съответните услуги, докато се използва. За целта услугите за местоположение трябва да са включени за устройството ви. Това може да увеличи използването на батерията."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"достъп до приблизителното местоположение само на преден план"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Това приложение може да получава данни за приблизителното ви местоположение от съответните услуги, докато се използва. За целта услугите за местоположение трябва да са включени за устройството ви."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"достъп до местоположението на заден план"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Това приложение може да осъществява достъп до местоположението по всяко време – дори когато не се използва."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"промяна на настройките ви за звука"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Разрешава на приложението да променя глобалните настройки за звука, като например силата и това, кой високоговорител се използва за изход."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"записва звук"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Това приложение може по всяко време да прави снимки и да записва видеоклипове посредством камерата."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Разрешаване на достъп на приложение или услуга до системните камери с цел правене на снимки и видеоклипове"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Това привилегировано/системно приложение може по всяко време да прави снимки и да записва видеоклипове посредством системна камера. Необходимо е също на приложението да бъде дадено разрешението android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Разрешаване на приложение или услуга да получават обратни повиквания за отварянето или затварянето на снимачни устройства."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Това приложение за подписване може да получава обратни повиквания, когато снимачно устройство бъде отворено (от кой пакет на приложение) или затворено."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролиране на вибрирането"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Разрешава на приложението да контролира устройството за вибрация."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дава възможност на приложението да осъществява достъп до състоянието на вибриране."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Разрешава на приложението да маршрутизира обажданията си чрез системата с цел подобряване на свързаната с тях практическа работа."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"вижда и управлява обажданията чрез системата."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Разрешава на приложението да вижда и управлява текущите обаждания на устройството. Това включва различна информация, като например номерата и състоянието на обажданията."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"продължаване на обаждане от друго приложение"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Разрешава на приложението да продължи обаждане, стартирано в друго приложение."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"четене на телефонните номера"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Разрешава на приложението да осъществява достъп до телефонните номера на устройството."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"постоянно включен екран на автомобила"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"предотвратяване на спящия режим на таблета"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"предотвратяване на активирането на спящия режим на устройството ви с Android TV"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"предотвратява спящ режим на телефона"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дава възможност на приложението да поддържа екрана на автомобила включен."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Разрешава на приложението да предотвратява преминаването на таблета в спящ режим."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Дава възможност на приложението да предотвратява преминаването в спящ режим на устройството ви с Android TV."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Разрешава на приложението да предотвратява преминаването на телефона в спящ режим."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобилната мрежа няма достъп до интернет"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Мрежата няма достъп до интернет"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Не може да се осъществи достъп до частния DNS сървър"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Установена е връзка"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> има ограничена свързаност"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Докоснете, за да се свържете въпреки това"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Превключи се към <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да се увеличи ли силата на звука над препоръчителното ниво?\n\nПродължителното слушане при висока сила на звука може да увреди слуха ви."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Искате ли да използвате пряк път към функцията за достъпност?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Когато прекият път е включен, можете да стартирате дадена функция за достъпност, като натиснете двата бутона за силата на звука и ги задържите за 3 секунди."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Искате ли да разрешите на <xliff:g id="SERVICE">%1$s</xliff:g> да има пълен контрол над устройството ви?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако включите <xliff:g id="SERVICE">%1$s</xliff:g>, устройството ви няма да подобрява шифроването на данни посредством опцията ви за заключване на екрана."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Пълният контрол е подходящ за приложенията, които помагат на потребителите със специални нужди, но не и за повечето приложения."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Преглед и управление на екрана"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Услугата може да чете цялото съдържание на екрана и да показва такова върху други приложения."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и извършване на действия"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Услугата може да проследява взаимодействията ви с дадено приложение или хардуерен сензор, както и да взаимодейства с приложенията от ваше име."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Разреш."</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Отказ"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Докоснете дадена функция, за да започнете да я използвате:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Изберете приложения, които да използвате с бутона за достъпност"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Изберете приложения, които да използвате с прекия път чрез бутона за силата на звука"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Изключихте <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Редактиране на преките пътища"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Отказ"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Изключване на прекия път"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Използване на пряк път"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инвертиране на цветовете"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Некатегоризирани"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Зададохте важността на тези известия."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Това е важно заради участващите хора."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Персонализирано известие за приложение"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g> (вече съществува потребител с този профил)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Да се разреши ли на <xliff:g id="APP">%1$s</xliff:g> да създаде нов потребител с профила <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Добавяне на език"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Меню за достъпност"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Лента за надписи на <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакетът <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е поставен в ОГРАНИЧЕНИЯ контейнер"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Служебни"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен изглед"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Служебен изглед"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Споделянето със служебни приложения не е възможно"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Споделянето с лични приложения не е възможно"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Системният ви администратор е блокирал споделянето между лични и служебни приложения"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Включете служебните приложения"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Включете служебните приложения, за да имате достъп до тях и служебните контакти"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Системният ви администратор е блокирал споделянето между лични и служебни потребителски профили"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Не може да се осъществи достъп до служебните приложения"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Системният ви администратор не разрешава прегледа на лично съдържание в служебните приложения"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Не може да се осъществи достъп до личните приложения"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Системният ви администратор не разрешава прегледа на служебно съдържание в личните приложения"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Включете служебния потребителски профил, за да споделяте съдържание"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Включете служебния потребителски профил, за да преглеждате съдържание"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Няма приложения"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Не успяхме да намерим приложения"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Включване на служебния потребителски профил"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Включване"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Записване или възпроизвеждане на аудио при телефонни обаждания"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Дава възможност на това приложение да записва или възпроизвежда аудио при телефонни обаждания, когато е зададено като основно приложение за набиране."</string>
 </resources>

@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Πατήστε, για να δείτε τις ρυθμίσεις τοποθεσίας."</string>
     <string name="country_detector" msgid="7023275114706088854">"Ανιχνευτής χώρας"</string>
     <string name="location_service" msgid="2439187616018455546">"Υπηρεσία τοποθεσίας"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Υπηρεσία GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Υπηρεσία ειδοποίησης αισθητήρα"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Υπηρεσία Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Η συσκευή σας θα διαγραφεί"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Λήψη στιγμιότυπου οθόνης για αναφορά σφαλμάτων σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα.</item>
       <item quantity="one">Λήψη στιγμιότυπου οθόνης για αναφορά σφαλμάτων σε <xliff:g id="NUMBER_0">%d</xliff:g> δευτερόλεπτο.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Έγινε λήψη στιγμιότυπου οθόνης με αναφορά σφάλματος"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Αποτυχία λήψης στιγμιότυπου οθόνης με αναφορά σφάλματος"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Λειτουργία σίγασης"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Ο ήχος είναι απενεργοποιημένος"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Ο ήχος είναι ενεργοποιημένος"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"έχει πρόσβαση σε επιπλέον εντολές παρόχου τοποθεσίας"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Επιτρέπει στην εφαρμογή την πρόσβαση σε επιπλέον εντολές παρόχου τοποθεσίας. Αυτό μπορεί να δώσει τη δυνατότητα στην εφαρμογή να παρέμβει στη λειτουργία του GPS ή άλλων πηγών τοποθεσίας."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"πρόσβαση στην ακριβή τοποθεσία μόνο στο προσκήνιο"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Αυτή η εφαρμογή έχει πρόσβαση στην ακριβή τοποθεσία από τις υπηρεσίες τοποθεσίας ενώ η εφαρμογή χρησιμοποιείται. Οι υπηρεσίες τοποθεσίας για τη συσκευή σας θα πρέπει να είναι ενεργοποιημένες έτσι ώστε η εφαρμογή να λάβει την τοποθεσία. Αυτό μπορεί να αυξήσει τη χρήση της μπαταρίας."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"πρόσβαση στην κατά προσέγγιση τοποθεσία μόνο στο προσκήνιο"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Αυτή η εφαρμογή έχει πρόσβαση στην τοποθεσία κατά προσέγγιση από τις υπηρεσίες τοποθεσίας ενώ η εφαρμογή χρησιμοποιείται. Οι υπηρεσίες τοποθεσίας για τη συσκευή σας θα πρέπει να είναι ενεργοποιημένες έτσι ώστε η εφαρμογή να λάβει την τοποθεσία."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"πρόσβαση στην τοποθεσία στο παρασκήνιο"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Αυτή η εφαρμογή μπορεί να αποκτήσει πρόσβαση στην τοποθεσία ανά πάσα στιγμή, ακόμη και όταν συσκευή δεν χρησιμοποιείται."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"αλλάζει τις ρυθμίσεις ήχου"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Επιτρέπει στην εφαρμογή την τροποποίηση καθολικών ρυθμίσεων ήχου, όπως η ένταση και ποιο ηχείο χρησιμοποιείται για έξοδο."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"εγγράφει ήχο"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Αυτή η εφαρμογή μπορεί να τραβήξει φωτογραφίες και βίντεο χρησιμοποιώντας την κάμερα, ανά πάσα στιγμή."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Παραχωρήστε σε μια εφαρμογή ή υπηρεσία πρόσβαση στις κάμερες του συστήματος για τη λήψη φωτογραφιών και βίντεο"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Αυτή η προνομιούχα εφαρμογή | εφαρμογή συστήματος μπορεί να τραβάει φωτογραφίες και να εγγράφει βίντεο, χρησιμοποιώντας μια κάμερα του συστήματος ανά πάσα στιγμή. Απαιτείται, επίσης, η εφαρμογή να έχει την άδεια android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Επιτρέψτε σε μια εφαρμογή ή μια υπηρεσία να λαμβάνει επανάκλησεις σχετικά με το άνοιγμα ή το κλείσιμο συσκευών κάμερας."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Αυτή η εφαρμογή υπογραφής μπορεί να λαμβάνει επανακλήσεις κατά το άνοιγμα οποιασδήποτε συσκευής κάμερας (από οποιοδήποτε πακέτο εφαρμογής) ή κατά το κλείσιμο."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ελέγχει τη δόνηση"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Επιτρέπει στην εφαρμογή τον έλεγχο της δόνησης."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Επιτρέπει στην εφαρμογή να έχει πρόσβαση στην κατάσταση δόνησης."</string>
@@ -453,13 +451,17 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Επιτρέπει στην εφαρμογή να δρομολογεί τις κλήσεις της μέσω του συστήματος για να βελτιώσει την εμπειρία κλήσης."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"προβολή και έλεγχος κλήσεων μέσω του συστήματος."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Επιτρέπει στην εφαρμογή να βλέπει και να ελέγχει τις εισερχόμενες κλήσεις στη συσκευή. Αυτό περιλαμβάνει πληροφορίες όπως τους αριθμούς κλήσεων για τις κλήσεις και την κατάσταση των κλήσεων."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"εξαίρεση από περιορισμούς εγγραφής ήχου"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Εξαιρέστε την εφαρμογή από περιορισμούς για την εγγραφή ήχου."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"συνέχιση κλήσης από άλλη συσκευή"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Επιτρέπει στην εφαρμογή να συνεχίσει μια κλήση η οποία ξεκίνησε σε άλλη εφαρμογή."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ανάγνωση αριθμών τηλεφώνου"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στους αριθμούς τηλεφώνου της συσκευής"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"διατήρηση ενεργοποίησης οθόνης αυτοκινήτου"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"αποτρέπει την μετάβαση του tablet σε κατάσταση αδράνειας"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"απαγόρευση μετάβασης της συσκευής Android TV σε κατάσταση αδράνειας"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"αποτρέπει το τηλεφώνο να μεταβεί σε κατάσταση αδράνειας"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Επιτρέπει στην εφαρμογή να διατηρεί την οθόνη του αυτοκινήτου ενεργοποιημένη."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Επιτρέπει στην εφαρμογή την παρεμπόδιση της μετάβασης του tablet σε κατάσταση αδράνειας."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Επιτρέπει στην εφαρμογή να εμποδίζει τη μετάβαση της συσκευής Android TV σε κατάσταση αδράνειας."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Επιτρέπει στην εφαρμογή την παρεμπόδιση της μετάβασης του τηλεφώνου σε κατάσταση αδράνειας."</string>
@@ -1262,7 +1264,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Το δίκτυο κινητής τηλεφωνίας δεν έχει πρόσβαση στο διαδίκτυο."</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Το δίκτυο δεν έχει πρόσβαση στο διαδίκτυο."</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Δεν είναι δυνατή η πρόσβαση στον ιδιωτικό διακομιστή DNS."</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Συνδέθηκε"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"Το δίκτυο <xliff:g id="NETWORK_SSID">%1$s</xliff:g> έχει περιορισμένη συνδεσιμότητα"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Πατήστε για σύνδεση ούτως ή άλλως"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Μετάβαση σε δίκτυο <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1635,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Αυξάνετε την ένταση ήχου πάνω από το επίπεδο ασφαλείας;\n\nΑν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Να χρησιμοποιείται η συντόμευση προσβασιμότητας;"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Όταν η συντόμευση είναι ενεργοποιημένη, το πάτημα και των δύο κουμπιών έντασης ήχου για 3 δευτερόλεπτα θα ξεκινήσει μια λειτουργία προσβασιμότητας."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Να επιτρέπεται στην υπηρεσία <xliff:g id="SERVICE">%1$s</xliff:g> να έχει τον πλήρη έλεγχο της συσκευής σας;"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Εάν ενεργοποιήσετε την υπηρεσία <xliff:g id="SERVICE">%1$s</xliff:g>, η συσκευή σας δεν θα χρησιμοποιεί το κλείδωμα οθόνης για τη βελτίωση της κρυπτογράφησης δεδομένων."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Ο πλήρης έλεγχος είναι κατάλληλος για εφαρμογές που εξυπηρετούν τις ανάγκες προσβασιμότητάς σας, αλλά όχι για όλες τις εφαρμογές."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Προβολή και έλεγχος οθόνης"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Μπορεί να διαβάσει όλα τα περιεχόμενα της οθόνης σας και να εμφανίσει περιεχόμενο πάνω από άλλες εφαρμογές."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Προβολή και εκτέλεση ενεργειών"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Μπορεί να παρακολουθήσει τις αλληλεπιδράσεις σας με μια εφαρμογή ή έναν αισθητήρα εξοπλισμού και να αλληλεπιδράσει με εφαρμογές εκ μέρους σας."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ναι"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Όχι"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Πατήστε μια λειτουργία για να ξεκινήσετε να τη χρησιμοποιείτε:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Επιλέξτε τις εφαρμογές που θέλετε να χρησιμοποιείτε με το κουμπί προσβασιμότητας"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Επιλέξτε τις εφαρμογές που θέλετε να χρησιμοποιείτε με τη συντόμευση κουμπιού έντασης ήχου"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Η υπηρεσία <xliff:g id="SERVICE_NAME">%s</xliff:g> έχει απενεργοποιηθεί."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Επεξεργασία συντομεύσεων"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Άκυρο"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Τέλος"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Απενεργοποίηση συντόμευσης"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Χρήση συντόμευσης"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Αντιστροφή χρωμάτων"</string>
@@ -1856,8 +1870,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Μη κατηγοριοποιημένο"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Μπορείτε να ρυθμίσετε τη βαρύτητα αυτών των ειδοποιήσεων."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Αυτό είναι σημαντικό λόγω των ατόμων που συμμετέχουν."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Προσαρμοσμένη ειδοποίηση εφαρμογής"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g> (υπάρχει ήδη χρήστης με αυτόν τον λογαριασμό);"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Επιτρέπετε στην εφαρμογή <xliff:g id="APP">%1$s</xliff:g> να δημιουργήσει έναν νέο χρήστη με τον λογαριασμό <xliff:g id="ACCOUNT">%2$s</xliff:g>;"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Προσθήκη γλώσσας"</string>
@@ -2029,16 +2042,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Μενού προσβασιμότητας"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Γραμμή υποτίτλων για την εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Το πακέτο <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> τοποθετήθηκε στον κάδο ΠΕΡΙΟΡΙΣΜΕΝΗΣ ΠΡΟΣΒΑΣΗΣ."</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Προσωπικό"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Εργασία"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Προσωπική προβολή"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Προβολή εργασίας"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Δεν είναι δυνατή η κοινοποίηση σε εφαρμογές εργασιών"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Δεν είναι δυνατή η κοινοποίηση σε προσωπικές εφαρμογές"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Ο διαχειριστής IT απέκλεισε την κοινοποίηση μεταξύ των προσωπικών εφαρμογών και των εφαρμογών εργασιών σας"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Ενεργοποίηση εφαρμογών εργασιών"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Ενεργοποίηση εφαρμογών εργασιών για πρόσβαση στις εφαρμογές εργασιών και τις επαφές"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Ο διαχειριστής IT απέκλεισε την κοινοποίηση μεταξύ των προσωπικών προφίλ και των προφίλ εργασίας."</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Δεν είναι δυνατή η πρόσβαση σε εφαρμογές εργασίας"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Ο διαχειριστής IT δεν σας επιτρέπει να βλέπετε το προσωπικό σας περιεχόμενο σε εφαρμογές εργασίας."</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Δεν είναι δυνατή η πρόσβαση σε προσωπικές εφαρμογές"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Ο διαχειριστής IT δεν σας επιτρέπει να βλέπετε το περιεχόμενο εργασίας σας σε προσωπικές εφαρμογές."</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Ενεργοποιήστε το προφίλ εργασίας για να κοινοποιήσετε περιεχόμενο."</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Ενεργοποιήστε το προφίλ εργασίας για να προβάλετε περιεχόμενο."</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Δεν υπάρχουν διαθέσιμες εφαρμογές"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Δεν ήταν δυνατή η εύρεση εφαρμογών"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Διακόπτης ενεργοποίησης προφίλ εργασίας"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Ενεργοποίηση"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Εγγραφή ή αναπαραγωγή ήχου σε τηλεφωνικές κλήσεις"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Επιτρέπει σε αυτήν την εφαρμογή, όταν ορίζεται ως προεπιλεγμένη εφαρμογή κλήσης, να εγγράφει ή να αναπαράγει ήχο σε τηλεφωνικές κλήσεις."</string>
 </resources>

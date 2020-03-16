@@ -91,7 +91,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Экстранныя выклікі ў сетцы Wi‑Fi недаступныя"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Абвесткі"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Пераадрасацыя выкліку"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстраннага зваротнага выкліку"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстранных зваротных выклікаў"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Стан мабільнай перадачы даных"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-паведамленні"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Паведамленні галасавой пошты"</string>
@@ -199,6 +199,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Націсніце, каб праглядзець налады месцазнаходжання."</string>
     <string name="country_detector" msgid="7023275114706088854">"Дэтэктар краіны"</string>
     <string name="location_service" msgid="2439187616018455546">"Служба геалакацыі"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Служба GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Служба апавяшчэнняў датчыка"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Служба Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Даныя вашай прылады будуць сцерты"</string>
@@ -255,10 +256,8 @@
       <item quantity="many">Здымак экрана для справаздачы пра памылкі будзе зроблены праз <xliff:g id="NUMBER_1">%d</xliff:g> секунд.</item>
       <item quantity="other">Здымак экрана для справаздачы пра памылкі будзе зроблены праз <xliff:g id="NUMBER_1">%d</xliff:g> секунды.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Зроблены здымак экрана са справаздачай пра памылкі"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Не ўдалося зрабіць здымак экрана са справаздачай пра памылкі"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Бязгучны рэжым"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Гук выкл."</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Гук уключаны"</string>
@@ -426,14 +425,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"доступ да дадатковых камандаў пастаўшчыка месцазнаходжання"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Дазваляе праграме атрымліваць доступ да дадатковых каманд службаў вызначэння месцазнаходжання. Гэта можа дазволіць праграме ўмешвацца ў функцыянаванне GPS або іншых крыніц даных аб месцазнаходжаннi."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"доступ да дакладнага месцазнаходжання толькі ў асноўным рэжыме"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Падчас выкарыстання гэта праграма можа атрымліваць ад службаў геалакацыі звесткі пра ваша дакладнае месцазнаходжанне. Каб праграма мела такія звесткі, на вашай прыладзе павінны быць уключаны службы геалакацыі. Магчымае павышэнне выкарыстання зараду акумулятара."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"доступ да прыблізнага месцазнаходжання толькі ў актыўным рэжыме"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Падчас выкарыстання гэта праграма можа атрымліваць ад службаў геалакацыі звесткі пра ваша прыблізнае месцазнаходжанне. Каб праграма мела такія звесткі, на вашай прыладзе павінны быць уключаны службы геалакацыі."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"доступ да вызначэння месцазнаходжання ў фонавым рэжыме"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Гэта праграма можа мець доступ да даных пра месцазнаходжанне ў любы час, нават калі яна не выкарыстоўваецца."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"змяняць налады аудыё"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Дазваляе прыкладанням змяняць глабальныя налады гуку, такія як моц і тое, што дынамік выкарыстоўваецца для выхаду."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"запіс аўдыя"</string>
@@ -446,6 +442,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Гэта праграма можа рабіць фота і запісваць відэа з дапамогай камеры ў любы час."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Дазволіць праграме або сэрвісу атрымліваць доступ да сістэмных камер, каб здымаць фота і запісваць відэа"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Гэта прыярытэтная | сістэмная праграма можа здымаць фота і запісваць відэа, выкарыстоўваючы сістэмную камеру. Праграме патрэбны дазвол android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дазволіць праграме ці сэрвісу атрымліваць зваротныя выклікі наконт адкрыцця ці закрыцця прылад камеры."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Гэта праграма для подпісу можа атрымліваць зваротныя вылікі, калі адкрываецца (пакетам праграм) або закрываецца прылада камеры."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"кіраванне вібрацыяй"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дазваляе прыкладанням кіраваць вібрацыяй."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дазваляе праграме атрымліваць доступ да вібрасігналу."</string>
@@ -459,13 +457,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дазваляе праграме перанакіроўваць выклікі праз сістэму ў мэтах паляпшэння выклікаў."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"праглядаць выклікі і кіраваць імі праз сістэму."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Дазваляе праграме праглядаць на прыладзе ўваходныя выклікі і кіраваць імі. Гэта інфармацыя ўключае нумары выклікаў і звесткі пра іх краіну."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"працяг выкліку з іншай праграмы"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Дазваляе праграме працягваць выклік, які пачаўся ў іншай праграме."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"счытваць нумары тэлефонаў"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Дазваляе праграме атрымліваць доступ да нумароў тэлефонаў на прыладзе."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"пакідаць экран аўтамабіля ўключаным"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"прадухіліць планшэт ад пераходу ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"прадухіляць пераход прылады Android TV у рэжым сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"забараняць тэлефону пераходзіць ў рэжым сну"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дазваляе праграме пакідаць экран аўтамабіля ўключаным."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дазваляе прыкладанням прадухіляць пераход планшэта ў рэжым сну."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Дазваляе праграме прадухіляць пераход прылады Android TV у рэжым сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дазваляе прыкладанням прадухіляць тэлефон ад пераходу ў рэжым сну."</string>
@@ -1302,7 +1306,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мабільная сетка не мае доступу ў інтэрнэт"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Сетка не мае доступу ў інтэрнэт"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Не ўдалося атрымаць доступ да прыватнага DNS-сервера"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Падключана"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> мае абмежаваную магчымасць падключэння"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Націсніце, каб падключыцца"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1678,8 +1681,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Павялiчыць гук вышэй рэкамендаванага ўзроўню?\n\nДоўгае праслухоўванне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Выкарыстоўваць камбінацыю хуткага доступу для спецыяльных магчымасцей?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Калі хуткі доступ уключаны, вы можаце націснуць абедзве кнопкі гучнасці і ўтрымліваць іх 3 секунды, каб запусціць функцыю спецыяльных магчымасцей."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дазволіць сэрвісу \"<xliff:g id="SERVICE">%1$s</xliff:g>\" мець поўны кантроль над вашай прыладай?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Калі вы ўключыце сэрвіс \"<xliff:g id="SERVICE">%1$s</xliff:g>\", на прыладзе не будзе выкарыстоўвацца блакіроўка экрана для паляпшэння шыфравання даных."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Поўны кантроль прызначаны для сэрвісаў спецыяльных магчымасцей, аднак не падыходзіць для большасці праграм."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Прагляд экрана і кіраванне ім"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Функцыя можа распазнаваць усё змесціва на экране і адлюстроўваць яго паверх іншых праграм."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Прагляд і выкананне дзеянняў"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Гэта функцыя можа адсочваць вашы ўзаемадзеянні з праграмай ці датчыкам апаратнага забеспячэння і ўзаемадзейнічаць з праграмамі ад вашага імя."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дазволіць"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Адмовіць"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Каб пачаць выкарыстоўваць функцыю, націсніце на яе:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Выберыце праграмы, якія будзеце выкарыстоўваць з кнопкай спецыяльных магчымасцей"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Выберыце праграмы, якія будзеце выкарыстоўваць са спалучэннем клавішы гучнасці"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сэрвіс \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" выключаны"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Змяніць ярлыкі"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Скасаваць"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Інверсія колеру"</string>
@@ -1920,8 +1936,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Некатэгарызаванае"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Вы задалі важнасць гэтых апавяшчэнняў."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Гэта важна, бо з гэтым звязаны пэўныя людзі."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Апавяшчэнне пра карыстальніцкую праграму"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g> (Карыстальнік з гэтым уліковым запісам ужо існуе)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Дазволіць праграме \"<xliff:g id="APP">%1$s</xliff:g>\" стварыць новага Карыстальніка з уліковым запісам <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Дадаць мову"</string>
@@ -2097,16 +2112,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Меню спецыяльных магчымасцей"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Панэль субцітраў праграмы \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет \"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>\" дададзены ў АБМЕЖАВАНУЮ групу"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Асабістыя"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Працоўныя"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Прагляд асабістага змесціва"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Прагляд працоўнага змесціва"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Не ўдалося абагуліць з працоўнымі праграмамі"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Не ўдалося абагуліць з асабістымі праграмамі"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Ваш ІТ-адміністратар заблакіраваў абагульванне паміж асабістымі і працоўнымі праграмамі"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Уключыце працоўныя праграмы"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Уключыце працоўныя праграмы, каб мець доступ да іх і да кантактаў"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Ваш ІТ-адміністратар заблакіраваў абагульванне паміж асабістымі і працоўнымі профілямі"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Не ўдалося атрымаць доступ да працоўных праграм"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Ваш ІТ-адміністратар не дазволіў вам праглядаць асабістае змесціва ў працоўных праграмах"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Не ўдалося атрымаць доступ да асабістых праграм"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Ваш ІТ-адміністратар не дазволіў вам праглядаць працоўнае змесціва ў асабістых праграмах"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Каб абагульваць змесціва, уключыце працоўны профіль"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Каб праглядаць змесціва, уключыце працоўны профіль"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Няма даступных праграм"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Нам не ўдалося знайсці ніводнай праграмы"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Пераключыцца на працоўны профіль"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Уключыць"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Запісваць або прайграваць аўдыя ў тэлефонных выкліках"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Дазваляе гэтай праграме (калі яна наладжана ў якасці стандартнага набіральніка нумара) запісваць або прайграваць аўдыя ў тэлефонных выкліках."</string>
 </resources>

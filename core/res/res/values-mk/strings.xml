@@ -21,9 +21,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="202579285008794431">"Б"</string>
-    <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
-    <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
-    <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
+    <string name="kilobyteShort" msgid="2214285521564195803">"KB"</string>
+    <string name="megabyteShort" msgid="6649361267635823443">"MB"</string>
+    <string name="gigabyteShort" msgid="7515809460261287991">"GB"</string>
     <string name="terabyteShort" msgid="1822367128583886496">"ТБ"</string>
     <string name="petabyteShort" msgid="5651571254228534832">"ПБ"</string>
     <string name="fileSizeSuffix" msgid="4233671691980131257">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Допрете за да ги видите поставките за локација."</string>
     <string name="country_detector" msgid="7023275114706088854">"Детектор на земја"</string>
     <string name="location_service" msgid="2439187616018455546">"Услуги според локација"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Услуга GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Услуга за известување од сензорот"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Услуга за самрак"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Уредот ќе се избрише"</string>
@@ -249,10 +250,8 @@
       <item quantity="one">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунда.</item>
       <item quantity="other">Ќе се направи слика од екранот за извештајот за грешки за <xliff:g id="NUMBER_1">%d</xliff:g> секунди.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Се сними слика од екранот со извештај за грешка"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Не успеа да се сними слика од екранот со извештај за грешка"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Тивок режим"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Звукот е исклучен"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Звукот е вклучен"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"пристапи кон наредби на давателот на дополнителна локација"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Овозможува апликацијата да пристапи кон дополнителни наредби на давател на локација. Ова може да овозможи апликацијата да го попечи функционирањето на GPS или други извори на локација."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"пристап до прецизната локација само во преден план"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Апликацијава може да ја добие вашата прецизна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата. Ова може да го зголеми користењето на батеријата."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"пристап до приближната локација само во преден план"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Апликацијава може да ја добие вашата приближна локација од „Услугите според локација“ кога се користи. „Услугите според локација“ за уредот мора да се вклучени ако сакате апликацијата да ја добие локацијата."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"пристап до локацијата во заднина"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Апликацијава може да пристапува до локацијата во секое време, дури и кога не се користи."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"менува аудио поставки"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Овозможува апликацијата да ги менува глобалните аудио поставки, како што се јачината на звукот и кој звучник се користи за излез."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"снимај аудио"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Апликацијава може да фотографира и да снима видеа со камерата во секое време."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Дозволете апликацијата или услугата да пристапува до системските камери за да фотографира и да снима видеа"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Оваа привилегирана | системска апликација може да фотографира и да снима видеа со системската камера во секое време. Потребно е апликацијата да ја има и дозволата android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволете апликацијатa или услугата да прима повратни повици за отворањето или затворањето на уредите со камера."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Оваа апликација за потпис може да прима повратни повици кога кој било уред со камера (од некој пакет за апликации) е отворен или затворен."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролирај вибрации"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволува апликацијата да ги контролира вибрациите."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ѝ дозволува на апликацијата да пристапи до состојбата на вибрации."</string>
@@ -453,13 +451,17 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дозволете ѝ на апликацијата да ги пренасочи повиците преку системот за да го подобри искуството при јавувањето."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"гледање и контролирање повици преку системот."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Дозволува апликацијата да гледа и контролира тековни повици на уредот. Ова вклучува информации како телефонски броеви за повици и состојбата на повиците."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"изземање од ограничувања за снимање аудио"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Изземете ја апликацијата од ограничувања за снимање аудио."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"продолжување повик од друга апликација"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Овозможува апликацијата да продолжи повик започнат на друга апликација."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"да чита телефонски броеви"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Ѝ дозволува на апликацијата да пристапи до телефонските броеви на уредот."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"оставете го екранот на автомобилот вклучен"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"спречи режим на штедење кај таблет"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"го спречува вашиот уред Android TV да влезе во режим на мирување"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"спречи телефон од режим на штедење"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дозволува апликацијата да го држи екранот на автомобилот вклучен."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дозволува апликацијата да го спречи таблетот да не заспие."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Дозволува апликацијата да го спречи вашиот уред Android TV да влезе во режим на мирување."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дозволува апликацијата да го спречи телефонот да не заспие."</string>
@@ -1126,7 +1128,7 @@
     <string name="define_desc" msgid="6916651934713282645">"Дефинирајте го избраниот текст"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Капацитетот е речиси полн"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Некои системски функции може да не работат"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 МБ и рестартирајте."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 MB и рестартирајте."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> работи"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Допрете за повеќе информации или за сопирање на апликацијата."</string>
     <string name="ok" msgid="2646370155170753815">"Во ред"</string>
@@ -1262,7 +1264,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобилната мрежа нема интернет-пристап"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Мрежата нема интернет-пристап"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Не може да се пристапи до приватниот DNS-сервер"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Поврзано"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> има ограничена поврзливост"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Допрете за да се поврзете и покрај тоа"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Префрлено на <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1636,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дали дозволувате <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако вклучите <xliff:g id="SERVICE">%1$s</xliff:g>, уредот нема да го користи заклучувањето на екранот за да го подобри шифрирањето на податоците."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини на други апликации."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Приказ и изведување дејства"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ги следи вашите интеракции со апликациите или хардверскиот сензор и да комуницира со апликациите во ваше име."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Допрете на функција за да почнете да ја користите:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Изберете ги апликациите што ќе ги користите со копчето за пристапност"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Изберете ги апликациите што ќе ги користите со кратенка за копчето за јачина на звук"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> е исклучена"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Изменете ги кратенките"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Откажи"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Исклучи ја кратенката"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи кратенка"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија на бои"</string>
@@ -1858,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Некатегоризирано"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ја поставивте важноста на известувањава."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ова е важно заради луѓето кои се вклучени."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Приспособено известување за апликација"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Дозволувате <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Веќе постои корисник со оваа сметка.)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Дозволувате <xliff:g id="APP">%1$s</xliff:g> да создаде нов корисник со <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Додај јазик"</string>
@@ -2031,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Мени за пристапност"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Насловна лента на <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> е ставен во корпата ОГРАНИЧЕНИ"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Службени"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Личен приказ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Работен приказ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Не може да се споделува со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Не може да се споделува со лични апликации"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Вашиот администратор за ИТ го блокирал споделувањето помеѓу лични и работни апликации"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Вклучете работни апликации"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Вклучете работни апликации за да пристапувате до работни апликации и контакти"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"IT-администраторот го блокирал споделувањето помеѓу лични и работни профили"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Не може да се пристапи до работните апликации"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"IT-администраторот не ви дозволува прегледување лични содржини во работни апликации"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Не може да се пристапи до личните апликации"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"IT-администраторот не ви дозволува прегледување работни содржини во лични апликации"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Вклучете го работниот профил за да споделувате содржини"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Вклучете го работниот профил за да прегледувате содржини"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Нема достапни апликации"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Не можевме да најдеме ниедна апликација"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Промени на работен"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Вклучи"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Снимајте или пуштајте аудио во телефонски повици"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Дозволува апликацијава да снима или да пушта аудио во телефонски повици кога е назначена како стандардна апликација за бирање."</string>
 </resources>
