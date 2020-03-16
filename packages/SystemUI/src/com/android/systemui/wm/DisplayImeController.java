@@ -49,6 +49,8 @@ import javax.inject.Singleton;
 public class DisplayImeController implements DisplayController.OnDisplaysChangedListener {
     private static final String TAG = "DisplayImeController";
 
+    private static final boolean DEBUG = false;
+
     public static final int ANIMATION_DURATION_SHOW_MS = 275;
     public static final int ANIMATION_DURATION_HIDE_MS = 340;
     public static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
@@ -209,6 +211,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
+            if (DEBUG) Slog.d(TAG, "Got showInsets for ime");
             startAnimation(true /* show */);
         }
 
@@ -217,6 +220,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             if ((types & WindowInsets.Type.ime()) == 0) {
                 return;
             }
+            if (DEBUG) Slog.d(TAG, "Got hideInsets for ime");
             startAnimation(false /* show */);
         }
 
@@ -241,6 +245,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 return;
             }
             mHandler.post(() -> {
+                if (DEBUG) {
+                    Slog.d(TAG, "Run startAnim  show:" + show + "  was:"
+                            + (mAnimationDirection == DIRECTION_SHOW ? "SHOW"
+                            : (mAnimationDirection == DIRECTION_HIDE ? "HIDE" : "NONE")));
+                }
                 if ((mAnimationDirection == DIRECTION_SHOW && show)
                         || (mAnimationDirection == DIRECTION_HIDE && !show)) {
                     return;
@@ -289,6 +298,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     public void onAnimationStart(Animator animation) {
                         SurfaceControl.Transaction t = mTransactionPool.acquire();
                         t.setPosition(mImeSourceControl.getLeash(), x, startY);
+                        if (DEBUG) {
+                            Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
+                                    + imeTop(imeSource, hiddenY) + "->" + imeTop(imeSource, shownY)
+                                    + " showing:" + (mAnimationDirection == DIRECTION_SHOW));
+                        }
                         dispatchStartPositioning(mDisplayId, imeTop(imeSource, hiddenY),
                                 imeTop(imeSource, shownY), mAnimationDirection == DIRECTION_SHOW,
                                 t);
@@ -304,6 +318,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     }
                     @Override
                     public void onAnimationEnd(Animator animation) {
+                        if (DEBUG) Slog.d(TAG, "onAnimationEnd " + mCancelled);
                         SurfaceControl.Transaction t = mTransactionPool.acquire();
                         if (!mCancelled) {
                             t.setPosition(mImeSourceControl.getLeash(), x, endY);
