@@ -931,6 +931,8 @@ public class NotificationManagerService extends SystemService {
                         .setType(MetricsEvent.TYPE_ACTION)
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count));
+                mNotificationRecordLogger.log(
+                        NotificationRecordLogger.NotificationEvent.NOTIFICATION_CLICKED, r);
                 EventLogTags.writeNotificationClicked(key,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
                         nv.rank, nv.count);
@@ -970,7 +972,8 @@ public class NotificationManagerService extends SystemService {
                                 generatedByAssistant ? 1 : 0)
                         .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
                                 nv.location.toMetricsEventEnum()));
-
+                mNotificationRecordLogger.log(
+                        NotificationRecordLogger.NotificationEvent.NOTIFICATION_ACTION_CLICKED, r);
                 EventLogTags.writeNotificationActionClicked(key, actionIndex,
                         r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
                         nv.rank, nv.count);
@@ -1004,6 +1007,8 @@ public class NotificationManagerService extends SystemService {
         public void onPanelRevealed(boolean clearEffects, int items) {
             MetricsLogger.visible(getContext(), MetricsEvent.NOTIFICATION_PANEL);
             MetricsLogger.histogram(getContext(), "note_load", items);
+            mNotificationRecordLogger.log(
+                    NotificationRecordLogger.NotificationPanelEvent.NOTIFICATION_PANEL_OPEN);
             EventLogTags.writeNotificationPanelRevealed(items);
             if (clearEffects) {
                 clearEffects();
@@ -1014,6 +1019,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onPanelHidden() {
             MetricsLogger.hidden(getContext(), MetricsEvent.NOTIFICATION_PANEL);
+            mNotificationRecordLogger.log(
+                    NotificationRecordLogger.NotificationPanelEvent.NOTIFICATION_PANEL_CLOSE);
             EventLogTags.writeNotificationPanelHidden();
             mAssistants.onPanelHidden();
         }
@@ -1103,6 +1110,10 @@ public class NotificationManagerService extends SystemService {
                         MetricsLogger.action(r.getItemLogMaker()
                                 .setType(expanded ? MetricsEvent.TYPE_DETAIL
                                         : MetricsEvent.TYPE_COLLAPSE));
+                        mNotificationRecordLogger.log(
+                                NotificationRecordLogger.NotificationEvent.fromExpanded(expanded,
+                                        userAction),
+                                r);
                     }
                     if (expanded && userAction) {
                         r.recordExpanded();
@@ -1124,6 +1135,9 @@ public class NotificationManagerService extends SystemService {
                     mMetricsLogger.write(r.getLogMaker()
                             .setCategory(MetricsEvent.NOTIFICATION_DIRECT_REPLY_ACTION)
                             .setType(MetricsEvent.TYPE_ACTION));
+                    mNotificationRecordLogger.log(
+                            NotificationRecordLogger.NotificationEvent.NOTIFICATION_DIRECT_REPLIED,
+                            r);
                     reportUserInteraction(r);
                     mAssistants.notifyAssistantNotificationDirectReplyLocked(r.getSbn());
                 }
@@ -1166,6 +1180,9 @@ public class NotificationManagerService extends SystemService {
                                     MetricsEvent.NOTIFICATION_SMART_REPLY_MODIFIED_BEFORE_SENDING,
                                     modifiedBeforeSending ? 1 : 0);
                     mMetricsLogger.write(logMaker);
+                    mNotificationRecordLogger.log(
+                            NotificationRecordLogger.NotificationEvent.NOTIFICATION_SMART_REPLIED,
+                            r);
                     // Treat clicking on a smart reply as a user interaction.
                     reportUserInteraction(r);
                     mAssistants.notifyAssistantSuggestedReplySent(
@@ -1310,6 +1327,9 @@ public class NotificationManagerService extends SystemService {
                             MetricsEvent.NOTIFICATION_SMART_REPLY_EDIT_BEFORE_SENDING,
                             r.getEditChoicesBeforeSending() ? 1 : 0);
             mMetricsLogger.write(logMaker);
+            mNotificationRecordLogger.log(
+                    NotificationRecordLogger.NotificationEvent.NOTIFICATION_SMART_REPLY_VISIBLE,
+                    r);
         }
     }
 
@@ -6150,6 +6170,9 @@ public class NotificationManagerService extends SystemService {
                 MetricsLogger.action(r.getLogMaker()
                         .setType(MetricsProto.MetricsEvent.TYPE_UPDATE)
                         .setCategory(MetricsProto.MetricsEvent.NOTIFICATION_SNOOZED));
+                mNotificationRecordLogger.log(
+                        NotificationRecordLogger.NotificationEvent.NOTIFICATION_NOT_POSTED_SNOOZED,
+                        r);
                 if (DBG) {
                     Slog.d(TAG, "Ignored enqueue for snoozed notification " + r.getKey());
                 }
@@ -6279,6 +6302,8 @@ public class NotificationManagerService extends SystemService {
                             mDuration)
                     .addTaggedData(MetricsEvent.NOTIFICATION_SNOOZED_CRITERIA,
                             mSnoozeCriterionId == null ? 0 : 1));
+            mNotificationRecordLogger.log(
+                    NotificationRecordLogger.NotificationEvent.NOTIFICATION_SNOOZED, r);
             reportUserInteraction(r);
             boolean wasPosted = removeFromNotificationListsLocked(r);
             cancelNotificationLocked(r, false, REASON_SNOOZED, wasPosted, null);
