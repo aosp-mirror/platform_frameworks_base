@@ -1547,19 +1547,18 @@
          See the <a href="http://llvm.org/docs/GwpAsan.html">LLVM documentation</a>
          for more information about this feature.
 
-         <p>This tag can be applied to any tag that allows
-         {@link android.R.styleable#AndroidManifestProcess process} tag:
+         <p>This attribute can be applied to a
+         {@link android.R.styleable#AndroidManifestProcess process} tag, or to an
          {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
-         a default setting for all application components), or with the
-         {@link android.R.styleable#AndroidManifestProvider provider},
-         {@link android.R.styleable#AndroidManifestService service},
-         {@link android.R.styleable#AndroidManifestReceiver receiver},
-         {@link android.R.styleable#AndroidManifestActivity activity} tag.
-         When multiple components run in the same process,
-         the first component to start determines the behavior of the entire process.
-
-         The default value is {@code false}. -->
-    <attr name="enableGwpAsan" format="boolean" />
+         a default setting for all application components). -->
+    <attr name="gwpAsanMode">
+        <!-- Default behavior: GwpAsan is disabled in user apps, randomly enabled in system apps. -->
+        <enum name="default" value="-1" />
+        <!-- Never enable GwpAsan. -->
+        <enum name="never" value="0" />
+        <!-- Always enable GwpAsan. -->
+       <enum name="always" value="1" />
+    </attr>
 
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
@@ -1826,7 +1825,7 @@
              The default value is {@code true}. -->
         <attr name="allowNativeHeapPointerTagging" format="boolean" />
 
-        <attr name="enableGwpAsan" />
+        <attr name="gwpAsanMode" />
 
         <!-- If {@code true} allow requesting that its permissions don't get automatically
              revoked when the app is unused for an extended amount of time.
@@ -2351,7 +2350,7 @@
     <declare-styleable name="AndroidManifestProcess" parent="AndroidManifestProcesses">
         <!-- Required name of the process that is allowed -->
         <attr name="process" />
-        <attr name="enableGwpAsan" />
+        <attr name="gwpAsanMode" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied

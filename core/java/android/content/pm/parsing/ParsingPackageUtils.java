@@ -1665,10 +1665,7 @@ public class ParsingPackageUtils {
                 return input.error("Invalid class loader name: " + classLoaderName);
             }
 
-            if (sa.hasValue(R.styleable.AndroidManifestApplication_enableGwpAsan)) {
-                pkg.setGwpAsanEnabled(
-                        sa.getBoolean(R.styleable.AndroidManifestApplication_enableGwpAsan, false));
-            }
+            pkg.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestApplication_gwpAsanMode, -1));
         } finally {
             sa.recycle();
         }

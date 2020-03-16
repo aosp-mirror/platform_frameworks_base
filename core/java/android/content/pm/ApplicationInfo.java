@@ -59,8 +59,6 @@ import java.util.UUID;
  * &lt;application&gt; tag.
  */
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
-    private static ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
-
     /**
      * Default task affinity of all activities in this application. See 
      * {@link ActivityInfo#taskAffinity} for more information.  This comes 
@@ -1277,12 +1275,37 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String zygotePreloadName;
 
     /**
-     * Indicates if the application has requested GWP-ASan to be enabled, disabled, or left
-     * unspecified. Processes can override this setting.
+     * Default (unspecified) setting of GWP-ASan.
+     */
+    public static final int GWP_ASAN_DEFAULT = -1;
+
+    /**
+     * Never enable GWP-ASan in this application or process.
+     */
+    public static final int GWP_ASAN_NEVER = 0;
+
+    /**
+     * Always enable GWP-ASan in this application or process.
+     */
+    public static final int GWP_ASAN_ALWAYS = 1;
+
+    /**
+     * These constants need to match the values of gwpAsanMode in application manifest.
      * @hide
      */
-    @Nullable
-    public Boolean enableGwpAsan;
+    @IntDef(prefix = {"GWP_ASAN_"}, value = {
+            GWP_ASAN_DEFAULT,
+            GWP_ASAN_NEVER,
+            GWP_ASAN_ALWAYS,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GwpAsanMode {}
+
+    /**
+     * Indicates if the application has requested GWP-ASan to be enabled, disabled, or left
+     * unspecified. Processes can override this setting.
+     */
+    private @GwpAsanMode int gwpAsanMode;
 
     /**
      * Represents the default policy. The actual policy used will depend on other properties of
@@ -1425,8 +1448,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             pw.println(prefix + "usesNonSdkApi=" + usesNonSdkApi());
             pw.println(prefix + "allowsPlaybackCapture="
                         + (isAudioPlaybackCaptureAllowed() ? "true" : "false"));
-            if (enableGwpAsan != null) {
-                pw.println(prefix + "enableGwpAsan=" + enableGwpAsan);
+            if (gwpAsanMode != GWP_ASAN_DEFAULT) {
+                pw.println(prefix + "gwpAsanMode=" + gwpAsanMode);
             }
         }
         super.dumpBack(pw, prefix);
@@ -1526,8 +1549,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             if (category != CATEGORY_UNDEFINED) {
                 proto.write(ApplicationInfoProto.Detail.CATEGORY, category);
             }
-            if (enableGwpAsan != null) {
-                proto.write(ApplicationInfoProto.Detail.ENABLE_GWP_ASAN, enableGwpAsan);
+            if (gwpAsanMode != GWP_ASAN_DEFAULT) {
+                proto.write(ApplicationInfoProto.Detail.ENABLE_GWP_ASAN, gwpAsanMode);
             }
             proto.end(detailToken);
         }
@@ -1638,7 +1661,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         mHiddenApiPolicy = orig.mHiddenApiPolicy;
         hiddenUntilInstalled = orig.hiddenUntilInstalled;
         zygotePreloadName = orig.zygotePreloadName;
-        enableGwpAsan = orig.enableGwpAsan;
+        gwpAsanMode = orig.gwpAsanMode;
     }
 
     public String toString() {
@@ -1722,7 +1745,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(mHiddenApiPolicy);
         dest.writeInt(hiddenUntilInstalled ? 1 : 0);
         dest.writeString(zygotePreloadName);
-        sForBoolean.parcel(enableGwpAsan, dest, parcelableFlags);
+        dest.writeInt(gwpAsanMode);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<ApplicationInfo> CREATOR
@@ -1803,7 +1826,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         mHiddenApiPolicy = source.readInt();
         hiddenUntilInstalled = source.readInt() != 0;
         zygotePreloadName = source.readString();
-        enableGwpAsan = sForBoolean.unparcel(source);
+        gwpAsanMode = source.readInt();
     }
 
     /**
@@ -2182,7 +2205,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** {@hide} */ public void setResourcePath(String resourcePath) { scanPublicSourceDir = resourcePath; }
     /** {@hide} */ public void setBaseResourcePath(String baseResourcePath) { publicSourceDir = baseResourcePath; }
     /** {@hide} */ public void setSplitResourcePaths(String[] splitResourcePaths) { splitPublicSourceDirs = splitResourcePaths; }
-    /** {@hide} */ public void setGwpAsanEnabled(@Nullable Boolean value) { enableGwpAsan = value; }
+    /** {@hide} */ public void setGwpAsanMode(@GwpAsanMode int value) { gwpAsanMode = value; }
 
     /** {@hide} */
     @UnsupportedAppUsage
@@ -2194,6 +2217,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     @UnsupportedAppUsage
     public String getBaseResourcePath() { return publicSourceDir; }
     /** {@hide} */ public String[] getSplitResourcePaths() { return splitPublicSourceDirs; }
-    @Nullable
-    public Boolean isGwpAsanEnabled() { return enableGwpAsan; }
+    @GwpAsanMode
+    public int getGwpAsanMode() { return gwpAsanMode; }
 }
