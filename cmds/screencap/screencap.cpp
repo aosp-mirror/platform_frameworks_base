@@ -102,14 +102,13 @@ static uint32_t dataSpaceToInt(ui::Dataspace d)
 static status_t notifyMediaScanner(const char* fileName) {
     std::string filePath("file://");
     filePath.append(fileName);
-    char* fp_arg = strdup(filePath.c_str());
     char *cmd[] = {
         (char*) "am",
         (char*) "broadcast",
         (char*) "am",
         (char*) "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
         (char*) "-d",
-        (char*) fp_arg,
+        &filePath[0],
         nullptr
     };
 
