@@ -29,6 +29,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -64,7 +65,8 @@ public class KeyguardModule {
             PowerManager powerManager,
             TrustManager trustManager,
             @UiBackground Executor uiBgExecutor,
-            DeviceConfigProxy deviceConfig) {
+            DeviceConfigProxy deviceConfig,
+            NavigationModeController navigationModeController) {
         return new KeyguardViewMediator(
                 context,
                 falsingManager,
@@ -78,6 +80,7 @@ public class KeyguardModule {
                 uiBgExecutor,
                 powerManager,
                 trustManager,
-                deviceConfig);
+                deviceConfig,
+                navigationModeController);
     }
 }
