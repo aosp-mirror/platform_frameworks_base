@@ -55,7 +55,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Slog;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1570,6 +1569,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mVisuallyInterruptive;
         private boolean mIsConversation;
         private ShortcutInfo mShortcutInfo;
+        private boolean mIsBubble;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1604,6 +1604,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeBoolean(mVisuallyInterruptive);
             out.writeBoolean(mIsConversation);
             out.writeParcelable(mShortcutInfo, flags);
+            out.writeBoolean(mIsBubble);
         }
 
         /** @hide */
@@ -1639,6 +1640,7 @@ public abstract class NotificationListenerService extends Service {
             mVisuallyInterruptive = in.readBoolean();
             mIsConversation = in.readBoolean();
             mShortcutInfo = in.readParcelable(cl);
+            mIsBubble = in.readBoolean();
         }
 
 
@@ -1844,6 +1846,14 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns whether this notification is actively a bubble.
+         * @hide
+         */
+        public boolean isBubble() {
+            return mIsBubble;
+        }
+
+        /**
          * @hide
          */
         public @Nullable ShortcutInfo getShortcutInfo() {
@@ -1862,7 +1872,8 @@ public abstract class NotificationListenerService extends Service {
                 int userSentiment, boolean hidden, long lastAudiblyAlertedMs,
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
-                boolean visuallyInterruptive, boolean isConversation, ShortcutInfo shortcutInfo) {
+                boolean visuallyInterruptive, boolean isConversation, ShortcutInfo shortcutInfo,
+                boolean isBubble) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1886,6 +1897,7 @@ public abstract class NotificationListenerService extends Service {
             mVisuallyInterruptive = visuallyInterruptive;
             mIsConversation = isConversation;
             mShortcutInfo = shortcutInfo;
+            mIsBubble = isBubble;
         }
 
         /**
@@ -1913,7 +1925,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mCanBubble,
                     other.mVisuallyInterruptive,
                     other.mIsConversation,
-                    other.mShortcutInfo);
+                    other.mShortcutInfo,
+                    other.mIsBubble);
         }
 
         /**
@@ -1970,7 +1983,8 @@ public abstract class NotificationListenerService extends Service {
                     && Objects.equals(mIsConversation, other.mIsConversation)
                     // Shortcutinfo doesn't have equals either; use id
                     &&  Objects.equals((mShortcutInfo == null ? 0 : mShortcutInfo.getId()),
-                    (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()));
+                    (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()))
+                    && Objects.equals(mIsBubble, other.mIsBubble);
         }
     }
 

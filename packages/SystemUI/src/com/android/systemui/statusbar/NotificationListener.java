@@ -206,7 +206,8 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                     false,
                     false,
                     false,
-                    null
+                    null,
+                    false
             );
         }
         return ranking;
