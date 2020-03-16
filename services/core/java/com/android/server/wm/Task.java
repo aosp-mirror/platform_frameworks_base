@@ -2127,14 +2127,26 @@ class Task extends WindowContainer<WindowContainer> {
         intersectWithInsetsIfFits(outStableBounds, mTmpBounds, mTmpInsets);
     }
 
+    /**
+     * Forces the app bounds related configuration can be computed by
+     * {@link #computeConfigResourceOverrides(Configuration, Configuration, DisplayInfo,
+     * ActivityRecord.CompatDisplayInsets)}.
+     */
+    private static void invalidateAppBoundsConfig(@NonNull Configuration inOutConfig) {
+        final Rect appBounds = inOutConfig.windowConfiguration.getAppBounds();
+        if (appBounds != null) {
+            appBounds.setEmpty();
+        }
+        inOutConfig.screenWidthDp = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
+        inOutConfig.screenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+    }
+
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig, @Nullable DisplayInfo overrideDisplayInfo) {
         if (overrideDisplayInfo != null) {
             // Make sure the screen related configs can be computed by the provided display info.
-            inOutConfig.windowConfiguration.setAppBounds(null);
             inOutConfig.screenLayout = Configuration.SCREENLAYOUT_UNDEFINED;
-            inOutConfig.screenWidthDp = Configuration.SCREEN_WIDTH_DP_UNDEFINED;
-            inOutConfig.screenHeightDp = Configuration.SCREEN_HEIGHT_DP_UNDEFINED;
+            invalidateAppBoundsConfig(inOutConfig);
         }
         computeConfigResourceOverrides(inOutConfig, parentConfig, overrideDisplayInfo,
                 null /* compatInsets */);
@@ -2149,6 +2161,10 @@ class Task extends WindowContainer<WindowContainer> {
     void computeConfigResourceOverrides(@NonNull Configuration inOutConfig,
             @NonNull Configuration parentConfig,
             @Nullable ActivityRecord.CompatDisplayInsets compatInsets) {
+        if (compatInsets != null) {
+            // Make sure the app bounds can be computed by the compat insets.
+            invalidateAppBoundsConfig(inOutConfig);
+        }
         computeConfigResourceOverrides(inOutConfig, parentConfig, null /* overrideDisplayInfo */,
                 compatInsets);
     }
