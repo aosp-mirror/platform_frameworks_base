@@ -1652,7 +1652,6 @@ public class SubscriptionManager {
      * @return the number of records updated
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public int setIconTint(@ColorInt int tint, int subId) {
         if (VDBG) logd("[setIconTint]+ tint:" + tint + " subId:" + subId);
@@ -1669,7 +1668,6 @@ public class SubscriptionManager {
      * @return the number of records updated or < 0 if invalid subId
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
     public int setDisplayName(@Nullable String displayName, int subId,
             @SimDisplayNameSource int nameSource) {

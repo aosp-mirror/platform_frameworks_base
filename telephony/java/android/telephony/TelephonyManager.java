@@ -12986,7 +12986,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setAlwaysAllowMmsData(boolean alwaysAllow) {
         try {
