@@ -16,6 +16,8 @@
 
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +29,8 @@ import static org.mockito.Mockito.when;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.media.MediaRoute2Info;
+import android.media.MediaRouter2Manager;
 
 import com.android.settingslib.bluetooth.A2dpProfile;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -53,10 +57,13 @@ import java.util.List;
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class LocalMediaManagerTest {
 
+    private static final String TEST_DEVICE_NAME_1 = "device_name_1";
+    private static final String TEST_DEVICE_NAME_2 = "device_name_2";
     private static final String TEST_DEVICE_ID_1 = "device_id_1";
     private static final String TEST_DEVICE_ID_2 = "device_id_2";
     private static final String TEST_DEVICE_ID_3 = "device_id_3";
     private static final String TEST_CURRENT_DEVICE_ID = "currentDevice_id";
+    private static final String TEST_PACKAGE_NAME = "com.test.playmusic";
 
     @Mock
     private BluetoothMediaManager mBluetoothMediaManager;
@@ -72,10 +79,18 @@ public class LocalMediaManagerTest {
     private A2dpProfile mA2dpProfile;
     @Mock
     private LocalBluetoothProfileManager mLocalProfileManager;
+    @Mock
+    private MediaRouter2Manager mMediaRouter2Manager;
+    @Mock
+    private MediaRoute2Info mRouteInfo1;
+    @Mock
+    private MediaRoute2Info mRouteInfo2;
 
     private Context mContext;
     private LocalMediaManager mLocalMediaManager;
     private ShadowBluetoothAdapter mShadowBluetoothAdapter;
+    private InfoMediaDevice mInfoMediaDevice1;
+    private InfoMediaDevice mInfoMediaDevice2;
 
     @Before
     public void setUp() {
@@ -84,11 +99,18 @@ public class LocalMediaManagerTest {
         final List<BluetoothDevice> bluetoothDevices = new ArrayList<>();
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         mShadowBluetoothAdapter.setMostRecentlyConnectedDevices(bluetoothDevices);
-
+        when(mRouteInfo1.getName()).thenReturn(TEST_DEVICE_NAME_1);
+        when(mRouteInfo1.getId()).thenReturn(TEST_DEVICE_ID_1);
+        when(mRouteInfo2.getName()).thenReturn(TEST_DEVICE_NAME_2);
+        when(mRouteInfo2.getId()).thenReturn(TEST_DEVICE_ID_2);
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalProfileManager);
         when(mLocalProfileManager.getA2dpProfile()).thenReturn(mA2dpProfile);
         when(mLocalProfileManager.getHearingAidProfile()).thenReturn(mHapProfile);
 
+        mInfoMediaDevice1 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo1,
+                TEST_PACKAGE_NAME);
+        mInfoMediaDevice2 = new InfoMediaDevice(mContext, mMediaRouter2Manager, mRouteInfo2,
+                TEST_PACKAGE_NAME);
         mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
                 mInfoMediaManager, "com.test.packagename");
         mLocalMediaManager.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -120,6 +142,32 @@ public class LocalMediaManagerTest {
 
         verify(currentDevice).disconnect();
         verify(device).connect();
+    }
+
+    @Test
+    public void connectDevice_deviceNotEqualCurrentConnectedDevice_isConnectingState() {
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice1);
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice2);
+        mLocalMediaManager.mCurrentConnectedDevice = mInfoMediaDevice1;
+
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.connectDevice(mInfoMediaDevice2);
+
+        assertThat(mInfoMediaDevice2.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_CONNECTING);
+    }
+
+    @Test
+    public void connectDevice_deviceEqualCurrentConnectedDevice_notConnectingState() {
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice1);
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice2);
+        mLocalMediaManager.mCurrentConnectedDevice = mInfoMediaDevice1;
+
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.connectDevice(mInfoMediaDevice1);
+
+        assertThat(mInfoMediaDevice1.getState()).isNotEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_CONNECTING);
     }
 
     @Test
@@ -388,12 +436,47 @@ public class LocalMediaManagerTest {
     }
 
     @Test
+    public void onConnectedDeviceChanged_isConnectedState() {
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice1);
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice2);
+        mInfoMediaDevice1.setState(LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_DISCONNECTED);
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_1);
+
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_CONNECTED);
+    }
+
+    @Test
     public void onDeviceAttributesChanged_shouldDispatchDeviceListUpdate() {
         mLocalMediaManager.registerCallback(mCallback);
 
         mLocalMediaManager.mMediaDeviceCallback.onDeviceAttributesChanged();
 
         verify(mCallback).onDeviceAttributesChanged();
+    }
+
+    @Test
+    public void onRequestFailed_checkDevicesState() {
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice1);
+        mLocalMediaManager.mMediaDevices.add(mInfoMediaDevice2);
+        mInfoMediaDevice1.setState(LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
+        mInfoMediaDevice2.setState(LocalMediaManager.MediaDeviceState.STATE_CONNECTED);
+
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_CONNECTING);
+        assertThat(mInfoMediaDevice2.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_CONNECTED);
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.mMediaDeviceCallback.onRequestFailed(REASON_UNKNOWN_ERROR);
+
+        assertThat(mInfoMediaDevice1.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_CONNECTING_FAILED);
+        assertThat(mInfoMediaDevice2.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
+                .STATE_CONNECTED);
     }
 
     @Test
