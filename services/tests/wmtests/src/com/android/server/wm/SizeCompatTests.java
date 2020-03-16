@@ -107,10 +107,16 @@ public class SizeCompatTests extends ActivityTestsBase {
         setUpApp(display);
 
         // Put app window into freeform and then make it a compat app.
-        mTask.setBounds(100, 100, 400, 600);
+        final Rect bounds = new Rect(100, 100, 400, 600);
+        mTask.setBounds(bounds);
         prepareUnresizable(-1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
+        assertEquals(bounds, mActivity.getBounds());
 
-        final Rect bounds = new Rect(mActivity.getBounds());
+        // The activity should be able to accept negative x position [-150, 100 - 150, 600].
+        final int dx = bounds.left + bounds.width() / 2;
+        mTask.setBounds(bounds.left - dx, bounds.top, bounds.right - dx, bounds.bottom);
+        assertEquals(mTask.getBounds(), mActivity.getBounds());
+
         final int density = mActivity.getConfiguration().densityDpi;
 
         // change display configuration to fullscreen
@@ -231,11 +237,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         // The position should be horizontal centered.
         assertEquals((displayWidth - bounds.width()) / 2, bounds.left);
 
-        final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
-                mService.mWindowManager, mock(Session.class), new TestIWindow(),
-                new WindowManager.LayoutParams(), mActivity);
-        mActivity.addWindow(w);
-        mActivity.mDisplayContent.mInputMethodTarget = w;
+        mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
         // Make sure IME cannot attach to the app, otherwise IME window will also be shifted.
         assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
     }
@@ -475,6 +477,25 @@ public class SizeCompatTests extends ActivityTestsBase {
         assertEquals((int) (dw * maxAspect), mActivity.getBounds().width());
         // The bounds should be horizontal centered: (2500-1900)/2=350.
         assertEquals((dh - mActivity.getBounds().width()) / 2, mActivity.getBounds().left);
+
+        // The letterbox needs a main window to layout.
+        addWindowToActivity(mActivity);
+        // Compute the frames of the window and invoke {@link ActivityRecord#layoutLetterbox}.
+        mActivity.mRootWindowContainer.performSurfacePlacement(false /* recoveringMemory */);
+        // The letterbox insets should be [350, 0 - 350, 0].
+        assertEquals(new Rect(mActivity.getBounds().left, 0, dh - mActivity.getBounds().right, 0),
+                mActivity.getLetterboxInsets());
+    }
+
+    private WindowState addWindowToActivity(ActivityRecord activity) {
+        final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+        params.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+        final WindowTestUtils.TestWindowState w = new WindowTestUtils.TestWindowState(
+                mService.mWindowManager, mock(Session.class), new TestIWindow(), params, mActivity);
+        WindowTestsBase.makeWindowVisible(w);
+        w.mWinAnimator.mDrawState = WindowStateAnimator.HAS_DRAWN;
+        mActivity.addWindow(w);
+        return w;
     }
 
     /**

@@ -1351,11 +1351,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
-            // Get the bounds of the "space-to-fill". In multi-window mode, the task-level
-            // represents this. In fullscreen-mode, the stack does (since the orientation letterbox
-            // is also applied to the task).
-            Rect spaceToFill = (inMultiWindowMode() || getStack() == null)
-                    ? task.getDisplayedBounds() : getStack().getDisplayedBounds();
+            // Get the bounds of the "space-to-fill". The transformed bounds have the highest
+            // priority because the activity is launched in a rotated environment. In multi-window
+            // mode, the task-level represents this. In fullscreen-mode, the task container does
+            // (since the orientation letterbox is also applied to the task).
+            final Rect transformedBounds = getFixedRotationTransformDisplayBounds();
+            final Rect spaceToFill = transformedBounds != null
+                    ? transformedBounds
+                    : inMultiWindowMode()
+                            ? task.getDisplayedBounds()
+                            : getRootTask().getParent().getDisplayedBounds();
             mLetterbox.layout(spaceToFill, w.getFrameLw(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
@@ -6362,33 +6367,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mCompatDisplayInsets != null) {
             resolveSizeCompatModeConfiguration(newParentConfiguration);
         } else {
-            // We ignore activities' requested orientation in multi-window modes. Task level may
-            // take them into consideration when calculating bounds.
             if (inMultiWindowMode()) {
+                // We ignore activities' requested orientation in multi-window modes. Task level may
+                // take them into consideration when calculating bounds.
                 resolvedConfig.orientation = Configuration.ORIENTATION_UNDEFINED;
-            }
-            final Rect parentAppBounds = newParentConfiguration.windowConfiguration.getAppBounds();
-            final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
-            // Use tmp bounds to calculate aspect ratio so we can know whether the activity should
-            // use restricted size (resolvedBounds may be the requested override bounds).
-            mTmpBounds.setEmpty();
-            applyAspectRatio(mTmpBounds, parentAppBounds, parentBounds);
-            // If the out bounds is not empty, it means the activity cannot fill parent's app
-            // bounds, then the relative configuration (e.g. screen size, layout) needs to be
-            // resolved according to the bounds.
-            if (!mTmpBounds.isEmpty()) {
-                final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
-                resolvedBounds.set(mTmpBounds);
-                // Exclude the horizontal decor area because the activity will be centered
-                // horizontally in parent's app bounds to balance the visual appearance.
-                resolvedBounds.left = parentAppBounds.left;
-                task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
-                        getFixedRotationTransformDisplayInfo());
-                final int offsetX = getHorizontalCenterOffset(
-                        parentAppBounds.width(), resolvedBounds.width());
-                if (offsetX > 0) {
-                    offsetBounds(resolvedConfig, offsetX - resolvedBounds.left, 0 /* offsetY */);
+                // If the activity has requested override bounds, the configuration needs to be
+                // computed accordingly.
+                if (!matchParentBounds()) {
+                    task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration);
                 }
+            } else {
+                resolveFullscreenConfiguration(newParentConfiguration);
             }
         }
 
@@ -6397,6 +6386,43 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // layout traversals.
         mConfigurationSeq = Math.max(++mConfigurationSeq, 1);
         getResolvedOverrideConfiguration().seq = mConfigurationSeq;
+    }
+
+    /**
+     * Resolves the configuration of activity in fullscreen mode. If the bounds are restricted by
+     * aspect ratio, the position will be centered horizontally in parent's app bounds to balance
+     * the visual appearance. The policy of aspect ratio has higher priority than the requested
+     * override bounds.
+     */
+    private void resolveFullscreenConfiguration(Configuration newParentConfiguration) {
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        final Rect parentAppBounds = newParentConfiguration.windowConfiguration.getAppBounds();
+        final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
+        final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
+        // Use tmp bounds to calculate aspect ratio so we can know whether the activity should use
+        // restricted size (resolved bounds may be the requested override bounds).
+        mTmpBounds.setEmpty();
+        applyAspectRatio(mTmpBounds, parentAppBounds, parentBounds);
+        // If the out bounds is not empty, it means the activity cannot fill parent's app bounds,
+        // then there is space to be centered.
+        final boolean needToBeCentered = !mTmpBounds.isEmpty();
+        if (needToBeCentered) {
+            resolvedBounds.set(mTmpBounds);
+            // Exclude the horizontal decor area.
+            resolvedBounds.left = parentAppBounds.left;
+        }
+        if (!resolvedBounds.isEmpty() && !resolvedBounds.equals(parentBounds)) {
+            // Compute the configuration based on the resolved bounds. If aspect ratio doesn't
+            // restrict, the bounds should be the requested override bounds.
+            task.computeConfigResourceOverrides(resolvedConfig, newParentConfiguration,
+                    getFixedRotationTransformDisplayInfo());
+        }
+        if (needToBeCentered) {
+            // Offset to center relative to parent's app bounds.
+            final int offsetX = getHorizontalCenterOffset(
+                    parentAppBounds.width(), resolvedBounds.width());
+            offsetBounds(resolvedConfig, offsetX, 0 /* offsetY */);
+        }
     }
 
     /**
@@ -6507,7 +6533,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Above coordinates are in "@" space, now place "*" and "#" to screen space.
         final int screenPosX = parentAppBounds.left + offsetX;
         final int screenPosY = parentBounds.top;
-        if (screenPosX > 0 || screenPosY > 0) {
+        if (screenPosX != 0 || screenPosY != 0) {
             if (mSizeCompatBounds != null) {
                 mSizeCompatBounds.offset(screenPosX, screenPosY);
             }
