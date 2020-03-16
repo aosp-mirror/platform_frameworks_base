@@ -100,10 +100,11 @@ public abstract class StorageManagerInternal {
     }
 
     /**
-     * Check if fuse is running in target user, if it's running then setup its obb directories.
-     * TODO: System server should store a list of active pids that obb is not mounted and use it.
+     * Create storage directories if it does not exist.
+     * Return true if the directories were setup correctly, otherwise false.
      */
-    public abstract void prepareObbDirs(int userId, Set<String> packageList, String processName);
+    public abstract boolean prepareStorageDirs(int userId, Set<String> packageList,
+            String processName);
 
     /**
      * Add a listener to listen to reset event in StorageManagerService.

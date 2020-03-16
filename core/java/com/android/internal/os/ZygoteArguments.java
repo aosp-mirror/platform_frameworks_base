@@ -227,6 +227,11 @@ class ZygoteArguments {
     String[] mPkgDataInfoList;
 
     /**
+     * @see Zygote#BIND_MOUNT_APP_STORAGE_DIRS
+     */
+    boolean mBindMountAppStorageDirs;
+
+    /**
      * Constructs instance and parses args
      *
      * @param args zygote command-line args
@@ -447,6 +452,8 @@ class ZygoteArguments {
                 }
             } else if (arg.startsWith(Zygote.PKG_DATA_INFO_MAP)) {
                 mPkgDataInfoList = getAssignmentList(arg);
+            } else if (arg.equals(Zygote.BIND_MOUNT_APP_STORAGE_DIRS)) {
+                mBindMountAppStorageDirs = true;
             } else {
                 break;
             }
