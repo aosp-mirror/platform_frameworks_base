@@ -446,12 +446,12 @@ public class OffloadControllerTest {
         final NetworkStats ifaceStats = mTetherStatsProvider.getTetherStats(STATS_PER_IFACE);
         final NetworkStats uidStats = mTetherStatsProvider.getTetherStats(STATS_PER_UID);
         final NetworkStats expectedIfaceStats = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_IFACE, ethernetIface, 12345, 54321));
+                .addEntry(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_IFACE, ethernetIface, 12345, 54321));
 
         final NetworkStats expectedUidStats = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_UID, ethernetIface, 12345, 54321));
+                .addEntry(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_UID, ethernetIface, 12345, 54321));
 
         assertTrue(orderInsensitiveEquals(expectedIfaceStats, ifaceStats));
         assertTrue(orderInsensitiveEquals(expectedUidStats, uidStats));
@@ -485,12 +485,12 @@ public class OffloadControllerTest {
         final NetworkStats ifaceStatsAccu = mTetherStatsProvider.getTetherStats(STATS_PER_IFACE);
         final NetworkStats uidStatsAccu = mTetherStatsProvider.getTetherStats(STATS_PER_UID);
         final NetworkStats expectedIfaceStatsAccu = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_IFACE, ethernetIface, 112345, 154321));
+                .addEntry(buildTestEntry(STATS_PER_IFACE, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_IFACE, ethernetIface, 112345, 154321));
 
         final NetworkStats expectedUidStatsAccu = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
-                .addValues(buildTestEntry(STATS_PER_UID, ethernetIface, 112345, 154321));
+                .addEntry(buildTestEntry(STATS_PER_UID, mobileIface, 999, 99999))
+                .addEntry(buildTestEntry(STATS_PER_UID, ethernetIface, 112345, 154321));
 
         assertTrue(orderInsensitiveEquals(expectedIfaceStatsAccu, ifaceStatsAccu));
         assertTrue(orderInsensitiveEquals(expectedUidStatsAccu, uidStatsAccu));
@@ -499,12 +499,12 @@ public class OffloadControllerTest {
         reset(mTetherStatsProviderCb);
         mTetherStatsProvider.pushTetherStats();
         final NetworkStats expectedIfaceStatsDiff = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_IFACE, mobileIface, 0, 0))
-                .addValues(buildTestEntry(STATS_PER_IFACE, ethernetIface, 100000, 100000));
+                .addEntry(buildTestEntry(STATS_PER_IFACE, mobileIface, 0, 0))
+                .addEntry(buildTestEntry(STATS_PER_IFACE, ethernetIface, 100000, 100000));
 
         final NetworkStats expectedUidStatsDiff = new NetworkStats(0L, 2)
-                .addValues(buildTestEntry(STATS_PER_UID, mobileIface, 0, 0))
-                .addValues(buildTestEntry(STATS_PER_UID, ethernetIface, 100000, 100000));
+                .addEntry(buildTestEntry(STATS_PER_UID, mobileIface, 0, 0))
+                .addEntry(buildTestEntry(STATS_PER_UID, ethernetIface, 100000, 100000));
         verify(mTetherStatsProviderCb, times(1))
                 .notifyStatsUpdated(anyInt(), ifaceStatsCaptor.capture(), uidStatsCaptor.capture());
         assertTrue(orderInsensitiveEquals(expectedIfaceStatsDiff, ifaceStatsCaptor.getValue()));
