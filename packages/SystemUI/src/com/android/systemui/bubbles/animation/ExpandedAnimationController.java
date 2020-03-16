@@ -409,11 +409,8 @@ public class ExpandedAnimationController
         mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
 
         // Includes overflow button.
-        // TODO(b/148675523) this is a temporary work around; change back once we have proper fix.
-//        float totalGapWidth = getWidthForDisplayingBubbles() - (mExpandedViewPadding * 2)
-//                - (mBubblesMaxRendered + 1) * mBubbleSizePx;
-        float totalGapWidth = getAvailableScreenWidth(true /* includeStableInsets */)
-                - (mExpandedViewPadding * 2) - (mBubblesMaxRendered + 1) * mBubbleSizePx;
+        float totalGapWidth = getWidthForDisplayingBubbles() - (mExpandedViewPadding * 2)
+                - (mBubblesMaxRendered + 1) * mBubbleSizePx;
         mSpaceBetweenBubbles = totalGapWidth / mBubblesMaxRendered;
 
         // Ensure that all child views are at 1x scale, and visible, in case they were animating
