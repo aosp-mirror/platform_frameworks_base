@@ -27,6 +27,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.app.WindowConfiguration;
+import android.content.ComponentName;
+import android.content.pm.ActivityInfo;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -108,6 +110,28 @@ public class RootWindowContainerTests extends WindowTestsBase {
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FREEFORM,
                 mWm.getDefaultDisplayContentLocked().getWindowingMode());
+    }
+
+    /**
+     * This test ensures that an existing single instance activity with alias name can be found by
+     * the same activity info. So {@link ActivityStarter#getReusableTask} won't miss it that leads
+     * to create an unexpected new instance.
+     */
+    @Test
+    public void testFindActivityByTargetComponent() {
+        final ComponentName aliasComponent = ComponentName.createRelative(
+                ActivityTestsBase.DEFAULT_COMPONENT_PACKAGE_NAME, ".AliasActivity");
+        final ComponentName targetComponent = ComponentName.createRelative(
+                aliasComponent.getPackageName(), ".TargetActivity");
+        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setComponent(aliasComponent)
+                .setTargetActivity(targetComponent.getClassName())
+                .setLaunchMode(ActivityInfo.LAUNCH_SINGLE_INSTANCE)
+                .setCreateTask(true)
+                .build();
+
+        assertEquals(activity, mWm.mRoot.findActivity(activity.intent, activity.info,
+                false /* compareIntentFilters */));
     }
 }
 
