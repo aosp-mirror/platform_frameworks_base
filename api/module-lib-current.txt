@@ -29,7 +29,7 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.TetheredClient.AddressInfo> CREATOR;
   }
 
-  public class TetheringConstants {
+  public final class TetheringConstants {
     field public static final String EXTRA_ADD_TETHER_TYPE = "extraAddTetherType";
     field public static final String EXTRA_PROVISION_CALLBACK = "extraProvisionCallback";
     field public static final String EXTRA_REM_TETHER_TYPE = "extraRemTetherType";
