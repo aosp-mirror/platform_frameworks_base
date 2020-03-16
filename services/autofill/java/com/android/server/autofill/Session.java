@@ -756,7 +756,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         setClientLocked(client);
 
         mInlineSuggestionSession = new InlineSuggestionSession(inputMethodManagerInternal, userId,
-                componentName, handler);
+                componentName, handler, mLock);
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FLAGS, flags));

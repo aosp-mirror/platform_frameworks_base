@@ -62,7 +62,7 @@ import java.util.function.Consumer;
  * side flow.
  *
  * <p>
- * This class is thread safe.
+ * This class should hold the same lock as {@link Session} as they call into each other.
  */
 final class InlineSuggestionSession {
 
@@ -105,12 +105,12 @@ final class InlineSuggestionSession {
     private boolean mImeInputViewStarted = false;
 
     InlineSuggestionSession(InputMethodManagerInternal inputMethodManagerInternal,
-            int userId, ComponentName componentName, Handler handler) {
+            int userId, ComponentName componentName, Handler handler, Object lock) {
         mInputMethodManagerInternal = inputMethodManagerInternal;
         mUserId = userId;
         mComponentName = componentName;
         mHandler = handler;
-        mLock = new Object();
+        mLock = lock;
         mImeStatusListener = new ImeStatusListener() {
             @Override
             public void onInputMethodStartInputView(AutofillId imeFieldId) {
@@ -261,29 +261,27 @@ final class InlineSuggestionSession {
             mHandler = handler;
             mTimeoutCallback = () -> {
                 Log.w(TAG, "Timed out waiting for IME callback InlineSuggestionsRequest.");
-                synchronized (mLock) {
-                    completeIfNotLocked(null);
-                }
+                completeIfNot(null);
             };
             mHandler.postDelayed(mTimeoutCallback, INLINE_REQUEST_TIMEOUT_MS);
         }
 
-        private void completeIfNotLocked(@Nullable ImeResponse response) {
-            if (mResponse.isDone()) {
-                return;
+        private void completeIfNot(@Nullable ImeResponse response) {
+            synchronized (mLock) {
+                if (mResponse.isDone()) {
+                    return;
+                }
+                mResponse.complete(response);
+                mRequestConsumer.accept(response == null ? null : response.mRequest);
+                mHandler.removeCallbacks(mTimeoutCallback);
             }
-            mResponse.complete(response);
-            mRequestConsumer.accept(response == null ? null : response.mRequest);
-            mHandler.removeCallbacks(mTimeoutCallback);
         }
 
         @BinderThread
         @Override
         public void onInlineSuggestionsUnsupported() throws RemoteException {
             if (sDebug) Log.d(TAG, "onInlineSuggestionsUnsupported() called.");
-            synchronized (mLock) {
-                completeIfNotLocked(null);
-            }
+            completeIfNot(null);
         }
 
         @BinderThread
@@ -302,13 +300,9 @@ final class InlineSuggestionSession {
                 mImeStatusListener.onInputMethodFinishInputView(imeFieldId);
             }
             if (request != null && callback != null) {
-                synchronized (mLock) {
-                    completeIfNotLocked(new ImeResponse(request, callback));
-                }
+                completeIfNot(new ImeResponse(request, callback));
             } else {
-                synchronized (mLock) {
-                    completeIfNotLocked(null);
-                }
+                completeIfNot(null);
             }
         }
 
