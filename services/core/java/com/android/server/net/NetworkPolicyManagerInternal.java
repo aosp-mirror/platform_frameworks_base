@@ -21,7 +21,7 @@ import static com.android.server.net.NetworkPolicyManagerService.isUidNetworking
 import android.annotation.NonNull;
 import android.net.Network;
 import android.net.NetworkTemplate;
-import android.net.netstats.provider.AbstractNetworkStatsProvider;
+import android.net.netstats.provider.NetworkStatsProvider;
 import android.telephony.SubscriptionPlan;
 
 import java.util.Set;
@@ -130,8 +130,8 @@ public abstract class NetworkPolicyManagerInternal {
             Set<String> packageNames, int userId);
 
     /**
-     *  Notifies that the specified {@link AbstractNetworkStatsProvider} has reached its quota
-     *  which was set through {@link AbstractNetworkStatsProvider#setLimit(String, long)}.
+     *  Notifies that the specified {@link NetworkStatsProvider} has reached its quota
+     *  which was set through {@link NetworkStatsProvider#onSetLimit(String, long)}.
      *
      * @param tag the human readable identifier of the custom network stats provider.
      */
