@@ -374,6 +374,17 @@
     <string name="biometric_dialog_wrong_password">Wrong password</string>
     <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
     <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
+    <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>
+
+    <!-- Content of a dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_device">Too many incorrect attempts. This device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
+    <!-- Content of a dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
+    <!-- Button label to dismiss the dialog telling the user the device, user, or work profile has been wiped. [CHAR LIMIT=40] -->
+    <string name="biometric_dialog_now_wiping_dialog_dismiss">Dismiss</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
