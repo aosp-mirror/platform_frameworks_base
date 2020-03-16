@@ -513,7 +513,6 @@ java_library {
         "//external/robolectric-shadows:__subpackages__",
         "//frameworks/base/packages/Tethering/common/TetheringLib:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
-        "//frameworks/opt/net/ike:__subpackages__",
     ],
 }
 
