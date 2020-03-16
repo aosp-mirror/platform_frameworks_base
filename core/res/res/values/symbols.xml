@@ -3615,6 +3615,7 @@
   <java-symbol type="bool" name="config_batterySaverStickyBehaviourDisabled" />
   <java-symbol type="integer" name="config_dynamicPowerSavingsDefaultDisableThreshold" />
   <java-symbol type="string" name="config_batterySaverScheduleProvider" />
+  <java-symbol type="string" name="config_powerSaveModeChangedListenerPackage" />
 
   <!-- For car devices -->
   <java-symbol type="string" name="car_loading_profile" />

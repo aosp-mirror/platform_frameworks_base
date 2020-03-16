@@ -991,4 +991,9 @@ public abstract class PackageManagerInternal {
      * @param enabled true if visibility blocks should be logged
      */
     public abstract void setVisibilityLogging(String packageName, boolean enabled);
+
+    /**
+     * Returns if a package name is a valid system package.
+     */
+    public abstract boolean isSystemPackage(@NonNull String packageName);
 }
