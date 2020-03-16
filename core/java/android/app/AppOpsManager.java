@@ -696,6 +696,10 @@ public class AppOpsManager {
     public static final int SAMPLING_STRATEGY_RARELY_USED =
             FrameworkStatsLog.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__RARELY_USED;
 
+    /** @hide */
+    public static final int SAMPLING_STRATEGY_BOOT_TIME_SAMPLING =
+            FrameworkStatsLog.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__BOOT_TIME_SAMPLING;
+
     /**
      * Strategies used for message sampling
      * @hide
@@ -704,7 +708,8 @@ public class AppOpsManager {
     @IntDef(prefix = {"SAMPLING_STRATEGY_"}, value = {
             SAMPLING_STRATEGY_DEFAULT,
             SAMPLING_STRATEGY_UNIFORM,
-            SAMPLING_STRATEGY_RARELY_USED
+            SAMPLING_STRATEGY_RARELY_USED,
+            SAMPLING_STRATEGY_BOOT_TIME_SAMPLING
     })
     public @interface SamplingStrategy {}
 
