@@ -8864,8 +8864,8 @@ public final class Settings {
         public static final String WINDOW_MAGNIFICATION = "window_magnification";
 
         /**
-         * Controls magnification mode when magnification is enabled via a system-wide
-         * triple tap gesture or the accessibility shortcut.
+         * Controls magnification mode when magnification is enabled via a system-wide triple tap
+         * gesture or the accessibility shortcut.
          *
          * @see#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
          * @see#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
@@ -8885,6 +8885,25 @@ public final class Settings {
          * @hide
          */
         public static final int ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW = 0x2;
+
+        /**
+         * Magnification mode value that is capable of magnifying whole display and particular
+         * region in a window.
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_ALL = 0x3;
+
+        /**
+         * Controls magnification capability. Accessibility magnification is capable of at least one
+         * of the magnification modes.
+         *
+         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+         * @see#ACCESSIBILITY_MAGNIFICATION_MODE_ALL
+         * @hide
+         */
+        public static final String ACCESSIBILITY_MAGNIFICATION_CAPABILITY =
+                "accessibility_magnification_capability";
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to
