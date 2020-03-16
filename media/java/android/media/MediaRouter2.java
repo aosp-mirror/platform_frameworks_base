@@ -58,7 +58,7 @@ import java.util.stream.Collectors;
 // TODO: Add method names at the beginning of log messages. (e.g. updateControllerOnHandler)
 //       Not only MediaRouter2, but also to service / manager / provider.
 // TODO: ensure thread-safe and document it
-public class MediaRouter2 {
+public final class MediaRouter2 {
     private static final String TAG = "MR2";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final Object sRouterLock = new Object();
@@ -93,9 +93,9 @@ public class MediaRouter2 {
     MediaRouter2Stub mStub;
 
     @GuardedBy("sRouterLock")
-    private Map<String, RoutingController> mRoutingControllers = new ArrayMap<>();
+    private final Map<String, RoutingController> mRoutingControllers = new ArrayMap<>();
 
-    private AtomicInteger mControllerCreationRequestCnt = new AtomicInteger(1);
+    private final AtomicInteger mControllerCreationRequestCnt = new AtomicInteger(1);
 
     final Handler mHandler;
     @GuardedBy("sRouterLock")
