@@ -249,6 +249,11 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     //TODO: remove this when development is done.
     private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
+    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 30;
+    private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 29;
+    private static final int DEBUG_FGS_ALLOW_WHILE_IN_USE = 0;
+    private static final int DEBUG_FGS_ENFORCE_TYPE = 1;
+
 
     final Context mContext;
     final AtomicFile mFile;
@@ -551,7 +556,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 // The FGS has the location capability, but due to FGS BG start
                                 // restriction it lost the capability, use temp location capability
                                 // to mark this case.
-                                maybeShowWhileInUseDebugToast(op, mode);
+                                maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ALLOW_WHILE_IN_USE);
                                 return MODE_IGNORED;
                             } else {
                                 return MODE_IGNORED;
@@ -559,15 +564,25 @@ public class AppOpsService extends IAppOpsService.Stub {
                         case OP_CAMERA:
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                                 return MODE_ALLOWED;
+                            } else if ((capability & TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA)
+                                    != 0) {
+                                // CHANGE TO MODE_IGNORED when enforce this feature.
+                                maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ENFORCE_TYPE);
+                                return MODE_ALLOWED;
                             } else {
-                                maybeShowWhileInUseDebugToast(op, mode);
+                                maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ALLOW_WHILE_IN_USE);
                                 return MODE_IGNORED;
                             }
                         case OP_RECORD_AUDIO:
                             if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
                                 return MODE_ALLOWED;
+                            } else if  ((capability & TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE)
+                                    != 0) {
+                                // CHANGE TO MODE_IGNORED when enforce this feature.
+                                maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ENFORCE_TYPE);
+                                return MODE_ALLOWED;
                             } else {
-                                maybeShowWhileInUseDebugToast(op, mode);
+                                maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ALLOW_WHILE_IN_USE);
                                 return MODE_IGNORED;
                             }
                         default:
@@ -582,15 +597,24 @@ public class AppOpsService extends IAppOpsService.Stub {
                     case OP_CAMERA:
                         if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                             return MODE_ALLOWED;
+                        } else if ((capability & TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
+                            // CHANGE TO MODE_IGNORED when enforce this feature.
+                            maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ENFORCE_TYPE);
+                            return MODE_ALLOWED;
                         } else {
-                            maybeShowWhileInUseDebugToast(op, mode);
+                            maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ALLOW_WHILE_IN_USE);
                             return MODE_IGNORED;
                         }
                     case OP_RECORD_AUDIO:
                         if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
                             return MODE_ALLOWED;
+                        } else if ((capability & TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE)
+                                != 0) {
+                            // CHANGE TO MODE_IGNORED when enforce this feature.
+                            maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ENFORCE_TYPE);
+                            return MODE_ALLOWED;
                         } else {
-                            maybeShowWhileInUseDebugToast(op, mode);
+                            maybeShowWhileInUseDebugToast(op, DEBUG_FGS_ALLOW_WHILE_IN_USE);
                             return MODE_IGNORED;
                         }
                     default:
