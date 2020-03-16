@@ -9189,7 +9189,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @CdmaRoamingMode int getCdmaRoamingMode() {
         int mode = CDMA_ROAMING_MODE_RADIO_DEFAULT;
@@ -9218,7 +9217,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCdmaRoamingMode(@CdmaRoamingMode int mode) {
         try {
@@ -9244,19 +9242,16 @@ public class TelephonyManager {
     /** Used for CDMA subscription mode, it'll be UNKNOWN if there is no Subscription source.
      * @hide
      */
-    @SystemApi
     public static final int CDMA_SUBSCRIPTION_UNKNOWN  = -1;
 
     /** Used for CDMA subscription mode: RUIM/SIM (default)
      * @hide
      */
-    @SystemApi
     public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0;
 
     /** Used for CDMA subscription mode: NV -> non-volatile memory
      * @hide
      */
-    @SystemApi
     public static final int CDMA_SUBSCRIPTION_NV       = 1;
 
     /** @hide */
@@ -9275,7 +9270,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCdmaSubscriptionMode(@CdmaSubscription int mode) {
         try {
