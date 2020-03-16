@@ -130,7 +130,6 @@ droidstubs {
     api_tag_name: "SYSTEM",
     api_filename: "system-api.txt",
     private_api_filename: "system-private.txt",
-    private_dex_api_filename: "system-private-dex.txt",
     removed_api_filename: "system-removed.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
@@ -324,8 +323,6 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    dex_api_filename: "public-dex.txt",
-    private_dex_api_filename: "private-dex.txt",
     removed_dex_api_filename: "removed-dex.txt",
     args: metalava_framework_docs_args +
         " --show-unannotated " +
