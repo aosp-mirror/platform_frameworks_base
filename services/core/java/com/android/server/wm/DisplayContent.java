@@ -197,7 +197,6 @@ import android.view.ViewRootImpl;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
-import android.window.ITaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -3530,6 +3529,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         onWallpaper, goingToShade, subtle));
             }
         }, true /* traverseTopToBottom */);
+        for (int i = mShellRoots.size() - 1; i >= 0; --i) {
+            mShellRoots.valueAt(i).startAnimation(policy.createHiddenByKeyguardExit(
+                    onWallpaper, goingToShade, subtle));
+        }
     }
 
     /** @return {@code true} if there is window to wait before enabling the screen. */
