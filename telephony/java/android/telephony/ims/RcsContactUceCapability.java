@@ -19,8 +19,6 @@ package android.telephony.ims;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -37,8 +35,6 @@ import java.util.Map;
  * Contains the User Capability Exchange capabilities corresponding to a contact's URI.
  * @hide
  */
-@SystemApi
-@TestApi
 public final class RcsContactUceCapability implements Parcelable {
 
     /** Supports 1-to-1 chat */
