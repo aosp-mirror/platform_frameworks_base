@@ -2561,7 +2561,7 @@ public class WifiManager {
     /**
      * Check if the chipset supports a certain Wi-Fi standard.
      * @param standard the IEEE 802.11 standard to check on.
-     *        valid values from {@link WifiAnnotations}'s {@code WIFI_STANDARD_}
+     *        valid values from {@link ScanResult}'s {@code WIFI_STANDARD_}
      * @return {@code true} if supported, {@code false} otherwise.
      */
     public boolean isWifiStandardSupported(@WifiAnnotations.WifiStandard int standard) {
