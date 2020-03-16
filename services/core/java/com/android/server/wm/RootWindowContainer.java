@@ -2695,7 +2695,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 return true;
             }
         } else {
-            if (r.intent.getComponent().equals(cls)) {
+            // Compare the target component instead of intent component so we don't miss if the
+            // activity uses alias.
+            if (r.mActivityComponent.equals(cls)) {
                 return true;
             }
         }
