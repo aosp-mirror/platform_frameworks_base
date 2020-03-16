@@ -125,7 +125,7 @@ public class NetworkStatsSubscriptionsMonitor extends
     @NonNull
     private List<Integer> getActiveSubIdList(@NonNull SubscriptionManager subscriptionManager) {
         final ArrayList<Integer> ret = new ArrayList<>();
-        final int[] ids = subscriptionManager.getActiveAndHiddenSubscriptionIdList();
+        final int[] ids = subscriptionManager.getCompleteActiveSubscriptionIdList();
         for (int id : ids) ret.add(id);
         return ret;
     }
