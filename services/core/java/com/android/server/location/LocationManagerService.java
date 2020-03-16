@@ -1343,9 +1343,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
-            String featureId) {
+            String attributionTag) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.addGnssBatchingCallback(callback, packageName, featureId);
+            mGnssManagerService.addGnssBatchingCallback(callback, packageName, attributionTag);
         }
     }
 
@@ -1358,9 +1358,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName,
-            String featureId) {
+            String attributionTag) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.startGnssBatch(periodNanos, wakeOnFifoFull, packageName, featureId);
+            mGnssManagerService.startGnssBatch(periodNanos, wakeOnFifoFull, packageName,
+                    attributionTag);
         }
     }
 
@@ -1687,7 +1688,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // Update statistics for historical location requests by package/provider
             mRequestStatistics.startRequesting(
-                    mReceiver.mCallerIdentity.packageName, mReceiver.mCallerIdentity.featureId,
+                    mReceiver.mCallerIdentity.packageName, mReceiver.mCallerIdentity.attributionTag,
                     provider, request.getInterval(), mIsForegroundUid);
         }
 
@@ -1697,7 +1698,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         private void updateForeground(boolean isForeground) {
             mIsForegroundUid = isForeground;
             mRequestStatistics.updateForeground(
-                    mReceiver.mCallerIdentity.packageName, mReceiver.mCallerIdentity.featureId,
+                    mReceiver.mCallerIdentity.packageName, mReceiver.mCallerIdentity.attributionTag,
                     mProvider, isForeground);
         }
 
@@ -1706,7 +1707,8 @@ public class LocationManagerService extends ILocationManager.Stub {
          */
         private void disposeLocked(boolean removeReceiver) {
             CallerIdentity identity = mReceiver.mCallerIdentity;
-            mRequestStatistics.stopRequesting(identity.packageName, identity.featureId, mProvider);
+            mRequestStatistics.stopRequesting(identity.packageName, identity.attributionTag,
+                    mProvider);
 
             mLocationUsageLogger.logLocationApiUsage(
                     LocationStatsEnums.USAGE_ENDED,
@@ -1827,12 +1829,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void requestLocationUpdates(LocationRequest request, ILocationListener listener,
-            PendingIntent intent, String packageName, String featureId) {
+            PendingIntent intent, String packageName, String attributionTag) {
         if (request == null) {
             request = DEFAULT_LOCATION_REQUEST;
         }
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         identity.enforceLocationPermission(PERMISSION_COARSE);
 
         WorkSource workSource = request.getWorkSource();
@@ -1978,13 +1980,15 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public Location getLastLocation(LocationRequest request, String packageName, String featureId) {
+    public Location getLastLocation(LocationRequest request, String packageName,
+            String attributionTag) {
         if (request == null) {
             request = DEFAULT_LOCATION_REQUEST;
         }
 
         // unsafe is ok because app ops will verify the package name
-        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName,
+                attributionTag);
         identity.enforceLocationPermission(PERMISSION_COARSE);
 
         if (mSettingsHelper.isLocationPackageBlacklisted(identity.userId, identity.packageName)) {
@@ -2018,9 +2022,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public boolean getCurrentLocation(LocationRequest locationRequest,
             ICancellationSignal remoteCancellationSignal, ILocationListener listener,
-            String packageName, String featureId) {
+            String packageName, String attributionTag) {
         // side effect of validating locationRequest and packageName
-        Location lastLocation = getLastLocation(locationRequest, packageName, featureId);
+        Location lastLocation = getLastLocation(locationRequest, packageName, attributionTag);
         if (lastLocation != null) {
             long locationAgeMs = NANOSECONDS.toMillis(
                     SystemClock.elapsedRealtimeNanos() - lastLocation.getElapsedRealtimeNanos());
@@ -2043,7 +2047,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        requestLocationUpdates(locationRequest, listener, null, packageName, featureId);
+        requestLocationUpdates(locationRequest, listener, null, packageName, attributionTag);
         CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
                 remoteCancellationSignal);
         if (cancellationSignal != null) {
@@ -2091,12 +2095,12 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void requestGeofence(LocationRequest request, Geofence geofence, PendingIntent intent,
-            String packageName, String featureId) {
+            String packageName, String attributionTag) {
         if (request == null) {
             request = DEFAULT_LOCATION_REQUEST;
         }
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         identity.enforceLocationPermission(PERMISSION_COARSE);
 
         Objects.requireNonNull(intent);
@@ -2159,9 +2163,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
-            String featureId) {
+            String attributionTag) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.registerGnssStatusCallback(listener, packageName, featureId);
+            mGnssManagerService.registerGnssStatusCallback(listener, packageName, attributionTag);
         }
     }
 
@@ -2174,10 +2178,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addGnssMeasurementsListener(@Nullable GnssRequest request,
-            IGnssMeasurementsListener listener, String packageName, String featureId) {
+            IGnssMeasurementsListener listener, String packageName, String attributionTag) {
         if (mGnssManagerService != null) {
             mGnssManagerService.addGnssMeasurementsListener(request, listener, packageName,
-                    featureId);
+                    attributionTag);
         }
     }
 
@@ -2206,9 +2210,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener,
-            String packageName, String featureId) {
+            String packageName, String attributionTag) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.addGnssAntennaInfoListener(listener, packageName, featureId);
+            mGnssManagerService.addGnssAntennaInfoListener(listener, packageName, attributionTag);
         }
     }
 
@@ -2221,9 +2225,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
-            String packageName, String featureId) {
+            String packageName, String attributionTag) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.addGnssNavigationMessageListener(listener, packageName, featureId);
+            mGnssManagerService.addGnssNavigationMessageListener(listener, packageName,
+                    attributionTag);
         }
     }
 
@@ -2547,9 +2552,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void addTestProvider(String provider, ProviderProperties properties,
-            String packageName, String featureId) {
+            String packageName, String attributionTag) {
         // unsafe is ok because app ops will verify the package name
-        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName,
+                attributionTag);
         if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
             return;
         }
@@ -2566,9 +2572,10 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void removeTestProvider(String provider, String packageName, String featureId) {
+    public void removeTestProvider(String provider, String packageName, String attributionTag) {
         // unsafe is ok because app ops will verify the package name
-        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName,
+                attributionTag);
         if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
             return;
         }
@@ -2588,9 +2595,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void setTestProviderLocation(String provider, Location location, String packageName,
-            String featureId) {
+            String attributionTag) {
         // unsafe is ok because app ops will verify the package name
-        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName,
+                attributionTag);
         if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
             return;
         }
@@ -2608,9 +2616,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void setTestProviderEnabled(String provider, boolean enabled, String packageName,
-            String featureId) {
+            String attributionTag) {
         // unsafe is ok because app ops will verify the package name
-        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName,
+                attributionTag);
         if (!mAppOpsHelper.noteMockLocationAccess(identity)) {
             return;
         }

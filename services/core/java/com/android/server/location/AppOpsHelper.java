@@ -191,7 +191,7 @@ public class AppOpsHelper {
                     AppOpsManager.OP_MOCK_LOCATION,
                     callerIdentity.uid,
                     callerIdentity.packageName,
-                    callerIdentity.featureId,
+                    callerIdentity.attributionTag,
                     null) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -210,7 +210,7 @@ public class AppOpsHelper {
                     callerIdentity.uid,
                     callerIdentity.packageName,
                     false,
-                    callerIdentity.featureId,
+                    callerIdentity.attributionTag,
                     null) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -228,7 +228,7 @@ public class AppOpsHelper {
                     appOp,
                     callerIdentity.uid,
                     callerIdentity.packageName,
-                    callerIdentity.featureId);
+                    callerIdentity.attributionTag);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -245,7 +245,7 @@ public class AppOpsHelper {
                     appOp,
                     callerIdentity.uid,
                     callerIdentity.packageName,
-                    callerIdentity.featureId,
+                    callerIdentity.attributionTag,
                     null) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
