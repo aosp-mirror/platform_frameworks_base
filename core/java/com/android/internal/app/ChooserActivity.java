@@ -2140,7 +2140,7 @@ public class ChooserActivity extends ResolverActivity implements
             return null;
         }
 
-        if (getPersonalProfileUserHandle() == userHandle) {
+        if (getPersonalProfileUserHandle().equals(userHandle)) {
             if (mPersonalAppPredictor != null) {
                 return mPersonalAppPredictor;
             }
@@ -2166,7 +2166,7 @@ public class ChooserActivity extends ResolverActivity implements
                         .getSystemService(AppPredictionManager.class);
         AppPredictor appPredictionSession = appPredictionManager.createAppPredictionSession(
                 appPredictionContext);
-        if (getPersonalProfileUserHandle() == userHandle) {
+        if (getPersonalProfileUserHandle().equals(userHandle)) {
             mPersonalAppPredictor = appPredictionSession;
         } else {
             mWorkAppPredictor = appPredictionSession;
@@ -2566,7 +2566,7 @@ public class ChooserActivity extends ResolverActivity implements
 
         ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
         if (chooserListAdapter.getUserHandle()
-                == mChooserMultiProfilePagerAdapter.getCurrentUserHandle()) {
+                .equals(mChooserMultiProfilePagerAdapter.getCurrentUserHandle())) {
             mChooserMultiProfilePagerAdapter.getActiveAdapterView()
                     .setAdapter(mChooserMultiProfilePagerAdapter.getCurrentRootAdapter());
             mChooserMultiProfilePagerAdapter
