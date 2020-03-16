@@ -26,6 +26,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.accessibility.IAccessibilityEmbeddedConnection;
 
+import java.util.Objects;
+
 /**
  * Utility class for adding a View hierarchy to a {@link SurfaceControl}. The View hierarchy
  * will render in to a root SurfaceControl, and receive input based on the SurfaceControl's
@@ -159,7 +161,8 @@ public class SurfaceControlViewHost {
      * @hide
      */
     @TestApi
-    public void addView(@NonNull View view, WindowManager.LayoutParams attrs) {
+    public void setView(@NonNull View view, @NonNull WindowManager.LayoutParams attrs) {
+        Objects.requireNonNull(view);
         mViewRoot.setView(view, attrs, null);
     }
 
@@ -172,11 +175,18 @@ public class SurfaceControlViewHost {
      * @param width The width to layout the View within, in pixels.
      * @param height The height to layout the View within, in pixels.
      */
-    public void addView(@NonNull View view, int width, int height) {
+    public void setView(@NonNull View view, int width, int height) {
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
                         WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
-        addView(view, lp);
+        setView(view, lp);
+    }
+
+    /**
+     * @return The view passed to setView, or null if none has been passed.
+     */
+    public @Nullable View getView() {
+        return mViewRoot.getView();
     }
 
     /**
