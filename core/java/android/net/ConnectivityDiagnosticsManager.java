@@ -136,7 +136,7 @@ public class ConnectivityDiagnosticsManager {
          * {@link #NETWORK_VALIDATION_RESULT_PARTIALLY_VALID},
          * {@link #NETWORK_VALIDATION_RESULT_SKIPPED}.
          *
-         * @see android.net.NetworkCapabilities#CAPABILITY_VALIDATED
+         * @see android.net.NetworkCapabilities#NET_CAPABILITY_VALIDATED
          */
         @NetworkValidationResult
         public static final String KEY_NETWORK_VALIDATION_RESULT = "networkValidationResult";
