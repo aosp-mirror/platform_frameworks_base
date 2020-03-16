@@ -41,6 +41,7 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OpEventProxyInfo;
 import static android.app.AppOpsManager.RestrictionBypass;
+import static android.app.AppOpsManager.SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
@@ -244,6 +245,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private static final int MAX_UNFORWARED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
+    private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
     //TODO: remove this when development is done.
     private static final int TEMP_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
@@ -1657,17 +1659,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }, packageAddedFilter);
 
-        List<String> packageNames = getPackageNamesForSampling();
-        synchronized (this) {
-            resamplePackageAndAppOpLocked(packageNames);
-        }
-
-        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
+        mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
+                List<String> packageNames = getPackageNamesForSampling();
+                resamplePackageAndAppOpLocked(packageNames);
                 initializeRarelyUsedPackagesList(new ArraySet<>(packageNames));
             }
-        });
+        }, RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS);
 
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
@@ -5618,7 +5617,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         int uid = Binder.getCallingUid();
         Objects.requireNonNull(packageName);
         synchronized (this) {
-            switchPackageIfRarelyUsedLocked(packageName);
+            switchPackageIfBootTimeOrRarelyUsedLocked(packageName);
             if (!packageName.equals(mSampledPackage)) {
                 return new MessageSamplingConfig(OP_NONE, 0,
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli());
@@ -5648,7 +5647,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     private void reportRuntimeAppOpAccessMessageAsyncLocked(int uid,
             @NonNull String packageName, int opCode, @Nullable String attributionTag,
             @NonNull String message) {
-        switchPackageIfRarelyUsedLocked(packageName);
+        switchPackageIfBootTimeOrRarelyUsedLocked(packageName);
         if (!Objects.equals(mSampledPackage, packageName)) {
             return;
         }
@@ -5699,11 +5698,16 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /**
      * Checks if package is in the list of rarely used package and starts watching the new package
-     * to collect incoming message.
+     * to collect incoming message or if collection is happening in first minutes since boot.
      * @param packageName
      */
-    private void switchPackageIfRarelyUsedLocked(@NonNull String packageName) {
-        if (mRarelyUsedPackages.contains(packageName)) {
+    private void switchPackageIfBootTimeOrRarelyUsedLocked(@NonNull String packageName) {
+        if (mSampledPackage == null) {
+            if (ThreadLocalRandom.current().nextFloat() < 0.1f) {
+                mSamplingStrategy = SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
+                resampleAppOpForPackageLocked(packageName);
+            }
+        } else if (mRarelyUsedPackages.contains(packageName)) {
             mRarelyUsedPackages.remove(packageName);
             if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
                 mSamplingStrategy = SAMPLING_STRATEGY_RARELY_USED;
@@ -5765,6 +5769,10 @@ public class AppOpsService extends IAppOpsService.Stub {
                             }
                         }
                         synchronized (this) {
+                            int numPkgs = mRarelyUsedPackages.size();
+                            for (int i = 0; i < numPkgs; i++) {
+                                candidates.add(mRarelyUsedPackages.valueAt(i));
+                            }
                             mRarelyUsedPackages = candidates;
                         }
                     }
