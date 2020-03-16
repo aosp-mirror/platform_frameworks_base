@@ -460,10 +460,7 @@ public class LauncherApps {
         /**
          * If non-null, return only the specified shortcuts by locus ID.  When setting this field,
          * a package name must also be set with {@link #setPackage}.
-         *
-         * @hide
          */
-        @SystemApi
         @NonNull
         public ShortcutQuery setLocusIds(@Nullable List<LocusId> locusIds) {
             mLocusIds = locusIds;

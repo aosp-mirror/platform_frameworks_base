@@ -2108,10 +2108,6 @@ package android.content.pm {
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.LauncherApps.AppUsageLimit> CREATOR;
   }
 
-  public static class LauncherApps.ShortcutQuery {
-    method @NonNull public android.content.pm.LauncherApps.ShortcutQuery setLocusIds(@Nullable java.util.List<android.content.LocusId>);
-  }
-
   public class PackageInstaller {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final int DATA_LOADER_TYPE_INCREMENTAL = 2; // 0x2
