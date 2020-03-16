@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  * A class that monitors and controls media routing of other apps.
  * @hide
  */
-public class MediaRouter2Manager {
+public final class MediaRouter2Manager {
     private static final String TAG = "MR2Manager";
     private static final Object sLock = new Object();
 
@@ -61,7 +61,7 @@ public class MediaRouter2Manager {
 
     final String mPackageName;
 
-    private Context mContext;
+    private final Context mContext;
     @GuardedBy("sLock")
     private Client mClient;
     private final IMediaRouterService mMediaRouterService;
@@ -74,7 +74,7 @@ public class MediaRouter2Manager {
     @NonNull
     final ConcurrentMap<String, List<String>> mPreferredFeaturesMap = new ConcurrentHashMap<>();
 
-    private AtomicInteger mNextRequestId = new AtomicInteger(1);
+    private final AtomicInteger mNextRequestId = new AtomicInteger(1);
 
     /**
      * Gets an instance of media router manager that controls media route of other applications.
