@@ -32,7 +32,7 @@ import android.os.ResultReceiver;
  * @hide
  */
 @SystemApi(client = MODULE_LIBRARIES)
-public class TetheringConstants {
+public final class TetheringConstants {
     /** An explicit private class to avoid exposing constructor.*/
     private TetheringConstants() { }
 
