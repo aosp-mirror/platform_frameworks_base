@@ -24192,6 +24192,12 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             mAppsFilter.getFeatureConfig().enableLogging(pkg.appId, enable);
         }
+
+        @Override
+        public boolean isSystemPackage(@NonNull String packageName) {
+            return packageName.equals(
+                    PackageManagerService.this.ensureSystemPackageName(packageName));
+        }
     }
 
     @GuardedBy("mLock")
