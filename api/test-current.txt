@@ -4957,8 +4957,8 @@ package android.view {
   }
 
   public class SurfaceControlViewHost {
-    method public void addView(@NonNull android.view.View, android.view.WindowManager.LayoutParams);
     method public void relayout(android.view.WindowManager.LayoutParams);
+    method public void setView(@NonNull android.view.View, @NonNull android.view.WindowManager.LayoutParams);
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
