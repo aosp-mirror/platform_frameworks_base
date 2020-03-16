@@ -1296,14 +1296,15 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean hasBadge(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "hasBadge");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "hasBadge");
         final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
         return userTypeDetails != null && userTypeDetails.hasBadge();
     }
 
     @Override
     public @StringRes int getUserBadgeLabelResId(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getUserBadgeLabelResId");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "getUserBadgeLabelResId");
         final UserInfo userInfo = getUserInfoNoChecks(userId);
         final UserTypeDetails userTypeDetails = getUserTypeDetails(userInfo);
         if (userInfo == null || userTypeDetails == null || !userTypeDetails.hasBadge()) {
@@ -1316,7 +1317,8 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public @ColorRes int getUserBadgeColorResId(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getUserBadgeColorResId");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "getUserBadgeColorResId");
         final UserInfo userInfo = getUserInfoNoChecks(userId);
         final UserTypeDetails userTypeDetails = getUserTypeDetails(userInfo);
         if (userInfo == null || userTypeDetails == null || !userTypeDetails.hasBadge()) {
@@ -1329,7 +1331,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public @DrawableRes int getUserIconBadgeResId(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getUserIconBadgeResId");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserIconBadgeResId");
         final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
         if (userTypeDetails == null || !userTypeDetails.hasBadge()) {
             Slog.e(LOG_TAG, "Requested icon badge for non-badged user " + userId);
@@ -1340,7 +1342,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public @DrawableRes int getUserBadgeResId(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getUserBadgeResId");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserBadgeResId");
         final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
         if (userTypeDetails == null || !userTypeDetails.hasBadge()) {
             Slog.e(LOG_TAG, "Requested badge for non-badged user " + userId);
@@ -1351,7 +1353,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public @DrawableRes int getUserBadgeNoBackgroundResId(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId,
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
                 "getUserBadgeNoBackgroundResId");
         final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
         if (userTypeDetails == null || !userTypeDetails.hasBadge()) {
@@ -1363,7 +1365,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isProfile(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isProfile");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isProfile");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isProfile();
@@ -1372,7 +1374,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isManagedProfile(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isManagedProfile");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isManagedProfile");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.isManagedProfile();
@@ -1381,19 +1383,20 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserUnlockingOrUnlocked");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "isUserUnlockingOrUnlocked");
         return mLocalService.isUserUnlockingOrUnlocked(userId);
     }
 
     @Override
     public boolean isUserUnlocked(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserUnlocked");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isUserUnlocked");
         return mLocalService.isUserUnlocked(userId);
     }
 
     @Override
     public boolean isUserRunning(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "isUserRunning");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isUserRunning");
         return mLocalService.isUserRunning(userId);
     }
 
@@ -1433,7 +1436,7 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-    private void checkManageOrInteractPermIfCallerInOtherProfileGroup(@UserIdInt int userId,
+    private void checkManageOrInteractPermissionIfCallerInOtherProfileGroup(@UserIdInt int userId,
             String name) {
         final int callingUserId = UserHandle.getCallingUserId();
         if (callingUserId == userId || isSameProfileGroupNoChecks(callingUserId, userId) ||
@@ -1462,11 +1465,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     @Override
     public boolean isPreCreated(@UserIdInt int userId) {
-        final int callingUserId = UserHandle.getCallingUserId();
-        if (callingUserId != userId && !hasManageUsersPermission()) {
-            throw new SecurityException("You need MANAGE_USERS permission to query if u=" + userId
-                    + " is pre-created");
-        }
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isPreCreated");
         synchronized (mUsersLock) {
             UserInfo userInfo = getUserInfoLU(userId);
             return userInfo != null && userInfo.preCreated;
@@ -1822,7 +1821,7 @@ public class UserManagerService extends IUserManager.Stub {
     /** @return a specific user restriction that's in effect currently. */
     @Override
     public boolean hasUserRestriction(String restrictionKey, @UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "hasUserRestriction");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "hasUserRestriction");
         return mLocalService.hasUserRestriction(restrictionKey, userId);
     }
 
@@ -1947,7 +1946,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public Bundle getUserRestrictions(@UserIdInt int userId) {
-        checkManageOrInteractPermIfCallerInOtherProfileGroup(userId, "getUserRestrictions");
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId, "getUserRestrictions");
         return UserRestrictionsUtils.clone(getEffectiveUserRestrictions(userId));
     }
 
