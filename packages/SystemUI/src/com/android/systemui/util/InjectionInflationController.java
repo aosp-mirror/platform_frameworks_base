@@ -34,7 +34,6 @@ import com.android.systemui.qs.QuickStatusBarHeader;
 import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
-import com.android.systemui.statusbar.phone.LockIcon;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -146,11 +145,6 @@ public class InjectionInflationController {
          * Creates the KeyguardMessageArea.
          */
         KeyguardMessageArea createKeyguardMessageArea();
-
-        /**
-         * Creates the keyguard LockIcon.
-         */
-        LockIcon createLockIcon();
 
         /**
          * Creates the QSPanel.
