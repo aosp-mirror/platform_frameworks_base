@@ -1899,8 +1899,9 @@ class ContextImpl extends Context {
     public Object getSystemService(String name) {
         // Check incorrect Context usage.
         if (isUiComponent(name) && !isUiContext() && vmIncorrectContextUseEnabled()) {
-            final String errorMessage = "Tried to access visual service " + name
-                    + " from a non-visual Context.";
+            final String errorMessage = "Tried to access visual service "
+                    + SystemServiceRegistry.getSystemServiceClassName(name)
+                    + " from a non-visual Context. ";
             final String message = "Visual services, such as WindowManager, WallpaperService or "
                     + "LayoutInflater should be accessed from Activity or other visual Context. "
                     + "Use an Activity or a Context created with "
