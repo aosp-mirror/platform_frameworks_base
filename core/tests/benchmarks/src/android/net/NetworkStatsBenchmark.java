@@ -54,7 +54,7 @@ public class NetworkStatsBenchmark {
             recycle.txBytes = 150000;
             recycle.txPackets = 1500;
             recycle.operations = 0;
-            mNetworkStats.addEntry(recycle);
+            mNetworkStats.insertEntry(recycle);
             if (recycle.set == 1) {
                 uid++;
             }
@@ -70,7 +70,7 @@ public class NetworkStatsBenchmark {
             recycle.txBytes = 180000 * mSize;
             recycle.txPackets = 1200 * mSize;
             recycle.operations = 0;
-            mNetworkStats.addEntry(recycle);
+            mNetworkStats.insertEntry(recycle);
         }
     }
 
