@@ -480,6 +480,13 @@ public class AppIntegrityManagerServiceImplTest {
         assertThat(mService.getCurrentRules().getList()).containsExactly(rule);
     }
 
+    @Test
+    public void getWhitelistedRuleProviders() throws Exception {
+        whitelistUsAsRuleProvider();
+
+        assertThat(mService.getWhitelistedRuleProviders()).containsExactly(TEST_FRAMEWORK_PACKAGE);
+    }
+
     private void whitelistUsAsRuleProvider() {
         Resources mockResources = mock(Resources.class);
         when(mockResources.getStringArray(R.array.config_integrityRuleProviderPackages))
