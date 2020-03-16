@@ -16,11 +16,15 @@
 
 package android.service.quickaccesswallet;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
+
+import java.io.Closeable;
+import java.util.concurrent.Executor;
 
 /**
  * Facilitates accessing cards from the {@link QuickAccessWalletService}.
@@ -28,7 +32,7 @@ import android.content.Intent;
  * @hide
  */
 @TestApi
-public interface QuickAccessWalletClient {
+public interface QuickAccessWalletClient extends Closeable {
 
     /**
      * Create a client for accessing wallet cards from the {@link QuickAccessWalletService}. If the
@@ -92,6 +96,14 @@ public interface QuickAccessWalletClient {
             @NonNull OnWalletCardsRetrievedCallback callback);
 
     /**
+     * Get wallet cards from the {@link QuickAccessWalletService}.
+     */
+    void getWalletCards(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull GetWalletCardsRequest request,
+            @NonNull OnWalletCardsRetrievedCallback callback);
+
+    /**
      * Callback for getWalletCards
      */
     interface OnWalletCardsRetrievedCallback {
@@ -111,12 +123,19 @@ public interface QuickAccessWalletClient {
     void notifyWalletDismissed();
 
     /**
-     * Unregister event listener.
+     * Register an event listener.
      */
     void addWalletServiceEventListener(@NonNull WalletServiceEventListener listener);
 
     /**
-     * Unregister event listener
+     * Register an event listener.
+     */
+    void addWalletServiceEventListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull WalletServiceEventListener listener);
+
+    /**
+     * Unregister an event listener
      */
     void removeWalletServiceEventListener(@NonNull WalletServiceEventListener listener);
 
