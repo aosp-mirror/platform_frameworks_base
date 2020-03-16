@@ -42,6 +42,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.phone.NavigationModeController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -71,6 +72,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock DumpManager mDumpManager;
     private @Mock PowerManager mPowerManager;
     private @Mock TrustManager mTrustManager;
+    private @Mock NavigationModeController mNavigationModeController;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -88,7 +90,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mContext, mFalsingManager, mLockPatternUtils, mBroadcastDispatcher,
                 mNotificationShadeWindowController, () -> mStatusBarKeyguardViewManager,
                 mDismissCallbackRegistry, mUpdateMonitor, mDumpManager, mUiBgExecutor,
-                mPowerManager, mTrustManager, mDeviceConfig);
+                mPowerManager, mTrustManager, mDeviceConfig, mNavigationModeController);
         mViewMediator.start();
     }
 
