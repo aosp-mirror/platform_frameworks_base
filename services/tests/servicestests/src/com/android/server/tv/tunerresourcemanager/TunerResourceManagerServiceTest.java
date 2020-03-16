@@ -28,6 +28,8 @@ import android.media.tv.TvInputService;
 import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
+import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -523,5 +525,39 @@ public class TunerResourceManagerServiceTest {
                 .isInUse()).isFalse();
         assertThat(mTunerResourceManagerService.checkClientExists(clientId[0])).isFalse();
 
+    }
+
+    @Test
+    public void requestDemuxTest() {
+        // Register client
+        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId = new int[1];
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile, null /*listener*/, clientId);
+        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        int[] demuxHandle = new int[1];
+        TunerDemuxRequest request = new TunerDemuxRequest(clientId[0]);
+        assertThat(mTunerResourceManagerService.requestDemuxInternal(request, demuxHandle))
+                .isTrue();
+        assertThat(getResourceIdFromHandle(demuxHandle[0])).isEqualTo(0);
+    }
+
+    @Test
+    public void requestDescramblerTest() {
+        // Register client
+        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId = new int[1];
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile, null /*listener*/, clientId);
+        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        int[] desHandle = new int[1];
+        TunerDescramblerRequest request = new TunerDescramblerRequest(clientId[0]);
+        assertThat(mTunerResourceManagerService.requestDescramblerInternal(request, desHandle))
+                .isTrue();
+        assertThat(getResourceIdFromHandle(desHandle[0])).isEqualTo(0);
     }
 }
