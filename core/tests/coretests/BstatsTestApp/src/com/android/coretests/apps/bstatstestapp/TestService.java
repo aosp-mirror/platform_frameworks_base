@@ -15,19 +15,24 @@
  */
 package com.android.coretests.apps.bstatstestapp;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
 import android.R;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,11 +51,17 @@ public class TestService extends Service {
 
     private static final int TIMEOUT_OVERLAY_SEC = 2;
 
+    private Context mOverlayContext;
     private View mOverlay;
 
     @Override
     public void onCreate() {
         Log.d(TAG, "onCreate called. myUid=" + Process.myUid());
+
+        final DisplayManager dm = getSystemService(DisplayManager.class);
+        final Display defaultDisplay = dm.getDisplay(Display.DEFAULT_DISPLAY);
+        final Context defaultDisplayContext = createDisplayContext(defaultDisplay);
+        mOverlayContext = defaultDisplayContext.createWindowContext(TYPE_APPLICATION_OVERLAY, null);
     }
 
     @Override
@@ -93,7 +104,7 @@ public class TestService extends Service {
 
     private void removeOverlays() {
         if (mOverlay != null) {
-            final WindowManager wm = TestService.this.getSystemService(WindowManager.class);
+            final WindowManager wm = mOverlayContext.getSystemService(WindowManager.class);
             wm.removeView(mOverlay);
             mOverlay = null;
         }
@@ -107,11 +118,11 @@ public class TestService extends Service {
 
         @Override
         public void showApplicationOverlay() throws RemoteException {
-            final WindowManager wm = TestService.this.getSystemService(WindowManager.class);
+            final WindowManager wm = mOverlayContext.getSystemService(WindowManager.class);
             final Size size = wm.getCurrentWindowMetrics().getSize();
 
             final WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+                    TYPE_APPLICATION_OVERLAY,
                     WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                             | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                             | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -124,7 +135,7 @@ public class TestService extends Service {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT);
 
-            mOverlay = new View(TestService.this);
+            mOverlay = new View(mOverlayContext);
             mOverlay.setBackgroundColor(Color.GREEN);
             mOverlay.setLayoutParams(vglp);
 
