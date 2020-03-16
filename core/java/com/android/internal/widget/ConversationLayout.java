@@ -122,6 +122,11 @@ public class ConversationLayout extends FrameLayout
     private CharSequence mFallbackChatName;
     private CharSequence mFallbackGroupChatName;
     private CharSequence mConversationTitle;
+    private int mNotificationHeaderExpandedPadding;
+    private View mConversationHeader;
+    private View mContentContainer;
+    private boolean mExpandable = true;
+    private int mContentMarginEnd;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -166,12 +171,18 @@ public class ConversationLayout extends FrameLayout
         });
         mConversationText = findViewById(R.id.conversation_text);
         mExpandButtonContainer = findViewById(R.id.expand_button_container);
+        mConversationHeader = findViewById(R.id.conversation_header);
+        mContentContainer = findViewById(R.id.notification_action_list_margin_target);
         mExpandButtonAndContentContainer = findViewById(R.id.expand_button_and_content_container);
         mExpandButton = findViewById(R.id.expand_button);
         mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_expand_button_top_margin_expanded);
         mExpandButtonExpandedSize = getResources().getDimensionPixelSize(
                 R.dimen.conversation_expand_button_expanded_size);
+        mNotificationHeaderExpandedPadding = getResources().getDimensionPixelSize(
+                R.dimen.conversation_header_expanded_padding_end);
+        mContentMarginEnd = getResources().getDimensionPixelSize(
+                R.dimen.notification_content_margin_end);
         mBadgedSideMargins = getResources().getDimensionPixelSize(
                 R.dimen.conversation_badge_side_margin);
         mIconSizeBadged = getResources().getDimensionPixelSize(
@@ -207,6 +218,7 @@ public class ConversationLayout extends FrameLayout
         mIsCollapsed = isCollapsed;
         mMessagingLinearLayout.setMaxDisplayedLines(isCollapsed ? 1 : Integer.MAX_VALUE);
         updateExpandButton();
+        updateContentPaddings();
     }
 
     @RemotableViewMethod
@@ -852,10 +864,39 @@ public class ConversationLayout extends FrameLayout
         mExpandButton.setLayoutParams(layoutParams);
 
         mExpandButtonContainer.setContentDescription(mContext.getText(contentDescriptionId));
+    }
 
+    private void updateContentPaddings() {
+
+        // Let's make sure the conversation header can't run into the expand button when we're
+        // collapsed and update the paddings of the content
+        int headerPaddingEnd;
+        int contentPaddingEnd;
+        if (!mExpandable) {
+            headerPaddingEnd = 0;
+            contentPaddingEnd = mContentMarginEnd;
+        } else if (mIsCollapsed) {
+            headerPaddingEnd = 0;
+            contentPaddingEnd = 0;
+        } else {
+            headerPaddingEnd = mNotificationHeaderExpandedPadding;
+            contentPaddingEnd = mContentMarginEnd;
+        }
+        mConversationHeader.setPaddingRelative(
+                mConversationHeader.getPaddingStart(),
+                mConversationHeader.getPaddingTop(),
+                headerPaddingEnd,
+                mConversationHeader.getPaddingBottom());
+
+        mContentContainer.setPaddingRelative(
+                mContentContainer.getPaddingStart(),
+                mContentContainer.getPaddingTop(),
+                contentPaddingEnd,
+                mContentContainer.getPaddingBottom());
     }
 
     public void updateExpandability(boolean expandable, @Nullable OnClickListener onClickListener) {
+        mExpandable = expandable;
         if (expandable) {
             mExpandButtonContainer.setVisibility(VISIBLE);
             mExpandButtonContainer.setOnClickListener(onClickListener);
@@ -863,5 +904,6 @@ public class ConversationLayout extends FrameLayout
             // TODO: handle content paddings to end of layout
             mExpandButtonContainer.setVisibility(GONE);
         }
+        updateContentPaddings();
     }
 }
