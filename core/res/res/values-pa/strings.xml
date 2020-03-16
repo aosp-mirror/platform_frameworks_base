@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ਇਹ ਐਪ ਤੁਹਾਡੀ ਸਰੀਰਕ ਸਰਗਰਮੀ ਨੂੰ ਪਛਾਣ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ਤਸਵੀਰਾਂ ਅਤੇ ਵੀਡੀਓ ਬਣਾਓ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ਇਹ ਐਪ ਕਿਸੇ ਵੀ ਸਮੇਂ ਕੈਮਰੇ ਨੂੰ ਵਰਤ ਕੇ ਤਸਵੀਰਾਂ ਖਿੱਚ ਸਕਦੀ ਹੈ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ਐਪਲੀਕੇਸ਼ਨ ਜਾਂ ਸੇਵਾ ਨੂੰ ਕੈਮਰਾ ਡੀਵਾਈਸਾਂ ਦੇ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕੀਤੇ ਜਾਣ ਬਾਰੇ ਕਾਲਬੈਕ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ।"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ਇਹ ਸਿਗਨੇਚਰ ਐਪ ਕੋਈ ਵੀ ਕੈਮਰਾ ਡੀਵਾਈਸ ਚਾਲੂ ਹੋਣ (ਕਿਸ ਐਪਲੀਕੇਸ਼ਨ ਪੈਕੇਜ ਰਾਹੀਂ) ਜਾਂ ਬੰਦ ਹੋਣ \'ਤੇ ਕਾਲਬੈਕ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ਵਾਈਬ੍ਰੇਸ਼ਨ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ਐਪ ਨੂੰ ਵਾਈਬ੍ਰੇਟਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ਫ਼ੋਨ ਨੰਬਰਾਂ ਤੇ ਸਿੱਧੇ ਕਾਲ ਕਰੋ"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ਐਪ ਨੂੰ ਉਹ ਕਾਲ ਜਾਰੀ ਰੱਖਣ ਦਿਓ ਜਿਸਨੂੰ ਹੋਰ ਐਪ ਤੋਂ ਚਾਲੂ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ਫ਼ੋਨ ਨੰਬਰ ਪੜ੍ਹੋ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ ਦੇ ਫ਼ੋਨ ਨੰਬਰਾਂ \'ਤੇ ਪਹੁੰਚ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦੀ ਹੈ।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ਕਾਰ ਦੀ ਸਕ੍ਰੀਨ ਚਾਲੂ ਰੱਖੋ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ਟੈਬਲੈੱਟ ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕੋ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"TV ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ਫ਼ੋਨ ਨੂੰ ਸਲੀਪਿੰਗ ਤੋਂ ਰੋਕੋ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ਐਪ ਨੂੰ ਕਾਰ ਦੀ ਸਕ੍ਰੀਨ ਹਰ ਵੇਲੇ ਚਾਲੂ ਰੱਖਣ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ਐਪ ਨੂੰ ਟੈਬਲੈੱਟ ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"ਐਪ ਨੂੰ TV ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ਐਪ ਨੂੰ ਫ਼ੋਨ ਨੂੰ ਸਲੀਪ ਤੇ ਜਾਣ ਤੋਂ ਰੋਕਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>

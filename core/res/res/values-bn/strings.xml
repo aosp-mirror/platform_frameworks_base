@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"এই অ্যাপ আপনার শারীরিক অ্যাক্টিভিটি শনাক্ত করতে পারবে।"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ছবি এবং ভিডিও তোলে"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"এই অ্যাপটি যে কোনো সময় ক্যামেরা ব্যবহার করে ছবি তুলতে বা ভিডিও রেকর্ড করতে পারে৷"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ভাইব্রেশন নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"অ্যাপ্লিকেশানকে কম্পক নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
@@ -450,9 +454,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"অন্য কোনও অ্যাপ দিয়ে কল করলে এই অ্যাপটিকে সেটি চালিয়ে যেতে দেয়।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ফোন নম্বরগুলি পড়া হোক"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"অ্যাপটিকে এই ডিভাইসের ফোন নম্বরগুলি অ্যাক্সেস করতে দেয়।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"গাড়ির স্ক্রিন চালু রাখা আছে"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ঘুমানো থেকে ট্যাবলেটকে প্রতিরোধ করে"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"টিভিকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করে"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ঘুমানো থেকে ফোনটিকে প্রতিরোধ করে"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"গাড়ির স্ক্রিন চালু রাখতে অ্যাপকে অনুমতি দেয়।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"অ্যাপ্লিকেশানকে ট্যাবলেট নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"অ্যাপ্লিকেশানকে টিভিকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"অ্যাপ্লিকেশানকে ফোনকে নিদ্রায় যাওয়া থেকে প্রতিরোধ করার মঞ্জুরি দেয়৷"</string>
@@ -1352,7 +1358,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"কোনো অনুমতির প্রয়োজন নেই"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"এর জন্য অর্থপ্রদান করতে হতে পারে"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ঠিক আছে"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"এই ডিভাইসটি USB এর মাধ্যমে চার্জ করুন"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"এই ডিভাইসটি USB দিয়ে চার্জ করা হচ্ছে"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"সংযুক্ত ডিভাইসটি USB এর মাধ্যমে চার্জ করা হচ্ছে"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ফাইল ট্রান্সফার চালু করা হয়েছে"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB এর মাধ্যমে PTP চালু করা হয়েছে"</string>

@@ -91,7 +91,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Экстранныя выклікі ў сетцы Wi‑Fi недаступныя"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Абвесткі"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Пераадрасацыя выкліку"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстраннага зваротнага выкліку"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Рэжым экстранных зваротных выклікаў"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Стан мабільнай перадачы даных"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS-паведамленні"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Паведамленні галасавой пошты"</string>
@@ -440,6 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Гэта праграма можа распазнаваць фізічную актыўнасць."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"рабіць фатаграфіі і відэа"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Гэта праграма можа рабіць фота і запісваць відэа з дапамогай камеры ў любы час."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дазволіць праграме ці сэрвісу атрымліваць зваротныя выклікі наконт адкрыцця ці закрыцця прылад камеры."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Гэта праграма для подпісу можа атрымліваць зваротныя вылікі, калі адкрываецца (пакетам праграм) або закрываецца прылада камеры."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"кіраванне вібрацыяй"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дазваляе прыкладанням кіраваць вібрацыяй."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"непасрэдна набіраць тэлефонныя нумары"</string>
@@ -456,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Дазваляе праграме працягваць выклік, які пачаўся ў іншай праграме."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"счытваць нумары тэлефонаў"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Дазваляе праграме атрымліваць доступ да нумароў тэлефонаў на прыладзе."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"пакідаць экран аўтамабіля ўключаным"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"прадухіліць планшэт ад пераходу ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"прадухіленне пераходу тэлевізара ў рэжым сну"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"забараняць тэлефону пераходзіць ў рэжым сну"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Дазваляе праграме пакідаць экран аўтамабіля ўключаным."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Дазваляе прыкладанням прадухіляць пераход планшэта ў рэжым сну."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Дазваляе праграме прадухіляць пераход тэлевізара ў рэжым сну."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Дазваляе прыкладанням прадухіляць тэлефон ад пераходу ў рэжым сну."</string>

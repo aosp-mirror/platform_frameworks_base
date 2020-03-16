@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"මෙම යෙදුමට ඔබේ ශාරීරික ක්‍රියාකාරකම හඳුනා ගැනීමට නොහැකිය"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"පින්තූර සහ වීඩියෝ ගන්න"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"මෙම යෙදුමට ඕනෑම වේලාවක කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"විවෘත වෙමින් හෝ වැසෙමින් පවතින කැමරා උපාංග පිළිබඳ පසු ඇමතුම් ලබා ගැනීමට යෙදුමකට හෝ සේවාවකට ඉඩ දෙන්න."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"මෙම අත්සන් යෙදුමට ඕනෑම කැමරා යෙදුමක් විවෘත වෙමින් හෝ වැසෙමින් (කුමන යෙදුම් පැකේජයෙන්ද) පවතින විට පසු ඇමතුම් ලබා ගැනීමට හැකිය."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"කම්පනය පාලනය කිරීම"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"වෙනත් යෙදුමක ආරම්භ කරන ලද ඇමතුමක් දිගටම කරගෙන යාමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"දුරකථන අංක කියවන්න"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"උපාංගයේ දුරකථන අංක වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"මෝටර් රථ තිරය ක්‍රියාත්මකව තබා ගන්න"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"රූපවාහිනිය නින්දට යාමෙන් නවත්වන්න"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"දුරකථනය නින්දට යාමෙන් වළකන්න"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"යෙදුමට මෝටර් රථ තිරය ක්‍රියාත්මකව තබා ගැනීමට ඉඩ දෙයි."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ටැබ්ලටය නින්දට යාමෙන් වැලැක්වීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"යෙදුමට රූපවාහිනිය නින්දට යාමට නැවැත්වීම අවසර දෙයි."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"දුරකථනය නින්දට යාමෙන් වැලැක්වීමට යෙදුමට අවසර දෙන්න."</string>

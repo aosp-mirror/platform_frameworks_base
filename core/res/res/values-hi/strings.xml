@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"यह ऐप्लिकेशन आपके शरीर की गतिविधि को पहचान सकता है."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"चित्र और वीडियो लें"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"यह ऐप्लिकेशन किसी भी समय कैमरे का उपयोग करके चित्र ले सकता है और वीडियो रिकॉर्ड कर सकता है."</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फ़ोन नंबर पर सीधे कॉल करें"</string>
@@ -450,9 +454,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"इसके ज़रिए आप, किसी ऐप्लिकेशन में शुरू किया गया कॉल दूसरे ऐप्लिकेशन में जारी रख सकते हैं."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फ़ोन नंबर पढ़ना"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ऐप को डिवाइस के फ़ोन नंबर का इस्तेमाल करने देती है."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"कार की स्क्रीन चालू रखना"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"टैबलेट को सोने (कम बैटरी मोड) से रोकें"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"टीवी को सोने (कम बैटरी मोड) से रोकें"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"फ़ोन को सोने (कम बैटरी मोड) से रोकें"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"यह अनुमति देने पर, ऐप्लिकेशन कार की स्क्रीन चालू रख पाएगा."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ऐप्स  को टैबलेट को प्रयोग में नहीं हो जाने से रोकता है."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"ऐप को टीवी को सोने (कम बैटरी मोड) से रोकने की अनुमति देता है."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ऐप्स  को फ़ोन को प्रयोग में नहीं होने से रोकता है."</string>

@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Az alkalmazás képes felismerni a testmozgást."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"fotók és videók készítése"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Az alkalmazás a kamera használatával bármikor készíthet fényképeket és rögzíthet videókat."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Visszahívás fogadásának engedélyezése alkalmazás vagy szolgáltatás számára, ha a kamerákat megnyitják vagy bezárják."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Az aláíró alkalmazás fogadhat visszahívásokat bármelyik kamera (adott alkalmazáscsomag általi) megnyitásakor vagy bezárásakor."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"rezgés szabályozása"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefonszámok közvetlen hívása"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Engedélyezi az alkalmazásnak, hogy folytassa a hívást, amelyet valamelyik másik alkalmazásban kezdtek meg."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"telefonszámok olvasása"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Engedélyezi az alkalmazás számára az eszköz telefonszámaihoz való hozzáférést."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"az autó képernyőjének bekapcsolva tartása"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"táblagép alvás üzemmódjának megakadályozása"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"a tévé alvó üzemmódba való lépésének megakadályozása"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"telefon alvó üzemmódjának megakadályozása"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Lehetővé teszi az alkalmazás számára az autó képernyőjének bekapcsolva tartását."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a táblagép alvó üzemmódra váltson."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Lehetővé teszi az alkalmazás számára azt, hogy megakadályozza a tévé alvó üzemmódba való lépését."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a telefon alvó üzemmódra váltson."</string>

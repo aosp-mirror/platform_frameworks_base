@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Þetta forrit getur greint hreyfingu þína."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"taka myndir og myndskeið"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Þetta forrit getur tekið myndir og tekið upp myndskeið með myndavélinni hvenær sem er."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Leyfa forriti eða þjónustu að taka við svörum um myndavélar sem verið er að opna eða loka."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Þetta undirritunarforrit getur tekið við svörum þegar verið er að opna (með forritapakka) eða loka hvaða myndavél sem er."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"stjórna titringi"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"hringja beint í símanúmer"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Leyfir forritinu að halda áfram með símtal sem hófst í öðru forriti."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lesa símanúmer"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Veitir forritinu aðgang að símanúmerum tækisins."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hafa kveikt á skjá bílsins"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"koma í veg fyrir að spjaldtölvan fari í biðstöðu"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"koma í veg fyrir að sjónvarpið fari í biðstöðu"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"koma í veg fyrir að síminn fari í biðstöðu"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Gerir forritinu kleift að hafa kveikt á skjá bílsins."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Leyfir forriti að koma í veg fyrir að spjaldtölvan fari í biðstöðu."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Leyfir forriti að koma í veg fyrir að sjónvarpið fari í biðstöðu."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Leyfir forriti að koma í veg fyrir að síminn fari í biðstöðu."</string>
