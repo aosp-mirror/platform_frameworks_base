@@ -3017,9 +3017,11 @@ class PackageManagerShellCommand extends ShellCommand {
 
     private int doAddFiles(int sessionId, ArrayList<String> args, long sessionSizeBytes,
             boolean isApex) throws RemoteException {
-        PackageInstaller.Session session = new PackageInstaller.Session(
-                mInterface.getPackageInstaller().openSession(sessionId));
+        PackageInstaller.Session session = null;
         try {
+            session = new PackageInstaller.Session(
+                    mInterface.getPackageInstaller().openSession(sessionId));
+
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
                 final String name = "base." + (isApex ? "apex" : "apk");
@@ -3043,6 +3045,10 @@ class PackageManagerShellCommand extends ShellCommand {
                 }
             }
             return 0;
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println("Failed to add file(s), reason: " + e);
+            getOutPrintWriter().println("Failure [failed to add file(s)]");
+            return 1;
         } finally {
             IoUtils.closeQuietly(session);
         }
