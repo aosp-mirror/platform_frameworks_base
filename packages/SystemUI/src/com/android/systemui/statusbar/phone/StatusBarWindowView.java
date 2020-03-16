@@ -33,6 +33,8 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.FrameLayout;
 
+import com.android.systemui.util.leak.RotationUtils;
+
 /**
  * Status bar view.
  */
@@ -52,17 +54,13 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets windowInsets) {
         final Insets insets = windowInsets.getInsetsIgnoringVisibility(systemBars());
-        mLeftInset = 0;
-        mRightInset = 0;
+        mLeftInset = insets.left;
+        mRightInset = insets.right;
         mTopInset = 0;
         DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
         if (displayCutout != null) {
             mTopInset = displayCutout.getWaterfallInsets().top;
-            mLeftInset = displayCutout.getSafeInsetLeft();
-            mRightInset = displayCutout.getSafeInsetRight();
         }
-        mLeftInset = Math.max(insets.left, mLeftInset);
-        mRightInset = Math.max(insets.right, mRightInset);
         applyMargins();
         return windowInsets;
     }
@@ -100,44 +98,33 @@ public class StatusBarWindowView extends FrameLayout {
             return new Pair<>(roundedCornerContentPadding, roundedCornerContentPadding);
         }
 
-        // compute the padding needed for corner cutout.
-        final int leftMargin = cutout.getSafeInsetLeft();
-        final int rightMargin = cutout.getSafeInsetRight();
+        // padding needed for corner cutout.
         int leftCornerCutoutPadding = 0;
         int rightCornerCutoutPadding = 0;
         if (cornerCutoutPadding != null) {
-            if (cornerCutoutPadding.first > leftMargin) {
-                leftCornerCutoutPadding = cornerCutoutPadding.first - leftMargin;
-            }
-            if (cornerCutoutPadding.second > rightMargin) {
-                rightCornerCutoutPadding = cornerCutoutPadding.second - rightMargin;
-            }
-        }
-
-        // compute the padding needed for rounded corner
-        int leftRoundedCornerPadding = 0;
-        int rightRoundedCornerPadding = 0;
-        if (roundedCornerContentPadding > leftMargin) {
-            leftRoundedCornerPadding = roundedCornerContentPadding - leftMargin;
-        }
-        if (roundedCornerContentPadding > rightMargin) {
-            rightRoundedCornerPadding = roundedCornerContentPadding - rightMargin;
+            leftCornerCutoutPadding = cornerCutoutPadding.first;
+            rightCornerCutoutPadding = cornerCutoutPadding.second;
         }
 
         return new Pair<>(
-                Math.max(leftCornerCutoutPadding, leftRoundedCornerPadding),
-                Math.max(rightCornerCutoutPadding, rightRoundedCornerPadding));
+                Math.max(leftCornerCutoutPadding, roundedCornerContentPadding),
+                Math.max(rightCornerCutoutPadding, roundedCornerContentPadding));
     }
 
+
     /**
-     * Compute the corner cutout margins
-     *
-     * @param cutout
-     * @param display
-     * @return
+     * Compute the corner cutout margins in portrait mode
      */
     public static Pair<Integer, Integer> cornerCutoutMargins(DisplayCutout cutout,
             Display display) {
+        return statusBarCornerCutoutMargins(cutout, display, RotationUtils.ROTATION_NONE, 0);
+    }
+
+    /**
+     * Compute the corner cutout margins in the given orientation (exactRotation)
+     */
+    public static Pair<Integer, Integer> statusBarCornerCutoutMargins(DisplayCutout cutout,
+            Display display, int exactRotation, int statusBarHeight) {
         if (cutout == null) {
             return null;
         }
@@ -145,14 +132,33 @@ public class StatusBarWindowView extends FrameLayout {
         display.getRealSize(size);
 
         Rect bounds = new Rect();
-        boundsFromDirection(cutout, Gravity.TOP, bounds);
+        switch (exactRotation) {
+            case RotationUtils.ROTATION_LANDSCAPE:
+                boundsFromDirection(cutout, Gravity.LEFT, bounds);
+                break;
+            case RotationUtils.ROTATION_SEASCAPE:
+                boundsFromDirection(cutout, Gravity.RIGHT, bounds);
+                break;
+            case RotationUtils.ROTATION_NONE:
+                boundsFromDirection(cutout, Gravity.TOP, bounds);
+                break;
+            case RotationUtils.ROTATION_UPSIDE_DOWN:
+                // we assume the cutout is always on top in portrait mode
+                return null;
+        }
+
+        if (statusBarHeight >= 0 && bounds.top > statusBarHeight) {
+            return null;
+        }
 
         if (bounds.left <= 0) {
             return new Pair<>(bounds.right, 0);
         }
+
         if (bounds.right >= size.x) {
             return new Pair<>(0, size.x - bounds.left);
         }
+
         return null;
     }
 }
