@@ -85,6 +85,10 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private int mSenderTextPaddingSingleLine;
     private boolean mIsFirstGroupInLayout = true;
     private boolean mCanHideSenderIfFirst;
+    private boolean mIsInConversation = true;
+    private ViewGroup mMessagingIconContainer;
+    private int mConversationContentStart;
+    private int mNonConversationMarginEnd;
 
     public MessagingGroup(@NonNull Context context) {
         super(context);
@@ -112,6 +116,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mAvatarView = findViewById(R.id.message_icon);
         mImageContainer = findViewById(R.id.messaging_group_icon_container);
         mSendingSpinner = findViewById(R.id.messaging_group_sending_progress);
+        mMessagingIconContainer = findViewById(R.id.message_icon_container);
         mContentContainer = findViewById(R.id.messaging_group_content_container);
         mSendingSpinnerContainer = findViewById(R.id.messaging_group_sending_progress_container);
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
@@ -119,6 +124,10 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mDisplaySize.y = displayMetrics.heightPixels;
         mSenderTextPaddingSingleLine = getResources().getDimensionPixelSize(
                 R.dimen.messaging_group_singleline_sender_padding_end);
+        mConversationContentStart = getResources().getDimensionPixelSize(
+                R.dimen.conversation_content_start);
+        mNonConversationMarginEnd = getResources().getDimensionPixelSize(
+                R.dimen.messaging_layout_margin_end);
     }
 
     public void updateClipRect() {
@@ -643,5 +652,22 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
 
     public boolean isSingleLine() {
         return mSingleLine;
+    }
+
+    /**
+     * Set this group to be displayed in a conversation and adjust the visual appearance
+     *
+     * @param isInConversation is this in a conversation
+     */
+    public void setIsInConversation(boolean isInConversation) {
+        if (mIsInConversation != isInConversation) {
+            mIsInConversation = isInConversation;
+            MarginLayoutParams layoutParams =
+                    (MarginLayoutParams) mMessagingIconContainer.getLayoutParams();
+            layoutParams.width = mIsInConversation ? mConversationContentStart
+                    : ViewPager.LayoutParams.WRAP_CONTENT;
+            layoutParams.setMarginEnd(mIsInConversation ? 0 : mNonConversationMarginEnd);
+            mMessagingIconContainer.setLayoutParams(layoutParams);
+        }
     }
 }

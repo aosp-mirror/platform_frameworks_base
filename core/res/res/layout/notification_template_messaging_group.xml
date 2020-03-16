@@ -21,8 +21,9 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal" >
     <FrameLayout
+        android:id="@+id/message_icon_container"
         android:layout_width="@dimen/conversation_content_start"
-        android:layout_height="wrap_content">         <!--TODO: make sure to make this padding dynamic-->
+        android:layout_height="wrap_content">
         <ImageView
             android:layout_gravity="top|center_horizontal"
             android:id="@+id/message_icon"
