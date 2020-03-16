@@ -58,6 +58,7 @@ import android.app.AppGlobals;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
+import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -1153,6 +1154,13 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
+    @VisibleForTesting
+    int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory.getAppStandbyReason(packageName, userId, elapsedRealtime);
+        }
+    }
+
     @Override
     public List<AppStandbyInfo> getAppStandbyBuckets(int userId) {
         synchronized (mAppIdleLock) {
@@ -1161,7 +1169,8 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
-    public void restrictApp(@NonNull String packageName, int userId, int restrictReason) {
+    public void restrictApp(@NonNull String packageName, int userId,
+            @SystemForcedReasons int restrictReason) {
         // If the package is not installed, don't allow the bucket to be set.
         if (!mInjector.isPackageInstalled(packageName, 0, userId)) {
             Slog.e(TAG, "Tried to restrict uninstalled app: " + packageName);
@@ -1256,10 +1265,28 @@ public class AppStandbyController implements AppStandbyInternal {
                 return;
             }
 
+            final boolean wasForcedBySystem =
+                    (app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM;
+
             // If the bucket was forced, don't allow prediction to override
             if (predicted
                     && ((app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_USER
-                    || (app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM)) {
+                    || wasForcedBySystem)) {
+                return;
+            }
+
+            final boolean isForcedBySystem =
+                    (reason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM;
+
+            if (app.currentBucket == newBucket && wasForcedBySystem && isForcedBySystem) {
+                mAppIdleHistory
+                        .noteRestrictionAttempt(packageName, userId, elapsedRealtime, reason);
+                // Keep track of all restricting reasons
+                reason = REASON_MAIN_FORCED_BY_SYSTEM
+                        | (app.bucketingReason & REASON_SUB_MASK)
+                        | (reason & REASON_SUB_MASK);
+                mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
+                        newBucket, reason, resetTimeout);
                 return;
             }
 
