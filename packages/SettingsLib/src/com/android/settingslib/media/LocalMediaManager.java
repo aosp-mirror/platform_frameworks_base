@@ -93,6 +93,15 @@ public class LocalMediaManager implements BluetoothCallback {
         mCallbacks.remove(callback);
     }
 
+    /**
+     * Creates a LocalMediaManager with references to given managers.
+     *
+     * It will obtain a {@link LocalBluetoothManager} by calling
+     * {@link LocalBluetoothManager#getInstance} and create an {@link InfoMediaManager} passing
+     * that bluetooth manager.
+     *
+     * It will use {@link BluetoothAdapter#getDefaultAdapter()] for setting the bluetooth adapter.
+     */
     public LocalMediaManager(Context context, String packageName, Notification notification) {
         mContext = context;
         mPackageName = packageName;
@@ -108,12 +117,18 @@ public class LocalMediaManager implements BluetoothCallback {
                 new InfoMediaManager(context, packageName, notification, mLocalBluetoothManager);
     }
 
+    /**
+     * Creates a LocalMediaManager with references to given managers.
+     *
+     * It will use {@link BluetoothAdapter#getDefaultAdapter()] for setting the bluetooth adapter.
+     */
     public LocalMediaManager(Context context, LocalBluetoothManager localBluetoothManager,
             InfoMediaManager infoMediaManager, String packageName) {
         mContext = context;
         mLocalBluetoothManager = localBluetoothManager;
         mInfoMediaManager = infoMediaManager;
         mPackageName = packageName;
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     /**
