@@ -25,6 +25,8 @@ import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
 import android.os.RemoteException;
 
+import java.util.List;
+
 /**
  * Class for pushing rules used to check the integrity of app installs.
  *
@@ -117,6 +119,23 @@ public class AppIntegrityManager {
             ParceledListSlice<Rule> rules = mManager.getCurrentRules();
             String version = mManager.getCurrentRuleSetVersion();
             return new RuleSet.Builder().setVersion(version).addRules(rules.getList()).build();
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Get the package names of all whitelisted rule providers.
+     *
+     * <p>Warning: this method is only used for tests.
+     *
+     * @hide
+     */
+    @TestApi
+    @NonNull
+    public List<String> getWhitelistedRuleProviders() {
+        try {
+            return mManager.getWhitelistedRuleProviders();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
