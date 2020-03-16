@@ -98,9 +98,9 @@ java_library_static {
         "android.hardware.power-V1.0-java",
         "android.hardware.tv.cec-V1.0-java",
         "android.hardware.vibrator-java",
+        "android.net.ipsec.ike.stubs.module_libs_api",
         "app-compat-annotations",
         "framework-tethering-stubs-module_libs_api",
-        "ike-stubs",
     ],
 
     required: [
@@ -128,7 +128,6 @@ java_library_static {
         "android.hidl.manager-V1.2-java",
         "dnsresolver_aidl_interface-V2-java",
         "netd_event_listener_interface-java",
-        "ike-stubs",
         "overlayable_policy_aidl-java",
     ],
 
