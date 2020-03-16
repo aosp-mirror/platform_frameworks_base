@@ -304,7 +304,7 @@ public class FrontendStatus {
      *  and ETSI EN 302 307-2 V1.1.1.
      */
     @FrontendSettings.InnerFec
-    public long getFec() {
+    public long getInnerFec() {
         if (mInnerFec == null) {
             throw new IllegalStateException();
         }
