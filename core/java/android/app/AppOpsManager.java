@@ -1369,7 +1369,6 @@ public class AppOpsManager {
     @SystemApi
     public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     /** @hide Read device identifiers */
-    @SystemApi
     public static final String OPSTR_READ_DEVICE_IDENTIFIERS = "android:read_device_identifiers";
     /** @hide Query all packages on device */
     public static final String OPSTR_QUERY_ALL_PACKAGES = "android:query_all_packages";
