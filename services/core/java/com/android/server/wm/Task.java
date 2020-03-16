@@ -3386,6 +3386,9 @@ class Task extends WindowContainer<WindowContainer> {
         } else {
             info.pictureInPictureParams = mPictureInPictureParams;
         }
+        info.topActivityInfo = mReuseActivitiesReport.top != null
+                ? mReuseActivitiesReport.top.info
+                : null;
     }
 
     /**
