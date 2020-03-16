@@ -104,12 +104,12 @@ import java.util.Map;
  *     private int bytesWrittenCount = 0;
  *
  *     &#64;Override
- *     public void onSeekMap(int i, &#64;NonNull MediaFormat mediaFormat) {
+ *     public void onSeekMapFound(int i, &#64;NonNull MediaFormat mediaFormat) {
  *       // Do nothing.
  *     }
  *
  *     &#64;Override
- *     public void onTrackData(int i, &#64;NonNull TrackData trackData) {
+ *     public void onTrackDataFound(int i, &#64;NonNull TrackData trackData) {
  *       MediaFormat mediaFormat = trackData.mediaFormat;
  *       if (videoTrackIndex == -1 &&
  *           mediaFormat
@@ -120,7 +120,7 @@ import java.util.Map;
  *     }
  *
  *     &#64;Override
- *     public void onSampleData(int trackIndex, &#64;NonNull InputReader inputReader)
+ *     public void onSampleDataFound(int trackIndex, &#64;NonNull InputReader inputReader)
  *         throws IOException {
  *       int numberOfBytesToRead = (int) inputReader.getLength();
  *       if (videoTrackIndex != trackIndex) {
@@ -387,9 +387,9 @@ public final class MediaParser {
          * @param flags Flags associated with the sample. See {@link MediaCodec
          *     MediaCodec.BUFFER_FLAG_*}.
          * @param size The size of the sample data, in bytes.
-         * @param offset The number of bytes that have been consumed by {@code onSampleData(int,
-         *     MediaParser.InputReader)} for the specified track, since the last byte belonging to
-         *     the sample whose metadata is being passed.
+         * @param offset The number of bytes that have been consumed by {@code
+         *     onSampleDataFound(int, MediaParser.InputReader)} for the specified track, since the
+         *     last byte belonging to the sample whose metadata is being passed.
          * @param cryptoData Encryption data required to decrypt the sample. May be null for
          *     unencrypted samples.
          */
