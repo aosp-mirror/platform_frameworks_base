@@ -1911,10 +1911,10 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * capture parameters itself.</p>
      * <p>When set to AUTO, the individual algorithm controls in
      * android.control.* are in effect, such as {@link CaptureRequest#CONTROL_AF_MODE android.control.afMode}.</p>
-     * <p>When set to USE_SCENE_MODE, the individual controls in
+     * <p>When set to USE_SCENE_MODE or USE_EXTENDED_SCENE_MODE, the individual controls in
      * android.control.* are mostly disabled, and the camera device
-     * implements one of the scene mode settings (such as ACTION,
-     * SUNSET, or PARTY) as it wishes. The camera device scene mode
+     * implements one of the scene mode or extended scene mode settings (such as ACTION,
+     * SUNSET, PARTY, or BOKEH) as it wishes. The camera device scene mode
      * 3A settings are provided by {@link android.hardware.camera2.CaptureResult capture results}.</p>
      * <p>When set to OFF_KEEP_STATE, it is similar to OFF mode, the only difference
      * is that this frame will not be used by camera device background 3A statistics
@@ -1927,6 +1927,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #CONTROL_MODE_AUTO AUTO}</li>
      *   <li>{@link #CONTROL_MODE_USE_SCENE_MODE USE_SCENE_MODE}</li>
      *   <li>{@link #CONTROL_MODE_OFF_KEEP_STATE OFF_KEEP_STATE}</li>
+     *   <li>{@link #CONTROL_MODE_USE_EXTENDED_SCENE_MODE USE_EXTENDED_SCENE_MODE}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#CONTROL_AVAILABLE_MODES android.control.availableModes}</p>
@@ -1938,6 +1939,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see #CONTROL_MODE_AUTO
      * @see #CONTROL_MODE_USE_SCENE_MODE
      * @see #CONTROL_MODE_OFF_KEEP_STATE
+     * @see #CONTROL_MODE_USE_EXTENDED_SCENE_MODE
      */
     @PublicKey
     @NonNull
@@ -2127,52 +2129,49 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Boolean>("android.control.enableZsl", boolean.class);
 
     /**
-     * <p>Whether bokeh mode is enabled for a particular capture request.</p>
+     * <p>Whether extended scene mode is enabled for a particular capture request.</p>
      * <p>With bokeh mode, the camera device may blur out the parts of scene that are not in
      * focus, creating a bokeh (or shallow depth of field) effect for people or objects.</p>
-     * <p>When set to STILL_CAPTURE bokeh mode with STILL_CAPTURE capture intent, due to the extra
+     * <p>When set to BOKEH_STILL_CAPTURE mode with STILL_CAPTURE capture intent, due to the extra
      * processing needed for high quality bokeh effect, the stall may be longer than when
      * capture intent is not STILL_CAPTURE.</p>
-     * <p>When set to STILL_CAPTURE bokeh mode with PREVIEW capture intent,</p>
+     * <p>When set to BOKEH_STILL_CAPTURE mode with PREVIEW capture intent,</p>
      * <ul>
      * <li>If the camera device has BURST_CAPTURE capability, the frame rate requirement of
      * BURST_CAPTURE must still be met.</li>
-     * <li>All streams not larger than the maximum streaming dimension for STILL_CAPTURE mode
-     * (queried via {@link android.hardware.camera2.CameraCharacteristics#CONTROL_AVAILABLE_BOKEH_CAPABILITIES })
+     * <li>All streams not larger than the maximum streaming dimension for BOKEH_STILL_CAPTURE mode
+     * (queried via {@link android.hardware.camera2.CameraCharacteristics#CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_CAPABILITIES })
      * will have preview bokeh effect applied.</li>
      * </ul>
-     * <p>When set to CONTINUOUS mode, configured streams dimension should not exceed this mode's
+     * <p>When set to BOKEH_CONTINUOUS mode, configured streams dimension should not exceed this mode's
      * maximum streaming dimension in order to have bokeh effect applied. Bokeh effect may not
      * be available for streams larger than the maximum streaming dimension.</p>
-     * <p>Switching between different bokeh modes may involve reconfiguration of the camera
+     * <p>Switching between different extended scene modes may involve reconfiguration of the camera
      * pipeline, resulting in long latency. The application should check this key against the
      * available session keys queried via
      * {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.</p>
-     * <p>When bokeh mode is on, the camera device may override certain control parameters, such as
-     * reduce frame rate or use face priority scene mode, to achieve best power and quality
-     * tradeoffs. When turned on, AE, AWB, and AF run in auto modes, and only the mandatory
-     * stream combinations of LIMITED hardware level are guaranteed.</p>
      * <p>For a logical multi-camera, bokeh may be implemented by stereo vision from sub-cameras
      * with different field of view. As a result, when bokeh mode is enabled, the camera device
-     * may override {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}, and the field of view will be smaller than when
-     * bokeh mode is off.</p>
+     * may override {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} or {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, and the field of
+     * view may be smaller than when bokeh mode is off.</p>
      * <p><b>Possible values:</b>
      * <ul>
-     *   <li>{@link #CONTROL_BOKEH_MODE_OFF OFF}</li>
-     *   <li>{@link #CONTROL_BOKEH_MODE_STILL_CAPTURE STILL_CAPTURE}</li>
-     *   <li>{@link #CONTROL_BOKEH_MODE_CONTINUOUS CONTINUOUS}</li>
+     *   <li>{@link #CONTROL_EXTENDED_SCENE_MODE_DISABLED DISABLED}</li>
+     *   <li>{@link #CONTROL_EXTENDED_SCENE_MODE_BOKEH_STILL_CAPTURE BOKEH_STILL_CAPTURE}</li>
+     *   <li>{@link #CONTROL_EXTENDED_SCENE_MODE_BOKEH_CONTINUOUS BOKEH_CONTINUOUS}</li>
      * </ul></p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#SCALER_CROP_REGION
-     * @see #CONTROL_BOKEH_MODE_OFF
-     * @see #CONTROL_BOKEH_MODE_STILL_CAPTURE
-     * @see #CONTROL_BOKEH_MODE_CONTINUOUS
+     * @see #CONTROL_EXTENDED_SCENE_MODE_DISABLED
+     * @see #CONTROL_EXTENDED_SCENE_MODE_BOKEH_STILL_CAPTURE
+     * @see #CONTROL_EXTENDED_SCENE_MODE_BOKEH_CONTINUOUS
      */
     @PublicKey
     @NonNull
-    public static final Key<Integer> CONTROL_BOKEH_MODE =
-            new Key<Integer>("android.control.bokehMode", int.class);
+    public static final Key<Integer> CONTROL_EXTENDED_SCENE_MODE =
+            new Key<Integer>("android.control.extendedSceneMode", int.class);
 
     /**
      * <p>The desired zoom ratio</p>
