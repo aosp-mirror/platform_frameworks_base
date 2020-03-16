@@ -1567,23 +1567,6 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
   auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
   const userid_t user_id = multiuser_get_user_id(uid);
 
-  // If FUSE is not ready for this user, skip it
-  // TODO(148772775): Pass primary volume name from zygote argument to here
-  std::string tmp = GetProperty("vold.fuse_running_users", "");
-  std::istringstream fuse_running_users(tmp);
-  bool user_found = false;
-  std::string s;
-  std::string user_id_str = std::to_string(user_id);
-  while (!user_found && std::getline(fuse_running_users, s, ',')) {
-    if (user_id_str == s) {
-      user_found = true;
-    }
-  }
-  if (!user_found) {
-    ALOGI("User %d is not running fuse yet, fuse_running_users=%s", user_id, tmp.c_str());
-    return;
-  }
-
   // Fuse is ready, so we can start using fuse path.
   int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
 
@@ -1611,7 +1594,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jstring managed_nice_name, bool is_system_server,
                              bool is_child_zygote, jstring managed_instruction_set,
                              jstring managed_app_data_dir, bool is_top_app,
-                             jobjectArray pkg_data_info_list) {
+                             jobjectArray pkg_data_info_list, bool mount_storage_dirs) {
   const char* process_name = is_system_server ? "system_server" : "zygote";
   auto fail_fn = std::bind(ZygoteFailure, env, process_name, managed_nice_name, _1);
   auto extract_fn = std::bind(ExtractJString, env, process_name, managed_nice_name, _1);
@@ -1650,10 +1633,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     isolateAppData(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
     isolateJitProfile(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
-
-  if ((mount_external != MOUNT_EXTERNAL_INSTALLER) &&
-        GetBoolProperty(kPropFuse, false) &&
-        GetBoolProperty(ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
+  if ((mount_external != MOUNT_EXTERNAL_INSTALLER) && mount_storage_dirs) {
     BindMountStorageDirs(env, pkg_data_info_list, uid, process_name, managed_nice_name, fail_fn);
   }
 
@@ -2023,7 +2003,7 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         jint mount_external, jstring se_info, jstring nice_name,
         jintArray managed_fds_to_close, jintArray managed_fds_to_ignore, jboolean is_child_zygote,
         jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
-        jobjectArray pkg_data_info_list) {
+        jobjectArray pkg_data_info_list, jboolean mount_storage_dirs) {
     jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
     if (UNLIKELY(managed_fds_to_close == nullptr)) {
@@ -2060,7 +2040,8 @@ static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
                        capabilities, capabilities,
                        mount_external, se_info, nice_name, false,
                        is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                       is_top_app == JNI_TRUE, pkg_data_info_list);
+                       is_top_app == JNI_TRUE, pkg_data_info_list,
+                       mount_storage_dirs == JNI_TRUE);
     }
     return pid;
 }
@@ -2095,7 +2076,7 @@ static jint com_android_internal_os_Zygote_nativeForkSystemServer(
                        permitted_capabilities, effective_capabilities,
                        MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
                        false, nullptr, nullptr, /* is_top_app= */ false,
-                       /* pkg_data_info_list */ nullptr);
+                       /* pkg_data_info_list */ nullptr, false);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -2225,14 +2206,15 @@ static void com_android_internal_os_Zygote_nativeSpecializeAppProcess(
     jint runtime_flags, jobjectArray rlimits,
     jint mount_external, jstring se_info, jstring nice_name,
     jboolean is_child_zygote, jstring instruction_set, jstring app_data_dir, jboolean is_top_app,
-    jobjectArray pkg_data_info_list) {
+    jobjectArray pkg_data_info_list, jboolean mount_storage_dirs) {
   jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
   SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                    capabilities, capabilities,
                    mount_external, se_info, nice_name, false,
                    is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
-                   is_top_app == JNI_TRUE, pkg_data_info_list);
+                   is_top_app == JNI_TRUE, pkg_data_info_list,
+                   mount_storage_dirs == JNI_TRUE);
 }
 
 /**
@@ -2426,7 +2408,7 @@ static jint com_android_internal_os_Zygote_nativeParseSigChld(JNIEnv* env, jclas
 static const JNINativeMethod gMethods[] = {
         {"nativeForkAndSpecialize",
          "(II[II[[IILjava/lang/String;Ljava/lang/String;[I[IZLjava/lang/String;Ljava/lang/"
-         "String;Z[Ljava/lang/String;)I",
+         "String;Z[Ljava/lang/String;Z)I",
          (void*)com_android_internal_os_Zygote_nativeForkAndSpecialize},
         {"nativeForkSystemServer", "(II[II[[IJJ)I",
          (void*)com_android_internal_os_Zygote_nativeForkSystemServer},
@@ -2439,7 +2421,7 @@ static const JNINativeMethod gMethods[] = {
         {"nativeForkUsap", "(II[IZ)I", (void*)com_android_internal_os_Zygote_nativeForkUsap},
         {"nativeSpecializeAppProcess",
          "(II[II[[IILjava/lang/String;Ljava/lang/String;ZLjava/lang/String;Ljava/lang/"
-         "String;Z[Ljava/lang/String;)V",
+         "String;Z[Ljava/lang/String;Z)V",
          (void*)com_android_internal_os_Zygote_nativeSpecializeAppProcess},
         {"nativeInitNativeState", "(Z)V",
          (void*)com_android_internal_os_Zygote_nativeInitNativeState},

@@ -18714,6 +18714,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public Map<Integer, String> getProcessesWithPendingBindMounts(int userId) {
+            return mProcessList.getProcessesWithPendingBindMounts(userId);
+        }
+
+        @Override
         public boolean isSystemReady() {
             // no need to synchronize(this) just to read & return the value
             return mSystemReady;
