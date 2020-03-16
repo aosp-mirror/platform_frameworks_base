@@ -2192,11 +2192,12 @@ public final class ProcessList {
                 app.setHasForegroundActivities(true);
             }
 
+            StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                    StorageManagerInternal.class);
             final Map<String, Pair<String, Long>> pkgDataInfoMap;
             boolean bindMountAppStorageDirs = false;
 
             if (shouldIsolateAppData(app)) {
-                bindMountAppStorageDirs = mVoldAppDataIsolationEnabled;
                 // Get all packages belongs to the same shared uid. sharedPackages is empty array
                 // if it doesn't have shared uid.
                 final PackageManagerInternal pmInt = mService.getPackageManagerInternalLocked();
@@ -2206,9 +2207,9 @@ public final class ProcessList {
                         ? new String[]{app.info.packageName} : sharedPackages, uid);
 
                 int userId = UserHandle.getUserId(uid);
-                if (mVoldAppDataIsolationEnabled) {
-                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                            StorageManagerInternal.class);
+                if (mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid) &&
+                        !storageManagerInternal.isExternalStorageService(uid)) {
+                    bindMountAppStorageDirs = true;
                     if (!storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
                             app.processName)) {
                         // Cannot prepare Android/app and Android/obb directory,

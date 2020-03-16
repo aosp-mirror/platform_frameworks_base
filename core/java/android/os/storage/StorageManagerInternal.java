@@ -144,4 +144,10 @@ public abstract class StorageManagerInternal {
      * @param uid the uid of the package
      */
     public abstract void prepareAppDataAfterInstall(@NonNull String packageName, int uid);
+
+
+    /**
+     * Return true if uid is external storage service.
+     */
+    public abstract boolean isExternalStorageService(int uid);
 }
