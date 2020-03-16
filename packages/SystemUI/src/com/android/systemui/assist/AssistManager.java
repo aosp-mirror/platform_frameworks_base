@@ -1,6 +1,9 @@
 package com.android.systemui.assist;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.systemui.DejankUtils.whitelistIpcs;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -43,6 +46,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.assist.ui.DefaultUiController;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -50,6 +54,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * Class to manage everything related to assist in SystemUI.
@@ -98,6 +104,9 @@ public class AssistManager {
     public static final String INVOCATION_TYPE_KEY = "invocation_type";
     protected static final String ACTION_KEY = "action";
     protected static final String SHOW_ASSIST_HANDLES_ACTION = "show_assist_handles";
+    protected static final String SET_ASSIST_GESTURE_CONSTRAINED_ACTION =
+            "set_assist_gesture_constrained";
+    protected static final String CONSTRAINED_KEY = "should_constrain";
 
     public static final int INVOCATION_TYPE_GESTURE = 1;
     public static final int INVOCATION_TYPE_ACTIVE_EDGE = 2;
@@ -120,6 +129,7 @@ public class AssistManager {
     private final PhoneStateMonitor mPhoneStateMonitor;
     private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
+    protected final Lazy<SysUiState> mSysUiState;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -185,7 +195,8 @@ public class AssistManager {
             CommandQueue commandQueue,
             PhoneStateMonitor phoneStateMonitor,
             OverviewProxyService overviewProxyService,
-            ConfigurationController configurationController) {
+            ConfigurationController configurationController,
+            Lazy<SysUiState> sysUiState) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
@@ -205,6 +216,8 @@ public class AssistManager {
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
 
         mUiController = new DefaultUiController(mContext);
+
+        mSysUiState = sysUiState;
 
         overviewProxyService.addCallback(new OverviewProxyService.OverviewProxyListener() {
             @Override
@@ -243,8 +256,16 @@ public class AssistManager {
                         if (VERBOSE) {
                             Log.v(TAG, "UI hints received");
                         }
-                        if (SHOW_ASSIST_HANDLES_ACTION.equals(hints.getString(ACTION_KEY))) {
+
+                        String action = hints.getString(ACTION_KEY);
+                        if (SHOW_ASSIST_HANDLES_ACTION.equals(action)) {
                             requestAssistHandles();
+                        } else if (SET_ASSIST_GESTURE_CONSTRAINED_ACTION.equals(action)) {
+                            mSysUiState.get()
+                                    .setFlag(
+                                            SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
+                                            hints.getBoolean(CONSTRAINED_KEY, false))
+                                    .commitUpdate(DEFAULT_DISPLAY);
                         }
                     }
                 });
