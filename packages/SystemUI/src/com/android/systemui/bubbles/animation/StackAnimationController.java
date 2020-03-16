@@ -43,6 +43,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.function.IntSupplier;
 
 /**
  * Animation controller for bubbles when they're in their stacked state. Stacked bubbles sit atop
@@ -241,9 +242,15 @@ public class StackAnimationController extends
         }
     };
 
+    /** Returns the number of 'real' bubbles (excluding the overflow bubble). */
+    private IntSupplier mBubbleCountSupplier;
+
     public StackAnimationController(
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            IntSupplier bubbleCountSupplier) {
         mFloatingContentCoordinator = floatingContentCoordinator;
+        mBubbleCountSupplier = bubbleCountSupplier;
+
     }
 
     /**
@@ -669,6 +676,8 @@ public class StackAnimationController extends
                 new SpringAnimation(this, firstBubbleProperty)
                         .setSpring(spring)
                         .addEndListener((dynamicAnimation, b, v, v1) -> {
+                            mRestingStackPosition.set(mStackPosition);
+
                             if (after != null) {
                                 for (Runnable callback : after) {
                                     callback.run();
@@ -736,7 +745,7 @@ public class StackAnimationController extends
             return;
         }
 
-        if (mLayout.getChildCount() == 1) {
+        if (getBubbleCount() == 1) {
             // If this is the first child added, position the stack in its starting position.
             moveStackToStartPosition();
         } else if (isStackPositionSet() && mLayout.indexOfChild(child) == 0) {
@@ -758,7 +767,7 @@ public class StackAnimationController extends
                 .start();
 
         // If there are other bubbles, pull them into the correct position.
-        if (mLayout.getChildCount() > 0) {
+        if (getBubbleCount() > 0) {
             animationForChildAtIndex(0).translationX(mStackPosition.x).start();
         } else {
             // When all children are removed ensure stack position is sane
@@ -977,6 +986,11 @@ public class StackAnimationController extends
         }
 
         return mMagnetizedStack;
+    }
+
+    /** Returns the number of 'real' bubbles (excluding overflow). */
+    private int getBubbleCount() {
+        return mBubbleCountSupplier.getAsInt();
     }
 
     /**
