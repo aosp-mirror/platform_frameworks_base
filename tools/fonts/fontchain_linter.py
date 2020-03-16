@@ -316,20 +316,25 @@ def get_emoji_font():
 
 def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
     coverage = get_emoji_map(emoji_font)
+
+    errors = []
+
     for sequence in all_emoji:
-        assert sequence in coverage, (
-            '%s is not supported in the emoji font.' % printable(sequence))
+        if not sequence in coverage:
+          errors.append('%s is not supported in the emoji font.' % printable(sequence))
 
     for sequence in coverage:
         if sequence in {0x0000, 0x000D, 0x0020}:
             # The font needs to support a few extra characters, which is OK
             continue
-        assert sequence in all_emoji, (
-            'Emoji font should not support %s.' % printable(sequence))
+        if sequence not in all_emoji:
+          errors.append('%s support unexpected in the emoji font.' % printable(sequence))
 
     for first, second in equivalent_emoji.items():
-        assert coverage[first] == coverage[second], (
-            '%s and %s should map to the same glyph.' % (
+        if first not in coverage or second not in coverage:
+            continue  # sequence will be reported missing
+        if coverage[first] != coverage[second]:
+            errors.append('%s and %s should map to the same glyph.' % (
                 printable(first),
                 printable(second)))
 
@@ -344,10 +349,12 @@ def check_emoji_font_coverage(emoji_font, all_emoji, equivalent_emoji):
                 while equivalent_seq in equivalent_emoji:
                     equivalent_seq = equivalent_emoji[equivalent_seq]
                 equivalent_seqs.add(equivalent_seq)
-            assert len(equivalent_seqs) == 1, (
-                'The sequences %s should not result in the same glyph %s' % (
+            if len(equivalent_seqs) != 1:
+                errors.append('The sequences %s should not result in the same glyph %s' % (
                     printable(equivalent_seqs),
                     glyph))
+
+    assert not errors, '%d emoji font errors:\n%s\n%d emoji font coverage errors' % (len(errors), '\n'.join(errors), len(errors))
 
 
 def check_emoji_defaults(default_emoji):
