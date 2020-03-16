@@ -24,6 +24,7 @@ import static android.net.util.NetworkConstants.FF;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.net.util.NetworkConstants.asByte;
 import static android.net.util.TetheringMessageBase.BASE_IPSERVER;
+import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
 
 import android.net.INetd;
 import android.net.INetworkStackStatusCallback;
@@ -448,7 +449,9 @@ public class IpServer extends StateMachine {
             final ArrayList<TetheredClient> leases = new ArrayList<>();
             for (DhcpLeaseParcelable lease : leaseParcelables) {
                 final LinkAddress address = new LinkAddress(
-                        intToInet4AddressHTH(lease.netAddr), lease.prefixLength);
+                        intToInet4AddressHTH(lease.netAddr), lease.prefixLength,
+                        0 /* flags */, RT_SCOPE_UNIVERSE /* as per RFC6724#3.2 */,
+                        lease.expTime /* deprecationTime */, lease.expTime /* expirationTime */);
 
                 final MacAddress macAddress;
                 try {
@@ -460,7 +463,7 @@ public class IpServer extends StateMachine {
                 }
 
                 final TetheredClient.AddressInfo addressInfo = new TetheredClient.AddressInfo(
-                        address, lease.hostname, lease.expTime);
+                        address, lease.hostname);
                 leases.add(new TetheredClient(
                         macAddress,
                         Collections.singletonList(addressInfo),
