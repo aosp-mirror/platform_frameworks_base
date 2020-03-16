@@ -84,9 +84,9 @@ public final class CallerIdentity {
      */
     @VisibleForTesting
     public static CallerIdentity forTest(int uid, int pid, String packageName,
-            @Nullable String featureId, @PermissionLevel int permissionLevel) {
+            @Nullable String attributionTag, @PermissionLevel int permissionLevel) {
 
-        return new CallerIdentity(uid, pid, packageName, featureId,
+        return new CallerIdentity(uid, pid, packageName, attributionTag,
                 permissionLevel);
     }
 
@@ -105,13 +105,13 @@ public final class CallerIdentity {
      * security exception will be thrown if it is invalid.
      */
     public static CallerIdentity fromBinder(Context context, String packageName,
-            @Nullable String featureId) {
+            @Nullable String attributionTag) {
         int uid = Binder.getCallingUid();
         if (!ArrayUtils.contains(context.getPackageManager().getPackagesForUid(uid), packageName)) {
             throw new SecurityException("invalid package \"" + packageName + "\" for uid " + uid);
         }
 
-        return fromBinderUnsafe(context, packageName, featureId);
+        return fromBinderUnsafe(context, packageName, attributionTag);
     }
 
     /**
@@ -121,9 +121,9 @@ public final class CallerIdentity {
      * an appops call.
      */
     public static CallerIdentity fromBinderUnsafe(Context context, String packageName,
-            @Nullable String featureId) {
+            @Nullable String attributionTag) {
         return new CallerIdentity(Binder.getCallingUid(), Binder.getCallingPid(),
-                packageName, featureId,
+                packageName, attributionTag,
                 getPermissionLevel(context, Binder.getCallingPid(), Binder.getCallingUid()));
     }
 
@@ -190,8 +190,8 @@ public final class CallerIdentity {
     /** The calling package name. */
     public final String packageName;
 
-    /** The calling feature id. */
-    public final @Nullable String featureId;
+    /** The calling attribution tag. */
+    public final @Nullable String attributionTag;
 
     /**
      * The calling location permission level. This field should only be used for validating
@@ -201,12 +201,12 @@ public final class CallerIdentity {
     public final @PermissionLevel int permissionLevel;
 
     private CallerIdentity(int uid, int pid, String packageName,
-            @Nullable String featureId, @PermissionLevel int permissionLevel) {
+            @Nullable String attributionTag, @PermissionLevel int permissionLevel) {
         this.uid = uid;
         this.pid = pid;
         this.userId = UserHandle.getUserId(uid);
         this.packageName = Objects.requireNonNull(packageName);
-        this.featureId = featureId;
+        this.attributionTag = attributionTag;
         this.permissionLevel = Preconditions.checkArgumentInRange(permissionLevel, PERMISSION_NONE,
                 PERMISSION_FINE, "permissionLevel");
     }
@@ -221,18 +221,18 @@ public final class CallerIdentity {
     @Override
     public String toString() {
         int length = 10 + packageName.length();
-        if (featureId != null) {
-            length += featureId.length();
+        if (attributionTag != null) {
+            length += attributionTag.length();
         }
 
         StringBuilder builder = new StringBuilder(length);
         builder.append(pid).append("/").append(packageName);
-        if (featureId != null) {
+        if (attributionTag != null) {
             builder.append("[");
-            if (featureId.startsWith(packageName)) {
-                builder.append(featureId.substring(packageName.length()));
+            if (attributionTag.startsWith(packageName)) {
+                builder.append(attributionTag.substring(packageName.length()));
             } else {
-                builder.append(featureId);
+                builder.append(attributionTag);
             }
             builder.append("]");
         }
@@ -251,11 +251,11 @@ public final class CallerIdentity {
         return uid == that.uid
                 && pid == that.pid
                 && packageName.equals(that.packageName)
-                && Objects.equals(featureId, that.featureId);
+                && Objects.equals(attributionTag, that.attributionTag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uid, pid, packageName, featureId);
+        return Objects.hash(uid, pid, packageName, attributionTag);
     }
 }

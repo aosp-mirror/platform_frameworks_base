@@ -199,10 +199,10 @@ public class GnssManagerService {
      * as a collection.
      */
     public boolean startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName,
-            String featureId) {
+            String attributionTag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         if (!mAppOpsHelper.checkLocationAccess(identity)) {
             return false;
         }
@@ -223,10 +223,10 @@ public class GnssManagerService {
      * Adds a GNSS batching callback for delivering GNSS location batch results.
      */
     public boolean addGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
-            @Nullable String featureId) {
+            @Nullable String attributionTag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         identity.enforceLocationPermission(PERMISSION_FINE);
 
         synchronized (mGnssBatchingLock) {
@@ -296,8 +296,8 @@ public class GnssManagerService {
      * Registers listener for GNSS status changes.
      */
     public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
-            @Nullable String featureId) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+            @Nullable String attributionTag) {
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         identity.enforceLocationPermission(PERMISSION_FINE);
 
         mGnssStatusProvider.addListener(identity, listener);
@@ -314,8 +314,8 @@ public class GnssManagerService {
      * Adds a GNSS measurements listener.
      */
     public void addGnssMeasurementsListener(GnssRequest request, IGnssMeasurementsListener listener,
-            String packageName, @Nullable String featureId) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+            String packageName, @Nullable String attributionTag) {
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         identity.enforceLocationPermission(PERMISSION_FINE);
 
         if (request.isFullTracking()) {
@@ -351,8 +351,8 @@ public class GnssManagerService {
      * @param packageName name of requesting package
      */
     public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener, String packageName,
-            @Nullable String featureId) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+            @Nullable String attributionTag) {
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         identity.enforceLocationPermission(PERMISSION_FINE);
 
         mGnssAntennaInfoProvider.addListener(identity, listener);
@@ -371,8 +371,8 @@ public class GnssManagerService {
      * Adds a GNSS navigation message listener.
      */
     public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
-            String packageName, @Nullable String featureId) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, featureId);
+            String packageName, @Nullable String attributionTag) {
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         identity.enforceLocationPermission(PERMISSION_FINE);
 
         mGnssNavigationMessageProvider.addListener(identity, listener);
