@@ -196,7 +196,7 @@ public class SystemWindows {
             final Display display = mDisplayController.getDisplay(mDisplayId);
             SurfaceControlViewHost viewRoot = new SurfaceControlViewHost(mContext, display, wwm);
             attrs.flags |= FLAG_HARDWARE_ACCELERATED;
-            viewRoot.addView(view, attrs);
+            viewRoot.setView(view, attrs);
             mViewRoots.put(view, viewRoot);
         }
 
