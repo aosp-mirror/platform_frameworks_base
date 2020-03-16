@@ -200,7 +200,7 @@ public class TunerResourceManagerService extends SystemService {
             enforceTunerAccessPermission("requestFrontend");
             enforceTrmAccessPermission("requestFrontend");
             if (frontendHandle == null) {
-                throw new RemoteException("frontendId can't be null");
+                throw new RemoteException("frontendHandle can't be null");
             }
             synchronized (mLock) {
                 try {
@@ -222,24 +222,28 @@ public class TunerResourceManagerService extends SystemService {
 
         @Override
         public boolean requestDemux(@NonNull TunerDemuxRequest request,
-                    @NonNull int[] demuxHandle) {
+                    @NonNull int[] demuxHandle)  throws RemoteException {
             enforceTunerAccessPermission("requestDemux");
             enforceTrmAccessPermission("requestDemux");
-            if (DEBUG) {
-                Slog.d(TAG, "requestDemux(request=" + request + ")");
+            if (demuxHandle == null) {
+                throw new RemoteException("demuxHandle can't be null");
             }
-            return true;
+            synchronized (mLock) {
+                return requestDemuxInternal(request, demuxHandle);
+            }
         }
 
         @Override
         public boolean requestDescrambler(@NonNull TunerDescramblerRequest request,
-                    @NonNull int[] descrambleHandle) {
+                    @NonNull int[] descrambleHandle) throws RemoteException {
             enforceDescramblerAccessPermission("requestDescrambler");
             enforceTrmAccessPermission("requestDescrambler");
-            if (DEBUG) {
-                Slog.d(TAG, "requestDescrambler(request=" + request + ")");
+            if (descrambleHandle == null) {
+                throw new RemoteException("descrambleHandle can't be null");
             }
-            return true;
+            synchronized (mLock) {
+                return requestDescramblerInternal(request, descrambleHandle);
+            }
         }
 
         @Override
@@ -478,6 +482,24 @@ public class TunerResourceManagerService extends SystemService {
         }
 
         return false;
+    }
+
+    @VisibleForTesting
+    boolean requestDemuxInternal(TunerDemuxRequest request, int[] demuxHandle) {
+        if (DEBUG) {
+            Slog.d(TAG, "requestDemux(request=" + request + ")");
+        }
+        demuxHandle[0] = generateResourceHandle(TUNER_RESOURCE_TYPE_DEMUX, 0);
+        return true;
+    }
+
+    @VisibleForTesting
+    boolean requestDescramblerInternal(TunerDescramblerRequest request, int[] descramblerHandle) {
+        if (DEBUG) {
+            Slog.d(TAG, "requestDescrambler(request=" + request + ")");
+        }
+        descramblerHandle[0] = generateResourceHandle(TUNER_RESOURCE_TYPE_DESCRAMBLER, 0);
+        return true;
     }
 
     @VisibleForTesting
