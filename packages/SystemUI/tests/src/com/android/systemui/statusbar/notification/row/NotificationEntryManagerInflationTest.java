@@ -285,7 +285,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 false,
                 false,
                 null,
-                0
+                0,
+                false
             );
         mRankingMap = new NotificationListenerService.RankingMap(new Ranking[] {ranking});
 
