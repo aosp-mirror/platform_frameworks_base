@@ -929,18 +929,10 @@ void RecordingCanvas::onDrawBitmap(const SkBitmap& bm, SkScalar x, SkScalar y,
                                    const SkPaint* paint) {
     fDL->drawImage(SkImage::MakeFromBitmap(bm), x, y, paint, BitmapPalette::Unknown);
 }
-void RecordingCanvas::onDrawBitmapNine(const SkBitmap& bm, const SkIRect& center, const SkRect& dst,
-                                       const SkPaint* paint) {
-    fDL->drawImageNine(SkImage::MakeFromBitmap(bm), center, dst, paint);
-}
 void RecordingCanvas::onDrawBitmapRect(const SkBitmap& bm, const SkRect* src, const SkRect& dst,
                                        const SkPaint* paint, SrcRectConstraint constraint) {
     fDL->drawImageRect(SkImage::MakeFromBitmap(bm), src, dst, paint, constraint,
                        BitmapPalette::Unknown);
-}
-void RecordingCanvas::onDrawBitmapLattice(const SkBitmap& bm, const SkCanvas::Lattice& lattice,
-                                          const SkRect& dst, const SkPaint* paint) {
-    fDL->drawImageLattice(SkImage::MakeFromBitmap(bm), lattice, dst, paint, BitmapPalette::Unknown);
 }
 
 void RecordingCanvas::drawImage(const sk_sp<SkImage>& image, SkScalar x, SkScalar y,

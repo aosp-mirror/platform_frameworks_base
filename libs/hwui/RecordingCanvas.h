@@ -182,9 +182,6 @@ public:
     void onDrawTextBlob(const SkTextBlob*, SkScalar, SkScalar, const SkPaint&) override;
 
     void onDrawBitmap(const SkBitmap&, SkScalar, SkScalar, const SkPaint*) override;
-    void onDrawBitmapLattice(const SkBitmap&, const Lattice&, const SkRect&,
-                             const SkPaint*) override;
-    void onDrawBitmapNine(const SkBitmap&, const SkIRect&, const SkRect&, const SkPaint*) override;
     void onDrawBitmapRect(const SkBitmap&, const SkRect*, const SkRect&, const SkPaint*,
                           SrcRectConstraint) override;
 
