@@ -93,9 +93,10 @@
             android:clipChildren="false"
             android:clipToPadding="false">
             <!--TODO: move this into a separate layout and share logic with the header to bring back app opps etc-->
-            <FrameLayout
+            <com.android.internal.widget.RemeasuringLinearLayout
                 android:id="@+id/notification_action_list_margin_target"
                 android:layout_width="0dp"
+                android:orientation="vertical"
                 android:layout_height="wrap_content"
                 android:layout_weight="1">
 
@@ -163,12 +164,12 @@
                     android:id="@+id/notification_messaging"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="40dp"
+                    android:layout_marginTop="2dp"
                     android:spacing="@dimen/notification_messaging_spacing"
                     android:clipToPadding="false"
                     android:clipChildren="false"
                     />
-            </FrameLayout>
+            </com.android.internal.widget.RemeasuringLinearLayout>
             <!-- Unread Count -->
             <!-- <TextView /> -->
 
