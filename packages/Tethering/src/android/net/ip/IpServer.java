@@ -34,6 +34,7 @@ import android.net.MacAddress;
 import android.net.RouteInfo;
 import android.net.TetheredClient;
 import android.net.TetheringManager;
+import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpLeaseParcelable;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
@@ -242,6 +243,10 @@ public class IpServer extends StateMachine {
     private IDhcpServer mDhcpServer;
     private RaParams mLastRaParams;
     private LinkAddress mIpv4Address;
+
+    private LinkAddress mStaticIpv4ServerAddr;
+    private LinkAddress mStaticIpv4ClientAddr;
+
     @NonNull
     private List<TetheredClient> mDhcpLeases = Collections.emptyList();
 
@@ -544,6 +549,8 @@ public class IpServer extends StateMachine {
         // into calls to InterfaceController, shared with startIPv4().
         mInterfaceCtrl.clearIPv4Address();
         mIpv4Address = null;
+        mStaticIpv4ServerAddr = null;
+        mStaticIpv4ClientAddr = null;
     }
 
     private boolean configureIPv4(boolean enabled) {
@@ -554,7 +561,10 @@ public class IpServer extends StateMachine {
         final Inet4Address srvAddr;
         int prefixLen = 0;
         try {
-            if (mInterfaceType == TetheringManager.TETHERING_USB
+            if (mStaticIpv4ServerAddr != null) {
+                srvAddr = (Inet4Address) mStaticIpv4ServerAddr.getAddress();
+                prefixLen = mStaticIpv4ServerAddr.getPrefixLength();
+            } else if (mInterfaceType == TetheringManager.TETHERING_USB
                     || mInterfaceType == TetheringManager.TETHERING_NCM) {
                 srvAddr = (Inet4Address) parseNumericAddress(USB_NEAR_IFACE_ADDR);
                 prefixLen = USB_PREFIX_LENGTH;
@@ -599,10 +609,6 @@ public class IpServer extends StateMachine {
             return false;
         }
 
-        if (!configureDhcp(enabled, srvAddr, prefixLen)) {
-            return false;
-        }
-
         // Directly-connected route.
         final IpPrefix ipv4Prefix = new IpPrefix(mIpv4Address.getAddress(),
                 mIpv4Address.getPrefixLength());
@@ -614,7 +620,8 @@ public class IpServer extends StateMachine {
             mLinkProperties.removeLinkAddress(mIpv4Address);
             mLinkProperties.removeRoute(route);
         }
-        return true;
+
+        return configureDhcp(enabled, srvAddr, prefixLen);
     }
 
     private String getRandomWifiIPv4Address() {
@@ -934,6 +941,13 @@ public class IpServer extends StateMachine {
         mLinkProperties.setInterfaceName(mIfaceName);
     }
 
+    private void maybeConfigureStaticIp(final TetheringRequestParcel request) {
+        if (request == null) return;
+
+        mStaticIpv4ServerAddr = request.localIPv4Address;
+        mStaticIpv4ClientAddr = request.staticClientAddress;
+    }
+
     class InitialState extends State {
         @Override
         public void enter() {
@@ -948,9 +962,11 @@ public class IpServer extends StateMachine {
                     mLastError = TetheringManager.TETHER_ERROR_NO_ERROR;
                     switch (message.arg1) {
                         case STATE_LOCAL_ONLY:
+                            maybeConfigureStaticIp((TetheringRequestParcel) message.obj);
                             transitionTo(mLocalHotspotState);
                             break;
                         case STATE_TETHERED:
+                            maybeConfigureStaticIp((TetheringRequestParcel) message.obj);
                             transitionTo(mTetheredState);
                             break;
                         default:
