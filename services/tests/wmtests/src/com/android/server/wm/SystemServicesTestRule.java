@@ -322,6 +322,8 @@ public class SystemServicesTestRule implements TestRule {
     }
 
     private void tearDown() {
+        mWmService.mRoot.forAllDisplayPolicies(DisplayPolicy::release);
+
         // Unregister display listener from root to avoid issues with subsequent tests.
         mContext.getSystemService(DisplayManager.class)
                 .unregisterDisplayListener(mAtmService.mRootWindowContainer);
