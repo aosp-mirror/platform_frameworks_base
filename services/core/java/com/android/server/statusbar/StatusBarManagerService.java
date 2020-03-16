@@ -520,6 +520,15 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
                 } catch (RemoteException ex) { }
             }
         }
+
+        @Override
+        public void requestWindowMagnificationConnection(boolean request) {
+            if (mBar != null) {
+                try {
+                    mBar.requestWindowMagnificationConnection(request);
+                } catch (RemoteException ex) { }
+            }
+        }
     };
 
     private final GlobalActionsProvider mGlobalActionsProvider = new GlobalActionsProvider() {

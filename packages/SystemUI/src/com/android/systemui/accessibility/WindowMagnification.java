@@ -28,37 +28,50 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.statusbar.CommandQueue;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Class to handle changes to setting window_magnification value.
+ * Class to handle the interaction with
+ * {@link com.android.server.accessibility.AccessibilityManagerService}. It invokes
+ * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
+ * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
 @Singleton
-public class WindowMagnification extends SystemUI implements WindowMagnifierCallback {
+public class WindowMagnification extends SystemUI implements WindowMagnifierCallback,
+        CommandQueue.Callbacks {
     private static final String TAG = "WindowMagnification";
     private static final int CONFIG_MASK =
             ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_ORIENTATION;
 
-    private WindowMagnificationController mWindowMagnificationController;
+    @VisibleForTesting
+    protected WindowMagnificationController mWindowMagnificationController;
     private final Handler mHandler;
-    //TODO:Set it by the request from AccessibilityManager.
-    private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
+    private final AccessibilityManager mAccessibilityManager;
+    private final CommandQueue mCommandQueue;
 
+    private WindowMagnificationConnectionImpl mWindowMagnificationConnectionImpl;
     private Configuration mLastConfiguration;
 
     @Inject
-    public WindowMagnification(Context context, @Main Handler mainHandler) {
+    public WindowMagnification(Context context, @Main Handler mainHandler,
+            CommandQueue commandQueue) {
         super(context);
         mHandler = mainHandler;
         mLastConfiguration = new Configuration(context.getResources().getConfiguration());
+        mAccessibilityManager = (AccessibilityManager) mContext.getSystemService(
+                Context.ACCESSIBILITY_SERVICE);
+        mCommandQueue = commandQueue;
     }
 
     @Override
@@ -75,6 +88,7 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
 
     @Override
     public void start() {
+        mCommandQueue.addCallback(this);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.WINDOW_MAGNIFICATION),
                 true, new ContentObserver(mHandler) {
@@ -148,6 +162,29 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         if (mWindowMagnificationConnectionImpl != null) {
             mWindowMagnificationConnectionImpl.onWindowMagnifierBoundsChanged(displayId, frame);
         }
+    }
+
+    @Override
+    public void requestWindowMagnificationConnection(boolean connect) {
+        if (connect) {
+            setWindowMagnificationConnection();
+        } else {
+            clearWindowMagnificationConnection();
+        }
+    }
+
+    private void setWindowMagnificationConnection() {
+        if (mWindowMagnificationConnectionImpl == null) {
+            mWindowMagnificationConnectionImpl = new WindowMagnificationConnectionImpl(this,
+                    mHandler);
+        }
+        mAccessibilityManager.setWindowMagnificationConnection(
+                mWindowMagnificationConnectionImpl);
+    }
+
+    private void clearWindowMagnificationConnection() {
+        mAccessibilityManager.setWindowMagnificationConnection(null);
+        //TODO: destroy controllers.
     }
 
     private static class WindowMagnificationConnectionImpl extends
