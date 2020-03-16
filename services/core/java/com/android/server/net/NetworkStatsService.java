@@ -1796,7 +1796,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    // TODO: It is copied from ConnectivitySerivce, consider refactor these check permission
+    // TODO: It is copied from ConnectivityService, consider refactor these check permission
     //  functions to a proper util.
     private boolean checkAnyPermissionOf(String... permissions) {
         for (String permission : permissions) {
