@@ -179,6 +179,7 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.function.TriConsumer;
@@ -259,7 +260,9 @@ public class DisplayPolicy {
     @Px
     private int mBottomGestureAdditionalInset;
     @Px
-    private int mSideGestureInset;
+    private int mLeftGestureInset;
+    @Px
+    private int mRightGestureInset;
 
     StatusBarManagerInternal getStatusBarManagerInternal() {
         synchronized (mServiceAcquireLock) {
@@ -426,6 +429,8 @@ public class DisplayPolicy {
 
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS = 0;
     private static final int MSG_REQUEST_TRANSIENT_BARS_ARG_NAVIGATION = 1;
+
+    private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
     private class PolicyHandler extends Handler {
 
@@ -651,6 +656,16 @@ public class DisplayPolicy {
         mRefreshRatePolicy = new RefreshRatePolicy(mService,
                 mDisplayContent.getDisplayInfo(),
                 mService.mHighRefreshRateBlacklist);
+
+        mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(mHandler,
+                mContext, () -> {
+            synchronized (mLock) {
+                onConfigurationChanged();
+                mSystemGestures.onConfigurationChanged();
+                mDisplayContent.updateSystemGestureExclusion();
+            }
+        });
+        mHandler.post(mGestureNavigationSettingsObserver::register);
     }
 
     void systemReady() {
@@ -723,7 +738,7 @@ public class DisplayPolicy {
     }
 
     boolean hasSideGestures() {
-        return mHasNavigationBar && mSideGestureInset > 0;
+        return mHasNavigationBar && (mLeftGestureInset > 0 || mRightGestureInset > 0);
     }
 
     public boolean navigationBarCanMove() {
@@ -1076,11 +1091,12 @@ public class DisplayPolicy {
                             inOutFrame.left = 0;
                             inOutFrame.top = 0;
                             inOutFrame.bottom = displayFrames.mDisplayHeight;
-                            inOutFrame.right = displayFrames.mUnrestricted.left + mSideGestureInset;
+                            inOutFrame.right = displayFrames.mUnrestricted.left + mLeftGestureInset;
                         });
                 mDisplayContent.setInsetProvider(ITYPE_RIGHT_GESTURES, win,
                         (displayFrames, windowState, inOutFrame) -> {
-                            inOutFrame.left = displayFrames.mUnrestricted.right - mSideGestureInset;
+                            inOutFrame.left = displayFrames.mUnrestricted.right
+                                    - mRightGestureInset;
                             inOutFrame.top = 0;
                             inOutFrame.bottom = displayFrames.mDisplayHeight;
                             inOutFrame.right = displayFrames.mDisplayWidth;
@@ -2819,7 +2835,8 @@ public class DisplayPolicy {
         }
 
         mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
-        mSideGestureInset = res.getDimensionPixelSize(R.dimen.config_backGestureInset);
+        mLeftGestureInset = mGestureNavigationSettingsObserver.getLeftSensitivity(res);
+        mRightGestureInset = mGestureNavigationSettingsObserver.getRightSensitivity(res);
         mNavigationBarLetsThroughTaps = res.getBoolean(R.bool.config_navBarTapThrough);
         mNavigationBarAlwaysShowOnSideGesture =
                 res.getBoolean(R.bool.config_navBarAlwaysShowOnSideEdgeGesture);
@@ -3951,6 +3968,10 @@ public class DisplayPolicy {
         }
 
         return false;
+    }
+
+    void release() {
+        mHandler.post(mGestureNavigationSettingsObserver::unregister);
     }
 
     @VisibleForTesting
