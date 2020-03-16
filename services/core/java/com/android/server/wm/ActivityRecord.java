@@ -5931,7 +5931,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (win == null) {
             return;
         }
-        final Rect frame = win.getFrameLw();
+        final Rect frame = win.getRelativeFrameLw();
         final int thumbnailDrawableRes = task.mUserId == mWmService.mCurrentUserId
                 ? R.drawable.ic_account_circle
                 : R.drawable.ic_corp_badge;
@@ -5941,12 +5941,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (thumbnail == null) {
             return;
         }
-        final Transaction transaction = getAnimatingContainer().getPendingTransaction();
+        final Transaction transaction = getPendingTransaction();
         mThumbnail = new WindowContainerThumbnail(mWmService.mSurfaceFactory,
-                transaction, getAnimatingContainer(), thumbnail);
+                transaction, getTask(), thumbnail);
         final Animation animation =
                 getDisplayContent().mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(
-                        win.getFrameLw());
+                        frame);
         mThumbnail.startAnimation(transaction, animation, new Point(frame.left, frame.top));
     }
 
