@@ -534,16 +534,31 @@ public final class DumpUtils {
         int procStateIndex = curState % STATE_COUNT;
 
         // Remap process state per array above.
-        procStateIndex = PROCESS_STATS_STATE_TO_AGGREGATED_STATE[procStateIndex];
+        try {
+            procStateIndex = PROCESS_STATS_STATE_TO_AGGREGATED_STATE[procStateIndex];
+        } catch (IndexOutOfBoundsException e) {
+            procStateIndex = ProcessStatsEnums.AGGREGATED_PROCESS_STATE_UNKNOWN;
+        }
 
         // Pack screen & process state using bit shifting
-        return (procStateIndex << 8) | screenStateIndex;
+        return (procStateIndex << 0xf) | screenStateIndex;
     }
 
     /** Print aggregated tags generated via {@code #aggregateCurrentProcessState}. */
     public static void printAggregatedProcStateTagProto(ProtoOutputStream proto, long screenId,
             long stateId, int state) {
-        proto.write(screenId, ADJ_SCREEN_PROTO_ENUMS[state >> 8]);
-        proto.write(stateId, STATE_PROTO_ENUMS[state]);
+        // screen state is in lowest 0xf bits, process state is in next 0xf bits up
+
+        try {
+            proto.write(stateId, STATE_PROTO_ENUMS[state >> 0xf]);
+        } catch (IndexOutOfBoundsException e) {
+            proto.write(stateId, ProcessStatsEnums.PROCESS_STATE_UNKNOWN);
+        }
+
+        try {
+            proto.write(screenId, ADJ_SCREEN_PROTO_ENUMS[state & 0xf]);
+        } catch (IndexOutOfBoundsException e) {
+            proto.write(screenId, ProcessStatsEnums.SCREEN_STATE_UNKNOWN);
+        }
     }
 }

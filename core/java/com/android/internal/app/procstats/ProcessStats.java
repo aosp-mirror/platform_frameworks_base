@@ -2178,29 +2178,7 @@ public final class ProcessStats implements Parcelable {
      * Writes to ProtoOutputStream.
      */
     public void dumpDebug(ProtoOutputStream proto, long now, int section) {
-        proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
-        proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
-                mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
-        proto.write(ProcessStatsSectionProto.START_UPTIME_MS, mTimePeriodStartUptime);
-        proto.write(ProcessStatsSectionProto.END_UPTIME_MS, mTimePeriodEndUptime);
-        proto.write(ProcessStatsSectionProto.RUNTIME, mRuntime);
-        proto.write(ProcessStatsSectionProto.HAS_SWAPPED_PSS, mHasSwappedOutPss);
-        boolean partial = true;
-        if ((mFlags & FLAG_SHUTDOWN) != 0) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SHUTDOWN);
-            partial = false;
-        }
-        if ((mFlags & FLAG_SYSPROPS) != 0) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SYSPROPS);
-            partial = false;
-        }
-        if ((mFlags & FLAG_COMPLETE) != 0) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_COMPLETE);
-            partial = false;
-        }
-        if (partial) {
-            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_PARTIAL);
-        }
+        dumpProtoPreamble(proto);
 
         final int NPAGETYPES = mPageTypeLabels.size();
         for (int i = 0; i < NPAGETYPES; i++) {
@@ -2244,6 +2222,49 @@ public final class ProcessStats implements Parcelable {
                     }
                 }
             }
+        }
+    }
+
+    /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
+    public void dumpAggregatedProtoForStatsd(ProtoOutputStream proto) {
+        dumpProtoPreamble(proto);
+        final ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+        for (int ip = 0; ip < procMap.size(); ip++) {
+            final String procName = procMap.keyAt(ip);
+            final SparseArray<ProcessState> uids = procMap.valueAt(ip);
+            for (int iu = 0; iu < uids.size(); iu++) {
+                final int uid = uids.keyAt(iu);
+                final ProcessState procState = uids.valueAt(iu);
+                procState.dumpAggregatedProtoForStatsd(proto,
+                        ProcessStatsSectionProto.PROCESS_STATS,
+                        procName, uid, mTimePeriodEndRealtime);
+            }
+        }
+    }
+
+    private void dumpProtoPreamble(ProtoOutputStream proto) {
+        proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
+        proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
+                mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
+        proto.write(ProcessStatsSectionProto.START_UPTIME_MS, mTimePeriodStartUptime);
+        proto.write(ProcessStatsSectionProto.END_UPTIME_MS, mTimePeriodEndUptime);
+        proto.write(ProcessStatsSectionProto.RUNTIME, mRuntime);
+        proto.write(ProcessStatsSectionProto.HAS_SWAPPED_PSS, mHasSwappedOutPss);
+        boolean partial = true;
+        if ((mFlags & FLAG_SHUTDOWN) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SHUTDOWN);
+            partial = false;
+        }
+        if ((mFlags & FLAG_SYSPROPS) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_SYSPROPS);
+            partial = false;
+        }
+        if ((mFlags & FLAG_COMPLETE) != 0) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_COMPLETE);
+            partial = false;
+        }
+        if (partial) {
+            proto.write(ProcessStatsSectionProto.STATUS, ProcessStatsSectionProto.STATUS_PARTIAL);
         }
     }
 
