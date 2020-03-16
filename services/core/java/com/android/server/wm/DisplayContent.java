@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -67,7 +68,6 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFI
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -757,11 +757,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (mTmpInitial) {
                 w.resetContentChanged();
             }
-            if (w.mAttrs.type == TYPE_DREAM) {
-                // Don't layout windows behind a dream, so that if it does stuff like hide
-                // the status bar we won't get a bad transition when it goes away.
-                mTmpWindow = w;
-            }
             w.mLayoutNeeded = false;
             w.prelayout();
             final boolean firstLayout = !w.isLaidOut();
@@ -815,10 +810,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                         + " mContainingFrame=" + w.getContainingFrame()
                         + " mDisplayFrame=" + w.getDisplayFrameLw());
             }
-        } else if (w.mAttrs.type == TYPE_DREAM) {
-            // Don't layout windows behind a dream, so that if it does stuff like hide the
-            // status bar we won't get a bad transition when it goes away.
-            mTmpWindow = mTmpWindow2;
         }
     };
 
@@ -902,17 +893,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // Take care of the window being ready to display.
             final boolean committed = winAnimator.commitFinishDrawingLocked();
             if (isDefaultDisplay && committed) {
-                if (w.mAttrs.type == TYPE_DREAM) {
-                    // HACK: When a dream is shown, it may at that point hide the lock screen.
-                    // So we need to redo the layout to let the phone window manager make this
-                    // happen.
-                    pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
-                    if (DEBUG_LAYOUT_REPEATS) {
-                        surfacePlacer.debugLayoutRepeats(
-                                "dream and commitFinishDrawingLocked true",
-                                pendingLayoutChanges);
-                    }
-                }
                 if ((w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0) {
                     if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
                             "First draw done in potential wallpaper target " + w);
@@ -3012,6 +2992,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_RECENTS);
         if (recentsStack != null) {
             pw.println(prefix + "recentsStack=" + recentsStack.getName());
+        }
+        final ActivityStack dreamStack =
+                getStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_DREAM);
+        if (dreamStack != null) {
+            pw.println(prefix + "dreamStack=" + dreamStack.getName());
         }
 
         pw.println();

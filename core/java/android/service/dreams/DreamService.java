@@ -15,8 +15,6 @@
  */
 package android.service.dreams;
 
-import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
-
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
 import android.annotation.NonNull;
@@ -1071,7 +1069,6 @@ public class DreamService extends Service implements Window.Callback {
     private void onWindowCreated(Window w) {
         mWindow = w;
         mWindow.setCallback(this);
-        mWindow.setType(TYPE_DREAM);
         mWindow.requestFeature(Window.FEATURE_NO_TITLE);
 
         WindowManager.LayoutParams lp = mWindow.getAttributes();
