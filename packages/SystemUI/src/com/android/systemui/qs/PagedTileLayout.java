@@ -142,6 +142,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     @Override
     public void computeScroll() {
         if (!mScroller.isFinished() && mScroller.computeScrollOffset()) {
+            if (!isFakeDragging()) {
+                beginFakeDrag();
+            }
             fakeDragBy(getScrollX() - mScroller.getCurrX());
             // Keep on drawing until the animation has finished.
             postInvalidateOnAnimation();
