@@ -90,7 +90,7 @@ public class SurfaceViewRequestReceiver {
             view.setTranslationX((surfaceControl.getWidth() - scale * viewSize.getWidth()) / 2);
             view.setTranslationY((surfaceControl.getHeight() - scale * viewSize.getHeight()) / 2);
 
-            mSurfaceControlViewHost.addView(view, layoutParams);
+            mSurfaceControlViewHost.setView(view, layoutParams);
         }
     }
 }
