@@ -91,7 +91,6 @@ public class LocalMediaManagerTest {
 
         mLocalMediaManager = new LocalMediaManager(mContext, mLocalBluetoothManager,
                 mInfoMediaManager, "com.test.packagename");
-        mLocalMediaManager.mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
     @Test
