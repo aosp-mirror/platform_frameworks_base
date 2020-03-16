@@ -55,6 +55,7 @@ public class RankingBuilder {
     private boolean mIsVisuallyInterruptive = false;
     private boolean mIsConversation = false;
     private ShortcutInfo mShortcutInfo = null;
+    private boolean mIsBubble = false;
 
     public RankingBuilder() {
     }
@@ -82,6 +83,7 @@ public class RankingBuilder {
         mIsVisuallyInterruptive = ranking.visuallyInterruptive();
         mIsConversation = ranking.isConversation();
         mShortcutInfo = ranking.getShortcutInfo();
+        mIsBubble = ranking.isBubble();
     }
 
     public Ranking build() {
@@ -108,7 +110,8 @@ public class RankingBuilder {
                 mCanBubble,
                 mIsVisuallyInterruptive,
                 mIsConversation,
-                mShortcutInfo);
+                mShortcutInfo,
+                mIsBubble);
         return ranking;
     }
 

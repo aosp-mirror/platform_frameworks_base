@@ -21,6 +21,7 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -46,6 +47,7 @@ import org.mockito.MockitoAnnotations;
 public class BubbleExtractorTest extends UiServiceTestCase {
 
     @Mock RankingConfig mConfig;
+    BubbleExtractor mBubbleExtractor;
 
     private String mPkg = "com.android.server.notification";
     private int mId = 1001;
@@ -57,6 +59,10 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mBubbleExtractor = new BubbleExtractor();
+        mBubbleExtractor.initialize(mContext, mock(NotificationUsageStats.class));
+        mBubbleExtractor.setConfig(mConfig);
+        mBubbleExtractor.setShortcutHelper(mock(ShortcutHelper.class));
     }
 
     private NotificationRecord getNotificationRecord(boolean allow, int importanceHigh) {
@@ -83,70 +89,55 @@ public class BubbleExtractorTest extends UiServiceTestCase {
 
     @Test
     public void testAppYesChannelNo() {
-        BubbleExtractor extractor = new BubbleExtractor();
-        extractor.setConfig(mConfig);
-
         when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
         NotificationRecord r = getNotificationRecord(false, IMPORTANCE_UNSPECIFIED);
 
-        extractor.process(r);
+        mBubbleExtractor.process(r);
 
         assertFalse(r.canBubble());
     }
 
     @Test
     public void testAppNoChannelYes() throws Exception {
-        BubbleExtractor extractor = new BubbleExtractor();
-        extractor.setConfig(mConfig);
-
         when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(false);
         NotificationRecord r = getNotificationRecord(true, IMPORTANCE_HIGH);
 
-        extractor.process(r);
+        mBubbleExtractor.process(r);
 
         assertFalse(r.canBubble());
     }
 
     @Test
     public void testAppYesChannelYes() {
-        BubbleExtractor extractor = new BubbleExtractor();
-        extractor.setConfig(mConfig);
-
         when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
         NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
 
-        extractor.process(r);
+        mBubbleExtractor.process(r);
 
         assertTrue(r.canBubble());
     }
 
     @Test
     public void testAppNoChannelNo() {
-        BubbleExtractor extractor = new BubbleExtractor();
-        extractor.setConfig(mConfig);
-
         when(mConfig.bubblesEnabled()).thenReturn(true);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(false);
         NotificationRecord r = getNotificationRecord(false, IMPORTANCE_UNSPECIFIED);
 
-        extractor.process(r);
+        mBubbleExtractor.process(r);
 
         assertFalse(r.canBubble());
     }
 
     @Test
     public void testAppYesChannelYesUserNo() {
-        BubbleExtractor extractor = new BubbleExtractor();
-        extractor.setConfig(mConfig);
-
         when(mConfig.bubblesEnabled()).thenReturn(false);
         when(mConfig.areBubblesAllowed(mPkg, mUid)).thenReturn(true);
         NotificationRecord r = getNotificationRecord(true, IMPORTANCE_HIGH);
 
-        extractor.process(r);
+        mBubbleExtractor.process(r);
 
         assertFalse(r.canBubble());
     }
