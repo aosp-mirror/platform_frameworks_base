@@ -35,7 +35,6 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.PendingIntent;
-import android.app.Person;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -191,7 +190,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 tweak.canBubble(),
                 tweak.visuallyInterruptive(),
                 tweak.isConversation(),
-                tweak.getShortcutInfo()
+                tweak.getShortcutInfo(),
+                tweak.isBubble()
         );
         assertNotEquals(nru, nru2);
     }
@@ -270,7 +270,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                     canBubble(i),
                     visuallyInterruptive(i),
                     isConversation(i),
-                    getShortcutInfo(i)
+                    getShortcutInfo(i),
+                    isBubble(i)
             );
             rankings[i] = ranking;
         }
@@ -392,6 +393,10 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 0, "iconResName", "bitmapPath", 0,
                 null, null);
         return si;
+    }
+
+    private boolean isBubble(int index) {
+        return index % 4 == 0;
     }
 
     private void assertActionsEqual(
