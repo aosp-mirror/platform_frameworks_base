@@ -9401,32 +9401,6 @@ package android.provider {
     method @RequiresPermission(android.Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE) public static boolean putString(@NonNull android.content.ContentResolver, @NonNull String, @Nullable String, boolean);
   }
 
-  public static interface Telephony.CarrierColumns extends android.provider.BaseColumns {
-    field @NonNull public static final android.net.Uri CONTENT_URI;
-    field public static final String EXPIRATION_TIME = "expiration_time";
-    field public static final String KEY_IDENTIFIER = "key_identifier";
-    field public static final String KEY_TYPE = "key_type";
-    field public static final String LAST_MODIFIED = "last_modified";
-    field public static final String MCC = "mcc";
-    field public static final String MNC = "mnc";
-    field public static final String MVNO_MATCH_DATA = "mvno_match_data";
-    field public static final String MVNO_TYPE = "mvno_type";
-    field public static final String PUBLIC_KEY = "public_key";
-  }
-
-  public static final class Telephony.CarrierId.All implements android.provider.BaseColumns {
-    field public static final String APN = "apn";
-    field @NonNull public static final android.net.Uri CONTENT_URI;
-    field public static final String GID1 = "gid1";
-    field public static final String GID2 = "gid2";
-    field public static final String ICCID_PREFIX = "iccid_prefix";
-    field public static final String IMSI_PREFIX_XPATTERN = "imsi_prefix_xpattern";
-    field public static final String MCCMNC = "mccmnc";
-    field public static final String PLMN = "plmn";
-    field public static final String PRIVILEGE_ACCESS_RULE = "privilege_access_rule";
-    field public static final String SPN = "spn";
-  }
-
   public static final class Telephony.Carriers implements android.provider.BaseColumns {
     field public static final String APN_SET_ID = "apn_set_id";
     field public static final int CARRIER_EDITED = 4; // 0x4
