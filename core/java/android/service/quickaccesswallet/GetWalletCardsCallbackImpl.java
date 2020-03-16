@@ -24,8 +24,6 @@ import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.util.List;
-
 /**
  * Handles response from the {@link QuickAccessWalletService} for {@link GetWalletCardsRequest}
  *
@@ -56,7 +54,6 @@ final class GetWalletCardsCallbackImpl implements GetWalletCardsCallback {
      *                 presented as the selected card.
      */
     public void onSuccess(@NonNull GetWalletCardsResponse response) {
-        Log.i(TAG, "onSuccess");
         if (isValidResponse(response)) {
             mHandler.post(() -> onSuccessInternal(response));
         } else {
@@ -78,7 +75,6 @@ final class GetWalletCardsCallbackImpl implements GetWalletCardsCallback {
     }
 
     private void onSuccessInternal(GetWalletCardsResponse response) {
-        Log.i(TAG, "onSuccessInternal");
         if (mCalled) {
             Log.w(TAG, "already called");
             return;
@@ -86,7 +82,6 @@ final class GetWalletCardsCallbackImpl implements GetWalletCardsCallback {
         mCalled = true;
         try {
             mCallback.onGetWalletCardsSuccess(response);
-            Log.i(TAG, "onSuccessInternal: returned response");
         } catch (RemoteException e) {
             Log.w(TAG, "Error returning wallet cards", e);
         }
@@ -106,29 +101,53 @@ final class GetWalletCardsCallbackImpl implements GetWalletCardsCallback {
     }
 
     private boolean isValidResponse(@NonNull GetWalletCardsResponse response) {
-        return response != null
-                && response.getWalletCards() != null
-                && response.getSelectedIndex() >= 0
-                && (response.getWalletCards().isEmpty() // selectedIndex may be 0 when list is empty
-                || response.getSelectedIndex() < response.getWalletCards().size())
-                && response.getWalletCards().size() < mRequest.getMaxCards()
-                && areValidCards(response.getWalletCards());
-    }
-
-    private boolean areValidCards(List<WalletCard> walletCards) {
-        for (WalletCard walletCard : walletCards) {
-            if (walletCard == null
-                    || walletCard.getCardId() == null
-                    || walletCard.getCardImage() == null
-                    || TextUtils.isEmpty(walletCard.getContentDescription())
-                    || walletCard.getPendingIntent() == null) {
+        if (response == null) {
+            Log.w(TAG, "Invalid response: response is null");
+            return false;
+        }
+        if (response.getWalletCards() == null) {
+            Log.w(TAG, "Invalid response: walletCards is null");
+            return false;
+        }
+        if (response.getSelectedIndex() < 0) {
+            Log.w(TAG, "Invalid response: selectedIndex is negative");
+            return false;
+        }
+        if (!response.getWalletCards().isEmpty()
+                && response.getSelectedIndex() >= response.getWalletCards().size()) {
+            Log.w(TAG, "Invalid response: selectedIndex out of bounds");
+            return false;
+        }
+        if (response.getWalletCards().size() > mRequest.getMaxCards()) {
+            Log.w(TAG, "Invalid response: too many cards");
+            return false;
+        }
+        for (WalletCard walletCard : response.getWalletCards()) {
+            if (walletCard == null) {
+                Log.w(TAG, "Invalid response: card is null");
+                return false;
+            }
+            if (walletCard.getCardId() == null) {
+                Log.w(TAG, "Invalid response: cardId is null");
                 return false;
             }
             Icon cardImage = walletCard.getCardImage();
+            if (cardImage == null) {
+                Log.w(TAG, "Invalid response: cardImage is null");
+                return false;
+            }
             if (cardImage.getType() == Icon.TYPE_BITMAP
-                    && walletCard.getCardImage().getBitmap().getConfig()
-                    != Bitmap.Config.HARDWARE) {
-                Log.w(TAG, "WalletCard bitmaps should be hardware bitmaps");
+                    && cardImage.getBitmap().getConfig() != Bitmap.Config.HARDWARE) {
+                Log.w(TAG, "Invalid response: cardImage bitmaps must be hardware bitmaps");
+                return false;
+            }
+            if (TextUtils.isEmpty(walletCard.getContentDescription())) {
+                Log.w(TAG, "Invalid response: contentDescription is null");
+                return false;
+            }
+            if (walletCard.getPendingIntent() == null) {
+                Log.w(TAG, "Invalid response: pendingIntent is null");
+                return false;
             }
         }
         return true;
