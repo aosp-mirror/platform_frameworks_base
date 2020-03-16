@@ -100,6 +100,9 @@ class WindowToken extends WindowContainer<WindowState> {
     private Configuration mLastReportedConfig;
     private int mLastReportedDisplay = INVALID_DISPLAY;
 
+    /**
+     * When set to {@code true}, this window token is created from {@link android.app.WindowContext}
+     */
     @VisibleForTesting
     final boolean mFromClientToken;
 
@@ -278,11 +281,23 @@ class WindowToken extends WindowContainer<WindowState> {
             // Child windows are added to their parent windows.
             return;
         }
+        // This token is created from WindowContext and the client requests to addView now, create a
+        // surface for this token.
+        if (mSurfaceControl == null) {
+            createSurfaceControl(true /* force */);
+        }
         if (!mChildren.contains(win)) {
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", win, this);
             addChild(win, mWindowComparator);
             mWmService.mWindowsChanged = true;
             // TODO: Should we also be setting layout needed here and other places?
+        }
+    }
+
+    @Override
+    void createSurfaceControl(boolean force) {
+        if (!mFromClientToken || force) {
+            super.createSurfaceControl(force);
         }
     }
 
