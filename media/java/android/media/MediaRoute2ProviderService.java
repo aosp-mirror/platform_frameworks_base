@@ -466,10 +466,6 @@ public abstract class MediaRoute2ProviderService extends Service {
             return;
         }
 
-        List<RoutingSessionInfo> sessionInfos;
-        synchronized (mSessionLock) {
-            sessionInfos = new ArrayList<>(mSessionInfo.values());
-        }
         try {
             mRemoteCallback.updateState(mProviderInfo);
         } catch (RemoteException ex) {
