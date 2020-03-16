@@ -99,6 +99,7 @@ import android.provider.DeviceConfig;
 import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -136,8 +137,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Activity manager code dealing with processes.
@@ -154,7 +158,8 @@ public final class ProcessList {
             "persist.sys.vold_app_data_isolation_enabled";
 
     // A device config to control the minimum target SDK to enable app data isolation
-    static final String ANDROID_APP_DATA_ISOLATION_MIN_SDK = "android_app_data_isolation_min_sdk";
+    static final String ANDROID_APP_DATA_ISOLATION_MIN_SDK =
+            "android_app_data_isolation_min_sdk";
 
     // The minimum time we allow between crashes, for us to consider this
     // application to be bad and stop and its services and reject broadcasts.
@@ -796,6 +801,31 @@ public final class ProcessList {
                 updateOomLevels(p.x, p.y, true);
                 mHaveDisplaySize = true;
             }
+        }
+    }
+
+    /**
+     * Get a map of pid and package name that process of that pid Android/data and Android/obb
+     * directory is not mounted to lowerfs to speed up access.
+     */
+    Map<Integer, String> getProcessesWithPendingBindMounts(int userId) {
+        final Map<Integer, String> pidPackageMap = new HashMap<>();
+        synchronized (mService) {
+            for (int i = mLruProcesses.size() - 1; i >= 0; i--) {
+                final ProcessRecord record = mLruProcesses.get(i);
+                if (record.userId != userId || !record.bindMountPending) {
+                    continue;
+                }
+                final int pid = record.pid;
+                // It can happen when app process is starting, but zygote work is not done yet so
+                // system does not this pid record yet.
+                if (pid == 0) {
+                    throw new IllegalStateException("Pending process is not started yet,"
+                            + "retry later");
+                }
+                pidPackageMap.put(pid, record.info.packageName);
+            }
+            return pidPackageMap;
         }
     }
 
@@ -1680,6 +1710,7 @@ public final class ProcessList {
         if (app.pid > 0 && app.pid != ActivityManagerService.MY_PID) {
             checkSlow(startTime, "startProcess: removing from pids map");
             mService.removePidLocked(app);
+            app.bindMountPending = false;
             mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             checkSlow(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
@@ -2162,8 +2193,10 @@ public final class ProcessList {
             }
 
             final Map<String, Pair<String, Long>> pkgDataInfoMap;
+            boolean bindMountAppStorageDirs = false;
 
             if (shouldIsolateAppData(app)) {
+                bindMountAppStorageDirs = mVoldAppDataIsolationEnabled;
                 // Get all packages belongs to the same shared uid. sharedPackages is empty array
                 // if it doesn't have shared uid.
                 final PackageManagerInternal pmInt = mService.getPackageManagerInternalLocked();
@@ -2172,11 +2205,17 @@ public final class ProcessList {
                 pkgDataInfoMap = getPackageAppDataInfoMap(pmInt, sharedPackages.length == 0
                         ? new String[]{app.info.packageName} : sharedPackages, uid);
 
+                int userId = UserHandle.getUserId(uid);
                 if (mVoldAppDataIsolationEnabled) {
                     StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                                StorageManagerInternal.class);
-                    storageManagerInternal.prepareObbDirs(UserHandle.getUserId(uid),
-                            pkgDataInfoMap.keySet(), app.processName);
+                            StorageManagerInternal.class);
+                    if (!storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
+                            app.processName)) {
+                        // Cannot prepare Android/app and Android/obb directory,
+                        // so we won't mount it in zygote.
+                        app.bindMountPending = true;
+                        bindMountAppStorageDirs = false;
+                    }
                 }
             } else {
                 pkgDataInfoMap = null;
@@ -2197,7 +2236,7 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, isTopApp,
-                        app.mDisabledCompatChanges, pkgDataInfoMap,
+                        app.mDisabledCompatChanges, pkgDataInfoMap, bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
@@ -2205,6 +2244,7 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName, zygotePolicyFlags,
                         isTopApp, app.mDisabledCompatChanges, pkgDataInfoMap,
+                        bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
@@ -2663,6 +2703,7 @@ public final class ProcessList {
             int pid = app.pid;
             if (pid > 0) {
                 mService.removePidLocked(app);
+                app.bindMountPending = false;
                 mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
                 mService.mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                 if (app.isolated) {
