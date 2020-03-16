@@ -471,7 +471,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   bool resources_asset_exists = false;
   auto resources_asset_ = assets->Open(kResourcesArsc, Asset::AccessMode::ACCESS_BUFFER,
                                        &resources_asset_exists);
-  
+
   assets = MultiAssetsProvider::Create(std::move(override_assets), std::move(assets));
 
   // Wrap the handle in a unique_ptr so it gets automatically closed.

@@ -66,6 +66,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -244,7 +245,36 @@ public class Resources {
          * @param resources the instance being updated
          * @param newLoaders the new set of loaders for the instance
          */
-        void onLoadersChanged(Resources resources, List<ResourcesLoader> newLoaders);
+        void onLoadersChanged(@NonNull Resources resources,
+                @NonNull List<ResourcesLoader> newLoaders);
+    }
+
+    /**
+     * Handler that propagates updates of the {@link Resources} instance to the underlying
+     * {@link AssetManager} when the Resources is not registered with a
+     * {@link android.app.ResourcesManager}.
+     * @hide
+     */
+    public class AssetManagerUpdateHandler implements UpdateCallbacks{
+
+        @Override
+        public void onLoadersChanged(@NonNull Resources resources,
+                @NonNull List<ResourcesLoader> newLoaders) {
+            Preconditions.checkArgument(Resources.this == resources);
+            final ResourcesImpl impl = mResourcesImpl;
+            impl.clearAllCaches();
+            impl.getAssets().setLoaders(newLoaders);
+        }
+
+        @Override
+        public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
+            final ResourcesImpl impl = mResourcesImpl;
+            final AssetManager assets = impl.getAssets();
+            if (assets.getLoaders().contains(loader)) {
+                impl.clearAllCaches();
+                assets.setLoaders(assets.getLoaders());
+            }
+        }
     }
 
     /**
@@ -2367,8 +2397,9 @@ public class Resources {
 
     private void checkCallbacksRegistered() {
         if (mCallbacks == null) {
-            throw new IllegalArgumentException("Cannot modify resource loaders of Resources"
-                    + " instances created outside of ResourcesManager");
+            // Fallback to updating the underlying AssetManager if the Resources is not associated
+            // with a ResourcesManager.
+            mCallbacks = new AssetManagerUpdateHandler();
         }
     }
 

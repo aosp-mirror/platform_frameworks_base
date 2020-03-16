@@ -50,8 +50,7 @@ TEST(ApkAssetsTest, LoadApkFromFd) {
   unique_fd fd(::open(path.c_str(), O_RDONLY | O_BINARY));
   ASSERT_THAT(fd.get(), Ge(0));
 
-  std::unique_ptr<const ApkAssets> loaded_apk =
-      ApkAssets::LoadFromFd(std::move(fd), path, false /*system*/, false /*force_shared_lib*/);
+  std::unique_ptr<const ApkAssets> loaded_apk = ApkAssets::LoadFromFd(std::move(fd), path);
   ASSERT_THAT(loaded_apk, NotNull());
 
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();

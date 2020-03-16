@@ -68,8 +68,7 @@ abstract class ResourceLoaderTestBase {
     open lateinit var dataType: DataType
 
     protected lateinit var context: Context
-    protected open val resources: Resources
-        get() = context.resources
+    protected lateinit var resources: Resources
 
     // Track opened streams and ResourcesProviders to close them after testing
     private val openedObjects = mutableListOf<Closeable>()
@@ -78,6 +77,7 @@ abstract class ResourceLoaderTestBase {
     fun setUpBase() {
         context = InstrumentationRegistry.getTargetContext()
                 .createConfigurationContext(Configuration())
+        resources = context.resources
     }
 
     @After
@@ -92,42 +92,42 @@ abstract class ResourceLoaderTestBase {
         }
     }
 
-    protected fun String.openProvider(dataType: DataType, assetsProvider: MemoryAssetsProvider?)
-            :ResourcesProvider {
+    protected fun String.openProvider(dataType: DataType,
+                                      assetsProvider: MemoryAssetsProvider?): ResourcesProvider {
         if (assetsProvider != null) {
             openedObjects += assetsProvider
         }
         return when (dataType) {
             DataType.APK_DISK_FD -> {
-                val file = context.copiedAssetFile("${this}.apk")
+                val file = context.copiedAssetFile("$this.apk")
                 ResourcesProvider.loadFromApk(ParcelFileDescriptor.fromFd(file.fd),
                         assetsProvider).apply {
                     file.close()
                 }
             }
             DataType.APK_DISK_FD_OFFSETS -> {
-                val asset = context.assets.openFd("${this}.apk")
+                val asset = context.assets.openFd("$this.apk")
                 ResourcesProvider.loadFromApk(asset.parcelFileDescriptor, asset.startOffset,
                         asset.length, assetsProvider).apply {
                     asset.close()
                 }
             }
             DataType.ARSC_DISK_FD -> {
-                val file = context.copiedAssetFile("${this}.arsc")
+                val file = context.copiedAssetFile("$this.arsc")
                 ResourcesProvider.loadFromTable(ParcelFileDescriptor.fromFd(file.fd),
                         assetsProvider).apply {
                     file.close()
                 }
             }
             DataType.ARSC_DISK_FD_OFFSETS -> {
-                val asset = context.assets.openFd("${this}.arsc")
+                val asset = context.assets.openFd("$this.arsc")
                 ResourcesProvider.loadFromTable(asset.parcelFileDescriptor, asset.startOffset,
                         asset.length, assetsProvider).apply {
                     asset.close()
                 }
             }
             DataType.APK_RAM_OFFSETS -> {
-                val asset = context.assets.openFd("${this}.apk")
+                val asset = context.assets.openFd("$this.apk")
                 val leadingGarbageSize = 100L
                 val trailingGarbageSize = 55L
                 val fd = loadAssetIntoMemory(asset, leadingGarbageSize.toInt(),
@@ -139,7 +139,7 @@ abstract class ResourceLoaderTestBase {
                 }
             }
             DataType.APK_RAM_FD -> {
-                val asset = context.assets.openFd("${this}.apk")
+                val asset = context.assets.openFd("$this.apk")
                 var fd = loadAssetIntoMemory(asset)
                 ResourcesProvider.loadFromApk(fd, assetsProvider).apply {
                     asset.close()
@@ -147,7 +147,7 @@ abstract class ResourceLoaderTestBase {
                 }
             }
             DataType.ARSC_RAM_MEMORY -> {
-                val asset = context.assets.openFd("${this}.arsc")
+                val asset = context.assets.openFd("$this.arsc")
                 var fd = loadAssetIntoMemory(asset)
                 ResourcesProvider.loadFromTable(fd, assetsProvider).apply {
                     asset.close()
@@ -155,7 +155,7 @@ abstract class ResourceLoaderTestBase {
                 }
             }
             DataType.ARSC_RAM_MEMORY_OFFSETS -> {
-                val asset = context.assets.openFd("${this}.arsc")
+                val asset = context.assets.openFd("$this.arsc")
                 val leadingGarbageSize = 100L
                 val trailingGarbageSize = 55L
                 val fd = loadAssetIntoMemory(asset, leadingGarbageSize.toInt(),
@@ -175,7 +175,7 @@ abstract class ResourceLoaderTestBase {
                 }
             }
             DataType.DIRECTORY -> {
-                ResourcesProvider.loadFromDirectory(zipToDir("${this}.apk").absolutePath,
+                ResourcesProvider.loadFromDirectory(zipToDir("$this.apk").absolutePath,
                         assetsProvider)
             }
             DataType.SPLIT -> {
@@ -186,9 +186,9 @@ abstract class ResourceLoaderTestBase {
 
     class EmptyAssetsProvider : AssetsProvider
 
-    /** */
-    inner class ZipAssetsProvider(val providerName : String) : AssetsProvider {
-        val root: File = zipToDir("${providerName}.apk")
+    /** An AssetsProvider that reads from a zip asset. */
+    inner class ZipAssetsProvider(val providerName: String) : AssetsProvider {
+        val root: File = zipToDir("$providerName.apk")
 
         override fun loadAssetFd(path: String, accessMode: Int): AssetFileDescriptor? {
             val f = File(root, path)
@@ -203,7 +203,7 @@ abstract class ResourceLoaderTestBase {
     class MemoryAssetsProvider : AssetsProvider, Closeable {
         var loadAssetResults = HashMap<String, FileDescriptor>()
 
-        fun addLoadAssetFdResult(path : String, value : String) = apply {
+        fun addLoadAssetFdResult(path: String, value: String) = apply {
             val fd = Os.memfd_create(path, 0)
             val valueBytes = value.toByteArray()
             Os.write(fd, valueBytes, 0, valueBytes.size)
@@ -224,7 +224,7 @@ abstract class ResourceLoaderTestBase {
     }
 
     /** Extracts an archive-based asset into a directory on disk. */
-    private fun zipToDir(name : String) : File {
+    private fun zipToDir(name: String): File {
         val root = File(context.filesDir, name.split('.')[0])
         if (root.exists()) {
             return root
@@ -252,13 +252,13 @@ abstract class ResourceLoaderTestBase {
         return root
     }
 
-
     /** Loads the asset into a temporary file stored in RAM. */
-    private fun loadAssetIntoMemory(asset: AssetFileDescriptor,
-                                    leadingGarbageSize: Int = 0,
-                                    trailingGarbageSize: Int = 0
+    private fun loadAssetIntoMemory(
+        asset: AssetFileDescriptor,
+        leadingGarbageSize: Int = 0,
+        trailingGarbageSize: Int = 0
     ): ParcelFileDescriptor {
-        val originalFd = Os.memfd_create(asset.toString(), 0 /* flags */);
+        val originalFd = Os.memfd_create(asset.toString(), 0 /* flags */)
         val fd = ParcelFileDescriptor.dup(originalFd)
         Os.close(originalFd)
 

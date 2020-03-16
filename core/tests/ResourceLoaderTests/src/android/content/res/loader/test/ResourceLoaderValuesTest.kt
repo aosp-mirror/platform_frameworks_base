@@ -19,6 +19,7 @@ package android.content.res.loader.test
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.AssetManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.content.res.loader.ResourcesLoader
@@ -63,22 +64,40 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
                             },
                             "getAdditional" to { res ->
                                 res.getString(0x7f0400fe /* R.string.additional */)
+                            },
+                            "getIdentifier" to { res ->
+                                res.getString(res.getIdentifier("test", "string",
+                                        "android.content.res.loader.test"))
+                            },
+                            "getIdentifierAdditional" to { res ->
+                                res.getString(res.getIdentifier("additional", "string",
+                                        "android.content.res.loader.test"))
                             }
                     )),
                     mapOf("getOverlaid" to "Not overlaid",
-                            "getAdditional" to "NotFoundException"),
+                            "getAdditional" to "NotFoundException",
+                            "getIdentifier" to "Not overlaid",
+                            "getIdentifierAdditional" to "NotFoundException"),
 
                     mapOf("getOverlaid" to "One",
-                            "getAdditional" to "One"),
+                            "getAdditional" to "One",
+                            "getIdentifier" to "One",
+                            "getIdentifierAdditional" to "One"),
 
                     mapOf("getOverlaid" to "Two",
-                            "getAdditional" to "Two"),
+                            "getAdditional" to "Two",
+                            "getIdentifier" to "Two",
+                            "getIdentifierAdditional" to "Two"),
 
                     mapOf("getOverlaid" to "Three",
-                            "getAdditional" to "Three"),
+                            "getAdditional" to "Three",
+                            "getIdentifier" to "Three",
+                            "getIdentifierAdditional" to "Three"),
 
                     mapOf("getOverlaid" to "Four",
-                            "getAdditional" to "Four"),
+                            "getAdditional" to "Four",
+                            "getIdentifier" to "Four",
+                            "getIdentifierAdditional" to "Four"),
                     listOf(DataType.APK_DISK_FD, DataType.APK_DISK_FD_OFFSETS, DataType.APK_RAM_FD,
                             DataType.APK_RAM_OFFSETS, DataType.ARSC_DISK_FD,
                             DataType.ARSC_DISK_FD_OFFSETS, DataType.ARSC_RAM_MEMORY,
@@ -224,7 +243,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
     lateinit var parameter: Parameter
 
     private val valueOriginal by lazy { mapToString(parameter.valueOriginal) }
-    private val valueOne by lazy {  mapToString(parameter.valueOne) }
+    private val valueOne by lazy { mapToString(parameter.valueOne) }
     private val valueTwo by lazy { mapToString(parameter.valueTwo) }
     private val valueThree by lazy { mapToString(parameter.valueThree) }
     private val valueFour by lazy { mapToString(parameter.valueFour) }
@@ -241,6 +260,7 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
 
     // Class method for syntax highlighting purposes
     private fun getValue(c: Context = context) = parameter.getValue(c.resources)
+    private fun getValue(r: Resources) = parameter.getValue(r)
 
     @Test
     fun assertValueUniqueness() {
@@ -713,28 +733,79 @@ class ResourceLoaderValuesTest : ResourceLoaderTestBase() {
         provider.close()
     }
 
+    @Test
+    fun addLoadersRepeatedlyCustomResources() {
+        val res = Resources(AssetManager::class.java.newInstance(), resources.displayMetrics,
+                resources.configuration!!)
+        val originalValue = getValue(res)
+        val testOne = openOne()
+        val testTwo = openTwo()
+        val loader1 = ResourcesLoader()
+        val loader2 = ResourcesLoader()
+
+        res.addLoaders(loader1)
+        loader1.addProvider(testOne)
+        assertEquals(valueOne, getValue(res))
+
+        res.addLoaders(loader2)
+        loader2.addProvider(testTwo)
+        assertEquals(valueTwo, getValue(res))
+
+        res.removeLoaders(loader1)
+        res.addLoaders(loader1)
+        assertEquals(valueOne, getValue(res))
+
+        res.removeLoaders(loader1)
+        assertEquals(valueTwo, getValue(res))
+
+        res.removeLoaders(loader2)
+        assertEquals(originalValue, getValue(res))
+    }
+
+    @Test
+    fun setMultipleProvidersCustomResources() {
+        val res = Resources(AssetManager::class.java.newInstance(), resources.displayMetrics,
+                resources.configuration!!)
+        val originalValue = getValue(res)
+        val testOne = openOne()
+        val testTwo = openTwo()
+        val loader = ResourcesLoader()
+
+        res.addLoaders(loader)
+        loader.providers = listOf(testOne, testTwo)
+        assertEquals(valueTwo, getValue(res))
+
+        loader.removeProvider(testTwo)
+        assertEquals(valueOne, getValue(res))
+
+        loader.providers = Collections.emptyList()
+        assertEquals(originalValue, getValue(res))
+    }
+
     data class Parameter(
-            val testPrefix: String,
-            val getValue: Resources.() -> String,
-            val valueOriginal: Map<String, String>,
-            val valueOne: Map<String, String>,
-            val assetProviderOne: (() -> MemoryAssetsProvider)? = null,
-            val valueTwo: Map<String, String>,
-            val assetProviderTwo: (() -> MemoryAssetsProvider)? = null,
-            val valueThree: Map<String, String>,
-            val assetProviderThree: (() -> MemoryAssetsProvider)? = null,
-            val valueFour: Map<String, String>,
-            val assetProviderFour: (() -> MemoryAssetsProvider)? = null,
-            val dataTypes: List<DataType>
+        val testPrefix: String,
+        val getValue: Resources.() -> String,
+        val valueOriginal: Map<String, String>,
+        val valueOne: Map<String, String>,
+        val assetProviderOne: (() -> MemoryAssetsProvider)? = null,
+        val valueTwo: Map<String, String>,
+        val assetProviderTwo: (() -> MemoryAssetsProvider)? = null,
+        val valueThree: Map<String, String>,
+        val assetProviderThree: (() -> MemoryAssetsProvider)? = null,
+        val valueFour: Map<String, String>,
+        val assetProviderFour: (() -> MemoryAssetsProvider)? = null,
+        val dataTypes: List<DataType>
     ) {
-        constructor(testPrefix: String,
-                    getValue: Resources.() -> String,
-                    valueOriginal : Map<String, String>,
-                    valueOne: Map<String, String>,
-                    valueTwo: Map<String, String>,
-                    valueThree: Map<String, String>,
-                    valueFour: Map<String, String>,
-                    dataTypes: List<DataType>): this(testPrefix, getValue, valueOriginal, valueOne,
+        constructor(
+            testPrefix: String,
+            getValue: Resources.() -> String,
+            valueOriginal: Map<String, String>,
+            valueOne: Map<String, String>,
+            valueTwo: Map<String, String>,
+            valueThree: Map<String, String>,
+            valueFour: Map<String, String>,
+            dataTypes: List<DataType>
+        ): this(testPrefix, getValue, valueOriginal, valueOne,
                 null, valueTwo, null, valueThree, null, valueFour, null, dataTypes)
 
         override fun toString() = testPrefix

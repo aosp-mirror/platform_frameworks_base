@@ -1288,7 +1288,8 @@ public class ResourcesManager {
          * instance uses.
          */
         @Override
-        public void onLoadersChanged(Resources resources, List<ResourcesLoader> newLoader) {
+        public void onLoadersChanged(@NonNull Resources resources,
+                @NonNull List<ResourcesLoader> newLoader) {
             synchronized (ResourcesManager.this) {
                 final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
                 if (oldKey == null) {
@@ -1316,7 +1317,7 @@ public class ResourcesManager {
          * {@code loader} to apply any changes of the set of {@link ApkAssets}.
          **/
         @Override
-        public void onLoaderUpdated(ResourcesLoader loader) {
+        public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
             synchronized (ResourcesManager.this) {
                 final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceImplKeys =
                         new ArrayMap<>();

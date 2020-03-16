@@ -148,12 +148,9 @@ public final class AssetManager implements AutoCloseable {
                 final List<ApkAssets> currentLoaderApkAssets = mLoaders.get(i).getApkAssets();
                 for (int j = currentLoaderApkAssets.size() - 1; j >= 0; j--) {
                     final ApkAssets apkAssets = currentLoaderApkAssets.get(j);
-                    if (uniqueLoaderApkAssets.contains(apkAssets)) {
-                        continue;
+                    if (uniqueLoaderApkAssets.add(apkAssets)) {
+                        loaderApkAssets.add(0, apkAssets);
                     }
-
-                    uniqueLoaderApkAssets.add(apkAssets);
-                    loaderApkAssets.add(0, apkAssets);
                 }
             }
 
@@ -326,6 +323,42 @@ public final class AssetManager implements AutoCloseable {
                 invalidateCachesLocked(-1);
             }
         }
+    }
+
+    /**
+     * Changes the {@link ResourcesLoader ResourcesLoaders} used in this AssetManager.
+     * @hide
+     */
+    void setLoaders(@NonNull List<ResourcesLoader> newLoaders) {
+        Objects.requireNonNull(newLoaders, "newLoaders");
+
+        final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
+        for (int i = 0; i < mApkAssets.length; i++) {
+            // Filter out the previous loader apk assets.
+            if (!mApkAssets[i].isForLoader()) {
+                apkAssets.add(mApkAssets[i]);
+            }
+        }
+
+        if (!newLoaders.isEmpty()) {
+            // Filter so that assets provided by multiple loaders are only included once
+            // in the final assets list. The last appearance of the ApkAssets dictates its load
+            // order.
+            final int loaderStartIndex = apkAssets.size();
+            final ArraySet<ApkAssets> uniqueLoaderApkAssets = new ArraySet<>();
+            for (int i = newLoaders.size() - 1; i >= 0; i--) {
+                final List<ApkAssets> currentLoaderApkAssets = newLoaders.get(i).getApkAssets();
+                for (int j = currentLoaderApkAssets.size() - 1; j >= 0; j--) {
+                    final ApkAssets loaderApkAssets = currentLoaderApkAssets.get(j);
+                    if (uniqueLoaderApkAssets.add(loaderApkAssets)) {
+                        apkAssets.add(loaderStartIndex, loaderApkAssets);
+                    }
+                }
+            }
+        }
+
+        mLoaders = newLoaders.toArray(new ResourcesLoader[0]);
+        setApkAssets(apkAssets.toArray(new ApkAssets[0]), true /* invalidate_caches */);
     }
 
     /**
