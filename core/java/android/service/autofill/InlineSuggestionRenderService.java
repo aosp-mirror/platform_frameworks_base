@@ -94,7 +94,7 @@ public abstract class InlineSuggestionRenderService extends Service {
 
             final SurfaceControlViewHost host = new SurfaceControlViewHost(this, getDisplay(),
                     hostInputToken);
-            host.addView(suggestionRoot, lp);
+            host.setView(suggestionRoot, lp);
             suggestionRoot.setOnClickListener((v) -> {
                 try {
                     callback.onClick();
