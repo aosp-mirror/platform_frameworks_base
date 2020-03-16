@@ -49,7 +49,7 @@ stubs_defaults {
 stubs_defaults {
     name: "framework-module-stubs-defaults-systemapi",
     args: mainline_stubs_args + priv_apps,
-    srcs: [":framework-annotations"],
+    libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "system_current",
 }
@@ -62,7 +62,7 @@ stubs_defaults {
 stubs_defaults {
     name: "framework-module-api-defaults-module_libs_api",
     args: mainline_stubs_args + module_libs,
-    srcs: [":framework-annotations"],
+    libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
 }
@@ -70,7 +70,7 @@ stubs_defaults {
 stubs_defaults {
     name: "framework-module-stubs-defaults-module_libs_api",
     args: mainline_stubs_args + module_libs + priv_apps,
-    srcs: [":framework-annotations"],
+    libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
 }
