@@ -36,6 +36,7 @@ import android.util.SparseArray;
 
 import androidx.annotation.ArrayRes;
 import androidx.annotation.DrawableRes;
+import androidx.annotation.IntDef;
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
 
@@ -61,7 +62,9 @@ public class TetheringNotificationUpdater {
     private static final boolean NOTIFY_DONE = true;
     private static final boolean NO_NOTIFY = false;
     // Id to update and cancel tethering notification. Must be unique within the tethering app.
-    private static final int NOTIFY_ID = 20191115;
+    private static final int ENABLE_NOTIFICATION_ID = 1000;
+    // Id to update and cancel restricted notification. Must be unique within the tethering app.
+    private static final int RESTRICTED_NOTIFICATION_ID = 1001;
     @VisibleForTesting
     static final int NO_ICON_ID = 0;
     @VisibleForTesting
@@ -85,6 +88,9 @@ public class TetheringNotificationUpdater {
     // INVALID_SUBSCRIPTION_ID.
     private volatile int mActiveDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
+    @IntDef({ENABLE_NOTIFICATION_ID, RESTRICTED_NOTIFICATION_ID})
+    @interface NotificationId {}
+
     public TetheringNotificationUpdater(@NonNull final Context context) {
         mContext = context;
         mNotificationManager = (NotificationManager) context.createContextAsUser(UserHandle.ALL, 0)
@@ -100,14 +106,14 @@ public class TetheringNotificationUpdater {
     public void onDownstreamChanged(@IntRange(from = 0, to = 7) final int downstreamTypesMask) {
         if (mDownstreamTypesMask == downstreamTypesMask) return;
         mDownstreamTypesMask = downstreamTypesMask;
-        updateNotification();
+        updateEnableNotification();
     }
 
     /** Called when active data subscription id changed */
     public void onActiveDataSubscriptionIdChanged(final int subId) {
         if (mActiveDataSubId == subId) return;
         mActiveDataSubId = subId;
-        updateNotification();
+        updateEnableNotification();
     }
 
     @VisibleForTesting
@@ -115,16 +121,31 @@ public class TetheringNotificationUpdater {
         return SubscriptionManager.getResourcesForSubId(c, subId);
     }
 
-    private void updateNotification() {
+    private void updateEnableNotification() {
         final boolean tetheringInactive = mDownstreamTypesMask <= DOWNSTREAM_NONE;
 
         if (tetheringInactive || setupNotification() == NO_NOTIFY) {
-            clearNotification();
+            clearNotification(ENABLE_NOTIFICATION_ID);
         }
     }
 
-    private void clearNotification() {
-        mNotificationManager.cancel(null /* tag */, NOTIFY_ID);
+    @VisibleForTesting
+    void tetheringRestrictionLifted() {
+        clearNotification(RESTRICTED_NOTIFICATION_ID);
+    }
+
+    private void clearNotification(@NotificationId final int id) {
+        mNotificationManager.cancel(null /* tag */, id);
+    }
+
+    @VisibleForTesting
+    void notifyTetheringDisabledByRestriction() {
+        final Resources res = getResourcesForSubId(mContext, mActiveDataSubId);
+        final String title = res.getString(R.string.disable_tether_notification_title);
+        final String message = res.getString(R.string.disable_tether_notification_message);
+
+        showNotification(R.drawable.stat_sys_tether_general, title, message,
+                RESTRICTED_NOTIFICATION_ID);
     }
 
     /**
@@ -195,12 +216,12 @@ public class TetheringNotificationUpdater {
         final String title = res.getString(R.string.tethering_notification_title);
         final String message = res.getString(R.string.tethering_notification_message);
 
-        showNotification(iconId, title, message);
+        showNotification(iconId, title, message, ENABLE_NOTIFICATION_ID);
         return NOTIFY_DONE;
     }
 
     private void showNotification(@DrawableRes final int iconId, @NonNull final String title,
-            @NonNull final String message) {
+            @NonNull final String message, @NotificationId final int id) {
         final Intent intent = new Intent(Settings.ACTION_TETHER_SETTINGS);
         final PendingIntent pi = PendingIntent.getActivity(
                 mContext.createContextAsUser(UserHandle.CURRENT, 0),
@@ -218,6 +239,6 @@ public class TetheringNotificationUpdater {
                         .setContentIntent(pi)
                         .build();
 
-        mNotificationManager.notify(null /* tag */, NOTIFY_ID, notification);
+        mNotificationManager.notify(null /* tag */, id, notification);
     }
 }
