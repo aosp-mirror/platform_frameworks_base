@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Esta app puede reconocer tu actividad física."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"tomar fotografías y grabar videos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta app puede tomar fotos y grabar videos con la cámara en cualquier momento."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permite que una aplicación o un servicio reciba devoluciones de llamada cuando se abren o cierran dispositivos de cámara."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Esta app de firma puede recibir devoluciones de llamada cuando se cierra o se abre cualquier dispositivo de cámara (y qué paquete de aplicación lo hace)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite que la app continúe con una llamada que se inició en otra app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"leer números de teléfono"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Le permite a la app acceder a los números de teléfono del dispositivo."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"mantener la pantalla del vehículo encendida"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"evitar que el tablet entre en estado de inactividad"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"evitar que la TV entre en suspensión"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"evitar que el dispositivo entre en estado de inactividad"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permite que la app mantenga la pantalla del vehículo encendida."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permite que la aplicación evite que la tablet entre en estado de inactividad."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Permite que la aplicación evite que la TV se suspenda."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permite que la aplicación evite que el dispositivo entre en estado de inactividad."</string>
@@ -1220,7 +1224,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"Tienes un volcado del montón del proceso de <xliff:g id="PROC">%1$s</xliff:g> disponible para compartir. Ten cuidado: Es posible que este volcado contenga información personal sensible (incluido el contenido que hayas escrito) a la que puede acceder el proceso."</string>
     <string name="sendText" msgid="493003724401350724">"Seleccionar una acción para el texto"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Volumen del timbre"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Volumen de los medios"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Volumen multimedia"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Reproduciendo a través de Bluetooth"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Tono de silencio establecido"</string>
     <string name="volume_call" msgid="7625321655265747433">"Volumen de llamadas entrantes"</string>
@@ -1231,7 +1235,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Volumen de Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Volumen del tono de llamada"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Volumen de la llamada"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volumen de los medios"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Volumen multimedia"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Volumen de notificación"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Tono predeterminado"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

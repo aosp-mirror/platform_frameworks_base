@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ఈ యాప్ మీ భౌతిక కార్యాకలాపాన్ని గుర్తించగలదు."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ఈ యాప్‌ కెమెరాను ఉపయోగించి ఎప్పుడైనా చిత్రాలను తీయగలదు మరియు వీడియోలను రికార్డ్ చేయగలదు."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ఏదైనా కెమెరా పరికరం తెరుచుకుంటున్నప్పుడు (ఏదైనా యాప్ ప్యాకేజీ ద్వారా) లేదా మూసుకుంటున్నప్పుడు ఈ సిగ్నేచర్ యాప్ కాల్‌బ్యాక్‌లను అందుకోగలదు."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"వైబ్రేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"వైబ్రేటర్‌ను నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"నేరుగా కాల్ చేసే ఫోన్ నంబర్‌లు"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"మరో యాప్‌లో ప్రారంభించిన కాల్‌ని కొనసాగించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ఫోన్ నంబర్‌లను చదువు"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"పరికరం యొక్క ఫోన్ నంబర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"కార్ స్క్రీన్‌ను ఆన్ చేసి ఉంచండి"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"టీవీ నిద్రావస్థకు వెళ్లకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ఫోన్‌ను స్లీప్ మోడ్‌లోకి వెళ్లనీయకుండా నిరోధించగలగడం"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"కార్ స్క్రీన్ ఆన్ చేసి ఉంచడానికి ఈ యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"నిద్రావస్థకి వెళ్లకుండా టాబ్లెట్‌ను నిరోధించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"టీవీ నిద్రావస్థకు వెళ్లకుండా నిరోధించడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"నిద్రావస్థకి వెళ్లకుండా ఫోన్‌ను నిరోధించడానికి యాప్‌ను అనుమతిస్తుంది."</string>

@@ -440,6 +440,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Tyto aplikace dokážou rozpoznat vaši fyzickou aktivitu."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"pořizování fotografií a videí"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Tato aplikace může pomocí fotoaparátu kdykoli pořídit snímek nebo nahrát video."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Povolte aplikaci nebo službě přijímat zpětná volání o otevření nebo zavření zařízení s fotoaparátem."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Tato podpisová aplikace může přijímat zpětná volání při otevírání nebo zavírání jakéhokoli zařízení s fotoaparátem (balíčkem příslušné aplikace)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ovládání vibrací"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"přímé volání na telefonní čísla"</string>
@@ -456,9 +458,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Umožňuje aplikace pokračovat v hovoru, který byl zahájen v jiné aplikaci."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"přístup k telefonním číslům"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Umožňuje aplikaci přístup k telefonním číslům v zařízení."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ponechání zapnuté obrazovky auta"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"bránění přechodu tabletu do režimu spánku"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"zabránění přechodu televize do režimu spánku"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"bránění přechodu telefonu do režimu spánku"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Umožňuje aplikaci nechat obrazovku auta zapnutou."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Umožňuje aplikaci zabránit přechodu tabletu do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Umožňuje aplikaci zabránit přechodu televize do režimu spánku."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Umožňuje aplikaci zabránit přechodu telefonu do režimu spánku."</string>

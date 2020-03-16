@@ -434,6 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Hierdie program kan jou fisieke aktiwiteit herken."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"neem foto\'s en video\'s"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Hierdie program kan enige tyd met die kamera foto\'s neem en video\'s opneem."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Laat \'n program of diens toe om terugbeloproepe te ontvang oor kameratoestelle wat oopgemaak of toegemaak word."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Hierdie handtekeningprogram kan terugbeloproepe ontvang wanneer enige kameratoestel oopgemaak (deur watter programpakket) of toegemaak word."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"beheer vibrasie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skakel foonnommers direk"</string>
@@ -450,9 +452,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Laat die program toe om \'n oproep voort te sit wat in \'n ander program begin is."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lees foonnommers"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Laat die program toe om toegang tot die toestel se foonnommers te kry."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hou motorskerm aan"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"verhoed dat tablet slaap"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"keer TV om te sluimer"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"verhoed foon om te slaap"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Laat die program toe om die motorskerm aan te hou."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Laat die program toe om die tablet te keer om te slaap."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Laat die program toe om die TV te keer om te sluimer."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Laat die program toe om die foon te keer om te slaap."</string>

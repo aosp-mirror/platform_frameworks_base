@@ -303,7 +303,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારી શારીરિક પ્રવૃત્તિને ઍક્સેસ કરવાની મંજૂરી આપવી છે?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"કૅમેરો"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"ચિત્રો લેવાની અને વીડિઓ રેકોર્ડ કરવાની"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ચિત્રો લેવાની અને વીડિઓ રેકૉર્ડ કરવાની મંજૂરી આપીએ?"</string>
+    <string name="permgrouprequest_camera" msgid="2697305443703328372">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને ચિત્રો લેવાની અને વીડિયો રેકૉર્ડ કરવાની મંજૂરી આપીએ?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"કૉલ લૉગ"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ફોન કૉલ લૉગ વાંચો અને લખો"</string>
     <string name="permgrouprequest_calllog" msgid="7565344038959817408">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા ફોનના કૉલ લૉગ ઍક્સેસ કરવાની મંજૂરી આપીએ?"</string>
@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"આ ઍપ તમારી શારીરિક પ્રવૃત્તિને ઓળખી શકે છે."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ચિત્રો અને વિડિઓઝ લો"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"આ ઍપ્લિકેશન, કૅમેરાનો ઉપયોગ કરીને કોઈપણ સમયે ચિત્રો લઈ અને વિડિઓઝ રેકોર્ડ કરી શકે છે."</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"વાઇબ્રેશન નિયંત્રિત કરો"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"એપ્લિકેશનને વાઇબ્રેટરને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"સીધા જ ફોન નંબર્સ પર કૉલ કરો"</string>
@@ -450,9 +454,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"એક અન્ય તૃતીય પક્ષ ઍપમાં ચાલુ થયેલા કૉલને આ ઍપમાં ચાલુ રાખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ફોન નંબર વાંચો"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ઍપ્લિકેશનને ઉપકરણનાં ફોન નંબરને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"કારની સ્ક્રીન ચાલુ રાખો."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ટેબ્લેટને નિષ્ક્રિય થતું અટકાવો"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ટીવીને નિષ્ક્રિય થતો અટકાવો"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ફોનને નિષ્ક્રિય થતો અટકાવો"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"ઍપને કારની સ્ક્રીન ચાલુ રાખવાની મંજૂરી આપો."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"એપ્લિકેશનને ટેબ્લેટને નિષ્ક્રિય થઈ જતો અટકાવવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"એપ્લિકેશનને TV ને નિષ્ક્રિય થઈ જતો અટકાવવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"એપ્લિકેશનને ફોનને નિષ્ક્રિય થઈ જતો અટકાવવાની મંજૂરી આપે છે."</string>

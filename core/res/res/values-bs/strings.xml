@@ -437,6 +437,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Ova aplikacija može prepoznati vašu fizičku aktivnost."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"snimanje slika i videozapisa"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ova aplikacija može slikati fotografije i snimati videozapise koristeći kameru bilo kada."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Dozvoliti aplikaciji ili usluzi da prima povratne pozive o otvaranju ili zatvaranju kamera."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Ova aplikacija za potpisivanje može primati povratne pozive kada se otvara ili zatvara bilo koja kamera (kojim paketom aplikacija)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrola vibracije"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Dozvoljava aplikaciji upravljanje vibracijom."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"izravno zvanje telefonskih brojeva"</string>
@@ -453,9 +455,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Dozvoljava aplikaciji nastavljanje poziva koji je započet u drugoj aplikaciji."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"čitanje telefonskih brojeva"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Dozvoljava aplikaciji pristup telefonskim brojevima uređaja."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ostavi ekran automobila uključenim"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"sprečavanje tableta da uđe u režim mirovanja"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"spriječi ulazak TV-a u režim mirovanja"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"sprečavanje telefona da uđe u režim mirovanja"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Dozvoljava aplikaciji da ostavi ekran automobila uključenim."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Dozvoljava aplikaciji da spriječi tablet da ode u stanje mirovanja."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"Dozvoljava aplikaciji da spriječi ulazak TV-a u režim mirovanja."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Dozvoljava aplikaciji da spriječi telefon da ode u stanje mirovanja."</string>

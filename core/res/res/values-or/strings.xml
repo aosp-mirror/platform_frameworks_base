@@ -434,6 +434,10 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"ଏହି ଆପ୍‍ଣ ଆପଣଙ୍କ ଶାରୀରିକ ଗତିବିଧିକୁ ଚିହ୍ନଟ କରିପାରେ"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ଫଟୋ ଓ ଭିଡିଓଗୁଡ଼ିକୁ ନିଅନ୍ତୁ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ଏହି ଆପ୍‍ ଯେକୌଣସି ସମୟରେ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଫଟୋ ଉଠାଇପାରେ ଏବଂ ଭିଡିଓ ରେକର୍ଡ କରିପାରେ।"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"କମ୍ପନ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ଆପ୍‍କୁ, ଭାଇବ୍ରେଟର୍‍ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ସିଧାସଳଖ ଫୋନ୍ ନମ୍ବରଗୁଡ଼ିକୁ କଲ୍ କରନ୍ତୁ"</string>
@@ -450,9 +454,11 @@
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ଅନ୍ୟ ଆପ୍‌ରେ ଆରମ୍ଭ ହୋଇଥିବା ଗୋଟିଏ କଲ୍‌କୁ ଜାରି ରଖିବା ପାଇଁ ଆପ୍‌କୁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ଫୋନ୍‍ ନମ୍ବର ପଢ଼େ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ଏହି ଡିଭାଇସର ଫୋନ୍‍ ନମ୍ବର ଆକ୍ସେସ୍‍ କରିବାକୁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"କାର ସ୍କ୍ରିନକୁ ଚାଲୁ ରଖନ୍ତୁ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ଟାବଲେଟ୍‌କୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌କୁ ଯିବାକୁ ରୋକନ୍ତୁ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2597122827869353116">"ଟିଭିକୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌ରୁ ଯିବାକୁ ରୋକନ୍ତୁ।"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ଫୋନକୁ ସ୍ଲୀପିଙ୍ଗ ମୋଡ୍‌କୁ ଯିବାକୁ ରୋକନ୍ତୁ"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"କାର ସ୍କ୍ରିନକୁ ଚାଲୁ ରଖିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ଆପ୍‍କୁ, ଟାବଲେଟ୍‍ଟିକୁ ସ୍ଲୀପ୍‍ ମୋଡ୍‍କୁ ଯିବାରେ ପ୍ରତିରୋଧ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="7562330010764851191">"TVକୁ ଶୁଆଇବାକୁ ଯିବାରୁ ରୋକିବାକୁ ଆପ୍‌ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ଆପ୍‍କୁ, ଫୋନ୍‌ଟିକୁ ସ୍ଲୀପ୍‍ ମୋଡ୍‍କୁ ଯିବାରେ ପ୍ରତିରୋଧ କରିବାକୁ ଦେଇଥାଏ।"</string>
