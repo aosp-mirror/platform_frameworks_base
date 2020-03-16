@@ -39,6 +39,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -56,6 +57,7 @@ import java.util.ArrayList;
  * Tests for {@link HdmiControlService} class.
  */
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 public class HdmiControlServiceTest {
 
