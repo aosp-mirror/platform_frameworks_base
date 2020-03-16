@@ -607,6 +607,7 @@ public class Process {
      *                             started.
      * @param pkgDataInfoMap Map from related package names to private data directory
      *                       volume UUID and inode number.
+     * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
@@ -630,12 +631,13 @@ public class Process {
                                            @Nullable long[] disabledCompatChanges,
                                            @Nullable Map<String, Pair<String, Long>>
                                                    pkgDataInfoMap,
+                                           boolean bindMountAppStorageDirs,
                                            @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
                     zygotePolicyFlags, isTopApp, disabledCompatChanges,
-                    pkgDataInfoMap, zygoteArgs);
+                    pkgDataInfoMap, bindMountAppStorageDirs, zygoteArgs);
     }
 
     /** @hide */
@@ -659,7 +661,7 @@ public class Process {
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
                     /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, /*isTopApp=*/ false,
-                disabledCompatChanges, /* pkgDataInfoMap */ null, zygoteArgs);
+                disabledCompatChanges, /* pkgDataInfoMap */ null, false, zygoteArgs);
     }
 
     /**
