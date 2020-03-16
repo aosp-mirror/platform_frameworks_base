@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
@@ -47,7 +48,9 @@ import com.android.systemui.R;
 import com.android.systemui.pip.phone.PipUpdateThread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -79,6 +82,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     private final Rect mLastReportedBounds = new Rect();
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
+    private final Map<IBinder, Rect> mBoundsToRestore = new HashMap<>();
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -222,6 +226,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             throw new RuntimeException("Unable to get leash", e);
         }
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
+        mBoundsToRestore.put(mToken.asBinder(), currentBounds);
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             scheduleAnimateResizePip(currentBounds, destinationBounds,
                     TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration, null);
@@ -246,8 +251,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
-        scheduleAnimateResizePip(mLastReportedBounds,
-                info.configuration.windowConfiguration.getBounds(),
+        final Rect boundsToRestore = mBoundsToRestore.remove(token.asBinder());
+        scheduleAnimateResizePip(mLastReportedBounds, boundsToRestore,
                 TRANSITION_DIRECTION_TO_FULLSCREEN, mEnterExitAnimationDuration, null);
         mInPip = false;
     }
