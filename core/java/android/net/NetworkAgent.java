@@ -78,6 +78,7 @@ public abstract class NetworkAgent {
     /**
      * The ID of the {@link NetworkProvider} that created this object, or
      * {@link NetworkProvider#ID_NONE} if unknown.
+     * @hide
      */
     public final int providerId;
 
@@ -584,6 +585,7 @@ public abstract class NetworkAgent {
      *
      * @deprecated this is for backward compatibility only.
      * @param legacySubtype the legacy subtype.
+     * @hide
      */
     @Deprecated
     public void setLegacySubtype(final int legacySubtype, @NonNull final String legacySubtypeName) {
@@ -608,6 +610,7 @@ public abstract class NetworkAgent {
      *
      * @deprecated this is for backward compatibility only.
      * @param extraInfo the ExtraInfo.
+     * @hide
      */
     @Deprecated
     public void setLegacyExtraInfo(@Nullable final String extraInfo) {
@@ -711,6 +714,7 @@ public abstract class NetworkAgent {
     /**
      * Called when ConnectivityService request a bandwidth update. The parent factory
      * shall try to overwrite this method and produce a bandwidth update if capable.
+     * @hide
      */
     public void onBandwidthUpdateRequested() {
         pollLceData();
