@@ -67,6 +67,8 @@ import com.android.systemui.R;
 import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
+import java.util.function.Consumer;
+
 /**
  * Docked stack divider.
  */
@@ -634,16 +636,20 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                         ? TASK_POSITION_SAME
                         : snapTarget.taskPosition,
                 snapTarget));
-        Runnable endAction = () -> {
+        Consumer<Boolean> endAction = cancelled -> {
+            final boolean wasMinimizeInteraction = mIsInMinimizeInteraction;
+            // Reset minimized divider position after unminimized state animation finishes.
+            if (!cancelled && !mDockedStackMinimized && mIsInMinimizeInteraction) {
+                mIsInMinimizeInteraction = false;
+            }
             boolean dismissed = commitSnapFlags(snapTarget);
             mWindowManagerProxy.setResizing(false);
             updateDockSide();
             mCurrentAnimator = null;
             mEntranceAnimationRunning = false;
             mExitAnimationRunning = false;
-            if (!dismissed) {
-                WindowManagerProxy.applyResizeSplits((mIsInMinimizeInteraction
-                        ? mSnapTargetBeforeMinimized : snapTarget).position, mSplitLayout);
+            if (!dismissed && !wasMinimizeInteraction) {
+                WindowManagerProxy.applyResizeSplits(snapTarget.position, mSplitLayout);
             }
             if (mCallback != null) {
                 mCallback.onDraggingEnd();
@@ -667,12 +673,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 }
             }
         };
-        Runnable notCancelledEndAction = () -> {
-            // Reset minimized divider position after unminimized state animation finishes
-            if (!mDockedStackMinimized && mIsInMinimizeInteraction) {
-                mIsInMinimizeInteraction = false;
-            }
-        };
         anim.addListener(new AnimatorListenerAdapter() {
 
             private boolean mCancelled;
@@ -694,15 +694,10 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     delay = mSfChoreographer.getSurfaceFlingerOffsetMs();
                 }
                 if (delay == 0) {
-                    if (!mCancelled) {
-                        notCancelledEndAction.run();
-                    }
-                    endAction.run();
+                    endAction.accept(mCancelled);
                 } else {
-                    if (!mCancelled) {
-                        mHandler.postDelayed(notCancelledEndAction, delay);
-                    }
-                    mHandler.postDelayed(endAction, delay);
+                    final Boolean cancelled = mCancelled;
+                    mHandler.postDelayed(() -> endAction.accept(cancelled), delay);
                 }
             }
         });
@@ -944,6 +939,15 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                 .setDuration(animDuration)
                 .start();
+    }
+
+    // Needed to end any currently playing animations when they might compete with other anims
+    // (specifically, IME adjust animation immediately after leaving minimized). Someday maybe
+    // these can be unified, but not today.
+    void finishAnimations() {
+        if (mCurrentAnimator != null) {
+            mCurrentAnimator.end();
+        }
     }
 
     public void setAdjustedForIme(boolean adjustedForIme, long animDuration) {
