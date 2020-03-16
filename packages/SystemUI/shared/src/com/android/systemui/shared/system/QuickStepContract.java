@@ -78,6 +78,9 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_QUICK_SETTINGS_EXPANDED = 1 << 11;
     // Winscope tracing is enabled
     public static final int SYSUI_STATE_TRACING_ENABLED = 1 << 12;
+    // The Assistant gesture should be constrained. It is up to the launcher implementation to
+    // decide how to constrain it
+    public static final int SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED = 1 << 13;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -92,7 +95,8 @@ public class QuickStepContract {
             SYSUI_STATE_OVERVIEW_DISABLED,
             SYSUI_STATE_HOME_DISABLED,
             SYSUI_STATE_SEARCH_DISABLED,
-            SYSUI_STATE_TRACING_ENABLED
+            SYSUI_STATE_TRACING_ENABLED,
+            SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED
     })
     public @interface SystemUiStateFlags {}
 
@@ -112,6 +116,8 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_CLICKABLE) != 0 ? "a11y_click" : "");
         str.add((flags & SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE) != 0 ? "a11y_long_click" : "");
         str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
+        str.add((flags & SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED) != 0
+                ? "asst_gesture_constrain" : "");
         return str.toString();
     }
 
