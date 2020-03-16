@@ -85,19 +85,24 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         int size = context.getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
         addView(mIconFrame, new LayoutParams(size, size));
         mBg = new ImageView(getContext());
-        Path path = new Path(PathParser.createPathFromPathData(
-                context.getResources().getString(ICON_MASK_ID)));
-        float pathSize = AdaptiveIconDrawable.MASK_SIZE;
-        PathShape p = new PathShape(path, pathSize, pathSize);
-        ShapeDrawable d = new ShapeDrawable(p);
-        d.setTintList(ColorStateList.valueOf(Color.TRANSPARENT));
-        int bgSize = context.getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
-        d.setIntrinsicHeight(bgSize);
-        d.setIntrinsicWidth(bgSize);
-        mBg.setImageDrawable(d);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(bgSize, bgSize, Gravity.CENTER);
-        mIconFrame.addView(mBg, lp);
-        mBg.setLayoutParams(lp);
+        if (context.getResources().getBoolean(R.bool.config_useMaskForQs)) {
+            Path path = new Path(PathParser.createPathFromPathData(
+                    context.getResources().getString(ICON_MASK_ID)));
+            float pathSize = AdaptiveIconDrawable.MASK_SIZE;
+            PathShape p = new PathShape(path, pathSize, pathSize);
+            ShapeDrawable d = new ShapeDrawable(p);
+            d.setTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+            int bgSize = context.getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
+            d.setIntrinsicHeight(bgSize);
+            d.setIntrinsicWidth(bgSize);
+            mBg.setImageDrawable(d);
+            FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(bgSize, bgSize, Gravity.CENTER);
+            mIconFrame.addView(mBg, lp);
+            mBg.setLayoutParams(lp);
+        } else {
+            mBg.setImageResource(R.drawable.ic_qs_circle);
+            mIconFrame.addView(mBg);
+        }
         mIcon = icon;
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT,
