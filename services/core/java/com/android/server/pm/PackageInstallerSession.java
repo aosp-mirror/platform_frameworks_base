@@ -314,8 +314,41 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private int mParentSessionId;
 
+    static class FileEntry {
+        private final int mIndex;
+        private final InstallationFile mFile;
+
+        FileEntry(int index, InstallationFile file) {
+            this.mIndex = index;
+            this.mFile = file;
+        }
+
+        int getIndex() {
+            return this.mIndex;
+        }
+
+        InstallationFile getFile() {
+            return this.mFile;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof FileEntry)) {
+                return false;
+            }
+            final FileEntry rhs = (FileEntry) obj;
+            return (mFile.getLocation() == rhs.mFile.getLocation()) && TextUtils.equals(
+                    mFile.getName(), rhs.mFile.getName());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mFile.getLocation(), mFile.getName());
+        }
+    }
+
     @GuardedBy("mLock")
-    private ArrayList<InstallationFile> mFiles = new ArrayList<>();
+    private ArraySet<FileEntry> mFiles = new ArraySet<>();
 
     @GuardedBy("mLock")
     private boolean mStagedSessionApplied;
@@ -519,8 +552,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         this.mParentSessionId = parentSessionId;
 
         if (files != null) {
-            for (InstallationFile file : files) {
-                mFiles.add(file);
+            for (int i = 0, size = files.length; i < size; ++i) {
+                InstallationFile file = files[i];
+                if (!mFiles.add(new FileEntry(i, file))) {
+                    throw new IllegalArgumentException(
+                            "Trying to add a duplicate installation file");
+                }
             }
         }
 
@@ -754,9 +791,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return result;
         }
 
-        String[] result = new String[mFiles.size()];
-        for (int i = 0, size = mFiles.size(); i < size; ++i) {
-            result[i] = mFiles.get(i).getName();
+        InstallationFile[] files = getInstallationFilesLocked();
+        String[] result = new String[files.length];
+        for (int i = 0, size = files.length; i < size; ++i) {
+            result[i] = files[i].getName();
+        }
+        return result;
+    }
+
+    @GuardedBy("mLock")
+    private InstallationFile[] getInstallationFilesLocked() {
+        final InstallationFile[] result = new InstallationFile[mFiles.size()];
+        for (FileEntry fileEntry : mFiles) {
+            result[fileEntry.getIndex()] = fileEntry.getFile();
         }
         return result;
     }
@@ -2448,7 +2495,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("addFile");
 
-            mFiles.add(new InstallationFile(location, name, lengthBytes, metadata, signature));
+            if (!mFiles.add(new FileEntry(mFiles.size(),
+                    new InstallationFile(location, name, lengthBytes, metadata, signature)))) {
+                throw new IllegalArgumentException("File already added: " + name);
+            }
         }
     }
 
@@ -2466,7 +2516,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotSealedLocked("removeFile");
 
-            mFiles.add(new InstallationFile(location, getRemoveMarkerName(name), -1, null, null));
+            if (!mFiles.add(new FileEntry(mFiles.size(),
+                    new InstallationFile(location, getRemoveMarkerName(name), -1, null, null)))) {
+                throw new IllegalArgumentException("File already removed: " + name);
+            }
         }
     }
 
@@ -2486,7 +2539,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final List<InstallationFileParcel> addedFiles = new ArrayList<>();
         final List<String> removedFiles = new ArrayList<>();
 
-        for (InstallationFile file : mFiles) {
+        final InstallationFile[] files = getInstallationFilesLocked();
+        for (InstallationFile file : files) {
             if (sAddedFilter.accept(new File(this.stageDir, file.getName()))) {
                 addedFiles.add(file.getData());
                 continue;
@@ -3007,7 +3061,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 writeIntAttribute(out, ATTR_SESSION_ID, childSessionId);
                 out.endTag(null, TAG_CHILD_SESSION);
             }
-            for (InstallationFile file : mFiles) {
+
+            final InstallationFile[] files = getInstallationFilesLocked();
+            for (InstallationFile file : getInstallationFilesLocked()) {
                 out.startTag(null, TAG_SESSION_FILE);
                 writeIntAttribute(out, ATTR_LOCATION, file.getLocation());
                 writeStringAttribute(out, ATTR_NAME, file.getName());
