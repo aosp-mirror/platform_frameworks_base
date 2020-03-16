@@ -34,6 +34,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.InsetsState;
@@ -75,6 +76,7 @@ import java.util.function.Consumer;
 public class DividerView extends FrameLayout implements OnTouchListener,
         OnComputeInternalInsetsListener {
     private static final String TAG = "DividerView";
+    private static final boolean DEBUG = Divider.DEBUG;
 
     public interface DividerCallbacks {
         void onDraggingStart();
@@ -629,6 +631,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             cancelFlingAnimation();
             updateDockSide();
         }
+        if (DEBUG) Slog.d(TAG, "Getting fling " + position + "->" + snapTarget.position);
         final boolean taskPositionSameAtEnd = snapTarget.flag == SnapTarget.FLAG_NONE;
         ValueAnimator anim = ValueAnimator.ofInt(position, snapTarget.position);
         anim.addUpdateListener(animation -> resizeStackDelayed((int) animation.getAnimatedValue(),
@@ -637,6 +640,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                         : snapTarget.taskPosition,
                 snapTarget));
         Consumer<Boolean> endAction = cancelled -> {
+            if (DEBUG) Slog.d(TAG, "End Fling " + cancelled + " min:" + mIsInMinimizeInteraction);
             final boolean wasMinimizeInteraction = mIsInMinimizeInteraction;
             // Reset minimized divider position after unminimized state animation finishes.
             if (!cancelled && !mDockedStackMinimized && mIsInMinimizeInteraction) {
@@ -697,6 +701,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                     endAction.accept(mCancelled);
                 } else {
                     final Boolean cancelled = mCancelled;
+                    if (DEBUG) Slog.d(TAG, "Posting endFling " + cancelled + " d:" + delay + "ms");
                     mHandler.postDelayed(() -> endAction.accept(cancelled), delay);
                 }
             }
@@ -894,6 +899,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     public void setMinimizedDockStack(boolean minimized, long animDuration,
             boolean isHomeStackResizable) {
+        if (DEBUG) Slog.d(TAG, "setMinDock: " + mDockedStackMinimized + "->" + minimized);
         mHomeStackResizable = isHomeStackResizable;
         updateDockSide();
         if (!isHomeStackResizable) {
@@ -1064,6 +1070,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
         mDividerPositionX = dockedRect.right;
         mDividerPositionY = dockedRect.bottom;
+
+        if (DEBUG) {
+            Slog.d(TAG, "Resizing split surfaces: " + dockedRect + " " + dockedTaskRect
+                    + " " + otherRect + " " + otherTaskRect);
+        }
 
         t.setPosition(mTiles.mPrimarySurface, dockedTaskRect.left, dockedTaskRect.top);
         Rect crop = new Rect(dockedRect);
