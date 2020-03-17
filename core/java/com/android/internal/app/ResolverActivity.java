@@ -49,6 +49,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Build;
@@ -65,6 +66,7 @@ import android.stats.devicepolicy.DevicePolicyEnums;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -1606,7 +1608,10 @@ public class ResolverActivity extends Activity implements
         for (int i = 0; i < tabWidget.getChildCount(); i++) {
             View tabView = tabWidget.getChildAt(i);
             TextView title = tabView.findViewById(android.R.id.title);
-            title.setTextColor(getColor(R.color.resolver_tabs_inactive_color));
+            title.setTextAppearance(android.R.style.TextAppearance_DeviceDefault_DialogWindowTitle);
+            title.setTextColor(getAttrColor(this, android.R.attr.textColorTertiary));
+            title.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                    getResources().getDimension(R.dimen.resolver_tab_text_size));
             if (title.getText().equals(getString(R.string.resolver_personal_tab))) {
                 tabView.setContentDescription(personalContentDescription);
             } else if (title.getText().equals(getString(R.string.resolver_work_tab))) {
@@ -1615,10 +1620,17 @@ public class ResolverActivity extends Activity implements
         }
     }
 
+    private static int getAttrColor(Context context, int attr) {
+        TypedArray ta = context.obtainStyledAttributes(new int[]{attr});
+        int colorAccent = ta.getColor(0, 0);
+        ta.recycle();
+        return colorAccent;
+    }
+
     private void updateActiveTabStyle(TabHost tabHost) {
         TextView title = tabHost.getTabWidget().getChildAt(tabHost.getCurrentTab())
                 .findViewById(android.R.id.title);
-        title.setTextColor(getColor(R.color.resolver_tabs_active_color));
+        title.setTextColor(getAttrColor(this, android.R.attr.colorAccent));
     }
 
     private void setupViewVisibilities() {
