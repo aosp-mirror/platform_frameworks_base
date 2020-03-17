@@ -1028,7 +1028,8 @@ public class LinkPropertiesTest {
         source.setCaptivePortalApiUrl(CAPPORT_API_URL);
         source.setCaptivePortalData((CaptivePortalData) getCaptivePortalData());
         source.setDhcpServerAddress((Inet4Address) GATEWAY1);
-        assertParcelSane(source.makeSensitiveFieldsParcelingCopy(), 18 /* fieldCount */);
+        assertParcelSane(new LinkProperties(source, true /* parcelSensitiveFields */),
+                18 /* fieldCount */);
 
         // Verify that without using a sensitiveFieldsParcelingCopy, sensitive fields are cleared.
         final LinkProperties sanitized = new LinkProperties(source);
