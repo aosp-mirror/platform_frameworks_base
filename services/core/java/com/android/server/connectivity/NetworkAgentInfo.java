@@ -621,22 +621,23 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
-    // TODO: Print shorter members first and only print the boolean variable which value is true
-    // to improve readability.
     public String toString() {
-        return "NetworkAgentInfo{ ni{" + networkInfo + "}  "
-                + "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  "
-                + "lp{" + linkProperties + "}  "
-                + "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  "
-                + "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  "
-                + "created{" + created + "} lingering{" + isLingering() + "} "
-                + "explicitlySelected{" + networkAgentConfig.explicitlySelected + "} "
-                + "acceptUnvalidated{" + networkAgentConfig.acceptUnvalidated + "} "
-                + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
-                + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
-                + "partialConnectivity{" + partialConnectivity + "} "
-                + "acceptPartialConnectivity{" + networkAgentConfig.acceptPartialConnectivity + "} "
-                + "clat{" + clatd + "} "
+        return "NetworkAgentInfo{"
+                + "network{" + network + "}  handle{" + network.getNetworkHandle() + "}  ni{"
+                + networkInfo.toShortString() + "} "
+                + "  Score{" + getCurrentScore() + "} "
+                + (isLingering() ? " lingering" : "")
+                + (everValidated ? " everValidated" : "")
+                + (lastValidated ? " lastValidated" : "")
+                + (partialConnectivity ? " partialConnectivity" : "")
+                + (everCaptivePortalDetected ? " everCaptivePortal" : "")
+                + (lastCaptivePortalDetected ? " isCaptivePortal" : "")
+                + (networkAgentConfig.explicitlySelected ? " explicitlySelected" : "")
+                + (networkAgentConfig.acceptUnvalidated ? " acceptUnvalidated" : "")
+                + (networkAgentConfig.acceptPartialConnectivity ? " acceptPartialConnectivity" : "")
+                + (clatd.isStarted() ? " clat{" + clatd + "} " : "")
+                + "  lp{" + linkProperties + "}"
+                + "  nc{" + networkCapabilities + "}"
                 + "}";
     }
 
