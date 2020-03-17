@@ -30,6 +30,7 @@ import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.util.ArrayUtils;
 
@@ -162,7 +163,7 @@ public final class CarrierAppUtils {
             for (ApplicationInfo ai : candidates) {
                 String packageName = ai.packageName;
                 String[] restrictedCarrierApps = Resources.getSystem().getStringArray(
-                        android.R.array.config_restrictedPreinstalledCarrierApps);
+                        R.array.config_restrictedPreinstalledCarrierApps);
                 boolean hasPrivileges = telephonyManager != null
                         && telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName)
                                 == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS
