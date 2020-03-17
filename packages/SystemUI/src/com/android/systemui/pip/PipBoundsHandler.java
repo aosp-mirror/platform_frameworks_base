@@ -229,8 +229,8 @@ public class PipBoundsHandler {
      */
     Rect getDestinationBounds(float aspectRatio, Rect bounds, Size minimalSize) {
         final Rect destinationBounds;
-        final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
         if (bounds == null) {
+            final Rect defaultBounds = getDefaultBounds(mReentrySnapFraction, mReentrySize);
             destinationBounds = new Rect(defaultBounds);
             if (mReentrySnapFraction == INVALID_SNAP_FRACTION && mReentrySize == null) {
                 mOverrideMinimalSize = minimalSize;
