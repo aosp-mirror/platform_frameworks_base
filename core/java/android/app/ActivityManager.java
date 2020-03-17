@@ -1315,7 +1315,8 @@ public class ActivityManager {
 
         /**
          * @return The in-memory or loaded icon that represents the current state of this task.
-         * @deprecated This call is no longer supported.
+         * @deprecated This call is no longer supported. The caller should keep track of any icons
+         *             it sets for the task descriptions internally.
          */
         @Deprecated
         public Bitmap getIcon() {
