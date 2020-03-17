@@ -1232,6 +1232,7 @@ public class AccessibilityWindowManager {
      */
     public boolean computePartialInteractiveRegionForWindowLocked(int windowId,
             @NonNull Region outRegion) {
+        windowId = resolveParentWindowIdLocked(windowId);
         final DisplayWindowsObserver observer = getDisplayWindowObserverByWindowIdLocked(windowId);
         if (observer != null) {
             return observer.computePartialInteractiveRegionForWindowLocked(windowId, outRegion);
@@ -1436,6 +1437,7 @@ public class AccessibilityWindowManager {
      */
     @Nullable
     public WindowInfo findWindowInfoByIdLocked(int windowId) {
+        windowId = resolveParentWindowIdLocked(windowId);
         final DisplayWindowsObserver observer = getDisplayWindowObserverByWindowIdLocked(windowId);
         if (observer != null) {
             return observer.findWindowInfoByIdLocked(windowId);
