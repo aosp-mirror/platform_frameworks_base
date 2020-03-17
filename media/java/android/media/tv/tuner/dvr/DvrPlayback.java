@@ -21,7 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
 
