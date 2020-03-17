@@ -657,7 +657,9 @@ public class SensorEvent {
     public int accuracy;
 
     /**
-     * The time in nanosecond at which the event happened
+     * The time in nanoseconds at which the event happened. For a given sensor,
+     * each new sensor event should be monotonically increasing using the same
+     * time base as {@link android.os.SystemClock#elapsedRealtimeNanos()}.
      */
     public long timestamp;
 
