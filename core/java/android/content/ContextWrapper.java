@@ -1145,4 +1145,12 @@ public class ContextWrapper extends Context {
             mBase.setContentCaptureOptions(options);
         }
     }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean isUiContext() {
+        return mBase.isUiContext();
+    }
 }
