@@ -158,7 +158,6 @@ public final class SelectionEvent implements Parcelable {
         mEventType = in.readInt();
         mEntityType = in.readString();
         mWidgetVersion = in.readInt() > 0 ? in.readString() : null;
-        // TODO: remove mPackageName once aiai does not need it
         mPackageName = in.readString();
         mWidgetType = in.readString();
         mInvocationMethod = in.readInt();
@@ -186,7 +185,6 @@ public final class SelectionEvent implements Parcelable {
         if (mWidgetVersion != null) {
             dest.writeString(mWidgetVersion);
         }
-        // TODO: remove mPackageName once aiai does not need it
         dest.writeString(mPackageName);
         dest.writeString(mWidgetType);
         dest.writeInt(mInvocationMethod);
@@ -406,7 +404,7 @@ public final class SelectionEvent implements Parcelable {
      */
     @NonNull
     public String getPackageName() {
-        return mSystemTcMetadata != null ? mSystemTcMetadata.getCallingPackageName() : "";
+        return mPackageName;
     }
 
     /**

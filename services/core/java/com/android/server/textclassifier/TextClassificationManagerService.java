@@ -234,7 +234,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
         handleRequest(
                 event.getSystemTextClassifierMetadata(),
-                /* verifyCallingPackage= */ false,
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ false,
                 service -> service.onSelectionEvent(sessionId, event),
                 "onSelectionEvent",
@@ -253,7 +253,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
         handleRequest(
                 systemTcMetadata,
-                /* verifyCallingPackage= */ false,
+                /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ false,
                 service -> service.onTextClassifierEvent(sessionId, event),
                 "onTextClassifierEvent",
