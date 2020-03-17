@@ -40,6 +40,7 @@ class NotificationConversationTemplateViewWrapper constructor(
     private var conversationIcon: View? = null
     private var conversationBadge: View? = null
     private var expandButton: View? = null
+    private lateinit var expandButtonContainer: View
     private var messagingLinearLayout: MessagingLinearLayout? = null
 
     init {
@@ -56,6 +57,8 @@ class NotificationConversationTemplateViewWrapper constructor(
                 com.android.internal.R.id.conversation_icon_badge)
         expandButton = conversationLayout.requireViewById(
                 com.android.internal.R.id.expand_button)
+        expandButtonContainer = conversationLayout.requireViewById(
+                com.android.internal.R.id.expand_button_container)
     }
 
     override fun onContentUpdated(row: ExpandableNotificationRow) {
@@ -88,6 +91,14 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     override fun updateExpandability(expandable: Boolean, onClickListener: View.OnClickListener?) {
         conversationLayout.updateExpandability(expandable, onClickListener)
+    }
+
+    override fun disallowSingleClick(x: Float, y: Float): Boolean {
+        if (expandButtonContainer.visibility == View.VISIBLE
+                && isOnView(expandButtonContainer, x, y)) {
+            return true
+        }
+        return super.disallowSingleClick(x, y)
     }
 
     override fun getMinLayoutHeight(): Int {
