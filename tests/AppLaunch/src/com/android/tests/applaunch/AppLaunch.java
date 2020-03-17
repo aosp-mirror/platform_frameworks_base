@@ -71,6 +71,7 @@ public class AppLaunch extends InstrumentationTestCase {
     // with the app launch
     private static final String KEY_REQUIRED_ACCOUNTS = "required_accounts";
     private static final String KEY_APPS = "apps";
+    private static final String KEY_IORAP_TRIAL_LAUNCH = "iorap_trial_launch";
     private static final String KEY_TRIAL_LAUNCH = "trial_launch";
     private static final String KEY_LAUNCH_ITERATIONS = "launch_iterations";
     private static final String KEY_LAUNCH_ORDER = "launch_order";
@@ -98,6 +99,9 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final int BEFORE_KILL_APP_SLEEP_TIMEOUT = 1000; // 1s before killing
     private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 3000; // 3s between launching apps
     private static final int PROFILE_SAVE_SLEEP_TIMEOUT = 1000; // Allow 1s for the profile to save
+    private static final int IORAP_TRACE_DURATION_TIMEOUT = 7000; // Allow 7s for trace to complete.
+    private static final int IORAP_TRIAL_LAUNCH_ITERATIONS = 3;  // min 3 launches to merge traces.
+    private static final int IORAP_COMPILE_CMD_TIMEOUT = 600;  // in seconds: 10 minutes
     private static final String LAUNCH_SUB_DIRECTORY = "launch_logs";
     private static final String LAUNCH_FILE = "applaunch.txt";
     private static final String TRACE_SUB_DIRECTORY = "atrace_logs";
@@ -106,6 +110,9 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String DEFAULT_TRACE_BUFFER_SIZE = "20000";
     private static final String DEFAULT_TRACE_DUMP_INTERVAL = "10";
     private static final String TRIAL_LAUNCH = "TRIAL_LAUNCH";
+    private static final String IORAP_TRIAL_LAUNCH = "IORAP_TRIAL_LAUNCH";
+    private static final String IORAP_TRIAL_LAUNCH_FIRST = "IORAP_TRIAL_LAUNCH_FIRST";
+    private static final String IORAP_TRIAL_LAUNCH_LAST = "IORAP_TRIAL_LAUNCH_LAST";
     private static final String DELIMITER = ",";
     private static final String DROP_CACHE_SCRIPT = "/data/local/tmp/dropCache.sh";
     private static final String APP_LAUNCH_CMD = "am start -W -n";
@@ -119,6 +126,10 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String LAUNCH_ORDER_CYCLIC = "cyclic";
     private static final String LAUNCH_ORDER_SEQUENTIAL = "sequential";
     private static final String COMPILE_CMD = "cmd package compile -f -m %s %s";
+    private static final String IORAP_COMPILE_CMD = "cmd jobscheduler run -f android 283673059";
+    private static final String IORAP_MAINTENANCE_CMD =
+            "iorap.cmd.maintenance --purge-package %s /data/misc/iorapd/sqlite.db";
+    private static final String IORAP_DUMPSYS_CMD = "dumpsys iorapd";
     private static final String SPEED_PROFILE_FILTER = "speed-profile";
     private static final String VERIFY_FILTER = "verify";
     private static final String LAUNCH_SCRIPT_NAME = "appLaunch";
@@ -138,6 +149,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private Bundle mResult = new Bundle();
     private Set<String> mRequiredAccounts;
     private boolean mTrialLaunch = false;
+    private boolean mIorapTrialLaunch = false;
     private BufferedWriter mBufferedWriter = null;
     private boolean mSimplePerfAppOnly = false;
     private String[] mCompilerFilters = null;
@@ -145,6 +157,13 @@ public class AppLaunch extends InstrumentationTestCase {
     private boolean mCycleCleanUp = false;
     private boolean mTraceAll = false;
     private boolean mIterationCycle = false;
+
+    enum IorapStatus {
+        UNDEFINED,
+        ENABLED,
+        DISABLED
+    }
+    private IorapStatus mIorapStatus = IorapStatus.UNDEFINED;
     private long mCycleTime = 0;
     private StringBuilder mCycleTimes = new StringBuilder();
 
@@ -243,7 +262,10 @@ public class AppLaunch extends InstrumentationTestCase {
             setLaunchOrder();
 
             for (LaunchOrder launch : mLaunchOrderList) {
-                dropCache();
+                toggleIorapStatus(launch.getIorapEnabled());
+                dropCache(/*override*/false);
+
+                Log.v(TAG, "Launch reason: " + launch.getLaunchReason());
 
                 // App launch times for trial launch will not be used for final
                 // launch time calculations.
@@ -287,6 +309,43 @@ public class AppLaunch extends InstrumentationTestCase {
                         sleep(PROFILE_SAVE_SLEEP_TIMEOUT);
                         assertTrue(String.format("Not able to compile the app : %s", appPkgName),
                               compileApp(launch.getCompilerFilter(), appPkgName));
+                    }
+                }
+                else if (launch.getLaunchReason().startsWith(IORAP_TRIAL_LAUNCH)) {
+                    mIterationCycle = false;
+
+                    // In the "applaunch.txt" file, iorap-trial launches is referenced using
+                    // "IORAP_TRIAL_LAUNCH" or "IORAP_TRIAL_LAUNCH_LAST"
+                    Intent startIntent = mNameToIntent.get(launch.getApp());
+                    if (startIntent == null) {
+                        Log.w(TAG, "App does not exist: " + launch.getApp());
+                        mResult.putString(mNameToResultKey.get(launch.getApp()),
+                            "App does not exist");
+                        continue;
+                    }
+                    String appPkgName = startIntent.getComponent().getPackageName();
+
+                    if (launch.getLaunchReason().equals(IORAP_TRIAL_LAUNCH_FIRST)) {
+                        // delete any iorap-traces associated with this package.
+                        purgeIorapPackage(appPkgName);
+                    }
+                    dropCache(/*override*/true);  // iorap-trial runs must have drop cache.
+
+                    AppLaunchResult launchResult =
+                        startApp(launch.getApp(), launch.getLaunchReason());
+                    if (launchResult.mLaunchTime < 0) {
+                        addLaunchResult(launch, new AppLaunchResult());
+                        // simply pass the app if launch isn't successful
+                        // error should have already been logged by startApp
+                        continue;
+                    }
+                    // wait for slightly more than 5s (iorapd.perfetto.trace_duration_ms) for the trace buffers to complete.
+                    sleep(IORAP_TRACE_DURATION_TIMEOUT);
+
+                    if (launch.getLaunchReason().equals(IORAP_TRIAL_LAUNCH_LAST)) {
+                        // run the iorap job scheduler and wait for iorap to compile fully.
+                        assertTrue(String.format("Not able to iorap-compile the app : %s", appPkgName),
+                                compileAppForIorap(appPkgName));
                     }
                 }
 
@@ -438,6 +497,74 @@ public class AppLaunch extends InstrumentationTestCase {
     }
 
     /**
+     * Compile the app package using compilerFilter and return true or false
+     * based on status of the compilation command.
+     */
+    private boolean compileAppForIorap(String appPkgName) throws IOException {
+        getInstrumentation().getUiAutomation().
+                executeShellCommand(IORAP_COMPILE_CMD);
+
+        for (int i = 0; i < IORAP_COMPILE_CMD_TIMEOUT; ++i) {
+            IorapCompilationStatus status = waitForIorapCompiled(appPkgName);
+            if (status == IorapCompilationStatus.COMPLETE) {
+                return true;
+            } else if (status == IorapCompilationStatus.INSUFFICIENT_TRACES) {
+                return false;
+            } // else INCOMPLETE. keep asking iorapd if it's done yet.
+            sleep(1000);
+        }
+
+        return false;
+    }
+
+    enum IorapCompilationStatus {
+        INCOMPLETE,
+        COMPLETE,
+        INSUFFICIENT_TRACES,
+    }
+    private IorapCompilationStatus waitForIorapCompiled(String appPkgName) throws IOException {
+        try (ParcelFileDescriptor result = getInstrumentation().getUiAutomation().
+                executeShellCommand(IORAP_DUMPSYS_CMD);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(result.getFileDescriptor())))) {
+            String line;
+            String prevLine = "";
+            while ((line = bufferedReader.readLine()) != null) {
+                // Match the indented VersionedComponentName string.
+                // "  com.google.android.deskclock/com.android.deskclock.DeskClock@62000712"
+                // Note: spaces are meaningful here.
+                if (prevLine.contains("  " + appPkgName) && prevLine.contains("@")) {
+                    // pre-requisite:
+                    // Compiled Status: Raw traces pending compilation (3)
+                    if (line.contains("Compiled Status: Usable compiled trace")) {
+                        return IorapCompilationStatus.COMPLETE;
+                    } else if (line.contains("Compiled Status: ") &&
+                            line.contains("more traces for compilation")) {
+                        //      Compiled Status: Need 1 more traces for compilation
+                        // No amount of waiting will help here because there were
+                        // insufficient traces made.
+                        return IorapCompilationStatus.INSUFFICIENT_TRACES;
+                    }
+                }
+
+                prevLine = line;
+            }
+            return IorapCompilationStatus.INCOMPLETE;
+        }
+    }
+
+    private String makeReasonForIorapTrialLaunch(int launchCount) {
+        String reason = IORAP_TRIAL_LAUNCH;
+        if (launchCount == 0) {
+            reason = IORAP_TRIAL_LAUNCH_FIRST;
+        }
+        if (launchCount == IORAP_TRIAL_LAUNCH_ITERATIONS - 1) {
+            reason = IORAP_TRIAL_LAUNCH_LAST;
+        }
+        return reason;
+    }
+
+    /**
      * If launch order is "cyclic" then apps will be launched one after the
      * other for each iteration count.
      * If launch order is "sequential" then each app will be launched for given number
@@ -448,20 +575,31 @@ public class AppLaunch extends InstrumentationTestCase {
             for (String compilerFilter : mCompilerFilters) {
                 if (mTrialLaunch) {
                     for (String app : mNameToResultKey.keySet()) {
-                        mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH));
+                        mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH, /*iorapEnabled*/false));
+                    }
+                }
+                if (mIorapTrialLaunch) {
+                    for (int launchCount = 0; launchCount < IORAP_TRIAL_LAUNCH_ITERATIONS; ++launchCount) {
+                        for (String app : mNameToResultKey.keySet()) {
+                            String reason = makeReasonForIorapTrialLaunch(launchCount);
+                            mLaunchOrderList.add(
+                                    new LaunchOrder(app, compilerFilter,
+                                            reason,
+                                            /*iorapEnabled*/true));
+                        }
                     }
                 }
                 for (int launchCount = 0; launchCount < mLaunchIterations; launchCount++) {
                     for (String app : mNameToResultKey.keySet()) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                  String.format(LAUNCH_ITERATION, launchCount)));
+                                  String.format(LAUNCH_ITERATION, launchCount), mIorapTrialLaunch));
                     }
                 }
                 if (mTraceDirectoryStr != null && !mTraceDirectoryStr.isEmpty()) {
                     for (int traceCount = 0; traceCount < mTraceLaunchCount; traceCount++) {
                         for (String app : mNameToResultKey.keySet()) {
                             mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                      String.format(TRACE_ITERATION, traceCount)));
+                                      String.format(TRACE_ITERATION, traceCount), mIorapTrialLaunch));
                         }
                     }
                 }
@@ -470,16 +608,25 @@ public class AppLaunch extends InstrumentationTestCase {
             for (String compilerFilter : mCompilerFilters) {
                 for (String app : mNameToResultKey.keySet()) {
                     if (mTrialLaunch) {
-                        mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH));
+                        mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH, /*iorapEnabled*/false));
+                    }
+                    if (mIorapTrialLaunch) {
+                        for (int launchCount = 0; launchCount < IORAP_TRIAL_LAUNCH_ITERATIONS; ++launchCount) {
+                            String reason = makeReasonForIorapTrialLaunch(launchCount);
+                            mLaunchOrderList.add(
+                                    new LaunchOrder(app, compilerFilter,
+                                            reason,
+                                            /*iorapEnabled*/true));
+                        }
                     }
                     for (int launchCount = 0; launchCount < mLaunchIterations; launchCount++) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                String.format(LAUNCH_ITERATION, launchCount)));
+                                String.format(LAUNCH_ITERATION, launchCount), mIorapTrialLaunch));
                     }
                     if (mTraceDirectoryStr != null && !mTraceDirectoryStr.isEmpty()) {
                         for (int traceCount = 0; traceCount < mTraceLaunchCount; traceCount++) {
                             mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                    String.format(TRACE_ITERATION, traceCount)));
+                                    String.format(TRACE_ITERATION, traceCount), mIorapTrialLaunch));
                         }
                     }
                 }
@@ -489,11 +636,89 @@ public class AppLaunch extends InstrumentationTestCase {
         }
     }
 
-    private void dropCache() {
-        if (mDropCache) {
+    private void dropCache(boolean override) {
+        if (mDropCache || override) {
             assertNotNull("Issue in dropping the cache",
                     getInstrumentation().getUiAutomation()
                             .executeShellCommand(DROP_CACHE_SCRIPT));
+        }
+    }
+
+    // [[ $(adb shell whoami) == "root" ]]
+    private boolean checkIfRoot() throws IOException {
+        String total = "";
+        try (ParcelFileDescriptor result = getInstrumentation().getUiAutomation().
+                executeShellCommand("whoami");
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(result.getFileDescriptor())))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                total = total + line;
+            }
+        }
+        return total.contains("root");
+    }
+
+    // Delete all db rows and files associated with a package in iorapd.
+    // Effectively deletes any raw or compiled trace files, unoptimizing the package in iorap.
+    private void purgeIorapPackage(String packageName) {
+        try {
+            if (!checkIfRoot()) {
+                throw new AssertionError("must be root to toggle iorapd; try adb root?");
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("stop iorapd");
+        sleep(100);  // give iorapd enough time to stop.
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand(String.format(IORAP_MAINTENANCE_CMD, packageName));
+        Log.v(TAG, "Executed: " + String.format(IORAP_MAINTENANCE_CMD, packageName));
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("start iorapd");
+        sleep(2000);  // give iorapd enough time to start up.
+    }
+
+    /**
+     * Toggle iorapd-based readahead and trace-collection.
+     * If iorapd is already enabled and enable is true, does nothing.
+     * If iorapd is already disabled and enable is false, does nothing.
+     */
+    private void toggleIorapStatus(boolean enable) {
+        boolean currentlyEnabled = false;
+        Log.v(TAG, "toggleIorapStatus " + Boolean.toString(enable));
+
+        // Do nothing if we are already enabled or disabled.
+        if (mIorapStatus == IorapStatus.ENABLED && enable) {
+            return;
+        } else if (mIorapStatus == IorapStatus.DISABLED && !enable) {
+            return;
+        }
+
+        try {
+            if (!checkIfRoot()) {
+                throw new AssertionError("must be root to toggle iorapd; try adb root?");
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("stop iorapd");
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand(String.format("setprop iorapd.perfetto.enable %b", enable));
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand(String.format("setprop iorapd.readahead.enable %b", enable));
+        getInstrumentation().getUiAutomation()
+                .executeShellCommand("start iorapd");
+        sleep(2000);  // give enough time for iorapd to start back up.
+
+        if (enable) {
+            mIorapStatus = IorapStatus.ENABLED;
+        } else {
+            mIorapStatus = IorapStatus.DISABLED;
         }
     }
 
@@ -560,6 +785,8 @@ public class AppLaunch extends InstrumentationTestCase {
         mCycleCleanUp = Boolean.parseBoolean(args.getString(KEY_CYCLE_CLEAN));
         mTraceAll = Boolean.parseBoolean(args.getString(KEY_TRACE_ALL));
         mTrialLaunch = mTrialLaunch || Boolean.parseBoolean(args.getString(KEY_TRIAL_LAUNCH));
+        mIorapTrialLaunch = mIorapTrialLaunch ||
+                Boolean.parseBoolean(args.getString(KEY_IORAP_TRIAL_LAUNCH));
 
         if (mSimplePerfCmd != null && mSimplePerfAppOnly) {
             Log.w(TAG, String.format("Passing both %s and %s is not supported, ignoring %s",
@@ -738,11 +965,13 @@ public class AppLaunch extends InstrumentationTestCase {
         private String mApp;
         private String mCompilerFilter;
         private String mLaunchReason;
+        private boolean mIorapEnabled;
 
-        LaunchOrder(String app, String compilerFilter, String launchReason){
+        LaunchOrder(String app, String compilerFilter, String launchReason, boolean iorapEnabled) {
             mApp = app;
             mCompilerFilter = compilerFilter;
             mLaunchReason = launchReason;
+            mIorapEnabled = iorapEnabled;
         }
 
         public String getApp() {
@@ -763,6 +992,14 @@ public class AppLaunch extends InstrumentationTestCase {
 
         public void setLaunchReason(String launchReason) {
             mLaunchReason = launchReason;
+        }
+
+        public void setIorapEnabled(boolean iorapEnabled) {
+            mIorapEnabled = iorapEnabled;
+        }
+
+        public boolean getIorapEnabled() {
+            return mIorapEnabled;
         }
     }
 
