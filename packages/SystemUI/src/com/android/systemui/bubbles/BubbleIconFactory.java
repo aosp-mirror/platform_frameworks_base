@@ -57,7 +57,7 @@ public class BubbleIconFactory extends BaseIconFactory {
             int density = context.getResources().getConfiguration().densityDpi;
             return launcherApps.getShortcutIconDrawable(shortcutInfo, density);
         } else {
-            Icon ic = metadata.getBubbleIcon();
+            Icon ic = metadata.getIcon();
             if (ic != null) {
                 return ic.loadDrawable(context);
             }

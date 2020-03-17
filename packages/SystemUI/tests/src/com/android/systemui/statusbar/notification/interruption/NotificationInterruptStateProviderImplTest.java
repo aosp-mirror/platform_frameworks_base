@@ -487,8 +487,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     private NotificationEntry createBubble() {
-        Notification.BubbleMetadata data = new Notification.BubbleMetadata.Builder()
-                .createIntentBubble(PendingIntent.getActivity(mContext, 0, new Intent(), 0),
+        Notification.BubbleMetadata data = new Notification.BubbleMetadata.Builder(
+                PendingIntent.getActivity(mContext, 0, new Intent(), 0),
                         Icon.createWithResource(mContext.getResources(), R.drawable.android))
                 .build();
         Notification n = new Notification.Builder(getContext(), "a")
