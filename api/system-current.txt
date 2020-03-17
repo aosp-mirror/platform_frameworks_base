@@ -148,6 +148,7 @@ package android {
     field public static final String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
     field public static final String NETWORK_SIGNAL_STRENGTH_WAKEUP = "android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
+    field public static final String NETWORK_STATS_PROVIDER = "android.permission.NETWORK_STATS_PROVIDER";
     field public static final String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
@@ -1409,7 +1410,8 @@ package android.app.usage {
   }
 
   public class NetworkStatsManager {
-    method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.net.netstats.provider.NetworkStatsProviderCallback registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.AbstractNetworkStatsProvider);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.NetworkStatsProvider);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void unregisterNetworkStatsProvider(@NonNull android.net.netstats.provider.NetworkStatsProvider);
   }
 
   public static final class UsageEvents.Event {
@@ -6406,14 +6408,13 @@ package android.net {
   public final class NetworkStats implements android.os.Parcelable {
     ctor public NetworkStats(long, int);
     method @NonNull public android.net.NetworkStats add(@NonNull android.net.NetworkStats);
-    method @NonNull public android.net.NetworkStats addValues(@NonNull android.net.NetworkStats.Entry);
+    method @NonNull public android.net.NetworkStats addEntry(@NonNull android.net.NetworkStats.Entry);
     method public int describeContents();
     method @NonNull public android.net.NetworkStats subtract(@NonNull android.net.NetworkStats);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
     field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
     field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
-    field @Nullable public static final String IFACE_ALL;
     field public static final String IFACE_VT = "vt_data0";
     field public static final int METERED_NO = 0; // 0x0
     field public static final int METERED_YES = 1; // 0x1
@@ -6813,19 +6814,15 @@ package android.net.metrics {
 
 package android.net.netstats.provider {
 
-  public abstract class AbstractNetworkStatsProvider {
-    ctor public AbstractNetworkStatsProvider();
-    method public abstract void requestStatsUpdate(int);
-    method public abstract void setAlert(long);
-    method public abstract void setLimit(@NonNull String, long);
+  public abstract class NetworkStatsProvider {
+    ctor public NetworkStatsProvider();
+    method public void notifyAlertReached();
+    method public void notifyLimitReached();
+    method public void notifyStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
+    method public abstract void onRequestStatsUpdate(int);
+    method public abstract void onSetAlert(long);
+    method public abstract void onSetLimit(@NonNull String, long);
     field public static final int QUOTA_UNLIMITED = -1; // 0xffffffff
-  }
-
-  public class NetworkStatsProviderCallback {
-    method public void onAlertReached();
-    method public void onLimitReached();
-    method public void onStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
-    method public void unregister();
   }
 
 }
