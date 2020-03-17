@@ -39,6 +39,7 @@ import com.android.internal.widget.ImageMessageConsumer;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -72,17 +73,20 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     private final NotifRemoteViewCache mRemoteViewCache;
     private final Lazy<SmartReplyConstants> mSmartReplyConstants;
     private final Lazy<SmartReplyController> mSmartReplyController;
+    private final ConversationNotificationProcessor mConversationProcessor;
 
     @Inject
     NotificationContentInflater(
             NotifRemoteViewCache remoteViewCache,
             NotificationRemoteInputManager remoteInputManager,
             Lazy<SmartReplyConstants> smartReplyConstants,
-            Lazy<SmartReplyController> smartReplyController) {
+            Lazy<SmartReplyController> smartReplyController,
+            ConversationNotificationProcessor conversationProcessor) {
         mRemoteViewCache = remoteViewCache;
         mRemoteInputManager = remoteInputManager;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
+        mConversationProcessor = conversationProcessor;
     }
 
     @Override
@@ -116,6 +120,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 entry,
                 mSmartReplyConstants.get(),
                 mSmartReplyController.get(),
+                mConversationProcessor,
                 row,
                 bindParams.isLowPriority,
                 bindParams.isChildInGroup,
@@ -671,6 +676,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private Exception mError;
         private RemoteViews.OnClickHandler mRemoteViewClickHandler;
         private CancellationSignal mCancellationSignal;
+        private final ConversationNotificationProcessor mConversationProcessor;
 
         private AsyncInflationTask(
                 boolean inflateSynchronously,
@@ -679,6 +685,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 NotificationEntry entry,
                 SmartReplyConstants smartReplyConstants,
                 SmartReplyController smartReplyController,
+                ConversationNotificationProcessor conversationProcessor,
                 ExpandableNotificationRow row,
                 boolean isLowPriority,
                 boolean isChildInGroup,
@@ -700,6 +707,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mUsesIncreasedHeadsUpHeight = usesIncreasedHeadsUpHeight;
             mRemoteViewClickHandler = remoteViewClickHandler;
             mCallback = callback;
+            mConversationProcessor = conversationProcessor;
             entry.setInflationTask(this);
         }
 
@@ -727,6 +735,9 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
                             packageContext);
                     processor.processNotification(notification, recoveredBuilder);
+                }
+                if (mEntry.getRanking().isConversation()) {
+                    mConversationProcessor.processNotification(mEntry, recoveredBuilder);
                 }
                 InflationProgress inflationProgress = createRemoteViews(mReInflateFlags,
                         recoveredBuilder, mIsLowPriority, mIsChildInGroup, mUsesIncreasedHeight,
