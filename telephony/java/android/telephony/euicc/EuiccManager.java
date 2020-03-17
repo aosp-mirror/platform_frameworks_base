@@ -257,27 +257,38 @@ public class EuiccManager {
      * the error is related to download.Since the OperationCode only uses at most one byte, the
      * maximum allowed quantity is 255(0xFF).
      *
-     * ErrorCode is the remaing three bytes of the result code, and it denotes what happened.
+     * ErrorCode is the remaining three bytes of the result code, and it denotes what happened.
      * e.g a combination of {@link #OPERATION_DOWNLOAD} and {@link #ERROR_TIME_OUT} will suggest the
      * download operation has timed out. The only exception here is
      * {@link #OPERATION_SMDX_SUBJECT_REASON_CODE}, where instead of ErrorCode, SubjectCode[5.2.6.1
      * from GSMA (SGP.22 v2.2) and ReasonCode[5.2.6.2] from GSMA (SGP.22 v2.2) are encoded. @see
      * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE} and
      * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE}
+     *
+     * In the case where ErrorCode contains a value of 0, it means it's an unknown error. E.g Intent
+     * only contains {@link #OPERATION_DOWNLOAD} and ErrorCode is 0 implies this is an unknown
+     * Download error.
+     *
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_OPERATION_CODE}
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_ERROR_CODE}
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE}
+     * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE}
      */
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DETAILED_CODE";
 
     /**
      * Key for an extra set on {@link PendingIntent} result callbacks providing a
-     * OperationCode of {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}.
+     * OperationCode of {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE},
+     * value will be an int.
      */
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_OPERATION_CODE =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_OPERATION_CODE";
 
     /**
      * Key for an extra set on {@link PendingIntent} result callbacks providing a
-     * ErrorCode of {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}.
+     * ErrorCode of {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE},
+     * value will be an int.
      */
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_ERROR_CODE =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_ERROR_CODE";
@@ -286,6 +297,7 @@ public class EuiccManager {
      * Key for an extra set on {@link PendingIntent} result callbacks providing a
      * SubjectCode[5.2.6.1] from GSMA (SGP.22 v2.2) decoded from
      * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}.
+     * The value of this extra will be a String.
      */
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_SMDX_SUBJECT_CODE";
@@ -294,6 +306,7 @@ public class EuiccManager {
      * Key for an extra set on {@link PendingIntent} result callbacks providing a
      * ReasonCode[5.2.6.2] from GSMA (SGP.22 v2.2) decoded from
      * {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE}.
+     * The value of this extra will be a String.
      */
     public static final String EXTRA_EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE =
             "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_SMDX_REASON_CODE";
@@ -668,7 +681,7 @@ public class EuiccManager {
             ERROR_EUICC_MISSING,
             ERROR_UNSUPPORTED_VERSION,
             ERROR_SIM_MISSING,
-            ERROR_EUICC_GSMA_INSTALL_ERROR,
+            ERROR_INSTALL_PROFILE,
             ERROR_DISALLOWED_BY_PPR,
             ERROR_ADDRESS_MISSING,
             ERROR_CERTIFICATE_ERROR,
@@ -736,14 +749,14 @@ public class EuiccManager {
     public static final int ERROR_SIM_MISSING = 10008;
 
     /**
-     * Failure to load the profile onto the eUICC card. i.e
+     * Failure to load the profile onto the eUICC card. e.g
      * 1. iccid of the profile already exists on the eUICC.
      * 2. GSMA(.22 v2.2) Profile Install Result - installFailedDueToDataMismatch
      * 3. operation was interrupted
      * 4. SIMalliance error in PEStatus(SGP.22 v2.2 section 2.5.6.1)
      * @see {@link #EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE} for details
      */
-    public static final int ERROR_EUICC_GSMA_INSTALL_ERROR = 10009;
+    public static final int ERROR_INSTALL_PROFILE = 10009;
 
     /**
      * Failed to load profile onto eUICC due to Profile Poicly Rules.
