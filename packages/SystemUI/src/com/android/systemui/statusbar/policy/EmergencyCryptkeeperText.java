@@ -97,7 +97,7 @@ public class EmergencyCryptkeeperText extends TextView {
         boolean allSimsMissing = true;
         CharSequence displayText = null;
 
-        List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
+        List<SubscriptionInfo> subs = mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(false);
         final int N = subs.size();
         for (int i = 0; i < N; i++) {
             int subId = subs.get(i).getSubscriptionId();

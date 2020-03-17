@@ -19,16 +19,12 @@ package com.android.keyguard;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
 import static android.telephony.PhoneStateListener.LISTEN_NONE;
 
-import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
-import android.os.SystemProperties;
-import android.telephony.CarrierConfigManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -37,19 +33,17 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.VisibleForTesting;
-
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import androidx.annotation.VisibleForTesting;
 
 /**
  * Controller that generates text including the carrier names and/or the status of all the SIM
@@ -73,8 +67,6 @@ public class CarrierTextController {
     private Context mContext;
     private CharSequence mSeparator;
     private WakefulnessLifecycle mWakefulnessLifecycle;
-    @VisibleForTesting
-    protected boolean mDisplayOpportunisticSubscriptionCarrierText;
     private final WakefulnessLifecycle.Observer mWakefulnessObserver =
             new WakefulnessLifecycle.Observer() {
                 @Override
@@ -175,9 +167,6 @@ public class CarrierTextController {
         mSimSlotsNumber = ((TelephonyManager) context.getSystemService(
                 Context.TELEPHONY_SERVICE)).getPhoneCount();
         mSimErrorState = new boolean[mSimSlotsNumber];
-        updateDisplayOpportunisticSubscriptionCarrierText(SystemProperties.getBoolean(
-                TelephonyProperties.DISPLAY_OPPORTUNISTIC_SUBSCRIPTION_CARRIER_TEXT_PROPERTY_NAME,
-                false));
     }
 
     /**
@@ -254,63 +243,8 @@ public class CarrierTextController {
         }
     }
 
-    /**
-     * @param subscriptions
-     */
-    private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
-        if (subscriptions.size() == MAX_PHONE_COUNT_DUAL_SIM) {
-            SubscriptionInfo info1 = subscriptions.get(0);
-            SubscriptionInfo info2 = subscriptions.get(1);
-            if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
-                // If both subscriptions are primary, show both.
-                if (!info1.isOpportunistic() && !info2.isOpportunistic()) return;
-
-                // If carrier required, always show signal bar of primary subscription.
-                // Otherwise, show whichever subscription is currently active for Internet.
-                boolean alwaysShowPrimary = CarrierConfigManager.getDefaultConfig()
-                        .getBoolean(CarrierConfigManager
-                        .KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN);
-                if (alwaysShowPrimary) {
-                    subscriptions.remove(info1.isOpportunistic() ? info1 : info2);
-                } else {
-                    subscriptions.remove(info1.getSubscriptionId() == mActiveMobileDataSubscription
-                            ? info2 : info1);
-                }
-
-            }
-        }
-    }
-
-    /**
-     * updates if opportunistic sub carrier text should be displayed or not
-     *
-     */
-    @VisibleForTesting
-    public void updateDisplayOpportunisticSubscriptionCarrierText(boolean isEnable) {
-        mDisplayOpportunisticSubscriptionCarrierText = isEnable;
-    }
-
     protected List<SubscriptionInfo> getSubscriptionInfo() {
-        List<SubscriptionInfo> subs;
-        if (mDisplayOpportunisticSubscriptionCarrierText) {
-            SubscriptionManager subscriptionManager = ((SubscriptionManager) mContext
-                    .getSystemService(
-                    Context.TELEPHONY_SUBSCRIPTION_SERVICE));
-            subs = subscriptionManager.getActiveSubscriptionInfoList(false);
-            if (subs == null) {
-                subs = new ArrayList<>();
-            } else {
-                filterMobileSubscriptionInSameGroup(subs);
-            }
-        } else {
-            subs = mKeyguardUpdateMonitor.getSubscriptionInfo(false);
-            if (subs == null) {
-                subs = new ArrayList<>();
-            } else {
-                filterMobileSubscriptionInSameGroup(subs);
-            }
-        }
-        return subs;
+        return mKeyguardUpdateMonitor.getFilteredSubscriptionInfo(false);
     }
 
     protected void updateCarrierText() {
