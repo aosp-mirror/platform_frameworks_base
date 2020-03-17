@@ -3049,6 +3049,10 @@
     <!-- Whether to use voip audio mode for ims call -->
     <bool name="config_use_voip_mode_for_ims">false</bool>
 
+    <!-- Boolean indicating USSD over IMS is allowed.
+     If it is not supported due to modem limitations, USSD send over the CS pipe instead.-->
+    <bool name="config_allow_ussd_over_ims">false</bool>
+
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
 
