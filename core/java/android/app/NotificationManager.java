@@ -1015,14 +1015,15 @@ public class NotificationManager {
     }
 
     /**
+     * Returns the currently applied notification policy.
+     *
      * <p>
-     *  Gets the currently applied notification policy. If {@link #getCurrentInterruptionFilter}
-     * is equal to {@link #INTERRUPTION_FILTER_ALL}, then the consolidated notification policy
-     * will match the default notification policy returned by {@link #getNotificationPolicy}.
+     * If {@link #getCurrentInterruptionFilter} is equal to {@link #INTERRUPTION_FILTER_ALL},
+     * then the consolidated notification policy will match the default notification policy
+     * returned by {@link #getNotificationPolicy}.
      * </p>
      */
-    @Nullable
-    public NotificationManager.Policy getConsolidatedNotificationPolicy() {
+    public @NonNull NotificationManager.Policy getConsolidatedNotificationPolicy() {
         INotificationManager service = getService();
         try {
             return service.getConsolidatedNotificationPolicy();
