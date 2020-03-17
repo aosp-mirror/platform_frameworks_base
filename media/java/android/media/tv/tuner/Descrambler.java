@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.filter.Filter;
 
 import java.lang.annotation.Retention;
