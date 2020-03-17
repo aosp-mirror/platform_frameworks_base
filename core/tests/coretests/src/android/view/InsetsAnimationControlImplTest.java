@@ -188,7 +188,7 @@ public class InsetsAnimationControlImplTest {
             fail("Expected exception to be thrown");
         } catch (IllegalStateException ignored) {
         }
-        verify(mMockListener).onCancelled();
+        verify(mMockListener).onCancelled(mController);
         mController.finish(true /* shown */);
     }
 
