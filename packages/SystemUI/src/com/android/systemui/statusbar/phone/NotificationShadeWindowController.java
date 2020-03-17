@@ -309,7 +309,8 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         return !state.mForceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.mPanelVisible || state.mKeyguardFadingAway || state.mBouncerShowing
                 || state.mHeadsUpShowing || state.mBubblesShowing
-                || state.mScrimsVisibility != ScrimController.TRANSPARENT);
+                || state.mScrimsVisibility != ScrimController.TRANSPARENT)
+                || state.mBackgroundBlurRadius > 0;
     }
 
     private void applyFitsSystemWindows(State state) {
@@ -475,6 +476,19 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
 
     public void setScrimsVisibility(int scrimsVisibility) {
         mCurrentState.mScrimsVisibility = scrimsVisibility;
+        apply(mCurrentState);
+    }
+
+    /**
+     * Current blur level, controller by
+     * {@link com.android.systemui.statusbar.NotificationShadeDepthController}.
+     * @param backgroundBlurRadius Radius in pixels.
+     */
+    public void setBackgroundBlurRadius(int backgroundBlurRadius) {
+        if (mCurrentState.mBackgroundBlurRadius == backgroundBlurRadius) {
+            return;
+        }
+        mCurrentState.mBackgroundBlurRadius = backgroundBlurRadius;
         apply(mCurrentState);
     }
 
@@ -665,6 +679,7 @@ public class NotificationShadeWindowController implements Callback, Dumpable,
         boolean mForcePluginOpen;
         boolean mDozing;
         int mScrimsVisibility;
+        int mBackgroundBlurRadius;
 
         private boolean isKeyguardShowingAndNotOccluded() {
             return mKeyguardShowing && !mKeyguardOccluded;
