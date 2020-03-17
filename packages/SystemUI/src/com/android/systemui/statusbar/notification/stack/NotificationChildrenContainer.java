@@ -412,7 +412,7 @@ public class NotificationChildrenContainer extends ViewGroup {
      * @param callback
      * @return whether the list order has changed
      */
-    public boolean applyChildOrder(List<ExpandableNotificationRow> childOrder,
+    public boolean applyChildOrder(List<? extends NotificationListItem> childOrder,
             VisualStabilityManager visualStabilityManager,
             VisualStabilityManager.Callback callback) {
         if (childOrder == null) {
@@ -421,7 +421,7 @@ public class NotificationChildrenContainer extends ViewGroup {
         boolean result = false;
         for (int i = 0; i < mChildren.size() && i < childOrder.size(); i++) {
             ExpandableNotificationRow child = mChildren.get(i);
-            ExpandableNotificationRow desiredChild = childOrder.get(i);
+            ExpandableNotificationRow desiredChild = (ExpandableNotificationRow) childOrder.get(i);
             if (child != desiredChild) {
                 if (visualStabilityManager.canReorderNotification(desiredChild)) {
                     mChildren.remove(desiredChild);
