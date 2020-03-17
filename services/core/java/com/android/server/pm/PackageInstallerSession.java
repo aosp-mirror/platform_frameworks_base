@@ -1487,6 +1487,18 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         return e;
     }
 
+    private void onDataLoaderUnrecoverable() {
+        final PackageManagerService packageManagerService = mPm;
+        final String packageName = mPackageName;
+        mHandler.post(() -> {
+            if (packageManagerService.deletePackageX(packageName,
+                    PackageManager.VERSION_CODE_HIGHEST, UserHandle.USER_SYSTEM,
+                    PackageManager.DELETE_ALL_USERS) != PackageManager.DELETE_SUCCEEDED) {
+                Slog.e(TAG, "Failed to uninstall package with failed dataloader: " + packageName);
+            }
+        });
+    }
+
     /**
      * If session should be sealed, then it's sealed to prevent further modification.
      * If the session can't be sealed then it's destroyed.
@@ -2564,11 +2576,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         IDataLoaderStatusListener listener = new IDataLoaderStatusListener.Stub() {
             @Override
             public void onStatusChanged(int dataLoaderId, int status) {
-                try {
-                    if (status == IDataLoaderStatusListener.DATA_LOADER_DESTROYED) {
+                switch (status) {
+                    case IDataLoaderStatusListener.DATA_LOADER_STOPPED:
+                    case IDataLoaderStatusListener.DATA_LOADER_DESTROYED:
                         return;
-                    }
+                    case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
+                        onDataLoaderUnrecoverable();
+                        return;
+                }
 
+                if (mDestroyed || mDataLoaderFinished) {
+                    return;
+                }
+
+                try {
                     IDataLoader dataLoader = dataLoaderManager.getDataLoader(dataLoaderId);
                     if (dataLoader == null) {
                         mDataLoaderFinished = true;
