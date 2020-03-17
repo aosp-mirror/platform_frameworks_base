@@ -22,6 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.NetworkType;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -538,7 +539,7 @@ public class NetworkInfo implements Parcelable {
     @Override
     public String toString() {
         synchronized (this) {
-            StringBuilder builder = new StringBuilder("[");
+            final StringBuilder builder = new StringBuilder("[");
             builder.append("type: ").append(getTypeName()).append("[").append(getSubtypeName()).
             append("], state: ").append(mState).append("/").append(mDetailedState).
             append(", reason: ").append(mReason == null ? "(unspecified)" : mReason).
@@ -547,6 +548,32 @@ public class NetworkInfo implements Parcelable {
             append(", available: ").append(mIsAvailable).
             append(", roaming: ").append(mIsRoaming).
             append("]");
+            return builder.toString();
+        }
+    }
+
+    /**
+     * Returns a brief summary string suitable for debugging.
+     * @hide
+     */
+    public String toShortString() {
+        synchronized (this) {
+            final StringBuilder builder = new StringBuilder();
+            builder.append(getTypeName());
+
+            final String subtype = getSubtypeName();
+            if (!TextUtils.isEmpty(subtype)) {
+                builder.append("[").append(subtype).append("]");
+            }
+
+            builder.append(" ");
+            builder.append(mDetailedState);
+            if (mIsRoaming) {
+                builder.append(" ROAMING");
+            }
+            if (mExtraInfo != null) {
+                builder.append(" extra: ").append(mExtraInfo);
+            }
             return builder.toString();
         }
     }
