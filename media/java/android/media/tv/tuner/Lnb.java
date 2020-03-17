@@ -23,7 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
-import android.media.tv.tuner.TunerConstants.Result;
+import android.media.tv.tuner.Tuner.Result;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
