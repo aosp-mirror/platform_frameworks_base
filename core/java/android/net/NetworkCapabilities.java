@@ -37,9 +37,7 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -96,7 +94,7 @@ public final class NetworkCapabilities implements Parcelable {
         mTransportInfo = null;
         mSignalStrength = SIGNAL_STRENGTH_UNSPECIFIED;
         mUids = null;
-        mAdministratorUids.clear();
+        mAdministratorUids = new int[0];
         mOwnerUid = Process.INVALID_UID;
         mSSID = null;
         mPrivateDnsBroken = false;
@@ -884,10 +882,10 @@ public final class NetworkCapabilities implements Parcelable {
      * empty unless the destination is 1) the System Server, or 2) Telephony. In either case, the
      * receiving entity must have the ACCESS_FINE_LOCATION permission and target R+.
      */
-    private final List<Integer> mAdministratorUids = new ArrayList<>();
+    private int[] mAdministratorUids = new int[0];
 
     /**
-     * Sets the list of UIDs that are administrators of this network.
+     * Sets the int[] of UIDs that are administrators of this network.
      *
      * <p>UIDs included in administratorUids gain administrator privileges over this Network.
      * Examples of UIDs that should be included in administratorUids are:
@@ -907,23 +905,21 @@ public final class NetworkCapabilities implements Parcelable {
      */
     @NonNull
     @SystemApi
-    public NetworkCapabilities setAdministratorUids(
-            @NonNull final List<Integer> administratorUids) {
-        mAdministratorUids.clear();
-        mAdministratorUids.addAll(administratorUids);
+    public NetworkCapabilities setAdministratorUids(@NonNull final int[] administratorUids) {
+        mAdministratorUids = Arrays.copyOf(administratorUids, administratorUids.length);
         return this;
     }
 
     /**
-     * Retrieves the list of UIDs that are administrators of this Network.
+     * Retrieves the UIDs that are administrators of this Network.
      *
-     * @return the List of UIDs that are administrators of this Network
+     * @return the int[] of UIDs that are administrators of this Network
      * @hide
      */
     @NonNull
     @SystemApi
-    public List<Integer> getAdministratorUids() {
-        return Collections.unmodifiableList(mAdministratorUids);
+    public int[] getAdministratorUids() {
+        return Arrays.copyOf(mAdministratorUids, mAdministratorUids.length);
     }
 
     /**
@@ -1584,7 +1580,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeArraySet(mUids);
         dest.writeString(mSSID);
         dest.writeBoolean(mPrivateDnsBroken);
-        dest.writeList(mAdministratorUids);
+        dest.writeIntArray(mAdministratorUids);
         dest.writeInt(mOwnerUid);
         dest.writeInt(mRequestorUid);
         dest.writeString(mRequestorPackageName);
@@ -1608,7 +1604,7 @@ public final class NetworkCapabilities implements Parcelable {
                         null /* ClassLoader, null for default */);
                 netCap.mSSID = in.readString();
                 netCap.mPrivateDnsBroken = in.readBoolean();
-                netCap.setAdministratorUids(in.readArrayList(null));
+                netCap.setAdministratorUids(in.createIntArray());
                 netCap.mOwnerUid = in.readInt();
                 netCap.mRequestorUid = in.readInt();
                 netCap.mRequestorPackageName = in.readString();
@@ -1665,8 +1661,8 @@ public final class NetworkCapabilities implements Parcelable {
             sb.append(" OwnerUid: ").append(mOwnerUid);
         }
 
-        if (!mAdministratorUids.isEmpty()) {
-            sb.append(" AdministratorUids: ").append(mAdministratorUids);
+        if (mAdministratorUids.length == 0) {
+            sb.append(" AdministratorUids: ").append(Arrays.toString(mAdministratorUids));
         }
 
         if (null != mSSID) {

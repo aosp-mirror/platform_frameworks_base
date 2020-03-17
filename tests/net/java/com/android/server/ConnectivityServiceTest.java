@@ -6847,7 +6847,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testCheckConnectivityDiagnosticsPermissionsNetworkAdministrator() throws Exception {
         final NetworkCapabilities nc = new NetworkCapabilities();
-        nc.setAdministratorUids(Arrays.asList(Process.myUid()));
+        nc.setAdministratorUids(new int[] {Process.myUid()});
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, nc, 0, mServiceContext, null, null,
@@ -6869,7 +6869,7 @@ public class ConnectivityServiceTest {
     public void testCheckConnectivityDiagnosticsPermissionsFails() throws Exception {
         final NetworkCapabilities nc = new NetworkCapabilities();
         nc.setOwnerUid(Process.myUid());
-        nc.setAdministratorUids(Arrays.asList(Process.myUid()));
+        nc.setAdministratorUids(new int[] {Process.myUid()});
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, nc, 0, mServiceContext, null, null,
@@ -6922,7 +6922,7 @@ public class ConnectivityServiceTest {
                 argThat(report -> {
                     final NetworkCapabilities nc = report.getNetworkCapabilities();
                     return nc.getUids() == null
-                            && nc.getAdministratorUids().isEmpty()
+                            && nc.getAdministratorUids().length == 0
                             && nc.getOwnerUid() == Process.INVALID_UID;
                 }));
     }
@@ -6943,7 +6943,7 @@ public class ConnectivityServiceTest {
                 argThat(report -> {
                     final NetworkCapabilities nc = report.getNetworkCapabilities();
                     return nc.getUids() == null
-                            && nc.getAdministratorUids().isEmpty()
+                            && nc.getAdministratorUids().length == 0
                             && nc.getOwnerUid() == Process.INVALID_UID;
                 }));
     }
