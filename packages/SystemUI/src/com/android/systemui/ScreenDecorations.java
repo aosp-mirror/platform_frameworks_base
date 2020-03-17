@@ -122,7 +122,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     protected int mRoundedDefaultBottom;
     @VisibleForTesting
     protected View[] mOverlays;
-    private DisplayCutoutView[] mCutoutViews;
+    private DisplayCutoutView[] mCutoutViews = new DisplayCutoutView[BOUNDS_POSITION_LENGTH];
     private float mDensity;
     private WindowManager mWindowManager;
     private int mRotation;
