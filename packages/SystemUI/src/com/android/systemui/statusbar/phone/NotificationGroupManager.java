@@ -398,8 +398,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener, State
         NotificationGroup group = mGroupMap.get(groupKey);
         //TODO: see if this can become an Entry
         return group == null ? null
-                : group.summary == null ? null
-                        : group.summary;
+                : group.summary;
     }
 
     /**
