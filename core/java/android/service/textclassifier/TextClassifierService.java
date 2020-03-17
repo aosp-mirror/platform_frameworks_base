@@ -41,7 +41,6 @@ import android.util.Slog;
 import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
-import android.view.textclassifier.TextClassificationConstants;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
@@ -405,27 +404,19 @@ public abstract class TextClassifierService extends Service {
      */
     @NonNull
     public static TextClassifier getDefaultTextClassifierImplementation(@NonNull Context context) {
-        final TextClassificationManager tcm =
-                context.getSystemService(TextClassificationManager.class);
-        if (tcm == null) {
+        final String defaultTextClassifierPackageName =
+                context.getPackageManager().getDefaultTextClassifierPackageName();
+        if (TextUtils.isEmpty(defaultTextClassifierPackageName)) {
             return TextClassifier.NO_OP;
         }
-        TextClassificationConstants settings = new TextClassificationConstants();
-        if (settings.getUseDefaultTextClassifierAsDefaultImplementation()) {
-            final String defaultTextClassifierPackageName =
-                    context.getPackageManager().getDefaultTextClassifierPackageName();
-            if (TextUtils.isEmpty(defaultTextClassifierPackageName)) {
-                return TextClassifier.NO_OP;
-            }
-            if (defaultTextClassifierPackageName.equals(context.getPackageName())) {
-                throw new RuntimeException(
-                        "The default text classifier itself should not call the"
-                                + "getDefaultTextClassifierImplementation() method.");
-            }
-            return tcm.getTextClassifier(TextClassifier.DEFAULT_SERVICE);
-        } else {
-            return tcm.getTextClassifier(TextClassifier.LOCAL);
+        if (defaultTextClassifierPackageName.equals(context.getPackageName())) {
+            throw new RuntimeException(
+                    "The default text classifier itself should not call the"
+                            + "getDefaultTextClassifierImplementation() method.");
         }
+        final TextClassificationManager tcm =
+                context.getSystemService(TextClassificationManager.class);
+        return tcm.getTextClassifier(TextClassifier.DEFAULT_SYSTEM);
     }
 
     /** @hide **/

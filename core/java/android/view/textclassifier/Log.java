@@ -32,7 +32,7 @@ public final class Log {
      * false: Limits logging to debug level.
      */
     static final boolean ENABLE_FULL_LOGGING =
-            android.util.Log.isLoggable(TextClassifier.DEFAULT_LOG_TAG, android.util.Log.VERBOSE);
+            android.util.Log.isLoggable(TextClassifier.LOG_TAG, android.util.Log.VERBOSE);
 
     private Log() {
     }
