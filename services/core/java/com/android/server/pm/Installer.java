@@ -724,6 +724,30 @@ public class Installer extends SystemService {
     }
 
     /**
+     * Deletes all snapshots of credential encrypted user data, where the snapshot id is not
+     * included in {@code retainSnapshotIds}.
+     *
+     * @param userId id of the user whose user data snapshots to delete.
+     * @param retainSnapshotIds ids of the snapshots that should not be deleted.
+     *
+     * @return {@code true} if the operation was successful, or {@code false} if a remote call
+     * shouldn't be continued. See {@link #checkBeforeRemote}.
+     *
+     * @throws InstallerException if failed to delete user data snapshot.
+     */
+    public boolean destroyCeSnapshotsNotSpecified(@UserIdInt int userId,
+            int[] retainSnapshotIds) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+
+        try {
+            mInstalld.destroyCeSnapshotsNotSpecified(null, userId, retainSnapshotIds);
+            return true;
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    /**
      * Migrates obb data from its legacy location {@code /data/media/obb} to
      * {@code /data/media/0/Android/obb}. This call is idempotent and a fast no-op if data has
      * already been migrated.

@@ -504,6 +504,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub {
             rollbackIds[i] = mRollbacks.get(i).info.getRollbackId();
         }
         ApexManager.getInstance().destroyCeSnapshotsNotSpecified(userId, rollbackIds);
+        try {
+            mInstaller.destroyCeSnapshotsNotSpecified(userId, rollbackIds);
+        } catch (Installer.InstallerException ie) {
+            Slog.e(TAG, "Failed to delete snapshots for user: " + userId, ie);
+        }
     }
 
     @WorkerThread
