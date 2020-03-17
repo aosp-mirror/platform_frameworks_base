@@ -28,9 +28,9 @@ java_library_static {
         "android.hardware.power-V1.0-java",
         "android.hardware.tv.cec-V1.0-java",
         "android.hardware.vibrator-java",
+        "android.net.ipsec.ike.stubs.module_libs_api",
         "app-compat-annotations",
         "framework-tethering-stubs-module_libs_api",
-        "ike-stubs",
     ],
 
     required: [
