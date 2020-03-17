@@ -7459,7 +7459,15 @@ package android.net.wifi {
   }
 
   public final class WifiMigration {
+    method @Nullable public static java.io.InputStream convertAndRetrieveSharedConfigStoreFile(int);
+    method @Nullable public static java.io.InputStream convertAndRetrieveUserConfigStoreFile(int, @NonNull android.os.UserHandle);
     method @NonNull public static android.net.wifi.WifiMigration.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
+    method public static void removeSharedConfigStoreFile(int);
+    method public static void removeUserConfigStoreFile(int, @NonNull android.os.UserHandle);
+    field public static final int STORE_FILE_SHARED_GENERAL = 0; // 0x0
+    field public static final int STORE_FILE_SHARED_SOFTAP = 1; // 0x1
+    field public static final int STORE_FILE_USER_GENERAL = 2; // 0x2
+    field public static final int STORE_FILE_USER_NETWORK_SUGGESTIONS = 3; // 0x3
   }
 
   public static final class WifiMigration.SettingsMigrationData implements android.os.Parcelable {
