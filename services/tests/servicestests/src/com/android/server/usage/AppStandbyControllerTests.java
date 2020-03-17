@@ -810,7 +810,7 @@ public class AppStandbyControllerTests {
     }
 
     @Test
-    public void testPredictionRaiseFromRestrictedTimeout() {
+    public void testPredictionRaiseFromRestrictedTimeout_highBucket() {
         reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
 
         // Way past all timeouts. App times out into RESTRICTED bucket.
@@ -823,6 +823,24 @@ public class AppStandbyControllerTests {
         mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_ACTIVE,
                 REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+    }
+
+    @Test
+    public void testPredictionRaiseFromRestrictedTimeout_lowBucket() {
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+
+        // Way past all timeouts. App times out into RESTRICTED bucket.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Prediction into a low bucket means no expectation of the app being used, so we shouldn't
+        // elevate the app from RESTRICTED.
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RARE,
+                REASON_MAIN_PREDICTED);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
     }
 
     @Test
