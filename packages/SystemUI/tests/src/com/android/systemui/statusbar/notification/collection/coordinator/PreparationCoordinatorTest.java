@@ -33,6 +33,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.NotifViewBarn;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
@@ -86,6 +87,7 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mock(PreparationCoordinatorLogger.class),
                 mNotifInflater,
                 mErrorManager,
+                mock(NotifViewBarn.class),
                 mService);
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
