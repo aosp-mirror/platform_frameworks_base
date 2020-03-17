@@ -180,7 +180,7 @@ public final class WalletCard implements Parcelable {
          *                           GetWalletCardsRequest#getCardWidthPx()} and a height of {@link
          *                           GetWalletCardsRequest#getCardHeightPx()}. If the card image
          *                           does not have these dimensions, it may appear distorted when it
-         *                           is scaled to fit these dimensions on screen. Bitmaps should be
+         *                           is scaled to fit these dimensions on screen. Bitmaps must be
          *                           of type {@link android.graphics.Bitmap.Config#HARDWARE} for
          *                           performance reasons.
          * @param contentDescription The content description of the card image. This field is

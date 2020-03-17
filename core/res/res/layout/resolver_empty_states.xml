@@ -38,7 +38,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textColor="@color/resolver_empty_state_text"
-        android:textSize="18sp"
+        android:textSize="14sp"
         android:layout_centerHorizontal="true" />
     <TextView
         android:id="@+id/resolver_empty_state_subtitle"
@@ -47,7 +47,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/resolver_empty_state_text"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:gravity="center_horizontal"
         android:layout_centerHorizontal="true" />
     <Button

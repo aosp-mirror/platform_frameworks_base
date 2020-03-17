@@ -28,6 +28,8 @@ import android.media.tv.TvInputService;
 import android.media.tv.tuner.frontend.FrontendSettings;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
+import android.media.tv.tunerresourcemanager.TunerDemuxRequest;
+import android.media.tv.tunerresourcemanager.TunerDescramblerRequest;
 import android.media.tv.tunerresourcemanager.TunerFrontendInfo;
 import android.media.tv.tunerresourcemanager.TunerFrontendRequest;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
@@ -91,6 +93,13 @@ public class TunerResourceManagerServiceTest {
                 return "is correctly configured from ";
             }
         };
+
+    private static int getResourceIdFromHandle(int resourceHandle) {
+        if (resourceHandle == TunerResourceManager.INVALID_RESOURCE_HANDLE) {
+            return resourceHandle;
+        }
+        return (resourceHandle & 0x00ff0000) >> 16;
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -229,14 +238,15 @@ public class TunerResourceManagerServiceTest {
     public void requestFrontendTest_ClientNotRegistered() {
         TunerFrontendRequest request =
                 new TunerFrontendRequest(0 /*clientId*/, FrontendSettings.TYPE_DVBT);
-        int[] frontendId = new int[1];
+        int[] frontendHandle = new int[1];
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isFalse();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isFalse();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(TunerResourceManager.INVALID_FRONTEND_ID);
+        assertThat(getResourceIdFromHandle(frontendHandle[0]))
+                .isEqualTo(TunerResourceManager.INVALID_RESOURCE_HANDLE);
     }
 
     @Test
@@ -256,14 +266,15 @@ public class TunerResourceManagerServiceTest {
 
         TunerFrontendRequest request =
                 new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
-        int[] frontendId = new int[1];
+        int[] frontendHandle = new int[1];
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isFalse();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isFalse();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(TunerResourceManager.INVALID_FRONTEND_ID);
+        assertThat(getResourceIdFromHandle(frontendHandle[0]))
+                .isEqualTo(TunerResourceManager.INVALID_RESOURCE_HANDLE);
     }
 
     @Test
@@ -287,14 +298,14 @@ public class TunerResourceManagerServiceTest {
 
         TunerFrontendRequest request =
                 new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
-        int[] frontendId = new int[1];
+        int[] frontendHandle = new int[1];
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isTrue();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isTrue();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(0);
+        assertThat(getResourceIdFromHandle(frontendHandle[0])).isEqualTo(0);
     }
 
     @Test
@@ -322,26 +333,26 @@ public class TunerResourceManagerServiceTest {
                 new TunerFrontendInfo(2 /*id*/, FrontendSettings.TYPE_DVBS, 1 /*exclusiveGroupId*/);
         mTunerResourceManagerService.setFrontendInfoListInternal(infos);
 
-        int[] frontendId = new int[1];
+        int[] frontendHandle = new int[1];
         TunerFrontendRequest request =
                 new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isTrue();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isTrue();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(infos[0].getId());
+        assertThat(getResourceIdFromHandle(frontendHandle[0])).isEqualTo(infos[0].getId());
 
         request =
                 new TunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isTrue();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isTrue();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(infos[1].getId());
+        assertThat(getResourceIdFromHandle(frontendHandle[0])).isEqualTo(infos[1].getId());
         assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
                 .isInUse()).isTrue();
         assertThat(mTunerResourceManagerService.getFrontendResource(infos[2].getId())
@@ -382,10 +393,10 @@ public class TunerResourceManagerServiceTest {
 
         TunerFrontendRequest request =
                 new TunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
-        int[] frontendId = new int[1];
+        int[] frontendHandle = new int[1];
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isTrue();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isTrue();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -393,8 +404,8 @@ public class TunerResourceManagerServiceTest {
         request =
                 new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isFalse();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isFalse();
             assertThat(listener.isRelaimed()).isFalse();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -403,8 +414,8 @@ public class TunerResourceManagerServiceTest {
         request =
                 new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isFalse();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isFalse();
             assertThat(listener.isRelaimed()).isFalse();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -444,24 +455,24 @@ public class TunerResourceManagerServiceTest {
 
         TunerFrontendRequest request =
                 new TunerFrontendRequest(clientId0[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
-        int[] frontendId = new int[1];
+        int[] frontendHandle = new int[1];
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isTrue();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isTrue();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(infos[0].getId());
+        assertThat(getResourceIdFromHandle(frontendHandle[0])).isEqualTo(infos[0].getId());
 
         request =
                 new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isTrue();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isTrue();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(infos[1].getId());
+        assertThat(getResourceIdFromHandle(frontendHandle[0])).isEqualTo(infos[1].getId());
         assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
                 .isInUse()).isTrue();
         assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
@@ -493,14 +504,14 @@ public class TunerResourceManagerServiceTest {
 
         TunerFrontendRequest request =
                 new TunerFrontendRequest(clientId[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
-        int[] frontendId = new int[1];
+        int[] frontendHandle = new int[1];
         try {
-            assertThat(mTunerResourceManagerService.requestFrontendInternal(request, frontendId))
-                    .isTrue();
+            assertThat(mTunerResourceManagerService
+                    .requestFrontendInternal(request, frontendHandle)).isTrue();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        assertThat(frontendId[0]).isEqualTo(infos[0].getId());
+        assertThat(getResourceIdFromHandle(frontendHandle[0])).isEqualTo(infos[0].getId());
         assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
                 .isInUse()).isTrue();
         assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
@@ -514,5 +525,39 @@ public class TunerResourceManagerServiceTest {
                 .isInUse()).isFalse();
         assertThat(mTunerResourceManagerService.checkClientExists(clientId[0])).isFalse();
 
+    }
+
+    @Test
+    public void requestDemuxTest() {
+        // Register client
+        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId = new int[1];
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile, null /*listener*/, clientId);
+        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        int[] demuxHandle = new int[1];
+        TunerDemuxRequest request = new TunerDemuxRequest(clientId[0]);
+        assertThat(mTunerResourceManagerService.requestDemuxInternal(request, demuxHandle))
+                .isTrue();
+        assertThat(getResourceIdFromHandle(demuxHandle[0])).isEqualTo(0);
+    }
+
+    @Test
+    public void requestDescramblerTest() {
+        // Register client
+        ResourceClientProfile profile = new ResourceClientProfile("0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_PLAYBACK);
+        int[] clientId = new int[1];
+        mTunerResourceManagerService.registerClientProfileInternal(
+                profile, null /*listener*/, clientId);
+        assertThat(clientId[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        int[] desHandle = new int[1];
+        TunerDescramblerRequest request = new TunerDescramblerRequest(clientId[0]);
+        assertThat(mTunerResourceManagerService.requestDescramblerInternal(request, desHandle))
+                .isTrue();
+        assertThat(getResourceIdFromHandle(desHandle[0])).isEqualTo(0);
     }
 }

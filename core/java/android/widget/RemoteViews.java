@@ -2818,7 +2818,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
-     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * costly to set PendingIntents on the individual items, and is hence not recommended. Instead
      * this method should be used to set a single PendingIntent template on the collection, and
      * individual items can differentiate their on-click behavior using
      * {@link RemoteViews#setOnClickFillInIntent(int, Intent)}.
@@ -2834,7 +2834,7 @@ public class RemoteViews implements Parcelable, Filter {
 
     /**
      * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is very
-     * costly to set PendingIntents on the individual items, and is hence not permitted. Instead
+     * costly to set PendingIntents on the individual items, and is hence not recommended. Instead
      * a single PendingIntent template can be set on the collection, see {@link
      * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the individual on-click
      * action of a given item can be distinguished by setting a fillInIntent on that item. The
@@ -3960,7 +3960,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         /**
          * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is
-         * very costly to set PendingIntents on the individual items, and is hence not permitted.
+         * very costly to set PendingIntents on the individual items, and is hence not recommended.
          * Instead a single PendingIntent template can be set on the collection, see {@link
          * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the individual on-click
          * action of a given item can be distinguished by setting a fillInIntent on that item. The

@@ -16,11 +16,13 @@
 package com.android.server.power.batterysaver;
 
 import android.Manifest;
+import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManagerInternal;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.BatteryManager;
 import android.os.BatterySaverPolicyConfig;
@@ -35,6 +37,7 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -49,6 +52,7 @@ import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Responsible for battery saver mode transition logic.
@@ -111,6 +115,14 @@ public class BatterySaverController implements BatterySaverPolicyListener {
      * Read-only list of plugins. No need for synchronization.
      */
     private final Plugin[] mPlugins;
+
+    /**
+     * Package name that will receive an explicit manifest broadcast for
+     * {@link PowerManager#ACTION_POWER_SAVE_MODE_CHANGED}. It's {@code null} if it hasn't been
+     * retrieved yet.
+     */
+    @Nullable
+    private Optional<String> mPowerSaveModeChangedListenerPackage;
 
     public static final int REASON_PERCENTAGE_AUTOMATIC_ON = 0;
     public static final int REASON_PERCENTAGE_AUTOMATIC_OFF = 1;
@@ -494,6 +506,14 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
 
+            // Send the broadcast to a manifest-registered receiver that is specified in the config.
+            if (getPowerSaveModeChangedListenerPackage().isPresent()) {
+                intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+                        .setPackage(getPowerSaveModeChangedListenerPackage().get())
+                        .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            }
+
             // Send internal version that requires signature permission.
             intent = new Intent(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
@@ -506,6 +526,20 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                 listener.onLowPowerModeChanged(result);
             }
         }
+    }
+
+    private Optional<String> getPowerSaveModeChangedListenerPackage() {
+        if (mPowerSaveModeChangedListenerPackage == null) {
+            String configPowerSaveModeChangedListenerPackage =
+                    mContext.getString(R.string.config_powerSaveModeChangedListenerPackage);
+            mPowerSaveModeChangedListenerPackage =
+                    LocalServices
+                            .getService(PackageManagerInternal.class)
+                            .isSystemPackage(configPowerSaveModeChangedListenerPackage)
+                            ? Optional.of(configPowerSaveModeChangedListenerPackage)
+                            : Optional.empty();
+        }
+        return mPowerSaveModeChangedListenerPackage;
     }
 
     private void updateBatterySavingStats() {
