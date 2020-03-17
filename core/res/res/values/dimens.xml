@@ -692,10 +692,10 @@
     <dimen name="conversation_expand_button_top_margin_expanded">18dp</dimen>
     <!-- Side margins of the conversation badge in relation to the conversation icon -->
     <dimen name="conversation_badge_side_margin">36dp</dimen>
-    <!-- size of the notification icon when badged in a conversation -->
-    <dimen name="conversation_icon_size_badged">15dp</dimen>
-    <!-- size of the notification icon when centered in a conversation -->
-    <dimen name="conversation_icon_size_centered">20dp</dimen>
+    <!-- size of the notification badge when applied to the conversation icon -->
+    <dimen name="conversation_icon_size_badged">20dp</dimen>
+    <!-- size of the notification badge when centered in a conversation -->
+    <dimen name="conversation_icon_size_centered">25dp</dimen>
     <!-- margin on the top when the icon is centered for group conversations -->
     <dimen name="conversation_icon_margin_top_centered">5dp</dimen>
 
