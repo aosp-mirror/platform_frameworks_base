@@ -19,6 +19,7 @@ package com.android.server.soundtrigger;
 import static android.Manifest.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
+import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
@@ -1133,7 +1134,8 @@ public class SoundTriggerService extends SystemService {
                 }
 
                 mIsBound = mContext.bindServiceAsUser(i, this,
-                        BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE, mUser);
+                        BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES,
+                        mUser);
 
                 if (mIsBound) {
                     mRemoteServiceWakeLock.acquire();
