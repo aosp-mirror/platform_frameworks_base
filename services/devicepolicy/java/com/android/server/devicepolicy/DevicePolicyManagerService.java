@@ -393,6 +393,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final long MS_PER_DAY = TimeUnit.DAYS.toMillis(1);
 
     private static final long EXPIRATION_GRACE_PERIOD_MS = 5 * MS_PER_DAY; // 5 days, in ms
+    private static final long MANAGED_PROFILE_MAXIMUM_TIME_OFF_THRESHOLD = 3 * MS_PER_DAY;
 
     private static final String ACTION_EXPIRED_PASSWORD_NOTIFICATION =
             "com.android.server.ACTION_EXPIRED_PASSWORD_NOTIFICATION";
@@ -15849,6 +15850,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // DO shouldn't be able to use this method.
             enforceProfileOwnerOfOrganizationOwnedDevice(admin);
             enforceHandlesCheckPolicyComplianceIntent(userId, admin.info.getPackageName());
+            Preconditions.checkArgument(timeoutMillis >= 0, "Timeout must be non-negative.");
+            // Ensure the timeout is long enough to avoid having bad user experience.
+            if (timeoutMillis > 0 && timeoutMillis < MANAGED_PROFILE_MAXIMUM_TIME_OFF_THRESHOLD
+                    && !isAdminTestOnlyLocked(who, userId)) {
+                timeoutMillis = MANAGED_PROFILE_MAXIMUM_TIME_OFF_THRESHOLD;
+            }
             if (admin.mProfileMaximumTimeOffMillis == timeoutMillis) {
                 return;
             }
