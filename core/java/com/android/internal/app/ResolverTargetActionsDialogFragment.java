@@ -27,6 +27,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.provider.Settings;
 
 import com.android.internal.R;
@@ -43,6 +44,7 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
     private static final String NAME_KEY = "componentName";
     private static final String TITLE_KEY = "title";
     private static final String PINNED_KEY = "pinned";
+    private static final String USER_ID_KEY = "userId";
 
     // Sync with R.array.resolver_target_actions_* resources
     private static final int TOGGLE_PIN_INDEX = 0;
@@ -56,19 +58,21 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
     }
 
     public ResolverTargetActionsDialogFragment(CharSequence title, ComponentName name,
-            boolean pinned) {
+            boolean pinned, UserHandle userHandle) {
         Bundle args = new Bundle();
         args.putCharSequence(TITLE_KEY, title);
         args.putParcelable(NAME_KEY, name);
         args.putBoolean(PINNED_KEY, pinned);
+        args.putParcelable(USER_ID_KEY, userHandle);
         setArguments(args);
     }
 
     public ResolverTargetActionsDialogFragment(CharSequence title, ComponentName name,
-            List<DisplayResolveInfo> targets, List<CharSequence> labels) {
+            List<DisplayResolveInfo> targets, List<CharSequence> labels, UserHandle userHandle) {
         Bundle args = new Bundle();
         args.putCharSequence(TITLE_KEY, title);
         args.putParcelable(NAME_KEY, name);
+        args.putParcelable(USER_ID_KEY, userHandle);
         mTargetInfos = targets;
         mLabels = labels;
         setArguments(args);
@@ -122,7 +126,8 @@ public class ResolverTargetActionsDialogFragment extends DialogFragment
             Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                     .setData(Uri.fromParts("package", name.getPackageName(), null))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-            startActivity(in);
+            UserHandle userHandle = args.getParcelable(USER_ID_KEY);
+            getActivity().startActivityAsUser(in, userHandle);
         }
         dismiss();
     }
