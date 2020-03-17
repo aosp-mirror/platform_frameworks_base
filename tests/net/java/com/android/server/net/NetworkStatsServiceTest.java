@@ -1034,10 +1034,10 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         // Create some initial traffic and report to the service.
         incrementCurrentTime(HOUR_IN_MILLIS);
         final NetworkStats expectedStats = new NetworkStats(0L, 1)
-                .addValues(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT,
+                .addEntry(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT,
                         TAG_NONE, METERED_YES, ROAMING_NO, DEFAULT_NETWORK_YES,
                         128L, 2L, 128L, 2L, 1L))
-                .addValues(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT,
+                .addEntry(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT,
                         0xF00D, METERED_YES, ROAMING_NO, DEFAULT_NETWORK_YES,
                         64L, 1L, 64L, 1L, 1L));
         cb.notifyStatsUpdated(0 /* unused */, expectedStats, expectedStats);
