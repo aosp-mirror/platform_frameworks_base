@@ -271,6 +271,10 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         }
     }
 
+    public boolean isActive() {
+        return mActivated;
+    }
+
     private void startActivateAnimation(final boolean reverse) {
         if (!isAttachedToWindow()) {
             return;
