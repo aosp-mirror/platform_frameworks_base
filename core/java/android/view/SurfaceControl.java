@@ -1960,7 +1960,7 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public static ScreenshotGraphicBuffer captureLayersExcluding(SurfaceControl layer,
-            Rect sourceCrop, float frameScale, SurfaceControl[] exclude) {
+          Rect sourceCrop, float frameScale, int format, SurfaceControl[] exclude) {
         final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
         long[] nativeExcludeObjects = new long[exclude.length];
         for (int i = 0; i < exclude.length; i++) {
