@@ -1090,7 +1090,9 @@ bool IncrementalService::prepareDataLoader(IncrementalService::IncFsMount& ifs,
             base::unique_fd(::dup(ifs.control.pendingReads)));
     fsControlParcel.incremental->log.reset(base::unique_fd(::dup(ifs.control.logs)));
     sp<IncrementalDataLoaderListener> listener =
-            new IncrementalDataLoaderListener(*this, *externalListener);
+            new IncrementalDataLoaderListener(*this,
+                                              externalListener ? *externalListener
+                                                               : DataLoaderStatusListener());
     bool created = false;
     auto status = mDataLoaderManager->initializeDataLoader(ifs.mountId, *dlp, fsControlParcel,
                                                            listener, &created);
@@ -1230,8 +1232,8 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
         std::unique_lock l(incrementalService.mLock);
         const auto& ifs = incrementalService.getIfsLocked(mountId);
         if (!ifs) {
-            LOG(WARNING) << "Received data loader status " << int(newStatus) << " for unknown mount "
-                         << mountId;
+            LOG(WARNING) << "Received data loader status " << int(newStatus)
+                         << " for unknown mount " << mountId;
             return binder::Status::ok();
         }
         ifs->dataLoaderStatus = newStatus;
