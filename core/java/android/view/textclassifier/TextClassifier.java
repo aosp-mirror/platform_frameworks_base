@@ -61,19 +61,32 @@ import java.util.Set;
 public interface TextClassifier {
 
     /** @hide */
-    String DEFAULT_LOG_TAG = "androidtc";
+    String LOG_TAG = "androidtc";
 
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {LOCAL, SYSTEM, DEFAULT_SERVICE})
+    @IntDef(value = {LOCAL, SYSTEM, DEFAULT_SYSTEM})
     @interface TextClassifierType {}  // TODO: Expose as system APIs.
     /** Specifies a TextClassifier that runs locally in the app's process. @hide */
     int LOCAL = 0;
     /** Specifies a TextClassifier that runs in the system process and serves all apps. @hide */
     int SYSTEM = 1;
     /** Specifies the default TextClassifier that runs in the system process. @hide */
-    int DEFAULT_SERVICE = 2;
+    int DEFAULT_SYSTEM = 2;
+
+    /** @hide */
+    static String typeToString(@TextClassifierType int type) {
+        switch (type) {
+            case LOCAL:
+                return "Local";
+            case SYSTEM:
+                return "System";
+            case DEFAULT_SYSTEM:
+                return "Default system";
+        }
+        return "Unknown";
+    }
 
     /** The TextClassifier failed to run. */
     String TYPE_UNKNOWN = "";
@@ -776,7 +789,7 @@ public interface TextClassifier {
 
         static void checkMainThread() {
             if (Looper.myLooper() == Looper.getMainLooper()) {
-                Log.w(DEFAULT_LOG_TAG, "TextClassifier called on main thread");
+                Log.w(LOG_TAG, "TextClassifier called on main thread");
             }
         }
     }
