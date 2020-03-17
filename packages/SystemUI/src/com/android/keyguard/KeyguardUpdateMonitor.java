@@ -2740,6 +2740,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastAllReceiver);
+
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     @Override
