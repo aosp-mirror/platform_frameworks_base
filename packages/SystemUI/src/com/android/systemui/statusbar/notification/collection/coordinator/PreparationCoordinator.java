@@ -26,6 +26,7 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.NotifViewBarn;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
@@ -57,6 +58,7 @@ public class PreparationCoordinator implements Coordinator {
     private final PreparationCoordinatorLogger mLogger;
     private final NotifInflater mNotifInflater;
     private final NotifInflationErrorManager mNotifErrorManager;
+    private final NotifViewBarn mViewBarn;
     private final Map<NotificationEntry, Integer> mInflationStates = new ArrayMap<>();
     private final IStatusBarService mStatusBarService;
 
@@ -65,12 +67,14 @@ public class PreparationCoordinator implements Coordinator {
             PreparationCoordinatorLogger logger,
             NotifInflaterImpl notifInflater,
             NotifInflationErrorManager errorManager,
+            NotifViewBarn viewBarn,
             IStatusBarService service) {
         mLogger = logger;
         mNotifInflater = notifInflater;
         mNotifInflater.setInflationCallback(mInflationCallback);
         mNotifErrorManager = errorManager;
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
+        mViewBarn = viewBarn;
         mStatusBarService = service;
     }
 
@@ -109,6 +113,7 @@ public class PreparationCoordinator implements Coordinator {
         @Override
         public void onEntryCleanUp(NotificationEntry entry) {
             mInflationStates.remove(entry);
+            mViewBarn.removeViewForEntry(entry);
         }
     };
 
@@ -142,6 +147,7 @@ public class PreparationCoordinator implements Coordinator {
         @Override
         public void onInflationFinished(NotificationEntry entry) {
             mLogger.logNotifInflated(entry.getKey());
+            mViewBarn.registerViewForEntry(entry, entry.getRow());
             mInflationStates.put(entry, STATE_INFLATED);
             mNotifInflatingFilter.invalidateList();
         }
@@ -151,6 +157,7 @@ public class PreparationCoordinator implements Coordinator {
             new NotifInflationErrorManager.NotifInflationErrorListener() {
         @Override
         public void onNotifInflationError(NotificationEntry entry, Exception e) {
+            mViewBarn.removeViewForEntry(entry);
             mInflationStates.put(entry, STATE_ERROR);
             try {
                 final StatusBarNotification sbn = entry.getSbn();
