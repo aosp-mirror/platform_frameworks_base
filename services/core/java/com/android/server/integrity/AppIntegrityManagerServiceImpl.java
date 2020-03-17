@@ -50,6 +50,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
@@ -73,6 +74,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
@@ -88,6 +90,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /** Implementation of {@link AppIntegrityManagerService}. */
 public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
@@ -240,6 +243,11 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
             Slog.e(TAG, "Error getting current rules", e);
         }
         return new ParceledListSlice<>(rules);
+    }
+
+    @Override
+    public List<String> getWhitelistedRuleProviders() throws RemoteException {
+        return getAllowedRuleProviders();
     }
 
     private void handleIntegrityVerification(Intent intent) {
@@ -473,9 +481,9 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
 
         SourceStampVerificationResult sourceStampVerificationResult;
         if (installationPath.isDirectory()) {
-            try {
+            try (Stream<Path> filesList = Files.list(installationPath.toPath())) {
                 List<String> apkFiles =
-                        Files.list(installationPath.toPath())
+                        filesList
                                 .map(path -> path.toAbsolutePath().toString())
                                 .collect(Collectors.toList());
                 sourceStampVerificationResult = SourceStampVerifier.verify(apkFiles);

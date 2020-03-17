@@ -154,7 +154,6 @@ import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.server.SystemService.TargetUser;
 import com.android.server.pm.Installer;
 import com.android.server.storage.AppFuseBridge;
 import com.android.server.storage.StorageSessionController;
@@ -232,6 +231,8 @@ class StorageManagerService extends IStorageManager.Stub
      */
     private static final String FUSE_ENABLED = "fuse_enabled";
     private static final boolean DEFAULT_FUSE_ENABLED = true;
+
+    private final Set<Integer> mFuseMountedUser = new ArraySet<>();
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
@@ -1497,6 +1498,9 @@ class StorageManagerService extends IStorageManager.Stub
 
     @GuardedBy("mLock")
     private void onVolumeStateChangedLocked(VolumeInfo vol, int oldState, int newState) {
+        if (vol.type == VolumeInfo.TYPE_EMULATED && newState != VolumeInfo.STATE_MOUNTED) {
+            mFuseMountedUser.remove(vol.getMountUserId());
+        }
         // Remember that we saw this volume so we're ready to accept user
         // metadata, or so we can annoy them when a private volume is ejected
         if (!TextUtils.isEmpty(vol.fsUuid)) {
@@ -2075,39 +2079,86 @@ class StorageManagerService extends IStorageManager.Stub
         mount(vol);
     }
 
+    private void remountAppStorageDirs(Map<Integer, String> pidPkgMap, int userId) {
+        for (Entry<Integer, String> entry : pidPkgMap.entrySet()) {
+            final int pid = entry.getKey();
+            final String packageName = entry.getValue();
+            Slog.i(TAG, "Remounting storage for pid: " + pid);
+            final String[] sharedPackages =
+                    mPmInternal.getSharedUserPackagesForPackage(packageName, userId);
+            final int uid = mPmInternal.getPackageUidInternal(packageName, 0, userId);
+            final String[] packages =
+                    sharedPackages.length != 0 ? sharedPackages : new String[]{packageName};
+            try {
+                mVold.remountAppStorageDirs(uid, pid, packages);
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        }
+    }
+
     private void mount(VolumeInfo vol) {
         try {
             // TODO(b/135341433): Remove paranoid logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
-                    @Override
-                    public boolean onVolumeChecking(FileDescriptor fd, String path,
-                            String internalPath) {
-                        vol.path = path;
-                        vol.internalPath = internalPath;
-                        ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd);
-                        try {
-                            mStorageSessionController.onVolumeMount(pfd, vol);
-                            return true;
-                        } catch (ExternalStorageServiceException e) {
-                            Slog.e(TAG, "Failed to mount volume " + vol, e);
+                @Override
+                public boolean onVolumeChecking(FileDescriptor fd, String path,
+                        String internalPath) {
+                    vol.path = path;
+                    vol.internalPath = internalPath;
+                    ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd);
+                    try {
+                        mStorageSessionController.onVolumeMount(pfd, vol);
+                        return true;
+                    } catch (ExternalStorageServiceException e) {
+                        Slog.e(TAG, "Failed to mount volume " + vol, e);
 
-                            int nextResetSeconds = REMOTE_TIMEOUT_SECONDS * 2;
-                            Slog.i(TAG, "Scheduling reset in " + nextResetSeconds + "s");
-                            mHandler.removeMessages(H_RESET);
-                            mHandler.sendMessageDelayed(mHandler.obtainMessage(H_RESET),
-                                    TimeUnit.SECONDS.toMillis(nextResetSeconds));
-                            return false;
-                        } finally {
-                            try {
-                                pfd.close();
-                            } catch (Exception e) {
-                                Slog.e(TAG, "Failed to close FUSE device fd", e);
-                            }
+                        int nextResetSeconds = REMOTE_TIMEOUT_SECONDS * 2;
+                        Slog.i(TAG, "Scheduling reset in " + nextResetSeconds + "s");
+                        mHandler.removeMessages(H_RESET);
+                        mHandler.sendMessageDelayed(mHandler.obtainMessage(H_RESET),
+                                TimeUnit.SECONDS.toMillis(nextResetSeconds));
+                        return false;
+                    } finally {
+                        try {
+                            pfd.close();
+                        } catch (Exception e) {
+                            Slog.e(TAG, "Failed to close FUSE device fd", e);
                         }
                     }
-                });
+                }
+            });
             Slog.i(TAG, "Mounted volume " + vol);
+            if (vol.type == VolumeInfo.TYPE_EMULATED) {
+                final int userId = vol.getMountUserId();
+                mFuseMountedUser.add(userId);
+                // Async remount app storage so it won't block the main thread.
+                new Thread(() -> {
+                    Map<Integer, String> pidPkgMap = null;
+                    // getProcessesWithPendingBindMounts() could fail when a new app process is
+                    // starting and it's not planning to mount storage dirs in zygote, but it's
+                    // rare, so we retry 5 times and hope we can get the result successfully.
+                    for (int i = 0; i < 5; i++) {
+                        try {
+                            pidPkgMap = LocalServices.getService(ActivityManagerInternal.class)
+                                    .getProcessesWithPendingBindMounts(vol.getMountUserId());
+                            break;
+                        } catch (IllegalStateException e) {
+                            Slog.i(TAG, "Some processes are starting, retry");
+                            // Wait 100ms and retry so hope the pending process is started.
+                            SystemClock.sleep(100);
+                        }
+                    }
+                    if (pidPkgMap != null) {
+                        remountAppStorageDirs(pidPkgMap, userId);
+                    } else {
+                        Slog.wtf(TAG, "Not able to getStorageNotOptimizedProcesses() after"
+                                + " 5 retries");
+                    }
+
+                }).start();
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -4309,7 +4360,8 @@ class StorageManagerService extends IStorageManager.Stub
             pw.println();
             pw.println("mObbPathToStateMap:");
             pw.increaseIndent();
-            final Iterator<Entry<String, ObbState>> maps = mObbPathToStateMap.entrySet().iterator();
+            final Iterator<Entry<String, ObbState>> maps =
+                    mObbPathToStateMap.entrySet().iterator();
             while (maps.hasNext()) {
                 final Entry<String, ObbState> e = maps.next();
                 pw.print(e.getKey());
@@ -4350,45 +4402,41 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         /**
-         * Check if fuse is running in target user, if it's running then setup its obb directories.
-         * TODO: System server should store a list of active pids that obb is not mounted and use it.
+         * Check if fuse is running in target user, if it's running then setup its storage dirs.
+         * Return true if storage dirs are mounted.
          */
         @Override
-        public void prepareObbDirs(int userId, Set<String> packageList, String processName) {
-            String fuseRunningUsersList = SystemProperties.get("vold.fuse_running_users", "");
-            String[] fuseRunningUsers = fuseRunningUsersList.split(",");
-            boolean fuseReady = false;
-            String targetUserId = String.valueOf(userId);
-            for (String user : fuseRunningUsers) {
-                if (targetUserId.equals(user)) {
-                    fuseReady = true;
-                }
+        public boolean prepareStorageDirs(int userId, Set<String> packageList,
+                String processName) {
+            if (!mFuseMountedUser.contains(userId)) {
+                Slog.w(TAG, "User " + userId + " is not unlocked yet so skip mounting obb");
+                return false;
             }
-            if (fuseReady) {
-                try {
-                    final IVold vold = IVold.Stub.asInterface(
-                            ServiceManager.getServiceOrThrow("vold"));
-                    for (String pkg : packageList) {
-                        final String packageObbDir =
-                                String.format("/storage/emulated/%d/Android/obb/%s/", userId, pkg);
-                        final String packageDataDir =
-                                String.format("/storage/emulated/%d/Android/data/%s/",
-                                        userId, pkg);
+            try {
+                final IVold vold = IVold.Stub.asInterface(
+                        ServiceManager.getServiceOrThrow("vold"));
+                for (String pkg : packageList) {
+                    final String packageObbDir =
+                            String.format("/storage/emulated/%d/Android/obb/%s/", userId, pkg);
+                    final String packageDataDir =
+                            String.format("/storage/emulated/%d/Android/data/%s/",
+                                    userId, pkg);
 
-                        // Create package obb and data dir if it doesn't exist.
-                        File file = new File(packageObbDir);
-                        if (!file.exists()) {
-                            vold.setupAppDir(packageObbDir, mPmInternal.getPackage(pkg).getUid());
-                        }
-                        file = new File(packageDataDir);
-                        if (!file.exists()) {
-                            vold.setupAppDir(packageDataDir, mPmInternal.getPackage(pkg).getUid());
-                        }
+                    // Create package obb and data dir if it doesn't exist.
+                    File file = new File(packageObbDir);
+                    if (!file.exists()) {
+                        vold.setupAppDir(packageObbDir, mPmInternal.getPackage(pkg).getUid());
                     }
-                } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
-                    Slog.e(TAG, "Unable to create obb and data directories for " + processName, e);
+                    file = new File(packageDataDir);
+                    if (!file.exists()) {
+                        vold.setupAppDir(packageDataDir, mPmInternal.getPackage(pkg).getUid());
+                    }
                 }
+            } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
+                Slog.e(TAG, "Unable to create obb and data directories for " + processName,e);
+                return false;
             }
+            return true;
         }
 
         @Override

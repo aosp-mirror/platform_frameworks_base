@@ -196,11 +196,11 @@ public interface RegistrationManager {
         }
 
         /**
-         * Notifies the framework when the IMS Provider is deregistered from the IMS network.
+         * Notifies the framework when the IMS Provider is unregistered from the IMS network.
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
-        public void onUnregistered(@Nullable ImsReasonInfo info) {
+        public void onUnregistered(@NonNull ImsReasonInfo info) {
         }
 
         /**
@@ -211,7 +211,7 @@ public interface RegistrationManager {
          */
         public void onTechnologyChangeFailed(
                 @AccessNetworkConstants.TransportType int imsTransportType,
-                @Nullable ImsReasonInfo info) {
+                @NonNull ImsReasonInfo info) {
         }
 
         /**

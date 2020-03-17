@@ -137,6 +137,10 @@ public final class ActiveServices {
 
     private static final boolean SHOW_DUNGEON_NOTIFICATION = false;
 
+    //TODO: remove this when development is done.
+    private static final int DEBUG_FGS_ALLOW_WHILE_IN_USE = 0;
+    private static final int DEBUG_FGS_ENFORCE_TYPE = 1;
+
     // How long we wait for a service to finish executing.
     static final int SERVICE_TIMEOUT = 20*1000;
 
@@ -4915,10 +4919,20 @@ public final class ActiveServices {
                 if (!r.isForeground) {
                     continue;
                 }
-                if (!r.mAllowWhileInUsePermissionInFgs
-                        && r.mInfoDenyWhileInUsePermissionInFgs != null) {
-                    final String msg = r.mInfoDenyWhileInUsePermissionInFgs
-                            + " affected while-in-use permission:"
+                if (mode == DEBUG_FGS_ALLOW_WHILE_IN_USE) {
+                    if (!r.mAllowWhileInUsePermissionInFgs
+                            && r.mInfoDenyWhileInUsePermissionInFgs != null) {
+                        final String msg = r.mInfoDenyWhileInUsePermissionInFgs
+                                + " affected while-in-use permission:"
+                                + AppOpsManager.opToPublicName(op);
+                        Slog.wtf(TAG, msg);
+                    }
+                } else if (mode == DEBUG_FGS_ENFORCE_TYPE) {
+                    final String msg =
+                            "FGS Missing foregroundServiceType in manifest file [callingPackage: "
+                            + r.mRecentCallingPackage
+                            + "; intent:" + r.intent.getIntent()
+                            + "] affected while-in-use permission:"
                             + AppOpsManager.opToPublicName(op);
                     Slog.wtf(TAG, msg);
                 }

@@ -191,13 +191,13 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"एडमिन ने निजी इस्तेमाल के लिए डिवाइस दे दिया है"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"डिवाइस प्रबंधित है"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"आपका संगठन इस डिवाइस का प्रबंधन करता है और वह नेटवर्क ट्रैफ़िक की निगरानी भी कर सकता है. विवरण के लिए टैप करें."</string>
-    <!-- no translation found for location_changed_notification_title (4119726617105166830) -->
-    <skip />
-    <!-- no translation found for location_changed_notification_text (198907268219396399) -->
-    <skip />
+    <string name="location_changed_notification_title" msgid="4119726617105166830">"आपके एडमिन ने जगह की सेटिंग बदली है"</string>
+    <string name="location_changed_notification_text" msgid="198907268219396399">"जगह की सेटिंग देखने के लिए टैप करें."</string>
     <!-- no translation found for country_detector (7023275114706088854) -->
     <skip />
     <!-- no translation found for location_service (2439187616018455546) -->
+    <skip />
+    <!-- no translation found for gnss_service (8907781262179951385) -->
     <skip />
     <!-- no translation found for sensor_notification_service (7474531979178682676) -->
     <skip />
@@ -255,10 +255,8 @@
       <item quantity="one">गड़बड़ी की रिपोर्ट के लिए <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में स्‍क्रीनशॉट लिया जा रहा है.</item>
       <item quantity="other">गड़बड़ी की रिपोर्ट के लिए <xliff:g id="NUMBER_1">%d</xliff:g> सेकंड में स्‍क्रीनशॉट लिया जा रहा है.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"गड़बड़ी की रिपोर्ट का स्क्रीनशॉट लिया गया"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"गड़बड़ी की रिपोर्ट का स्क्रीनशॉट नहीं लिया जा सका"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"साइलेंट मोड (खामोश)"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ध्‍वनि बंद है"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ध्‍वनि चालू है"</string>
@@ -426,14 +424,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"कुछ और जगह बताने वाले आदेशों तक पहुंच"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"ऐप को कुछ और जगह की जानकारी देने वाले आदेशों की पहुंच पाने देता है. इससे ऐप जीपीएस या जगह की जानकारी देने वाले दूसरे स्रोतों के काम में रोक-टोक कर सकता है."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"ऐप्लिकेशन \'जगह की सटीक जानकारी\' सिर्फ़ सामने खुली होने पर ऐक्सेस करे"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"जब ऐप्लिकेशन काम कर रहा हो, तब जगह की जानकारी की सुविधा का इस्तेमाल करके, यह आपकी जगह की सटीक जानकारी ऐक्सेस कर सकता है. अपने डिवाइस पर जगह की जानकारी की सेटिंग चालू करें, ताकि ऐप्लिकेशन जगह की जानकारी ऐक्सेस कर सके. इससे बैटरी खर्च बढ़ सकता है."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"अनुमानित जगह की जानकारी सिर्फ़ तब ऐक्सेस करें, जब ऐप्लिकेशन स्क्रीन पर खुला हो"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"जब ऐप्लिकेशन काम कर रहा हो, तब जगह की जानकारी की सुविधा का इस्तेमाल करके, यह आपकी अनुमानित जगह की जानकारी ऐक्सेस कर सकता है. अपने डिवाइस पर जगह की जानकारी की सेटिंग चालू करें, ताकि ऐप्लिकेशन जगह की जानकारी ऐक्सेस कर सके."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"बैकग्राउंड में जगह की जानकारी ऐक्सेस करना"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"यह ऐप्लिकेशन जगह की जानकारी का ऐक्सेस किसी भी समय कर सकता है, भले ही आप उसका इस्तेमाल न कर रहे हों."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"अपनी ऑडियो सेटिंग बदलें"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"ऐप्स  को वैश्विक ऑडियो सेटिंग, जैसे वॉल्‍यूम और कौन-सा स्पीकर आउटपुट के लिए उपयोग किया गया, संशोधित करने देता है."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ऑडियो रिकॉर्ड करने"</string>
@@ -446,10 +441,13 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"यह ऐप्लिकेशन किसी भी समय कैमरे का उपयोग करके चित्र ले सकता है और वीडियो रिकॉर्ड कर सकता है."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"तस्वीरें और वीडियो लेने के लिए ऐप्लिकेशन या सेवा को सिस्टम के कैमरे का ऐक्सेस दें"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"यह सिस्टम ऐप्लिकेशन तस्वीरें लेने और वीडियो रिकॉर्ड करने के लिए जब चाहे, सिस्टम के कैमरे का इस्तेमाल कर सकता है. ऐप्लिकेशन को android.permission.CAMERA की अनुमति देना भी ज़रूरी है"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
-    <!-- no translation found for permdesc_vibrator_state (7050024956594170724) -->
-    <skip />
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"इससे ऐप्लिकेशन, डिवाइस का वाइब्रेटर ऐक्सेस कर पाएगा."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फ़ोन नंबर पर सीधे कॉल करें"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"ऐप्लिकेशन को आपके हस्‍तक्षेप के बिना फ़ोन नंबर पर कॉल करने देता है. इसके परिणाम अनचाहे शुल्‍क या कॉल हो सकते हैं. ध्यान दें कि यह ऐप्लिकेशन को आपातकालीन नंबर पर कॉल नहीं करने देता. नुकसान पहुंचाने वाला ऐप्लिकेशन आपकी पुष्टि के बिना कॉल करके आपके पैसे खर्च करवा सकते हैं."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS कॉल सेवा ऐक्‍सेस करें"</string>
@@ -460,13 +458,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"कॉल करने के अनुभव को बेहतर बनाने के लिए ऐप्लिकेशन को सिस्टम के माध्यम से उसके कॉल रूट करने देती है."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"सिस्टम के ज़रिए कॉल देखना और नियंत्रित करना."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ऐप्लिकेशन को डिवाइस पर चल रहे कॉल देखने और नियंत्रित करने देती है. इसमें कॉल के नंबर और उनकी स्थिति से जुड़ी जानकारी शामिल है."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"दूसरे ऐप्लिकेशन से शुरू किया गया कॉल जारी रखें"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"इसके ज़रिए आप, किसी ऐप्लिकेशन में शुरू किया गया कॉल दूसरे ऐप्लिकेशन में जारी रख सकते हैं."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फ़ोन नंबर पढ़ना"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ऐप को डिवाइस के फ़ोन नंबर का इस्तेमाल करने देती है."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"कार की स्क्रीन चालू रखना"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"टैबलेट को सोने (कम बैटरी मोड) से रोकें"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"अपने Android TV डिवाइस को स्लीप मोड (कम बैटरी मोड में जाने) से रोकें"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"फ़ोन को सोने (कम बैटरी मोड) से रोकें"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"यह अनुमति देने पर, ऐप्लिकेशन कार की स्क्रीन चालू रख पाएगा."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"ऐप्स  को टैबलेट को प्रयोग में नहीं हो जाने से रोकता है."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"यह ऐप्लिकेशन को आपके Android TV डिवाइस को स्लीप मोड (कम बैटरी मोड में जाने) से रोकने की अनुमति देता है."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"ऐप्स  को फ़ोन को प्रयोग में नहीं होने से रोकता है."</string>
@@ -1269,7 +1273,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"मोबाइल नेटवर्क पर इंटरनेट ऐक्सेस नहीं है"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"इस नेटवर्क पर इंटरनेट ऐक्सेस नहीं है"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"निजी डीएनएस सर्वर को ऐक्सेस नहीं किया जा सकता"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"जुड़ गया है"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> की कनेक्टिविटी सीमित है"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"फिर भी कनेक्ट करने के लिए टैप करें"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> पर ले जाया गया"</string>
@@ -1641,8 +1644,28 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर ज़्यादा समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"सुलभता शॉर्टकट का इस्तेमाल करना चाहते हैं?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट के चालू होने पर, दाेनाें वॉल्यूम बटन (आवाज़ कम या ज़्यादा करने वाले बटन) को तीन सेकंड तक दबाने से, सुलभता सुविधा शुरू हाे जाएगी."</string>
+    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
+    <skip />
+    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
+    <skip />
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह नियंत्रित करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और नियंत्रित करें"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाली हर तरह की सामग्री को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन पर दिखा सकता है."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"देखें और कार्रवाई करें"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इंकार करें"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
+    <skip />
+    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
+    <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"शॉर्टकट में बदलाव करें"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"अभी नहीं"</string>
+    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
+    <skip />
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"शॉर्टकट बंद करें"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट का उपयोग करें"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंग बदलने की सुविधा"</string>
@@ -2036,18 +2059,37 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"सुलभता मेन्यू"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> का कैप्शन बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> को प्रतिबंधित बकेट में रखा गया है"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"निजी प्रोफ़ाइल"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"वर्क प्रोफ़ाइल"</string>
+    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <skip />
+    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <skip />
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन के साथ चीज़ें शेयर नहीं की जा सकतीं"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"निजी ऐप्लिकेशन के साथ कुछ शेयर नहीं किया जा सकता"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"आपके आईटी एडमिन ने निजी ऐप्लिकेशन और ऑफ़िस के काम से जुड़े ऐप्लिकेशन के बीच कुछ शेयर करने की सुविधा पर रोक लगा दी है"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन चालू करें"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"ऑफ़िस के काम से जुड़े ऐप्लिकेशन और संपर्क ऐक्सेस करने के लिए, इन ऐप्लिकेशन को चालू करें"</string>
+    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <skip />
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"कोई ऐप्लिकेशन उपलब्ध नहीं है"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"हमें कोई ऐप्लिकेशन नहीं मिला"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"वर्क प्रोफ़ाइल को चालू करें"</string>
-    <!-- no translation found for permlab_accessCallAudio (1682957511874097664) -->
+    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
     <skip />
-    <!-- no translation found for permdesc_accessCallAudio (8448360894684277823) -->
-    <skip />
+    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"फ़ोन कॉल के दौरान, ऑडियो रिकॉर्ड करने या उसे चलाने की अनुमति"</string>
+    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"डिफ़ॉल्ट डायलर ऐप्लिकेशन के तौर पर असाइन होने पर, इस ऐप्लिकेशन को फ़ोन कॉल के दौरान ऑडियो रिकॉर्ड करने और उसे चलाने की मंज़ूरी मिल जाती है."</string>
 </resources>

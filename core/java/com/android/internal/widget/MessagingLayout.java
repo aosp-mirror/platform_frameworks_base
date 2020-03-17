@@ -448,6 +448,7 @@ public class MessagingLayout extends FrameLayout
                 mAddedGroups.add(newGroup);
             }
             newGroup.setDisplayImagesAtEnd(mDisplayImagesAtEnd);
+            newGroup.setIsInConversation(false);
             newGroup.setLayoutColor(mLayoutColor);
             newGroup.setTextColors(mSenderTextColor, mMessageTextColor);
             Person sender = senders.get(groupIndex);

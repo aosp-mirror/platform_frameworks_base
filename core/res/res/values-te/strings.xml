@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"మీ లొకేషన్ సెట్టింగ్‌లను చూడటానికి ట్యాప్ చేయండి."</string>
     <string name="country_detector" msgid="7023275114706088854">"దేశం డిటెక్టర్"</string>
     <string name="location_service" msgid="2439187616018455546">"లొకేషన్ సర్వీస్"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS సర్వీస్"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"సెన్సార్ నోటిఫికేషన్ సర్వీస్"</string>
     <string name="twilight_service" msgid="8964898045693187224">"ట్విలైట్ సర్వీస్"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_1">%d</xliff:g> సెకన్లలో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
       <item quantity="one">బగ్ నివేదిక కోసం <xliff:g id="NUMBER_0">%d</xliff:g> సెకనులో స్క్రీన్‌షాట్ తీయబోతోంది.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"బగ్ నివేదికతో ఉన్న స్క్రీన్‌షాట్ తీయబడింది"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"బగ్ నివేదికతో ఉన్న స్క్రీన్‌షాట్‌ను తీయడం విఫలమైంది"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"నిశ్శబ్ద మోడ్"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ధ్వని ఆఫ్‌లో ఉంది"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ధ్వని ఆన్‌లో ఉంది"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"అదనపు స్థాన ప్రదాత ఆదేశాలను యాక్సెస్ చేయడం"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"అదనపు స్థాన ప్రదాత ఆదేశాలను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఇది GPS లేదా ఇతర స్థాన మూలాల నిర్వహణలో యాప్‌ ప్రమేయం ఉండేలా అనుమతించవచ్చు."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"స్క్రీన్‌పై ఉన్నప్పుడు మాత్రమే ఖచ్చితమైన స్థానాన్ని యాక్సెస్ చేయండి"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"యాప్ ఉపయోగంలో ఉన్నప్పుడు మాత్రమే ఈ యాప్ మీ ఖచ్చితమైన లొకేషన్‌ను లొకేషన్ సర్వీస్‌ల ద్వారా తెలుసుకోగలదు. లొకేషన్‌ను యాప్ పొందాలంటే, దాని కోసం మీ పరికరం యొక్క లొకేషన్ సర్వీస్‌లను తప్పనిసరిగా ఆన్ చేయాలి. ఇది బ్యాటరీ వినియోగాన్ని పెంచవచ్చు."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"స్క్రీన్‌పై ఉన్నప్పుడు మాత్రమే సుమారు లొకేషన్‌ను యాక్సెస్ చేయండి"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"యాప్ ఉపయోగంలో ఉన్నప్పుడు మాత్రమే ఈ యాప్ మీ ఇంచుమించు లొకేషన్‌ను లొకేషన్ సర్వీస్‌ల నుండి తెలుసుకోగలదు. లొకేషన్‌ను యాప్ పొందాలంటే, దాని కోసం మీ పరికరం యొక్క లొకేషన్ సర్వీస్‌లను తప్పనిసరిగా ఆన్ చేయాలి."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"నేపథ్యంలో స్థానాన్ని యాక్సెస్ చేయి"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"యాప్ ఉపయోగంలో లేనప్పటికీ కూడా, ఈ యాప్, లొకేషన్‌ను ఎప్పుడైనా యాక్సెస్ చేయగలదు."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"మీ ఆడియో సెట్టింగ్‌లను మార్చడం"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"వాల్యూమ్ మరియు అవుట్‌పుట్ కోసం ఉపయోగించాల్సిన స్పీకర్ వంటి సార్వజనీన ఆడియో సెట్టింగ్‌లను సవరించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"ఆడియోను రికార్డ్ చేయడం"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ఈ యాప్‌ కెమెరాను ఉపయోగించి ఎప్పుడైనా చిత్రాలను తీయగలదు మరియు వీడియోలను రికార్డ్ చేయగలదు."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ఫోటోలు, వీడియోలు తీయడానికి సిస్టమ్ కెమెరాలకు యాప్, లేదా సేవా యాక్సెస్‌ను అనుమతించండి"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ఈ విశేష | సిస్టమ్ యాప్ ఎప్పుడైనా సిస్టమ్ కెమెరాను ఉపయోగించి ఫోటోలు తీయగలదు, వీడియోలను రికార్డ్ చేయగలదు. యాప్‌కు android.permission.CAMERA అనుమతి ఇవ్వడం కూడా అవసరం"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ఏదైనా కెమెరా పరికరం తెరుచుకుంటున్నప్పుడు (ఏదైనా యాప్ ప్యాకేజీ ద్వారా) లేదా మూసుకుంటున్నప్పుడు ఈ సిగ్నేచర్ యాప్ కాల్‌బ్యాక్‌లను అందుకోగలదు."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"వైబ్రేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"వైబ్రేటర్‌ను నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"వైబ్రేటర్ స్థితిని యాక్సెస్ చేసేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"సిస్టమ్ ద్వారా కాల్‌లను చూసి, నియంత్రించండి."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"పరికరంలో కొనసాగుతున్న కాల్‌లను చూడడానికి మరియు నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది. ఇందులో కాల్ కోసం కాల్‌ల నంబర్‌లు మరియు రాష్ట్ర కాల్ వంటి సమాచారం ఉంటుంది."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"మరో యాప్ నుండి కాల్‌ని కొనసాగించండి"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"మరో యాప్‌లో ప్రారంభించిన కాల్‌ని కొనసాగించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ఫోన్ నంబర్‌లను చదువు"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"పరికరం యొక్క ఫోన్ నంబర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"కార్ స్క్రీన్‌ను ఆన్ చేసి ఉంచండి"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"స్లీప్ మోడ్‌కి వెళ్లకుండా మీ Android TV పరికరాన్ని నివారించండి"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"ఫోన్‌ను స్లీప్ మోడ్‌లోకి వెళ్లనీయకుండా నిరోధించగలగడం"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"కార్ స్క్రీన్ ఆన్ చేసి ఉంచడానికి ఈ యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"నిద్రావస్థకి వెళ్లకుండా టాబ్లెట్‌ను నిరోధించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"మీ Android TV పరికరం స్లీప్ మోడ్‌లోకి వెళ్లకుండా నివారించడానికి యాప్‌ని అనుమతిస్తుంది."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"నిద్రావస్థకి వెళ్లకుండా ఫోన్‌ను నిరోధించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"మొబైల్ నెట్‌వర్క్‌కు ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"నెట్‌వర్క్‌కు ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"ప్రైవేట్ DNS సర్వర్‌ను యాక్సెస్ చేయడం సాధ్యపడదు"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"కనెక్ట్ చేయబడింది"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> పరిమిత కనెక్టివిటీని కలిగి ఉంది"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ఏదేమైనా కనెక్ట్ చేయడానికి నొక్కండి"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>కి మార్చబడింది"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"షార్ట్‌కట్ ఆన్ చేసి ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కి ఉంచితే యాక్సెస్ సౌలభ్య ఫీచర్ ప్రారంభం అవుతుంది."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>కి మీ పరికరంపై పూర్తి నియంత్రణను ఇవ్వాలనుకుంటున్నారా?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"మీరు <xliff:g id="SERVICE">%1$s</xliff:g>ని ఆన్ చేస్తే, డేటా ఎన్‌క్రిప్షన్‌ను మెరుగుపరచడానికి మీ పరికరం మీ స్క్రీన్ లాక్‌ను ఉపయోగించదు."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"అవసరమైన యాక్సెస్ సామర్ధ్యం కోసం యాప్‌లకు పూర్తి నియంత్రణ ఇవ్వడం తగిన పనే అయినా, అన్ని యాప్‌లకు అలా ఇవ్వడం సరికాదు."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"స్క్రీన్‌ను చూసి, నియంత్రించండి"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"స్క్రీన్‌పై ఉండే కంటెంట్‌ మొత్తాన్ని చదవగలుగుతుంది మరియు ఇతర యాప్‌లలో కూడా ఈ కంటెంట్‌ను ప్రదర్శిస్తుంది."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"చర్యలను చూసి, అమలు చేయండి"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు యాప్‌‌తో చేసే పరస్పర చర్యల‌ను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో పరస్పరం సమన్వయం చేస్తుంది."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించు"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"నిరాకరించు"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి యాప్‌లను ఎంచుకోండి"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి యాప్‌లను ఎంచుకోండి"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"షార్ట్‌కట్‌లను ఎడిట్ చేయి"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"రద్దు చేయి"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"పూర్తయింది"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"సత్వరమార్గాన్ని ఆఫ్ చేయి"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"సత్వరమార్గాన్ని ఉపయోగించు"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"రంగుల మార్పిడి"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"వర్గీకరించబడలేదు"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"మీరు ఈ నోటిఫికేషన్‌ల ప్రాముఖ్యతను సెట్ చేసారు."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ఇందులో పేర్కొనబడిన వ్యక్తులను బట్టి ఇది చాలా ముఖ్యమైనది."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"అనుకూల యాప్ నోటిఫికేషన్"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా (ఈ ఖాతాతో ఇప్పటికే ఒక వినియోగదారు ఉన్నారు) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g>తో కొత్త వినియోగదారుని సృష్టించడానికి <xliff:g id="APP">%1$s</xliff:g>ను అనుమతించాలా?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"భాషను జోడించండి"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"యాక్సెసిబిలిటీ మెను"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> క్యాప్షన్ బార్."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> పరిమితం చేయబడిన బకెట్‌లో ఉంచబడింది"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"వ్యక్తిగతం"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"కార్యాలయం"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"వ్యక్తిగత వీక్షణ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"పని వీక్షణ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"వర్క్ యాప్‌లతో షేర్ చేయడం సాధ్యపడదు"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"వ్యక్తిగత యాప్‌లతో షేర్ చేయడం సాధ్యపడదు"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"వ్యక్తిగత, వర్క్ యాప్‌ల మధ్య షేర్ చేయడాన్ని మీ IT అడ్మిన్ బ్లాక్ చేశారు"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"వర్క్ యాప్‌లను ఆన్ చేయండి"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"వర్క్ యాప్‌లు &amp; కాంటాక్ట్‌లను యాక్సెస్ చేయడానికి వర్క్ యాప్‌లను ఆన్ చేయండి"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"వ్యక్తిగత మరియు కార్యాలయ ప్రొఫైల్‌ల మధ్య షేర్ చేయడాన్ని మీ IT అడ్మిన్ బ్లాక్ చేశారు"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"కార్యాలయ యాప్‌లను యాక్సెస్ చేయడం సాధ్యపడలేదు"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"కార్యాలయ యాప్‌లలో వ్యక్తిగత కంటెంట్‌ను చూడటాన్ని మీ IT అడ్మిన్ అనుమతించరు"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"వ్యక్తిగత యాప్‌లను యాక్సెస్ చేయలేకపోతున్నాను"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"వ్యక్తిగత యాప్‌లలో పని కంటెంట్‌ను చూడటాన్ని మీ IT అడ్మిన్ అనుమతించరు"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"కంటెంట్‌ను షేర్ చేయడానికి కార్యాలయ ప్రొఫైల్‌ను ఆన్ చేయండి"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"కంటెంట్‌ను చూడటానికి కార్యాలయ ప్రొఫైల్‌ను ఆన్ చేయండి"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"యాప్‌లు ఏవీ అందుబాటులో లేవు"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"మేము యాప్‌లు వేటినీ కనుగొనలేకపోయాము"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"కార్యాలయ ప్రొఫైల్‌ను ఆన్ చేయి"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ఆన్ చేయి"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"టెలిఫోనీ కాల్స్‌లో రికార్డ్ చేయండి లేదా ఆడియో ప్లే చేయండి"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"డిఫాల్ట్ డయలర్ యాప్‌గా కేటాయించినప్పుడు, టెలిఫోనీ కాల్స్‌లో రికార్డ్ చేయడానికి లేదా ఆడియో ప్లే చేయడానికి ఈ యాప్‌ను అనుమతిస్తుంది."</string>
 </resources>

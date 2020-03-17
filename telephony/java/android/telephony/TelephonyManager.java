@@ -7992,17 +7992,17 @@ public class TelephonyManager {
 
     /**
      * Get the PLMN chosen for Manual Network Selection if active.
-     * Return empty string if in automatic selection.
+     * Return null string if in automatic selection.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE
      * READ_PRECISE_PHONE_STATE} or that the calling app has carrier privileges
      * (see {@link #hasCarrierPrivileges})
      *
-     * @return manually selected network info on success or empty string on failure
+     * @return manually selected network info on success or null string on failure
      */
     @SuppressAutoDoc // No support carrier privileges (b/72967236).
     @RequiresPermission(android.Manifest.permission.READ_PRECISE_PHONE_STATE)
-    public @NonNull String getManualNetworkSelectionPlmn() {
+    public @Nullable String getManualNetworkSelectionPlmn() {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null && isManualNetworkSelectionAllowed()) {
@@ -8011,7 +8011,7 @@ public class TelephonyManager {
         } catch (RemoteException ex) {
             Rlog.e(TAG, "getManualNetworkSelectionPlmn RemoteException", ex);
         }
-        return "";
+        return null;
     }
 
     /**
@@ -9171,7 +9171,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @CdmaRoamingMode int getCdmaRoamingMode() {
         int mode = CDMA_ROAMING_MODE_RADIO_DEFAULT;
@@ -9200,7 +9199,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCdmaRoamingMode(@CdmaRoamingMode int mode) {
         try {
@@ -9226,19 +9224,16 @@ public class TelephonyManager {
     /** Used for CDMA subscription mode, it'll be UNKNOWN if there is no Subscription source.
      * @hide
      */
-    @SystemApi
     public static final int CDMA_SUBSCRIPTION_UNKNOWN  = -1;
 
     /** Used for CDMA subscription mode: RUIM/SIM (default)
      * @hide
      */
-    @SystemApi
     public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0;
 
     /** Used for CDMA subscription mode: NV -> non-volatile memory
      * @hide
      */
-    @SystemApi
     public static final int CDMA_SUBSCRIPTION_NV       = 1;
 
     /** @hide */
@@ -9257,7 +9252,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCdmaSubscriptionMode(@CdmaSubscription int mode) {
         try {
@@ -12870,7 +12864,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setDataAllowedDuringVoiceCall(boolean allow) {
         try {
@@ -12899,7 +12892,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isDataAllowedInVoiceCall() {
         try {
@@ -12946,7 +12938,6 @@ public class TelephonyManager {
      * The IccLock state or password was changed successfully.
      * @hide
      */
-    @SystemApi
     public static final int CHANGE_ICC_LOCK_SUCCESS = Integer.MAX_VALUE;
 
     /**
@@ -12959,7 +12950,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @WorkerThread
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isIccLockEnabled() {
@@ -12996,7 +12986,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int setIccLockEnabled(boolean enabled, @NonNull String password) {
         checkNotNull(password, "setIccLockEnabled password can't be null.");
@@ -13030,7 +13019,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public int changeIccLockPassword(@NonNull String oldPassword, @NonNull String newPassword) {
         checkNotNull(oldPassword, "changeIccLockPassword oldPassword can't be null.");

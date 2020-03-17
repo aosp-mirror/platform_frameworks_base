@@ -60,11 +60,6 @@ public class TunerResourceManager {
     private static final String TAG = "TunerResourceManager";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    public static final int INVALID_FRONTEND_ID = -1;
-    public static final int INVALID_CAS_SESSION_RESOURCE_ID = -1;
-    public static final int INVALID_LNB_ID = -1;
-    public static final int INVALID_TV_INPUT_DEVICE_ID = -1;
-    public static final int INVALID_TV_INPUT_PORT_ID = -1;
     public static final int INVALID_RESOURCE_HANDLE = -1;
 
     private final ITunerResourceManager mService;

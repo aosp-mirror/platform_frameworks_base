@@ -333,6 +333,7 @@ public class ZygoteProcess {
      *                             started.
      * @param pkgDataInfoMap Map from related package names to private data directory
      *                       volume UUID and inode number.
+     * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
      *
      * @param zygoteArgs Additional arguments to supply to the Zygote process.
      * @return An object that describes the result of the attempt to start the process.
@@ -354,6 +355,7 @@ public class ZygoteProcess {
                                                   @Nullable long[] disabledCompatChanges,
                                                   @Nullable Map<String, Pair<String, Long>>
                                                           pkgDataInfoMap,
+                                                  boolean bindMountAppStorageDirs,
                                                   @Nullable String[] zygoteArgs) {
         // TODO (chriswailes): Is there a better place to check this value?
         if (fetchUsapPoolEnabledPropWithMinInterval()) {
@@ -365,7 +367,7 @@ public class ZygoteProcess {
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
                     packageName, zygotePolicyFlags, isTopApp, disabledCompatChanges,
-                    pkgDataInfoMap, zygoteArgs);
+                    pkgDataInfoMap, bindMountAppStorageDirs, zygoteArgs);
         } catch (ZygoteStartFailedEx ex) {
             Log.e(LOG_TAG,
                     "Starting VM process through Zygote failed");
@@ -606,6 +608,7 @@ public class ZygoteProcess {
      * @param disabledCompatChanges a list of disabled compat changes for the process being started.
      * @param pkgDataInfoMap Map from related package names to private data directory volume UUID
      *                       and inode number.
+     * @param bindMountAppStorageDirs whether zygote needs to mount Android/obb and Android/data.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -628,6 +631,7 @@ public class ZygoteProcess {
                                                       @Nullable long[] disabledCompatChanges,
                                                       @Nullable Map<String, Pair<String, Long>>
                                                               pkgDataInfoMap,
+                                                      boolean bindMountAppStorageDirs,
                                                       @Nullable String[] extraArgs)
                                                       throws ZygoteStartFailedEx {
         ArrayList<String> argsForZygote = new ArrayList<>();
@@ -723,6 +727,10 @@ public class ZygoteProcess {
                 sb.append(entry.getValue().second);
             }
             argsForZygote.add(sb.toString());
+        }
+
+        if (bindMountAppStorageDirs) {
+            argsForZygote.add(Zygote.BIND_MOUNT_APP_STORAGE_DIRS);
         }
 
         if (disabledCompatChanges != null && disabledCompatChanges.length > 0) {
@@ -1282,7 +1290,9 @@ public class ZygoteProcess {
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
                     ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS /* zygotePolicyFlags */, false /* isTopApp */,
-                    null /* disabledCompatChanges */, null /* pkgDataInfoMap */, extraArgs);
+                    null /* disabledCompatChanges */, null /* pkgDataInfoMap */,
+                    /* bindMountAppStorageDirs */ false, extraArgs);
+
         } catch (ZygoteStartFailedEx ex) {
             throw new RuntimeException("Starting child-zygote through Zygote failed", ex);
         }

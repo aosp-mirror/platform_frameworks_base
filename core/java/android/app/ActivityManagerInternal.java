@@ -34,6 +34,7 @@ import android.os.TransactionTooLargeException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Activity manager local system service interface.
@@ -122,6 +123,12 @@ public abstract class ActivityManagerInternal {
      * (-1).
      */
     public abstract int getUidProcessState(int uid);
+
+    /**
+     * Get a map of pid and package name that process of that pid Android/data and Android/obb
+     * directory is not mounted to lowerfs.
+     */
+    public abstract Map<Integer, String> getProcessesWithPendingBindMounts(int userId);
 
     /**
      * @return {@code true} if system is ready, {@code false} otherwise.

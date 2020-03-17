@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Koppintson a helybeállítások megtekintéséhez."</string>
     <string name="country_detector" msgid="7023275114706088854">"Országfelismerő"</string>
     <string name="location_service" msgid="2439187616018455546">"Helyszolgáltatás"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS-szolgáltatás"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Szenzoros értesítési szolgáltatás"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight szolgáltatás"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"A rendszer törölni fogja eszközét"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_1">%d</xliff:g> másodpercen belül.</item>
       <item quantity="one">Képernyőkép készítése a hibajelentéshez <xliff:g id="NUMBER_0">%d</xliff:g> másodpercen belül.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Sikerült a képernyőkép elkészítése a hibajelentéshez"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Nem sikerült képernyőképet készíteni a hibajelentéshez"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Néma üzemmód"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Hang kikapcsolva"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Hang bekapcsolva"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"további helyszolgáltatói parancsok elérése"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Lehetővé teszi az alkalmazás számára további helyszolgáltatói parancsok elérését. Ezáltal az alkalmazás beavatkozhat a GPS vagy más helyforrások működésébe."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"pontos helyadatokhoz való hozzáférés csak előtérben"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Ez az alkalmazás megkaphatja a pontos tartózkodási helyet a helyszolgáltatásoktól, amikor használatban van. Csak akkor juthat hozzá a tartózkodási helyhez, ha a helyszolgáltatások be vannak kapcsolva az eszközön. Ez növelheti az akkumulátorhasználatot."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"megközelítőleges helyadatokhoz való hozzáférés csak előtérben"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Ez az alkalmazás megkaphatja a hozzávetőleges tartózkodási helyet a helyszolgáltatásoktól, amikor használatban van. Csak akkor juthat hozzá a tartózkodási helyhez, ha a helyszolgáltatások be vannak kapcsolva az eszközön."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"Hozzáférés a helyadatokhoz a háttérben"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Ez az alkalmazás bármikor hozzáférhet a helyadatokhoz – még akkor is, ha nincs használatban."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"hangbeállítások módosítása"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Lehetővé teszi az alkalmazás számára az általános hangbeállítások, például a hangerő és a használni kívánt kimeneti hangszóró módosítását."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"hanganyag rögzítése"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Az alkalmazás a kamera használatával bármikor készíthet fényképeket és rögzíthet videókat."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"A rendszerkamerákhoz való hozzáférés, illetve képek és videók rögzítésének engedélyezése alkalmazás vagy szolgáltatás számára"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"A rendszerkamera használatával ez az előnyben részesített vagy rendszeralkalmazás bármikor készíthet fényképeket és videókat. Az alkalmazásnak az „android.permission.CAMERA” engedéllyel is rendelkeznie kell."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Visszahívás fogadásának engedélyezése alkalmazás vagy szolgáltatás számára, ha a kamerákat megnyitják vagy bezárják."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Az aláíró alkalmazás fogadhat visszahívásokat bármelyik kamera (adott alkalmazáscsomag általi) megnyitásakor vagy bezárásakor."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"rezgés szabályozása"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lehetővé teszi az alkalmazás számára a rezgés vezérlését."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Lehetővé teszi az alkalmazás számára a rezgés állapotához való hozzáférést."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"A telefonálási élmény javítása érdekében lehetővé teszi az alkalmazás számára a rendszeren keresztüli hívásirányítást."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Hívások megtekintése és vezérlése a rendszeren keresztül"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Engedélyezi az alkalmazásnak az eszközön folyamatban lévő hívások megtekintését és vezérlését. Ebbe beletartoznak az olyan információk is, mint a hívásban részt vevő felek hívószáma és a hívások állapota."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"Másik alkalmazásból indított hívás folytatása"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Engedélyezi az alkalmazásnak, hogy folytassa a hívást, amelyet valamelyik másik alkalmazásban kezdtek meg."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"telefonszámok olvasása"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Engedélyezi az alkalmazás számára az eszköz telefonszámaihoz való hozzáférést."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"az autó képernyőjének bekapcsolva tartása"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"táblagép alvás üzemmódjának megakadályozása"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"megakadályozza, hogy az Android TV eszköz alvó üzemmódra váltson"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"telefon alvó üzemmódjának megakadályozása"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Lehetővé teszi az alkalmazás számára az autó képernyőjének bekapcsolva tartását."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a táblagép alvó üzemmódra váltson."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy az Android TV eszköz alvó üzemmódra váltson."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Lehetővé teszi az alkalmazás számára, hogy megakadályozza, hogy a telefon alvó üzemmódra váltson."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"A mobilhálózaton nincs internet-hozzáférés"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"A hálózaton nincs internet-hozzáférés"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"A privát DNS-kiszolgálóhoz nem lehet hozzáférni"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Csatlakozva"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"A(z) <xliff:g id="NETWORK_SSID">%1$s</xliff:g> hálózat korlátozott kapcsolatot biztosít"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Koppintson, ha mindenképpen csatlakozni szeretne"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Átváltva erre: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Az ajánlott szint fölé szeretné emelni a hangerőt?\n\nHa hosszú időn át teszi ki magát nagy hangerőnek, azzal károsíthatja a hallását."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Szeretné használni a Kisegítő lehetőségek billentyűparancsot?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ha a gyorsparancs aktív, akkor a két hangerőgomb három másodpercig tartó együttes lenyomásával kisegítő funkciót indíthat el."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Teljes körű vezérlést biztosít eszköze felett a(z) <xliff:g id="SERVICE">%1$s</xliff:g> szolgáltatás számára?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ha engedélyezi a(z) <xliff:g id="SERVICE">%1$s</xliff:g> szolgáltatást, az eszköz nem fogja használni a képernyőzárat az adattitkosítás növelése érdekében."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"A teljes vezérlés indokolt olyan alkalmazásoknál, amelyek kisegítő lehetőségeket nyújtanak, a legtöbb alkalmazásnál azonban nem."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Képernyő megtekintése és kezelése"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Elolvashatja a képernyő tartalmát, és tartalmakat jeleníthet meg más alkalmazások felett."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Műveletek megtekintése és elvégzése"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Követheti az alkalmazásokkal és hardveres érzékelőkkel való interakcióit, és műveleteket végezhet az alkalmazásokkal az Ön nevében."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Engedélyezés"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tiltás"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Koppintson valamelyik funkcióra a használatához:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"A kisegítő lehetőségek gombjával kiválaszthatja a használni kívánt alkalmazásokat"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"A hangerőszabályzó gombbal kiválaszthatja a használni kívánt alkalmazásokat"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> kikapcsolva"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Gyorsparancsszerkesztés"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Mégse"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Kész"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Billentyűparancs kikapcsolása"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Billentyűparancs használata"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Színek invertálása"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Nincs kategóriába sorolva"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ön állította be ezen értesítések fontossági szintjét."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ez az üzenet a résztvevők miatt fontos."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Egyéni alkalmazásértesítés"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal? (Már létezik felhasználó ezzel a fiókkal.)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Engedélyezi a(z) <xliff:g id="APP">%1$s</xliff:g> számára, hogy új felhasználót hozzon létre a(z) <xliff:g id="ACCOUNT">%2$s</xliff:g> fiókkal?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Nyelv hozzáadása"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Kisegítő lehetőségek menü"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> alkalmazás címsora."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"A következő csomag a KORLÁTOZOTT csoportba került: <xliff:g id="PACKAGE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Személyes"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Munka"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Személyes nézet"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Munkanézet"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Nem lehetséges a munkahelyi alkalmazásokkal való megosztás"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Nem lehetséges a személyes alkalmazásokkal való megosztás"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Rendszergazdája letiltotta a személyes és a munkahelyi alkalmazások közti megosztást"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Kapcsolja be a munkahelyi alkalmazásokat"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Kapcsolja be a munkahelyi alkalmazásokat a munkahelyi alkalmazásokhoz és a névjegyekhez való hozzáférés érdekében"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Rendszergazdája letiltotta a személyes és a munkaprofilok közti megosztást"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Nem lehet hozzáférni a munkahelyi alkalmazásokhoz"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Rendszergazdája nem engedélyezi személyes tartalmak munkahelyi alkalmazásokban való megtekintését"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Nem lehet hozzáférni a személyes alkalmazásokhoz"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Rendszergazdája nem engedélyezi a munkahelyi tartalmak személyes alkalmazásokban való megtekintését"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"A tartalom megosztásához kapcsolja be munkaprofilját"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"A tartalom megtekintéséhez kapcsolja be munkaprofilját"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Nem áll rendelkezésre alkalmazás"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Nem találtunk egy alkalmazást sem"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Munkaprofil bekapcsolása"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Bekapcsolás"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Audiotartalmak felvétele és lejátszása telefonhívások közben"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Lehetővé teszi ennek az alkalmazásnak audiotartalmak felvételét és lejátszását telefonhívások közben, amennyiben az alkalmazás alapértelmezett tárcsázóalkalmazásként van kijelölve."</string>
 </resources>

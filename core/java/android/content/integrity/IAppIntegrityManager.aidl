@@ -19,6 +19,7 @@ package android.content.integrity;
 import android.content.integrity.Rule;
 import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
+import java.util.List;
 
 /** @hide */
 interface IAppIntegrityManager {
@@ -26,4 +27,5 @@ interface IAppIntegrityManager {
     String getCurrentRuleSetVersion();
     String getCurrentRuleSetProvider();
     ParceledListSlice<Rule> getCurrentRules();
+    List<String> getWhitelistedRuleProviders();
 }

@@ -5215,6 +5215,10 @@ public class DevicePolicyManager {
      * <p>Because this method might take several seconds to complete, it should only be called from
      * a worker thread. This method returns {@code null} when called from the main thread.
      *
+     * <p>This method is not thread-safe, calling it from multiple threads at the same time will
+     * result in undefined behavior. If the calling thread is interrupted while the invocation is
+     * in-flight, it will eventually terminate and return {@code null}.
+     *
      * <p>Note: If the provided {@code alias} is of an existing alias, all former grants that apps
      * have been given to access the key and certificates associated with this alias will be
      * revoked.
@@ -5732,6 +5736,10 @@ public class DevicePolicyManager {
         throwIfParentInstance("isAlwaysOnVpnLockdownEnabled");
         if (mService != null) {
             try {
+                // Starting from Android R, the caller can pass the permission check in
+                // DevicePolicyManagerService if it holds android.permission.MAINLINE_NETWORK_STACK.
+                // Note that the android.permission.MAINLINE_NETWORK_STACK is a signature permission
+                // which is used by the NetworkStack mainline module.
                 return mService.isAlwaysOnVpnLockdownEnabled(admin);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
@@ -11848,18 +11856,19 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by Device owner to set packages as protected. User will not be able to clear app
-     * data or force-stop protected packages.
+     * Called by Device owner to disable user control over apps. User will not be able to clear
+     * app data or force-stop packages.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
-     * @param packages The package names to protect.
+     * @param packages The package names for the apps.
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public void setProtectedPackages(@NonNull ComponentName admin, @NonNull List<String> packages) {
-        throwIfParentInstance("setProtectedPackages");
+    public void setUserControlDisabledPackages(@NonNull ComponentName admin,
+            @NonNull List<String> packages) {
+        throwIfParentInstance("setUserControlDisabledPackages");
         if (mService != null) {
             try {
-                mService.setProtectedPackages(admin, packages);
+                mService.setUserControlDisabledPackages(admin, packages);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
@@ -11867,16 +11876,16 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns the list of packages protected by the device owner.
+     * Returns the list of packages over which user control is disabled by the device owner.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @throws SecurityException if {@code admin} is not a device owner.
      */
-    public @NonNull List<String> getProtectedPackages(@NonNull ComponentName admin) {
-        throwIfParentInstance("getProtectedPackages");
+    public @NonNull List<String> getUserControlDisabledPackages(@NonNull ComponentName admin) {
+        throwIfParentInstance("getUserControlDisabledPackages");
         if (mService != null) {
             try {
-                return mService.getProtectedPackages(admin);
+                return mService.getUserControlDisabledPackages(admin);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

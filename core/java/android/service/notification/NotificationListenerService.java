@@ -55,7 +55,6 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.util.Slog;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.GuardedBy;
@@ -1594,6 +1593,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mIsConversation;
         private ShortcutInfo mShortcutInfo;
         private @RankingAdjustment int mRankingAdjustment;
+        private boolean mIsBubble;
 
         private static final int PARCEL_VERSION = 2;
 
@@ -1629,6 +1629,7 @@ public abstract class NotificationListenerService extends Service {
             out.writeBoolean(mIsConversation);
             out.writeParcelable(mShortcutInfo, flags);
             out.writeInt(mRankingAdjustment);
+            out.writeBoolean(mIsBubble);
         }
 
         /** @hide */
@@ -1665,6 +1666,7 @@ public abstract class NotificationListenerService extends Service {
             mIsConversation = in.readBoolean();
             mShortcutInfo = in.readParcelable(cl);
             mRankingAdjustment = in.readInt();
+            mIsBubble = in.readBoolean();
         }
 
 
@@ -1870,6 +1872,14 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns whether this notification is actively a bubble.
+         * @hide
+         */
+        public boolean isBubble() {
+            return mIsBubble;
+        }
+
+        /**
          * @hide
          */
         public @Nullable ShortcutInfo getShortcutInfo() {
@@ -1897,7 +1907,7 @@ public abstract class NotificationListenerService extends Service {
                 boolean noisy, ArrayList<Notification.Action> smartActions,
                 ArrayList<CharSequence> smartReplies, boolean canBubble,
                 boolean visuallyInterruptive, boolean isConversation, ShortcutInfo shortcutInfo,
-                int rankingAdjustment) {
+                int rankingAdjustment, boolean isBubble) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1922,6 +1932,7 @@ public abstract class NotificationListenerService extends Service {
             mIsConversation = isConversation;
             mShortcutInfo = shortcutInfo;
             mRankingAdjustment = rankingAdjustment;
+            mIsBubble = isBubble;
         }
 
         /**
@@ -1950,7 +1961,8 @@ public abstract class NotificationListenerService extends Service {
                     other.mVisuallyInterruptive,
                     other.mIsConversation,
                     other.mShortcutInfo,
-                    other.mRankingAdjustment);
+                    other.mRankingAdjustment,
+                    other.mIsBubble);
         }
 
         /**
@@ -2008,7 +2020,8 @@ public abstract class NotificationListenerService extends Service {
                     // Shortcutinfo doesn't have equals either; use id
                     &&  Objects.equals((mShortcutInfo == null ? 0 : mShortcutInfo.getId()),
                     (other.mShortcutInfo == null ? 0 : other.mShortcutInfo.getId()))
-                    && Objects.equals(mRankingAdjustment, other.mRankingAdjustment);
+                    && Objects.equals(mRankingAdjustment, other.mRankingAdjustment)
+                    && Objects.equals(mIsBubble, other.mIsBubble);
         }
     }
 

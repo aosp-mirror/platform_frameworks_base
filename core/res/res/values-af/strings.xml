@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Tik om jou ligginginstellings te sien."</string>
     <string name="country_detector" msgid="7023275114706088854">"Landaanwyser"</string>
     <string name="location_service" msgid="2439187616018455546">"Liggingdiens"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS-diens"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensorkennisgewingdiens"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Skemerdiens"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Jou toestel sal uitgevee word"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Neem skermkiekie vir foutverslag oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes.</item>
       <item quantity="one">Neem skermkiekie vir foutverslag oor <xliff:g id="NUMBER_0">%d</xliff:g> sekonde.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Skermkiekie met foutverslag geneem"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Kon nie skermkiekie met foutverslag neem nie"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Stilmodus"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Klank is AF"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Klank is AAN"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"Kry toegang tot ekstra liggingverskaffer-bevele"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Gee die program toegang tot ekstra liggingverskaffer-bevele. Dit kan die program dalk toelaat om in te meng met die werking van die GPS of ander liggingbronne."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"kry net op die voorgrond toegang tot presiese ligging"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Hierdie program kan jou presiese ligging van liggingdienste af kry terwyl die program gebruik word. Liggingdienste vir jou toestel moet aangeskakel wees vir die program om die ligging te kry. Dit kan batterygebruik verhoog."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"kry benaderde ligging net op die voorgrond"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Hierdie program kan jou benaderde ligging van liggingdienste af kry terwyl die program gebruik word. Liggingdienste vir jou toestel moet aangeskakel wees vir die program om die ligging te kry."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"kry ligging op die agtergrond"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Hierdie program kan op enige tydstip toegang tot ligging kry, selfs wanneer die program nie gebruik word nie."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"neem klank op"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Hierdie program kan enige tyd met die kamera foto\'s neem en video\'s opneem."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Gee \'n program of diens toegang tot stelselkameras om foto\'s en video\'s te neem"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Hierdie bevoorregte | stelselprogram kan enige tyd met \'n stelselkamera foto\'s neem en video\'s opneem. Vereis dat die program ook die android.permission.CAMERA-toestemming het"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Laat \'n program of diens toe om terugbeloproepe te ontvang oor kameratoestelle wat oopgemaak of toegemaak word."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Hierdie handtekeningprogram kan terugbeloproepe ontvang wanneer enige kameratoestel oopgemaak (deur watter programpakket) of toegemaak word."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"beheer vibrasie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Stel die program in staat om toegang tot die vibreerderstand te kry."</string>
@@ -453,13 +451,17 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Laat die program toe om sy oproepe deur die stelsel te stuur om die oproepervaring te verbeter."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"sien en beheer oproepe deur die stelsel."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Laat die program toe om deurlopende oproepe op die toestel te sien en te beheer. Dit sluit inligting in soos oproepnommers vir oproepe en die toedrag van die oproepe."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"vrygestel van beperkings op oudio-opnames"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Stel die program vry van beperkings om oudio op te neem."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"gaan voort met \'n oproep uit \'n ander program"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Laat die program toe om \'n oproep voort te sit wat in \'n ander program begin is."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lees foonnommers"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Laat die program toe om toegang tot die toestel se foonnommers te kry."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"hou motorskerm aan"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"verhoed dat tablet slaap"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"keer dat jou Android TV-toestel slaap"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"verhoed foon om te slaap"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Laat die program toe om die motorskerm aan te hou."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Laat die program toe om die tablet te keer om te slaap."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Laat die program toe om te keer dat jou Android TV-toestel slaap."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Laat die program toe om die foon te keer om te slaap."</string>
@@ -1262,7 +1264,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Selnetwerk het nie internettoegang nie"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Netwerk het nie internettoegang nie"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Daar kan nie by private DNS-bediener ingegaan word nie"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Gekoppel"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> het beperkte konnektiwiteit"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Tik om in elk geval te koppel"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Het oorgeskakel na <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1635,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Verhoog volume bo aanbevole vlak?\n\nOm lang tydperke teen hoë volume te luister, kan jou gehoor beskadig."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gebruik toeganklikheidkortpad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Wanneer die kortpad aan is, sal \'n toeganklikheidkenmerk begin word as albei volumeknoppies 3 sekondes lank gedruk word."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Gee <xliff:g id="SERVICE">%1$s</xliff:g> volle beheer oor jou toestel?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"As jy <xliff:g id="SERVICE">%1$s</xliff:g> aanskakel, sal jou toestel nie jou skermslot gebruik om data-enkripsie te verbeter nie."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volle beheer is gepas vir programme wat jou help met toeganklikheidsbehoeftes, maar nie vir die meeste programme nie."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bekyk en beheer skerm"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dit kan alle inhoud op die skerm lees en inhoud bo-oor ander programme vertoon."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Bekyk en voer handelinge uit"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Dit kan jou interaksies met \'n program of \'n hardewaresensor naspoor en namens jou met programme interaksie hê."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Laat toe"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Weier"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op \'n kenmerk om dit te begin gebruik:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Kies programme om saam met die toeganklikheidknoppie te gebruik"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Kies programme om saam met die volumesleutelkortpad te gebruik"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> is afgeskakel"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Wysig kortpaaie"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Kanselleer"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klaar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Skakel kortpad af"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gebruik kortpad"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Kleuromkering"</string>
@@ -1856,8 +1870,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Ongekategoriseer"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Jy stel die belangrikheid van hierdie kennisgewings."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Dit is belangrik as gevolg van die mense wat betrokke is."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Gepasmaakte programkennisgewing"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep (\'n gebruiker met hierdie rekening bestaan reeds)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Laat <xliff:g id="APP">%1$s</xliff:g> toe om \'n nuwe gebruiker met <xliff:g id="ACCOUNT">%2$s</xliff:g> te skep?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Voeg \'n taal by"</string>
@@ -2029,16 +2042,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Toeganklikheid-kieslys"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> se onderskrifbalk."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> is in die BEPERK-groep geplaas"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Persoonlik"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Werk"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Persoonlike aansig"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Werkaansig"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Kan nie met werkprogramme deel nie"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Kan nie met persoonlike programme deel nie"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Jou IT-admin het deling tussen persoonlike en werkprogramme geblokkeer"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Skakel werkprogramme aan"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Skakel werkprogramme aan om toegang tot werkprogramme en -kontakte te kry"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Jou IT-admin het deling tussen persoonlike en werkprofiele geblokkeer"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Kan nie toegang tot werkprogramme kry nie"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Jou IT-admin laat jou nie toe om persoonlike inhoud in werkprogramme te bekyk nie"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Kan nie toegang tot persoonlike programme kry nie"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Jou IT-admin laat jou nie toe om werkinhoud in persoonlike programme te bekyk nie"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Skakel werkprofiel aan om inhoud te deel"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Skakel werkprofiel aan om inhoud te bekyk"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Geen programme beskikbaar nie"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Ons kon geen programme kry nie"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Skakel werk aan"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Skakel aan"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Neem oudio in telefonie-oproepe op of speel dit"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Laat hierdie program, indien dit as die verstekbellerprogram aangewys is, toe om oudio in telefonie-oproepe op te neem of te speel."</string>
 </resources>

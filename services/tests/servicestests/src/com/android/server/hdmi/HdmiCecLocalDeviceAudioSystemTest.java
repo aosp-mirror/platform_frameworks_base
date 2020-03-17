@@ -34,6 +34,7 @@ import android.hardware.hdmi.HdmiPortInfo;
 import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -48,6 +49,7 @@ import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiCecLocalDeviceAudioSystem} class. */
 public class HdmiCecLocalDeviceAudioSystemTest {

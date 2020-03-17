@@ -61,6 +61,10 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.launcher3">
+        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.location.fused">
         <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
@@ -255,6 +259,7 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkstack.tethering">
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>

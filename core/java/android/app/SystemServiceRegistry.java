@@ -19,6 +19,7 @@ package android.app;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.ContextImpl.ServiceInitializationState;
 import android.app.admin.DevicePolicyManager;
@@ -228,6 +229,8 @@ public final class SystemServiceRegistry {
             new ArrayMap<Class<?>, String>();
     private static final Map<String, ServiceFetcher<?>> SYSTEM_SERVICE_FETCHERS =
             new ArrayMap<String, ServiceFetcher<?>>();
+    private static final Map<String, String> SYSTEM_SERVICE_CLASS_NAMES = new ArrayMap<>();
+
     private static int sServiceCacheSize;
 
     private static volatile boolean sInitializing;
@@ -1391,6 +1394,19 @@ public final class SystemServiceRegistry {
             @NonNull Class<T> serviceClass, @NonNull ServiceFetcher<T> serviceFetcher) {
         SYSTEM_SERVICE_NAMES.put(serviceClass, serviceName);
         SYSTEM_SERVICE_FETCHERS.put(serviceName, serviceFetcher);
+        SYSTEM_SERVICE_CLASS_NAMES.put(serviceName, serviceClass.getSimpleName());
+    }
+
+    /**
+     * Returns system service class name by system service name. This method is mostly an inverse of
+     * {@link #getSystemServiceName(Class)}
+     *
+     * @return system service class name. {@code null} if service name is invalid.
+     * @hide
+     */
+    @Nullable
+    public static String getSystemServiceClassName(@NonNull String name) {
+        return SYSTEM_SERVICE_CLASS_NAMES.get(name);
     }
 
     /**

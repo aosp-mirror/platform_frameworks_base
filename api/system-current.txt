@@ -408,7 +408,6 @@ package android.app {
     field public static final String OPSTR_POST_NOTIFICATION = "android:post_notification";
     field public static final String OPSTR_PROJECT_MEDIA = "android:project_media";
     field public static final String OPSTR_READ_CLIPBOARD = "android:read_clipboard";
-    field public static final String OPSTR_READ_DEVICE_IDENTIFIERS = "android:read_device_identifiers";
     field public static final String OPSTR_READ_ICC_SMS = "android:read_icc_sms";
     field public static final String OPSTR_READ_MEDIA_AUDIO = "android:read_media_audio";
     field public static final String OPSTR_READ_MEDIA_IMAGES = "android:read_media_images";
@@ -758,7 +757,6 @@ package android.app {
   public class StatusBarManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.STATUS_BAR) public android.app.StatusBarManager.DisableInfo getDisableInfo();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSetup(boolean);
-    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setDisabledForSimNetworkLock(boolean);
   }
 
   public static final class StatusBarManager.DisableInfo {
@@ -1424,7 +1422,8 @@ package android.app.usage {
   }
 
   public class NetworkStatsManager {
-    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public android.net.netstats.provider.NetworkStatsProviderCallback registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.AbstractNetworkStatsProvider);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void registerNetworkStatsProvider(@NonNull String, @NonNull android.net.netstats.provider.NetworkStatsProvider);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_STATS_PROVIDER, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void unregisterNetworkStatsProvider(@NonNull android.net.netstats.provider.NetworkStatsProvider);
   }
 
   public static final class UsageEvents.Event {
@@ -2288,7 +2287,6 @@ package android.content.pm {
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
-    field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
     field public static final int MODULE_APEX_NAME = 1; // 0x1
     field public static final int RESTRICTION_HIDE_FROM_SUGGESTIONS = 1; // 0x1
@@ -5496,7 +5494,7 @@ package android.media.tv.tuner.frontend {
   public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder(@NonNull android.content.Context);
     method public int getAnnex();
-    method public long getFec();
+    method public long getInnerFec();
     method public int getModulation();
     method public int getOuterFec();
     method public int getSpectralInversion();
@@ -5524,7 +5522,7 @@ package android.media.tv.tuner.frontend {
   public static class DvbcFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder> {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
-    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFec(long);
+    method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setInnerFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setOuterFec(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setSpectralInversion(int);
@@ -5790,9 +5788,9 @@ package android.media.tv.tuner.frontend {
     method public int getAgc();
     method @NonNull public android.media.tv.tuner.frontend.FrontendStatus.Atsc3PlpInfo[] getAtsc3PlpInfo();
     method public int getBer();
-    method public long getFec();
     method public int getFreqOffset();
     method public int getHierarchy();
+    method public long getInnerFec();
     method @NonNull public boolean[] getLayerErrors();
     method public int getLnbVoltage();
     method public int getMer();
@@ -6295,7 +6293,6 @@ package android.net {
     method @Nullable public android.net.Network getNetwork();
     method public void onAddKeepalivePacketFilter(int, @NonNull android.net.KeepalivePacketData);
     method public void onAutomaticReconnectDisabled();
-    method public void onBandwidthUpdateRequested();
     method public void onNetworkUnwanted();
     method public void onRemoveKeepalivePacketFilter(int);
     method public void onSaveAcceptUnvalidated(boolean);
@@ -6309,23 +6306,17 @@ package android.net {
     method public void sendNetworkScore(int);
     method public void sendSocketKeepaliveEvent(int, int);
     method public void setConnected();
-    method @Deprecated public void setLegacyExtraInfo(@Nullable String);
-    method @Deprecated public void setLegacySubtype(int, @NonNull String);
     method public void unregister();
     field public static final int VALIDATION_STATUS_NOT_VALID = 2; // 0x2
     field public static final int VALIDATION_STATUS_VALID = 1; // 0x1
-    field public final int providerId;
   }
 
   public final class NetworkAgentConfig implements android.os.Parcelable {
     method public int describeContents();
     method public int getLegacyType();
     method @NonNull public String getLegacyTypeName();
-    method @Nullable public String getSubscriberId();
     method public boolean isExplicitlySelected();
-    method public boolean isNat64DetectionEnabled();
     method public boolean isPartialConnectivityAcceptable();
-    method public boolean isProvisioningNotificationEnabled();
     method public boolean isUnvalidatedConnectivityAcceptable();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkAgentConfig> CREATOR;
@@ -6334,18 +6325,14 @@ package android.net {
   public static class NetworkAgentConfig.Builder {
     ctor public NetworkAgentConfig.Builder();
     method @NonNull public android.net.NetworkAgentConfig build();
-    method @NonNull public android.net.NetworkAgentConfig.Builder disableNat64Detection();
-    method @NonNull public android.net.NetworkAgentConfig.Builder disableProvisioningNotification();
     method @NonNull public android.net.NetworkAgentConfig.Builder setExplicitlySelected(boolean);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyType(int);
     method @NonNull public android.net.NetworkAgentConfig.Builder setLegacyTypeName(@NonNull String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setPartialConnectivityAcceptable(boolean);
-    method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
     method @NonNull public android.net.NetworkAgentConfig.Builder setUnvalidatedConnectivityAcceptable(boolean);
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    method public boolean deduceRestrictedCapability();
     method @NonNull public java.util.List<java.lang.Integer> getAdministratorUids();
     method @Nullable public String getSSID();
     method @NonNull public int[] getTransportTypes();
@@ -6370,27 +6357,9 @@ package android.net {
     field public final android.net.WifiKey wifiKey;
   }
 
-  public class NetworkPolicyManager {
-    method @NonNull public android.telephony.SubscriptionPlan[] getSubscriptionPlans(int, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void registerSubscriptionCallback(@NonNull android.net.NetworkPolicyManager.SubscriptionCallback);
-    method public void setSubscriptionOverride(int, int, int, long, @NonNull String);
-    method public void setSubscriptionPlans(int, @NonNull android.telephony.SubscriptionPlan[], @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.OBSERVE_NETWORK_POLICY) public void unregisterSubscriptionCallback(@NonNull android.net.NetworkPolicyManager.SubscriptionCallback);
-    field public static final int SUBSCRIPTION_OVERRIDE_CONGESTED = 2; // 0x2
-    field public static final int SUBSCRIPTION_OVERRIDE_UNMETERED = 1; // 0x1
-  }
-
-  public static class NetworkPolicyManager.SubscriptionCallback {
-    ctor public NetworkPolicyManager.SubscriptionCallback();
-    method public void onSubscriptionOverride(int, int, int);
-    method public void onSubscriptionPlansChanged(int, @NonNull android.telephony.SubscriptionPlan[]);
-  }
-
   public class NetworkProvider {
     ctor public NetworkProvider(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void declareNetworkRequestUnfulfillable(@NonNull android.net.NetworkRequest);
-    method @Nullable public android.os.Messenger getMessenger();
-    method @NonNull public String getName();
     method public int getProviderId();
     method public void onNetworkRequested(@NonNull android.net.NetworkRequest, int, int);
     method public void onRequestWithdrawn(@NonNull android.net.NetworkRequest);
@@ -6459,7 +6428,6 @@ package android.net {
     field @NonNull public static final android.os.Parcelable.Creator<android.net.NetworkStats> CREATOR;
     field public static final int DEFAULT_NETWORK_NO = 0; // 0x0
     field public static final int DEFAULT_NETWORK_YES = 1; // 0x1
-    field @Nullable public static final String IFACE_ALL;
     field public static final String IFACE_VT = "vt_data0";
     field public static final int METERED_NO = 0; // 0x0
     field public static final int METERED_YES = 1; // 0x1
@@ -6859,19 +6827,15 @@ package android.net.metrics {
 
 package android.net.netstats.provider {
 
-  public abstract class AbstractNetworkStatsProvider {
-    ctor public AbstractNetworkStatsProvider();
-    method public abstract void requestStatsUpdate(int);
-    method public abstract void setAlert(long);
-    method public abstract void setLimit(@NonNull String, long);
+  public abstract class NetworkStatsProvider {
+    ctor public NetworkStatsProvider();
+    method public void notifyAlertReached();
+    method public void notifyLimitReached();
+    method public void notifyStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
+    method public abstract void onRequestStatsUpdate(int);
+    method public abstract void onSetAlert(long);
+    method public abstract void onSetLimit(@NonNull String, long);
     field public static final int QUOTA_UNLIMITED = -1; // 0xffffffff
-  }
-
-  public class NetworkStatsProviderCallback {
-    method public void onAlertReached();
-    method public void onLimitReached();
-    method public void onStatsUpdated(int, @NonNull android.net.NetworkStats, @NonNull android.net.NetworkStats);
-    method public void unregister();
   }
 
 }
@@ -9378,7 +9342,6 @@ package android.provider {
     field public static final String AUTOFILL_USER_DATA_MAX_VALUE_LENGTH = "autofill_user_data_max_value_length";
     field public static final String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
     field public static final String AUTO_REVOKE_DISABLED = "auto_revoke_disabled";
-    field public static final String CARRIER_APPS_HANDLED = "carrier_apps_handled";
     field public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
     field public static final String HUSH_GESTURE_USED = "hush_gesture_used";
@@ -11548,7 +11511,6 @@ package android.telephony {
 
   public class TelephonyManager {
     method @Deprecated @RequiresPermission(android.Manifest.permission.CALL_PHONE) public void call(String, String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int changeIccLockPassword(@NonNull String, @NonNull String);
     method public int checkCarrierPrivilegesForPackage(String);
     method public int checkCarrierPrivilegesForPackageAnyPhone(String);
     method public void dial(String);
@@ -11572,7 +11534,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public String getCdmaMin(int);
     method public String getCdmaPrlVersion();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCdmaRoamingMode();
     method public int getCurrentPhoneType();
     method public int getCurrentPhoneType(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getDataActivationState();
@@ -11609,12 +11570,10 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isAnyRadioPoweredOn();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApnMetered(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isApplicationOnUicc(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataAllowedInVoiceCall();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataConnectionAllowed();
     method public boolean isDataConnectivityPossible();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) @WorkerThread public boolean isIccLockEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isInEmergencySmsMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isLteCdmaEvdoGsmWcdmaEnabled();
@@ -11648,13 +11607,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallWaitingStatus(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setCarrierRestrictionRules(@NonNull android.telephony.CarrierRestrictionRules);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCdmaRoamingMode(int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCdmaSubscriptionMode(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setDataAllowedDuringVoiceCall(boolean);
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setIccLockEnabled(boolean, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunisticNetworkState(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setPreferredNetworkTypeBitmask(long);
@@ -11704,10 +11659,6 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
-    field public static final int CDMA_SUBSCRIPTION_NV = 1; // 0x1
-    field public static final int CDMA_SUBSCRIPTION_RUIM_SIM = 0; // 0x0
-    field public static final int CDMA_SUBSCRIPTION_UNKNOWN = -1; // 0xffffffff
-    field public static final int CHANGE_ICC_LOCK_SUCCESS = 2147483647; // 0x7fffffff
     field public static final String EXTRA_ANOMALY_DESCRIPTION = "android.telephony.extra.ANOMALY_DESCRIPTION";
     field public static final String EXTRA_ANOMALY_ID = "android.telephony.extra.ANOMALY_ID";
     field @Deprecated public static final String EXTRA_APN_PROTOCOL = "apnProto";

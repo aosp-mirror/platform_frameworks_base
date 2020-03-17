@@ -2059,7 +2059,7 @@ public class AudioService extends IAudioService.Stub
         if (adjustVolume && (direction != AudioManager.ADJUST_SAME)) {
             mAudioHandler.removeMessages(MSG_UNMUTE_STREAM);
 
-            if (isMuteAdjust) {
+            if (isMuteAdjust && !mFullVolumeDevices.contains(device)) {
                 boolean state;
                 if (direction == AudioManager.ADJUST_TOGGLE_MUTE) {
                     state = !streamState.mIsMuted;

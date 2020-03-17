@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Toca para ver a configuración de localización."</string>
     <string name="country_detector" msgid="7023275114706088854">"Detector do país"</string>
     <string name="location_service" msgid="2439187616018455546">"Servizo de localización"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Servizo GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servizo de notificacións dos sensores"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servizo Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Borrarase o teu dispositivo"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Vaise facer unha captura de pantalla para o informe de erros en <xliff:g id="NUMBER_1">%d</xliff:g> segundos.</item>
       <item quantity="one">Vaise facer unha captura de pantalla para o informe de erros en <xliff:g id="NUMBER_0">%d</xliff:g> segundo.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Realizouse a captura de pantalla co informe de erros"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Produciuse un erro ao realizar a captura de pantalla co informe de erros"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Modo de silencio"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"O son está desactivado"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"O son está activado"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"acceder a comandos adicionais do provedor de localización"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permite á aplicación acceder a comandos adicionais de fornecedor de localizacións. É posible que isto provoque que a aplicación interfira co funcionamento do GPS ou doutras fontes da localización."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"acceder á localización exacta só en primeiro plano"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Mentres a utilizas, esta aplicación pode obter a túa localización exacta a través dos servizos de localización. Para facelo, os servizos mencionados deben estar activados no teu dispositivo. Isto pode aumentar o uso da batería."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"acceder á localización aproximada só en primeiro plano"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Mentres a utilizas, esta aplicación pode obter a túa localización aproximada a través dos servizos de localización. Para facelo, os servizos mencionados deben estar activados no teu dispositivo."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"acceder á localización en segundo plano"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Esta aplicación pode acceder á localización en calquera momento, aínda que non a esteas utilizando."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"cambiar a configuración de son"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Permite á aplicación modificar a configuración de audio global, como o volume e que altofalante se utiliza para a saída."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"gravar audio"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta aplicación pode utilizar a cámara en calquera momento para sacar fotos e gravar vídeos."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Permitir que unha aplicación ou un servizo acceda ás cámaras do sistema para sacar fotos e gravar vídeos"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Esta aplicación do sistema con privilexios pode utilizar unha cámara do sistema en calquera momento para sacar fotos e gravar vídeos. Require que a aplicación tamén teña o permiso android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que unha aplicación ou servizo reciba retrochamadas cando se abran ou se pechen dispositivos con cámara."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Esta aplicación de sinaturas pode recibir retrochamadas cando un paquete de aplicacións abra ou peche un dispositivo con cámara."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar a vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite á aplicación controlar o vibrador."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que a aplicación acceda ao estado de vibrador"</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permite á aplicación dirixir as súas chamadas a través do sistema para mellorar a túa experiencia durante as chamadas."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"consultar e controlar as chamadas a través do sistema."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Permite que a aplicación consulte e controle as chamadas en curso do dispositivo. Pode acceder a información como os números e os estados das chamadas."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"continuar unha chamada iniciada noutra aplicación"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite que a aplicación continúe unha chamada que se iniciou noutra aplicación."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ler números de teléfono"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Permite que a aplicación acceda aos números de teléfono do dispositivo."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"manter acendida a pantalla do coche"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"evitar que a tableta entre en modo de inactividade"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"evitar que o dispositivo Android TV entre en modo de suspensión"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"evitar que o teléfono entre en modo de suspensión"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Permite que a aplicación manteña acendida a pantalla do coche."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Permite á aplicación evitar que a tableta acceda ao modo de suspensión."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Permite que a aplicación evite que o dispositivo Android TV entre en modo de suspensión."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Permite á aplicación evitar que o teléfono acceda ao modo de suspensión."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"A rede de telefonía móbil non ten acceso a Internet"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"A rede non ten acceso a Internet"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Non se puido acceder ao servidor DNS privado"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Estableceuse conexión"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"A conectividade de <xliff:g id="NETWORK_SSID">%1$s</xliff:g> é limitada"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Toca para conectarte de todas formas"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Cambiouse a: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Queres utilizar o atallo de accesibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Cando o atallo está activado, podes premer os dous botóns de volume durante 3 segundos para iniciar unha función de accesibilidade."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Queres permitir que <xliff:g id="SERVICE">%1$s</xliff:g> poida controlar totalmente o teu dispositivo?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Se activas <xliff:g id="SERVICE">%1$s</xliff:g>, o dispositivo non utilizará o teu bloqueo de pantalla para mellorar a encriptación de datos."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"O control total é adecuado para as aplicacións que che axudan coa accesibilidade, pero non para a maioría das aplicacións."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver e controlar a pantalla"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pode ler todo o contido da pantalla e mostralo sobre outras aplicacións."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver e realizar accións"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Pode facer un seguimento das túas interaccións cunha aplicación ou cun sensor de hardware, así como interactuar por ti coas aplicacións."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denegar"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tocar unha función para comezar a utilizala:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Escoller as aplicacións que queres utilizar co botón de accesibilidade"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Escoller as aplicacións que queres utilizar co atallo da tecla de volume"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g>: desactivouse"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atallos"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancelar"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Feito"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar atallo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atallo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de cor"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Sen clasificar"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Ti defines a importancia destas notificacións."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"É importante polas persoas involucradas."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notificación de aplicacións personalizada"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>? (Xa existe un usuario con esta conta)"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Queres permitir que <xliff:g id="APP">%1$s</xliff:g> cree un usuario novo con <xliff:g id="ACCOUNT">%2$s</xliff:g>?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Engadir un idioma"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menú de accesibilidade"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de subtítulos de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> incluíuse no grupo RESTRINXIDO"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Persoal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Traballo"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Vista persoal"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vista de traballo"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Non se pode compartir información coas aplicacións do traballo"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Non se pode compartir información coas aplicacións persoais"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"O teu administrador de TI bloqueou a función de compartir información entre as aplicacións persoais e as do traballo"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Activa as aplicacións do traballo"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Activa as aplicacións do traballo para acceder a elas e aos contactos do traballo"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"O teu administrador de TI bloqueou a función de compartir información entre o perfil persoal e o de traballo"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Non se puido acceder ás aplicacións do traballo"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"O teu administrador de TI non che permite ver o teu contido persoal nas aplicacións do traballo"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Non se puido acceder ás aplicacións persoais"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"O teu administrador de TI non che permite ver o contido do traballo nas aplicacións persoais"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Para compartir contido, activa o perfil de traballo"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Para ver contido, activa o perfil de traballo"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Non hai aplicacións dispoñibles"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Non se puideron atopar aplicacións"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Activar perfil do traballo"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activar"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Gravar ou reproducir audio en chamadas telefónicas"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permite que esta aplicación, cando está asignada como aplicación predeterminada do marcador, grave e reproduza audio en chamadas telefónicas."</string>
 </resources>

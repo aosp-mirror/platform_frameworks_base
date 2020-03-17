@@ -66,7 +66,7 @@ public class SurfaceControlViewHostTest extends Activity implements SurfaceHolde
         WindowManager.LayoutParams lp =
             new WindowManager.LayoutParams(500, 500, WindowManager.LayoutParams.TYPE_APPLICATION,
                     0, PixelFormat.OPAQUE);
-        mVr.addView(v, lp);
+        mVr.setView(v, lp);
     }
 
     @Override

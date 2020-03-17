@@ -857,6 +857,7 @@ package android.content.integrity {
     method @NonNull public android.content.integrity.RuleSet getCurrentRuleSet();
     method @NonNull public String getCurrentRuleSetProvider();
     method @NonNull public String getCurrentRuleSetVersion();
+    method @NonNull public java.util.List<java.lang.String> getWhitelistedRuleProviders();
     method public void updateRuleSet(@NonNull android.content.integrity.RuleSet, @NonNull android.content.IntentSender);
     field public static final String EXTRA_STATUS = "android.content.integrity.extra.STATUS";
     field public static final int STATUS_FAILURE = 1; // 0x1
@@ -3434,13 +3435,15 @@ package android.service.notification {
 
 package android.service.quickaccesswallet {
 
-  public interface QuickAccessWalletClient {
+  public interface QuickAccessWalletClient extends java.io.Closeable {
     method public void addWalletServiceEventListener(@NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
+    method public void addWalletServiceEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.WalletServiceEventListener);
     method @NonNull public static android.service.quickaccesswallet.QuickAccessWalletClient create(@NonNull android.content.Context);
     method @Nullable public android.content.Intent createWalletIntent();
     method @Nullable public android.content.Intent createWalletSettingsIntent();
     method public void disconnect();
     method public void getWalletCards(@NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
+    method public void getWalletCards(@NonNull java.util.concurrent.Executor, @NonNull android.service.quickaccesswallet.GetWalletCardsRequest, @NonNull android.service.quickaccesswallet.QuickAccessWalletClient.OnWalletCardsRetrievedCallback);
     method public boolean isWalletFeatureAvailable();
     method public boolean isWalletFeatureAvailableWhenDeviceLocked();
     method public boolean isWalletServiceAvailable();
@@ -4957,8 +4960,8 @@ package android.view {
   }
 
   public class SurfaceControlViewHost {
-    method public void addView(@NonNull android.view.View, android.view.WindowManager.LayoutParams);
     method public void relayout(android.view.WindowManager.LayoutParams);
+    method public void setView(@NonNull android.view.View, @NonNull android.view.WindowManager.LayoutParams);
   }
 
   @UiThread public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {

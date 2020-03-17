@@ -89,7 +89,7 @@
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"Tidak dapat melakukan panggilan darurat melalui Wi-Fi"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Notifikasi"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Penerusan panggilan"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode panggilan balik darurat"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"Mode telepon balik darurat"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"Status data seluler"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"Pesan SMS"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"Notifikasi pesan suara"</string>
@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Ketuk untuk melihat setelan lokasi Anda."</string>
     <string name="country_detector" msgid="7023275114706088854">"Pendeteksi Negara"</string>
     <string name="location_service" msgid="2439187616018455546">"Layanan Lokasi"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"Layanan GNSS"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Layanan Notifikasi Sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Layanan Twilight"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Perangkat akan dihapus"</string>
@@ -249,10 +250,8 @@
       <item quantity="other">Mengambil screenshot untuk laporan bug dalam <xliff:g id="NUMBER_1">%d</xliff:g> detik.</item>
       <item quantity="one">Mengambil screenshot untuk laporan bug dalam <xliff:g id="NUMBER_0">%d</xliff:g> detik.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Screenshot berisi laporan bug diambil"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Gagal mengambil screenshot berisi laporan bug"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Mode senyap"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Suara MATI"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Suara AKTIF"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"akses perintah penyedia lokasi ekstra"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"akses lokasi pasti hanya saat di latar depan"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aplikasi ini bisa mendapatkan lokasi pasti Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi. Ini dapat meningkatkan penggunaan baterai."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"akses perkiraan lokasi hanya saat berada di latar depan"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aplikasi ini bisa mendapatkan perkiraan lokasi Anda dari layanan lokasi saat aplikasi sedang digunakan. Layanan lokasi untuk perangkat harus diaktifkan agar aplikasi bisa mendapatkan lokasi."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"akses lokasi di latar belakang"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Aplikasi ini dapat mengakses lokasi kapan saja, bahkan saat aplikasi tidak sedang digunakan."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"rekam audio"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikasi ini dapat mengambil foto dan merekam video menggunakan kamera kapan saja."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Izinkan akses aplikasi atau layanan ke kamera sistem untuk mengambil gambar dan video"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Hak istimewa ini | aplikasi sistem dapat mengambil gambar dan merekam video menggunakan kamera sistem kapan saja. Mewajibkan aplikasi juga memegang izin android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Izinkan aplikasi atau layanan untuk menerima callback tentang perangkat kamera yang sedang dibuka atau ditutup."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Aplikasi tanda tangan ini dapat menerima callback saat perangkat kamera sedang dibuka (oleh paket aplikasi) atau ditutup."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrol getaran"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Mengizinkan aplikasi untuk mengendalikan vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Mengizinkan aplikasi untuk mengakses status vibrator."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Mengizinkan aplikasi menyambungkan panggilan telepon melalui sistem untuk menyempurnakan pengalaman menelepon."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"melihat dan mengontrol panggilan melalui sistem."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Memungkinkan aplikasi melihat dan mengontrol panggilan telepon yang sedang berlangsung di perangkat. Ini mencakup informasi seperti nomor yang menelepon dan status panggilan telepon."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"lanjutkan panggilan dari aplikasi lain"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Mengizinkan aplikasi melanjutkan panggilan yang dimulai di aplikasi lain."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"membaca nomor telepon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Mengizinkan aplikasi mengakses nomor telepon perangkat."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"tetap aktifkan layar mobil"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"cegah tablet dari tidur"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"cegah perangkat Android TV tidur"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"mencegah ponsel menjadi tidak aktif"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Mengizinkan aplikasi untuk menjaga agar layar mobil tetap aktif."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Mengizinkan apl mencegah tablet tidur."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Mengizinkan aplikasi untuk mencegah perangkat Android TV tidur."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Mengizinkan apl mencegah ponsel tidur."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Jaringan seluler tidak memiliki akses internet"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Jaringan tidak memiliki akses internet"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Server DNS pribadi tidak dapat diakses"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Tersambung"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> memiliki konektivitas terbatas"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Ketuk untuk tetap menyambungkan"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Dialihkan ke <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Izinkan <xliff:g id="SERVICE">%1$s</xliff:g> memiliki kontrol penuh atas perangkat Anda?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jika Anda mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, perangkat tidak akan menggunakan kunci layar untuk meningkatkan enkripsi data."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kontrol penuh sesuai untuk aplikasi yang membantu Anda terkait kebutuhan aksesibilitas, tetapi tidak untuk sebagian besar aplikasi."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Tampilan dan layar kontrol"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Aplikasi dapat membaca semua konten di layar dan menampilkan konten di atas aplikasi lain."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Menampilkan dan melakukan tindakan"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Aplikasi dapat melacak interaksi Anda dengan aplikasi atau sensor hardware, dan berinteraksi dengan aplikasi atas nama Anda."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Izinkan"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketuk fitur untuk mulai menggunakannya:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Pilih aplikasi yang akan digunakan dengan tombol aksesibilitas"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Pilih aplikasi yang akan digunakan dengan pintasan tombol volume"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> telah dinonaktifkan"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Batal"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Selesai"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Nonaktifkan Pintasan"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversi Warna"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Belum dikategorikan"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Anda menyetel nilai penting notifikasi ini."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Ini penting karena orang-orang yang terlibat."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Notifikasi aplikasi kustom"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> (Pengguna dengan akun ini sudah ada) ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"Izinkan <xliff:g id="APP">%1$s</xliff:g> membuat Pengguna baru dengan <xliff:g id="ACCOUNT">%2$s</xliff:g> ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Tambahkan bahasa"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menu Aksesibilitas"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Kolom teks <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> telah dimasukkan ke dalam bucket DIBATASI"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pribadi"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Tampilan pribadi"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Tampilan kerja"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Tidak dapat membagikan ke aplikasi kerja"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Tidak dapat membagikan ke aplikasi pribadi"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"Admin IT memblokir berbagi antara aplikasi kerja dan pribadi"</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Aktifkan aplikasi kerja"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Aktifkan aplikasi kerja untuk mengakses aplikasi kerja &amp; kontak"</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Admin IT memblokir berbagi antara profil kerja dan pribadi"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Tidak dapat mengakses aplikasi kerja"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Admin IT tidak mengizinkan Anda melihat konten pribadi di aplikasi kerja"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Tidak dapat mengakses aplikasi pribadi"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Admin IT tidak mengizinkan Anda melihat konten kerja di aplikasi pribadi"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Aktifkan profil kerja untuk membagikan konten"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Aktifkan profil kerja untuk melihat konten"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Tidak ada aplikasi yang tersedia"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Kami tidak menemukan aplikasi"</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Aktifkan profil kerja"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktifkan"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Rekam atau putar audio dalam panggilan telepon"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Mengizinkan aplikasi ini, saat ditetapkan sebagai aplikasi telepon default, untuk merekam atau memutar audio dalam panggilan telepon."</string>
 </resources>

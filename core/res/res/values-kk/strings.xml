@@ -195,6 +195,7 @@
     <string name="location_changed_notification_text" msgid="198907268219396399">"Орналасу параметрлерін көру үшін түртіңіз."</string>
     <string name="country_detector" msgid="7023275114706088854">"Ел детекторы"</string>
     <string name="location_service" msgid="2439187616018455546">"Орынды анықтау қызметі"</string>
+    <string name="gnss_service" msgid="8907781262179951385">"GNSS қызметі"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Датчик хабарландыруы қызметі"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight қызметі"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Құрылғыңыздағы деректер өшіріледі"</string>
@@ -249,10 +250,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> секундтан кейін қате туралы есептің скриншоты түсіріледі.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> секундтан кейін қате туралы есептің скриншоты түсіріледі.</item>
     </plurals>
-    <!-- no translation found for bugreport_screenshot_success_toast (7986095104151473745) -->
-    <skip />
-    <!-- no translation found for bugreport_screenshot_failure_toast (6736320861311294294) -->
-    <skip />
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Қате туралы есеп түсірілген скриншот"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Қате туралы есеп скриншоты түсірілмеді."</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"Үнсіз режимі"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"Дыбыс ӨШІРУЛІ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"Дыбыс ҚОСУЛЫ"</string>
@@ -420,14 +419,11 @@
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"қосымша аймақ жабдықтаушы пәрмендеріне қол жетімділік"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Қолданбаға орын жеткізушісінің қосымша пәрмендеріне қатынасуға рұқсат береді. Бұл қолданбаға GPS немесе басқа орын көздерінің жұмысына кедергі келтіруге рұқсат беруі мүмкін."</string>
     <string name="permlab_accessFineLocation" msgid="6426318438195622966">"нақты орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
-    <!-- no translation found for permdesc_accessFineLocation (6732174080240016335) -->
-    <skip />
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Қолданба пайдаланылып жатқанда, ол орынды анықтау қызметтерінен дәл геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған орынды анықтау қызметтері қосулы тұруы керек. Бұл батарея шығынын арттыруы мүмкін."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"болжалды орналасқан жер туралы ақпаратқа тек ашық экранда кіру"</string>
-    <!-- no translation found for permdesc_accessCoarseLocation (778521847873199160) -->
-    <skip />
+    <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Бұл қолданба пайдаланылып жатқанда, ол орынды анықтау қызметтерінен болжалды геодерегіңізді ала алады. Геодеректі алу үшін құрылғыңызға арналған орынды анықтау қызметтері қосулы тұруы керек."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"геодеректерді фондық режимде пайдалану"</string>
-    <!-- no translation found for permdesc_accessBackgroundLocation (8264885066095638105) -->
-    <skip />
+    <string name="permdesc_accessBackgroundLocation" msgid="8264885066095638105">"Бұл қолданба пайдаланылмайтын кезде де, ол геодеректі кез келген уақытта пайдалана алады."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"аудио параметрлерін өзгерту"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Қолданбаға дыбыс қаттылығы және аудио шығыс үндеткішін таңдау сияқты жаһандық аудио параметрлерін өзгерту мүмкіндігін береді."</string>
     <string name="permlab_recordAudio" msgid="1208457423054219147">"аудио жазу"</string>
@@ -440,6 +436,8 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Бұл қолданба кез келген уақытта камерамен суретке түсіруі және бейнелерді жазуы мүмкін."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Суретке немесе бейнеге түсіру үшін қолданбаға немесе қызметке жүйелік камераларды пайдалануға рұқсат беру"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Осы айрықша | жүйе қолданбасы кез келген уақытта жүйелік камера арқылы суретке не бейнеге түсіре алады. Қолданбаға android.permission.CAMERA рұқсаты қажет болады."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Қолданбаға не қызметке ашылып не жабылып жатқан камера құрылғылары туралы кері шақыру алуға рұқсат ету"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Кез келген камера ашылып (көрсетілген қолданба пакеті арқылы) не жабылып жатқанда, бұл қолтаңба қолданбасы кері шақыру алады."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"тербелісті басқару"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Қолданбаға діріл күйін пайдалануға мүмкіндік береді."</string>
@@ -453,13 +451,19 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Қоңырау шалу тәжірибесін жақсарту үшін қолданба қоңырауларды жүйе арқылы бағыттай алады."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"жүйе арқылы қоңырауларды көру және басқару."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Қолданбаға құрылғыдағы қазіргі қоңырауларды көруге және басқаруға мүмкіндік береді. Бұл – қоңырау шалу нөмірлері және қоңыраулардың күйі сияқты ақпаратқа қатысты."</string>
+    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
+    <skip />
+    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
+    <skip />
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"басқа қолданбадағы қоңырауды жалғастыру"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Қолданбаға басқа қолданбадағы қоңырауды жалғастыруға рұқсат береді."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"телефон нөмірлерін оқу"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Қолданбаға құрылғының телефон нөмірлерін алуға мүмкіндік береді."</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"көлік экранын қосулы күйде ұстау"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"планшетті ұйқыдан бөгеу"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV құрылғыңызды ұйқы режиміне өткізбеу"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"телефонды ұйқыдан бөгеу"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"Қолданбаға көлік экранын қосулы күйде ұстауға мүмкіндік береді."</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"Қолданбаға планшеттің ұйқыға кетуін болдырмауға рұқсат береді."</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Қолданба Android TV құрылғысын \"Ұйқы\" режиміне өткізбейтін болады."</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"Қолданбаға телефонның ұйқыға кетуін болдырмауға рұқсат береді."</string>
@@ -1262,7 +1266,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобильдік желі интернетке қосылмаған."</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Желі интернетке қосылмаған."</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Жеке DNS серверіне кіру мүмкін емес."</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Жалғанды"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> желісінің қосылу мүмкіндігі шектеулі."</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Бәрібір жалғау үшін түртіңіз."</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> желісіне ауысты"</string>
@@ -1634,8 +1637,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дыбыс деңгейін ұсынылған деңгейден көтеру керек пе?\n\nЖоғары дыбыс деңгейінде ұзақ кезеңдер бойы тыңдау есту қабілетіңізге зиян тигізуі мүмкін."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Арнайы мүмкіндік төте жолын пайдалану керек пе?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Түймелер тіркесімі қосулы кезде, екі дыбыс түймесін 3 секунд басып тұрсаңыз, \"Арнайы мүмкіндіктер\" функциясы іске қосылады."</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> қызметі құрылғыңызды толық басқаруына рұқсат етілсін бе?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> қоссаңыз, құрылғыңыз деректерді шифрлау үшін экранды бекітуді пайдаланбайды."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Арнайы мүмкіндіктер бойынша көмектесетін қолданбаларға ғана құрылғыны толық басқару рұқсатын берген дұрыс."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Экранды көру және басқару"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ол экрандағы мазмұнды толық оқиды және мазмұнды басқа қолданбалардың үстінен көрсете алады."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Әрекеттерді көру және орындау"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ол қолданбамен немесе жабдық датчигімен істеген тапсырмаларыңызды бақылайды және қолданбаларды сіздің атыңыздан пайдаланады."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Рұқсат ету"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Қабылдамау"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Функцияны пайдалана бастау үшін түртіңіз:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"\"Арнайы мүмкіндіктер\" түймесімен қолданылатын қолданбаларды таңдаңыз"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Дыбыс деңгейі пернелері таңбашасымен қолданылатын қолданбаларды таңдаңыз"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> қызметі өшірулі."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Таңбашаларды өзгерту"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Бас тарту"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Дайын"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Төте жолды өшіру"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Төте жолды пайдалану"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Түстер инверсиясы"</string>
@@ -1856,8 +1872,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"Санатқа жатқызылмаған"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"Сіз осы хабарландырулардың маңыздылығын орнатасыз."</string>
     <string name="importance_from_person" msgid="4235804979664465383">"Қатысты адамдарға байланысты бұл маңызды."</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"Арнаулы хабар хабарландыруы"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы (мұндай есептік жазбаға ие пайдаланушы бұрыннан бар) жасауға рұқсат етілсін бе?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> қолданбасына <xliff:g id="ACCOUNT">%2$s</xliff:g> есептік жазбасы бар жаңа пайдаланушы жасауға рұқсат етілсін бе?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"Тілді қосу"</string>
@@ -2029,16 +2044,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Арнайы мүмкіндіктер мәзірі"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасының жазу жолағы."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ШЕКТЕЛГЕН себетке салынды."</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Жеке"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Жұмыс"</string>
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Жеке көру"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Жұмыс деректерін көру"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Жұмыс қолданбаларымен бөлісілмейді"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Жеке қолданбалармен бөлісілмейді"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="3536237105241882679">"АТ әкімшісі жеке және жұмыс қолданбалары арасында деректер бөлісуді бөгеді."</string>
-    <string name="resolver_turn_on_work_apps" msgid="8987359079870455469">"Жұмыс қолданбаларын іске қосу"</string>
-    <string name="resolver_turn_on_work_apps_explanation" msgid="6322467455509618928">"Жұмыс қолданбаларын және контактілерді пайдалану үшін, оларды іске қосыңыз."</string>
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Әкімшіңіз жеке және жұмыс қолданбалары арасында деректер бөлісуге тыйым салған."</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Жұмыс қолданбаларын пайдалану мүмкін емес"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Әкімшіңіз жұмыс қолданбаларынан жеке мазмұнды көруге тыйым салған."</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Жеке қолданбаларды пайдалану мүмкін емес"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Әкімшіңіз жеке қолданбалардан жұмыс мазмұнын көруге тыйым салған."</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Мазмұнды бөлісу үшін жұмыс профилін қосыңыз."</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Мазмұнды көру үшін жұмыс профилін қосыңыз."</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Қолданбалар жоқ"</string>
-    <string name="resolver_no_apps_available_explanation" msgid="4662694431121196560">"Ешқандай қолданба табылмады."</string>
-    <string name="resolver_switch_on_work" msgid="8294542702883688533">"Жұмыс профилін іске қосу"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Қосу"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Телефон қоңырауларында аудио жазу немесе ойнату"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Қолданба әдепкі нөмір тергіш қолданба ретінде тағайындалған кезде, телефон қоңырауларында аудионы жазуға немесе ойнатуға мүмкіндік береді."</string>
 </resources>

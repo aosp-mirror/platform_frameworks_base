@@ -22,6 +22,7 @@ import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
@@ -30,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @SmallTest
+@Presubmit
 @RunWith(JUnit4.class)
 /** Tests for {@link HdmiCecMessageBuilder}.. */
 public class HdmiCecMessageBuilderTest {
