@@ -242,11 +242,13 @@ final class CompatConfig {
             CompatChange c = mChanges.get(changeId);
             try {
                 if (c != null) {
-                    OverrideAllowedState allowedState =
-                            mOverrideValidator.getOverrideAllowedState(changeId, packageName);
-                    allowedState.enforce(changeId, packageName);
-                    overrideExists = true;
-                    c.removePackageOverride(packageName);
+                    overrideExists = c.hasOverride(packageName);
+                    if (overrideExists) {
+                        OverrideAllowedState allowedState =
+                                mOverrideValidator.getOverrideAllowedState(changeId, packageName);
+                        allowedState.enforce(changeId, packageName);
+                        c.removePackageOverride(packageName);
+                    }
                 }
             } catch (RemoteException e) {
                 // Should never occur, since validator is in the same process.
@@ -291,12 +293,14 @@ final class CompatConfig {
             for (int i = 0; i < mChanges.size(); ++i) {
                 try {
                     CompatChange change = mChanges.valueAt(i);
-                    OverrideAllowedState allowedState =
-                            mOverrideValidator.getOverrideAllowedState(change.getId(),
-                                                                       packageName);
-                    allowedState.enforce(change.getId(), packageName);
-                    if (change != null) {
-                        mChanges.valueAt(i).removePackageOverride(packageName);
+                    if (change.hasOverride(packageName)) {
+                        OverrideAllowedState allowedState =
+                                mOverrideValidator.getOverrideAllowedState(change.getId(),
+                                        packageName);
+                        allowedState.enforce(change.getId(), packageName);
+                        if (change != null) {
+                            mChanges.valueAt(i).removePackageOverride(packageName);
+                        }
                     }
                 } catch (RemoteException e) {
                     // Should never occur, since validator is in the same process.
