@@ -17,6 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -91,10 +92,21 @@ public class AtscFrontendSettings extends FrontendSettings {
     /**
      * Builder for {@link AtscFrontendSettings}.
      */
-    public static class Builder extends FrontendSettings.Builder<Builder> {
+    public static class Builder {
+        private int mFrequency;
         private int mModulation;
 
         private Builder() {
+        }
+
+        /**
+         * Sets frequency in Hz.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequency(int frequency) {
+            mFrequency = frequency;
+            return this;
         }
 
         /**
@@ -112,11 +124,6 @@ public class AtscFrontendSettings extends FrontendSettings {
         @NonNull
         public AtscFrontendSettings build() {
             return new AtscFrontendSettings(mFrequency, mModulation);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 
