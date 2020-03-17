@@ -167,7 +167,19 @@ public final class LinkProperties implements Parcelable {
         this(source, false /* parcelSensitiveFields */);
     }
 
-    private LinkProperties(@Nullable LinkProperties source, boolean parcelSensitiveFields) {
+    /**
+     * Create a copy of a {@link LinkProperties} that may preserve fields that were set
+     * based on the permissions of the process that originally received it.
+     *
+     * <p>By default {@link LinkProperties} does not preserve such fields during parceling, as
+     * they should not be shared outside of the process that receives them without appropriate
+     * checks.
+     * @param parcelSensitiveFields Whether the sensitive fields should be kept when parceling
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public LinkProperties(@Nullable LinkProperties source, boolean parcelSensitiveFields) {
         mParcelSensitiveFields = parcelSensitiveFields;
         if (source == null) return;
         mIfaceName = source.mIfaceName;
@@ -1558,22 +1570,6 @@ public final class LinkProperties implements Parcelable {
     @Nullable
     public CaptivePortalData getCaptivePortalData() {
         return mCaptivePortalData;
-    }
-
-    /**
-     * Create a copy of this {@link LinkProperties} that will preserve fields that were set
-     * based on the permissions of the process that received this {@link LinkProperties}.
-     *
-     * <p>By default {@link LinkProperties} does not preserve such fields during parceling, as
-     * they should not be shared outside of the process that receives them without appropriate
-     * checks.
-     * @hide
-     */
-    @SystemApi
-    @TestApi
-    @NonNull
-    public LinkProperties makeSensitiveFieldsParcelingCopy() {
-        return new LinkProperties(this, true /* parcelSensitiveFields */);
     }
 
     /**
