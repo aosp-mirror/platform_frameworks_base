@@ -3247,7 +3247,6 @@ package android.telephony {
     method @NonNull public java.util.List<android.telephony.data.ApnSetting> getDevicePolicyOverrideApns(@NonNull android.content.Context);
     method @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public int getEmergencyNumberDbVersion();
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public String getLine1AlphaTag();
-    method @NonNull @RequiresPermission("android.permission.READ_PRIVILEGED_PHONE_STATE") public String getNetworkCountryIso(int);
     method public android.util.Pair<java.lang.Integer,java.lang.Integer> getRadioHalVersion();
     method public boolean modifyDevicePolicyOverrideApn(@NonNull android.content.Context, int, @NonNull android.telephony.data.ApnSetting);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void refreshUiccProfile();
