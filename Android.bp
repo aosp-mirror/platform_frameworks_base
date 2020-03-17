@@ -456,7 +456,7 @@ java_library {
     defaults: ["framework-defaults"],
     srcs: [":framework-non-updatable-sources"],
     libs: [
-        "framework-tethering-stubs",
+        "framework-tethering-stubs-module_libs_api",
     ],
     installable: true,
     javac_shard_size: 150,
@@ -496,7 +496,7 @@ java_library {
         "framework-minus-apex",
         "updatable_media_stubs",
         "framework-sdkextensions-stubs-systemapi",
-        "framework-tethering-stubs",
+        "framework-tethering-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
@@ -511,7 +511,6 @@ java_library {
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
-        "//frameworks/base/packages/Tethering/common/TetheringLib:__subpackages__",
         "//frameworks/layoutlib:__subpackages__",
         "//frameworks/opt/net/ike:__subpackages__",
     ],
