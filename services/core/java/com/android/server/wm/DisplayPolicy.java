@@ -28,6 +28,7 @@ import static android.view.Display.TYPE_INTERNAL;
 import static android.view.InsetsState.ITYPE_BOTTOM_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_BOTTOM_GESTURES;
 import static android.view.InsetsState.ITYPE_BOTTOM_TAPPABLE_ELEMENT;
+import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_LEFT_GESTURES;
@@ -1024,6 +1025,13 @@ public class DisplayPolicy {
             case TYPE_STATUS_BAR_PANEL:
                 return WindowManagerGlobal.ADD_INVALID_TYPE;
         }
+
+        if (attrs.providesInsetsTypes != null) {
+            mContext.enforcePermission(
+                    android.Manifest.permission.STATUS_BAR_SERVICE, callingPid, callingUid,
+                    "DisplayPolicy");
+            enforceSingleInsetsTypeCorrespondingToWindowType(attrs.providesInsetsTypes);
+        }
         return ADD_OKAY;
     }
 
@@ -1110,6 +1118,28 @@ public class DisplayPolicy {
                         });
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
+            default:
+                if (attrs.providesInsetsTypes != null) {
+                    for (int insetsType : attrs.providesInsetsTypes) {
+                        mDisplayContent.setInsetProvider(insetsType, win, null);
+                    }
+                }
+                break;
+        }
+    }
+
+    private static void enforceSingleInsetsTypeCorrespondingToWindowType(int[] insetsTypes) {
+        int count = 0;
+        for (int insetsType : insetsTypes) {
+            switch (insetsType) {
+                case ITYPE_NAVIGATION_BAR:
+                case ITYPE_STATUS_BAR:
+                case ITYPE_CAPTION_BAR:
+                    if (++count > 1) {
+                        throw new IllegalArgumentException(
+                                "Multiple InsetsTypes corresponding to Window type");
+                    }
+            }
         }
     }
 
