@@ -97,6 +97,9 @@ public abstract class InlineSuggestionRenderService extends Service {
             host.setView(suggestionRoot, lp);
             suggestionRoot.setOnClickListener((v) -> {
                 try {
+                    if (suggestionView.hasOnClickListeners()) {
+                        suggestionView.callOnClick();
+                    }
                     callback.onClick();
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException calling onClick()");
@@ -105,6 +108,9 @@ public abstract class InlineSuggestionRenderService extends Service {
 
             suggestionRoot.setOnLongClickListener((v) -> {
                 try {
+                    if (suggestionView.hasOnLongClickListeners()) {
+                        suggestionView.performLongClick();
+                    }
                     callback.onLongClick();
                 } catch (RemoteException e) {
                     Log.w(TAG, "RemoteException calling onLongClick()");
