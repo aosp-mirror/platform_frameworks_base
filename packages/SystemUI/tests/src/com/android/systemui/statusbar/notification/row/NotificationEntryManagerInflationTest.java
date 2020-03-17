@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
+import android.content.pm.LauncherApps;
 import android.os.Handler;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
@@ -61,6 +62,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationRankingManager;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
+import com.android.systemui.statusbar.notification.icon.IconBuilder;
+import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
@@ -245,14 +248,13 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 mLockscreenUserManager,
                 pipeline,
                 stage,
-                true, /* allowLongPress */
-                mock(KeyguardBypassController.class),
-                mock(StatusBarStateController.class),
-                mGroupManager,
-                mGutsManager,
                 mNotificationInterruptionStateProvider,
                 RowInflaterTask::new,
-                mExpandableNotificationRowComponentBuilder);
+                mExpandableNotificationRowComponentBuilder,
+                new IconManager(
+                        mEntryManager,
+                        mock(LauncherApps.class),
+                        new IconBuilder(mContext)));
 
         mEntryManager.setUpWithPresenter(mPresenter);
         mEntryManager.addNotificationEntryListener(mEntryListener);

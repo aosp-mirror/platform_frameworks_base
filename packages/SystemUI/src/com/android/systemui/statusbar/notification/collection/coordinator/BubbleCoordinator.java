@@ -126,7 +126,7 @@ public class BubbleCoordinator implements Coordinator {
                 mInterceptedDismissalEntries.remove(entry.getKey());
                 mOnEndDismissInterception.onEndDismissInterception(mDismissInterceptor, entry,
                         createDismissedByUserStats(entry));
-            } else if (mNotifPipeline.getActiveNotifs().contains(entry)) {
+            } else if (mNotifPipeline.getAllNotifs().contains(entry)) {
                 // Bubbles are hiding the notifications from the shade, but the bubble was
                 // deleted; therefore, the notification should be cancelled as if it were a user
                 // dismissal (this won't re-enter handleInterceptDimissal because Bubbles
