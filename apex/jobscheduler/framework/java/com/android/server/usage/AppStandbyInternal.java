@@ -5,6 +5,7 @@ import android.annotation.UserIdInt;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
+import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.content.Context;
 import android.os.Looper;
 
@@ -123,9 +124,10 @@ public interface AppStandbyInternal {
      * appropriate time.
      *
      * @param restrictReason The restrictReason for restricting the app. Should be one of the
-     *                       UsageStatsManager.REASON_SUB_RESTRICT_* reasons.
+     *                       UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_* reasons.
      */
-    void restrictApp(@NonNull String packageName, int userId, int restrictReason);
+    void restrictApp(@NonNull String packageName, int userId,
+            @SystemForcedReasons int restrictReason);
 
     void addActiveDeviceAdmin(String adminPkg, int userId);
 
