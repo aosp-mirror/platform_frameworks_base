@@ -26,7 +26,6 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.TvInputService;
-import android.media.tv.tuner.TunerConstants.Result;
 import android.media.tv.tuner.dvr.DvrPlayback;
 import android.media.tv.tuner.dvr.DvrRecorder;
 import android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener;
@@ -50,6 +49,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -68,6 +68,96 @@ import java.util.concurrent.Executor;
  */
 @SystemApi
 public class Tuner implements AutoCloseable  {
+    /**
+     * Invalid TS packet ID.
+     */
+    public static final int INVALID_TS_PID = Constants.Constant.INVALID_TS_PID;
+    /**
+     * Invalid stream ID.
+     */
+    public static final int INVALID_STREAM_ID = Constants.Constant.INVALID_STREAM_ID;
+    /**
+     * Invalid filter ID.
+     */
+    public static final int INVALID_FILTER_ID = Constants.Constant.INVALID_FILTER_ID;
+    /**
+     * Invalid AV Sync ID.
+     */
+    public static final int INVALID_AV_SYNC_ID = Constants.Constant.INVALID_AV_SYNC_ID;
+    /**
+     * Invalid timestamp.
+     *
+     * <p>Returned by {@link android.media.tv.tuner.filter.TimeFilter#getSourceTime()},
+     * {@link android.media.tv.tuner.filter.TimeFilter#getTimeStamp()}, or
+     * {@link Tuner#getAvSyncTime(int)} when the requested timestamp is not available.
+     *
+     * @see android.media.tv.tuner.filter.TimeFilter#getSourceTime()
+     * @see android.media.tv.tuner.filter.TimeFilter#getTimeStamp()
+     * @see Tuner#getAvSyncTime(int)
+     */
+    public static final long INVALID_TIMESTAMP = -1L;
+
+
+    /** @hide */
+    @IntDef(prefix = "SCAN_TYPE_", value = {SCAN_TYPE_UNDEFINED, SCAN_TYPE_AUTO, SCAN_TYPE_BLIND})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ScanType {}
+    /**
+     * Scan type undefined.
+     */
+    public static final int SCAN_TYPE_UNDEFINED = Constants.FrontendScanType.SCAN_UNDEFINED;
+    /**
+     * Scan type auto.
+     *
+     * <p> Tuner will send {@link android.media.tv.tuner.frontend.ScanCallback#onLocked}
+     */
+    public static final int SCAN_TYPE_AUTO = Constants.FrontendScanType.SCAN_AUTO;
+    /**
+     * Blind scan.
+     *
+     * <p>Frequency range is not specified. The {@link android.media.tv.tuner.Tuner} will scan an
+     * implementation specific range.
+     */
+    public static final int SCAN_TYPE_BLIND = Constants.FrontendScanType.SCAN_BLIND;
+
+
+    /** @hide */
+    @IntDef({RESULT_SUCCESS, RESULT_UNAVAILABLE, RESULT_NOT_INITIALIZED, RESULT_INVALID_STATE,
+            RESULT_INVALID_ARGUMENT, RESULT_OUT_OF_MEMORY, RESULT_UNKNOWN_ERROR})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Result {}
+
+    /**
+     * Operation succeeded.
+     */
+    public static final int RESULT_SUCCESS = Constants.Result.SUCCESS;
+    /**
+     * Operation failed because the corresponding resources are not available.
+     */
+    public static final int RESULT_UNAVAILABLE = Constants.Result.UNAVAILABLE;
+    /**
+     * Operation failed because the corresponding resources are not initialized.
+     */
+    public static final int RESULT_NOT_INITIALIZED = Constants.Result.NOT_INITIALIZED;
+    /**
+     * Operation failed because it's not in a valid state.
+     */
+    public static final int RESULT_INVALID_STATE = Constants.Result.INVALID_STATE;
+    /**
+     * Operation failed because there are invalid arguments.
+     */
+    public static final int RESULT_INVALID_ARGUMENT = Constants.Result.INVALID_ARGUMENT;
+    /**
+     * Memory allocation failed.
+     */
+    public static final int RESULT_OUT_OF_MEMORY = Constants.Result.OUT_OF_MEMORY;
+    /**
+     * Operation failed due to unknown errors.
+     */
+    public static final int RESULT_UNKNOWN_ERROR = Constants.Result.UNKNOWN_ERROR;
+
+
+
     private static final String TAG = "MediaTvTuner";
     private static final boolean DEBUG = false;
 
@@ -93,8 +183,12 @@ public class Tuner implements AutoCloseable  {
     public static final int DVR_TYPE_PLAYBACK = Constants.DvrType.PLAYBACK;
 
     static {
-        System.loadLibrary("media_tv_tuner");
-        nativeInit();
+        try {
+            System.loadLibrary("media_tv_tuner");
+            nativeInit();
+        } catch (UnsatisfiedLinkError e) {
+            Log.d(TAG, "tuner JNI library not found!");
+        }
     }
 
     private final Context mContext;
@@ -411,7 +505,7 @@ public class Tuner implements AutoCloseable  {
      */
     @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
-    public int scan(@NonNull FrontendSettings settings, @TunerConstants.ScanType int scanType,
+    public int scan(@NonNull FrontendSettings settings, @ScanType int scanType,
             @NonNull @CallbackExecutor Executor executor, @NonNull ScanCallback scanCallback) {
         TunerUtils.checkTunerPermission(mContext);
         if (mScanCallback != null || mScanCallbackExecutor != null) {
@@ -498,7 +592,7 @@ public class Tuner implements AutoCloseable  {
     public int getAvSyncHwId(@NonNull Filter filter) {
         TunerUtils.checkTunerPermission(mContext);
         Integer id = nativeGetAvSyncHwId(filter);
-        return id == null ? TunerConstants.INVALID_AV_SYNC_ID : id;
+        return id == null ? INVALID_AV_SYNC_ID : id;
     }
 
     /**
@@ -514,7 +608,7 @@ public class Tuner implements AutoCloseable  {
     public long getAvSyncTime(int avSyncHwId) {
         TunerUtils.checkTunerPermission(mContext);
         Long time = nativeGetAvSyncTime(avSyncHwId);
-        return time == null ? TunerConstants.TIMESTAMP_UNAVAILABLE : time;
+        return time == null ? INVALID_TIMESTAMP : time;
     }
 
     /**
