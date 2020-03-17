@@ -7461,24 +7461,7 @@ package android.net.wifi {
   }
 
   public final class WifiMigration {
-    method @Nullable public static android.net.wifi.WifiMigration.ConfigStoreMigrationData loadFromConfigStore();
     method @NonNull public static android.net.wifi.WifiMigration.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
-    method public static void removeConfigStore();
-  }
-
-  public static final class WifiMigration.ConfigStoreMigrationData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
-    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.ConfigStoreMigrationData> CREATOR;
-  }
-
-  public static final class WifiMigration.ConfigStoreMigrationData.Builder {
-    ctor public WifiMigration.ConfigStoreMigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData build();
-    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
-    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
   }
 
   public static final class WifiMigration.SettingsMigrationData implements android.os.Parcelable {
