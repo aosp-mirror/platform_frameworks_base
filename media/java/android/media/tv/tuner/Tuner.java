@@ -453,6 +453,10 @@ public class Tuner implements AutoCloseable  {
     /**
      * Tunes the frontend to using the settings given.
      *
+     * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
+     * to get frontend resource. If the client can't get the resource, this call returns {@link
+     * Result#RESULT_UNAVAILABLE}.
+     *
      * <p>
      * This locks the frontend to a frequency by providing signal
      * delivery information. If previous tuning isn't completed, this stop the previous tuning, and
