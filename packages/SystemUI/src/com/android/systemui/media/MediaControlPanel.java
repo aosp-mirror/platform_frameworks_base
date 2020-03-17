@@ -33,7 +33,6 @@ import android.media.MediaMetadata;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -64,6 +63,7 @@ import java.util.concurrent.Executor;
 public class MediaControlPanel implements NotificationMediaManager.MediaListener {
     private static final String TAG = "MediaControlPanel";
     private final NotificationMediaManager mMediaManager;
+    private final Executor mForegroundExecutor;
     private final Executor mBackgroundExecutor;
 
     private Context mContext;
@@ -102,15 +102,18 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
      * @param manager
      * @param layoutId layout resource to use for this control panel
      * @param actionIds resource IDs for action buttons in the layout
+     * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
      */
     public MediaControlPanel(Context context, ViewGroup parent, NotificationMediaManager manager,
-            @LayoutRes int layoutId, int[] actionIds, Executor backgroundExecutor) {
+            @LayoutRes int layoutId, int[] actionIds, Executor foregroundExecutor,
+            Executor backgroundExecutor) {
         mContext = context;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         mMediaNotifView = (LinearLayout) inflater.inflate(layoutId, parent, false);
         mMediaManager = manager;
         mActionIds = actionIds;
+        mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
     }
 
@@ -176,15 +179,17 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
         mMediaNotifView.setBackgroundTintList(ColorStateList.valueOf(mBackgroundColor));
 
         // Click action
-        mMediaNotifView.setOnClickListener(v -> {
-            try {
-                contentIntent.send();
-                // Also close shade
-                mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
-            } catch (PendingIntent.CanceledException e) {
-                Log.e(TAG, "Pending intent was canceled", e);
-            }
-        });
+        if (contentIntent != null) {
+            mMediaNotifView.setOnClickListener(v -> {
+                try {
+                    contentIntent.send();
+                    // Also close shade
+                    mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                } catch (PendingIntent.CanceledException e) {
+                    Log.e(TAG, "Pending intent was canceled", e);
+                }
+            });
+        }
 
         // App icon
         ImageView appIcon = mMediaNotifView.findViewById(R.id.icon);
@@ -316,7 +321,7 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
 
         // Now that it's resized, update the UI
         final RoundedBitmapDrawable result = roundedDrawable;
-        albumView.getHandler().post(() -> {
+        mForegroundExecutor.execute(() -> {
             if (result != null) {
                 albumView.setImageDrawable(result);
                 albumView.setVisibility(View.VISIBLE);
@@ -335,8 +340,7 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
         if (mSeamless == null) {
             return;
         }
-        Handler handler = mSeamless.getHandler();
-        handler.post(() -> {
+        mForegroundExecutor.execute(() -> {
             updateChipInternal(device);
         });
     }
@@ -401,12 +405,15 @@ public class MediaControlPanel implements NotificationMediaManager.MediaListener
                         new KeyEvent(KeyEvent.ACTION_DOWN, keyCode));
                 mContext.sendBroadcast(intent);
             } else {
-                Log.d(TAG, "No receiver to restart");
                 // If we don't have a receiver, try relaunching the activity instead
-                try {
-                    mController.getSessionActivity().send();
-                } catch (PendingIntent.CanceledException e) {
-                    Log.e(TAG, "Pending intent was canceled", e);
+                if (mController.getSessionActivity() != null) {
+                    try {
+                        mController.getSessionActivity().send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Pending intent was canceled", e);
+                    }
+                } else {
+                    Log.e(TAG, "No receiver or activity to restart");
                 }
             }
         });
