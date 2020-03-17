@@ -4589,7 +4589,7 @@ public class Editor {
         private float mTouchOffsetY;
         // Where the touch position should be on the handle to ensure a maximum cursor visibility.
         // This is the distance in pixels from the top of the handle view.
-        private float mIdealVerticalOffset;
+        private final float mIdealVerticalOffset;
         // Parent's (TextView) previous position in window
         private int mLastParentX, mLastParentY;
         // Parent's (TextView) previous position on screen
@@ -4638,8 +4638,18 @@ public class Editor {
 
             final int handleHeight = getPreferredHeight();
             mTouchOffsetY = -0.3f * handleHeight;
-            mIdealVerticalOffset = 0.7f * handleHeight;
-            mIdealFingerToCursorOffset = (int)(mIdealVerticalOffset - mTouchOffsetY);
+            final int distance = AppGlobals.getIntCoreSetting(
+                    WidgetFlags.KEY_FINGER_TO_CURSOR_DISTANCE,
+                    WidgetFlags.FINGER_TO_CURSOR_DISTANCE_DEFAULT);
+            if (distance < 0 || distance > 100) {
+                mIdealVerticalOffset = 0.7f * handleHeight;
+                mIdealFingerToCursorOffset = (int)(mIdealVerticalOffset - mTouchOffsetY);
+            } else {
+                mIdealFingerToCursorOffset = (int) TypedValue.applyDimension(
+                        TypedValue.COMPLEX_UNIT_DIP, distance,
+                        mTextView.getContext().getResources().getDisplayMetrics());
+                mIdealVerticalOffset = mIdealFingerToCursorOffset + mTouchOffsetY;
+            }
         }
 
         public float getIdealVerticalOffset() {
