@@ -368,7 +368,14 @@ public class ConnectivityDiagnosticsManager {
 
     /** Class that includes information for a suspected data stall on a specific Network */
     public static final class DataStallReport implements Parcelable {
+        /**
+         * Indicates that the Data Stall was detected using DNS events.
+         */
         public static final int DETECTION_METHOD_DNS_EVENTS = 1;
+
+        /**
+         * Indicates that the Data Stall was detected using TCP metrics.
+         */
         public static final int DETECTION_METHOD_TCP_METRICS = 2;
 
         /** @hide */

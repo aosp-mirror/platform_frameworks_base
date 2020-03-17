@@ -66,13 +66,11 @@ class QuickAccessWalletServiceInfo {
     static QuickAccessWalletServiceInfo tryCreate(@NonNull Context context) {
         ComponentName defaultPaymentApp = getDefaultPaymentApp(context);
         if (defaultPaymentApp == null) {
-            Log.d(TAG, "create: default payment app not set");
             return null;
         }
 
         ServiceInfo serviceInfo = getWalletServiceInfo(context, defaultPaymentApp.getPackageName());
         if (serviceInfo == null) {
-            Log.d(TAG, "create: unable to resolve service intent");
             return null;
         }
 

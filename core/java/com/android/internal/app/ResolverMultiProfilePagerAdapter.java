@@ -103,10 +103,10 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
     @Override
     @Nullable
     ResolverListAdapter getListAdapterForUserHandle(UserHandle userHandle) {
-        if (getActiveListAdapter().getUserHandle() == userHandle) {
+        if (getActiveListAdapter().getUserHandle().equals(userHandle)) {
             return getActiveListAdapter();
         } else if (getInactiveListAdapter() != null
-                && getInactiveListAdapter().getUserHandle() == userHandle) {
+                && getInactiveListAdapter().getUserHandle().equals(userHandle)) {
             return getInactiveListAdapter();
         }
         return null;

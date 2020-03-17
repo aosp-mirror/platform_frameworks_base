@@ -17538,8 +17538,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     final void setProcessTrackerStateLocked(ProcessRecord proc, int memFactor, long now) {
         if (proc.thread != null && proc.baseProcessTracker != null) {
-            proc.baseProcessTracker.setState(
-                    proc.getReportedProcState(), memFactor, now, proc.pkgList.mPkgList);
+            final int procState = proc.getReportedProcState();
+            if (procState != PROCESS_STATE_NONEXISTENT) {
+                proc.baseProcessTracker.setState(
+                        procState, memFactor, now, proc.pkgList.mPkgList);
+            }
         }
     }
 
@@ -18711,6 +18714,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int getUidProcessState(int uid) {
             return getUidState(uid);
+        }
+
+        @Override
+        public Map<Integer, String> getProcessesWithPendingBindMounts(int userId) {
+            return mProcessList.getProcessesWithPendingBindMounts(userId);
         }
 
         @Override

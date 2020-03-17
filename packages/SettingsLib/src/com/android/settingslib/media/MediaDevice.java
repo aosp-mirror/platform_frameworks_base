@@ -51,6 +51,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     int mType;
 
     private int mConnectedRecord;
+    private int mState;
 
     protected final Context mContext;
     protected final MediaRoute2Info mRouteInfo;
@@ -197,6 +198,22 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * Stop transfer MediaDevice
      */
     public void disconnect() {
+    }
+
+    /**
+     * Set current device's state
+     */
+    public void setState(@LocalMediaManager.MediaDeviceState int state) {
+        mState = state;
+    }
+
+    /**
+     * Get current device's state
+     *
+     * @return state of device
+     */
+    public @LocalMediaManager.MediaDeviceState int getState() {
+        return mState;
     }
 
     /**

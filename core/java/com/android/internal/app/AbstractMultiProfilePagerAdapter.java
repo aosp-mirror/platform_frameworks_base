@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.AsyncTask;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -90,7 +91,9 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
             @Override
             public void requestQuietModeEnabled(boolean enabled, UserHandle workProfileUserHandle) {
-                userManager.requestQuietModeEnabled(enabled, workProfileUserHandle);
+                AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
+                    userManager.requestQuietModeEnabled(enabled, workProfileUserHandle);
+                });
                 mIsWaitingToEnableWorkProfile = true;
             }
         };
@@ -284,7 +287,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     }
 
     private int userHandleToPageIndex(UserHandle userHandle) {
-        if (userHandle == getPersonalListAdapter().mResolverListController.getUserHandle()) {
+        if (userHandle.equals(getPersonalListAdapter().mResolverListController.getUserHandle())) {
             return PROFILE_PERSONAL;
         } else {
             return PROFILE_WORK;
@@ -293,7 +296,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
 
     private boolean rebuildTab(ResolverListAdapter activeListAdapter, boolean doPostProcessing) {
         UserHandle listUserHandle = activeListAdapter.getUserHandle();
-        if (listUserHandle == mWorkProfileUserHandle
+        if (listUserHandle.equals(mWorkProfileUserHandle)
                 && mInjector.isQuietModeEnabled(mWorkProfileUserHandle)) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.RESOLVER_EMPTY_STATE_WORK_APPS_DISABLED)
@@ -311,7 +314,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         if (UserHandle.myUserId() != listUserHandle.getIdentifier()) {
             if (!mInjector.hasCrossProfileIntents(activeListAdapter.getIntents(),
                     UserHandle.myUserId(), listUserHandle.getIdentifier())) {
-                if (listUserHandle == mPersonalProfileUserHandle) {
+                if (listUserHandle.equals(mPersonalProfileUserHandle)) {
                     DevicePolicyEventLogger.createEvent(
                                 DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_SHARING_TO_PERSONAL)
                             .setStrings(getMetricsCategory())

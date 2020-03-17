@@ -399,7 +399,6 @@ public class StatusBarManager {
      *                 {@code false}, re-enables expansion of the status bar.
      * @hide
      */
-    @SystemApi
     @TestApi
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     public void setDisabledForSimNetworkLock(boolean disabled) {
