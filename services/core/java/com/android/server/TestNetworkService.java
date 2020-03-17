@@ -53,6 +53,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -230,6 +231,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             @Nullable LinkProperties lp,
             boolean isMetered,
             int callingUid,
+            @NonNull int[] administratorUids,
             @NonNull IBinder binder)
             throws RemoteException, SocketException {
         Objects.requireNonNull(looper, "missing Looper");
@@ -248,6 +250,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
         nc.setNetworkSpecifier(new StringNetworkSpecifier(iface));
+        nc.setAdministratorUids(intArrayToList(administratorUids));
         if (!isMetered) {
             nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
         }
@@ -290,6 +293,14 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         return new TestNetworkAgent(looper, context, ni, nc, lp, callingUid, binder);
     }
 
+    private List<Integer> intArrayToList(@NonNull int[] array) {
+        final List<Integer> list = new ArrayList<>(array.length);
+        for (final int i : array) {
+            list.add(i);
+        }
+        return list;
+    }
+
     /**
      * Sets up a Network with extremely limited privileges, guarded by the MANAGE_TEST_NETWORKS
      * permission.
@@ -301,6 +312,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             @NonNull String iface,
             @Nullable LinkProperties lp,
             boolean isMetered,
+            @NonNull int[] administratorUids,
             @NonNull IBinder binder) {
         enforceTestNetworkPermissions(mContext);
 
@@ -335,6 +347,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
                                             lp,
                                             isMetered,
                                             callingUid,
+                                            administratorUids,
                                             binder);
 
                             mTestNetworkTracker.put(agent.getNetwork().netId, agent);
