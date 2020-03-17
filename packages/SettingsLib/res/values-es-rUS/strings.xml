@@ -64,7 +64,7 @@
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desconectado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Conectando…"</string>
-    <string name="bluetooth_connected" msgid="8065345572198502293">"Conectado a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_connected" msgid="8065345572198502293">"Conectado<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_pairing" msgid="4269046942588193600">"Vinculando..."</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"Conectado (sin teléfono) a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"Conectado (sin archivos multimedia) a <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -170,7 +170,7 @@
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Este idioma necesita una conexión de red en funcionamiento para la salida de texto a voz."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Ejemplo de síntesis de voz"</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Estado del idioma predeterminado"</string>
-    <string name="tts_status_ok" msgid="8583076006537547379">"El idioma <xliff:g id="LOCALE">%1$s</xliff:g> es totalmente compatible."</string>
+    <string name="tts_status_ok" msgid="8583076006537547379">"El idioma <xliff:g id="LOCALE">%1$s</xliff:g> es totalmente compatible"</string>
     <string name="tts_status_requires_network" msgid="8327617638884678896">"El idioma <xliff:g id="LOCALE">%1$s</xliff:g> requiere una conexión de red."</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"El idioma <xliff:g id="LOCALE">%1$s</xliff:g> no es compatible."</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"Comprobando…"</string>
