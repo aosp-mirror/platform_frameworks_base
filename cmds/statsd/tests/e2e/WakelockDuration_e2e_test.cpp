@@ -42,7 +42,7 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
     // The predicate is dimensioning by any attribution node and both by uid and tag.
     FieldMatcher dimensions = CreateAttributionUidAndTagDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST, Position::LAST});
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST, Position::LAST});
     // Also slice by the wakelock tag
     dimensions.add_child()->set_field(3);  // The wakelock tag is set in field 3 of the wakelock.
     *holdingWakelockPredicate.mutable_simple_predicate()->mutable_dimensions() = dimensions;
@@ -56,7 +56,7 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     // The metric is dimensioning by first attribution node and only by uid.
     *durationMetric->mutable_dimensions_in_what() =
         CreateAttributionUidDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     durationMetric->set_bucket(FIVE_MINUTES);
     return config;
 }
@@ -142,7 +142,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration1) 
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
-                                    android::util::WAKELOCK_STATE_CHANGED, 111);
+                                    util::WAKELOCK_STATE_CHANGED, 111);
     // Validate bucket info.
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 1);
     data = reports.reports(0).metrics(0).duration_metrics().data(0);
@@ -178,7 +178,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration2) 
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
-                                    android::util::WAKELOCK_STATE_CHANGED, 111);
+                                    util::WAKELOCK_STATE_CHANGED, 111);
     // Two output buckets.
     // The wakelock holding interval in the 1st bucket starts from the screen off event and to
     // the end of the 1st bucket.
@@ -228,7 +228,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForSumDuration3) 
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 6);
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     ValidateAttributionUidDimension(data.dimensions_in_what(),
-                                    android::util::WAKELOCK_STATE_CHANGED, 111);
+                                    util::WAKELOCK_STATE_CHANGED, 111);
     // The last wakelock holding spans 4 buckets.
     EXPECT_EQ((unsigned long long)data.bucket_info(2).duration_nanos(), bucketSizeNs - 100);
     EXPECT_EQ((unsigned long long)data.bucket_info(3).duration_nanos(), bucketSizeNs);
@@ -293,7 +293,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration2) 
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
-                                    android::util::WAKELOCK_STATE_CHANGED, 111);
+                                    util::WAKELOCK_STATE_CHANGED, 111);
     // The max is acquire event for wl1 to screen off start.
     EXPECT_EQ((unsigned long long)data.bucket_info(0).duration_nanos(), bucketSizeNs + 2 - 200);
 }
@@ -337,7 +337,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensionsForMaxDuration3) 
     EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     ValidateAttributionUidDimension(data.dimensions_in_what(),
-                                    android::util::WAKELOCK_STATE_CHANGED, 111);
+                                    util::WAKELOCK_STATE_CHANGED, 111);
     // The last wakelock holding spans 4 buckets.
     EXPECT_EQ((unsigned long long)data.bucket_info(1).duration_nanos(), 3 * bucketSizeNs);
     EXPECT_EQ((unsigned long long)data.bucket_info(1).start_bucket_elapsed_nanos(),

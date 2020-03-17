@@ -81,12 +81,16 @@ message Atom {
         BleScanStateChanged ble_scan_state_changed = 2 [(module) = "bluetooth"];
         ProcessStateChanged process_state_changed = 3 [(module) = "framework"];
         BleScanResultReceived ble_scan_result_received = 4 [(module) = "bluetooth"];
-        SensorStateChanged sensor_state_changed = 5 [(module) = "framework"];
+        SensorStateChanged sensor_state_changed =
+                5 [(module) = "framework", (module) = "statsdtest"];
         GpsScanStateChanged gps_scan_state_changed = 6 [(module) = "framework"];
-        SyncStateChanged sync_state_changed = 7 [(module) = "framework"];
-        ScheduledJobStateChanged scheduled_job_state_changed = 8 [(module) = "framework"];
-        ScreenBrightnessChanged screen_brightness_changed = 9 [(module) = "framework"];
-        WakelockStateChanged wakelock_state_changed = 10 [(module) = "framework"];
+        SyncStateChanged sync_state_changed = 7 [(module) = "framework", (module) = "statsdtest"];
+        ScheduledJobStateChanged scheduled_job_state_changed =
+                8 [(module) = "framework", (module) = "statsdtest"];
+        ScreenBrightnessChanged screen_brightness_changed =
+                9 [(module) = "framework", (module) = "statsdtest"];
+        WakelockStateChanged wakelock_state_changed =
+                10 [(module) = "framework", (module) = "statsdtest"];
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed =
                 11 [(module) = "framework"];
         MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12 [(module) = "framework"];
@@ -98,17 +102,22 @@ message Atom {
         CachedKillReported cached_kill_reported = 17 [(module) = "framework"];
         ProcessMemoryStatReported process_memory_stat_reported = 18 [(module) = "framework"];
         LauncherUIChanged launcher_event = 19 [(module) = "sysui"];
-        BatterySaverModeStateChanged battery_saver_mode_state_changed = 20 [(module) = "framework"];
+        BatterySaverModeStateChanged battery_saver_mode_state_changed =
+                20 [(module) = "framework", (module) = "statsdtest"];
         DeviceIdleModeStateChanged device_idle_mode_state_changed = 21 [(module) = "framework"];
         DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22 [(module) = "framework"];
         AudioStateChanged audio_state_changed = 23 [(module) = "framework"];
         MediaCodecStateChanged media_codec_state_changed = 24 [(module) = "framework"];
         CameraStateChanged camera_state_changed = 25 [(module) = "framework"];
         FlashlightStateChanged flashlight_state_changed = 26 [(module) = "framework"];
-        UidProcessStateChanged uid_process_state_changed = 27 [(module) = "framework"];
-        ProcessLifeCycleStateChanged process_life_cycle_state_changed = 28 [(module) = "framework"];
-        ScreenStateChanged screen_state_changed = 29 [(module) = "framework"];
-        BatteryLevelChanged battery_level_changed = 30 [(module) = "framework"];
+        UidProcessStateChanged uid_process_state_changed =
+                27 [(module) = "framework", (module) = "statsdtest"];
+        ProcessLifeCycleStateChanged process_life_cycle_state_changed =
+                28 [(module) = "framework", (module) = "statsdtest"];
+        ScreenStateChanged screen_state_changed =
+                29 [(module) = "framework", (module) = "statsdtest"];
+        BatteryLevelChanged battery_level_changed =
+                30 [(module) = "framework", (module) = "statsdtest"];
         ChargingStateChanged charging_state_changed = 31 [(module) = "framework"];
         PluggedStateChanged plugged_state_changed = 32 [(module) = "framework"];
         InteractiveStateChanged interactive_state_changed = 33 [(module) = "framework"];
@@ -121,14 +130,15 @@ message Atom {
         PhoneSignalStrengthChanged phone_signal_strength_changed = 40 [(module) = "framework"];
         SettingChanged setting_changed = 41 [(module) = "framework"];
         ActivityForegroundStateChanged activity_foreground_state_changed =
-                42 [(module) = "framework"];
-        IsolatedUidChanged isolated_uid_changed = 43 [(module) = "framework", (module) = "statsd"];
+                42 [(module) = "framework", (module) = "statsdtest"];
+        IsolatedUidChanged isolated_uid_changed =
+                43 [(module) = "framework", (module) = "statsd", (module) = "statsdtest"];
         PacketWakeupOccurred packet_wakeup_occurred = 44 [(module) = "framework"];
         WallClockTimeShifted wall_clock_time_shifted = 45 [(module) = "framework"];
         AnomalyDetected anomaly_detected = 46 [(module) = "statsd"];
         AppBreadcrumbReported app_breadcrumb_reported =
                 47 [(allow_from_any_uid) = true, (module) = "statsd"];
-        AppStartOccurred app_start_occurred = 48 [(module) = "framework"];
+        AppStartOccurred app_start_occurred = 48 [(module) = "framework", (module) = "statsdtest"];
         AppStartCanceled app_start_canceled = 49 [(module) = "framework"];
         AppStartFullyDrawn app_start_fully_drawn = 50 [(module) = "framework"];
         LmkKillOccurred lmk_kill_occurred = 51 [(module) = "lmkd"];
@@ -139,7 +149,8 @@ message Atom {
         ShutdownSequenceReported shutdown_sequence_reported = 56 [(module) = "framework"];
         BootSequenceReported boot_sequence_reported = 57;
         DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true, (module) = "statsd"];
-        OverlayStateChanged overlay_state_changed = 59 [(module) = "framework"];
+        OverlayStateChanged overlay_state_changed =
+                59 [(module) = "framework", (module) = "statsdtest"];
         ForegroundServiceStateChanged foreground_service_state_changed
                 = 60 [(module) = "framework"];
         CallStateChanged call_state_changed = 61 [(module) = "telecom"];
@@ -160,7 +171,7 @@ message Atom {
         MobileConnectionStateChanged mobile_connection_state_changed = 75 [(module) = "telephony"];
         MobileRadioTechnologyChanged mobile_radio_technology_changed = 76 [(module) = "telephony"];
         UsbDeviceAttached usb_device_attached = 77 [(module) = "framework"];
-        AppCrashOccurred app_crash_occurred = 78 [(module) = "framework"];
+        AppCrashOccurred app_crash_occurred = 78 [(module) = "framework", (module) = "statsdtest"];
         ANROccurred anr_occurred = 79 [(module) = "framework"];
         WTFOccurred wtf_occurred = 80 [(module) = "framework"];
         LowMemReported low_mem_reported = 81 [(module) = "framework"];
@@ -410,9 +421,9 @@ message Atom {
         MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 10003 [(module) = "framework"];
         BluetoothBytesTransfer bluetooth_bytes_transfer = 10006 [(module) = "framework"];
         KernelWakelock kernel_wakelock = 10004 [(module) = "framework"];
-        SubsystemSleepState subsystem_sleep_state = 10005;
+        SubsystemSleepState subsystem_sleep_state = 10005 [(module) = "statsdtest"];
         CpuTimePerFreq cpu_time_per_freq = 10008 [(module) = "framework"];
-        CpuTimePerUid cpu_time_per_uid = 10009 [(module) = "framework"];
+        CpuTimePerUid cpu_time_per_uid = 10009 [(module) = "framework", (module) = "statsdtest"];
         CpuTimePerUidFreq cpu_time_per_uid_freq =
                 10010 [(module) = "framework", (module) = "statsd"];
         WifiActivityInfo wifi_activity_info = 10011 [(module) = "framework"];
@@ -420,13 +431,13 @@ message Atom {
         BluetoothActivityInfo bluetooth_activity_info = 10007 [(module) = "framework"];
         ProcessMemoryState process_memory_state = 10013 [(module) = "framework"];
         SystemElapsedRealtime system_elapsed_realtime = 10014 [(module) = "framework"];
-        SystemUptime system_uptime = 10015 [(module) = "framework"];
+        SystemUptime system_uptime = 10015 [(module) = "framework", (module) = "statsdtest"];
         CpuActiveTime cpu_active_time = 10016 [(module) = "framework"];
-        CpuClusterTime cpu_cluster_time = 10017 [(module) = "framework"];
-        DiskSpace disk_space = 10018 [deprecated=true];
+        CpuClusterTime cpu_cluster_time = 10017 [(module) = "framework", (module) = "statsdtest"];
+        DiskSpace disk_space = 10018 [deprecated=true, (module) = "statsdtest"];
         RemainingBatteryCapacity remaining_battery_capacity = 10019 [(module) = "framework"];
         FullBatteryCapacity full_battery_capacity = 10020 [(module) = "framework"];
-        Temperature temperature = 10021 [(module) = "framework"];
+        Temperature temperature = 10021 [(module) = "framework", (module) = "statsdtest"];
         BinderCalls binder_calls = 10022 [(module) = "framework", (module) = "statsd"];
         BinderCallsExceptions binder_calls_exceptions = 10023 [(module) = "framework"];
         LooperStats looper_stats = 10024 [(module) = "framework", (module) = "statsd"];

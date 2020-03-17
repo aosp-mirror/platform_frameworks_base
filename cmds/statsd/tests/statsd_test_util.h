@@ -25,7 +25,7 @@
 #include "src/hash.h"
 #include "src/logd/LogEvent.h"
 #include "src/stats_log_util.h"
-#include "statslog.h"
+#include "statslog_statsdtest.h"
 
 namespace android {
 namespace os {
@@ -38,8 +38,8 @@ using android::util::ProtoReader;
 using google::protobuf::RepeatedPtrField;
 using Status = ::ndk::ScopedAStatus;
 
-const int SCREEN_STATE_ATOM_ID = android::util::SCREEN_STATE_CHANGED;
-const int UID_PROCESS_STATE_ATOM_ID = android::util::UID_PROCESS_STATE_CHANGED;
+const int SCREEN_STATE_ATOM_ID = util::SCREEN_STATE_CHANGED;
+const int UID_PROCESS_STATE_ATOM_ID = util::UID_PROCESS_STATE_CHANGED;
 
 // Converts a ProtoOutputStream to a StatsLogReport proto.
 StatsLogReport outputStreamToProto(ProtoOutputStream* proto);
