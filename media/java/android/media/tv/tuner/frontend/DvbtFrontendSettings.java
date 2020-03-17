@@ -17,6 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -506,7 +507,8 @@ public class DvbtFrontendSettings extends FrontendSettings {
     /**
      * Builder for {@link DvbtFrontendSettings}.
      */
-    public static class Builder extends FrontendSettings.Builder<Builder> {
+    public static class Builder {
+        private int mFrequency;
         private int mTransmissionMode;
         private int mBandwidth;
         private int mConstellation;
@@ -522,6 +524,16 @@ public class DvbtFrontendSettings extends FrontendSettings {
         private int mPlpGroupId;
 
         private Builder() {
+        }
+
+        /**
+         * Sets frequency in Hz.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequency(int frequency) {
+            mFrequency = frequency;
+            return this;
         }
 
         /**
@@ -637,11 +649,6 @@ public class DvbtFrontendSettings extends FrontendSettings {
             return new DvbtFrontendSettings(mFrequency, mTransmissionMode, mBandwidth,
                     mConstellation, mHierarchy, mHpCodeRate, mLpCodeRate, mGuardInterval,
                     mIsHighPriority, mStandard, mIsMiso, mPlpMode, mPlpId, mPlpGroupId);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 
