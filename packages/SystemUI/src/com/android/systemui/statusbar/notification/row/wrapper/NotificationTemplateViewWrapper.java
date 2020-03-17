@@ -58,7 +58,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
     private TextView mText;
     protected View mActionsContainer;
     private ImageView mReplyAction;
-    private Rect mTmpRect = new Rect();
 
     private int mContentHeight;
     private int mMinHeightHint;
@@ -269,18 +268,6 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
             }
         }
         return super.disallowSingleClick(x, y);
-    }
-
-    private boolean isOnView(View view, float x, float y) {
-        View searchView = (View) view.getParent();
-        while (searchView != null && !(searchView instanceof ExpandableNotificationRow)) {
-            searchView.getHitRect(mTmpRect);
-            x -= mTmpRect.left;
-            y -= mTmpRect.top;
-            searchView = (View) searchView.getParent();
-        }
-        view.getHitRect(mTmpRect);
-        return mTmpRect.contains((int) x,(int) y);
     }
 
     @Override
