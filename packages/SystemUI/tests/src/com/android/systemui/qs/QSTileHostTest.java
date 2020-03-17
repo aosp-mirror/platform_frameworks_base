@@ -86,7 +86,7 @@ public class QSTileHostTest extends SysuiTestCase {
     @Mock
     private StatusBarIconController mIconController;
     @Mock
-    private QSFactoryImpl mDefaultFactory;
+    private QSFactory mDefaultFactory;
     @Mock
     private PluginManager mPluginManager;
     @Mock
@@ -295,7 +295,7 @@ public class QSTileHostTest extends SysuiTestCase {
 
     private static class TestQSTileHost extends QSTileHost {
         TestQSTileHost(Context context, StatusBarIconController iconController,
-                QSFactoryImpl defaultFactory, Handler mainHandler, Looper bgLooper,
+                QSFactory defaultFactory, Handler mainHandler, Looper bgLooper,
                 PluginManager pluginManager, TunerService tunerService,
                 Provider<AutoTileManager> autoTiles, DumpManager dumpManager,
                 BroadcastDispatcher broadcastDispatcher, StatusBar statusBar, QSLogger qsLogger) {
