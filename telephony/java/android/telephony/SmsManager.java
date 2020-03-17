@@ -975,11 +975,7 @@ public final class SmsManager {
      *
      * @param packageName serves as the default package name if the package name that is
      *        associated with the user id is null.
-     *
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public void sendMultipartTextMessage(
             @NonNull String destinationAddress, @Nullable String scAddress,
             @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
