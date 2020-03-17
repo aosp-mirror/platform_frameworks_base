@@ -1305,7 +1305,7 @@ public class ResolverActivity extends Activity implements
         Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 .setData(Uri.fromParts("package", ri.activityInfo.packageName, null))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        startActivity(in);
+        startActivityAsUser(in, mMultiProfilePagerAdapter.getCurrentUserHandle());
     }
 
     @VisibleForTesting
