@@ -16,8 +16,6 @@
 
 package android.net.wifi;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -25,8 +23,6 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Settings;
-
-import java.util.List;
 
 /**
  * Class used to provide one time hooks for existing OEM devices to migrate their config store
@@ -37,166 +33,6 @@ import java.util.List;
 public final class WifiMigration {
 
     private WifiMigration() { }
-
-    /**
-     * Container for all the wifi config data to migrate.
-     */
-    public static final class ConfigStoreMigrationData implements Parcelable {
-        /**
-         * Builder to create instance of {@link ConfigStoreMigrationData}.
-         */
-        public static final class Builder {
-            private List<WifiConfiguration> mUserSavedNetworkConfigurations;
-            private SoftApConfiguration mUserSoftApConfiguration;
-
-            public Builder() {
-                mUserSavedNetworkConfigurations = null;
-                mUserSoftApConfiguration = null;
-            }
-
-            /**
-             * Sets the list of all user's saved network configurations parsed from OEM config
-             * store files.
-             *
-             * @param userSavedNetworkConfigurations List of {@link WifiConfiguration} representing
-             *                                       the list of user's saved networks
-             * @return Instance of {@link Builder} to enable chaining of the builder method.
-             */
-            public @NonNull Builder setUserSavedNetworkConfigurations(
-                    @NonNull List<WifiConfiguration> userSavedNetworkConfigurations) {
-                checkNotNull(userSavedNetworkConfigurations);
-                mUserSavedNetworkConfigurations = userSavedNetworkConfigurations;
-                return this;
-            }
-
-            /**
-             * Sets the user's softap configuration parsed from OEM config store files.
-             *
-             * @param userSoftApConfiguration {@link SoftApConfiguration} representing user's
-             *                                SoftAp configuration
-             * @return Instance of {@link Builder} to enable chaining of the builder method.
-             */
-            public @NonNull Builder setUserSoftApConfiguration(
-                    @NonNull SoftApConfiguration userSoftApConfiguration) {
-                checkNotNull(userSoftApConfiguration);
-                mUserSoftApConfiguration  = userSoftApConfiguration;
-                return this;
-            }
-
-            /**
-             * Build an instance of {@link ConfigStoreMigrationData}.
-             *
-             * @return Instance of {@link ConfigStoreMigrationData}.
-             */
-            public @NonNull ConfigStoreMigrationData build() {
-                return new ConfigStoreMigrationData(
-                        mUserSavedNetworkConfigurations, mUserSoftApConfiguration);
-            }
-        }
-
-        private final List<WifiConfiguration> mUserSavedNetworkConfigurations;
-        private final SoftApConfiguration mUserSoftApConfiguration;
-
-        private ConfigStoreMigrationData(
-                @Nullable List<WifiConfiguration> userSavedNetworkConfigurations,
-                @Nullable SoftApConfiguration userSoftApConfiguration) {
-            mUserSavedNetworkConfigurations = userSavedNetworkConfigurations;
-            mUserSoftApConfiguration = userSoftApConfiguration;
-        }
-
-        public static final @NonNull Parcelable.Creator<ConfigStoreMigrationData> CREATOR =
-                new Parcelable.Creator<ConfigStoreMigrationData>() {
-                    @Override
-                    public ConfigStoreMigrationData createFromParcel(Parcel in) {
-                        List<WifiConfiguration> userSavedNetworkConfigurations =
-                                in.readArrayList(null);
-                        SoftApConfiguration userSoftApConfiguration = in.readParcelable(null);
-                        return new ConfigStoreMigrationData(
-                                userSavedNetworkConfigurations, userSoftApConfiguration);
-                    }
-
-                    @Override
-                    public ConfigStoreMigrationData[] newArray(int size) {
-                        return new ConfigStoreMigrationData[size];
-                    }
-                };
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(@NonNull Parcel dest, int flags) {
-            dest.writeList(mUserSavedNetworkConfigurations);
-            dest.writeParcelable(mUserSoftApConfiguration, flags);
-        }
-
-        /**
-         * Returns list of all user's saved network configurations.
-         *
-         * Note: Only to be returned if there is any format change in how OEM persisted this info.
-         * @return List of {@link WifiConfiguration} representing the list of user's saved networks,
-         * or null if no migration necessary.
-         */
-        @Nullable
-        public List<WifiConfiguration> getUserSavedNetworkConfigurations() {
-            return mUserSavedNetworkConfigurations;
-        }
-
-        /**
-         * Returns user's softap configuration.
-         *
-         * Note: Only to be returned if there is any format change in how OEM persisted this info.
-         * @return {@link SoftApConfiguration} representing user's SoftAp configuration,
-         * or null if no migration necessary.
-         */
-        @Nullable
-        public SoftApConfiguration getUserSoftApConfiguration() {
-            return mUserSoftApConfiguration;
-        }
-    }
-
-    /**
-     * Load data from OEM's config store.
-     * <p>
-     * Note:
-     * <li>OEMs need to implement {@link #loadFromConfigStore()} ()} only if their
-     * existing config store format or file locations differs from the vanilla AOSP implementation.
-     * </li>
-     * <li>The wifi mainline module will invoke {@link #loadFromConfigStore()} method on every
-     * bootup, its the responsibility of the OEM implementation to ensure that this method returns
-     * non-null data only on the first bootup. Once the migration is done, the OEM can safely delete
-     * their config store files when {@link #removeConfigStore()} is invoked.
-     * <li>The first & only relevant invocation of {@link #loadFromConfigStore()} occurs when a
-     * previously released device upgrades to the wifi mainline module from an OEM implementation
-     * of the wifi stack.
-     * </li>
-     *
-     * @return Instance of {@link ConfigStoreMigrationData} for migrating data, null if no
-     * migration is necessary.
-     */
-    @Nullable
-    public static ConfigStoreMigrationData loadFromConfigStore() {
-        // Note: OEMs should add code to parse data from their config store format here!
-        return null;
-    }
-
-    /**
-     * Remove OEM's config store.
-     * <p>
-     * Note:
-     * <li>OEMs need to implement {@link #removeConfigStore()} only if their
-     * existing config store format or file locations differs from the vanilla AOSP implementation (
-     * which is what the wifi mainline module understands).
-     * </li>
-     * <li> The wifi mainline module will invoke {@link #removeConfigStore()} after it migrates
-     * all the existing data retrieved from {@link #loadFromConfigStore()}.
-     * </li>
-     */
-    public static void removeConfigStore() {
-        // Note: OEMs should remove their custom config store files here!
-    }
 
     /**
      * Container for all the wifi settings data to migrate.
