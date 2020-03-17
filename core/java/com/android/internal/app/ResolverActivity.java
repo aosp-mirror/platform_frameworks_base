@@ -1242,12 +1242,12 @@ public class ResolverActivity extends Activity implements
     }
 
     private void maybeLogCrossProfileTargetLaunch(TargetInfo cti, UserHandle currentUserHandle) {
-        if (!hasWorkProfile() || currentUserHandle == getUser()) {
+        if (!hasWorkProfile() || currentUserHandle.equals(getUser())) {
             return;
         }
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.RESOLVER_CROSS_PROFILE_TARGET_OPENED)
-                .setBoolean(currentUserHandle == getPersonalProfileUserHandle())
+                .setBoolean(currentUserHandle.equals(getPersonalProfileUserHandle()))
                 .setStrings(getMetricsCategory(),
                         cti instanceof ChooserTargetInfo ? "direct_share" : "other_target")
                 .write();
@@ -1486,7 +1486,8 @@ public class ResolverActivity extends Activity implements
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.RESOLVER_AUTOLAUNCH_CROSS_PROFILE_TARGET)
-                .setBoolean(activeListAdapter.getUserHandle() == getPersonalProfileUserHandle())
+                .setBoolean(activeListAdapter.getUserHandle()
+                        .equals(getPersonalProfileUserHandle()))
                 .setStrings(getMetricsCategory())
                 .write();
         safelyStartActivity(activeProfileTarget);
@@ -1778,7 +1779,7 @@ public class ResolverActivity extends Activity implements
     @Override // ResolverListCommunicator
     public void onHandlePackagesChanged(ResolverListAdapter listAdapter) {
         if (listAdapter == mMultiProfilePagerAdapter.getActiveListAdapter()) {
-            if (listAdapter.getUserHandle() == getWorkProfileUserHandle()
+            if (listAdapter.getUserHandle().equals(getWorkProfileUserHandle())
                     && mMultiProfilePagerAdapter.isWaitingToEnableWorkProfile()) {
                 // We have just turned on the work profile and entered the pass code to start it,
                 // now we are waiting to receive the ACTION_USER_UNLOCKED broadcast. There is no
@@ -1819,7 +1820,7 @@ public class ResolverActivity extends Activity implements
                     mMultiProfilePagerAdapter.markWorkProfileEnabledBroadcastReceived();
                 }
                 if (mMultiProfilePagerAdapter.getCurrentUserHandle()
-                        == getWorkProfileUserHandle()) {
+                        .equals(getWorkProfileUserHandle())) {
                     mMultiProfilePagerAdapter.rebuildActiveTab(true);
                 } else {
                     mMultiProfilePagerAdapter.clearInactiveProfileCache();
