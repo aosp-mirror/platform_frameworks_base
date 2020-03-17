@@ -24,6 +24,7 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -49,6 +50,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     protected final View mView;
     protected final ExpandableNotificationRow mRow;
+    private final Rect mTmpRect = new Rect();
 
     protected int mBackgroundColor = 0;
 
@@ -303,6 +305,26 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     public boolean disallowSingleClick(float x, float y) {
         return false;
+    }
+
+    /**
+     * Is a given x and y coordinate on a view.
+     *
+     * @param view the view to be checked
+     * @param x the x coordinate, relative to the ExpandableNotificationRow
+     * @param y the y coordinate, relative to the ExpandableNotificationRow
+     * @return {@code true} if it is on the view
+     */
+    protected boolean isOnView(View view, float x, float y) {
+        View searchView = (View) view.getParent();
+        while (searchView != null && !(searchView instanceof ExpandableNotificationRow)) {
+            searchView.getHitRect(mTmpRect);
+            x -= mTmpRect.left;
+            y -= mTmpRect.top;
+            searchView = (View) searchView.getParent();
+        }
+        view.getHitRect(mTmpRect);
+        return mTmpRect.contains((int) x,(int) y);
     }
 
     public int getMinLayoutHeight() {
