@@ -7817,7 +7817,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 getMatchingPermissionedCallbacks(nai);
         for (final IConnectivityDiagnosticsCallback cb : results) {
             try {
-                cb.onConnectivityReport(report);
+                cb.onConnectivityReportAvailable(report);
             } catch (RemoteException ex) {
                 loge("Error invoking onConnectivityReport", ex);
             }
