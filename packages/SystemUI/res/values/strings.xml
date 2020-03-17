@@ -2653,4 +2653,8 @@
 
     <!-- Tooltip to show in management screen when there are multiple structures [CHAR_LIMIT=50] -->
     <string name="controls_structure_tooltip">Swipe to see other structures</string>
+
+    <!-- Message to tell the user to wait while systemui attempts to load a set of
+         recommended controls [CHAR_LIMIT=30] -->
+    <string name="controls_seeding_in_progress">Loading recommendations</string>
 </resources>

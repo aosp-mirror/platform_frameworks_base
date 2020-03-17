@@ -40,14 +40,20 @@
         android:paddingBottom="8dp" />
 
     <TextView
+        style="@style/TextAppearance.ControlSetup.Title"
         android:id="@+id/controls_title"
         android:text="@string/quick_controls_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:layout_gravity="center"
-        android:textSize="25sp"
-        android:textColor="@*android:color/foreground_material_dark"
-        android:fontFamily="@*android:string/config_headlineFontFamily" />
+        android:layout_gravity="center" />
+
+    <TextView
+        style="@style/TextAppearance.ControlSetup.Subtitle"
+        android:id="@+id/controls_subtitle"
+        android:visibility="gone"
+        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
   </LinearLayout>
 </merge>
