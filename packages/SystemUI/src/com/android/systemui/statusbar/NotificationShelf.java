@@ -329,7 +329,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     expandableRow.setAboveShelf(false);
                 }
                 if (notGoneIndex == 0) {
-                    StatusBarIconView icon = expandableRow.getEntry().expandedIcon;
+                    StatusBarIconView icon = expandableRow.getEntry().getIcons().getShelfIcon();
                     NotificationIconContainer.IconState iconState = getIconState(icon);
                     // The icon state might be null in rare cases where the notification is actually
                     // added to the layout, but not to the shelf. An example are replied messages,
@@ -432,7 +432,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // if the shelf is clipped, lets make sure we also clip the icon
             maxTop = Math.max(maxTop, getTranslationY() + getClipTopAmount());
         }
-        StatusBarIconView icon = row.getEntry().expandedIcon;
+        StatusBarIconView icon = row.getEntry().getIcons().getShelfIcon();
         float shelfIconPosition = getTranslationY() + icon.getTop() + icon.getTranslationY();
         if (shelfIconPosition < maxTop && !mAmbientState.isFullyHidden()) {
             int top = (int) (maxTop - shelfIconPosition);
@@ -444,7 +444,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     private void updateContinuousClipping(final ExpandableNotificationRow row) {
-        StatusBarIconView icon = row.getEntry().expandedIcon;
+        StatusBarIconView icon = row.getEntry().getIcons().getShelfIcon();
         boolean needsContinuousClipping = ViewState.isAnimatingY(icon) && !mAmbientState.isDozing();
         boolean isContinuousClipping = icon.getTag(TAG_CONTINUOUS_CLIPPING) != null;
         if (needsContinuousClipping && !isContinuousClipping) {

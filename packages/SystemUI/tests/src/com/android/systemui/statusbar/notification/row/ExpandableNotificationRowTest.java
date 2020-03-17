@@ -329,10 +329,10 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     @Test
     public void testIconScrollXAfterTranslationAndReset() throws Exception {
         mGroupRow.setTranslation(50);
-        assertEquals(50, -mGroupRow.getEntry().expandedIcon.getScrollX());
+        assertEquals(50, -mGroupRow.getEntry().getIcons().getShelfIcon().getScrollX());
 
         mGroupRow.resetTranslation();
-        assertEquals(0, mGroupRow.getEntry().expandedIcon.getScrollX());
+        assertEquals(0, mGroupRow.getEntry().getIcons().getShelfIcon().getScrollX());
     }
 
     @Test
