@@ -124,6 +124,12 @@ public class LockSettingsServiceTestable extends LockSettingsService {
         }
 
         @Override
+        public int settingsSecureGetInt(ContentResolver contentResolver, String keyName,
+                int defaultValue, int userId) {
+            return mSettings.secureGetInt(contentResolver, keyName, defaultValue, userId);
+        }
+
+        @Override
         public UserManagerInternal getUserManagerInternal() {
             return mUserManagerInternal;
         }
