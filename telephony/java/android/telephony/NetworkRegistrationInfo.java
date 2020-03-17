@@ -297,7 +297,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
         mDataSpecificInfo = new DataSpecificRegistrationInfo(
                 maxDataCalls, isDcNrRestricted, isNrAvailable, isEndcAvailable, lteVopsSupportInfo,
                 isUsingCarrierAggregation);
-        updateNrState(mDataSpecificInfo);
+        updateNrState();
     }
 
     private NetworkRegistrationInfo(Parcel source) {
@@ -686,12 +686,12 @@ public final class NetworkRegistrationInfo implements Parcelable {
      * DCNR is not restricted and NR is supported by the selected PLMN. Otherwise the use of 5G
      * NR is restricted.
      *
-     * @param state data specific registration state contains the 5G NR indicators.
+     * @hide
      */
-    private void updateNrState(DataSpecificRegistrationInfo state) {
+    public void updateNrState() {
         mNrState = NR_STATE_NONE;
-        if (state.isEnDcAvailable) {
-            if (!state.isDcNrRestricted && state.isNrAvailable) {
+        if (mDataSpecificInfo.isEnDcAvailable) {
+            if (!mDataSpecificInfo.isDcNrRestricted && mDataSpecificInfo.isNrAvailable) {
                 mNrState = NR_STATE_NOT_RESTRICTED;
             } else {
                 mNrState = NR_STATE_RESTRICTED;
