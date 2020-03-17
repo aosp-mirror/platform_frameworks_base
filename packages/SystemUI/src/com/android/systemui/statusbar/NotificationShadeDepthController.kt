@@ -31,6 +31,7 @@ import com.android.systemui.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
+import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import java.io.FileDescriptor
@@ -50,6 +51,7 @@ class NotificationShadeDepthController @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val choreographer: Choreographer,
     private val wallpaperManager: WallpaperManager,
+    private val notificationShadeWindowController: NotificationShadeWindowController,
     dumpManager: DumpManager
 ) : PanelExpansionListener, Dumpable {
     companion object {
@@ -62,7 +64,6 @@ class NotificationShadeDepthController @Inject constructor(
     private var keyguardAnimator: Animator? = null
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
-    private var shadeExpansion = 1.0f
     private val shadeSpring = SpringAnimation(this, object :
             FloatPropertyCompat<NotificationShadeDepthController>("shadeBlurRadius") {
         override fun setValue(rect: NotificationShadeDepthController?, value: Float) {
@@ -100,6 +101,7 @@ class NotificationShadeDepthController @Inject constructor(
         val rawZoom = max(blurUtils.ratioOfBlurRadius(blur), globalDialogVisibility)
         wallpaperManager.setWallpaperZoomOut(root.windowToken,
                 zoomInterpolator.getInterpolation(rawZoom))
+        notificationShadeWindowController.setBackgroundBlurRadius(blur)
     }
 
     /**
