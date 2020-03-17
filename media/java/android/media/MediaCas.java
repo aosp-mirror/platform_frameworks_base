@@ -870,16 +870,17 @@ public final class MediaCas implements AutoCloseable {
     private int getSessionResourceId() throws MediaCasException {
         validateInternalStates();
 
-        int[] sessionResourceId = new int[1];
-        sessionResourceId[0] = -1;
+        int[] sessionResourceHandle = new int[1];
+        sessionResourceHandle[0] = -1;
         if (mTunerResourceManager != null) {
             CasSessionRequest casSessionRequest = new CasSessionRequest(mClientId, mCasSystemId);
-            if (!mTunerResourceManager.requestCasSession(casSessionRequest, sessionResourceId)) {
-                throw new MediaCasException.ResourceBusyException(
+            if (!mTunerResourceManager
+                    .requestCasSession(casSessionRequest, sessionResourceHandle)) {
+                throw new MediaCasException.InsufficientResourceException(
                     "insufficient resource to Open Session");
             }
         }
-        return  sessionResourceId[0];
+        return  sessionResourceHandle[0];
     }
 
     private void addSessionToResourceMap(Session session, int sessionResourceId) {
@@ -905,6 +906,10 @@ public final class MediaCas implements AutoCloseable {
      * Open a session to descramble one or more streams scrambled by the
      * conditional access system.
      *
+     * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
+     * to get cas session resource if cas session resources is limited. If the client can't get the
+     * resource, this call returns {@link MediaCasException.InsufficientResourceException }.
+     *
      * @return session the newly opened session.
      *
      * @throws IllegalStateException if the MediaCas instance is not valid.
@@ -929,6 +934,10 @@ public final class MediaCas implements AutoCloseable {
     /**
      * Open a session with usage and scrambling information, so that descrambler can be configured
      * to descramble one or more streams scrambled by the conditional access system.
+     *
+     * <p>Tuner resource manager (TRM) uses the client priority value to decide whether it is able
+     * to get cas session resource if cas session resources is limited. If the client can't get the
+     * resource, this call returns {@link MediaCasException.InsufficientResourceException}.
      *
      * @param sessionUsage used for the created session.
      * @param scramblingMode used for the created session.
