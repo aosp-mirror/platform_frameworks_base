@@ -319,7 +319,7 @@ public class ShadeListBuilder implements Dumpable {
         logParentingChanges();
         freeEmptyGroups();
 
-        // Step 6: Dispatch the new list, first to any listeners and then to the view layer
+        // Step 8: Dispatch the new list, first to any listeners and then to the view layer
         if (mIterationCount % 10 == 0) {
             mLogger.logFinalList(mNotifList);
         }
@@ -328,7 +328,7 @@ public class ShadeListBuilder implements Dumpable {
             mOnRenderListListener.onRenderList(mReadOnlyNotifList);
         }
 
-        // Step 7: We're done!
+        // Step 9: We're done!
         mLogger.logEndBuildList(mIterationCount);
         mPipelineState.setState(STATE_IDLE);
         mIterationCount++;
@@ -816,7 +816,7 @@ public class ShadeListBuilder implements Dumpable {
          * @param entries A read-only view into the current notif list. Note that this list is
          *                backed by the live list and will change in response to new pipeline runs.
          */
-        void onRenderList(List<ListEntry> entries);
+        void onRenderList(@NonNull List<ListEntry> entries);
     }
 
     private static final NotifSection sDefaultSection =
