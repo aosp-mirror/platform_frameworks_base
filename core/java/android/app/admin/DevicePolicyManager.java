@@ -9388,9 +9388,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of secondary users  that is affiliated with the
-     * device to disable the status bar. Disabling the status bar blocks notifications, quick
-     * settings and other screen overlays that allow escaping from a single use device.
+     * Called by device owner or profile owner of secondary users that is affiliated with the
+     * device to disable the status bar. Disabling the status bar blocks notifications and quick
+     * settings.
      * <p>
      * <strong>Note:</strong> This method has no effect for LockTask mode. The behavior of the
      * status bar in LockTask mode can be configured with
