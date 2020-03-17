@@ -70,8 +70,24 @@ public interface NotifCollectionListener {
     }
 
     /**
-     * Called whenever the RankingMap is updated by system server. By the time this listener is
-     * called, the Rankings of all entries will have been updated.
+     * Called whenever a ranking update is applied. During a ranking update, all active,
+     * non-lifetime-extended notification entries will have their ranking object updated.
+     *
+     * Ranking updates occur whenever a notification is added, updated, or removed, or when a
+     * standalone ranking is sent from the server.
+     */
+    default void onRankingApplied() {
+    }
+
+    /**
+     * Called whenever system server sends a standalone ranking update (i.e. one that isn't
+     * associated with a notification being added or removed).
+     *
+     * In general it is unsafe to depend on this method as rankings can change for other reasons.
+     * Instead, listen for {@link #onRankingApplied()}, which is called whenever ANY ranking update
+     * is applied, regardless of source.
+     *
+     * @deprecated Use {@link #onRankingApplied()} instead.
      */
     default void onRankingUpdate(NotificationListenerService.RankingMap rankingMap) {
     }
