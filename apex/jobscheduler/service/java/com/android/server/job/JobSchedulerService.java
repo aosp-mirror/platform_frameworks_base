@@ -974,7 +974,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (!mQuotaTracker.isWithinQuota(userId, pkg, QUOTA_TRACKER_SCHEDULE_PERSISTED_TAG)) {
                 Slog.e(TAG, userId + "-" + pkg + " has called schedule() too many times");
                 mAppStandbyInternal.restrictApp(
-                        pkg, userId, UsageStatsManager.REASON_SUB_RESTRICT_BUGGY);
+                        pkg, userId, UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
                 if (mConstants.API_QUOTA_SCHEDULE_THROW_EXCEPTION) {
                     final boolean isDebuggable;
                     synchronized (mLock) {
