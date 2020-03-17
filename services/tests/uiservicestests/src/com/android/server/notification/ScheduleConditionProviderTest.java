@@ -3,10 +3,8 @@ package com.android.server.notification;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-import android.app.Application;
 import android.content.Intent;
 import android.net.Uri;
 import android.service.notification.Condition;
@@ -47,7 +45,7 @@ public class ScheduleConditionProviderTest extends UiServiceTestCase {
                 null,               // ActivityThread not actually used in Service
                 ScheduleConditionProvider.class.getName(),
                 null,               // token not needed when not talking with the activity manager
-                mock(Application.class),
+                null,
                 null                // mocked services don't talk with the activity manager
                 );
         service.onCreate();
