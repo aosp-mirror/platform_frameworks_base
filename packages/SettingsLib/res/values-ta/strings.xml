@@ -147,7 +147,7 @@
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"டெதெரிங்"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"டெதெரிங் &amp; போர்டபிள் ஹாட்ஸ்பாட்"</string>
     <string name="managed_user_title" msgid="449081789742645723">"எல்லா பணிப் பயன்பாடுகளும்"</string>
-    <string name="user_guest" msgid="6939192779649870792">"வேறொருவர்"</string>
+    <string name="user_guest" msgid="6939192779649870792">"கெஸ்ட்"</string>
     <string name="unknown" msgid="3544487229740637809">"அறியப்படாத"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"பயனர்: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"சில இயல்புநிலைகள் அமைக்கப்பட்டன"</string>
@@ -246,7 +246,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"DNS வழங்குநரின் ஹோஸ்ட் பெயரை உள்ளிடவும்"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"இணைக்க முடியவில்லை"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"வயர்லெஸ் காட்சி சான்றுக்கான விருப்பங்களைக் காட்டு"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"வைஃபை நுழைவு அளவை அதிகரித்து, வைஃபை தேர்வுக் கருவியில் ஒவ்வொன்றிற்கும் SSID RSSI ஐ காட்டுக"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"பேட்டரி தீர்ந்துபோவதைக் குறைத்து நெட்வொர்க்கின் செயல்திறனை மேம்படுத்தும்"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"கட்டண நெட்வொர்க்"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"கட்டணமில்லா நெட்வொர்க்"</string>
@@ -376,7 +376,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"நிறம் அடையாளங்காண முடியாமை (சிவப்பு-பச்சை)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"நிறம் அடையாளங்காண முடியாமை (நீலம்-மஞ்சள்)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"வண்ணத்திருத்தம்"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"இது சோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="5190814747212060815">"இது பரிசோதனை முறையிலான அம்சம், இது செயல்திறனைப் பாதிக்கலாம்."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> மூலம் மேலெழுதப்பட்டது"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"கிட்டத்தட்ட <xliff:g id="TIME_REMAINING">%1$s</xliff:g> மீதமுள்ளது"</string>
@@ -428,7 +428,7 @@
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"பெரியது"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"கொஞ்சம் பெரியது"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"மிகப் பெரியது"</string>
-    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"தனிப்பயன் (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
+    <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"பிரத்தியேக (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"மெனு"</string>
     <string name="retail_demo_reset_message" msgid="5392824901108195463">"டெமோ பயன்முறையில் ஆரம்பநிலை மீட்டமைவைச் செயல்படுத்த, கடவுச்சொல்லை உள்ளிடவும்"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"அடுத்து"</string>

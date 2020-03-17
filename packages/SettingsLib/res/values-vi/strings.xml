@@ -199,7 +199,7 @@
     <string name="development_settings_summary" msgid="8718917813868735095">"Đặt tùy chọn cho phát triển ứng dụng"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Tùy chọn dành cho nhà phát triển không khả dụng cho người dùng này"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Cài đặt VPN không khả dụng cho người dùng này"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"Cài đặt chia sẻ kết nối không khả dụng cho người dùng này"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"Cài đặt cách chia sẻ kết nối không khả dụng cho người dùng này"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Cài đặt tên điểm truy cập không khả dụng cho người dùng này"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Gỡ lỗi qua USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Bật chế độ gỡ lỗi khi kết nối USB"</string>

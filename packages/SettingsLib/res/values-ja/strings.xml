@@ -201,7 +201,7 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"このユーザーはVPN設定を利用できません。"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"このユーザーはテザリング設定を利用できません"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"このユーザーはアクセスポイント名設定を利用できません"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"USBデバッグ"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"USB デバッグ"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"USB接続時はデバッグモードにする"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USBデバッグの許可の取り消し"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"バグレポートのショートカット"</string>
