@@ -227,9 +227,20 @@ class ZygoteArguments {
     String[] mPkgDataInfoList;
 
     /**
+     * A list that stores all whitelisted app data info: volume uuid and inode.
+     * Null if it does need to do app data isolation.
+     */
+    String[] mWhitelistedDataInfoList;
+
+    /**
      * @see Zygote#BIND_MOUNT_APP_STORAGE_DIRS
      */
     boolean mBindMountAppStorageDirs;
+
+    /**
+     * @see Zygote#BIND_MOUNT_APP_DATA_DIRS
+     */
+    boolean mBindMountAppDataDirs;
 
     /**
      * Constructs instance and parses args
@@ -452,8 +463,12 @@ class ZygoteArguments {
                 }
             } else if (arg.startsWith(Zygote.PKG_DATA_INFO_MAP)) {
                 mPkgDataInfoList = getAssignmentList(arg);
+            } else if (arg.startsWith(Zygote.WHITELISTED_DATA_INFO_MAP)) {
+                mWhitelistedDataInfoList = getAssignmentList(arg);
             } else if (arg.equals(Zygote.BIND_MOUNT_APP_STORAGE_DIRS)) {
                 mBindMountAppStorageDirs = true;
+            } else if (arg.equals(Zygote.BIND_MOUNT_APP_DATA_DIRS)) {
+                mBindMountAppDataDirs = true;
             } else {
                 break;
             }
