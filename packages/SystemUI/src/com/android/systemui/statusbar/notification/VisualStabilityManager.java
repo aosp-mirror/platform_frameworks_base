@@ -45,7 +45,6 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     private final ArrayList<Callback> mCallbacks =  new ArrayList<>();
     private final Handler mHandler;
 
-    private NotificationPresenter mPresenter;
     private boolean mPanelExpanded;
     private boolean mScreenOn;
     private boolean mReorderingAllowed;
@@ -80,7 +79,6 @@ public class VisualStabilityManager implements OnHeadsUpChangedListener, Dumpabl
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
-        mPresenter = presenter;
     }
 
     /**
