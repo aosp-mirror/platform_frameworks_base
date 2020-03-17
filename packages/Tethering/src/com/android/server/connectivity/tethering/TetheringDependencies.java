@@ -26,6 +26,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.util.StateMachine;
 
 import java.util.ArrayList;
@@ -99,6 +101,13 @@ public abstract class TetheringDependencies {
     public INetd getINetd(Context context) {
         return INetd.Stub.asInterface(
                 (IBinder) context.getSystemService(Context.NETD_SERVICE));
+    }
+
+    /**
+     * Get a reference to the TetheringNotificationUpdater to be used by tethering.
+     */
+    public TetheringNotificationUpdater getNotificationUpdater(@NonNull final Context ctx) {
+        return new TetheringNotificationUpdater(ctx);
     }
 
     /**
