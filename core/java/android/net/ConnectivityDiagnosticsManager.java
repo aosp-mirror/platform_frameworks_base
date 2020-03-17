@@ -233,8 +233,8 @@ public class ConnectivityDiagnosticsManager {
          * Constructor for ConnectivityReport.
          *
          * <p>Apps should obtain instances through {@link
-         * ConnectivityDiagnosticsCallback#onConnectivityReport} instead of instantiating their own
-         * instances (unless for testing purposes).
+         * ConnectivityDiagnosticsCallback#onConnectivityReportAvailable} instead of instantiating
+         * their own instances (unless for testing purposes).
          *
          * @param network The Network for which this ConnectivityReport applies
          * @param reportTimestamp The timestamp for the report
@@ -622,10 +622,10 @@ public class ConnectivityDiagnosticsManager {
 
         /** @hide */
         @VisibleForTesting
-        public void onConnectivityReport(@NonNull ConnectivityReport report) {
+        public void onConnectivityReportAvailable(@NonNull ConnectivityReport report) {
             Binder.withCleanCallingIdentity(() -> {
                 mExecutor.execute(() -> {
-                    mCb.onConnectivityReport(report);
+                    mCb.onConnectivityReportAvailable(report);
                 });
             });
         }
@@ -666,7 +666,7 @@ public class ConnectivityDiagnosticsManager {
          *
          * @param report The ConnectivityReport containing information about a connectivity check
          */
-        public void onConnectivityReport(@NonNull ConnectivityReport report) {}
+        public void onConnectivityReportAvailable(@NonNull ConnectivityReport report) {}
 
         /**
          * Called when the platform suspects a data stall on some Network.
