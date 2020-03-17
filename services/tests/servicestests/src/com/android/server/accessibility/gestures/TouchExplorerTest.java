@@ -30,7 +30,6 @@ import static com.android.server.accessibility.gestures.TouchState.STATE_DELEGAT
 import static com.android.server.accessibility.gestures.TouchState.STATE_DRAGGING;
 import static com.android.server.accessibility.gestures.TouchState.STATE_TOUCH_EXPLORING;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -48,7 +47,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.accessibility.EventStreamTransformation;
-import com.android.server.accessibility.utils.MotionEventMatcher;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -101,11 +99,6 @@ public class TouchExplorerTest {
         @Override
         public void onMotionEvent(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
             mEvents.add(0, event.copy());
-            // LastEvent may not match if we're clearing the state
-            if (mLastEvent != null) {
-                MotionEventMatcher lastEventMatcher = new MotionEventMatcher(mLastEvent);
-                assertThat(rawEvent, lastEventMatcher);
-            }
         }
 
         @Override
@@ -139,6 +132,53 @@ public class TouchExplorerTest {
         send(mLastEvent);
         goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
         assertCapturedEvents(ACTION_HOVER_ENTER, ACTION_HOVER_MOVE, ACTION_HOVER_EXIT);
+    }
+
+    /**
+     * Test the case where ACTION_DOWN is followed by a number of ACTION_MOVE events that do not
+     * change the coordinates.
+     */
+    @Test
+    public void testOneFingerMoveWithExtraMoveEvents() {
+        goFromStateClearTo(STATE_TOUCH_EXPLORING_1FINGER);
+        // Inject a set of move events that have the same coordinates as the down event.
+        moveEachPointers(mLastEvent, p(0, 0));
+        send(mLastEvent);
+        try {
+            Thread.sleep(2 * ViewConfiguration.getDoubleTapTimeout());
+        } catch (InterruptedException e) {
+            fail("Interrupted while waiting for transition to touch exploring state.");
+        }
+        // Now move for real.
+        moveEachPointers(mLastEvent, p(10, 10));
+        send(mLastEvent);
+        // One more move event with no change.
+        moveEachPointers(mLastEvent, p(0, 0));
+        send(mLastEvent);
+        goToStateClearFrom(STATE_TOUCH_EXPLORING_1FINGER);
+        assertCapturedEvents(
+                ACTION_HOVER_ENTER,
+                ACTION_HOVER_MOVE,
+                ACTION_HOVER_MOVE,
+                ACTION_HOVER_MOVE,
+                ACTION_HOVER_EXIT);
+    }
+
+    /**
+     * Test the case where ACTION_POINTER_DOWN is followed by a number of ACTION_MOVE events that do
+     * not change the coordinates.
+     */
+    @Test
+    public void testTwoFingerDragWithExtraMoveEvents() {
+        goFromStateClearTo(STATE_DRAGGING_2FINGERS);
+        // Inject a set of move events that have the same coordinates as the down event.
+        moveEachPointers(mLastEvent, p(0, 0), p(0, 0));
+        send(mLastEvent);
+        // Now move for real.
+        moveEachPointers(mLastEvent, p(10, 10), p(10, 10));
+        send(mLastEvent);
+        goToStateClearFrom(STATE_DRAGGING_2FINGERS);
+        assertCapturedEvents(ACTION_DOWN, ACTION_MOVE, ACTION_MOVE, ACTION_UP);
     }
 
     @Test
