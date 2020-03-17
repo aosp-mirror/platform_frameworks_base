@@ -579,7 +579,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @VisibleForTesting
     void updateShelfIconColor() {
-        StatusBarIconView expandedIcon = mEntry.expandedIcon;
+        StatusBarIconView expandedIcon = mEntry.getIcons().getShelfIcon();
         boolean isPreL = Boolean.TRUE.equals(expandedIcon.getTag(R.id.icon_is_pre_L));
         boolean colorize = !isPreL || NotificationUtils.isGrayscale(expandedIcon,
                 ContrastColorUtil.getInstance(mContext));
@@ -1290,7 +1290,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setLongPressListener(null);
         mGroupParentWhenDismissed = mNotificationParent;
         mChildAfterViewWhenDismissed = null;
-        mEntry.icon.setDismissed();
+        mEntry.getIcons().getStatusBarIcon().setDismissed();
         if (isChildInGroup()) {
             List<ExpandableNotificationRow> notificationChildren =
                     mNotificationParent.getNotificationChildren();
@@ -1832,7 +1832,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 mTranslateableViews.get(i).setTranslationX(0);
             }
             invalidateOutline();
-            getEntry().expandedIcon.setScrollX(0);
+            getEntry().getIcons().getShelfIcon().setScrollX(0);
         }
 
         if (mMenuRow != null) {
@@ -1912,7 +1912,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             // In order to keep the shelf in sync with this swiping, we're simply translating
             // it's icon by the same amount. The translation is already being used for the normal
             // positioning, so we can use the scrollX instead.
-            getEntry().expandedIcon.setScrollX((int) -translationX);
+            getEntry().getIcons().getShelfIcon().setScrollX((int) -translationX);
         }
 
         if (mMenuRow != null && mMenuRow.getMenuView() != null) {
@@ -2111,7 +2111,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public StatusBarIconView getShelfIcon() {
-        return getEntry().expandedIcon;
+        return getEntry().getIcons().getShelfIcon();
     }
 
     @Override
