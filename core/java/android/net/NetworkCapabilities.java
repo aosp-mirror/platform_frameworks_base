@@ -613,7 +613,6 @@ public final class NetworkCapabilities implements Parcelable {
      * @return {@code true} if the network should be restricted.
      * @hide
      */
-    @SystemApi
     public boolean deduceRestrictedCapability() {
         // Check if we have any capability that forces the network to be restricted.
         final boolean forceRestrictedCapability =
