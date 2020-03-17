@@ -925,16 +925,6 @@ void RecordingCanvas::onDrawTextBlob(const SkTextBlob* blob, SkScalar x, SkScala
     fDL->drawTextBlob(blob, x, y, paint);
 }
 
-void RecordingCanvas::onDrawBitmap(const SkBitmap& bm, SkScalar x, SkScalar y,
-                                   const SkPaint* paint) {
-    fDL->drawImage(SkImage::MakeFromBitmap(bm), x, y, paint, BitmapPalette::Unknown);
-}
-void RecordingCanvas::onDrawBitmapRect(const SkBitmap& bm, const SkRect* src, const SkRect& dst,
-                                       const SkPaint* paint, SrcRectConstraint constraint) {
-    fDL->drawImageRect(SkImage::MakeFromBitmap(bm), src, dst, paint, constraint,
-                       BitmapPalette::Unknown);
-}
-
 void RecordingCanvas::drawImage(const sk_sp<SkImage>& image, SkScalar x, SkScalar y,
                                 const SkPaint* paint, BitmapPalette palette) {
     fDL->drawImage(image, x, y, paint, palette);
