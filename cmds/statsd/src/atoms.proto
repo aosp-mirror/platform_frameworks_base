@@ -398,6 +398,8 @@ message Atom {
             256  [(module) = "framework"];
         DisplayJankReported display_jank_reported = 257;
         AppStandbyBucketChanged app_standby_bucket_changed = 258 [(module) = "framework"];
+        SharesheetStarted sharesheet_started = 259 [(module) = "framework"];
+        RankingSelected ranking_selected = 260 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
     }
 
@@ -8913,4 +8915,65 @@ message AppStandbyBucketChanged {
     // the main reason. Values are one of the REASON_SUB_XXX constants defined in
     // UsageStatsManager.java.
     optional int32 sub_reason = 5;
+}
+
+/**
+* Reports a started sharesheet transaction.
+*
+* Logged from:
+*   frameworks/base/core/java/com/android/internal/app/ChooserActivity.java
+*/
+message SharesheetStarted {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    // The calling app's package name.
+    optional string package_name = 2;
+    // An identifier to tie together multiple logs relating to the same share event
+    optional int32 instance_id = 3;
+    // The mime type of the share
+    optional string mime_type = 4;
+    // The number of direct targets the calling app is providing that will be shown.
+    optional int32 num_app_provided_direct_targets = 5;
+    // The number of app targets the calling app is providing that will be shown.
+    optional int32 num_app_provided_app_targets = 6;
+    // True if the share originates from the workprofile
+    optional bool is_workprofile = 7;
+
+    enum SharesheetPreviewType {  // Constants from ChooserActivity.java
+        CONTENT_PREVIEW_IMAGE = 1;  // The preview shown in the sharesheet is an image.
+        CONTENT_PREVIEW_FILE = 2;  // The preview shown in the sharesheet is a file.
+        CONTENT_PREVIEW_TEXT = 3;  // The preview shown in the sharesheet is text.
+    }
+    // How the sharesheet preview is presented.
+    optional SharesheetPreviewType previewType = 8;
+
+    enum ResolverActivityIntent { // Intents handled by ResolverActivity.java
+        INTENT_DEFAULT = 0;
+        INTENT_ACTION_VIEW = 1;
+        INTENT_ACTION_EDIT = 2;
+        INTENT_ACTION_SEND = 3;
+        INTENT_ACTION_SENDTO = 4;
+        INTENT_ACTION_SEND_MULTIPLE = 5;
+        INTENT_ACTION_IMAGE_CAPTURE = 6;
+        INTENT_ACTION_MAIN = 7;
+    }
+    // The intent being processed (only SEND and SEND_MULTIPLE are system sharesheet)
+    optional ResolverActivityIntent intentType = 9;
+}
+
+/**
+ * Reports a ranking selection event.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/app/ChooserActivity.java (sharesheet)
+ */
+message RankingSelected {
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+    // The relevant app's package name (can be source or picked package).
+    optional string package_name = 2;
+    // An identifier to tie together multiple logs relating to the same share event.
+    optional int32 instance_id = 3;
+    // Which of the ranked targets got picked, default starting position 0.
+    optional int32 position_picked = 4;
 }
