@@ -282,7 +282,7 @@ interface ITelephony {
      * operator's MCC (Mobile Country Code).
      * @see android.telephony.TelephonyManager#getNetworkCountryIso
      */
-    String getNetworkCountryIsoForPhone(int phoneId, String callingPkg, String callingFeatureId);
+    String getNetworkCountryIsoForPhone(int phoneId);
 
     /**
      * Returns the neighboring cell information of the device.
