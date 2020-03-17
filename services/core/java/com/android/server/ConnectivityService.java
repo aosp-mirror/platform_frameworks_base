@@ -7892,8 +7892,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return true;
         }
 
-        if (!mLocationPermissionChecker.checkLocationPermission(
-                callbackPackageName, null /* featureId */, callbackUid, null /* message */)) {
+        // LocationPermissionChecker#checkLocationPermission can throw SecurityException if the uid
+        // and package name don't match. Throwing on the CS thread is not acceptable, so wrap the
+        // call in a try-catch.
+        try {
+            if (!mLocationPermissionChecker.checkLocationPermission(
+                    callbackPackageName, null /* featureId */, callbackUid, null /* message */)) {
+                return false;
+            }
+        } catch (SecurityException e) {
             return false;
         }
 
