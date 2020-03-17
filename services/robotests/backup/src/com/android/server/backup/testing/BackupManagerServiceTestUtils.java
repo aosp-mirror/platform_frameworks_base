@@ -166,7 +166,7 @@ public class BackupManagerServiceTestUtils {
         PowerManager powerManager =
                 (PowerManager) application.getSystemService(Context.POWER_SERVICE);
         return new UserBackupManagerService.BackupWakeLock(
-                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*"));
+                powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*"), 0);
     }
 
     /**
