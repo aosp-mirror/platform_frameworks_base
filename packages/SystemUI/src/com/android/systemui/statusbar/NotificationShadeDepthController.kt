@@ -22,6 +22,7 @@ import android.animation.ValueAnimator
 import android.app.WallpaperManager
 import android.view.Choreographer
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
@@ -29,6 +30,7 @@ import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.Interpolators
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController
@@ -45,7 +47,7 @@ import kotlin.math.max
  */
 @Singleton
 class NotificationShadeDepthController @Inject constructor(
-    private val statusBarStateController: SysuiStatusBarStateController,
+    private val statusBarStateController: StatusBarStateController,
     private val blurUtils: BlurUtils,
     private val biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
@@ -56,7 +58,6 @@ class NotificationShadeDepthController @Inject constructor(
 ) : PanelExpansionListener, Dumpable {
     companion object {
         private const val WAKE_UP_ANIMATION_ENABLED = true
-        private const val SHADE_BLUR_ENABLED = true
     }
 
     lateinit var root: View
@@ -64,7 +65,9 @@ class NotificationShadeDepthController @Inject constructor(
     private var keyguardAnimator: Animator? = null
     private var notificationAnimator: Animator? = null
     private var updateScheduled: Boolean = false
-    private val shadeSpring = SpringAnimation(this, object :
+    private var shadeExpansion = 0f
+    @VisibleForTesting
+    var shadeSpring = SpringAnimation(this, object :
             FloatPropertyCompat<NotificationShadeDepthController>("shadeBlurRadius") {
         override fun setValue(rect: NotificationShadeDepthController?, value: Float) {
             shadeBlurRadius = value.toInt()
@@ -75,12 +78,25 @@ class NotificationShadeDepthController @Inject constructor(
         }
     })
     private val zoomInterpolator = Interpolators.ACCELERATE_DECELERATE
+
+    /**
+     * Radius that we're animating to.
+     */
+    private var pendingShadeBlurRadius = -1
+
+    /**
+     * Shade blur radius on the current frame.
+     */
     private var shadeBlurRadius = 0
         set(value) {
             if (field == value) return
             field = value
             scheduleUpdate()
         }
+
+    /**
+     * Blur radius of the wake-up animation on this frame.
+     */
     private var wakeAndUnlockBlurRadius = 0
         set(value) {
             if (field == value) return
@@ -141,6 +157,18 @@ class NotificationShadeDepthController @Inject constructor(
         }
     }
 
+    private val statusBarStateCallback = object : StatusBarStateController.StateListener {
+        override fun onStateChanged(newState: Int) {
+            updateShadeBlur()
+        }
+
+        override fun onDozingChanged(isDozing: Boolean) {
+            if (isDozing && shadeSpring.isRunning) {
+                shadeSpring.skipToEnd()
+            }
+        }
+    }
+
     init {
         dumpManager.registerDumpable(javaClass.name, this)
         if (WAKE_UP_ANIMATION_ENABLED) {
@@ -149,24 +177,31 @@ class NotificationShadeDepthController @Inject constructor(
         shadeSpring.spring = SpringForce(0.0f)
         shadeSpring.spring.dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
         shadeSpring.spring.stiffness = SpringForce.STIFFNESS_LOW
+        shadeSpring.addEndListener { _, _, _, _ -> pendingShadeBlurRadius = -1 }
+        statusBarStateController.addCallback(statusBarStateCallback)
     }
 
     /**
      * Update blurs when pulling down the shade
      */
     override fun onPanelExpansionChanged(expansion: Float, tracking: Boolean) {
-        if (!SHADE_BLUR_ENABLED) {
+        if (expansion == shadeExpansion) {
             return
         }
+        shadeExpansion = expansion
+        updateShadeBlur()
+    }
 
+    private fun updateShadeBlur() {
         var newBlur = 0
         if (statusBarStateController.state == StatusBarState.SHADE) {
-            newBlur = blurUtils.blurRadiusOfRatio(expansion)
+            newBlur = blurUtils.blurRadiusOfRatio(shadeExpansion)
         }
 
-        if (shadeBlurRadius == newBlur) {
+        if (pendingShadeBlurRadius == newBlur) {
             return
         }
+        pendingShadeBlurRadius = newBlur
         shadeSpring.animateToFinalPosition(newBlur.toFloat())
     }
 
