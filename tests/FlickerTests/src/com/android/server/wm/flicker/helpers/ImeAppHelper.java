@@ -18,6 +18,8 @@ package com.android.server.wm.flicker.helpers;
 
 import static android.os.SystemClock.sleep;
 
+import static org.junit.Assert.assertNotNull;
+
 import android.app.Instrumentation;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
@@ -35,6 +37,8 @@ public class ImeAppHelper extends FlickerAppHelper {
 
     public void clickEditTextWidget(UiDevice device) {
         UiObject2 editText = device.findObject(By.res(getPackage(), "plain_text_input"));
+        assertNotNull("Text field not found, this usually happens when the device was left "
+                + "in an unknown state (e.g. in split screen)", editText);
         editText.click();
         sleep(500);
     }
