@@ -1536,10 +1536,12 @@ public class ChooserActivity extends ResolverActivity implements
                 labels.add(innerInfo.getResolveInfo().loadLabel(getPackageManager()));
             }
             f = new ResolverTargetActionsDialogFragment(mti.getDisplayLabel(), name,
-                    mti.getTargets(), labels);
+                    mti.getTargets(), labels,
+                    mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
         } else {
             f = new ResolverTargetActionsDialogFragment(
-                    ti.getResolveInfo().loadLabel(getPackageManager()), name, pinned);
+                    ti.getResolveInfo().loadLabel(getPackageManager()), name, pinned,
+                    mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
         }
 
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
