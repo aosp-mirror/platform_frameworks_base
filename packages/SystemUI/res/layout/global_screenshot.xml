@@ -58,13 +58,15 @@
         android:elevation="@dimen/screenshot_preview_elevation"
         android:visibility="gone"
         android:background="@drawable/screenshot_rounded_corners"
-        android:adjustViewBounds="true"/>
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/screenshot_preview_description"/>
     <FrameLayout
         android:id="@+id/global_screenshot_dismiss_button"
         android:layout_width="@dimen/screenshot_dismiss_button_tappable_size"
         android:layout_height="@dimen/screenshot_dismiss_button_tappable_size"
         android:elevation="7dp"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:contentDescription="@string/screenshot_dismiss_ui_description">
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
