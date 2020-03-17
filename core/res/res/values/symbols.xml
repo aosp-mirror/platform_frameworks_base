@@ -3908,8 +3908,6 @@
   <java-symbol type="layout" name="conversation_face_pile_layout" />
 
   <!-- Intent resolver and share sheet -->
-  <java-symbol type="color" name="resolver_tabs_active_color" />
-  <java-symbol type="color" name="resolver_tabs_inactive_color" />
   <java-symbol type="string" name="resolver_personal_tab" />
   <java-symbol type="string" name="resolver_personal_tab_accessibility" />
   <java-symbol type="string" name="resolver_work_tab" />
@@ -3940,6 +3938,7 @@
   <java-symbol type="dimen" name="resolver_empty_state_height_with_tabs" />
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_tabs" />
   <java-symbol type="bool" name="sharesheet_show_content_preview" />
+  <java-symbol type="dimen" name="resolver_tab_text_size" />
 
   <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
   <java-symbol type="string" name="allow_while_in_use_permission_in_fgs" />
