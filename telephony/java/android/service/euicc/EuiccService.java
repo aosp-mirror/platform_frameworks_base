@@ -31,7 +31,9 @@ import android.os.RemoteException;
 import android.telephony.TelephonyManager;
 import android.telephony.euicc.DownloadableSubscription;
 import android.telephony.euicc.EuiccInfo;
+import android.telephony.euicc.EuiccManager;
 import android.telephony.euicc.EuiccManager.OtaStatus;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.PrintWriter;
@@ -309,6 +311,64 @@ public abstract class EuiccService extends Service {
 
     public EuiccService() {
         mStubWrapper = new IEuiccServiceWrapper();
+    }
+
+    /**
+     * Given a SubjectCode[5.2.6.1] and ReasonCode[5.2.6.2] from GSMA (SGP.22 v2.2), encode it to
+     * the format described in
+     * {@link android.telephony.euicc.EuiccManager#OPERATION_SMDX_SUBJECT_REASON_CODE}
+     *
+     * @param subjectCode SubjectCode[5.2.6.1] from GSMA (SGP.22 v2.2)
+     * @param reasonCode  ReasonCode[5.2.6.2] from GSMA (SGP.22 v2.2)
+     * @return encoded error code described in
+     * {@link android.telephony.euicc.EuiccManager#OPERATION_SMDX_SUBJECT_REASON_CODE}
+     * @throws NumberFormatException         when the Subject/Reason code contains non digits
+     * @throws IllegalArgumentException      when Subject/Reason code is null/empty
+     * @throws UnsupportedOperationException when sections has more than four layers (e.g 5.8.1.2)
+     *                                       or when an number is bigger than 15
+     */
+    public int encodeSmdxSubjectAndReasonCode(@NonNull String subjectCode,
+            @NonNull String reasonCode) {
+        final int maxSupportedSection = 3;
+        final int maxSupportedDigit = 15;
+        final int bitsPerSection = 4;
+
+        if (TextUtils.isEmpty(subjectCode) || TextUtils.isEmpty(reasonCode)) {
+            throw new IllegalArgumentException("SubjectCode/ReasonCode is empty");
+        }
+
+        final String[] subjectCodeToken = subjectCode.split("\\.");
+        final String[] reasonCodeToken = reasonCode.split("\\.");
+
+        if (subjectCodeToken.length > maxSupportedSection
+                || reasonCodeToken.length > maxSupportedSection) {
+            throw new UnsupportedOperationException("Only three nested layer is supported.");
+        }
+
+        int result = EuiccManager.OPERATION_SMDX_SUBJECT_REASON_CODE;
+
+        // Pad the 0s needed for subject code
+        result = result << (maxSupportedSection - subjectCodeToken.length) * bitsPerSection;
+
+        for (String digitString : subjectCodeToken) {
+            int num = Integer.parseInt(digitString);
+            if (num > maxSupportedDigit) {
+                throw new UnsupportedOperationException("SubjectCode exceeds " + maxSupportedDigit);
+            }
+            result = (result << bitsPerSection) + num;
+        }
+
+        // Pad the 0s needed for reason code
+        result = result << (maxSupportedSection - reasonCodeToken.length) * bitsPerSection;
+        for (String digitString : reasonCodeToken) {
+            int num = Integer.parseInt(digitString);
+            if (num > maxSupportedDigit) {
+                throw new UnsupportedOperationException("ReasonCode exceeds " + maxSupportedDigit);
+            }
+            result = (result << bitsPerSection) + num;
+        }
+
+        return result;
     }
 
     @Override
