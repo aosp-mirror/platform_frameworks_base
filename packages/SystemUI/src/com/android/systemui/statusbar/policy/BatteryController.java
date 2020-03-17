@@ -53,6 +53,16 @@ public interface BatteryController extends DemoMode, Dumpable,
     boolean isAodPowerSave();
 
     /**
+     * Returns {@code true} if reverse is supported.
+     */
+    default boolean isReverseSupported() { return false; }
+
+    /**
+     * Returns {@code true} if reverse is on.
+     */
+    default boolean isReverseOn() { return false; }
+
+    /**
      * Set reverse state.
      * @param isReverse true if turn on reverse, false otherwise
      */

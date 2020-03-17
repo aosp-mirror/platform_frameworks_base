@@ -45,7 +45,6 @@ import com.android.systemui.qs.external.CustomTile;
 import com.android.systemui.qs.external.TileLifecycleManager;
 import com.android.systemui.qs.external.TileServices;
 import com.android.systemui.qs.logging.QSLogger;
-import com.android.systemui.qs.tileimpl.QSFactoryImpl;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -98,7 +97,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     @Inject
     public QSTileHost(Context context,
             StatusBarIconController iconController,
-            QSFactoryImpl defaultFactory,
+            QSFactory defaultFactory,
             @Main Handler mainHandler,
             @Background Looper bgLooper,
             PluginManager pluginManager,
@@ -120,7 +119,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         mServices = new TileServices(this, bgLooper, mBroadcastDispatcher);
         mStatusBarOptional = statusBarOptional;
 
-        defaultFactory.setHost(this);
         mQsFactories.add(defaultFactory);
         pluginManager.addPluginListener(this, QSFactory.class, true);
         mDumpManager.registerDumpable(TAG, this);
@@ -211,10 +209,12 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         return mContext;
     }
 
+    @Override
     public Context getUserContext() {
         return mUserContext;
     }
 
+    @Override
     public TileServices getTileServices() {
         return mServices;
     }
