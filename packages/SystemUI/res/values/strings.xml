@@ -233,6 +233,10 @@
     <!-- Notification text displayed when we fail to take a screenshot. [CHAR LIMIT=100] -->
     <string name="screenshot_failed_to_capture_text">Taking screenshots isn\'t allowed by the app or
         your organization</string>
+    <!-- Content description indicating that tapping a button will dismiss the screenshots UI [CHAR LIMIT=NONE] -->
+    <string name="screenshot_dismiss_ui_description">Dismiss screenshot</string>
+    <!-- Content description indicating that tapping will open an app to view/edit the screenshot. [CHAR LIMIT=NONE] -->
+    <string name="screenshot_preview_description">Open screenshot</string>
 
     <!-- Notification title displayed for screen recording [CHAR LIMIT=50]-->
     <string name="screenrecord_name">Screen Recorder</string>
