@@ -15,14 +15,21 @@
  */
 package com.android.server.locksettings;
 
+import android.content.ContentResolver;
+import android.os.UserHandle;
 import android.provider.Settings;
 
 public class FakeSettings {
 
     private int mDeviceProvisioned;
+    private int mSecureFrpMode;
 
     public void setDeviceProvisioned(boolean provisioned) {
         mDeviceProvisioned = provisioned ? 1 : 0;
+    }
+
+    public void setSecureFrpMode(boolean secure) {
+        mSecureFrpMode = secure ? 1 : 0;
     }
 
     public int globalGetInt(String keyName) {
@@ -32,5 +39,13 @@ public class FakeSettings {
             default:
                 throw new IllegalArgumentException("Unhandled global settings: " + keyName);
         }
+    }
+
+    public int secureGetInt(ContentResolver contentResolver, String keyName, int defaultValue,
+            int userId) {
+        if (Settings.Secure.SECURE_FRP_MODE.equals(keyName) && userId == UserHandle.USER_SYSTEM) {
+            return mSecureFrpMode;
+        }
+        return defaultValue;
     }
 }
