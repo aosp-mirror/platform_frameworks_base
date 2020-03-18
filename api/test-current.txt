@@ -3098,6 +3098,15 @@ package android.telephony {
     field public static final int FREQUENCY_RANGE_GROUP_UNKNOWN = 0; // 0x0
   }
 
+  public final class BarringInfo implements android.os.Parcelable {
+    ctor public BarringInfo();
+    ctor public BarringInfo(@Nullable android.telephony.CellIdentity, @NonNull android.util.SparseArray<android.telephony.BarringInfo.BarringServiceInfo>);
+  }
+
+  public static final class BarringInfo.BarringServiceInfo implements android.os.Parcelable {
+    ctor public BarringInfo.BarringServiceInfo(int, boolean, int, int);
+  }
+
   public final class CallQuality implements android.os.Parcelable {
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int, boolean, boolean, boolean);
@@ -3184,6 +3193,7 @@ package android.telephony {
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setDomain(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setEmergencyOnly(boolean);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegisteredPlmn(@Nullable String);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegistrationState(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRejectCause(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);

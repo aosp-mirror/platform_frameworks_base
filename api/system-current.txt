@@ -8169,6 +8169,11 @@ package android.telephony {
     field public static final int FREQUENCY_RANGE_GROUP_UNKNOWN = 0; // 0x0
   }
 
+  public final class BarringInfo implements android.os.Parcelable {
+    ctor public BarringInfo();
+    method @NonNull public android.telephony.BarringInfo createLocationInfoSanitizedCopy();
+  }
+
   public final class CallAttributes implements android.os.Parcelable {
     ctor public CallAttributes(@NonNull android.telephony.PreciseCallState, int, @NonNull android.telephony.CallQuality);
     method public int describeContents();
@@ -8844,6 +8849,7 @@ package android.telephony {
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setCellIdentity(@Nullable android.telephony.CellIdentity);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setDomain(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setEmergencyOnly(boolean);
+    method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegisteredPlmn(@Nullable String);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRegistrationState(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setRejectCause(int);
     method @NonNull public android.telephony.NetworkRegistrationInfo.Builder setTransportType(int);

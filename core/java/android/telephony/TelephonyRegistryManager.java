@@ -729,4 +729,21 @@ public class TelephonyRegistryManager {
         } catch (RemoteException ex) {
         }
     }
+
+    /**
+     * Notify {@link BarringInfo} has changed for a specific subscription.
+     *
+     * @param slotIndex for the phone object that got updated barring info.
+     * @param subId for which the BarringInfo changed.
+     * @param barringInfo updated BarringInfo.
+     */
+    public void notifyBarringInfoChanged(
+            int slotIndex, int subId, @NonNull BarringInfo barringInfo) {
+        try {
+            sRegistry.notifyBarringInfoChanged(slotIndex, subId, barringInfo);
+        } catch (RemoteException ex) {
+            // system server crash
+        }
+    }
+
 }
