@@ -156,8 +156,7 @@ public class ScanResultTest {
                 + "distance: 0(cm), distanceSd: 0(cm), "
                 + "passpoint: no, ChannelBandwidth: 0, centerFreq0: 0, centerFreq1: 0, "
                 + "standard: 11ac, "
-                + "80211mcResponder: is not supported, Carrier AP: no, "
-                + "Carrier AP EAP Type: 0, Carrier name: null, "
+                + "80211mcResponder: is not supported, "
                 + "Radio Chain Infos: null", scanResult.toString());
     }
 
@@ -179,8 +178,7 @@ public class ScanResultTest {
                 + "distanceSd: 0(cm), "
                 + "passpoint: no, ChannelBandwidth: 0, centerFreq0: 0, centerFreq1: 0, "
                 + "standard: 11ac, "
-                + "80211mcResponder: is not supported, Carrier AP: no, "
-                + "Carrier AP EAP Type: 0, Carrier name: null, "
+                + "80211mcResponder: is not supported, "
                 + "Radio Chain Infos: [RadioChainInfo: id=0, level=-45, "
                 + "RadioChainInfo: id=1, level=-54]", scanResult.toString());
     }

@@ -30,11 +30,14 @@ import android.app.ActivityTaskManager;
 import android.app.ITaskOrganizerController;
 import android.app.PictureInPictureParams;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Size;
 import android.view.ITaskOrganizer;
 import android.view.IWindowContainer;
 import android.view.SurfaceControl;
@@ -45,7 +48,9 @@ import com.android.systemui.R;
 import com.android.systemui.pip.phone.PipUpdateThread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -77,6 +82,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     private final Rect mLastReportedBounds = new Rect();
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
+    private final Map<IBinder, Rect> mBoundsToRestore = new HashMap<>();
 
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
@@ -204,26 +210,12 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         mOneShotAnimationType = animationType;
     }
 
-    /**
-     * Callback to issue the final {@link WindowContainerTransaction} on end of movements.
-     * @param destinationBounds the final bounds.
-     */
-    public void onMotionMovementEnd(Rect destinationBounds) {
-        try {
-            mLastReportedBounds.set(destinationBounds);
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.setBounds(mToken, destinationBounds);
-            mTaskOrganizerController.applyContainerTransaction(wct, null /* ITaskOrganizer */);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Failed to apply window container transaction", e);
-        }
-    }
-
     @Override
     public void taskAppeared(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                getAspectRatioOrDefault(info.pictureInPictureParams), null /* bounds */);
+                getAspectRatioOrDefault(info.pictureInPictureParams),
+                null /* bounds */, getMinimalSize(info.topActivityInfo));
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         mTaskInfo = info;
         mToken = mTaskInfo.token;
@@ -234,6 +226,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             throw new RuntimeException("Unable to get leash", e);
         }
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
+        mBoundsToRestore.put(mToken.asBinder(), currentBounds);
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             scheduleAnimateResizePip(currentBounds, destinationBounds,
                     TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration, null);
@@ -258,8 +251,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
-        scheduleAnimateResizePip(mLastReportedBounds,
-                info.configuration.windowConfiguration.getBounds(),
+        final Rect boundsToRestore = mBoundsToRestore.remove(token.asBinder());
+        scheduleAnimateResizePip(mLastReportedBounds, boundsToRestore,
                 TRANSITION_DIRECTION_TO_FULLSCREEN, mEnterExitAnimationDuration, null);
         mInPip = false;
     }
@@ -276,7 +269,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             return;
         }
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                getAspectRatioOrDefault(newParams), null /* bounds */);
+                getAspectRatioOrDefault(newParams),
+                null /* bounds */, getMinimalSize(info.topActivityInfo));
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration, null);
     }
@@ -444,6 +438,14 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(durationMs)
                 .start());
+    }
+
+    private Size getMinimalSize(ActivityInfo activityInfo) {
+        if (activityInfo == null || activityInfo.windowLayout == null) {
+            return null;
+        }
+        final ActivityInfo.WindowLayout windowLayout = activityInfo.windowLayout;
+        return new Size(windowLayout.minWidth, windowLayout.minHeight);
     }
 
     private float getAspectRatioOrDefault(@Nullable PictureInPictureParams params) {

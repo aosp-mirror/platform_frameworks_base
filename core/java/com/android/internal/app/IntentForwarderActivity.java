@@ -38,6 +38,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.widget.Toast;
 
@@ -153,6 +154,9 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     private boolean shouldShowDisclosure(@Nullable ResolveInfo ri, Intent intent) {
+        if (!isDeviceProvisioned()) {
+            return false;
+        }
         if (ri == null || ri.activityInfo == null) {
             return true;
         }
@@ -161,6 +165,11 @@ public class IntentForwarderActivity extends Activity  {
             return false;
         }
         return !isTargetResolverOrChooserActivity(ri.activityInfo);
+    }
+
+    private boolean isDeviceProvisioned() {
+        return Settings.Global.getInt(getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, /* def= */ 0) != 0;
     }
 
     private boolean isTextMessageIntent(Intent intent) {

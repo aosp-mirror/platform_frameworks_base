@@ -37,7 +37,7 @@ class DungeonRow(context: Context, attrs: AttributeSet) : LinearLayout(context, 
         }
 
         (findViewById(R.id.icon) as StatusBarIconView).apply {
-            set(entry?.icon?.statusBarIcon)
+            set(entry?.icons?.statusBarIcon?.statusBarIcon)
         }
     }
 }

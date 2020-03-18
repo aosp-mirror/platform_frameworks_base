@@ -58,6 +58,7 @@ import android.app.AppGlobals;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager.StandbyBuckets;
+import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -1153,6 +1154,13 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
+    @VisibleForTesting
+    int getAppStandbyBucketReason(String packageName, int userId, long elapsedRealtime) {
+        synchronized (mAppIdleLock) {
+            return mAppIdleHistory.getAppStandbyReason(packageName, userId, elapsedRealtime);
+        }
+    }
+
     @Override
     public List<AppStandbyInfo> getAppStandbyBuckets(int userId) {
         synchronized (mAppIdleLock) {
@@ -1161,7 +1169,8 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
-    public void restrictApp(@NonNull String packageName, int userId, int restrictReason) {
+    public void restrictApp(@NonNull String packageName, int userId,
+            @SystemForcedReasons int restrictReason) {
         // If the package is not installed, don't allow the bucket to be set.
         if (!mInjector.isPackageInstalled(packageName, 0, userId)) {
             Slog.e(TAG, "Tried to restrict uninstalled app: " + packageName);
@@ -1248,30 +1257,52 @@ public class AppStandbyController implements AppStandbyInternal {
             // Don't allow changing bucket if higher than ACTIVE
             if (app.currentBucket < STANDBY_BUCKET_ACTIVE) return;
 
-            // Don't allow prediction to change from/to NEVER or from RESTRICTED.
-            if ((app.currentBucket == STANDBY_BUCKET_NEVER
-                    || app.currentBucket == STANDBY_BUCKET_RESTRICTED
-                    || newBucket == STANDBY_BUCKET_NEVER)
+            // Don't allow prediction to change from/to NEVER.
+            if ((app.currentBucket == STANDBY_BUCKET_NEVER || newBucket == STANDBY_BUCKET_NEVER)
                     && predicted) {
                 return;
             }
 
+            final boolean wasForcedBySystem =
+                    (app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM;
+
             // If the bucket was forced, don't allow prediction to override
             if (predicted
                     && ((app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_USER
-                    || (app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM)) {
+                    || wasForcedBySystem)) {
+                return;
+            }
+
+            final boolean isForcedBySystem =
+                    (reason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_SYSTEM;
+
+            if (app.currentBucket == newBucket && wasForcedBySystem && isForcedBySystem) {
+                mAppIdleHistory
+                        .noteRestrictionAttempt(packageName, userId, elapsedRealtime, reason);
+                // Keep track of all restricting reasons
+                reason = REASON_MAIN_FORCED_BY_SYSTEM
+                        | (app.bucketingReason & REASON_SUB_MASK)
+                        | (reason & REASON_SUB_MASK);
+                mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
+                        newBucket, reason, resetTimeout);
                 return;
             }
 
             final boolean isForcedByUser =
                     (reason & REASON_MAIN_MASK) == REASON_MAIN_FORCED_BY_USER;
 
-            // If the current bucket is RESTRICTED, only user force or usage should bring it out,
-            // unless the app was put into the bucket due to timing out.
-            if (app.currentBucket == STANDBY_BUCKET_RESTRICTED && !isUserUsage(reason)
-                    && !isForcedByUser
-                    && (app.bucketingReason & REASON_MAIN_MASK) != REASON_MAIN_TIMEOUT) {
-                return;
+            if (app.currentBucket == STANDBY_BUCKET_RESTRICTED) {
+                if ((app.bucketingReason & REASON_MAIN_MASK) == REASON_MAIN_TIMEOUT) {
+                    if (predicted && newBucket >= STANDBY_BUCKET_RARE) {
+                        // Predicting into RARE or below means we don't expect the user to use the
+                        // app anytime soon, so don't elevate it from RESTRICTED.
+                        return;
+                    }
+                } else if (!isUserUsage(reason) && !isForcedByUser) {
+                    // If the current bucket is RESTRICTED, only user force or usage should bring
+                    // it out, unless the app was put into the bucket due to timing out.
+                    return;
+                }
             }
 
             if (newBucket == STANDBY_BUCKET_RESTRICTED) {

@@ -127,8 +127,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     @Override
     public void requestCreateSession(long requestId, String packageName, String routeId,
             Bundle sessionHints) {
-        // Handle it as an internal transfer.
+
         transferToRoute(requestId, SYSTEM_SESSION_ID, routeId);
+        mCallback.onSessionCreated(this, requestId, mSessionInfos.get(0));
+        //TODO: We should call after the session info is changed.
     }
 
     @Override
@@ -240,7 +242,6 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             builder.addTransferableRoute(route.getId());
         }
 
-
         RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
         if (Objects.equals(oldSessionInfo, newSessionInfo)) {
             return false;
@@ -261,6 +262,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         synchronized (mLock) {
             sessionInfo = mSessionInfos.get(0);
         }
+
         mCallback.onSessionUpdated(this, sessionInfo);
     }
 

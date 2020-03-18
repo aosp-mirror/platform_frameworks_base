@@ -85,6 +85,7 @@ public class ProvisioningManager {
 
     /**
      * There is no existing configuration for the queried provisioning key.
+     * @hide
      */
     public static final int PROVISIONING_RESULT_UNKNOWN = -1;
 
@@ -120,6 +121,7 @@ public class ProvisioningManager {
      * Value is in String format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_AMR_CODEC_MODE_SET_VALUES = 0;
 
@@ -143,6 +145,7 @@ public class ProvisioningManager {
      * Value is in String format.
      * @see #setProvisioningStringValue(int, String)
      * @see #getProvisioningStringValue(int)
+     * @hide
      */
     public static final int KEY_AMR_WB_CODEC_MODE_SET_VALUES = 1;
 
@@ -154,6 +157,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_SESSION_TIMER_SEC = 2;
 
@@ -165,6 +169,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_MINIMUM_SIP_SESSION_EXPIRATION_TIMER_SEC = 3;
 
@@ -176,6 +181,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_INVITE_CANCELLATION_TIMER_MS = 4;
 
@@ -184,6 +190,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_TRANSITION_TO_LTE_DELAY_MS = 5;
 
@@ -192,6 +199,7 @@ public class ProvisioningManager {
      * Value is in boolean format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_ENABLE_SILENT_REDIAL = 6;
 
@@ -207,6 +215,7 @@ public class ProvisioningManager {
      * The value is an integer.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_T1_TIMER_VALUE_MS = 7;
 
@@ -218,6 +227,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_T2_TIMER_VALUE_MS = 8;
 
@@ -229,6 +239,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_TF_TIMER_VALUE_MS = 9;
 
@@ -241,6 +252,7 @@ public class ProvisioningManager {
      * {@link #PROVISIONING_VALUE_DISABLED} to disable VoLTE provisioning.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_VOLTE_PROVISIONING_STATUS = 10;
 
@@ -253,6 +265,7 @@ public class ProvisioningManager {
      * {@link #PROVISIONING_VALUE_DISABLED} to disable VT provisioning.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_VT_PROVISIONING_STATUS = 11;
 
@@ -261,6 +274,7 @@ public class ProvisioningManager {
      * Value is in String format.
      * @see #setProvisioningStringValue(int, String)
      * @see #getProvisioningStringValue(int)
+     * @hide
      */
     public static final int KEY_REGISTRATION_DOMAIN_NAME = 12;
 
@@ -270,18 +284,21 @@ public class ProvisioningManager {
      * Valid values are {@link #SMS_FORMAT_3GPP} and {@link #SMS_FORMAT_3GPP2}.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SMS_FORMAT = 13;
 
     /**
      * Value used with {@link #KEY_SMS_FORMAT} to indicate 3GPP2 SMS format is used.
      * See {@link android.telephony.SmsMessage#FORMAT_3GPP2} for more information.
+     * @hide
      */
     public static final int SMS_FORMAT_3GPP2 = 0;
 
     /**
      * Value used with {@link #KEY_SMS_FORMAT} to indicate 3GPP SMS format is used.
      * See {@link android.telephony.SmsMessage#FORMAT_3GPP} for more information.
+     * @hide
      */
     public static final int SMS_FORMAT_3GPP = 1;
 
@@ -290,6 +307,7 @@ public class ProvisioningManager {
      * Value is in Integer format. ON (1), OFF(0).
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SMS_OVER_IP_ENABLED = 14;
 
@@ -300,6 +318,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15;
 
@@ -310,6 +329,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC = 16;
 
@@ -322,6 +342,7 @@ public class ProvisioningManager {
      * enabled.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17;
 
@@ -334,6 +355,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC = 18;
 
@@ -345,6 +367,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_AVAILABILITY_CACHE_EXPIRATION_SEC = 19;
 
@@ -356,6 +379,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_CAPABILITIES_POLL_INTERVAL_SEC = 20;
 
@@ -366,6 +390,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21;
 
@@ -376,6 +401,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22;
 
@@ -387,6 +413,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23;
 
@@ -395,6 +422,7 @@ public class ProvisioningManager {
      * Value is in Integer format. Enable (1), Disable(0).
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_USE_GZIP_FOR_LIST_SUBSCRIPTION = 24;
 
@@ -407,6 +435,7 @@ public class ProvisioningManager {
      * {@link #PROVISIONING_VALUE_DISABLED} to disable EAB provisioning.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_EAB_PROVISIONING_STATUS = 25;
 
@@ -440,6 +469,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE = 28;
 
@@ -448,6 +478,7 @@ public class ProvisioningManager {
      * Value is in Integer format. On (1), OFF(0).
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_MOBILE_DATA_ENABLED = 29;
 
@@ -456,12 +487,14 @@ public class ProvisioningManager {
      * Value is in Integer format. Opted-in (1) Opted-out (0).
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_VOLTE_USER_OPT_IN_STATUS = 30;
 
     /**
      * Proxy for Call Session Control Function(P-CSCF) address for Local-BreakOut(LBO).
      * Value is in String format.
+     * @hide
      */
     public static final int KEY_LOCAL_BREAKOUT_PCSCF_ADDRESS = 31;
 
@@ -470,6 +503,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_KEEP_ALIVE_ENABLED = 32;
 
@@ -479,6 +513,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_REGISTRATION_RETRY_BASE_TIME_SEC = 33;
 
@@ -488,6 +523,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_REGISTRATION_RETRY_MAX_TIME_SEC = 34;
 
@@ -496,6 +532,7 @@ public class ProvisioningManager {
      * Value is in integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
 
     public static final int KEY_RTP_SPEECH_START_PORT = 35;
@@ -505,6 +542,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RTP_SPEECH_END_PORT = 36;
 
@@ -514,6 +552,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_INVITE_REQUEST_TRANSMIT_INTERVAL_MS = 37;
 
@@ -523,6 +562,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_INVITE_ACK_WAIT_TIME_MS = 38;
 
@@ -532,6 +572,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_INVITE_RESPONSE_RETRANSMIT_WAIT_TIME_MS = 39;
 
@@ -541,6 +582,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_NON_INVITE_REQUEST_RETRANSMIT_INTERVAL_MS = 40;
 
@@ -550,6 +592,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_NON_INVITE_TRANSACTION_TIMEOUT_TIMER_MS = 41;
 
@@ -559,6 +602,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_INVITE_RESPONSE_RETRANSMIT_INTERVAL_MS = 42;
 
@@ -568,6 +612,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_ACK_RECEIPT_WAIT_TIME_MS = 43;
 
@@ -577,6 +622,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_ACK_RETRANSMIT_WAIT_TIME_MS = 44;
 
@@ -586,6 +632,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_NON_INVITE_REQUEST_RETRANSMISSION_WAIT_TIME_MS = 45;
 
@@ -595,6 +642,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_SIP_NON_INVITE_RESPONSE_RETRANSMISSION_WAIT_TIME_MS = 46;
 
@@ -603,6 +651,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_AMR_WB_OCTET_ALIGNED_PAYLOAD_TYPE = 47;
 
@@ -611,6 +660,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_AMR_WB_BANDWIDTH_EFFICIENT_PAYLOAD_TYPE = 48;
 
@@ -619,6 +669,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_AMR_OCTET_ALIGNED_PAYLOAD_TYPE = 49;
 
@@ -627,6 +678,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_AMR_BANDWIDTH_EFFICIENT_PAYLOAD_TYPE = 50;
 
@@ -635,6 +687,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_DTMF_WB_PAYLOAD_TYPE = 51;
 
@@ -643,6 +696,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_DTMF_NB_PAYLOAD_TYPE = 52;
 
@@ -651,12 +705,14 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_AMR_DEFAULT_ENCODING_MODE = 53;
 
     /**
      * SMS Public Service Identity.
      * Value is in String format.
+     * @hide
      */
     public static final int KEY_SMS_PUBLIC_SERVICE_IDENTITY = 54;
 
@@ -666,16 +722,19 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_VIDEO_QUALITY = 55;
 
     /**
      * Used with {@link #KEY_VIDEO_QUALITY} to indicate low video quality.
+     * @hide
      */
     public static final int VIDEO_QUALITY_LOW = 0;
 
     /**
      * Used with {@link #KEY_VIDEO_QUALITY} to indicate high video quality.
+     * @hide
      */
     public static final int VIDEO_QUALITY_HIGH = 1;
 
@@ -685,6 +744,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_LTE_THRESHOLD_1 = 56;
 
@@ -696,6 +756,7 @@ public class ProvisioningManager {
      *
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_LTE_THRESHOLD_2 = 57;
 
@@ -707,6 +768,7 @@ public class ProvisioningManager {
      *
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_LTE_THRESHOLD_3 = 58;
 
@@ -716,6 +778,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_1X_THRESHOLD = 59;
 
@@ -727,6 +790,7 @@ public class ProvisioningManager {
      *
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_WIFI_THRESHOLD_A = 60;
 
@@ -737,6 +801,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_WIFI_THRESHOLD_B = 61;
 
@@ -746,6 +811,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_LTE_EPDG_TIMER_SEC = 62;
 
@@ -755,12 +821,14 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_WIFI_EPDG_TIMER_SEC = 63;
 
     /**
      * 1x ePDG timer (in seconds).
      * Device shall not re-register on 1x until the T_ePDG_1x timer expires.
+     * @hide
      */
     public static final int KEY_1X_EPDG_TIMER_SEC = 64;
 
@@ -769,6 +837,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_MULTIENDPOINT_ENABLED = 65;
 
@@ -777,6 +846,7 @@ public class ProvisioningManager {
      * Value is in Integer format.
      * @see #setProvisioningIntValue(int, int)
      * @see #getProvisioningIntValue(int)
+     * @hide
      */
     public static final int KEY_RTT_ENABLED = 66;
 
@@ -928,7 +998,7 @@ public class ProvisioningManager {
      *
      * @param key An integer that represents the provisioning key, which is defined by the OEM.
      * @return an integer value for the provided key, or
-     * {@link #PROVISIONING_RESULT_UNKNOWN} if the key doesn't exist.
+     * {@link ImsConfigImplBase#CONFIG_RESULT_UNKNOWN} if the key doesn't exist.
      * @throws IllegalArgumentException if the key provided was invalid.
      */
     @WorkerThread

@@ -30,7 +30,7 @@ import android.view.IWindowManager
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
-import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QSHost
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Assert.assertEquals
@@ -56,7 +56,7 @@ class CustomTileTest : SysuiTestCase() {
         val TILE_SPEC = CustomTile.toSpec(componentName)
     }
 
-    @Mock private lateinit var mTileHost: QSTileHost
+    @Mock private lateinit var mTileHost: QSHost
     @Mock private lateinit var mTileService: IQSTileService
     @Mock private lateinit var mTileServices: TileServices
     @Mock private lateinit var mTileServiceManager: TileServiceManager

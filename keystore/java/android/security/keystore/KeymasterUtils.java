@@ -82,6 +82,63 @@ public abstract class KeymasterUtils {
         }
     }
 
+    private static void addSids(KeymasterArguments args, UserAuthArgs spec) {
+        // If both biometric and credential are accepted, then just use the root sid from gatekeeper
+        if (spec.getUserAuthenticationType() == (KeyProperties.AUTH_BIOMETRIC_STRONG
+                                                 | KeyProperties.AUTH_DEVICE_CREDENTIAL)) {
+            if (spec.getBoundToSpecificSecureUserId() != GateKeeper.INVALID_SECURE_USER_ID) {
+                args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
+                        KeymasterArguments.toUint64(spec.getBoundToSpecificSecureUserId()));
+            } else {
+                // The key is authorized for use for the specified amount of time after the user has
+                // authenticated. Whatever unlocks the secure lock screen should authorize this key.
+                args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
+                        KeymasterArguments.toUint64(getRootSid()));
+            }
+        } else {
+            List<Long> sids = new ArrayList<>();
+            if ((spec.getUserAuthenticationType() & KeyProperties.AUTH_BIOMETRIC_STRONG) != 0) {
+                final BiometricManager bm = KeyStore.getApplicationContext()
+                        .getSystemService(BiometricManager.class);
+
+                // TODO: Restore permission check in getAuthenticatorIds once the ID is no longer
+                // needed here.
+
+                final long[] biometricSids = bm.getAuthenticatorIds();
+
+                if (biometricSids.length == 0) {
+                    throw new IllegalStateException(
+                            "At least one biometric must be enrolled to create keys requiring user"
+                            + " authentication for every use");
+                }
+
+                if (spec.getBoundToSpecificSecureUserId() != GateKeeper.INVALID_SECURE_USER_ID) {
+                    sids.add(spec.getBoundToSpecificSecureUserId());
+                } else if (spec.isInvalidatedByBiometricEnrollment()) {
+                    // The biometric-only SIDs will change on biometric enrollment or removal of all
+                    // enrolled templates, invalidating the key.
+                    for (long sid : biometricSids) {
+                        sids.add(sid);
+                    }
+                } else {
+                    // The root SID will *not* change on fingerprint enrollment, or removal of all
+                    // enrolled fingerprints, allowing the key to remain valid.
+                    sids.add(getRootSid());
+                }
+            } else if ((spec.getUserAuthenticationType() & KeyProperties.AUTH_DEVICE_CREDENTIAL)
+                            != 0) {
+                sids.add(getRootSid());
+            } else {
+                throw new IllegalStateException("Invalid or no authentication type specified.");
+            }
+
+            for (int i = 0; i < sids.size(); i++) {
+                args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
+                        KeymasterArguments.toUint64(sids.get(i)));
+            }
+        }
+    }
+
     /**
      * Adds keymaster arguments to express the key's authorization policy supported by user
      * authentication.
@@ -114,40 +171,7 @@ public abstract class KeymasterUtils {
 
         if (spec.getUserAuthenticationValidityDurationSeconds() == 0) {
             // Every use of this key needs to be authorized by the user.
-            final BiometricManager bm = KeyStore.getApplicationContext()
-                    .getSystemService(BiometricManager.class);
-
-            // TODO: Restore permission check in getAuthenticatorIds once the ID is no longer
-            // needed here.
-
-            final long[] biometricSids = bm.getAuthenticatorIds();
-
-            if (biometricSids.length == 0) {
-                throw new IllegalStateException(
-                        "At least one biometric must be enrolled to create keys requiring user"
-                        + " authentication for every use");
-            }
-
-            List<Long> sids = new ArrayList<>();
-            if (spec.getBoundToSpecificSecureUserId() != GateKeeper.INVALID_SECURE_USER_ID) {
-                sids.add(spec.getBoundToSpecificSecureUserId());
-            } else if (spec.isInvalidatedByBiometricEnrollment()) {
-                // The biometric-only SIDs will change on biometric enrollment or removal of all
-                // enrolled templates, invalidating the key.
-                for (long sid : biometricSids) {
-                    sids.add(sid);
-                }
-            } else {
-                // The root SID will *not* change on fingerprint enrollment, or removal of all
-                // enrolled fingerprints, allowing the key to remain valid.
-                sids.add(getRootSid());
-            }
-
-            for (int i = 0; i < sids.size(); i++) {
-                args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
-                        KeymasterArguments.toUint64(sids.get(i)));
-            }
-
+            addSids(args, spec);
             args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, spec.getUserAuthenticationType());
 
             if (spec.isUserAuthenticationValidWhileOnBody()) {
@@ -155,16 +179,7 @@ public abstract class KeymasterUtils {
                         + "supported for keys requiring fingerprint authentication");
             }
         } else {
-            long sid;
-            if (spec.getBoundToSpecificSecureUserId() != GateKeeper.INVALID_SECURE_USER_ID) {
-                sid = spec.getBoundToSpecificSecureUserId();
-            } else {
-                // The key is authorized for use for the specified amount of time after the user has
-                // authenticated. Whatever unlocks the secure lock screen should authorize this key.
-                sid = getRootSid();
-            }
-            args.addUnsignedLong(KeymasterDefs.KM_TAG_USER_SECURE_ID,
-                    KeymasterArguments.toUint64(sid));
+            addSids(args, spec);
             args.addEnum(KeymasterDefs.KM_TAG_USER_AUTH_TYPE, spec.getUserAuthenticationType());
             args.addUnsignedInt(KeymasterDefs.KM_TAG_AUTH_TIMEOUT,
                     spec.getUserAuthenticationValidityDurationSeconds());

@@ -797,10 +797,6 @@ java_library {
         "libphonenumber-platform",
         "tagsoup",
         "rappor",
-        "libtextclassifier-java",
-    ],
-    required: [
-        "libtextclassifier",
     ],
     dxflags: ["--core-library"],
 }

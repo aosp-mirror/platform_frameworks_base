@@ -1710,7 +1710,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (checkSettingsPermission(callerPid, callerUid)) {
-            return lp.makeSensitiveFieldsParcelingCopy();
+            return new LinkProperties(lp, true /* parcelSensitiveFields */);
         }
 
         final LinkProperties newLp = new LinkProperties(lp);
@@ -7817,7 +7817,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 getMatchingPermissionedCallbacks(nai);
         for (final IConnectivityDiagnosticsCallback cb : results) {
             try {
-                cb.onConnectivityReport(report);
+                cb.onConnectivityReportAvailable(report);
             } catch (RemoteException ex) {
                 loge("Error invoking onConnectivityReport", ex);
             }

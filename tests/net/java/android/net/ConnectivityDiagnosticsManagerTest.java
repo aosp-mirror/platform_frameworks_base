@@ -304,12 +304,12 @@ public class ConnectivityDiagnosticsManagerTest {
     }
 
     @Test
-    public void testConnectivityDiagnosticsCallbackOnConnectivityReport() {
-        mBinder.onConnectivityReport(createSampleConnectivityReport());
+    public void testConnectivityDiagnosticsCallbackOnConnectivityReportAvailable() {
+        mBinder.onConnectivityReportAvailable(createSampleConnectivityReport());
 
         // The callback will be invoked synchronously by inline executor. Immediately check the
         // latch without waiting.
-        verify(mCb).onConnectivityReport(eq(createSampleConnectivityReport()));
+        verify(mCb).onConnectivityReportAvailable(eq(createSampleConnectivityReport()));
     }
 
     @Test

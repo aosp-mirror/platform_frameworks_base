@@ -471,7 +471,8 @@ public class BubbleStackView extends FrameLayout {
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
-        mStackAnimationController = new StackAnimationController(floatingContentCoordinator);
+        mStackAnimationController = new StackAnimationController(
+                floatingContentCoordinator, this::getBubbleCount);
 
         mExpandedAnimationController = new ExpandedAnimationController(
                 mDisplaySize, mExpandedViewPadding, res.getConfiguration().orientation);

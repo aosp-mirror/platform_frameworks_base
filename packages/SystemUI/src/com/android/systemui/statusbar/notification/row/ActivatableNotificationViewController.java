@@ -111,7 +111,7 @@ public class ActivatableNotificationViewController {
             if (mNeedsDimming && ev.getActionMasked() == MotionEvent.ACTION_DOWN
                     && mView.disallowSingleClick(ev)
                     && !mAccessibilityManager.isTouchExplorationEnabled()) {
-                if (!mView.isActivated()) {
+                if (!mView.isActive()) {
                     return true;
                 } else if (!mDoubleTapHelper.isWithinDoubleTapSlop(ev)) {
                     mBlockNextTouch = true;

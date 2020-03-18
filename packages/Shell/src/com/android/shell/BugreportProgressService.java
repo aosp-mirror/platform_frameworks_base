@@ -112,6 +112,9 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -250,8 +253,6 @@ public class BugreportProgressService extends Service {
 
     private boolean mIsWatch;
     private boolean mIsTv;
-
-    private int mLastProgressPercent;
 
     @Override
     public void onCreate() {
@@ -684,12 +685,12 @@ public class BugreportProgressService extends Service {
      * Updates the system notification for a given bugreport.
      */
     private void updateProgress(BugreportInfo info) {
-        if (info.getProgress() < 0) {
+        if (info.progress.intValue() < 0) {
             Log.e(TAG, "Invalid progress values for " + info);
             return;
         }
 
-        if (info.isFinished()) {
+        if (info.finished.get()) {
             Log.w(TAG, "Not sending progress notification because bugreport has finished already ("
                     + info + ")");
             return;
@@ -698,7 +699,7 @@ public class BugreportProgressService extends Service {
         final NumberFormat nf = NumberFormat.getPercentInstance();
         nf.setMinimumFractionDigits(2);
         nf.setMaximumFractionDigits(2);
-        final String percentageText = nf.format((double) info.getProgress() / 100);
+        final String percentageText = nf.format((double) info.progress.intValue() / 100);
 
         String title = mContext.getString(R.string.bugreport_in_progress_title, info.id);
 
@@ -706,7 +707,7 @@ public class BugreportProgressService extends Service {
         if (mIsWatch) {
             nf.setMinimumFractionDigits(0);
             nf.setMaximumFractionDigits(0);
-            final String watchPercentageText = nf.format((double) info.getProgress() / 100);
+            final String watchPercentageText = nf.format((double) info.progress.intValue() / 100);
             title = title + "\n" + watchPercentageText;
         }
 
@@ -718,7 +719,8 @@ public class BugreportProgressService extends Service {
                 .setContentTitle(title)
                 .setTicker(title)
                 .setContentText(name)
-                .setProgress(100 /* max value of progress percentage */, info.getProgress(), false)
+                .setProgress(100 /* max value of progress percentage */,
+                        info.progress.intValue(), false)
                 .setOngoing(true);
 
         // Wear and ATV bugreport doesn't need the bug info dialog, screenshot and cancel action.
@@ -747,13 +749,14 @@ public class BugreportProgressService extends Service {
                 .setActions(infoAction, screenshotAction, cancelAction);
         }
         // Show a debug log, every LOG_PROGRESS_STEP percent.
-        final int progress = info.getProgress();
+        final int progress = info.progress.intValue();
 
-        if ((info.getProgress() == 0) || (info.getProgress() >= 100)
-                || ((progress / LOG_PROGRESS_STEP) != (mLastProgressPercent / LOG_PROGRESS_STEP))) {
+        if ((progress == 0) || (progress >= 100)
+                || ((progress / LOG_PROGRESS_STEP)
+                != (info.lastProgress.intValue() / LOG_PROGRESS_STEP))) {
             Log.d(TAG, "Progress #" + info.id + ": " + percentageText);
         }
-        mLastProgressPercent = progress;
+        info.lastProgress = new AtomicInteger(progress);
 
         sendForegroundabledNotification(info.id, builder.build());
     }
@@ -810,10 +813,10 @@ public class BugreportProgressService extends Service {
         mInfoDialog.cancel();
         synchronized (mLock) {
             final BugreportInfo info = getInfoLocked(id);
-            if (info != null && !info.isFinished()) {
+            if (info != null && !info.finished.get()) {
                 Log.i(TAG, "Cancelling bugreport service (ID=" + id + ") on user's request");
                 mBugreportManager.cancelBugreport();
-                deleteScreenshots(info);
+                info.deleteScreenshots();
             }
             stopProgressLocked(id);
         }
@@ -925,7 +928,7 @@ public class BugreportProgressService extends Service {
             mTakingScreenshot = flag;
             for (int i = 0; i < mBugreportInfos.size(); i++) {
                 final BugreportInfo info = getInfoLocked(mBugreportInfos.keyAt(i));
-                if (info.isFinished()) {
+                if (info.finished.get()) {
                     Log.d(TAG, "Not updating progress for " + info.id + " while taking screenshot"
                             + " because share notification was already sent");
                     continue;
@@ -958,7 +961,7 @@ public class BugreportProgressService extends Service {
         final String msg;
         if (taken) {
             info.addScreenshot(screenshotFile);
-            if (info.isFinished()) {
+            if (info.finished.get()) {
                 Log.d(TAG, "Screenshot finished after bugreport; updating share notification");
                 info.renameScreenshots();
                 sendBugreportNotification(info, mTakingScreenshot);
@@ -969,16 +972,6 @@ public class BugreportProgressService extends Service {
             Toast.makeText(mContext, msg, Toast.LENGTH_SHORT).show();
         }
         Log.d(TAG, msg);
-    }
-
-    /**
-     * Deletes all screenshots taken for a given bugreport.
-     */
-    private void deleteScreenshots(BugreportInfo info) {
-        for (File file : info.screenshotFiles) {
-            Log.i(TAG, "Deleting screenshot file " + file);
-            file.delete();
-        }
     }
 
     /**
@@ -1001,7 +994,7 @@ public class BugreportProgressService extends Service {
         if (total > 0) {
             for (int i = 0; i < total; i++) {
                 final BugreportInfo info = getInfoLocked(mBugreportInfos.keyAt(i));
-                if (!info.isFinished()) {
+                if (!info.finished.get()) {
                     updateProgress(info);
                     break;
                 }
@@ -1028,7 +1021,7 @@ public class BugreportProgressService extends Service {
     private void onBugreportFinished(BugreportInfo info) {
         Log.d(TAG, "Bugreport finished with title: " + info.getTitle()
                 + " and shareDescription:  " + info.shareDescription);
-        info.setFinished(true);
+        info.finished = new AtomicBoolean(true);
 
         synchronized (mLock) {
             // Stop running on foreground, otherwise share notification cannot be dismissed.
@@ -1772,25 +1765,25 @@ public class BugreportProgressService extends Service {
          * This will end with the string "wifi"/"telephony" for wifi/telephony bugreports.
          * Bugreport zip file name  = "<baseName>-<name>.zip"
          */
-        String baseName;
+        private final String baseName;
 
         /**
          * Suffix name of the bugreport/screenshot, is set to timestamp initially. User can make
          * modifications to this using interface.
          */
-        String name;
+        private String name;
 
         /**
          * Initial value of the field name. This is required to rename the files later on, as they
          * are created using initial value of name.
          */
-        String initialName;
+        private final String initialName;
 
         /**
          * User-provided, one-line summary of the bug; when set, will be used as the subject
          * of the {@link Intent#ACTION_SEND_MULTIPLE} intent.
          */
-        String title;
+        private String title;
 
         /**
          * One-line summary of the bug; when set, will be used as the subject of the
@@ -1798,23 +1791,30 @@ public class BugreportProgressService extends Service {
          * set initially when the request to take a bugreport is made. This overrides any changes
          * in the title that the user makes after the bugreport starts.
          */
-        String shareTitle;
+        private final String shareTitle;
 
         /**
          * User-provided, detailed description of the bugreport; when set, will be added to the body
          * of the {@link Intent#ACTION_SEND_MULTIPLE} intent.
          */
-        String description;
+        private String description;
 
         /**
-         * Current progress (in percentage) of the bugreport generation as displayed by the UI.
+         * Current value of progress (in percentage) of the bugreport generation as
+         * displayed by the UI.
          */
-        int progress;
+        AtomicInteger progress;
+
+        /**
+         * Last value of progress (in percentage) of the bugreport generation for which
+         * system notification was updated.
+         */
+        AtomicInteger lastProgress;
 
         /**
          * Time of the last progress update.
          */
-        long lastUpdate = System.currentTimeMillis();
+        AtomicLong lastUpdate = new AtomicLong(System.currentTimeMillis());
 
         /**
          * Time of the last progress update when Parcel was created.
@@ -1834,7 +1834,7 @@ public class BugreportProgressService extends Service {
         /**
          * Whether dumpstate sent an intent informing it has finished.
          */
-        boolean finished;
+        AtomicBoolean finished = new AtomicBoolean(false);
 
         /**
          * Whether the details entries have been added to the bugreport yet.
@@ -1852,12 +1852,12 @@ public class BugreportProgressService extends Service {
          * predefined description which is set initially when the request to take a bugreport is
          * made.
          */
-        String shareDescription;
+        private final String shareDescription;
 
         /**
          * Type of the bugreport
          */
-        int type;
+        final int type;
 
         private final Object mLock = new Object();
 
@@ -1899,18 +1899,6 @@ public class BugreportProgressService extends Service {
             return getFd(screenshotFiles.get(0));
         }
 
-        void setFinished(boolean isFinished) {
-            synchronized (mLock) {
-                this.finished = isFinished;
-            }
-        }
-
-        boolean isFinished() {
-            synchronized (mLock) {
-                return finished;
-            }
-        }
-
         void setTitle(String title) {
             synchronized (mLock) {
                 this.title = title;
@@ -1947,30 +1935,6 @@ public class BugreportProgressService extends Service {
             }
         }
 
-        void setProgress(int progress) {
-            synchronized (mLock) {
-                this.progress = progress;
-            }
-        }
-
-        int getProgress() {
-            synchronized (mLock) {
-                return progress;
-            }
-        }
-
-        void setLastUpdate(long lastUpdate) {
-            synchronized (mLock) {
-                this.lastUpdate = lastUpdate;
-            }
-        }
-
-        long getLastUpdate() {
-            synchronized (mLock) {
-                return lastUpdate;
-            }
-        }
-
         /**
          * Gets the name for next user triggered screenshot file.
          */
@@ -1991,6 +1955,16 @@ public class BugreportProgressService extends Service {
          */
         void addScreenshot(File screenshot) {
             screenshotFiles.add(screenshot);
+        }
+
+        /**
+         * Deletes all screenshots taken for a given bugreport.
+         */
+        private void deleteScreenshots() {
+            for (File file : screenshotFiles) {
+                Log.i(TAG, "Deleting screenshot file " + file);
+                file.delete();
+            }
         }
 
         /**
@@ -2040,9 +2014,9 @@ public class BugreportProgressService extends Service {
             if (context == null) {
                 // Restored from Parcel
                 return formattedLastUpdate == null ?
-                        Long.toString(getLastUpdate()) : formattedLastUpdate;
+                        Long.toString(lastUpdate.longValue()) : formattedLastUpdate;
             }
-            return DateUtils.formatDateTime(context, getLastUpdate(),
+            return DateUtils.formatDateTime(context, lastUpdate.longValue(),
                     DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_TIME);
         }
 
@@ -2087,8 +2061,8 @@ public class BugreportProgressService extends Service {
             initialName = in.readString();
             title = in.readString();
             description = in.readString();
-            progress = in.readInt();
-            lastUpdate = in.readLong();
+            progress = new AtomicInteger(in.readInt());
+            lastUpdate = new AtomicLong(in.readLong());
             formattedLastUpdate = in.readString();
             bugreportFile = readFile(in);
 
@@ -2097,10 +2071,11 @@ public class BugreportProgressService extends Service {
                   screenshotFiles.add(readFile(in));
             }
 
-            finished = in.readInt() == 1;
+            finished = new AtomicBoolean(in.readInt() == 1);
             screenshotCounter = in.readInt();
             shareDescription = in.readString();
             shareTitle = in.readString();
+            type = in.readInt();
         }
 
         @Override
@@ -2111,8 +2086,8 @@ public class BugreportProgressService extends Service {
             dest.writeString(initialName);
             dest.writeString(title);
             dest.writeString(description);
-            dest.writeInt(progress);
-            dest.writeLong(lastUpdate);
+            dest.writeInt(progress.intValue());
+            dest.writeLong(lastUpdate.longValue());
             dest.writeString(getFormattedLastUpdate());
             writeFile(dest, bugreportFile);
 
@@ -2121,10 +2096,11 @@ public class BugreportProgressService extends Service {
                 writeFile(dest, screenshotFile);
             }
 
-            dest.writeInt(finished ? 1 : 0);
+            dest.writeInt(finished.get() ? 1 : 0);
             dest.writeInt(screenshotCounter);
             dest.writeString(shareDescription);
             dest.writeString(shareTitle);
+            dest.writeInt(type);
         }
 
         @Override
@@ -2163,13 +2139,13 @@ public class BugreportProgressService extends Service {
             progress = CAPPED_PROGRESS;
         }
         if (DEBUG) {
-            if (progress != info.getProgress()) {
+            if (progress != info.progress.intValue()) {
                 Log.v(TAG, "Updating progress for name " + info.getName() + "(id: " + info.id
-                        + ") from " + info.getProgress() + " to " + progress);
+                        + ") from " + info.progress.intValue() + " to " + progress);
             }
         }
-        info.setProgress(progress);
-        info.setLastUpdate(System.currentTimeMillis());
+        info.progress = new AtomicInteger(progress);
+        info.lastUpdate = new AtomicLong(System.currentTimeMillis());
 
         updateProgress(info);
     }

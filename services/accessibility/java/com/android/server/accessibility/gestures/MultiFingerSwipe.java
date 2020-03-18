@@ -106,7 +106,7 @@ class MultiFingerSwipe extends GestureMatcher {
     }
 
     @Override
-    protected void clear() {
+    public void clear() {
         mTargetFingerCountReached = false;
         mCurrentFingerCount = 0;
         for (int i = 0; i < mTargetFingerCount; ++i) {
@@ -489,7 +489,7 @@ class MultiFingerSwipe extends GestureMatcher {
     }
 
     @Override
-    String getGestureName() {
+    protected String getGestureName() {
         StringBuilder builder = new StringBuilder();
         builder.append(mTargetFingerCount).append("-finger ");
         builder.append("Swipe ").append(directionToString(mDirection));

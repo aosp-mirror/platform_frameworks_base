@@ -419,8 +419,7 @@ public final class MediaRouter2 {
 
         controller.release();
 
-        final int requestId;
-        requestId = mControllerCreationRequestCnt.getAndIncrement();
+        final int requestId = mControllerCreationRequestCnt.getAndIncrement();
 
         ControllerCreationRequest request =
                 new ControllerCreationRequest(requestId, controller, route);
@@ -610,10 +609,16 @@ public final class MediaRouter2 {
         }
 
         if (sessionInfo != null) {
-            RoutingController newController = new RoutingController(sessionInfo);
-            synchronized (sRouterLock) {
-                mRoutingControllers.put(newController.getId(), newController);
+            RoutingController newController;
+            if (sessionInfo.isSystemSession()) {
+                newController = getSystemController();
+            } else {
+                newController = new RoutingController(sessionInfo);
+                synchronized (sRouterLock) {
+                    mRoutingControllers.put(newController.getId(), newController);
+                }
             }
+            //TODO: Determine oldController properly when transfer is launched by Output Switcher.
             notifyTransferred(matchingRequest != null ? matchingRequest.mController :
                     getSystemController(), newController);
         }

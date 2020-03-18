@@ -846,10 +846,9 @@ class RecentTasks {
     @VisibleForTesting
     Set<Integer> getProfileIds(int userId) {
         Set<Integer> userIds = new ArraySet<>();
-        final List<UserInfo> profiles = mService.getUserManager().getProfiles(userId,
-                false /* enabledOnly */);
-        for (int i = profiles.size() - 1; i >= 0; --i) {
-            userIds.add(profiles.get(i).id);
+        int[] profileIds = mService.getUserManager().getProfileIds(userId, false /* enabledOnly */);
+        for (int i = 0; i < profileIds.length; i++) {
+            userIds.add(Integer.valueOf(profileIds[i]));
         }
         return userIds;
     }

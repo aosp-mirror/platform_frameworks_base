@@ -200,8 +200,9 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         try {
             return doInvoke();
         } finally {
-            if (isRecycleOnUse()) doRecycle();
-            if (!isRecycled()) {
+            if (isRecycleOnUse()) {
+                doRecycle();
+            } else if (!isRecycled()) {
                 int argsSize = ArrayUtils.size(mArgs);
                 for (int i = 0; i < argsSize; i++) {
                     popArg(i);

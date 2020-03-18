@@ -46,8 +46,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
-
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
@@ -68,11 +66,7 @@ public class CarNavigationBarTest extends SysuiTestCase {
     @Mock
     private ButtonSelectionStateListener mButtonSelectionStateListener;
     @Mock
-    private Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
-    @Mock
     private KeyguardStateController mKeyguardStateController;
-    @Mock
-    private Lazy<NavigationBarController> mNavigationBarControllerLazy;
     @Mock
     private NavigationBarController mNavigationBarController;
     @Mock
@@ -89,13 +83,11 @@ public class CarNavigationBarTest extends SysuiTestCase {
         mCarNavigationBar = new CarNavigationBar(mContext, mCarNavigationBarController,
                 mWindowManager, mDeviceProvisionedController, new CommandQueue(mContext),
                 mAutoHideController, mButtonSelectionStateListener, mHandler,
-                mKeyguardStateControllerLazy, mNavigationBarControllerLazy,
+                () -> mKeyguardStateController, () -> mNavigationBarController,
                 mSuperStatusBarViewFactory, mButtonSelectionStateController);
         StatusBarWindowView statusBarWindowView = (StatusBarWindowView) LayoutInflater.from(
                 mContext).inflate(R.layout.super_status_bar, /* root= */ null);
         when(mSuperStatusBarViewFactory.getStatusBarWindowView()).thenReturn(statusBarWindowView);
-        when(mNavigationBarControllerLazy.get()).thenReturn(mNavigationBarController);
-        when(mKeyguardStateControllerLazy.get()).thenReturn(mKeyguardStateController);
         when(mKeyguardStateController.isShowing()).thenReturn(false);
         mDependency.injectMockDependency(WindowManager.class);
         // Needed to inflate top navigation bar.
@@ -118,5 +110,45 @@ public class CarNavigationBarTest extends SysuiTestCase {
         waitForIdleSync(mHandler);
 
         verify(mButtonSelectionStateListener).onTaskStackChanged();
+    }
+
+    @Test
+    public void restartNavBars_newUserNotSetupWithKeyguardShowing_showsKeyguardButtons() {
+        ArgumentCaptor<CarDeviceProvisionedController.DeviceProvisionedListener>
+                deviceProvisionedCallbackCaptor = ArgumentCaptor.forClass(
+                CarDeviceProvisionedController.DeviceProvisionedListener.class);
+        when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
+        mCarNavigationBar.start();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        // switching the currentUserSetup value to force restart the navbars.
+        when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(false);
+        verify(mDeviceProvisionedController).addCallback(deviceProvisionedCallbackCaptor.capture());
+
+        deviceProvisionedCallbackCaptor.getValue().onUserSwitched();
+        waitForIdleSync(mHandler);
+
+        verify(mCarNavigationBarController).showAllKeyguardButtons(false);
+    }
+
+    @Test
+    public void restartNavbars_newUserIsSetupWithKeyguardHidden_hidesKeyguardButtons() {
+        ArgumentCaptor<CarDeviceProvisionedController.DeviceProvisionedListener>
+                deviceProvisionedCallbackCaptor = ArgumentCaptor.forClass(
+                CarDeviceProvisionedController.DeviceProvisionedListener.class);
+        when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
+        mCarNavigationBar.start();
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        // switching the currentUserSetup value to force restart the navbars.
+        when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(false);
+        verify(mDeviceProvisionedController).addCallback(deviceProvisionedCallbackCaptor.capture());
+        deviceProvisionedCallbackCaptor.getValue().onUserSwitched();
+        waitForIdleSync(mHandler);
+        when(mDeviceProvisionedController.isCurrentUserSetup()).thenReturn(true);
+        when(mKeyguardStateController.isShowing()).thenReturn(false);
+
+        deviceProvisionedCallbackCaptor.getValue().onUserSetupChanged();
+        waitForIdleSync(mHandler);
+
+        verify(mCarNavigationBarController).hideAllKeyguardButtons(true);
     }
 }

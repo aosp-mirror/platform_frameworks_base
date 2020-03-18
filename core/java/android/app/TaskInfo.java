@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.RemoteException;
@@ -161,6 +162,13 @@ public class TaskInfo {
      */
     public @WindowConfiguration.ActivityType int topActivityType;
 
+    /**
+     * The {@link ActivityInfo} of the top activity in this task.
+     * @hide
+     */
+    @Nullable
+    public ActivityInfo topActivityInfo;
+
     TaskInfo() {
         // Do nothing
     }
@@ -217,8 +225,11 @@ public class TaskInfo {
         token = IWindowContainer.Stub.asInterface(source.readStrongBinder());
         topActivityType = source.readInt();
         pictureInPictureParams = source.readInt() != 0
-            ? PictureInPictureParams.CREATOR.createFromParcel(source)
-            : null;
+                ? PictureInPictureParams.CREATOR.createFromParcel(source)
+                : null;
+        topActivityInfo = source.readInt() != 0
+                ? ActivityInfo.CREATOR.createFromParcel(source)
+                : null;
     }
 
     /**
@@ -262,6 +273,12 @@ public class TaskInfo {
             dest.writeInt(1);
             pictureInPictureParams.writeToParcel(dest, flags);
         }
+        if (topActivityInfo == null) {
+            dest.writeInt(0);
+        } else {
+            dest.writeInt(1);
+            topActivityInfo.writeToParcel(dest, flags);
+        }
     }
 
     @Override
@@ -278,6 +295,7 @@ public class TaskInfo {
                 + " resizeMode=" + resizeMode
                 + " token=" + token
                 + " topActivityType=" + topActivityType
-                + " pictureInPictureParams=" + pictureInPictureParams;
+                + " pictureInPictureParams=" + pictureInPictureParams
+                + " topActivityInfo=" + topActivityInfo;
     }
 }

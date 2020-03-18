@@ -25,7 +25,7 @@
     </item>
     <item android:gravity="bottom">
         <shape android:shape="rectangle"
-               android:tint="@color/resolver_tabs_active_color">
+               android:tint="?attr/colorAccent">
             <size android:height="2dp" />
             <solid android:color="@color/tab_indicator_material" />
         </shape>

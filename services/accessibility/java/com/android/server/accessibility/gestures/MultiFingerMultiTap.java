@@ -79,7 +79,7 @@ class MultiFingerMultiTap extends GestureMatcher {
     }
 
     @Override
-    protected void clear() {
+    public void clear() {
         mCompletedTapCount = 0;
         mIsTargetFingerCountReached = false;
         for (int i = 0; i < mBases.length; i++) {

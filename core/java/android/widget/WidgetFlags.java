@@ -41,6 +41,25 @@ public final class WidgetFlags {
     public static final boolean ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT = true;
 
     /**
+     * The flag of finger-to-cursor distance in DP for cursor dragging.
+     * The value unit is DP and the range is {0..100}. If the value is out of range, the legacy
+     * value, which is based on handle size, will be used.
+     */
+    public static final String FINGER_TO_CURSOR_DISTANCE =
+            "CursorControlFeature__finger_to_cursor_distance";
+
+    /**
+     * The key used in app core settings for the flag {@link #FINGER_TO_CURSOR_DISTANCE}.
+     */
+    public static final String KEY_FINGER_TO_CURSOR_DISTANCE =
+            "widget__finger_to_cursor_distance";
+
+    /**
+     * Default value for the flag {@link #FINGER_TO_CURSOR_DISTANCE}.
+     */
+    public static final int FINGER_TO_CURSOR_DISTANCE_DEFAULT = -1;
+
+    /**
      * Whether additional gestures should be enabled for the insertion cursor handle (e.g.
      * long-press or double-tap on the handle to trigger selection).
      */

@@ -260,11 +260,14 @@ public class GroupCoalescer implements Dumpable {
     private void applyRanking(RankingMap rankingMap) {
         for (CoalescedEvent event : mCoalescedEvents.values()) {
             Ranking ranking = new Ranking();
-            if (!rankingMap.getRanking(event.getKey(), ranking)) {
-                throw new IllegalStateException(
-                        "Ranking map doesn't contain key: " + event.getKey());
+            if (rankingMap.getRanking(event.getKey(), ranking)) {
+                event.setRanking(ranking);
+            } else {
+                // TODO: (b/148791039) We should crash if we are ever handed a ranking with
+                //  incomplete entries. Right now, there's a race condition in NotificationListener
+                //  that means this might occur when SystemUI is starting up.
+                mLogger.logMissingRanking(event.getKey());
             }
-            event.setRanking(ranking);
         }
     }
 

@@ -20,6 +20,7 @@ import static android.net.InvalidPacketException.ERROR_INVALID_IP_ADDRESS;
 import static android.net.InvalidPacketException.ERROR_INVALID_PORT;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.util.IpUtils;
 import android.os.Parcel;
@@ -30,6 +31,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 
 /** @hide */
 @SystemApi
@@ -121,4 +123,19 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
                     return new NattKeepalivePacketData[size];
                 }
             };
+
+    @Override
+    public boolean equals(@Nullable final Object o) {
+        if (!(o instanceof NattKeepalivePacketData)) return false;
+        final NattKeepalivePacketData other = (NattKeepalivePacketData) o;
+        return this.srcAddress.equals(other.srcAddress)
+            && this.dstAddress.equals(other.dstAddress)
+            && this.srcPort == other.srcPort
+            && this.dstPort == other.dstPort;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(srcAddress, dstAddress, srcPort, dstPort);
+    }
 }

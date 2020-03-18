@@ -57,6 +57,14 @@ class GroupCoalescerLogger @Inject constructor(
             "Modification of notif $str1 triggered TIMEOUT emit of batched group $str2"
         })
     }
+
+    fun logMissingRanking(forKey: String) {
+        buffer.log(TAG, LogLevel.WARNING, {
+            str1 = forKey
+        }, {
+            "RankingMap is missing an entry for coalesced notification $str1"
+        })
+    }
 }
 
 private const val TAG = "GroupCoalescer"

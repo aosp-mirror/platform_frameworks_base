@@ -240,7 +240,7 @@ public class ForegroundCoordinator implements Coordinator {
     }
 
     private NotificationEntry findNotificationEntryWithKey(String key) {
-        for (NotificationEntry entry : mNotifPipeline.getActiveNotifs()) {
+        for (NotificationEntry entry : mNotifPipeline.getAllNotifs()) {
             if (entry.getKey().equals(key)) {
                 return entry;
             }

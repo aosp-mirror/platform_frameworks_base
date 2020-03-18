@@ -1565,6 +1565,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SuppressLint("ActionValue")
     public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED =
             "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
@@ -1786,6 +1787,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SuppressLint("ActionValue")
     public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED =
             "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
@@ -5279,8 +5281,8 @@ public class TelephonyManager {
      *      not present or not loaded
      * @hide
      */
+    @UnsupportedAppUsage
     @Nullable
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String[] getIsimImpu() {
         try {
@@ -9959,18 +9961,30 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets the default Respond Via Message application
-     * @param context context from the calling app
-     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * Gets the default Respond Via Message application, updating the cache if there is no
+     * respond-via-message application currently configured.
      * @return component name of the app and class to direct Respond Via Message intent to, or
      * {@code null} if the functionality is not supported.
      * @hide
      */
     @SystemApi
     @TestApi
-    public static @Nullable ComponentName getDefaultRespondViaMessageApplication(
-            @NonNull Context context, boolean updateIfNeeded) {
-        return SmsApplication.getDefaultRespondViaMessageApplication(context, updateIfNeeded);
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    public @Nullable ComponentName getAndUpdateDefaultRespondViaMessageApplication() {
+        return SmsApplication.getDefaultRespondViaMessageApplication(mContext, true);
+    }
+
+    /**
+     * Gets the default Respond Via Message application.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    public @Nullable ComponentName getDefaultRespondViaMessageApplication() {
+        return SmsApplication.getDefaultRespondViaMessageApplication(mContext, false);
     }
 
     /**
@@ -11147,6 +11161,8 @@ public class TelephonyManager {
      * PackageManager.FEATURE_TELEPHONY system feature, which is available
      * on any device with a telephony radio, even if the device is
      * voice-only.
+     *
+     * @hide
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;

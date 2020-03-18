@@ -12,7 +12,8 @@
     <application
             android:allowBackup="false"
             android:supportsRtl="true">
-        <receiver android:name="RingtoneReceiver">
+        <receiver android:name="RingtoneReceiver"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY"/>
             </intent-filter>
@@ -23,7 +24,8 @@
         <activity android:name="RingtonePickerActivity"
                 android:theme="@style/PickerDialogTheme"
                 android:enabled="@*android:bool/config_defaultRingtonePickerEnabled"
-                android:excludeFromRecents="true">
+                android:excludeFromRecents="true"
+                android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.RINGTONE_PICKER" />
                 <category android:name="android.intent.category.DEFAULT" />

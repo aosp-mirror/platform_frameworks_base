@@ -426,7 +426,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         cancelAnimations();
 
         mAnimatedBoundsPhysicsAnimator
-                .withEndActions(() ->  mPipTaskOrganizer.onMotionMovementEnd(mAnimatedBounds))
+                .withEndActions(() ->  mPipTaskOrganizer.scheduleFinishResizePip(mAnimatedBounds))
                 .addUpdateListener(mResizePipUpdateListener)
                 .start();
     }

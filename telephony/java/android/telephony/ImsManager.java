@@ -19,9 +19,7 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.content.Context;
 import android.telephony.SubscriptionManager;
 
@@ -44,8 +42,6 @@ public class ImsManager {
      * issues.
      * @hide
      */
-    @SystemApi
-    @TestApi
     // Moved from TelephonyIntents, need to keep backwards compatibility with OEM apps that have
     // this value hard-coded in BroadcastReceiver.
     @SuppressLint("ActionValue")

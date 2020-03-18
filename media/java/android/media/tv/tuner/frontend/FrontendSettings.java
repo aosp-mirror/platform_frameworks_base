@@ -17,9 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
-import android.annotation.IntRange;
 import android.annotation.LongDef;
-import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 
@@ -264,28 +262,5 @@ public abstract class FrontendSettings {
      */
     public int getFrequency() {
         return mFrequency;
-    }
-
-    /**
-     * Builder for {@link FrontendSettings}.
-     *
-     * @param <T> The subclass to be built.
-     */
-    public abstract static class Builder<T extends Builder<T>> {
-        /* package */ int mFrequency;
-
-        /* package */ Builder() {}
-
-        /**
-         * Sets frequency in Hz.
-         */
-        @NonNull
-        @IntRange(from = 1)
-        public T setFrequency(int frequency) {
-            mFrequency = frequency;
-            return self();
-        }
-
-        /* package */ abstract T self();
     }
 }

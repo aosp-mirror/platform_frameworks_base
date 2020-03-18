@@ -253,9 +253,6 @@ package android {
 
   public static final class R.array {
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
-    field public static final int config_restrictedPreinstalledCarrierApps = 17235975; // 0x1070007
-    field public static final int config_sms_enabled_locking_shift_tables = 17235977; // 0x1070009
-    field public static final int config_sms_enabled_single_shift_tables = 17235976; // 0x1070008
     field public static final int simColors = 17235974; // 0x1070006
   }
 
@@ -308,7 +305,6 @@ package android {
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
     field public static final int config_systemGallery = 17039402; // 0x104002a
-    field public static final int low_memory = 17039403; // 0x104002b
   }
 
   public static final class R.style {
@@ -2111,10 +2107,6 @@ package android.content.pm {
     method public long getUsageRemaining();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.LauncherApps.AppUsageLimit> CREATOR;
-  }
-
-  public static class LauncherApps.ShortcutQuery {
-    method @NonNull public android.content.pm.LauncherApps.ShortcutQuery setLocusIds(@Nullable java.util.List<android.content.LocusId>);
   }
 
   public class PackageInstaller {
@@ -4901,16 +4893,10 @@ package android.media.tv.tuner {
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
     method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void updateResourcePriority(int, int);
-  }
-
-  public static interface Tuner.OnResourceLostListener {
-    method public void onResourceLost(@NonNull android.media.tv.tuner.Tuner);
-  }
-
-  public final class TunerConstants {
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
     field public static final int INVALID_STREAM_ID = 65535; // 0xffff
+    field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
     field public static final int INVALID_TS_PID = 65535; // 0xffff
     field public static final int RESULT_INVALID_ARGUMENT = 4; // 0x4
     field public static final int RESULT_INVALID_STATE = 3; // 0x3
@@ -4922,6 +4908,10 @@ package android.media.tv.tuner {
     field public static final int SCAN_TYPE_AUTO = 1; // 0x1
     field public static final int SCAN_TYPE_BLIND = 2; // 0x2
     field public static final int SCAN_TYPE_UNDEFINED = 0; // 0x0
+  }
+
+  public static interface Tuner.OnResourceLostListener {
+    method public void onResourceLost(@NonNull android.media.tv.tuner.Tuner);
   }
 
 }
@@ -5284,7 +5274,6 @@ package android.media.tv.tuner.filter {
     method public long getSourceTime();
     method public long getTimeStamp();
     method public int setCurrentTimestamp(long);
-    field public static final long TIMESTAMP_UNAVAILABLE = -1L; // 0xffffffffffffffffL
   }
 
   public final class TlvFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
@@ -5371,8 +5360,9 @@ package android.media.tv.tuner.frontend {
     field public static final int SIGNAL_TYPE_UNDEFINED = 0; // 0x0
   }
 
-  public static class AnalogFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder> {
+  public static class AnalogFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings build();
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setSifStandard(int);
     method @NonNull public android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder setSignalType(int);
   }
@@ -5436,10 +5426,11 @@ package android.media.tv.tuner.frontend {
     field public static final int TIME_INTERLEAVE_MODE_UNDEFINED = 0; // 0x0
   }
 
-  public static class Atsc3FrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder> {
+  public static class Atsc3FrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setBandwidth(int);
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setDemodOutputFormat(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder setPlpSettings(@NonNull android.media.tv.tuner.frontend.Atsc3PlpSettings[]);
   }
 
@@ -5480,8 +5471,9 @@ package android.media.tv.tuner.frontend {
     field public static final int MODULATION_UNDEFINED = 0; // 0x0
   }
 
-  public static class AtscFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.AtscFrontendSettings.Builder> {
+  public static class AtscFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings build();
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.AtscFrontendSettings.Builder setModulation(int);
   }
 
@@ -5519,9 +5511,10 @@ package android.media.tv.tuner.frontend {
     field public static final int SPECTRAL_INVERSION_UNDEFINED = 0; // 0x0
   }
 
-  public static class DvbcFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder> {
+  public static class DvbcFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setAnnex(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setInnerFec(long);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder setOuterFec(int);
@@ -5597,9 +5590,10 @@ package android.media.tv.tuner.frontend {
     field public static final int VCM_MODE_UNDEFINED = 0; // 0x0
   }
 
-  public static class DvbsFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder> {
+  public static class DvbsFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setCodeRate(@Nullable android.media.tv.tuner.frontend.DvbsCodeRate);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setInputStreamId(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder setPilot(int);
@@ -5696,10 +5690,11 @@ package android.media.tv.tuner.frontend {
     field public static final int TRANSMISSION_MODE_UNDEFINED = 0; // 0x0
   }
 
-  public static class DvbtFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder> {
+  public static class DvbtFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setBandwidth(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setConstellation(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHierarchy(int);
     method @NonNull public android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder setHighPriority(boolean);
@@ -5778,10 +5773,6 @@ package android.media.tv.tuner.frontend {
     field public static final int TYPE_ISDBS3 = 8; // 0x8
     field public static final int TYPE_ISDBT = 9; // 0x9
     field public static final int TYPE_UNDEFINED = 0; // 0x0
-  }
-
-  public abstract static class FrontendSettings.Builder<T extends android.media.tv.tuner.frontend.FrontendSettings.Builder<T>> {
-    method @IntRange(from=1) @NonNull public T setFrequency(int);
   }
 
   public class FrontendStatus {
@@ -5875,9 +5866,10 @@ package android.media.tv.tuner.frontend {
     field public static final int ROLLOFF_UNDEFINED = 0; // 0x0
   }
 
-  public static class Isdbs3FrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder> {
+  public static class Isdbs3FrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setCodeRate(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setRolloff(int);
     method @NonNull public android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder setStreamId(int);
@@ -5917,9 +5909,10 @@ package android.media.tv.tuner.frontend {
     field public static final int STREAM_ID_TYPE_RELATIVE_NUMBER = 1; // 0x1
   }
 
-  public static class IsdbsFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder> {
+  public static class IsdbsFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setCodeRate(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setModulation(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setRolloff(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder setStreamId(int);
@@ -5962,10 +5955,11 @@ package android.media.tv.tuner.frontend {
     field public static final int MODULATION_UNDEFINED = 0; // 0x0
   }
 
-  public static class IsdbtFrontendSettings.Builder extends android.media.tv.tuner.frontend.FrontendSettings.Builder<android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder> {
+  public static class IsdbtFrontendSettings.Builder {
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings build();
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setBandwidth(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setCodeRate(int);
+    method @IntRange(from=1) @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setFrequency(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setGuardInterval(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setMode(int);
     method @NonNull public android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder setModulation(int);
@@ -6232,6 +6226,7 @@ package android.net {
 
   public final class LinkProperties implements android.os.Parcelable {
     ctor public LinkProperties(@Nullable android.net.LinkProperties);
+    ctor public LinkProperties(@Nullable android.net.LinkProperties, boolean);
     method public boolean addDnsServer(@NonNull java.net.InetAddress);
     method public boolean addLinkAddress(@NonNull android.net.LinkAddress);
     method public boolean addPcscfServer(@NonNull java.net.InetAddress);
@@ -6254,7 +6249,6 @@ package android.net {
     method public boolean isIpv6Provisioned();
     method public boolean isProvisioned();
     method public boolean isReachable(@NonNull java.net.InetAddress);
-    method @NonNull public android.net.LinkProperties makeSensitiveFieldsParcelingCopy();
     method public boolean removeDnsServer(@NonNull java.net.InetAddress);
     method public boolean removeLinkAddress(@NonNull android.net.LinkAddress);
     method public boolean removeRoute(@NonNull android.net.RouteInfo);
@@ -6611,9 +6605,11 @@ package android.net {
   public static class TetheringManager.TetheringRequest.Builder {
     ctor public TetheringManager.TetheringRequest.Builder(int);
     method @NonNull public android.net.TetheringManager.TetheringRequest build();
+    method @Nullable public android.net.LinkAddress getClientStaticIpv4Address();
+    method @Nullable public android.net.LinkAddress getLocalIpv4Address();
     method @NonNull @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public android.net.TetheringManager.TetheringRequest.Builder setExemptFromEntitlementCheck(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public android.net.TetheringManager.TetheringRequest.Builder setSilentProvisioning(boolean);
-    method @NonNull @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public android.net.TetheringManager.TetheringRequest.Builder useStaticIpv4Addresses(@NonNull android.net.LinkAddress);
+    method @NonNull @RequiresPermission(android.Manifest.permission.TETHER_PRIVILEGED) public android.net.TetheringManager.TetheringRequest.Builder setStaticIpv4Addresses(@NonNull android.net.LinkAddress, @NonNull android.net.LinkAddress);
   }
 
   public class TrafficStats {
@@ -7461,24 +7457,7 @@ package android.net.wifi {
   }
 
   public final class WifiMigration {
-    method @Nullable public static android.net.wifi.WifiMigration.ConfigStoreMigrationData loadFromConfigStore();
     method @NonNull public static android.net.wifi.WifiMigration.SettingsMigrationData loadFromSettings(@NonNull android.content.Context);
-    method public static void removeConfigStore();
-  }
-
-  public static final class WifiMigration.ConfigStoreMigrationData implements android.os.Parcelable {
-    method public int describeContents();
-    method @Nullable public java.util.List<android.net.wifi.WifiConfiguration> getUserSavedNetworkConfigurations();
-    method @Nullable public android.net.wifi.SoftApConfiguration getUserSoftApConfiguration();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.net.wifi.WifiMigration.ConfigStoreMigrationData> CREATOR;
-  }
-
-  public static final class WifiMigration.ConfigStoreMigrationData.Builder {
-    ctor public WifiMigration.ConfigStoreMigrationData.Builder();
-    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData build();
-    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSavedNetworkConfigurations(@NonNull java.util.List<android.net.wifi.WifiConfiguration>);
-    method @NonNull public android.net.wifi.WifiMigration.ConfigStoreMigrationData.Builder setUserSoftApConfiguration(@NonNull android.net.wifi.SoftApConfiguration);
   }
 
   public static final class WifiMigration.SettingsMigrationData implements android.os.Parcelable {
@@ -11277,7 +11256,6 @@ package android.telephony {
 
   public class ServiceState implements android.os.Parcelable {
     method public void fillInNotifierBundle(@NonNull android.os.Bundle);
-    method public int getDataNetworkType();
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
@@ -11423,7 +11401,6 @@ package android.telephony {
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_MESSAGES_ON_ICC) public java.util.List<android.telephony.SmsMessage> getMessagesFromIcc();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getPremiumSmsConsent(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getSmsCapacityOnIcc();
-    method public void sendMultipartTextMessage(@NonNull String, @Nullable String, @NonNull java.util.List<java.lang.String>, @Nullable java.util.List<android.app.PendingIntent>, @Nullable java.util.List<android.app.PendingIntent>, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void sendMultipartTextMessageWithoutPersisting(String, String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setPremiumSmsConsent(@NonNull String, int);
     field public static final int PREMIUM_SMS_CONSENT_ALWAYS_ALLOW = 3; // 0x3
@@ -11521,6 +11498,7 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getAidForAppType(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypes();
+    method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.ComponentName getAndUpdateDefaultRespondViaMessageApplication();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.CallForwardingInfo getCallForwarding(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCallWaitingStatus();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int);
@@ -11539,12 +11517,11 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getDataActivationState();
     method @Deprecated public boolean getDataEnabled();
     method @Deprecated public boolean getDataEnabled(int);
-    method @Nullable public static android.content.ComponentName getDefaultRespondViaMessageApplication(@NonNull android.content.Context, boolean);
+    method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public android.content.ComponentName getDefaultRespondViaMessageApplication();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDeviceSoftwareVersion(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean getEmergencyCallbackMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getEmergencyNumberDbVersion();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimDomain();
-    method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getIsimImpu();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getIsimIst();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.Map<java.lang.Integer,java.lang.Integer> getLogicalToPhysicalSlotMapping();
     method public int getMaxNumberOfSimultaneouslyActiveSims();
@@ -12280,10 +12257,6 @@ package android.telephony.ims {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.ImsExternalCallState> CREATOR;
   }
 
-  public class ImsManager {
-    field public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
-  }
-
   public class ImsMmTelManager implements android.telephony.ims.RegistrationManager {
     method @Deprecated @NonNull @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PRECISE_PHONE_STATE}) public static android.telephony.ims.ImsMmTelManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void getFeatureState(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Integer>) throws android.telephony.ims.ImsException;
@@ -12549,138 +12522,18 @@ package android.telephony.ims {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public int setProvisioningStringValue(int, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) @WorkerThread public void setRcsProvisioningStatusForCapability(int, boolean);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void unregisterProvisioningChangedCallback(@NonNull android.telephony.ims.ProvisioningManager.Callback);
-    field public static final int KEY_1X_EPDG_TIMER_SEC = 64; // 0x40
-    field public static final int KEY_1X_THRESHOLD = 59; // 0x3b
-    field public static final int KEY_AMR_BANDWIDTH_EFFICIENT_PAYLOAD_TYPE = 50; // 0x32
-    field public static final int KEY_AMR_CODEC_MODE_SET_VALUES = 0; // 0x0
-    field public static final int KEY_AMR_DEFAULT_ENCODING_MODE = 53; // 0x35
-    field public static final int KEY_AMR_OCTET_ALIGNED_PAYLOAD_TYPE = 49; // 0x31
-    field public static final int KEY_AMR_WB_BANDWIDTH_EFFICIENT_PAYLOAD_TYPE = 48; // 0x30
-    field public static final int KEY_AMR_WB_CODEC_MODE_SET_VALUES = 1; // 0x1
-    field public static final int KEY_AMR_WB_OCTET_ALIGNED_PAYLOAD_TYPE = 47; // 0x2f
-    field public static final int KEY_DTMF_NB_PAYLOAD_TYPE = 52; // 0x34
-    field public static final int KEY_DTMF_WB_PAYLOAD_TYPE = 51; // 0x33
-    field public static final int KEY_EAB_PROVISIONING_STATUS = 25; // 0x19
-    field public static final int KEY_ENABLE_SILENT_REDIAL = 6; // 0x6
-    field public static final int KEY_LOCAL_BREAKOUT_PCSCF_ADDRESS = 31; // 0x1f
-    field public static final int KEY_LTE_EPDG_TIMER_SEC = 62; // 0x3e
-    field public static final int KEY_LTE_THRESHOLD_1 = 56; // 0x38
-    field public static final int KEY_LTE_THRESHOLD_2 = 57; // 0x39
-    field public static final int KEY_LTE_THRESHOLD_3 = 58; // 0x3a
-    field public static final int KEY_MINIMUM_SIP_SESSION_EXPIRATION_TIMER_SEC = 3; // 0x3
-    field public static final int KEY_MOBILE_DATA_ENABLED = 29; // 0x1d
-    field public static final int KEY_MULTIENDPOINT_ENABLED = 65; // 0x41
-    field public static final int KEY_RCS_AVAILABILITY_CACHE_EXPIRATION_SEC = 19; // 0x13
-    field public static final int KEY_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC = 18; // 0x12
-    field public static final int KEY_RCS_CAPABILITIES_POLL_INTERVAL_SEC = 20; // 0x14
-    field public static final int KEY_RCS_CAPABILITY_DISCOVERY_ENABLED = 17; // 0x11
-    field public static final int KEY_RCS_CAPABILITY_POLL_LIST_SUB_EXP_SEC = 23; // 0x17
-    field public static final int KEY_RCS_MAX_NUM_ENTRIES_IN_RCL = 22; // 0x16
-    field public static final int KEY_RCS_PUBLISH_OFFLINE_AVAILABILITY_TIMER_SEC = 16; // 0x10
-    field public static final int KEY_RCS_PUBLISH_SOURCE_THROTTLE_MS = 21; // 0x15
-    field public static final int KEY_RCS_PUBLISH_TIMER_SEC = 15; // 0xf
-    field public static final int KEY_REGISTRATION_DOMAIN_NAME = 12; // 0xc
-    field public static final int KEY_REGISTRATION_RETRY_BASE_TIME_SEC = 33; // 0x21
-    field public static final int KEY_REGISTRATION_RETRY_MAX_TIME_SEC = 34; // 0x22
-    field public static final int KEY_RTP_SPEECH_END_PORT = 36; // 0x24
-    field public static final int KEY_RTP_SPEECH_START_PORT = 35; // 0x23
-    field public static final int KEY_RTT_ENABLED = 66; // 0x42
-    field public static final int KEY_SIP_ACK_RECEIPT_WAIT_TIME_MS = 43; // 0x2b
-    field public static final int KEY_SIP_ACK_RETRANSMIT_WAIT_TIME_MS = 44; // 0x2c
-    field public static final int KEY_SIP_INVITE_ACK_WAIT_TIME_MS = 38; // 0x26
-    field public static final int KEY_SIP_INVITE_CANCELLATION_TIMER_MS = 4; // 0x4
-    field public static final int KEY_SIP_INVITE_REQUEST_TRANSMIT_INTERVAL_MS = 37; // 0x25
-    field public static final int KEY_SIP_INVITE_RESPONSE_RETRANSMIT_INTERVAL_MS = 42; // 0x2a
-    field public static final int KEY_SIP_INVITE_RESPONSE_RETRANSMIT_WAIT_TIME_MS = 39; // 0x27
-    field public static final int KEY_SIP_KEEP_ALIVE_ENABLED = 32; // 0x20
-    field public static final int KEY_SIP_NON_INVITE_REQUEST_RETRANSMISSION_WAIT_TIME_MS = 45; // 0x2d
-    field public static final int KEY_SIP_NON_INVITE_REQUEST_RETRANSMIT_INTERVAL_MS = 40; // 0x28
-    field public static final int KEY_SIP_NON_INVITE_RESPONSE_RETRANSMISSION_WAIT_TIME_MS = 46; // 0x2e
-    field public static final int KEY_SIP_NON_INVITE_TRANSACTION_TIMEOUT_TIMER_MS = 41; // 0x29
-    field public static final int KEY_SIP_SESSION_TIMER_SEC = 2; // 0x2
-    field public static final int KEY_SMS_FORMAT = 13; // 0xd
-    field public static final int KEY_SMS_OVER_IP_ENABLED = 14; // 0xe
-    field public static final int KEY_SMS_PUBLIC_SERVICE_IDENTITY = 54; // 0x36
-    field public static final int KEY_T1_TIMER_VALUE_MS = 7; // 0x7
-    field public static final int KEY_T2_TIMER_VALUE_MS = 8; // 0x8
-    field public static final int KEY_TF_TIMER_VALUE_MS = 9; // 0x9
-    field public static final int KEY_TRANSITION_TO_LTE_DELAY_MS = 5; // 0x5
-    field public static final int KEY_USE_GZIP_FOR_LIST_SUBSCRIPTION = 24; // 0x18
-    field public static final int KEY_VIDEO_QUALITY = 55; // 0x37
-    field public static final int KEY_VOICE_OVER_WIFI_ENABLED_OVERRIDE = 28; // 0x1c
     field public static final int KEY_VOICE_OVER_WIFI_MODE_OVERRIDE = 27; // 0x1b
     field public static final int KEY_VOICE_OVER_WIFI_ROAMING_ENABLED_OVERRIDE = 26; // 0x1a
-    field public static final int KEY_VOLTE_PROVISIONING_STATUS = 10; // 0xa
-    field public static final int KEY_VOLTE_USER_OPT_IN_STATUS = 30; // 0x1e
-    field public static final int KEY_VT_PROVISIONING_STATUS = 11; // 0xb
-    field public static final int KEY_WIFI_EPDG_TIMER_SEC = 63; // 0x3f
-    field public static final int KEY_WIFI_THRESHOLD_A = 60; // 0x3c
-    field public static final int KEY_WIFI_THRESHOLD_B = 61; // 0x3d
-    field public static final int PROVISIONING_RESULT_UNKNOWN = -1; // 0xffffffff
     field public static final int PROVISIONING_VALUE_DISABLED = 0; // 0x0
     field public static final int PROVISIONING_VALUE_ENABLED = 1; // 0x1
-    field public static final int SMS_FORMAT_3GPP = 1; // 0x1
-    field public static final int SMS_FORMAT_3GPP2 = 0; // 0x0
     field public static final String STRING_QUERY_RESULT_ERROR_GENERIC = "STRING_QUERY_RESULT_ERROR_GENERIC";
     field public static final String STRING_QUERY_RESULT_ERROR_NOT_READY = "STRING_QUERY_RESULT_ERROR_NOT_READY";
-    field public static final int VIDEO_QUALITY_HIGH = 1; // 0x1
-    field public static final int VIDEO_QUALITY_LOW = 0; // 0x0
   }
 
   public static class ProvisioningManager.Callback {
     ctor public ProvisioningManager.Callback();
     method public void onProvisioningIntChanged(int, int);
     method public void onProvisioningStringChanged(int, @NonNull String);
-  }
-
-  public final class RcsContactUceCapability implements android.os.Parcelable {
-    method public int describeContents();
-    method @NonNull public java.util.List<java.lang.String> getCapableExtensionTags();
-    method @NonNull public android.net.Uri getContactUri();
-    method @Nullable public android.net.Uri getServiceUri(long);
-    method public boolean isCapable(long);
-    method public boolean isCapable(@NonNull String);
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field public static final int CAPABILITY_CALL_COMPOSER = 4194304; // 0x400000
-    field public static final int CAPABILITY_CHAT_BOT = 67108864; // 0x4000000
-    field public static final int CAPABILITY_CHAT_BOT_ROLE = 134217728; // 0x8000000
-    field public static final int CAPABILITY_CHAT_SESSION = 2; // 0x2
-    field public static final int CAPABILITY_CHAT_SESSION_STORE_FORWARD = 4; // 0x4
-    field public static final int CAPABILITY_CHAT_STANDALONE = 1; // 0x1
-    field public static final int CAPABILITY_DISCOVERY_VIA_PRESENCE = 4096; // 0x1000
-    field public static final int CAPABILITY_FILE_TRANSFER = 8; // 0x8
-    field public static final int CAPABILITY_FILE_TRANSFER_HTTP = 64; // 0x40
-    field public static final int CAPABILITY_FILE_TRANSFER_SMS = 128; // 0x80
-    field public static final int CAPABILITY_FILE_TRANSFER_STORE_FORWARD = 32; // 0x20
-    field public static final int CAPABILITY_FILE_TRANSFER_THUMBNAIL = 16; // 0x10
-    field public static final int CAPABILITY_GEOLOCATION_PULL = 131072; // 0x20000
-    field public static final int CAPABILITY_GEOLOCATION_PULL_FILE_TRANSFER = 262144; // 0x40000
-    field public static final int CAPABILITY_GEOLOCATION_PUSH = 32768; // 0x8000
-    field public static final int CAPABILITY_GEOLOCATION_PUSH_SMS = 65536; // 0x10000
-    field public static final int CAPABILITY_IMAGE_SHARE = 256; // 0x100
-    field public static final int CAPABILITY_IP_VIDEO_CALL = 16384; // 0x4000
-    field public static final int CAPABILITY_IP_VOICE_CALL = 8192; // 0x2000
-    field public static final int CAPABILITY_MMTEL_CALL_COMPOSER = 1073741824; // 0x40000000
-    field public static final int CAPABILITY_PLUG_IN = 268435456; // 0x10000000
-    field public static final int CAPABILITY_POST_CALL = 8388608; // 0x800000
-    field public static final int CAPABILITY_RCS_VIDEO_CALL = 1048576; // 0x100000
-    field public static final int CAPABILITY_RCS_VIDEO_ONLY_CALL = 2097152; // 0x200000
-    field public static final int CAPABILITY_RCS_VOICE_CALL = 524288; // 0x80000
-    field public static final int CAPABILITY_SHARED_MAP = 16777216; // 0x1000000
-    field public static final int CAPABILITY_SHARED_SKETCH = 33554432; // 0x2000000
-    field public static final int CAPABILITY_SOCIAL_PRESENCE = 2048; // 0x800
-    field public static final int CAPABILITY_STANDALONE_CHAT_BOT = 536870912; // 0x20000000
-    field public static final int CAPABILITY_VIDEO_SHARE = 1024; // 0x400
-    field public static final int CAPABILITY_VIDEO_SHARE_DURING_CS_CALL = 512; // 0x200
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsContactUceCapability> CREATOR;
-  }
-
-  public static class RcsContactUceCapability.Builder {
-    ctor public RcsContactUceCapability.Builder(@NonNull android.net.Uri);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(long, @NonNull android.net.Uri);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(long);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability.Builder add(@NonNull String);
-    method @NonNull public android.telephony.ims.RcsContactUceCapability build();
   }
 
   public class RcsUceAdapter {
@@ -12929,7 +12782,6 @@ package android.telephony.ims.stub {
     method public int transact(android.os.Bundle);
     method public int updateCallBarring(int, int, String[]);
     method public int updateCallBarringForServiceClass(int, int, String[], int);
-    method public int updateCallBarringWithPassword(int, int, @Nullable String[], int, @NonNull String);
     method public int updateCallForward(int, int, String, int, int);
     method public int updateCallWaiting(boolean, int);
     method public int updateClip(boolean);
