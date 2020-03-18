@@ -94,6 +94,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.LauncherAppsService.LauncherAppsImpl;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
+import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.uri.UriPermissionOwner;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.Assert;
@@ -630,6 +632,9 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected UsageStatsManagerInternal mMockUsageStatsManagerInternal;
     protected ActivityManagerInternal mMockActivityManagerInternal;
     protected ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
+    protected UriGrantsManagerInternal mMockUriGrantsManagerInternal;
+
+    protected UriPermissionOwner mUriPermissionOwner;
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
     protected static final int CALLING_UID_1 = 10001;
@@ -771,6 +776,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         mMockUsageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
         mMockActivityManagerInternal = mock(ActivityManagerInternal.class);
         mMockActivityTaskManagerInternal = mock(ActivityTaskManagerInternal.class);
+        mMockUriGrantsManagerInternal = mock(UriGrantsManagerInternal.class);
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPackageManagerInternal);
@@ -782,6 +788,10 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         LocalServices.addService(ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, mMockUserManagerInternal);
+        LocalServices.removeServiceForTest(UriGrantsManagerInternal.class);
+        LocalServices.addService(UriGrantsManagerInternal.class, mMockUriGrantsManagerInternal);
+
+        mUriPermissionOwner = new UriPermissionOwner(mMockUriGrantsManagerInternal, TAG);
 
         // Prepare injection values.
 
@@ -2193,6 +2203,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         for (ShortcutInfo s : actualShortcuts) {
             assertTrue("ID " + s.getId() + " not have icon res ID", s.hasIconResource());
             assertFalse("ID " + s.getId() + " shouldn't have icon FD", s.hasIconFile());
+            assertFalse("ID " + s.getId() + " shouldn't have icon URI", s.hasIconUri());
         }
         return actualShortcuts;
     }
@@ -2202,6 +2213,17 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         for (ShortcutInfo s : actualShortcuts) {
             assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
             assertTrue("ID " + s.getId() + " not have icon FD", s.hasIconFile());
+            assertFalse("ID " + s.getId() + " shouldn't have icon URI", s.hasIconUri());
+        }
+        return actualShortcuts;
+    }
+
+    public static List<ShortcutInfo> assertAllHaveIconUri(
+            List<ShortcutInfo> actualShortcuts) {
+        for (ShortcutInfo s : actualShortcuts) {
+            assertFalse("ID " + s.getId() + " shouldn't have icon res ID", s.hasIconResource());
+            assertFalse("ID " + s.getId() + " shouldn't have have icon FD", s.hasIconFile());
+            assertTrue("ID " + s.getId() + " not have icon URI", s.hasIconUri());
         }
         return actualShortcuts;
     }
