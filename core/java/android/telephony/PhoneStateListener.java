@@ -64,6 +64,18 @@ public class PhoneStateListener {
     private static final String LOG_TAG = "PhoneStateListener";
     private static final boolean DBG = false; // STOPSHIP if true
 
+
+    /**
+     * Limit on registrations of {@link PhoneStateListener}s on a per-pid
+     * basis. When this limit is exceeded, any calls to {@link TelephonyManager#listen} will fail
+     * with an {@link IllegalStateException}.
+     *
+     * {@link android.os.Process#PHONE_UID}, {@link android.os.Process#SYSTEM_UID}, and the uid that
+     * TelephonyRegistry runs under are exempt from this limit.
+     * @hide
+     */
+    public static final int PER_PID_REGISTRATION_LIMIT = 50;
+
     /**
      * Stop listening for updates.
      *
