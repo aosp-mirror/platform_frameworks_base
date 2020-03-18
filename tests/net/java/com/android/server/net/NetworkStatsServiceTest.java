@@ -1026,7 +1026,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         mService.forceUpdateIfaces(NETWORKS_WIFI, states, getActiveIface(states), new VpnInfo[0]);
 
         // Verifies that one requestStatsUpdate will be called during iface update.
-        provider.expectStatsUpdate(0 /* unused */);
+        provider.expectOnRequestStatsUpdate(0 /* unused */);
 
         // Create some initial traffic and report to the service.
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -1037,7 +1037,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
                 .addValues(new NetworkStats.Entry(TEST_IFACE, UID_RED, SET_DEFAULT,
                         0xF00D, METERED_YES, ROAMING_NO, DEFAULT_NETWORK_YES,
                         64L, 1L, 64L, 1L, 1L));
-        cb.onStatsUpdated(0 /* unused */, expectedStats, expectedStats);
+        cb.notifyStatsUpdated(0 /* unused */, expectedStats, expectedStats);
 
         // Make another empty mutable stats object. This is necessary since the new NetworkStats
         // object will be used to compare with the old one in NetworkStatsRecoder, two of them
@@ -1047,8 +1047,8 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         forcePollAndWaitForIdle();
 
         // Verifies that one requestStatsUpdate and setAlert will be called during polling.
-        provider.expectStatsUpdate(0 /* unused */);
-        provider.expectSetAlert(MB_IN_BYTES);
+        provider.expectOnRequestStatsUpdate(0 /* unused */);
+        provider.expectOnSetAlert(MB_IN_BYTES);
 
         // Verifies that service recorded history, does not verify uid tag part.
         assertUidTotal(sTemplateWifi, UID_RED, 128L, 2L, 128L, 2L, 1);
@@ -1082,13 +1082,13 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         assertNotNull(cb);
 
         // Simulates alert quota of the provider has been reached.
-        cb.onAlertReached();
+        cb.notifyAlertReached();
         HandlerUtilsKt.waitForIdle(mHandlerThread, WAIT_TIMEOUT);
 
         // Verifies that polling is triggered by alert reached.
-        provider.expectStatsUpdate(0 /* unused */);
+        provider.expectOnRequestStatsUpdate(0 /* unused */);
         // Verifies that global alert will be re-armed.
-        provider.expectSetAlert(MB_IN_BYTES);
+        provider.expectOnSetAlert(MB_IN_BYTES);
     }
 
     private static File getBaseDir(File statsDir) {
