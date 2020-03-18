@@ -215,14 +215,16 @@ public class AnalogFrontendSettings extends FrontendSettings {
      * Builder for {@link AnalogFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency;
-        private int mSignalType;
-        private int mSifStandard;
+        private int mFrequency = 0;
+        private int mSignalType = SIGNAL_TYPE_UNDEFINED;
+        private int mSifStandard = SIF_UNDEFINED;
 
         private Builder() {}
 
         /**
          * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         @IntRange(from = 1)
@@ -233,6 +235,8 @@ public class AnalogFrontendSettings extends FrontendSettings {
 
         /**
          * Sets analog signal type.
+         *
+         * <p>Default value is {@link #SIGNAL_TYPE_UNDEFINED}.
          */
         @NonNull
         public Builder setSignalType(@SignalType int signalType) {
@@ -242,6 +246,8 @@ public class AnalogFrontendSettings extends FrontendSettings {
 
         /**
          * Sets Standard Interchange Format (SIF).
+         *
+         * <p>Default value is {@link #SIF_UNDEFINED}.
          */
         @NonNull
         public Builder setSifStandard(@SifStandard int sifStandard) {
