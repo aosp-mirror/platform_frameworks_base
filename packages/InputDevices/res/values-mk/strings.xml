@@ -3,12 +3,12 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"Влезни уреди"</string>
     <string name="keyboard_layouts_label" msgid="6688773268302087545">"Тастатура за Android"</string>
-    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"Англиски (О.К.)"</string>
-    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"Англиски (САД)"</string>
-    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"Англиски (САД), меѓународен стил"</string>
-    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"Англиски (САД), Colemak стил"</string>
-    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"Англиски (САД), Dvorak стил"</string>
-    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"Англиски (САД), Workman стил"</string>
+    <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"англиски (О.К.)"</string>
+    <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"англиски (САД)"</string>
+    <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"англиски (САД), меѓународен стил"</string>
+    <string name="keyboard_layout_english_us_colemak_label" msgid="4194969610343455380">"англиски (САД), Colemak стил"</string>
+    <string name="keyboard_layout_english_us_dvorak_label" msgid="793528923171145202">"англиски (САД), Dvorak стил"</string>
+    <string name="keyboard_layout_english_us_workman_label" msgid="2944541595262173111">"англиски (САД), Workman стил"</string>
     <string name="keyboard_layout_german_label" msgid="8451565865467909999">"Германски"</string>
     <string name="keyboard_layout_french_label" msgid="813450119589383723">"Француски"</string>
     <string name="keyboard_layout_french_ca_label" msgid="365352601060604832">"Француски (Канада)"</string>
