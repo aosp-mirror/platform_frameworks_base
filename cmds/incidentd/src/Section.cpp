@@ -267,28 +267,29 @@ status_t WorkerThreadSection::Execute(ReportWriter* writer) const {
     bool workerDone = false;
     FdBuffer buffer;
 
-    // Create shared data and pipe
-    WorkerThreadData data(this);
-    if (!data.pipe.init()) {
+    // Create shared data and pipe. Don't put data on the stack since this thread may exit early.
+    sp<WorkerThreadData> data = new WorkerThreadData(this);
+    if (!data->pipe.init()) {
         return -errno;
     }
-
-    std::thread([&]() {
+    data->incStrong(this);
+    std::thread([data, this]() {
         // Don't crash the service if writing to a closed pipe (may happen if dumping times out)
         signal(SIGPIPE, sigpipe_handler);
-        status_t err = data.section->BlockingCall(data.pipe.writeFd());
+        status_t err = data->section->BlockingCall(data->pipe.writeFd());
         {
-            std::unique_lock<std::mutex> lock(data.lock);
-            data.workerDone = true;
-            data.workerError = err;
+            std::scoped_lock<std::mutex> lock(data->lock);
+            data->workerDone = true;
+            data->workerError = err;
             // unique_fd is not thread safe. If we don't lock it, reset() may pause half way while
             // the other thread executes to the end, calling ~Fpipe, which is a race condition.
-            data.pipe.writeFd().reset();
+            data->pipe.writeFd().reset();
         }
+        data->decStrong(this);
     }).detach();
 
     // Loop reading until either the timeout or the worker side is done (i.e. eof).
-    err = buffer.read(data.pipe.readFd().get(), this->timeoutMs);
+    err = buffer.read(data->pipe.readFd().get(), this->timeoutMs);
     if (err != NO_ERROR) {
         ALOGE("[%s] reader failed with error '%s'", this->name.string(), strerror(-err));
     }
@@ -296,13 +297,13 @@ status_t WorkerThreadSection::Execute(ReportWriter* writer) const {
     // If the worker side is finished, then return its error (which may overwrite
     // our possible error -- but it's more interesting anyway). If not, then we timed out.
     {
-        std::unique_lock<std::mutex> lock(data.lock);
-        data.pipe.close();
-        if (data.workerError != NO_ERROR) {
-            err = data.workerError;
+        std::scoped_lock<std::mutex> lock(data->lock);
+        data->pipe.close();
+        if (data->workerError != NO_ERROR) {
+            err = data->workerError;
             ALOGE("[%s] worker failed with error '%s'", this->name.string(), strerror(-err));
         }
-        workerDone = data.workerDone;
+        workerDone = data->workerDone;
     }
 
     writer->setSectionStats(buffer);
