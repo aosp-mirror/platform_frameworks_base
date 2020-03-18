@@ -125,8 +125,8 @@ public final class AlpFilterConfiguration extends FilterConfiguration {
      * Builder for {@link AlpFilterConfiguration}.
      */
     public static final class Builder {
-        private int mPacketType;
-        private int mLengthType;
+        private int mPacketType = PACKET_TYPE_IPV4;
+        private int mLengthType = LENGTH_TYPE_UNDEFINED;
         private Settings mSettings;
 
         private Builder() {
@@ -136,6 +136,7 @@ public final class AlpFilterConfiguration extends FilterConfiguration {
          * Sets packet type.
          *
          * <p>The meaning of each packet type value is shown in ATSC A/330:2019 table 5.2.
+         * <p>Default value is {@link #PACKET_TYPE_IPV4}.
          */
         @NonNull
         public Builder setPacketType(int packetType) {
@@ -144,6 +145,8 @@ public final class AlpFilterConfiguration extends FilterConfiguration {
         }
         /**
          * Sets length type.
+         *
+         * <p>Default value is {@link #LENGTH_TYPE_UNDEFINED}.
          */
         @NonNull
         public Builder setLengthType(@LengthType int lengthType) {
