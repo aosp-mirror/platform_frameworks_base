@@ -93,6 +93,43 @@ public class CompatibilityChangeInfo implements Parcelable {
         dest.writeString(mDescription);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("CompatibilityChangeInfo(")
+                .append(getId());
+        if (getName() != null) {
+            sb.append("; name=").append(getName());
+        }
+        if (getEnableAfterTargetSdk() != -1) {
+            sb.append("; enableAfterTargetSdk=").append(getEnableAfterTargetSdk());
+        }
+        if (getDisabled()) {
+            sb.append("; disabled");
+        }
+        if (getLoggingOnly()) {
+            sb.append("; loggingOnly");
+        }
+        return sb.append(")").toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof CompatibilityChangeInfo)) {
+            return false;
+        }
+        CompatibilityChangeInfo that = (CompatibilityChangeInfo) o;
+        return this.mChangeId == that.mChangeId
+                && this.mName.equals(that.mName)
+                && this.mEnableAfterTargetSdk == that.mEnableAfterTargetSdk
+                && this.mDisabled == that.mDisabled
+                && this.mLoggingOnly == that.mLoggingOnly
+                && this.mDescription.equals(that.mDescription);
+
+    }
+
     public static final Parcelable.Creator<CompatibilityChangeInfo> CREATOR =
             new Parcelable.Creator<CompatibilityChangeInfo>() {
 
