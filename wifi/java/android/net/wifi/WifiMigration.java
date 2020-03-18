@@ -16,23 +16,250 @@
 
 package android.net.wifi;
 
+import static android.os.Environment.getDataMiscCeDirectory;
+import static android.os.Environment.getDataMiscDirectory;
+
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.AtomicFile;
+import android.util.SparseArray;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Class used to provide one time hooks for existing OEM devices to migrate their config store
- * data and other settings to the wifi mainline module.
+ * data and other settings to the wifi apex.
  * @hide
  */
 @SystemApi
 public final class WifiMigration {
+    /**
+     * Directory to read the wifi config store files from under.
+     */
+    private static final String LEGACY_WIFI_STORE_DIRECTORY_NAME = "wifi";
+    /**
+     * Config store file for general shared store file.
+     * AOSP Path on Android 10: /data/misc/wifi/WifiConfigStore.xml
+     */
+    public static final int STORE_FILE_SHARED_GENERAL = 0;
+    /**
+     * Config store file for softap shared store file.
+     * AOSP Path on Android 10: /data/misc/wifi/softap.conf
+     */
+    public static final int STORE_FILE_SHARED_SOFTAP = 1;
+    /**
+     * Config store file for general user store file.
+     * AOSP Path on Android 10: /data/misc_ce/<userId>/wifi/WifiConfigStore.xml
+     */
+    public static final int STORE_FILE_USER_GENERAL = 2;
+    /**
+     * Config store file for network suggestions user store file.
+     * AOSP Path on Android 10: /data/misc_ce/<userId>/wifi/WifiConfigStoreNetworkSuggestions.xml
+     */
+    public static final int STORE_FILE_USER_NETWORK_SUGGESTIONS = 3;
+
+    /** @hide */
+    @IntDef(prefix = { "STORE_FILE_SHARED_" }, value = {
+            STORE_FILE_SHARED_GENERAL,
+            STORE_FILE_SHARED_SOFTAP,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SharedStoreFileId { }
+
+    /** @hide */
+    @IntDef(prefix = { "STORE_FILE_USER_" }, value = {
+            STORE_FILE_USER_GENERAL,
+            STORE_FILE_USER_NETWORK_SUGGESTIONS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UserStoreFileId { }
+
+    /**
+     * Mapping of Store file Id to Store file names.
+     *
+     * NOTE: This is the default path for the files on AOSP devices. If the OEM has modified
+     * the path or renamed the files, please edit this appropriately.
+     */
+    private static final SparseArray<String> STORE_ID_TO_FILE_NAME =
+            new SparseArray<String>() {{
+                put(STORE_FILE_SHARED_GENERAL, "WifiConfigStore.xml");
+                put(STORE_FILE_SHARED_SOFTAP, "softap.conf");
+                put(STORE_FILE_USER_GENERAL, "WifiConfigStore.xml");
+                put(STORE_FILE_USER_NETWORK_SUGGESTIONS, "WifiConfigStoreNetworkSuggestions.xml");
+            }};
+
+    /**
+     * Pre-apex wifi shared folder.
+     */
+    private static File getLegacyWifiSharedDirectory() {
+        return new File(getDataMiscDirectory(), LEGACY_WIFI_STORE_DIRECTORY_NAME);
+    }
+
+    /**
+     * Pre-apex wifi user folder.
+     */
+    private static File getLegacyWifiUserDirectory(int userId) {
+        return new File(getDataMiscCeDirectory(userId), LEGACY_WIFI_STORE_DIRECTORY_NAME);
+    }
+
+    /**
+     * Legacy files were stored as AtomicFile. So, always use AtomicFile to operate on it to ensure
+     * data integrity.
+     */
+    private static AtomicFile getSharedAtomicFile(@SharedStoreFileId int storeFileId) {
+        return new AtomicFile(new File(
+                getLegacyWifiSharedDirectory(),
+                STORE_ID_TO_FILE_NAME.get(storeFileId)));
+    }
+
+    /**
+     * Legacy files were stored as AtomicFile. So, always use AtomicFile to operate on it to ensure
+     * data integrity.
+     */
+    private static AtomicFile getUserAtomicFile(@UserStoreFileId  int storeFileId, int userId) {
+        return new AtomicFile(new File(
+                getLegacyWifiUserDirectory(userId),
+                STORE_ID_TO_FILE_NAME.get(storeFileId)));
+    }
 
     private WifiMigration() { }
+
+    /**
+     * Load data from legacy shared wifi config store file.
+     * TODO(b/149418926): Add XSD for the AOSP file format for each file from R.
+     * <p>
+     * Note:
+     * <li>OEMs need to change the implementation of
+     * {@link #convertAndRetrieveSharedConfigStoreFile(int)} only if their existing config store
+     * format or file locations differs from the vanilla AOSP implementation.</li>
+     * <li>The wifi apex will invoke
+     * {@link #convertAndRetrieveSharedConfigStoreFile(int)}
+     * method on every bootup, it is the responsibility of the OEM implementation to ensure that
+     * they perform the necessary in place conversion of their config store file to conform to the
+     * AOSP format. The OEM should ensure that the method should only return the
+     * {@link InputStream} stream for the data to be migrated only on the first bootup.</li>
+     * <li>Once the migration is done, the apex will invoke
+     * {@link #removeSharedConfigStoreFile(int)} to delete the store file.</li>
+     * <li>The only relevant invocation of {@link #convertAndRetrieveSharedConfigStoreFile(int)}
+     * occurs when a previously released device upgrades to the wifi apex from an OEM
+     * implementation of the wifi stack.
+     * <li>Ensure that the legacy file paths are accessible to the wifi module (sepolicy rules, file
+     * permissions, etc). Since the wifi service continues to run inside system_server process, this
+     * method will be called from the same context (so ideally the file should still be accessible).
+     * </li>
+     *
+     * @param storeFileId Identifier for the config store file. One of
+     * {@link #STORE_FILE_SHARED_GENERAL} or {@link #STORE_FILE_SHARED_GENERAL}
+     * @return Instance of {@link InputStream} for migrating data, null if no migration is
+     * necessary.
+     * @throws IllegalArgumentException on invalid storeFileId.
+     */
+    @Nullable
+    public static InputStream convertAndRetrieveSharedConfigStoreFile(
+            @SharedStoreFileId int storeFileId) {
+        if (storeFileId != STORE_FILE_SHARED_GENERAL && storeFileId !=  STORE_FILE_SHARED_SOFTAP) {
+            throw new IllegalArgumentException("Invalid shared store file id");
+        }
+        try {
+            // OEMs should do conversions necessary here before returning the stream.
+            return getSharedAtomicFile(storeFileId).openRead();
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Remove the legacy shared wifi config store file.
+     *
+     * @param storeFileId Identifier for the config store file. One of
+     * {@link #STORE_FILE_SHARED_GENERAL} or {@link #STORE_FILE_SHARED_GENERAL}
+     * @throws IllegalArgumentException on invalid storeFileId.
+     */
+    public static void removeSharedConfigStoreFile(@SharedStoreFileId int storeFileId) {
+        if (storeFileId != STORE_FILE_SHARED_GENERAL && storeFileId !=  STORE_FILE_SHARED_SOFTAP) {
+            throw new IllegalArgumentException("Invalid shared store file id");
+        }
+        getSharedAtomicFile(storeFileId).delete();
+    }
+
+    /**
+     * Load data from legacy user wifi config store file.
+     * TODO(b/149418926): Add XSD for the AOSP file format for each file from R.
+     * <p>
+     * Note:
+     * <li>OEMs need to change the implementation of
+     * {@link #convertAndRetrieveUserConfigStoreFile(int, UserHandle)} only if their existing config
+     * store format or file locations differs from the vanilla AOSP implementation.</li>
+     * <li>The wifi apex will invoke
+     * {@link #convertAndRetrieveUserConfigStoreFile(int, UserHandle)}
+     * method on every bootup, it is the responsibility of the OEM implementation to ensure that
+     * they perform the necessary in place conversion of their config store file to conform to the
+     * AOSP format. The OEM should ensure that the method should only return the
+     * {@link InputStream} stream for the data to be migrated only on the first bootup.</li>
+     * <li>Once the migration is done, the apex will invoke
+     * {@link #removeUserConfigStoreFile(int, UserHandle)} to delete the store file.</li>
+     * <li>The only relevant invocation of
+     * {@link #convertAndRetrieveUserConfigStoreFile(int, UserHandle)} occurs when a previously
+     * released device upgrades to the wifi apex from an OEM implementation of the wifi
+     * stack.
+     * </li>
+     * <li>Ensure that the legacy file paths are accessible to the wifi module (sepolicy rules, file
+     * permissions, etc). Since the wifi service continues to run inside system_server process, this
+     * method will be called from the same context (so ideally the file should still be accessible).
+     * </li>
+     *
+     * @param storeFileId Identifier for the config store file. One of
+     * {@link #STORE_FILE_USER_GENERAL} or {@link #STORE_FILE_USER_NETWORK_SUGGESTIONS}
+     * @param userHandle User handle.
+     * @return Instance of {@link InputStream} for migrating data, null if no migration is
+     * necessary.
+     * @throws IllegalArgumentException on invalid storeFileId or userHandle.
+     */
+    @Nullable
+    public static InputStream convertAndRetrieveUserConfigStoreFile(
+            @UserStoreFileId int storeFileId, @NonNull UserHandle userHandle) {
+        if (storeFileId != STORE_FILE_USER_GENERAL
+                && storeFileId !=  STORE_FILE_USER_NETWORK_SUGGESTIONS) {
+            throw new IllegalArgumentException("Invalid user store file id");
+        }
+        Objects.requireNonNull(userHandle);
+        try {
+            // OEMs should do conversions necessary here before returning the stream.
+            return getUserAtomicFile(storeFileId, userHandle.getIdentifier()).openRead();
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Remove the legacy user wifi config store file.
+     *
+     * @param storeFileId Identifier for the config store file. One of
+     * {@link #STORE_FILE_USER_GENERAL} or {@link #STORE_FILE_USER_NETWORK_SUGGESTIONS}
+     * @param userHandle User handle.
+     * @throws IllegalArgumentException on invalid storeFileId or userHandle.
+    */
+    public static void removeUserConfigStoreFile(
+            @UserStoreFileId int storeFileId, @NonNull UserHandle userHandle) {
+        if (storeFileId != STORE_FILE_USER_GENERAL
+                && storeFileId !=  STORE_FILE_USER_NETWORK_SUGGESTIONS) {
+            throw new IllegalArgumentException("Invalid user store file id");
+        }
+        Objects.requireNonNull(userHandle);
+        getUserAtomicFile(storeFileId, userHandle.getIdentifier()).delete();
+    }
 
     /**
      * Container for all the wifi settings data to migrate.
@@ -260,7 +487,7 @@ public final class WifiMigration {
      * <li> This is method is invoked once on the first bootup. OEM can safely delete these settings
      * once the migration is complete. The first & only relevant invocation of
      * {@link #loadFromSettings(Context)} ()} occurs when a previously released
-     * device upgrades to the wifi mainline module from an OEM implementation of the wifi stack.
+     * device upgrades to the wifi apex from an OEM implementation of the wifi stack.
      * </li>
      *
      * @param context Context to use for loading the settings provider.
