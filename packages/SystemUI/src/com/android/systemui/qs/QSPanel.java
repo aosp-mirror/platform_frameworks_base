@@ -53,6 +53,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.qs.DetailAdapter;
 import com.android.systemui.plugins.qs.QSTile;
@@ -101,6 +102,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final ArrayList<QSMediaPlayer> mMediaPlayers = new ArrayList<>();
     private final NotificationMediaManager mNotificationMediaManager;
     private final LocalBluetoothManager mLocalBluetoothManager;
+    private final Executor mForegroundExecutor;
     private final Executor mBackgroundExecutor;
     private LocalMediaManager mLocalMediaManager;
     private MediaDevice mDevice;
@@ -160,6 +162,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             BroadcastDispatcher broadcastDispatcher,
             QSLogger qsLogger,
             NotificationMediaManager notificationMediaManager,
+            @Main Executor foregroundExecutor,
             @Background Executor backgroundExecutor,
             @Nullable LocalBluetoothManager localBluetoothManager
     ) {
@@ -168,6 +171,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mQSLogger = qsLogger;
         mDumpManager = dumpManager;
         mNotificationMediaManager = notificationMediaManager;
+        mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mLocalBluetoothManager = localBluetoothManager;
 
@@ -270,7 +274,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (player == null) {
             Log.d(TAG, "creating new player");
             player = new QSMediaPlayer(mContext, this, mNotificationMediaManager,
-                    mBackgroundExecutor);
+                    mForegroundExecutor, mBackgroundExecutor);
 
             if (player.isPlaying()) {
                 mMediaCarousel.addView(player.getView(), 0, lp); // add in front

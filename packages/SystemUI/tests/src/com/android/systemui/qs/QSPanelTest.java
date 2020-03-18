@@ -85,6 +85,8 @@ public class QSPanelTest extends SysuiTestCase {
     @Mock
     private NotificationMediaManager mNotificationMediaManager;
     @Mock
+    private Executor mForegroundExecutor;
+    @Mock
     private Executor mBackgroundExecutor;
     @Mock
     private LocalBluetoothManager mLocalBluetoothManager;
@@ -97,7 +99,7 @@ public class QSPanelTest extends SysuiTestCase {
         mTestableLooper.runWithLooper(() -> {
             mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
             mQsPanel = new QSPanel(mContext, null, mDumpManager, mBroadcastDispatcher,
-                    mQSLogger, mNotificationMediaManager, mBackgroundExecutor,
+                    mQSLogger, mNotificationMediaManager, mForegroundExecutor, mBackgroundExecutor,
                     mLocalBluetoothManager);
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);
