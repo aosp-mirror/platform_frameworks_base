@@ -100,6 +100,7 @@ public class TunerResourceManagerService extends SystemService {
                 @NonNull IResourcesReclaimListener listener, @NonNull int[] clientId)
                 throws RemoteException {
             enforceTrmAccessPermission("registerClientProfile");
+            enforceTunerAccessPermission("registerClientProfile");
             if (profile == null) {
                 throw new RemoteException("ResourceClientProfile can't be null");
             }
