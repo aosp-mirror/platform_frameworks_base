@@ -1299,6 +1299,13 @@ droidstubs {
         "framework-annotations-lib",
         "android.hardware.radio-V1.5-java",
     ],
+    check_api: {
+        current: {
+            // TODO(b/147699819): remove telephony prefix when moved
+            api_file: "telephony/api/system-current.txt",
+            removed_api_file: "telephony/api/system-removed.txt",
+        },
+    },
     defaults: ["framework-module-stubs-defaults-systemapi"],
     filter_packages: ["android.telephony"],
     sdk_version: "system_current",
