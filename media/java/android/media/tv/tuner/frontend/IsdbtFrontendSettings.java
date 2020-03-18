@@ -204,19 +204,21 @@ public class IsdbtFrontendSettings extends FrontendSettings {
      * Builder for {@link IsdbtFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency;
-        private int mModulation;
-        private int mBandwidth;
-        private int mMode;
-        private int mCodeRate;
-        private int mGuardInterval;
-        private int mServiceAreaId;
+        private int mFrequency = 0;
+        private int mModulation = MODULATION_UNDEFINED;
+        private int mBandwidth = BANDWIDTH_UNDEFINED;
+        private int mMode = MODE_UNDEFINED;
+        private int mCodeRate = DvbtFrontendSettings.CODERATE_UNDEFINED;
+        private int mGuardInterval = DvbtFrontendSettings.GUARD_INTERVAL_UNDEFINED;
+        private int mServiceAreaId = 0;
 
         private Builder() {
         }
 
         /**
          * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         @IntRange(from = 1)
@@ -227,6 +229,8 @@ public class IsdbtFrontendSettings extends FrontendSettings {
 
         /**
          * Sets Modulation.
+         *
+         * <p>Default value is {@link #MODULATION_UNDEFINED}.
          */
         @NonNull
         public Builder setModulation(@Modulation int modulation) {
@@ -235,6 +239,8 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets Bandwidth.
+         *
+         * <p>Default value is {@link #BANDWIDTH_UNDEFINED}.
          */
         @NonNull
         public Builder setBandwidth(@Bandwidth int bandwidth) {
@@ -243,6 +249,8 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets ISDBT mode.
+         *
+         * <p>Default value is {@link #MODE_UNDEFINED}.
          */
         @NonNull
         public Builder setMode(@Mode int mode) {
@@ -251,14 +259,18 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets Code rate.
+         *
+         * <p>Default value is {@link DvbtFrontendSettings#CODERATE_UNDEFINED}.
          */
         @NonNull
-        public Builder setCodeRate(@CodeRate int codeRate) {
+        public Builder setCodeRate(@DvbtFrontendSettings.CodeRate int codeRate) {
             mCodeRate = codeRate;
             return this;
         }
         /**
          * Sets Guard Interval.
+         *
+         * <p>Default value is {@link DvbtFrontendSettings#GUARD_INTERVAL_UNDEFINED}.
          */
         @NonNull
         public Builder setGuardInterval(@DvbtFrontendSettings.GuardInterval int guardInterval) {
@@ -267,6 +279,8 @@ public class IsdbtFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets Service Area ID.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         public Builder setServiceAreaId(int serviceAreaId) {
