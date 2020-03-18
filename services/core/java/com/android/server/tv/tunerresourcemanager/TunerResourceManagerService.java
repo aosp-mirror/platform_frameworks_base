@@ -16,7 +16,6 @@
 
 package com.android.server.tv.tunerresourcemanager;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -41,8 +40,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -78,25 +75,6 @@ public class TunerResourceManagerService extends SystemService {
 
     // Used to synchronize the access to the service.
     private final Object mLock = new Object();
-
-    /**
-     * Tuner resource type to help generate resource handle
-     */
-    @IntDef({
-        TUNER_RESOURCE_TYPE_FRONTEND,
-        TUNER_RESOURCE_TYPE_DEMUX,
-        TUNER_RESOURCE_TYPE_DESCRAMBLER,
-        TUNER_RESOURCE_TYPE_LNB,
-        TUNER_RESOURCE_TYPE_CAS_SESSION,
-     })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface TunerResourceType {}
-
-    public static final int TUNER_RESOURCE_TYPE_FRONTEND = 0;
-    public static final int TUNER_RESOURCE_TYPE_DEMUX = 1;
-    public static final int TUNER_RESOURCE_TYPE_DESCRAMBLER = 2;
-    public static final int TUNER_RESOURCE_TYPE_LNB = 3;
-    public static final int TUNER_RESOURCE_TYPE_CAS_SESSION = 4;
 
     public TunerResourceManagerService(@Nullable Context context) {
         super(context);
@@ -465,7 +443,7 @@ public class TunerResourceManagerService extends SystemService {
         // Grant frontend when there is unused resource.
         if (grantingFrontendId > -1) {
             frontendHandle[0] = generateResourceHandle(
-                    TUNER_RESOURCE_TYPE_FRONTEND, grantingFrontendId);
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, grantingFrontendId);
             updateFrontendClientMappingOnNewGrant(grantingFrontendId, request.getClientId());
             return true;
         }
@@ -474,7 +452,7 @@ public class TunerResourceManagerService extends SystemService {
         // request client has higher priority.
         if (inUseLowestPriorityFrId > -1 && (requestClient.getPriority() > currentLowestPriority)) {
             frontendHandle[0] = generateResourceHandle(
-                    TUNER_RESOURCE_TYPE_FRONTEND, inUseLowestPriorityFrId);
+                    TunerResourceManager.TUNER_RESOURCE_TYPE_FRONTEND, inUseLowestPriorityFrId);
             reclaimFrontendResource(getFrontendResource(
                     inUseLowestPriorityFrId).getOwnerClientId());
             updateFrontendClientMappingOnNewGrant(inUseLowestPriorityFrId, request.getClientId());
@@ -489,7 +467,7 @@ public class TunerResourceManagerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "requestDemux(request=" + request + ")");
         }
-        demuxHandle[0] = generateResourceHandle(TUNER_RESOURCE_TYPE_DEMUX, 0);
+        demuxHandle[0] = generateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_DEMUX, 0);
         return true;
     }
 
@@ -498,7 +476,8 @@ public class TunerResourceManagerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "requestDescrambler(request=" + request + ")");
         }
-        descramblerHandle[0] = generateResourceHandle(TUNER_RESOURCE_TYPE_DESCRAMBLER, 0);
+        descramblerHandle[0] =
+                generateResourceHandle(TunerResourceManager.TUNER_RESOURCE_TYPE_DESCRAMBLER, 0);
         return true;
     }
 
@@ -664,7 +643,8 @@ public class TunerResourceManagerService extends SystemService {
         return mClientProfiles.keySet().contains(clientId);
     }
 
-    private int generateResourceHandle(@TunerResourceType int resourceType, int resourceId) {
+    private int generateResourceHandle(
+            @TunerResourceManager.TunerResourceType int resourceType, int resourceId) {
         return (resourceType & 0x000000ff) << 24
                 | (resourceId << 16)
                 | (mResourceRequestCount++ & 0xffff);
