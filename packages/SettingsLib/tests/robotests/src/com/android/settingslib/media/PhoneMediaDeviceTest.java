@@ -16,21 +16,32 @@
 
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
+import android.media.MediaRoute2Info;
 
 import com.android.settingslib.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class PhoneMediaDeviceTest {
+
+    @Mock
+    private MediaRoute2Info mInfo;
 
     private Context mContext;
     private PhoneMediaDevice mPhoneMediaDevice;
@@ -41,7 +52,7 @@ public class PhoneMediaDeviceTest {
         mContext = RuntimeEnvironment.application;
 
         mPhoneMediaDevice =
-                new PhoneMediaDevice(mContext, null, null, null);
+                new PhoneMediaDevice(mContext, null, mInfo, null);
     }
 
     @Test
@@ -57,5 +68,43 @@ public class PhoneMediaDeviceTest {
         mPhoneMediaDevice.updateSummary(false);
 
         assertThat(mPhoneMediaDevice.getSummary()).isEmpty();
+    }
+
+    @Test
+    public void getDrawableResId_returnCorrectResId() {
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+
+        assertThat(mPhoneMediaDevice.getDrawableResId())
+                .isEqualTo(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
+
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADSET);
+
+        assertThat(mPhoneMediaDevice.getDrawableResId())
+                .isEqualTo(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
+
+        when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mPhoneMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_smartphone);
+    }
+
+    @Test
+    public void getName_returnCorrectName() {
+        final String deviceName = "test_name";
+
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
+        when(mInfo.getName()).thenReturn(deviceName);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(deviceName);
+
+        when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADSET);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(deviceName);
+
+        when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
+
+        assertThat(mPhoneMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_this_device_name));
     }
 }

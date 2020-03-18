@@ -16,6 +16,10 @@
 
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.when;
@@ -85,5 +89,20 @@ public class InfoMediaDeviceTest {
         when(mRouteInfo.getId()).thenReturn(TEST_ID);
 
         assertThat(mInfoMediaDevice.getId()).isEqualTo(TEST_ID);
+    }
+
+    @Test
+    public void getDrawableResId_returnCorrectResId() {
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_TV);
+
+        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_device);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
+
+        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_device);
+
+        when(mRouteInfo.getType()).thenReturn(TYPE_GROUP);
+
+        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_group_device);
     }
 }

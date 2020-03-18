@@ -15,10 +15,16 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_GROUP;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -51,7 +57,23 @@ public class InfoMediaDevice extends MediaDevice {
     public Drawable getIcon() {
         //TODO(b/120669861): Return remote device icon uri once api is ready.
         return BluetoothUtils.buildBtRainbowDrawable(mContext,
-                mContext.getDrawable(R.drawable.ic_media_device), getId().hashCode());
+                mContext.getDrawable(getDrawableResId()), getId().hashCode());
+    }
+
+    @VisibleForTesting
+    int getDrawableResId() {
+        int resId;
+        switch (mRouteInfo.getType()) {
+            case TYPE_GROUP:
+                resId = R.drawable.ic_media_group_device;
+                break;
+            case TYPE_REMOTE_TV:
+            case TYPE_REMOTE_SPEAKER:
+            default:
+                resId = R.drawable.ic_media_device;
+                break;
+        }
+        return resId;
     }
 
     @Override
