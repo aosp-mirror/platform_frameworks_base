@@ -579,6 +579,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final String EXTRA_DESCRIPTION = "android.intent.extra.DESCRIPTION";
     static final String EXTRA_BUGREPORT_TYPE = "android.intent.extra.BUGREPORT_TYPE";
 
+    /**
+     * The maximum number of bytes that {@link #setProcessStateSummary} accepts.
+     *
+     * @see {@link android.app.ActivityManager#setProcessStateSummary(byte[])}
+     */
+    static final int MAX_STATE_DATA_SIZE = 128;
+
     /** All system services */
     SystemServiceManager mSystemServiceManager;
 
@@ -3202,7 +3209,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mAtmInternal.compatibilityInfoForPackage(ai);
     }
 
-    private void enforceNotIsolatedCaller(String caller) {
+    /* package */ void enforceNotIsolatedCaller(String caller) {
         if (UserHandle.isIsolated(Binder.getCallingUid())) {
             throw new SecurityException("Isolated process not allowed to call " + caller);
         }
@@ -3887,6 +3894,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     public static File dumpStackTraces(ArrayList<Integer> firstPids,
             ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
             ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile) {
+        return dumpStackTraces(firstPids, processCpuTracker, lastPids, nativePids,
+                logExceptionCreatingFile, null);
+    }
+
+    /**
+     * @param firstPidOffsets Optional, when it's set, it receives the start/end offset
+     *                        of the very first pid to be dumped.
+     */
+    /* package */ static File dumpStackTraces(ArrayList<Integer> firstPids,
+            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids,
+            ArrayList<Integer> nativePids, StringWriter logExceptionCreatingFile,
+            long[] firstPidOffsets) {
         ArrayList<Integer> extraPids = null;
 
         Slog.i(TAG, "dumpStackTraces pids=" + lastPids + " nativepids=" + nativePids);
@@ -3938,12 +3957,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             return null;
         }
 
-        dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
+        Pair<Long, Long> offsets = dumpStackTraces(
+                tracesFile.getAbsolutePath(), firstPids, nativePids, extraPids);
+        if (firstPidOffsets != null) {
+            if (offsets == null) {
+                firstPidOffsets[0] = firstPidOffsets[1] = -1;
+            } else {
+                firstPidOffsets[0] = offsets.first; // Start offset to the ANR trace file
+                firstPidOffsets[1] = offsets.second; // End offset to the ANR trace file
+            }
+        }
         return tracesFile;
     }
 
     @GuardedBy("ActivityManagerService.class")
     private static SimpleDateFormat sAnrFileDateFormat;
+    static final String ANR_FILE_PREFIX = "anr_";
 
     private static synchronized File createAnrDumpFile(File tracesDir) throws IOException {
         if (sAnrFileDateFormat == null) {
@@ -3951,7 +3980,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         final String formattedDate = sAnrFileDateFormat.format(new Date());
-        final File anrFile = new File(tracesDir, "anr_" + formattedDate);
+        final File anrFile = new File(tracesDir, ANR_FILE_PREFIX + formattedDate);
 
         if (anrFile.createNewFile()) {
             FileUtils.setPermissions(anrFile.getAbsolutePath(), 0600, -1, -1); // -rw-------
@@ -4020,7 +4049,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         return SystemClock.elapsedRealtime() - timeStart;
     }
 
-    public static void dumpStackTraces(String tracesFile, ArrayList<Integer> firstPids,
+    /**
+     * @return The start/end offset of the trace of the very first PID
+     */
+    public static Pair<Long, Long> dumpStackTraces(String tracesFile, ArrayList<Integer> firstPids,
             ArrayList<Integer> nativePids, ArrayList<Integer> extraPids) {
 
         Slog.i(TAG, "Dumping to " + tracesFile);
@@ -4032,21 +4064,39 @@ public class ActivityManagerService extends IActivityManager.Stub
         // We must complete all stack dumps within 20 seconds.
         long remainingTime = 20 * 1000;
 
+        // As applications are usually interested with the ANR stack traces, but we can't share with
+        // them the stack traces other than their own stacks. So after the very first PID is
+        // dumped, remember the current file size.
+        long firstPidStart = -1;
+        long firstPidEnd = -1;
+
         // First collect all of the stacks of the most important pids.
         if (firstPids != null) {
             int num = firstPids.size();
             for (int i = 0; i < num; i++) {
-                Slog.i(TAG, "Collecting stacks for pid " + firstPids.get(i));
-                final long timeTaken = dumpJavaTracesTombstoned(firstPids.get(i), tracesFile,
+                final int pid = firstPids.get(i);
+                // We don't copy ANR traces from the system_server intentionally.
+                final boolean firstPid = i == 0 && MY_PID != pid;
+                File tf = null;
+                if (firstPid) {
+                    tf = new File(tracesFile);
+                    firstPidStart = tf.exists() ? tf.length() : 0;
+                }
+
+                Slog.i(TAG, "Collecting stacks for pid " + pid);
+                final long timeTaken = dumpJavaTracesTombstoned(pid, tracesFile,
                                                                 remainingTime);
 
                 remainingTime -= timeTaken;
                 if (remainingTime <= 0) {
-                    Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + firstPids.get(i) +
-                           "); deadline exceeded.");
-                    return;
+                    Slog.e(TAG, "Aborting stack trace dump (current firstPid=" + pid
+                            + "); deadline exceeded.");
+                    return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
                 }
 
+                if (firstPid) {
+                    firstPidEnd = tf.length();
+                }
                 if (DEBUG_ANR) {
                     Slog.d(TAG, "Done with pid " + firstPids.get(i) + " in " + timeTaken + "ms");
                 }
@@ -4068,7 +4118,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (remainingTime <= 0) {
                     Slog.e(TAG, "Aborting stack trace dump (current native pid=" + pid +
                         "); deadline exceeded.");
-                    return;
+                    return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
                 }
 
                 if (DEBUG_ANR) {
@@ -4088,7 +4138,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (remainingTime <= 0) {
                     Slog.e(TAG, "Aborting stack trace dump (current extra pid=" + pid +
                             "); deadline exceeded.");
-                    return;
+                    return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
                 }
 
                 if (DEBUG_ANR) {
@@ -4097,6 +4147,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         Slog.i(TAG, "Done dumping");
+        return firstPidStart >= 0 ? new Pair<>(firstPidStart, firstPidEnd) : null;
     }
 
     @Override
@@ -10280,6 +10331,15 @@ public class ActivityManagerService extends IActivityManager.Stub
         return new ParceledListSlice<ApplicationExitInfo>(results);
     }
 
+    @Override
+    public void setProcessStateSummary(@Nullable byte[] state) {
+        if (state != null && state.length > MAX_STATE_DATA_SIZE) {
+            throw new IllegalArgumentException("Data size is too large");
+        }
+        mProcessList.mAppExitInfoTracker.setProcessStateSummary(Binder.getCallingUid(),
+                Binder.getCallingPid(), state);
+    }
+
     /**
      * Check if the calling process has the permission to dump given package,
      * throw SecurityException if it doesn't have the permission.
@@ -10287,7 +10347,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @return The UID of the given package, or {@link android.os.Process#INVALID_UID}
      *         if the package is not found.
      */
-    private int enforceDumpPermissionForPackage(String packageName, int userId, int callingUid,
+    int enforceDumpPermissionForPackage(String packageName, int userId, int callingUid,
             String function) {
         long identity = Binder.clearCallingIdentity();
         int uid = Process.INVALID_UID;
