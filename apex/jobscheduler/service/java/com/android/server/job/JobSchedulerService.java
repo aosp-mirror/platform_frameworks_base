@@ -746,7 +746,13 @@ public class JobSchedulerService extends com.android.server.SystemService
     final Constants mConstants;
     final ConstantsObserver mConstantsObserver;
 
-    static final Comparator<JobStatus> mEnqueueTimeComparator = (o1, o2) -> {
+    private static final Comparator<JobStatus> sPendingJobComparator = (o1, o2) -> {
+        // Jobs with an override state set (via adb) should be put first as tests/developers
+        // expect the jobs to run immediately.
+        if (o1.overrideState != o2.overrideState) {
+            // Higher override state (OVERRIDE_FULL) should be before lower state (OVERRIDE_SOFT)
+            return o2.overrideState - o1.overrideState;
+        }
         if (o1.enqueueTime < o2.enqueueTime) {
             return -1;
         }
@@ -1097,7 +1103,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 // This is a new job, we can just immediately put it on the pending
                 // list and try to run it.
                 mJobPackageTracker.notePending(jobStatus);
-                addOrderedItem(mPendingJobs, jobStatus, mEnqueueTimeComparator);
+                addOrderedItem(mPendingJobs, jobStatus, sPendingJobComparator);
                 maybeRunPendingJobsLocked();
             } else {
                 evaluateControllerStatesLocked(jobStatus);
@@ -1858,7 +1864,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                         // state is such that all ready jobs should be run immediately.
                         if (runNow != null && isReadyToBeExecutedLocked(runNow)) {
                             mJobPackageTracker.notePending(runNow);
-                            addOrderedItem(mPendingJobs, runNow, mEnqueueTimeComparator);
+                            addOrderedItem(mPendingJobs, runNow, sPendingJobComparator);
                         } else {
                             queueReadyJobsForExecutionLocked();
                         }
@@ -2030,7 +2036,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             noteJobsPending(newReadyJobs);
             mPendingJobs.addAll(newReadyJobs);
             if (mPendingJobs.size() > 1) {
-                mPendingJobs.sort(mEnqueueTimeComparator);
+                mPendingJobs.sort(sPendingJobComparator);
             }
 
             newReadyJobs.clear();
@@ -2107,7 +2113,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 noteJobsPending(runnableJobs);
                 mPendingJobs.addAll(runnableJobs);
                 if (mPendingJobs.size() > 1) {
-                    mPendingJobs.sort(mEnqueueTimeComparator);
+                    mPendingJobs.sort(sPendingJobComparator);
                 }
             } else {
                 if (DEBUG) {
@@ -2813,11 +2819,9 @@ public class JobSchedulerService extends com.android.server.SystemService
     }
 
     // Shell command infrastructure: run the given job immediately
-    int executeRunCommand(String pkgName, int userId, int jobId, boolean force) {
-        if (DEBUG) {
-            Slog.v(TAG, "executeRunCommand(): " + pkgName + "/" + userId
-                    + " " + jobId + " f=" + force);
-        }
+    int executeRunCommand(String pkgName, int userId, int jobId, boolean satisfied, boolean force) {
+        Slog.d(TAG, "executeRunCommand(): " + pkgName + "/" + userId
+                + " " + jobId + " s=" + satisfied + " f=" + force);
 
         try {
             final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
@@ -2832,7 +2836,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     return JobSchedulerShellCommand.CMD_ERR_NO_JOB;
                 }
 
-                js.overrideState = (force) ? JobStatus.OVERRIDE_FULL : JobStatus.OVERRIDE_SOFT;
+                js.overrideState = (force) ? JobStatus.OVERRIDE_FULL
+                        : (satisfied ? JobStatus.OVERRIDE_SORTING : JobStatus.OVERRIDE_SOFT);
 
                 // Re-evaluate constraints after the override is set in case one of the overridden
                 // constraints was preventing another constraint from thinking it needed to update.
@@ -2841,7 +2846,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                 }
 
                 if (!js.isConstraintsSatisfied()) {
-                    js.overrideState = 0;
+                    js.overrideState = JobStatus.OVERRIDE_NONE;
                     return JobSchedulerShellCommand.CMD_ERR_CONSTRAINTS;
                 }
 
