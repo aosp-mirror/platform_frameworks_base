@@ -893,16 +893,16 @@ public class PhoneStateListener {
 
     /**
      * Callback invoked when the display info has changed on the registered subscription.
-     * <p> The {@link DisplayInfo} contains status information shown to the user based on
+     * <p> The {@link TelephonyDisplayInfo} contains status information shown to the user based on
      * carrier policy.
      *
      * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @param displayInfo The display information.
+     * @param telephonyDisplayInfo The display information.
      */
     @RequiresPermission((android.Manifest.permission.READ_PHONE_STATE))
-    public void onDisplayInfoChanged(@NonNull DisplayInfo displayInfo) {
+    public void onDisplayInfoChanged(@NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
         // default implementation empty
     }
 
@@ -1285,13 +1285,13 @@ public class PhoneStateListener {
                             () -> psl.onUserMobileDataStateChanged(enabled)));
         }
 
-        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
+        public void onDisplayInfoChanged(TelephonyDisplayInfo telephonyDisplayInfo) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
-                            () -> psl.onDisplayInfoChanged(displayInfo)));
+                            () -> psl.onDisplayInfoChanged(telephonyDisplayInfo)));
         }
 
         public void onOemHookRawEvent(byte[] rawData) {

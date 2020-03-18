@@ -25,12 +25,12 @@ import android.provider.Settings.Global;
 import android.telephony.Annotation;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
-import android.telephony.DisplayInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.TextUtils;
@@ -75,8 +75,9 @@ public class MobileSignalController extends SignalController<
     // this could potentially become part of MobileState for simplification/complication
     // of code.
     private int mDataState = TelephonyManager.DATA_DISCONNECTED;
-    private DisplayInfo mDisplayInfo = new DisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
-            DisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
+    private TelephonyDisplayInfo mTelephonyDisplayInfo =
+            new TelephonyDisplayInfo(TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                    TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
     private ServiceState mServiceState;
     private SignalStrength mSignalStrength;
     private MobileIconGroup mDefaultIcons;
@@ -245,41 +246,52 @@ public class MobileSignalController extends SignalController<
         mNetworkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_HSPAP), hPlusGroup);
 
         if (mConfig.show4gForLte) {
-            mNetworkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_LTE),
+            mNetworkToIconLookup.put(toIconKey(
+                    TelephonyManager.NETWORK_TYPE_LTE),
                     TelephonyIcons.FOUR_G);
             if (mConfig.hideLtePlus) {
                 mNetworkToIconLookup.put(toDisplayIconKey(
-                        DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA), TelephonyIcons.FOUR_G);
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA),
+                        TelephonyIcons.FOUR_G);
             } else {
                 mNetworkToIconLookup.put(toDisplayIconKey(
-                        DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA), TelephonyIcons.FOUR_G_PLUS);
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA),
+                        TelephonyIcons.FOUR_G_PLUS);
             }
         } else {
-            mNetworkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_LTE),
+            mNetworkToIconLookup.put(toIconKey(
+                    TelephonyManager.NETWORK_TYPE_LTE),
                     TelephonyIcons.LTE);
             if (mConfig.hideLtePlus) {
                 mNetworkToIconLookup.put(toDisplayIconKey(
-                        DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA), TelephonyIcons.LTE);
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA),
+                        TelephonyIcons.LTE);
             } else {
                 mNetworkToIconLookup.put(toDisplayIconKey(
-                        DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA), TelephonyIcons.LTE_PLUS);
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA),
+                        TelephonyIcons.LTE_PLUS);
             }
         }
-        mNetworkToIconLookup.put(toIconKey(TelephonyManager.NETWORK_TYPE_IWLAN),
+        mNetworkToIconLookup.put(toIconKey(
+                TelephonyManager.NETWORK_TYPE_IWLAN),
                 TelephonyIcons.WFC);
         mNetworkToIconLookup.put(toDisplayIconKey(
-                DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO), TelephonyIcons.LTE_CA_5G_E);
+                TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO),
+                TelephonyIcons.LTE_CA_5G_E);
         mNetworkToIconLookup.put(toDisplayIconKey(
-                DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA), TelephonyIcons.NR_5G);
+                TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA),
+                TelephonyIcons.NR_5G);
         mNetworkToIconLookup.put(toDisplayIconKey(
-                DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE), TelephonyIcons.NR_5G_PLUS);
+                TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE),
+                TelephonyIcons.NR_5G_PLUS);
     }
 
     private String getIconKey() {
-        if (mDisplayInfo.getOverrideNetworkType() == DisplayInfo.OVERRIDE_NETWORK_TYPE_NONE) {
-            return toIconKey(mDisplayInfo.getNetworkType());
+        if (mTelephonyDisplayInfo.getOverrideNetworkType()
+                == TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE) {
+            return toIconKey(mTelephonyDisplayInfo.getNetworkType());
         } else {
-            return toDisplayIconKey(mDisplayInfo.getOverrideNetworkType());
+            return toDisplayIconKey(mTelephonyDisplayInfo.getOverrideNetworkType());
         }
     }
 
@@ -289,13 +301,13 @@ public class MobileSignalController extends SignalController<
 
     private String toDisplayIconKey(@Annotation.OverrideNetworkType int displayNetworkType) {
         switch (displayNetworkType) {
-            case DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA:
+            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA:
                 return toIconKey(TelephonyManager.NETWORK_TYPE_LTE) + "_CA";
-            case DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO:
+            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO:
                 return toIconKey(TelephonyManager.NETWORK_TYPE_LTE) + "_CA_Plus";
-            case DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA:
+            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA:
                 return "5G";
-            case DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE:
+            case TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE:
                 return "5G_Plus";
             default:
                 return "unsupported";
@@ -507,14 +519,14 @@ public class MobileSignalController extends SignalController<
 
     /**
      * Updates the current state based on mServiceState, mSignalStrength, mDataState,
-     * mDisplayInfo, and mSimState.  It should be called any time one of these is updated.
+     * mTelephonyDisplayInfo, and mSimState.  It should be called any time one of these is updated.
      * This will call listeners if necessary.
      */
     private final void updateTelephony() {
         if (DEBUG) {
             Log.d(mTag, "updateTelephonySignalStrength: hasService=" +
                     Utils.isInService(mServiceState) + " ss=" + mSignalStrength
-                    + " displayInfo=" + mDisplayInfo);
+                    + " displayInfo=" + mTelephonyDisplayInfo);
         }
         checkDefaultData();
         mCurrentState.connected = Utils.isInService(mServiceState) && mSignalStrength != null;
@@ -600,7 +612,7 @@ public class MobileSignalController extends SignalController<
         pw.println("  mSubscription=" + mSubscriptionInfo + ",");
         pw.println("  mServiceState=" + mServiceState + ",");
         pw.println("  mSignalStrength=" + mSignalStrength + ",");
-        pw.println("  mDisplayInfo=" + mDisplayInfo + ",");
+        pw.println("  mTelephonyDisplayInfo=" + mTelephonyDisplayInfo + ",");
         pw.println("  mDataState=" + mDataState + ",");
         pw.println("  mInflateSignalStrengths=" + mInflateSignalStrengths + ",");
         pw.println("  isDataDisabled=" + isDataDisabled() + ",");
@@ -639,8 +651,9 @@ public class MobileSignalController extends SignalController<
                         + " type=" + networkType);
             }
             mDataState = state;
-            if (networkType != mDisplayInfo.getNetworkType()) {
-                mDisplayInfo = new DisplayInfo(networkType, DisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
+            if (networkType != mTelephonyDisplayInfo.getNetworkType()) {
+                mTelephonyDisplayInfo = new TelephonyDisplayInfo(networkType,
+                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
             }
             updateTelephony();
         }
@@ -670,11 +683,11 @@ public class MobileSignalController extends SignalController<
         }
 
         @Override
-        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
+        public void onDisplayInfoChanged(TelephonyDisplayInfo telephonyDisplayInfo) {
             if (DEBUG) {
-                Log.d(mTag, "onDisplayInfoChanged: displayInfo=" + displayInfo);
+                Log.d(mTag, "onDisplayInfoChanged: telephonyDisplayInfo=" + telephonyDisplayInfo);
             }
-            mDisplayInfo = displayInfo;
+            mTelephonyDisplayInfo = telephonyDisplayInfo;
             updateTelephony();
         }
     }

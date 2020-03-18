@@ -500,12 +500,12 @@ public class TelephonyRegistryManager {
      * derived from {@code subscriptionId} except when {@code subscriptionId} is invalid, such as
      * when the device is in emergency-only mode.
      * @param subscriptionId Subscription id for which display network info has changed.
-     * @param displayInfo The display info.
+     * @param telephonyDisplayInfo The display info.
      */
     public void notifyDisplayInfoChanged(int slotIndex, int subscriptionId,
-            @NonNull DisplayInfo displayInfo) {
+                                         @NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
         try {
-            sRegistry.notifyDisplayInfoChanged(slotIndex, subscriptionId, displayInfo);
+            sRegistry.notifyDisplayInfoChanged(slotIndex, subscriptionId, telephonyDisplayInfo);
         } catch (RemoteException ex) {
             // system process is dead
         }
