@@ -39,7 +39,7 @@ StatsdConfig CreateStatsdConfig(int num_buckets, int threshold) {
     countMetric->set_id(123456);
     countMetric->set_what(wakelockAcquireMatcher.id());
     *countMetric->mutable_dimensions_in_what() = CreateAttributionUidDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     countMetric->set_bucket(FIVE_MINUTES);
 
     auto alert = config.add_alert();
@@ -83,12 +83,12 @@ TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket) {
     std::vector<int> attributionUids5 = {222};
     std::vector<string> attributionTags5 = {"GMSCoreModule1"};
 
-    FieldValue fieldValue1(Field(android::util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
+    FieldValue fieldValue1(Field(util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
                            Value((int32_t)111));
     HashableDimensionKey whatKey1({fieldValue1});
     MetricDimensionKey dimensionKey1(whatKey1, DEFAULT_DIMENSION_KEY);
 
-    FieldValue fieldValue2(Field(android::util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
+    FieldValue fieldValue2(Field(util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
                            Value((int32_t)222));
     HashableDimensionKey whatKey2({fieldValue2});
     MetricDimensionKey dimensionKey2(whatKey2, DEFAULT_DIMENSION_KEY);
@@ -194,7 +194,7 @@ TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets) {
     std::vector<int> attributionUids2 = {111, 222};
     std::vector<string> attributionTags2 = {"App1", "GMSCoreModule1"};
 
-    FieldValue fieldValue1(Field(android::util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
+    FieldValue fieldValue1(Field(util::WAKELOCK_STATE_CHANGED, (int32_t)0x02010101),
                            Value((int32_t)111));
     HashableDimensionKey whatKey1({fieldValue1});
     MetricDimensionKey dimensionKey1(whatKey1, DEFAULT_DIMENSION_KEY);

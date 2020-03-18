@@ -45,7 +45,7 @@ StatsdConfig CreateStatsdConfig(int num_buckets,
 
     auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
     FieldMatcher dimensions = CreateAttributionUidDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     dimensions.add_child()->set_field(3);  // The wakelock tag is set in field 3 of the wakelock.
     *holdingWakelockPredicate.mutable_simple_predicate()->mutable_dimensions() = dimensions;
     holdingWakelockPredicate.mutable_simple_predicate()->set_count_nesting(nesting);
@@ -57,7 +57,7 @@ StatsdConfig CreateStatsdConfig(int num_buckets,
     durationMetric->set_condition(screenIsOffPredicate.id());
     durationMetric->set_aggregation_type(aggregationType);
     *durationMetric->mutable_dimensions_in_what() =
-        CreateAttributionUidDimensions(android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+        CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     durationMetric->set_bucket(FIVE_MINUTES);
 
     auto alert = config.add_alert();
@@ -79,13 +79,13 @@ std::vector<int> attributionUids3 = {222};
 std::vector<string> attributionTags3 = {"GMSCoreModule1"};
 
 MetricDimensionKey dimensionKey1(
-        HashableDimensionKey({FieldValue(Field(android::util::WAKELOCK_STATE_CHANGED,
+        HashableDimensionKey({FieldValue(Field(util::WAKELOCK_STATE_CHANGED,
                                                (int32_t)0x02010101),
                                          Value((int32_t)111))}),
         DEFAULT_DIMENSION_KEY);
 
 MetricDimensionKey dimensionKey2(
-    HashableDimensionKey({FieldValue(Field(android::util::WAKELOCK_STATE_CHANGED,
+    HashableDimensionKey({FieldValue(Field(util::WAKELOCK_STATE_CHANGED,
                                            (int32_t)0x02010101), Value((int32_t)222))}),
     DEFAULT_DIMENSION_KEY);
 

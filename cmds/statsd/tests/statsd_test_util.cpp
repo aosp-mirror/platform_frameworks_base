@@ -51,7 +51,7 @@ AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId) {
 }
 
 AtomMatcher CreateTemperatureAtomMatcher() {
-    return CreateSimpleAtomMatcher("TemperatureMatcher", android::util::TEMPERATURE);
+    return CreateSimpleAtomMatcher("TemperatureMatcher", util::TEMPERATURE);
 }
 
 AtomMatcher CreateScheduledJobStateChangedAtomMatcher(const string& name,
@@ -59,7 +59,7 @@ AtomMatcher CreateScheduledJobStateChangedAtomMatcher(const string& name,
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::SCHEDULED_JOB_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::SCHEDULED_JOB_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(3);  // State field.
     field_value_matcher->set_eq_int(state);
@@ -80,7 +80,7 @@ AtomMatcher CreateScreenBrightnessChangedAtomMatcher() {
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId("ScreenBrightnessChanged"));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::SCREEN_BRIGHTNESS_CHANGED);
+    simple_atom_matcher->set_atom_id(util::SCREEN_BRIGHTNESS_CHANGED);
     return atom_matcher;
 }
 
@@ -88,7 +88,7 @@ AtomMatcher CreateUidProcessStateChangedAtomMatcher() {
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId("UidProcessStateChanged"));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::UID_PROCESS_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::UID_PROCESS_STATE_CHANGED);
     return atom_matcher;
 }
 
@@ -97,7 +97,7 @@ AtomMatcher CreateWakelockStateChangedAtomMatcher(const string& name,
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::WAKELOCK_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::WAKELOCK_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(4);  // State field.
     field_value_matcher->set_eq_int(state);
@@ -117,7 +117,7 @@ AtomMatcher CreateBatterySaverModeStateChangedAtomMatcher(
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::BATTERY_SAVER_MODE_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::BATTERY_SAVER_MODE_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(1);  // State field.
     field_value_matcher->set_eq_int(state);
@@ -141,7 +141,7 @@ AtomMatcher CreateScreenStateChangedAtomMatcher(
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::SCREEN_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::SCREEN_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(1);  // State field.
     field_value_matcher->set_eq_int(state);
@@ -164,7 +164,7 @@ AtomMatcher CreateSyncStateChangedAtomMatcher(
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::SYNC_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::SYNC_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(3);  // State field.
     field_value_matcher->set_eq_int(state);
@@ -184,7 +184,7 @@ AtomMatcher CreateActivityForegroundStateChangedAtomMatcher(
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(4);  // Activity field.
     field_value_matcher->set_eq_int(state);
@@ -206,7 +206,7 @@ AtomMatcher CreateProcessLifeCycleStateChangedAtomMatcher(
     AtomMatcher atom_matcher;
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
-    simple_atom_matcher->set_atom_id(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    simple_atom_matcher->set_atom_id(util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
     field_value_matcher->set_field(3);  // Process state field.
     field_value_matcher->set_eq_int(state);
@@ -277,28 +277,28 @@ Predicate CreateIsInBackgroundPredicate() {
 State CreateScreenState() {
     State state;
     state.set_id(StringToId("ScreenState"));
-    state.set_atom_id(android::util::SCREEN_STATE_CHANGED);
+    state.set_atom_id(util::SCREEN_STATE_CHANGED);
     return state;
 }
 
 State CreateUidProcessState() {
     State state;
     state.set_id(StringToId("UidProcessState"));
-    state.set_atom_id(android::util::UID_PROCESS_STATE_CHANGED);
+    state.set_atom_id(util::UID_PROCESS_STATE_CHANGED);
     return state;
 }
 
 State CreateOverlayState() {
     State state;
     state.set_id(StringToId("OverlayState"));
-    state.set_atom_id(android::util::OVERLAY_STATE_CHANGED);
+    state.set_atom_id(util::OVERLAY_STATE_CHANGED);
     return state;
 }
 
 State CreateScreenStateWithOnOffMap() {
     State state;
     state.set_id(StringToId("ScreenStateOnOff"));
-    state.set_atom_id(android::util::SCREEN_STATE_CHANGED);
+    state.set_atom_id(util::SCREEN_STATE_CHANGED);
 
     auto map = CreateScreenStateOnOffMap();
     *state.mutable_map() = map;
@@ -309,7 +309,7 @@ State CreateScreenStateWithOnOffMap() {
 State CreateScreenStateWithInDozeMap() {
     State state;
     state.set_id(StringToId("ScreenStateInDoze"));
-    state.set_atom_id(android::util::SCREEN_STATE_CHANGED);
+    state.set_atom_id(util::SCREEN_STATE_CHANGED);
 
     auto map = CreateScreenStateInDozeMap();
     *state.mutable_map() = map;
@@ -534,7 +534,7 @@ shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs) {
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
         uint64_t timestampNs, const android::view::DisplayStateEnum state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::SCREEN_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::SCREEN_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, state);
@@ -551,7 +551,7 @@ std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
 
 std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::BATTERY_SAVER_MODE_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::BATTERY_SAVER_MODE_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, BatterySaverModeStateChanged::ON);
@@ -568,7 +568,7 @@ std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs) {
 
 std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::BATTERY_SAVER_MODE_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::BATTERY_SAVER_MODE_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, BatterySaverModeStateChanged::OFF);
@@ -585,7 +585,7 @@ std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
 
 std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(uint64_t timestampNs, int level) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::SCREEN_BRIGHTNESS_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::SCREEN_BRIGHTNESS_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, level);
@@ -603,7 +603,7 @@ std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(uint64_t timestampN
 //std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
 //        const std::vector<AttributionNodeInternal>& attributions, const string& jobName,
 //        const ScheduledJobStateChanged::State state, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(android::util::SCHEDULED_JOB_STATE_CHANGED, timestampNs);
+//    auto event = std::make_unique<LogEvent>(util::SCHEDULED_JOB_STATE_CHANGED, timestampNs);
 //    event->write(attributions);
 //    event->write(jobName);
 //    event->write(state);
@@ -632,7 +632,7 @@ std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(uint64_t timestampNs,
                                                           const string& wakelockName,
                                                           const WakelockStateChanged::State state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::WAKELOCK_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::WAKELOCK_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     vector<const char*> cTags(attributionTags.size());
@@ -676,7 +676,7 @@ std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(uint64_t timestampNs,
 std::unique_ptr<LogEvent> CreateActivityForegroundStateChangedEvent(
         uint64_t timestampNs, const int uid, const ActivityForegroundStateChanged::State state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, uid);
@@ -710,7 +710,7 @@ std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(uint64_t timestampNs,
                                                       const string& name,
                                                       const SyncStateChanged::State state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::SYNC_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::SYNC_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     vector<const char*> cTags(attributionTags.size());
@@ -753,7 +753,7 @@ std::unique_ptr<LogEvent> CreateSyncEndEvent(uint64_t timestampNs,
 std::unique_ptr<LogEvent> CreateProcessLifeCycleStateChangedEvent(
         uint64_t timestampNs, const int uid, const ProcessLifeCycleStateChanged::State state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, uid);
@@ -777,7 +777,7 @@ std::unique_ptr<LogEvent> CreateAppCrashEvent(uint64_t timestampNs, const int ui
 
 std::unique_ptr<LogEvent> CreateAppCrashOccurredEvent(uint64_t timestampNs, const int uid) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::APP_CRASH_OCCURRED);
+    AStatsEvent_setAtomId(statsEvent, util::APP_CRASH_OCCURRED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, uid);
@@ -797,7 +797,7 @@ std::unique_ptr<LogEvent> CreateAppCrashOccurredEvent(uint64_t timestampNs, cons
 std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(uint64_t timestampNs, int hostUid,
                                                         int isolatedUid, bool is_create) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::ISOLATED_UID_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::ISOLATED_UID_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, hostUid);
@@ -817,7 +817,7 @@ std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(uint64_t timestampNs, in
 std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
         uint64_t timestampNs, int uid, const android::app::ProcessStateEnum state) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::UID_PROCESS_STATE_CHANGED);
+    AStatsEvent_setAtomId(statsEvent, util::UID_PROCESS_STATE_CHANGED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, uid);
