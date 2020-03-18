@@ -15,26 +15,28 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.accessorychat">
+     package="com.android.accessorychat">
 
-    <uses-feature android:name="android.hardware.usb.accessory" />
+    <uses-feature android:name="android.hardware.usb.accessory"/>
 
     <application android:label="Accessory Chat">
 
-        <activity android:name="AccessoryChat" android:label="Accessory Chat">
+        <activity android:name="AccessoryChat"
+             android:label="Accessory Chat"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
             <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>
             </intent-filter>
 
             <meta-data android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
-                android:resource="@xml/accessory_filter" />
+                 android:resource="@xml/accessory_filter"/>
         </activity>
     </application>
-    <uses-sdk android:minSdkVersion="12" />
+    <uses-sdk android:minSdkVersion="12"/>
 </manifest>

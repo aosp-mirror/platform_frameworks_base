@@ -16,12 +16,13 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.showwhenlocked">
+     package="com.android.showwhenlocked">
     <application android:label="ShowWhenLocked">
         <activity android:name=".ShowWhenLockedActivity"
-                  android:showWhenLocked="true"
-                  android:turnScreenOn="true"
-                  android:launchMode="singleTask">
+             android:showWhenLocked="true"
+             android:turnScreenOn="true"
+             android:launchMode="singleTask"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

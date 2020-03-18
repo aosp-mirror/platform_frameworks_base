@@ -16,21 +16,22 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.surfacecomposition">
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+     package="android.surfacecomposition">
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application android:theme="@style/noeffects">
-        <uses-library android:name="android.test.runner" />
-        <activity android:name="android.surfacecomposition.SurfaceCompositionMeasuringActivity" >
+        <uses-library android:name="android.test.runner"/>
+        <activity android:name="android.surfacecomposition.SurfaceCompositionMeasuringActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
     </application>
 
     <!--  self-instrumenting test package. -->
     <instrumentation android:name="android.test.InstrumentationTestRunner"
-                     android:targetPackage="android.surfacecomposition">
+         android:targetPackage="android.surfacecomposition">
     </instrumentation>
 </manifest>

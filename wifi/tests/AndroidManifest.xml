@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <!--
   ~ Copyright (C) 2016 The Android Open Source Project
   ~
@@ -17,22 +16,23 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="android.net.wifi.test">
+     package="android.net.wifi.test">
 
     <application>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
         <activity android:label="WifiTestDummyLabel"
-                  android:name="WifiTestDummyName">
+             android:name="WifiTestDummyName"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="android.net.wifi.test"
-        android:label="Frameworks Wifi API Tests">
+         android:targetPackage="android.net.wifi.test"
+         android:label="Frameworks Wifi API Tests">
     </instrumentation>
 
 </manifest>

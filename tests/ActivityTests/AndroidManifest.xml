@@ -15,85 +15,98 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.android.test.activity">
-    <uses-permission android:name="android.permission.REAL_GET_TASKS" />
-    <uses-permission android:name="android.permission.REORDER_TASKS" />
-    <uses-permission android:name="android.permission.REMOVE_TASKS" />
-    <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-    <uses-permission android:name="android.permission.MANAGE_USERS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-sdk android:targetSdkVersion="22" />
+     package="com.google.android.test.activity">
+    <uses-permission android:name="android.permission.REAL_GET_TASKS"/>
+    <uses-permission android:name="android.permission.REORDER_TASKS"/>
+    <uses-permission android:name="android.permission.REMOVE_TASKS"/>
+    <uses-permission android:name="android.permission.READ_FRAME_BUFFER"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+    <uses-permission android:name="android.permission.MANAGE_USERS"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-sdk android:targetSdkVersion="22"/>
     <application android:label="ActivityTest">
-        <activity android:name="ActivityTestMain">
+        <activity android:name="ActivityTestMain"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="www.angryredplanet.com"
-                        android:pathPrefix="" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="http"
+                     android:host="www.angryredplanet.com"
+                     android:pathPrefix=""/>
             </intent-filter>
             <preferred>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="www.angryredplanet.com"
-                        android:pathPrefix="" />
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="http"
+                     android:host="www.angryredplanet.com"
+                     android:pathPrefix=""/>
             </preferred>
         </activity>
-        <activity android:name="SpamActivity" android:label="Spam!"
-                android:documentLaunchMode="always">
+        <activity android:name="SpamActivity"
+             android:label="Spam!"
+             android:documentLaunchMode="always">
         </activity>
-        <activity android:name="DocActivity" android:label="Some doc">
+        <activity android:name="DocActivity"
+             android:label="Some doc">
         </activity>
         <service android:name="SingleUserService"
-            android:singleUser="true" android:exported="true">
+             android:singleUser="true"
+             android:exported="true">
         </service>
         <service android:name="ServiceUserTarget">
         </service>
         <receiver android:name="UserTarget">
         </receiver>
-        <service android:name="IsolatedService" android:isolatedProcess="true">
+        <service android:name="IsolatedService"
+             android:isolatedProcess="true">
         </service>
-        <receiver android:name="StartEmpty" android:exported="true">
+        <receiver android:name="StartEmpty"
+             android:exported="true">
             <intent-filter>
-                <action android:name="com.example.START_EMPTY" />
+                <action android:name="com.example.START_EMPTY"/>
             </intent-filter>
         </receiver>
-        <service android:name="EmptyService" android:exported="true">
+        <service android:name="EmptyService"
+             android:exported="true">
             <intent-filter>
-                <action android:name="com.example.START_EMPTY" />
+                <action android:name="com.example.START_EMPTY"/>
             </intent-filter>
         </service>
         <receiver android:name="SingleUserReceiver"
-            android:singleUser="true" android:exported="true" >
+             android:singleUser="true"
+             android:exported="true">
         </receiver>
         <provider android:name="SingleUserProvider"
-            android:authorities="com.google.android.test.activity.single_user"
-            android:singleUser="true" android:exported="true" />
-        <receiver android:name="TrackTimeReceiver" />
-        <receiver android:name="AlarmSpamReceiver" />
-        <receiver android:name="SlowReceiver" />
+             android:authorities="com.google.android.test.activity.single_user"
+             android:singleUser="true"
+             android:exported="true"/>
+        <receiver android:name="TrackTimeReceiver"/>
+        <receiver android:name="AlarmSpamReceiver"/>
+        <receiver android:name="SlowReceiver"/>
         <activity android:name="DisableScreenshotsActivity"
-                android:label="DisableScreenshots"
-                android:theme="@style/DisableScreenshots">
+             android:label="DisableScreenshots"
+             android:theme="@style/DisableScreenshots"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="CustomSplashscreenActivity"
-            android:label="CustomSplashscreen"
-            android:theme="@style/CustomSplashscreen">
+             android:label="CustomSplashscreen"
+             android:theme="@style/CustomSplashscreen"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

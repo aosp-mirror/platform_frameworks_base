@@ -16,39 +16,34 @@
  -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.stubs.am">
+     package="com.android.stubs.am">
 
     <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
-    <application android:label="Android TestCase" >
-        <provider
-                android:authorities="@string/authority"
-                android:name=".TestContentProvider"
-                android:exported="true" />
-        <receiver
-                android:name=".TestBroadcastReceiver"
-                android:exported="true">
+    <application android:label="Android TestCase">
+        <provider android:authorities="@string/authority"
+             android:name=".TestContentProvider"
+             android:exported="true"/>
+        <receiver android:name=".TestBroadcastReceiver"
+             android:exported="true">
             <intent-filter>
-                <action android:name="com.android.stubs.am.ACTION_BROADCAST_TEST" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.android.stubs.am.ACTION_BROADCAST_TEST"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>
-        <service
-                android:name=".InitService"
-                android:exported="true" />
-        <service
-                android:name=".TestService"
-                android:exported="true" />
-        <activity
-                android:name=".TestActivity"
-                android:excludeFromRecents="true"
-                android:turnScreenOn="true"
-                android:launchMode="singleTask">
+        <service android:name=".InitService"
+             android:exported="true"/>
+        <service android:name=".TestService"
+             android:exported="true"/>
+        <activity android:name=".TestActivity"
+             android:excludeFromRecents="true"
+             android:turnScreenOn="true"
+             android:launchMode="singleTask"
+             android:exported="true">
             <intent-filter>
-                <action android:name="com.android.stubs.am.ACTION_START_TEST_ACTIVITY" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="com.android.stubs.am.ACTION_START_TEST_ACTIVITY"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
     </application>
 
 </manifest>
-

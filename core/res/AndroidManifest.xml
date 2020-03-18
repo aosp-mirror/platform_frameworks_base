@@ -5044,6 +5044,7 @@
                 android:relinquishTaskIdentity="true"
                 android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
                 android:process=":ui"
+                android:exported="true"
                 android:visibleToInstantApps="true">
             <intent-filter>
                 <action android:name="android.intent.action.CHOOSER" />
@@ -5155,6 +5156,7 @@
         <activity android:name="com.android.internal.app.ShutdownActivity"
             android:permission="android.permission.SHUTDOWN"
             android:theme="@style/Theme.NoDisplay"
+            android:exported="true"
             android:excludeFromRecents="true">
             <intent-filter>
                 <action android:name="com.android.internal.intent.action.REQUEST_SHUTDOWN" />
@@ -5176,6 +5178,7 @@
                   android:enabled="false"
                   android:process=":ui"
                   android:systemUserOnly="true"
+                  android:exported="true"
                   android:theme="@style/Theme.Translucent.NoTitleBar">
             <intent-filter android:priority="-100">
                 <action android:name="android.intent.action.MAIN" />
@@ -5188,6 +5191,7 @@
         <activity android:name="com.android.internal.app.ConfirmUserCreationActivity"
                 android:excludeFromRecents="true"
                 android:process=":ui"
+                android:exported="true"
                 android:theme="@style/Theme.Dialog.Confirmation">
             <intent-filter android:priority="1000">
                 <action android:name="android.os.action.CREATE_USER" />
@@ -5228,6 +5232,7 @@
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver"
+                android:exported="true"
                 android:systemUserOnly="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -5235,6 +5240,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.CertPinInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_PINS" />
@@ -5243,6 +5249,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.IntentFirewallInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_INTENT_FIREWALL" />
@@ -5251,6 +5258,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.SmsShortCodesInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SMS_SHORT_CODES" />
@@ -5259,6 +5267,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.NetworkWatchlistInstallReceiver"
+                  android:exported="true"
                   android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_NETWORK_WATCHLIST" />
@@ -5267,6 +5276,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.ApnDbInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="com.android.internal.intent.action.UPDATE_APN_DB" />
@@ -5275,6 +5285,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.CarrierProvisioningUrlsInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_CARRIER_PROVISIONING_URLS" />
@@ -5283,6 +5294,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.CertificateTransparencyLogInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_CT_LOGS" />
@@ -5291,6 +5303,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.LangIdInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_LANG_ID" />
@@ -5299,6 +5312,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.SmartSelectionInstallReceiver"
+                android:exported="true"
                 android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_SMART_SELECTION" />
@@ -5307,6 +5321,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.ConversationActionsInstallReceiver"
+                  android:exported="true"
                   android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.intent.action.UPDATE_CONVERSATION_ACTIONS" />
@@ -5315,6 +5330,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.CarrierIdInstallReceiver"
+                  android:exported="true"
                   android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.os.action.UPDATE_CARRIER_ID_DB" />
@@ -5323,6 +5339,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.updates.EmergencyNumberDbInstallReceiver"
+                  android:exported="true"
                   android:permission="android.permission.UPDATE_CONFIG">
             <intent-filter>
                 <action android:name="android.os.action.UPDATE_EMERGENCY_NUMBER_DB" />
@@ -5331,6 +5348,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.MasterClearReceiver"
+            android:exported="true"
             android:permission="android.permission.MASTER_CLEAR">
             <intent-filter
                     android:priority="100" >
@@ -5347,6 +5365,7 @@
         </receiver>
 
         <receiver android:name="com.android.server.WallpaperUpdateReceiver"
+                  android:exported="true"
                   android:permission="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY">
             <intent-filter>
                 <action android:name="android.intent.action.DEVICE_CUSTOMIZATION_READY"/>
@@ -5443,7 +5462,8 @@
                  android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
-        <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader">
+        <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA" />
             </intent-filter>

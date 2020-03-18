@@ -692,7 +692,8 @@
                   android:visibleToInstantApps="true">
         </activity>
 
-        <receiver android:name=".controls.management.ControlsRequestReceiver">
+        <receiver android:name=".controls.management.ControlsRequestReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.service.controls.action.ADD_CONTROL" />
             </intent-filter>
