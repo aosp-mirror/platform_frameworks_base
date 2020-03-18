@@ -60,6 +60,8 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
         mCarDeviceProvisionedController = deviceProvisionedController;
         mCarStatusBarLazy = carStatusBarLazy;
 
+        boolean showOnBottom = resources.getBoolean(R.bool.config_showHeadsUpNotificationOnBottom);
+
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -68,11 +70,13 @@ public class CarHeadsUpNotificationSystemContainer implements CarHeadsUpNotifica
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
                 PixelFormat.TRANSLUCENT);
 
-        lp.gravity = Gravity.TOP;
+        lp.gravity = showOnBottom ? Gravity.BOTTOM : Gravity.TOP;
         lp.setTitle("HeadsUpNotification");
 
-        mWindow = (ViewGroup) LayoutInflater.from(context)
-                .inflate(R.layout.headsup_container, null, false);
+        int layoutId = showOnBottom
+                ? R.layout.headsup_container_bottom
+                : R.layout.headsup_container;
+        mWindow = (ViewGroup) LayoutInflater.from(context).inflate(layoutId, null, false);
         windowManager.addView(mWindow, lp);
         mWindow.setVisibility(View.INVISIBLE);
         mHeadsUpContentFrame = mWindow.findViewById(R.id.headsup_content);
