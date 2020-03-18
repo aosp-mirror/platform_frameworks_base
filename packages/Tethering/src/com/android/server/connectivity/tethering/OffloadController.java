@@ -284,7 +284,7 @@ public class OffloadController {
                 final ForwardedStats value = kv.getValue();
                 final Entry entry = new Entry(kv.getKey(), uid, SET_DEFAULT, TAG_NONE, METERED_NO,
                         ROAMING_NO, DEFAULT_NETWORK_NO, value.rxBytes, 0L, value.txBytes, 0L, 0L);
-                stats = stats.addValues(entry);
+                stats = stats.addEntry(entry);
             }
 
             return stats;
