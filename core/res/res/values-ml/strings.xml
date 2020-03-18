@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"നിങ്ങളുടെ ശാരീരിക പ്രവർത്തനം ഈ ആപ്പിന് തിരിച്ചറിയാനാവും."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ഏതുസമയത്തും ക്യാമറ ഉപയോഗിച്ചുകൊണ്ട് ചിത്രങ്ങൾ എടുക്കാനും വീഡിയോകൾ റെക്കോർഡുചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
-    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ക്യാമറയുള്ള ഉപകരണങ്ങൾ ഓണാക്കുന്നതിനെയോ അടയ്ക്കുന്നതിനെയോ കുറിച്ചുള്ള കോൾബാക്കുകൾ സ്വീകരിക്കാൻ ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ക്യാമറയുള്ള ഏതെങ്കിലും ഉപകരണം ഓണാക്കുമ്പോഴോ (ആപ്പ് പാക്കേജ് മുഖേന) അടയ്ക്കുമ്പോഴോ ഈ സിഗ്‌നേച്ചർ ആപ്പിന് കോൾബാക്കുകൾ സ്വീകരിക്കാനാവും."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>

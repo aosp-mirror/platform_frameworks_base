@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"এই অ্যাপ আপনার শারীরিক অ্যাক্টিভিটি শনাক্ত করতে পারবে।"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ছবি এবং ভিডিও তোলে"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"এই অ্যাপটি যে কোনো সময় ক্যামেরা ব্যবহার করে ছবি তুলতে বা ভিডিও রেকর্ড করতে পারে৷"</string>
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
-    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"কোনও অ্যাপ্লিকেশন বা পরিষেবাকে ক্যামেরা ডিভাইসগুলি খোলা বা বন্ধ হওয়া সম্পর্কে কলব্যাকগুলি গ্রহণ করার অনুমতি দিন।"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"কোনও ক্যামেরা ডিভাইস খোলার সময় (কোনও অ্যাপ্লিকেশন প্যাকেজের সাহায্যে) বা বন্ধ করার সময় এই সিগনেচার অ্যাপটি কলব্যাকগুলি গ্রহণ করতে পারে।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ভাইব্রেশন নিয়ন্ত্রণ করুন"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"অ্যাপ্লিকেশানকে কম্পক নিয়ন্ত্রণ করতে দেয়৷"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"সরাসরি ফোন নম্বরগুলিতে কল করে"</string>
