@@ -31,7 +31,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 class StatefulControlSubscriber(
     private val controller: ControlsController,
     private val provider: ControlsProviderLifecycleManager,
-    private val bgExecutor: DelayableExecutor
+    private val bgExecutor: DelayableExecutor,
+    private val requestLimit: Long
 ) : IControlsSubscriber.Stub() {
     private var subscriptionOpen = false
     private var subscription: IControlsSubscription? = null
@@ -50,7 +51,7 @@ class StatefulControlSubscriber(
         run(token) {
             subscriptionOpen = true
             subscription = subs
-            provider.startSubscription(subs)
+            provider.startSubscription(subs, requestLimit)
         }
     }
 

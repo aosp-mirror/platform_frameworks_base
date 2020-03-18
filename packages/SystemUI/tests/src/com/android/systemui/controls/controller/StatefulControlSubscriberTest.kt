@@ -59,13 +59,15 @@ class StatefulControlSubscriberTest : SysuiTestCase() {
 
     private lateinit var scs: StatefulControlSubscriber
 
+    private val REQUEST_LIMIT = 5L
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
         `when`(provider.componentName).thenReturn(TEST_COMPONENT)
         `when`(provider.token).thenReturn(token)
-        scs = StatefulControlSubscriber(controller, provider, executor)
+        scs = StatefulControlSubscriber(controller, provider, executor, REQUEST_LIMIT)
     }
 
     @Test
@@ -73,7 +75,7 @@ class StatefulControlSubscriberTest : SysuiTestCase() {
         scs.onSubscribe(token, subscription)
 
         executor.runAllReady()
-        verify(provider).startSubscription(subscription)
+        verify(provider).startSubscription(subscription, REQUEST_LIMIT)
     }
 
     @Test
@@ -81,7 +83,7 @@ class StatefulControlSubscriberTest : SysuiTestCase() {
         scs.onSubscribe(badToken, subscription)
 
         executor.runAllReady()
-        verify(provider, never()).startSubscription(subscription)
+        verify(provider, never()).startSubscription(subscription, REQUEST_LIMIT)
     }
 
     @Test
