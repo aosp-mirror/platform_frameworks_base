@@ -294,7 +294,7 @@
     <string name="permgrouprequest_sms" msgid="3985338150822482831">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да изпраща и преглежда SMS съобщения?"</string>
     <string name="permgrouplab_storage" msgid="1121695277384787841">"Хранилище"</string>
     <string name="permgroupdesc_storage" msgid="6351503740613026600">"да има достъп до снимките, мултимедията и файловете на устройството ви"</string>
-    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да осъществява достъп до снимките, мултимедията и файловете на устройството ви?"</string>
+    <string name="permgrouprequest_storage" msgid="1594774620878445266">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да има достъп до снимките, мултимедията и файловете на устройството ви?"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"записва звук"</string>
     <string name="permgrouprequest_microphone" msgid="4942966684471718126">"Да се разреши ли на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да записва аудио?"</string>

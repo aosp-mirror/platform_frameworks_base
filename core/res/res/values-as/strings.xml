@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"এই এপটোৱে আপোনাৰ শাৰীৰিক কাৰ্যকলাপ চিনাক্ত কৰিব পাৰে।"</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ফট\' তোলা আৰু ভিডিঅ\' ৰেকৰ্ড কৰা"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"এই এপে যিকোনো সময়তে কেমেৰা ব্যৱহাৰ কৰি ফট\' তুলিব আৰু ভিডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
-    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"কোনো এপ্লিকেশ্বন অথবা সেৱাক কেমেৰা ডিভাইচসমূহ খোলা অথবা বন্ধ কৰাৰ বিষয়ে কলবেকসমূহ গ্ৰহণ কৰিবলৈ অনুমতি দিয়ক।"</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"যেতিয়া কোনো কেমেৰা ডিভাইচ খোলা (কোনো এপ্লিকেশ্বন পেকেজৰ দ্বাৰা) অথবা বন্ধ কৰা হয়, তেতিয়া এই স্বাক্ষৰ এপ্‌টোৱে কলবেকসমূহ গ্ৰহণ কৰিব পাৰে।"</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"কম্পন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ভাইব্ৰেটৰ নিয়ন্ত্ৰণ কৰিবলৈ এপটোক অনুমতি দিয়ে।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"পোনপটীয়াকৈ ফ\'ন নম্বৰলৈ কল কৰক"</string>

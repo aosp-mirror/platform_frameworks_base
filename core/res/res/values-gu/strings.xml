@@ -434,10 +434,8 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"આ ઍપ તમારી શારીરિક પ્રવૃત્તિને ઓળખી શકે છે."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"ચિત્રો અને વિડિઓઝ લો"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"આ ઍપ્લિકેશન, કૅમેરાનો ઉપયોગ કરીને કોઈપણ સમયે ચિત્રો લઈ અને વિડિઓઝ રેકોર્ડ કરી શકે છે."</string>
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
-    <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
-    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"કૅમેરા ડિવાઇસ ચાલુ કે બંધ થવા વિશે કૉલબૅક પ્રાપ્ત કરવાની ઍપ્લિકેશન કે સેવાને મંજૂરી આપો."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"જ્યારે કોઈ કૅમેરા ડિવાઇસ (ક્યા ઍપ્લિકેશન પૅકેજ વડે) ખોલવા કે બંધ કરવામાં આવે, ત્યારે આ વિશેષ ઍપ કૉલબૅક પ્રાપ્ત કરી શકે છે."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"વાઇબ્રેશન નિયંત્રિત કરો"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"એપ્લિકેશનને વાઇબ્રેટરને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"સીધા જ ફોન નંબર્સ પર કૉલ કરો"</string>

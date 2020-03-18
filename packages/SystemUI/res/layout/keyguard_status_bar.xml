@@ -30,6 +30,7 @@
         android:id="@+id/status_icon_area"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:paddingTop="@dimen/status_bar_padding_top"
         android:layout_alignParentEnd="true"
         android:gravity="center_vertical|end" >
         <FrameLayout android:id="@+id/system_icons_container"
@@ -66,6 +67,7 @@
         android:id="@+id/keyguard_carrier_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="@dimen/status_bar_padding_top"
         android:layout_marginStart="@dimen/keyguard_carrier_text_margin"
         android:layout_toStartOf="@id/system_icons_container"
         android:gravity="center_vertical"
