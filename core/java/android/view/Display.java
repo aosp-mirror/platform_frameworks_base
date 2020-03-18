@@ -1307,6 +1307,15 @@ public final class Display {
     }
 
     /**
+     * Returns true if the display is in active state such as {@link #STATE_ON}
+     * or {@link #STATE_VR}.
+     * @hide
+     */
+    public static boolean isActiveState(int state) {
+        return state == STATE_ON || state == STATE_VR;
+    }
+
+    /**
      * A mode supported by a given display.
      *
      * @see Display#getSupportedModes()
