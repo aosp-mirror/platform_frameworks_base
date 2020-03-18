@@ -66,6 +66,10 @@ public final class SocketUtils {
 
     /**
      * Make socket address that packet sockets can bind to.
+     *
+     * @param protocol the layer 2 protocol of the packets to receive. One of the {@code ETH_P_*}
+     *                 constants in {@link android.system.OsConstants}.
+     * @param ifIndex the interface index on which packets will be received.
      */
     @NonNull
     public static SocketAddress makePacketSocketAddress(int protocol, int ifIndex) {
@@ -78,6 +82,9 @@ public final class SocketUtils {
     /**
      * Make a socket address that packet socket can send packets to.
      * @deprecated Use {@link #makePacketSocketAddress(int, int, byte[])} instead.
+     *
+     * @param ifIndex the interface index on which packets will be sent.
+     * @param hwAddr the hardware address to which packets will be sent.
      */
     @Deprecated
     @NonNull
@@ -89,7 +96,12 @@ public final class SocketUtils {
     }
 
     /**
-     * Make a socket address that packet socket can send packets to.
+     * Make a socket address that a packet socket can send packets to.
+     *
+     * @param protocol the layer 2 protocol of the packets to send. One of the {@code ETH_P_*}
+     *                 constants in {@link android.system.OsConstants}.
+     * @param ifIndex the interface index on which packets will be sent.
+     * @param hwAddr the hardware address to which packets will be sent.
      */
     @NonNull
     public static SocketAddress makePacketSocketAddress(int protocol, int ifIndex,
