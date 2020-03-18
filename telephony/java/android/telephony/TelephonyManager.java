@@ -73,6 +73,7 @@ import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.CallForwardingReason;
 import android.telephony.Annotation.CallState;
 import android.telephony.Annotation.CallWaitingStatus;
+import android.telephony.Annotation.CarrierPrivilegeStatus;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
@@ -11115,8 +11116,6 @@ public class TelephonyManager {
                 retVal = telephony.isDataEnabled(subId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error isDataConnectionAllowed", e);
-        } catch (NullPointerException e) {
-            return false;
         }
         return retVal;
     }
@@ -12351,7 +12350,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getCarrierPrivilegeStatus(int uid) {
+    public @CarrierPrivilegeStatus int getCarrierPrivilegeStatus(int uid) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
