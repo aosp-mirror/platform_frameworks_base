@@ -65,7 +65,6 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
             new TetheringManager.TetheringEventCallback() {
                 @Override
                 public void onTetheringSupported(boolean supported) {
-                    super.onTetheringSupported(supported);
                     if (mIsTetheringSupported != supported) {
                         mIsTetheringSupported = supported;
                         fireHotspotAvailabilityChanged();
@@ -75,7 +74,6 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
                 @Override
                 public void onTetherableInterfaceRegexpsChanged(
                         TetheringManager.TetheringInterfaceRegexps reg) {
-                    super.onTetherableInterfaceRegexpsChanged(reg);
                     final boolean newValue = reg.getTetherableWifiRegexs().size() != 0;
                     if (mHasTetherableWifiRegexs != newValue) {
                         mHasTetherableWifiRegexs = newValue;
