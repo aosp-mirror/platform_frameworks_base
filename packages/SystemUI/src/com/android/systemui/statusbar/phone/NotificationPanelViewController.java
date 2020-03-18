@@ -1844,7 +1844,14 @@ public class NotificationPanelViewController extends PanelViewController {
         } else {
             maxHeight = calculatePanelHeightShade();
         }
-        maxHeight = Math.max(maxHeight, min);
+        maxHeight = Math.max(min, maxHeight);
+        if (maxHeight == 0) {
+            Log.wtf(TAG, "maxPanelHeight is 0. getOverExpansionAmount(): "
+                    + getOverExpansionAmount() + ", calculatePanelHeightQsExpanded: "
+                    + calculatePanelHeightQsExpanded() + ", calculatePanelHeightShade: "
+                    + calculatePanelHeightShade() + ", mStatusBarMinHeight = "
+                    + mStatusBarMinHeight + ", mQsMinExpansionHeight = " + mQsMinExpansionHeight);
+        }
         return maxHeight;
     }
 
