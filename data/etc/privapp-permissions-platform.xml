@@ -354,6 +354,8 @@ applications that come with the platform
         <!-- Permission required to test lights control APIs. -->
         <permission name="android.permission.CONTROL_DEVICE_LIGHTS" />
         <permission name="android.permission.REBOOT"/>
+        <!-- Permission required for testing system audio effect APIs. -->
+        <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
