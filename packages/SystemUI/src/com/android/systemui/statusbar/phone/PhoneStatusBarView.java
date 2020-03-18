@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.ScreenDecorations.DisplayCutoutView.boundsFromDirection;
 
+import static java.lang.Float.isNaN;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -254,6 +256,9 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public void panelScrimMinFractionChanged(float minFraction) {
+        if (isNaN(minFraction)) {
+            throw new IllegalArgumentException("minFraction cannot be NaN");
+        }
         if (mMinFraction != minFraction) {
             mMinFraction = minFraction;
             updateScrimFraction();
