@@ -233,7 +233,7 @@ public class SurfaceControlViewHost {
      * and render the object unusable.
      */
     public void release() {
-        mViewRoot.dispatchDetachedFromWindow();
+        mViewRoot.die(false /* immediate */);
         mSurfaceControl.release();
     }
 
