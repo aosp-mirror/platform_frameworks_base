@@ -6824,6 +6824,10 @@ public class DevicePolicyManager {
      * package will no longer be suspended. The admin can block this by using
      * {@link #setUninstallBlocked}.
      *
+     * <p>Some apps cannot be suspended, such as device admins, the active launcher, the required
+     * package installer, the required package uninstaller, the required package verifier, the
+     * default dialer, and the permission controller.
+     *
      * @param admin The name of the admin component to check, or {@code null} if the caller is a
      *            package access delegate.
      * @param packageNames The package names to suspend or unsuspend.
