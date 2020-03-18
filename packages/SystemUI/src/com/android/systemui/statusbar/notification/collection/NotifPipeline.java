@@ -82,14 +82,14 @@ public class NotifPipeline implements CommonNotifCollection {
     }
 
     /**
-     * Returns the list of "active" notifications, i.e. the notifications that are currently posted
+     * Returns the list of all known notifications, i.e. the notifications that are currently posted
      * to the phone. In general, this tracks closely to the list maintained by NotificationManager,
      * but it can diverge slightly due to lifetime extenders.
      *
      * The returned collection is read-only, unsorted, unfiltered, and ungrouped.
      */
-    public Collection<NotificationEntry> getActiveNotifs() {
-        return mNotifCollection.getActiveNotifs();
+    public Collection<NotificationEntry> getAllNotifs() {
+        return mNotifCollection.getAllNotifs();
     }
 
     @Override

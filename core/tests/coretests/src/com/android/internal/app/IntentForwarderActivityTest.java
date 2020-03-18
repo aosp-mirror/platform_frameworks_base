@@ -48,6 +48,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -56,6 +57,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -87,6 +89,7 @@ public class IntentForwarderActivityTest {
     static {
         MANAGED_PROFILE_INFO.id = 10;
         MANAGED_PROFILE_INFO.flags = UserInfo.FLAG_MANAGED_PROFILE;
+        MANAGED_PROFILE_INFO.userType = UserManager.USER_TYPE_PROFILE_MANAGED;
     }
 
     private static UserInfo CURRENT_USER_INFO = new UserInfo();
@@ -116,12 +119,21 @@ public class IntentForwarderActivityTest {
 
     private Context mContext;
     public static final String PHONE_NUMBER = "123-456-789";
+    private int mDeviceProvisionedInitialValue;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getTargetContext();
         sInjector = spy(new TestInjector());
+        mDeviceProvisionedInitialValue = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.DEVICE_PROVISIONED, /* def= */ 0);
+    }
+
+    @After
+    public void tearDown() {
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                mDeviceProvisionedInitialValue);
     }
 
     @Test
@@ -533,6 +545,22 @@ public class IntentForwarderActivityTest {
     }
 
     @Test
+    public void shouldSkipDisclosure_duringDeviceSetup() throws RemoteException {
+        setupShouldSkipDisclosureTest();
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                /* value= */ 0);
+        Intent intent = new Intent(mContext, IntentForwarderWrapperActivity.class)
+                .setAction(Intent.ACTION_VIEW)
+                .addCategory(Intent.CATEGORY_BROWSABLE)
+                .setData(Uri.fromParts("http", "apache.org", null));
+
+        mActivityRule.launchActivity(intent);
+
+        verify(mIPm).canForwardTo(any(), any(), anyInt(), anyInt());
+        verify(sInjector, never()).showToast(anyInt(), anyInt());
+    }
+
+    @Test
     public void forwardToManagedProfile_LoggingTest() throws Exception {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
 
@@ -590,6 +618,8 @@ public class IntentForwarderActivityTest {
         sComponentName = FORWARD_TO_MANAGED_PROFILE_COMPONENT_NAME;
         sActivityName = "MyTestActivity";
         sPackageName = "test.package.name";
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.DEVICE_PROVISIONED,
+                /* value= */ 1);
         when(mApplicationInfo.isSystemApp()).thenReturn(true);
         // Managed profile exists.
         List<UserInfo> profiles = new ArrayList<>();

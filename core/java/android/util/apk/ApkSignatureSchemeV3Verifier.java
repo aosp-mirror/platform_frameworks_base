@@ -213,13 +213,22 @@ public class ApkSignatureSchemeV3Verifier {
                     verityDigest, apk.length(), signatureInfo);
         }
 
-        if (contentDigests.containsKey(CONTENT_DIGEST_CHUNKED_SHA512)) {
-            result.digest = contentDigests.get(CONTENT_DIGEST_CHUNKED_SHA512);
-        } else if (contentDigests.containsKey(CONTENT_DIGEST_CHUNKED_SHA256)) {
-            result.digest = contentDigests.get(CONTENT_DIGEST_CHUNKED_SHA256);
-        }
+        result.digest = pickBestV3DigestForV4(contentDigests);
 
         return result;
+    }
+
+    // Keep in sync with pickBestV3DigestForV4 in apksigner.V3SchemeVerifier.
+    private static byte[] pickBestV3DigestForV4(Map<Integer, byte[]> contentDigests) {
+        final int[] orderedContentDigestTypes =
+                {CONTENT_DIGEST_CHUNKED_SHA512, CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
+                        CONTENT_DIGEST_CHUNKED_SHA256};
+        for (int contentDigestType : orderedContentDigestTypes) {
+            if (contentDigests.containsKey(contentDigestType)) {
+                return contentDigests.get(contentDigestType);
+            }
+        }
+        return null;
     }
 
     private static VerifiedSigner verifySigner(

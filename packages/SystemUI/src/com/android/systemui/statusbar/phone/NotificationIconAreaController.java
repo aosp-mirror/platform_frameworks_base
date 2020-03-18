@@ -253,8 +253,8 @@ public class NotificationIconAreaController implements DarkReceiver,
             boolean hidePulsing, boolean onlyShowCenteredIcon) {
 
         final boolean isCenteredNotificationIcon = mCenteredIconView != null
-                && entry.centeredIcon != null
-                && Objects.equals(entry.centeredIcon, mCenteredIconView);
+                && entry.getIcons().getCenteredIcon() != null
+                && Objects.equals(entry.getIcons().getCenteredIcon(), mCenteredIconView);
         if (onlyShowCenteredIcon) {
             return isCenteredNotificationIcon;
         }
@@ -307,7 +307,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     }
 
     private void updateShelfIcons() {
-        updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
+        updateIconsForLayout(entry -> entry.getIcons().getShelfIcon(), mShelfIcons,
                 true /* showAmbient */,
                 true /* showLowPriority */,
                 false /* hideDismissed */,
@@ -319,7 +319,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     }
 
     public void updateStatusBarIcons() {
-        updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
+        updateIconsForLayout(entry -> entry.getIcons().getStatusBarIcon(), mNotificationIcons,
                 false /* showAmbient */,
                 mShowLowPriority,
                 true /* hideDismissed */,
@@ -331,7 +331,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     }
 
     private void updateCenterIcon() {
-        updateIconsForLayout(entry -> entry.centeredIcon, mCenteredIcon,
+        updateIconsForLayout(entry -> entry.getIcons().getCenteredIcon(), mCenteredIcon,
                 false /* showAmbient */,
                 true /* showLowPriority */,
                 false /* hideDismissed */,
@@ -343,7 +343,7 @@ public class NotificationIconAreaController implements DarkReceiver,
     }
 
     public void updateAodNotificationIcons() {
-        updateIconsForLayout(entry -> entry.aodIcon, mAodIcons,
+        updateIconsForLayout(entry -> entry.getIcons().getAodIcon(), mAodIcons,
                 false /* showAmbient */,
                 true /* showLowPriority */,
                 true /* hideDismissed */,
@@ -517,7 +517,7 @@ public class NotificationIconAreaController implements DarkReceiver,
      * Shows the icon view given in the center.
      */
     public void showIconCentered(NotificationEntry entry) {
-        StatusBarIconView icon = entry == null ? null :  entry.centeredIcon;
+        StatusBarIconView icon = entry == null ? null : entry.getIcons().getCenteredIcon();
         if (!Objects.equals(mCenteredIconView, icon)) {
             mCenteredIconView = icon;
             updateNotificationIcons();

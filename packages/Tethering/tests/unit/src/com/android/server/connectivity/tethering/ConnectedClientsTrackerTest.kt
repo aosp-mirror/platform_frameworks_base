@@ -46,22 +46,27 @@ class ConnectedClientsTrackerTest {
 
     private val client1Addr = MacAddress.fromString("01:23:45:67:89:0A")
     private val client1 = TetheredClient(client1Addr, listOf(
-            AddressInfo(LinkAddress("192.168.43.44/32"), null /* hostname */, clock.time + 20)),
+            makeAddrInfo("192.168.43.44/32", null /* hostname */, clock.time + 20)),
             TETHERING_WIFI)
     private val wifiClient1 = makeWifiClient(client1Addr)
     private val client2Addr = MacAddress.fromString("02:34:56:78:90:AB")
-    private val client2Exp30AddrInfo = AddressInfo(
-            LinkAddress("192.168.43.45/32"), "my_hostname", clock.time + 30)
+    private val client2Exp30AddrInfo = makeAddrInfo(
+            "192.168.43.45/32", "my_hostname", clock.time + 30)
     private val client2 = TetheredClient(client2Addr, listOf(
             client2Exp30AddrInfo,
-            AddressInfo(LinkAddress("2001:db8:12::34/72"), "other_hostname", clock.time + 10)),
+            makeAddrInfo("2001:db8:12::34/72", "other_hostname", clock.time + 10)),
             TETHERING_WIFI)
     private val wifiClient2 = makeWifiClient(client2Addr)
     private val client3Addr = MacAddress.fromString("03:45:67:89:0A:BC")
     private val client3 = TetheredClient(client3Addr,
-            listOf(AddressInfo(LinkAddress("2001:db8:34::34/72"), "other_other_hostname",
-                    clock.time + 10)),
+            listOf(makeAddrInfo("2001:db8:34::34/72", "other_other_hostname", clock.time + 10)),
             TETHERING_USB)
+
+    private fun makeAddrInfo(addr: String, hostname: String?, expTime: Long) =
+            LinkAddress(addr).let {
+                AddressInfo(LinkAddress(it.address, it.prefixLength, it.flags, it.scope,
+                        expTime /* deprecationTime */, expTime /* expirationTime */), hostname)
+            }
 
     @Test
     fun testUpdateConnectedClients() {

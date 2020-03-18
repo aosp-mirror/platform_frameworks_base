@@ -278,7 +278,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testContainerChanges() {
+    public void testContainerFocusableChanges() {
         removeGlobalMinSizeRestriction();
         final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
@@ -288,6 +288,24 @@ public class TaskOrganizerTests extends WindowTestsBase {
         t.setFocusable(stack.mRemoteToken, false);
         mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
         assertFalse(task.isFocusable());
+        t.setFocusable(stack.mRemoteToken, true);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        assertTrue(task.isFocusable());
+    }
+
+    @Test
+    public void testContainerHiddenChanges() {
+        removeGlobalMinSizeRestriction();
+        final ActivityStack stack = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
+        WindowContainerTransaction t = new WindowContainerTransaction();
+        assertTrue(stack.shouldBeVisible(null));
+        t.setHidden(stack.mRemoteToken, true);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        assertFalse(stack.shouldBeVisible(null));
+        t.setHidden(stack.mRemoteToken, false);
+        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        assertTrue(stack.shouldBeVisible(null));
     }
 
     @Test

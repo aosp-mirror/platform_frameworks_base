@@ -20,8 +20,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
@@ -33,12 +35,15 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.NotifViewBarn;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -73,6 +78,8 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
     @Mock private NotifPipeline mNotifPipeline;
     @Mock private IStatusBarService mService;
     @Mock private NotifInflaterImpl mNotifInflater;
+    @Mock private NotificationInterruptStateProvider mNotificationInterruptStateProvider;
+    @Mock private HeadsUpManager mHeadsUpManager;
 
     @Before
     public void setUp() {
@@ -86,7 +93,10 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
                 mock(PreparationCoordinatorLogger.class),
                 mNotifInflater,
                 mErrorManager,
-                mService);
+                mock(NotifViewBarn.class),
+                mService,
+                mNotificationInterruptStateProvider,
+                mHeadsUpManager);
 
         ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
         mCoordinator.attach(mNotifPipeline);
@@ -169,5 +179,25 @@ public class PreparationCoordinatorTest extends SysuiTestCase {
 
         // THEN it isn't filtered from shade list
         assertFalse(mUninflatedFilter.shouldFilterOut(mEntry, 0));
+    }
+
+    @Test
+    public void testShowHUNOnInflationFinished() {
+        // WHEN a notification should HUN and its inflation is finished
+        when(mNotificationInterruptStateProvider.shouldHeadsUp(mEntry)).thenReturn(true);
+        mCallback.onInflationFinished(mEntry);
+
+        // THEN we tell the HeadsUpManager to show the notification
+        verify(mHeadsUpManager).showNotification(mEntry);
+    }
+
+    @Test
+    public void testNoHUNOnInflationFinished() {
+        // WHEN a notification shouldn't HUN and its inflation is finished
+        when(mNotificationInterruptStateProvider.shouldHeadsUp(mEntry)).thenReturn(false);
+        mCallback.onInflationFinished(mEntry);
+
+        // THEN we never tell the HeadsUpManager to show the notification
+        verify(mHeadsUpManager, never()).showNotification(mEntry);
     }
 }

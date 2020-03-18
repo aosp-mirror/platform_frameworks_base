@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -51,6 +52,7 @@ public class GroupEntry extends ListEntry {
         return mSummary;
     }
 
+    @NonNull
     public List<NotificationEntry> getChildren() {
         return mUnmodifiableChildren;
     }

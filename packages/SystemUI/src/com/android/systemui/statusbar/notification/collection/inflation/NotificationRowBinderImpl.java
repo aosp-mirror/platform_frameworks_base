@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation;
 
-import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
@@ -29,8 +28,6 @@ import android.util.Log;
 import android.view.ViewGroup;
 
 import com.android.internal.util.NotificationMessagingUtil;
-import com.android.systemui.R;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -38,25 +35,22 @@ import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotifBindPipeline;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder;
 import com.android.systemui.statusbar.notification.row.RowContentBindParams;
 import com.android.systemui.statusbar.notification.row.RowContentBindStage;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
-import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.util.Objects;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -66,23 +60,23 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
     private static final String TAG = "NotificationViewManager";
 
-    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
-
     private final Context mContext;
-    private final NotifBindPipeline mNotifBindPipeline;
-    private final RowContentBindStage mRowContentBindStage;
     private final NotificationMessagingUtil mMessagingUtil;
     private final NotificationRemoteInputManager mNotificationRemoteInputManager;
     private final NotificationLockscreenUserManager mNotificationLockscreenUserManager;
+    private final NotifBindPipeline mNotifBindPipeline;
+    private final RowContentBindStage mRowContentBindStage;
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
+    private final Provider<RowInflaterTask> mRowInflaterTaskProvider;
+    private final ExpandableNotificationRowComponent.Builder
+            mExpandableNotificationRowComponentBuilder;
+    private final IconManager mIconManager;
 
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
     private NotificationRowContentBinder.InflationCallback mInflationCallback;
     private BindRowCallback mBindRowCallback;
     private NotificationClicker mNotificationClicker;
-    private final Provider<RowInflaterTask> mRowInflaterTaskProvider;
-    private final ExpandableNotificationRowComponent.Builder
-            mExpandableNotificationRowComponentBuilder;
 
     @Inject
     public NotificationRowBinderImpl(
@@ -92,14 +86,10 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotifBindPipeline notifBindPipeline,
             RowContentBindStage rowContentBindStage,
-            @Named(ALLOW_NOTIFICATION_LONG_PRESS_NAME) boolean allowLongPress,
-            KeyguardBypassController keyguardBypassController,
-            StatusBarStateController statusBarStateController,
-            NotificationGroupManager notificationGroupManager,
-            NotificationGutsManager notificationGutsManager,
             NotificationInterruptStateProvider notificationInterruptionStateProvider,
             Provider<RowInflaterTask> rowInflaterTaskProvider,
-            ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder) {
+            ExpandableNotificationRowComponent.Builder expandableNotificationRowComponentBuilder,
+            IconManager iconManager) {
         mContext = context;
         mNotifBindPipeline = notifBindPipeline;
         mRowContentBindStage = rowContentBindStage;
@@ -109,6 +99,7 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mNotificationInterruptStateProvider = notificationInterruptionStateProvider;
         mRowInflaterTaskProvider = rowInflaterTaskProvider;
         mExpandableNotificationRowComponentBuilder = expandableNotificationRowComponentBuilder;
+        mIconManager = iconManager;
     }
 
     /**
@@ -120,6 +111,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mPresenter = presenter;
         mListContainer = listContainer;
         mBindRowCallback = bindRowCallback;
+
+        mIconManager.attach();
     }
 
     public void setInflationCallback(NotificationRowContentBinder.InflationCallback callback) {
@@ -142,12 +135,12 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
 
         final StatusBarNotification sbn = entry.getSbn();
         if (entry.rowExists()) {
-            entry.updateIcons(mContext, sbn);
+            mIconManager.updateIcons(entry);
             entry.reset();
             updateNotification(entry, pmUser, sbn, entry.getRow());
             entry.getRowController().setOnDismissRunnable(onDismissRunnable);
         } else {
-            entry.createIcons(mContext, sbn);
+            mIconManager.createIcons(entry);
             mRowInflaterTaskProvider.get().inflate(mContext, parent, entry,
                     row -> {
                         // Setup the controller for the view.
@@ -227,8 +220,8 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         row.setLegacy(entry.targetSdk >= Build.VERSION_CODES.GINGERBREAD
                 && entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
 
-        // TODO: should updates to the entry be happening somewhere else?
-        entry.setIconTag(R.id.icon_is_pre_L, entry.targetSdk < Build.VERSION_CODES.LOLLIPOP);
+        // TODO: should this be happening somewhere else?
+        mIconManager.updateIconTags(entry, entry.targetSdk);
 
         row.setOnActivatedListener(mPresenter);
 

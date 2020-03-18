@@ -16,15 +16,12 @@
 
 package android.view.textclassifier;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.provider.DeviceConfig;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.google.common.primitives.Floats;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,17 +54,17 @@ public class TextClassificationConstantsTest {
     public void testLoadFromDeviceConfig_IntValue() throws Exception {
         // Saves config original value.
         final String originalValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                TextClassificationConstants.SUGGEST_SELECTION_MAX_RANGE_LENGTH);
+                TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH);
 
         final TextClassificationConstants constants = new TextClassificationConstants();
         try {
             // Sets and checks different value.
-            setDeviceConfig(TextClassificationConstants.SUGGEST_SELECTION_MAX_RANGE_LENGTH, "8");
-            assertWithMessage(TextClassificationConstants.SUGGEST_SELECTION_MAX_RANGE_LENGTH)
-                    .that(constants.getSuggestSelectionMaxRangeLength()).isEqualTo(8);
+            setDeviceConfig(TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH, "8");
+            assertWithMessage(TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH)
+                    .that(constants.getGenerateLinksMaxTextLength()).isEqualTo(8);
         } finally {
             // Restores config original value.
-            setDeviceConfig(TextClassificationConstants.SUGGEST_SELECTION_MAX_RANGE_LENGTH,
+            setDeviceConfig(TextClassificationConstants.GENERATE_LINKS_MAX_TEXT_LENGTH,
                     originalValue);
         }
     }
@@ -91,61 +88,6 @@ public class TextClassificationConstantsTest {
             // Restores config original value.
             setDeviceConfig(TextClassificationConstants.TEXT_CLASSIFIER_SERVICE_PACKAGE_OVERRIDE,
                     originalValue);
-        }
-    }
-
-    @Test
-    public void testLoadFromDeviceConfig_FloatValue() throws Exception {
-        // Saves config original value.
-        final String originalValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                TextClassificationConstants.LANG_ID_THRESHOLD_OVERRIDE);
-
-        final TextClassificationConstants constants = new TextClassificationConstants();
-        try {
-            // Sets and checks different value.
-            setDeviceConfig(TextClassificationConstants.LANG_ID_THRESHOLD_OVERRIDE, "2");
-            assertWithMessage(TextClassificationConstants.LANG_ID_THRESHOLD_OVERRIDE)
-                    .that(constants.getLangIdThresholdOverride()).isWithin(EPSILON).of(2f);
-        } finally {
-            // Restores config original value.
-            setDeviceConfig(TextClassificationConstants.LANG_ID_THRESHOLD_OVERRIDE, originalValue);
-        }
-    }
-
-    @Test
-    public void testLoadFromDeviceConfig_StringList() throws Exception {
-        // Saves config original value.
-        final String originalValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                TextClassificationConstants.ENTITY_LIST_DEFAULT);
-
-        final TextClassificationConstants constants = new TextClassificationConstants();
-        try {
-            // Sets and checks different value.
-            setDeviceConfig(TextClassificationConstants.ENTITY_LIST_DEFAULT, "email:url");
-            assertWithMessage(TextClassificationConstants.ENTITY_LIST_DEFAULT)
-                    .that(constants.getEntityListDefault())
-                    .containsExactly("email", "url");
-        } finally {
-            // Restores config original value.
-            setDeviceConfig(TextClassificationConstants.ENTITY_LIST_DEFAULT, originalValue);
-        }
-    }
-
-    @Test
-    public void testLoadFromDeviceConfig_FloatList() throws Exception {
-        // Saves config original value.
-        final String originalValue = DeviceConfig.getProperty(DeviceConfig.NAMESPACE_TEXTCLASSIFIER,
-                TextClassificationConstants.LANG_ID_CONTEXT_SETTINGS);
-
-        final TextClassificationConstants constants = new TextClassificationConstants();
-        try {
-            // Sets and checks different value.
-            setDeviceConfig(TextClassificationConstants.LANG_ID_CONTEXT_SETTINGS, "30:0.5:0.3");
-            assertThat(Floats.asList(constants.getLangIdContextSettings())).containsExactly(30f,
-                    0.5f, 0.3f).inOrder();
-        } finally {
-            // Restores config original value.
-            setDeviceConfig(TextClassificationConstants.LANG_ID_CONTEXT_SETTINGS, originalValue);
         }
     }
 

@@ -223,7 +223,7 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
                 .setPkg(TEST_PKG)
                 .setId(2)
                 .build();
-        when(mNotifPipeline.getActiveNotifs()).thenReturn(List.of(entry1, entry2, entry2Other));
+        when(mNotifPipeline.getAllNotifs()).thenReturn(List.of(entry1, entry2, entry2Other));
 
         // GIVEN that entry2 is currently associated with a foreground service
         when(mForegroundServiceController.getStandardLayoutKey(0, TEST_PKG))
@@ -253,7 +253,7 @@ public class ForegroundCoordinatorTest extends SysuiTestCase {
                 .setPkg(TEST_PKG)
                 .setId(2)
                 .build();
-        when(mNotifPipeline.getActiveNotifs()).thenReturn(List.of(entry));
+        when(mNotifPipeline.getAllNotifs()).thenReturn(List.of(entry));
         when(mForegroundServiceController.getStandardLayoutKey(0, TEST_PKG))
                 .thenReturn(entry.getKey());
 

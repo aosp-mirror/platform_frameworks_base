@@ -26,13 +26,16 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotifInflaterImpl;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
+import com.android.systemui.statusbar.notification.collection.NotifViewBarn;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.inflation.NotifInflater;
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnBeforeFinalizeFilterListener;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.row.NotifInflationErrorManager;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -57,21 +60,31 @@ public class PreparationCoordinator implements Coordinator {
     private final PreparationCoordinatorLogger mLogger;
     private final NotifInflater mNotifInflater;
     private final NotifInflationErrorManager mNotifErrorManager;
+    private final NotifViewBarn mViewBarn;
     private final Map<NotificationEntry, Integer> mInflationStates = new ArrayMap<>();
     private final IStatusBarService mStatusBarService;
+    private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
+    private final HeadsUpManager mHeadsUpManager;
 
     @Inject
     public PreparationCoordinator(
             PreparationCoordinatorLogger logger,
             NotifInflaterImpl notifInflater,
             NotifInflationErrorManager errorManager,
-            IStatusBarService service) {
+            NotifViewBarn viewBarn,
+            IStatusBarService service,
+            NotificationInterruptStateProvider notificationInterruptStateProvider,
+            HeadsUpManager headsUpManager
+    ) {
         mLogger = logger;
         mNotifInflater = notifInflater;
         mNotifInflater.setInflationCallback(mInflationCallback);
         mNotifErrorManager = errorManager;
         mNotifErrorManager.addInflationErrorListener(mInflationErrorListener);
+        mViewBarn = viewBarn;
         mStatusBarService = service;
+        mNotificationInterruptStateProvider = notificationInterruptStateProvider;
+        mHeadsUpManager = headsUpManager;
     }
 
     @Override
@@ -109,6 +122,7 @@ public class PreparationCoordinator implements Coordinator {
         @Override
         public void onEntryCleanUp(NotificationEntry entry) {
             mInflationStates.remove(entry);
+            mViewBarn.removeViewForEntry(entry);
         }
     };
 
@@ -142,7 +156,13 @@ public class PreparationCoordinator implements Coordinator {
         @Override
         public void onInflationFinished(NotificationEntry entry) {
             mLogger.logNotifInflated(entry.getKey());
+            mViewBarn.registerViewForEntry(entry, entry.getRow());
             mInflationStates.put(entry, STATE_INFLATED);
+
+            // TODO: should eventually be moved to HeadsUpCoordinator
+            if (mNotificationInterruptStateProvider.shouldHeadsUp(entry)) {
+                mHeadsUpManager.showNotification(entry);
+            }
             mNotifInflatingFilter.invalidateList();
         }
     };
@@ -151,6 +171,7 @@ public class PreparationCoordinator implements Coordinator {
             new NotifInflationErrorManager.NotifInflationErrorListener() {
         @Override
         public void onNotifInflationError(NotificationEntry entry, Exception e) {
+            mViewBarn.removeViewForEntry(entry);
             mInflationStates.put(entry, STATE_ERROR);
             try {
                 final StatusBarNotification sbn = entry.getSbn();

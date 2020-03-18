@@ -75,7 +75,8 @@ class SurfaceFreezer {
 
         mLeash = SurfaceAnimator.createAnimationLeash(mAnimatable, mAnimatable.getSurfaceControl(),
                 t, ANIMATION_TYPE_SCREEN_ROTATION, startBounds.width(), startBounds.height(),
-                startBounds.left, startBounds.top, false /* hidden */);
+                startBounds.left, startBounds.top, false /* hidden */,
+                mWmService.mTransactionFactory);
         mAnimatable.onAnimationLeashCreated(t, mLeash);
 
         SurfaceControl freezeTarget = mAnimatable.getFreezeSnapshotTarget();

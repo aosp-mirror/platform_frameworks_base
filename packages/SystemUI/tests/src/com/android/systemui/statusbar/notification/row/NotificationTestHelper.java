@@ -34,6 +34,7 @@ import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
@@ -53,6 +54,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
+import com.android.systemui.statusbar.notification.icon.IconBuilder;
+import com.android.systemui.statusbar.notification.icon.IconManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpansionLogger;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
@@ -93,6 +96,7 @@ public class NotificationTestHelper {
     private final NotifBindPipeline mBindPipeline;
     private final NotifCollectionListener mBindPipelineEntryListener;
     private final RowContentBindStage mBindStage;
+    private final IconManager mIconManager;
     private StatusBarStateController mStatusBarStateController;
 
     public NotificationTestHelper(Context context, TestableDependency dependency) {
@@ -106,6 +110,10 @@ public class NotificationTestHelper {
                 mock(KeyguardBypassController.class), mock(NotificationGroupManager.class),
                 mock(ConfigurationControllerImpl.class));
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
+        mIconManager = new IconManager(
+                mock(CommonNotifCollection.class),
+                mock(LauncherApps.class),
+                new IconBuilder(mContext));
 
         NotificationContentInflater contentBinder = new NotificationContentInflater(
                 mock(NotifRemoteViewCache.class),
@@ -377,7 +385,7 @@ public class NotificationTestHelper {
                 .build();
 
         entry.setRow(row);
-        entry.createIcons(mContext, entry.getSbn());
+        mIconManager.createIcons(entry);
         row.setEntry(entry);
 
         mBindPipelineEntryListener.onEntryInit(entry);
