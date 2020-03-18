@@ -4825,11 +4825,11 @@ package android.media.tv.tuner {
   }
 
   public class Lnb implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int sendDiseqcMessage(@NonNull byte[]);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setSatellitePosition(int);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setTone(int);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setVoltage(int);
+    method public void close();
+    method public int sendDiseqcMessage(@NonNull byte[]);
+    method public int setSatellitePosition(int);
+    method public int setTone(int);
+    method public int setVoltage(int);
     field public static final int EVENT_TYPE_DISEQC_RX_OVERFLOW = 0; // 0x0
     field public static final int EVENT_TYPE_DISEQC_RX_PARITY_ERROR = 2; // 0x2
     field public static final int EVENT_TYPE_DISEQC_RX_TIMEOUT = 1; // 0x1
@@ -4857,32 +4857,32 @@ package android.media.tv.tuner {
 
   public class Tuner implements java.lang.AutoCloseable {
     ctor @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public Tuner(@NonNull android.content.Context, @Nullable String, int);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelScanning();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int cancelTuning();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearOnTuneEventListener();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void clearResourceLostListener();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void close();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int connectCiCam(int);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int disconnectCiCam();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public long getAvSyncTime(int);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities(@NonNull android.content.Context);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
+    method public int cancelScanning();
+    method public int cancelTuning();
+    method public void clearOnTuneEventListener();
+    method public void clearResourceLostListener();
+    method public void close();
+    method public int connectCiCam(int);
+    method public int disconnectCiCam();
+    method public int getAvSyncHwId(@NonNull android.media.tv.tuner.filter.Filter);
+    method public long getAvSyncTime(int);
+    method @Nullable public android.media.tv.tuner.DemuxCapabilities getDemuxCapabilities();
+    method @Nullable public android.media.tv.tuner.frontend.FrontendInfo getFrontendInfo();
     method @Nullable public android.media.tv.tuner.frontend.FrontendStatus getFrontendStatus(@NonNull int[]);
     method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_DESCRAMBLER) public android.media.tv.tuner.Descrambler openDescrambler();
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.dvr.DvrRecorder openDvrRecorder(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnRecordStatusChangedListener);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.filter.Filter openFilter(int, int, long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.filter.FilterCallback);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Lnb openLnb(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
-    method @Nullable @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public android.media.tv.tuner.Lnb openLnbByName(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
+    method @Nullable public android.media.tv.tuner.dvr.DvrPlayback openDvrPlayback(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnPlaybackStatusChangedListener);
+    method @Nullable public android.media.tv.tuner.dvr.DvrRecorder openDvrRecorder(long, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.dvr.OnRecordStatusChangedListener);
+    method @Nullable public android.media.tv.tuner.filter.Filter openFilter(int, int, long, @Nullable java.util.concurrent.Executor, @Nullable android.media.tv.tuner.filter.FilterCallback);
+    method @Nullable public android.media.tv.tuner.Lnb openLnb(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
+    method @Nullable public android.media.tv.tuner.Lnb openLnbByName(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.LnbCallback);
     method @Nullable public android.media.tv.tuner.filter.TimeFilter openTimeFilter();
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int setLnaEnabled(boolean);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void setResourceLostListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.Tuner.OnResourceLostListener);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
-    method @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public void updateResourcePriority(int, int);
+    method public int scan(@NonNull android.media.tv.tuner.frontend.FrontendSettings, int, @NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.ScanCallback);
+    method public int setLnaEnabled(boolean);
+    method public void setOnTuneEventListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.frontend.OnTuneEventListener);
+    method public void setResourceLostListener(@NonNull java.util.concurrent.Executor, @NonNull android.media.tv.tuner.Tuner.OnResourceLostListener);
+    method public void shareFrontendFromTuner(@NonNull android.media.tv.tuner.Tuner);
+    method public int tune(@NonNull android.media.tv.tuner.frontend.FrontendSettings);
+    method public void updateResourcePriority(int, int);
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
     field public static final int INVALID_STREAM_ID = 65535; // 0xffff
