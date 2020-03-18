@@ -43,8 +43,7 @@ import java.io.PrintWriter;
  * as the WebView preparation class.
  * 2. The SystemServer calls WebViewUpdateService.prepareWebViewInSystemServer. This happens at boot
  * and the WebViewUpdateService should not have been accessed before this call. In this call we
- * migrate away from the old fallback logic if necessary and then choose WebView implementation for
- * the first time.
+ * choose WebView implementation for the first time.
  * 3. The update service listens for Intents related to package installs and removals. These intents
  * are received and processed on the UI thread. Each intent can result in changing WebView
  * implementation.
@@ -80,7 +79,6 @@ public class WebViewUpdateServiceImpl {
     }
 
     void prepareWebViewInSystemServer() {
-        migrateFallbackStateOnBoot();
         mWebViewUpdater.prepareWebViewInSystemServer();
         if (getCurrentWebViewPackage() == null) {
             // We didn't find a valid WebView implementation. Try explicitly re-enabling the
@@ -159,27 +157,6 @@ public class WebViewUpdateServiceImpl {
     }
 
     /**
-     * If the fallback logic is enabled, re-enable any fallback package for all users, then
-     * disable the fallback logic.
-     *
-     * This migrates away from the old fallback mechanism to the new state where packages are never
-     * automatically enableenableisabled.
-     */
-    private void migrateFallbackStateOnBoot() {
-        if (!mSystemInterface.isFallbackLogicEnabled()) return;
-
-        WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
-        WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
-        if (fallbackProvider != null) {
-            Slog.i(TAG, "One-time migration: enabling " + fallbackProvider.packageName);
-            mSystemInterface.enablePackageForAllUsers(mContext, fallbackProvider.packageName, true);
-        } else {
-            Slog.i(TAG, "Skipping one-time migration: no fallback provider");
-        }
-        mSystemInterface.enableFallbackLogic(false);
-    }
-
-    /**
      * Returns the only fallback provider in the set of given packages, or null if there is none.
      */
     private static WebViewProviderInfo getFallbackProvider(WebViewProviderInfo[] webviewPackages) {
@@ -217,8 +194,6 @@ public class WebViewUpdateServiceImpl {
      */
     void dumpState(PrintWriter pw) {
         pw.println("Current WebView Update Service state");
-        pw.println(String.format("  Fallback logic enabled: %b",
-                mSystemInterface.isFallbackLogicEnabled()));
         pw.println(String.format("  Multiprocess enabled: %b", isMultiProcessEnabled()));
         mWebViewUpdater.dumpState(pw);
     }
