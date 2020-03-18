@@ -64,7 +64,7 @@ fun <Type : Any?> whenever(mock: Type, block: InvocationOnMock.() -> Any?) =
 
 fun whenever(mock: Unit) = Mockito.`when`(mock).thenAnswer { }
 
-inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit): T {
+inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit = {}): T {
     val swappingAnswer = object : Answer<Any?> {
         var delegate: Answer<*> = Answers.RETURNS_DEFAULTS
 
@@ -81,4 +81,5 @@ inline fun <reified T> spyThrowOnUnmocked(value: T?, block: T.() -> Unit): T {
             }
 }
 
-inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit) = spyThrowOnUnmocked<T>(null, block)
+inline fun <reified T> mockThrowOnUnmocked(block: T.() -> Unit = {}) =
+        spyThrowOnUnmocked<T>(null, block)
