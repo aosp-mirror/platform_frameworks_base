@@ -16,6 +16,8 @@
 
 package com.android.internal.os;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.Nullable;
 import android.util.ArrayMap;
 import android.util.Slog;
@@ -99,7 +101,7 @@ public class KernelCpuThreadReaderDiff {
 
     @VisibleForTesting
     public KernelCpuThreadReaderDiff(KernelCpuThreadReader reader, int minimumTotalCpuUsageMillis) {
-        mReader = reader;
+        mReader = checkNotNull(reader);
         mMinimumTotalCpuUsageMillis = minimumTotalCpuUsageMillis;
         mPreviousCpuUsage = null;
     }
