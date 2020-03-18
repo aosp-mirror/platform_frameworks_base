@@ -110,10 +110,6 @@ public class PipAnimationController {
         return mCurrentAnimator;
     }
 
-    PipTransitionAnimator getCurrentAnimator() {
-        return mCurrentAnimator;
-    }
-
     private PipTransitionAnimator setupPipTransitionAnimator(PipTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
         animator.setInterpolator(mFastOutSlowInInterpolator);
@@ -178,7 +174,7 @@ public class PipAnimationController {
         @Override
         public void onAnimationStart(Animator animation) {
             mCurrentValue = mStartValue;
-            applySurfaceControlTransaction(mLeash, newSurfaceControlTransaction(), FRACTION_START);
+            onStartTransaction(mLeash, newSurfaceControlTransaction());
             if (mPipAnimationCallback != null) {
                 mPipAnimationCallback.onPipAnimationStart(this);
             }
@@ -194,7 +190,7 @@ public class PipAnimationController {
         public void onAnimationEnd(Animator animation) {
             mCurrentValue = mEndValue;
             final SurfaceControl.Transaction tx = newSurfaceControlTransaction();
-            applySurfaceControlTransaction(mLeash, tx, FRACTION_END);
+            onEndTransaction(mLeash, tx);
             if (mPipAnimationCallback != null) {
                 mPipAnimationCallback.onPipAnimationEnd(tx, this);
             }
@@ -253,6 +249,13 @@ public class PipAnimationController {
             return mTransitionDirection != TRANSITION_DIRECTION_TO_FULLSCREEN;
         }
 
+        boolean inScaleTransition() {
+            if (mAnimationType != ANIM_TYPE_BOUNDS) return false;
+            final int direction = getTransitionDirection();
+            return direction != TRANSITION_DIRECTION_TO_FULLSCREEN
+                    && direction != TRANSITION_DIRECTION_TO_PIP;
+        }
+
         /**
          * Updates the {@link #mEndValue}.
          *
@@ -284,6 +287,10 @@ public class PipAnimationController {
             mSurfaceTransactionHelper = helper;
         }
 
+        void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {}
+
+        void onEndTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {}
+
         abstract void applySurfaceControlTransaction(SurfaceControl leash,
                 SurfaceControl.Transaction tx, float fraction);
 
@@ -297,11 +304,14 @@ public class PipAnimationController {
                     final float alpha = getStartValue() * (1 - fraction) + getEndValue() * fraction;
                     setCurrentValue(alpha);
                     getSurfaceTransactionHelper().alpha(tx, leash, alpha);
-                    if (Float.compare(fraction, FRACTION_START) == 0) {
-                        getSurfaceTransactionHelper()
-                                .crop(tx, leash, getDestinationBounds())
-                                .round(tx, leash, shouldApplyCornerRadius());
-                    }
+                    tx.apply();
+                }
+
+                @Override
+                void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
+                    getSurfaceTransactionHelper()
+                            .crop(tx, leash, getDestinationBounds())
+                            .round(tx, leash, shouldApplyCornerRadius());
                     tx.apply();
                 }
             };
@@ -329,14 +339,29 @@ public class PipAnimationController {
                             getCastedFractionValue(start.right, end.right, fraction),
                             getCastedFractionValue(start.bottom, end.bottom, fraction));
                     setCurrentValue(mTmpRect);
-                    getSurfaceTransactionHelper().crop(tx, leash, mTmpRect);
-                    if (Float.compare(fraction, FRACTION_START) == 0) {
-                        // Ensure the start condition
-                        getSurfaceTransactionHelper()
-                                .alpha(tx, leash, 1f)
-                                .round(tx, leash, shouldApplyCornerRadius());
+                    if (inScaleTransition()) {
+                        getSurfaceTransactionHelper().scale(tx, leash, start, mTmpRect);
+                    } else {
+                        getSurfaceTransactionHelper().crop(tx, leash, mTmpRect);
                     }
                     tx.apply();
+                }
+
+                @Override
+                void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
+                    getSurfaceTransactionHelper()
+                            .alpha(tx, leash, 1f)
+                            .round(tx, leash, shouldApplyCornerRadius());
+                    tx.apply();
+                }
+
+                @Override
+                void onEndTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
+                    if (!inScaleTransition()) return;
+                    // NOTE: intentionally does not apply the transaction here.
+                    // this end transaction should get executed synchronously with the final
+                    // WindowContainerTransaction in task organizer
+                    getSurfaceTransactionHelper().resetScale(tx, leash, getDestinationBounds());
                 }
             };
         }
