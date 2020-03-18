@@ -52,7 +52,7 @@ public class SurfaceControlViewHost {
      * a SurfaceView by calling {@link SurfaceView#setChildSurfacePackage}.
      */
     public static final class SurfacePackage implements Parcelable {
-        private final SurfaceControl mSurfaceControl;
+        private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
         SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection) {
@@ -95,6 +95,16 @@ public class SurfaceControlViewHost {
         public void writeToParcel(@NonNull Parcel out, int flags) {
             mSurfaceControl.writeToParcel(out, flags);
             out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
+        }
+
+        /**
+         * Release the SurfaceControl associated with the SurfacePackage.
+         */
+        public void release() {
+            if (mSurfaceControl != null) {
+                mSurfaceControl.release();
+             }
+             mSurfaceControl = null;
         }
 
         public static final @NonNull Creator<SurfacePackage> CREATOR
