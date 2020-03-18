@@ -191,7 +191,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -269,6 +268,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final int mAppOp;
     // UserId and appId of the owner. Don't display windows of non-current user.
     final int mOwnerUid;
+    /**
+     * Requested userId, if this is not equals with the userId from mOwnerUid, then this window is
+     * created for secondary user.
+     * Use this member instead of get userId from mOwnerUid while query for visibility.
+     */
+    final int mShowUserId;
     /** The owner has {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW} */
     final boolean mOwnerCanAddInternalSystemWindow;
     final WindowId mWindowId;
@@ -806,8 +811,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
             WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-            int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow) {
-        this(service, s, c, token, parentWindow, appOp, seq, a, viewVisibility, ownerId,
+            int viewVisibility, int ownerId, int showUserId,
+            boolean ownerCanAddInternalSystemWindow) {
+        this(service, s, c, token, parentWindow, appOp, seq, a, viewVisibility, ownerId, showUserId,
                 ownerCanAddInternalSystemWindow, new PowerManagerWrapper() {
                     @Override
                     public void wakeUp(long time, @WakeReason int reason, String details) {
@@ -823,8 +829,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
             WindowState parentWindow, int appOp, int seq, WindowManager.LayoutParams a,
-            int viewVisibility, int ownerId, boolean ownerCanAddInternalSystemWindow,
-            PowerManagerWrapper powerManagerWrapper) {
+            int viewVisibility, int ownerId, int showUserId,
+            boolean ownerCanAddInternalSystemWindow, PowerManagerWrapper powerManagerWrapper) {
         super(service);
         mSession = s;
         mClient = c;
@@ -832,6 +838,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mToken = token;
         mActivityRecord = mToken.asActivityRecord();
         mOwnerUid = ownerId;
+        mShowUserId = showUserId;
         mOwnerCanAddInternalSystemWindow = ownerCanAddInternalSystemWindow;
         mWindowId = new WindowId(this);
         mAttrs.copyFrom(a);
@@ -3275,7 +3282,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         return win.showForAllUsers()
-                || mWmService.isCurrentProfile(UserHandle.getUserId(win.mOwnerUid));
+                || mWmService.isCurrentProfile(win.mShowUserId);
     }
 
     private static void applyInsets(Region outRegion, Rect frame, Rect inset) {
@@ -3795,7 +3802,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(HASH_CODE, System.identityHashCode(this));
-        proto.write(USER_ID, UserHandle.getUserId(mOwnerUid));
+        proto.write(USER_ID, mShowUserId);
         final CharSequence title = getWindowTag();
         if (title != null) {
             proto.write(TITLE, title.toString());
@@ -3979,7 +3986,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mLastTitle = title;
             mWasExiting = mAnimatingExit;
             mStringNameCache = "Window{" + Integer.toHexString(System.identityHashCode(this))
-                    + " u" + UserHandle.getUserId(mOwnerUid)
+                    + " u" + mShowUserId
                     + " " + mLastTitle + (mAnimatingExit ? " EXITING}" : "}");
         }
         return mStringNameCache;

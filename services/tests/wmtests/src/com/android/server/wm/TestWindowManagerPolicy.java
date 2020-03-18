@@ -120,8 +120,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             IWindow iWindow = mock(IWindow.class);
             doReturn(mock(IBinder.class)).when(iWindow).asBinder();
             window = WindowTestsBase.createWindow(null, TYPE_APPLICATION_STARTING, activity,
-                    "Starting window", 0 /* ownerId */, false /* internalWindows */, wm,
-                    mock(Session.class), iWindow, mPowerManagerWrapper);
+                    "Starting window", 0 /* ownerId */, 0 /* userId*/, false /* internalWindows */,
+                    wm, mock(Session.class), iWindow, mPowerManagerWrapper);
             activity.startingWindow = window;
         }
         if (mRunnableWhenAddingSplashScreen != null) {
