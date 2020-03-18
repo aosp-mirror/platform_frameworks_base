@@ -37,7 +37,7 @@ StatsdConfig CreateStatsdConfig(bool useCondition = true) {
     StatsdConfig config;
     config.add_allowed_log_source("AID_ROOT"); // LogEvent defaults to UID of root.
     auto pulledAtomMatcher =
-            CreateSimpleAtomMatcher("TestMatcher", android::util::SUBSYSTEM_SLEEP_STATE);
+            CreateSimpleAtomMatcher("TestMatcher", util::SUBSYSTEM_SLEEP_STATE);
     *config.add_atom_matcher() = pulledAtomMatcher;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
     *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
@@ -52,9 +52,9 @@ StatsdConfig CreateStatsdConfig(bool useCondition = true) {
         valueMetric->set_condition(screenIsOffPredicate.id());
     }
     *valueMetric->mutable_value_field() =
-            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
     *valueMetric->mutable_dimensions_in_what() =
-            CreateDimensions(android::util::SUBSYSTEM_SLEEP_STATE, {1 /* subsystem name */});
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {1 /* subsystem name */});
     valueMetric->set_bucket(FIVE_MINUTES);
     valueMetric->set_use_absolute_value_on_reset(true);
     valueMetric->set_skip_zero_diff_output(false);
@@ -73,7 +73,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                              SharedRefBase::make<FakeSubsystemSleepCallback>(),
-                                             android::util::SUBSYSTEM_SLEEP_STATE);
+                                             util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -142,7 +142,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents) {
     EXPECT_GT((int)valueMetrics.data_size(), 1);
 
     auto data = valueMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -177,7 +177,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                              SharedRefBase::make<FakeSubsystemSleepCallback>(),
-                                             android::util::SUBSYSTEM_SLEEP_STATE);
+                                             util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -250,7 +250,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm) {
     EXPECT_GT((int)valueMetrics.data_size(), 1);
 
     auto data = valueMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -289,7 +289,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation) {
     ConfigKey cfgKey;
     auto processor = CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
                                              SharedRefBase::make<FakeSubsystemSleepCallback>(),
-                                             android::util::SUBSYSTEM_SLEEP_STATE);
+                                             util::SUBSYSTEM_SLEEP_STATE);
     EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
     EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
     processor->mPullerManager->ForceClearPullerCache();
@@ -353,7 +353,7 @@ TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation) {
     EXPECT_GT((int)valueMetrics.data_size(), 0);
 
     auto data = valueMetrics.data(0);
-    EXPECT_EQ(android::util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
+    EXPECT_EQ(util::SUBSYSTEM_SLEEP_STATE, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* subsystem name field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -383,7 +383,7 @@ TEST(ValueMetricE2eTest, TestInitWithSlicedState) {
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
 
     auto pulledAtomMatcher =
-            CreateSimpleAtomMatcher("TestMatcher", android::util::SUBSYSTEM_SLEEP_STATE);
+            CreateSimpleAtomMatcher("TestMatcher", util::SUBSYSTEM_SLEEP_STATE);
     *config.add_atom_matcher() = pulledAtomMatcher;
 
     auto screenState = CreateScreenState();
@@ -396,7 +396,7 @@ TEST(ValueMetricE2eTest, TestInitWithSlicedState) {
     valueMetric->set_bucket(TimeUnit::FIVE_MINUTES);
     valueMetric->set_what(pulledAtomMatcher.id());
     *valueMetric->mutable_value_field() =
-            CreateDimensions(android::util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
+            CreateDimensions(util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
     valueMetric->add_slice_by_state(screenState.id());
     valueMetric->set_max_pull_delay_sec(INT_MAX);
 
@@ -437,7 +437,7 @@ TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions) {
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
 
     auto cpuTimePerUidMatcher =
-            CreateSimpleAtomMatcher("CpuTimePerUidMatcher", android::util::CPU_TIME_PER_UID);
+            CreateSimpleAtomMatcher("CpuTimePerUidMatcher", util::CPU_TIME_PER_UID);
     *config.add_atom_matcher() = cpuTimePerUidMatcher;
 
     auto uidProcessState = CreateUidProcessState();
@@ -450,14 +450,14 @@ TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions) {
     valueMetric->set_bucket(TimeUnit::FIVE_MINUTES);
     valueMetric->set_what(cpuTimePerUidMatcher.id());
     *valueMetric->mutable_value_field() =
-            CreateDimensions(android::util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
+            CreateDimensions(util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
     *valueMetric->mutable_dimensions_in_what() =
-            CreateDimensions(android::util::CPU_TIME_PER_UID, {1 /* uid */});
+            CreateDimensions(util::CPU_TIME_PER_UID, {1 /* uid */});
     valueMetric->add_slice_by_state(uidProcessState.id());
     MetricStateLink* stateLink = valueMetric->add_state_link();
     stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
     auto fieldsInWhat = stateLink->mutable_fields_in_what();
-    *fieldsInWhat = CreateDimensions(android::util::CPU_TIME_PER_UID, {1 /* uid */});
+    *fieldsInWhat = CreateDimensions(util::CPU_TIME_PER_UID, {1 /* uid */});
     auto fieldsInState = stateLink->mutable_fields_in_state();
     *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
     valueMetric->set_max_pull_delay_sec(INT_MAX);
@@ -497,7 +497,7 @@ TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions) {
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
 
     auto cpuTimePerUidMatcher =
-            CreateSimpleAtomMatcher("CpuTimePerUidMatcher", android::util::CPU_TIME_PER_UID);
+            CreateSimpleAtomMatcher("CpuTimePerUidMatcher", util::CPU_TIME_PER_UID);
     *config.add_atom_matcher() = cpuTimePerUidMatcher;
 
     auto uidProcessState = CreateUidProcessState();
@@ -510,12 +510,12 @@ TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions) {
     valueMetric->set_bucket(TimeUnit::FIVE_MINUTES);
     valueMetric->set_what(cpuTimePerUidMatcher.id());
     *valueMetric->mutable_value_field() =
-            CreateDimensions(android::util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
+            CreateDimensions(util::CPU_TIME_PER_UID, {2 /* user_time_micros */});
     valueMetric->add_slice_by_state(uidProcessState.id());
     MetricStateLink* stateLink = valueMetric->add_state_link();
     stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
     auto fieldsInWhat = stateLink->mutable_fields_in_what();
-    *fieldsInWhat = CreateDimensions(android::util::CPU_TIME_PER_UID, {1 /* uid */});
+    *fieldsInWhat = CreateDimensions(util::CPU_TIME_PER_UID, {1 /* uid */});
     auto fieldsInState = stateLink->mutable_fields_in_state();
     *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
     valueMetric->set_max_pull_delay_sec(INT_MAX);

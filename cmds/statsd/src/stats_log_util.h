@@ -23,24 +23,26 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
 
+using android::util::ProtoOutputStream;
+
 namespace android {
 namespace os {
 namespace statsd {
 
 void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& values,
-                                 util::ProtoOutputStream* protoOutput);
+                                 ProtoOutputStream* protoOutput);
 void writeDimensionToProto(const HashableDimensionKey& dimension, std::set<string> *str_set,
-                           util::ProtoOutputStream* protoOutput);
+                           ProtoOutputStream* protoOutput);
 
 void writeDimensionLeafNodesToProto(const HashableDimensionKey& dimension,
                                     const int dimensionLeafFieldId,
                                     std::set<string> *str_set,
-                                    util::ProtoOutputStream* protoOutput);
+                                    ProtoOutputStream* protoOutput);
 
 void writeDimensionPathToProto(const std::vector<Matcher>& fieldMatchers,
-                               util::ProtoOutputStream* protoOutput);
+                               ProtoOutputStream* protoOutput);
 
-void writeStateToProto(const FieldValue& state, util::ProtoOutputStream* protoOutput);
+void writeStateToProto(const FieldValue& state, ProtoOutputStream* protoOutput);
 
 // Convert the TimeUnit enum to the bucket size in millis with a guardrail on
 // bucket size.
@@ -73,14 +75,14 @@ int64_t MillisToNano(const int64_t millis);
 
 // Helper function to write PulledAtomStats to ProtoOutputStream
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,
-                              util::ProtoOutputStream* protoOutput);
+                              ProtoOutputStream* protoOutput);
 
 // Helper function to write AtomMetricStats to ProtoOutputStream
 void writeAtomMetricStatsToStream(const std::pair<int64_t, StatsdStats::AtomMetricStats> &pair,
-                                  util::ProtoOutputStream *protoOutput);
+                                  ProtoOutputStream *protoOutput);
 
 template<class T>
-bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
+bool parseProtoOutputStream(ProtoOutputStream& protoOutput, T* message) {
     std::string pbBytes;
     sp<android::util::ProtoReader> reader = protoOutput.data();
     while (reader->readBuffer() != NULL) {

@@ -35,12 +35,12 @@ StatsdConfig CreateStatsdConfigForPushedEvent(const GaugeMetric::SamplingType sa
     *config.add_atom_matcher() = CreateMoveToBackgroundAtomMatcher();
     *config.add_atom_matcher() = CreateMoveToForegroundAtomMatcher();
 
-    auto atomMatcher = CreateSimpleAtomMatcher("", android::util::APP_START_OCCURRED);
+    auto atomMatcher = CreateSimpleAtomMatcher("", util::APP_START_OCCURRED);
     *config.add_atom_matcher() = atomMatcher;
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
     *isInBackgroundPredicate.mutable_simple_predicate()->mutable_dimensions() =
-        CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */ });
+        CreateDimensions(util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */ });
     *config.add_predicate() = isInBackgroundPredicate;
 
     auto gaugeMetric = config.add_gauge_metric();
@@ -50,21 +50,21 @@ StatsdConfig CreateStatsdConfigForPushedEvent(const GaugeMetric::SamplingType sa
     gaugeMetric->mutable_gauge_fields_filter()->set_include_all(false);
     gaugeMetric->set_sampling_type(sampling_type);
     auto fieldMatcher = gaugeMetric->mutable_gauge_fields_filter()->mutable_fields();
-    fieldMatcher->set_field(android::util::APP_START_OCCURRED);
+    fieldMatcher->set_field(util::APP_START_OCCURRED);
     fieldMatcher->add_child()->set_field(3);  // type (enum)
     fieldMatcher->add_child()->set_field(4);  // activity_name(str)
     fieldMatcher->add_child()->set_field(7);  // activity_start_msec(int64)
     *gaugeMetric->mutable_dimensions_in_what() =
-        CreateDimensions(android::util::APP_START_OCCURRED, {1 /* uid field */ });
+        CreateDimensions(util::APP_START_OCCURRED, {1 /* uid field */ });
     gaugeMetric->set_bucket(FIVE_MINUTES);
 
     auto links = gaugeMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
     auto dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(android::util::APP_START_OCCURRED);
+    dimensionWhat->set_field(util::APP_START_OCCURRED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
     auto dimensionCondition = links->mutable_fields_in_condition();
-    dimensionCondition->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+    dimensionCondition->set_field(util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     dimensionCondition->add_child()->set_field(1);  // uid field.
     return config;
 }
@@ -74,7 +74,7 @@ std::unique_ptr<LogEvent> CreateAppStartOccurredEvent(
         AppStartOccurred::TransitionType type, const string& activity_name,
         const string& calling_pkg_name, const bool is_instant_app, int64_t activity_start_msec) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, android::util::APP_START_OCCURRED);
+    AStatsEvent_setAtomId(statsEvent, util::APP_START_OCCURRED);
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, uid);
@@ -173,7 +173,7 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
         EXPECT_EQ(2, gaugeMetrics.data_size());
 
         auto data = gaugeMetrics.data(0);
-        EXPECT_EQ(android::util::APP_START_OCCURRED, data.dimensions_in_what().field());
+        EXPECT_EQ(util::APP_START_OCCURRED, data.dimensions_in_what().field());
         EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
         EXPECT_EQ(1 /* uid field */,
                   data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -272,7 +272,7 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
 
         data = gaugeMetrics.data(1);
 
-        EXPECT_EQ(data.dimensions_in_what().field(), android::util::APP_START_OCCURRED);
+        EXPECT_EQ(data.dimensions_in_what().field(), util::APP_START_OCCURRED);
         EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
         EXPECT_EQ(1 /* uid field */,
                   data.dimensions_in_what().value_tuple().dimensions_value(0).field());
