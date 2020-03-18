@@ -93,14 +93,16 @@ public class AtscFrontendSettings extends FrontendSettings {
      * Builder for {@link AtscFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency;
-        private int mModulation;
+        private int mFrequency = 0;
+        private int mModulation = MODULATION_UNDEFINED;
 
         private Builder() {
         }
 
         /**
          * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         @IntRange(from = 1)
@@ -111,6 +113,8 @@ public class AtscFrontendSettings extends FrontendSettings {
 
         /**
          * Sets Modulation.
+         *
+         * <p>Default value is {@link #MODULATION_UNDEFINED}.
          */
         @NonNull
         public Builder setModulation(@Modulation int modulation) {
