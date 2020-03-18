@@ -1448,13 +1448,13 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
 
     SET(BasebandCn0DbHz, measurement_V2_1->basebandCN0DbHz);
 
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_RECEIVER_ISB) {
-        SET(ReceiverInterSignalBiasNanos, measurement_V2_1->receiverInterSignalBiasNs);
+    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_FULL_ISB) {
+        SET(FullInterSignalBiasNanos, measurement_V2_1->fullInterSignalBiasNs);
     }
 
-    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_RECEIVER_ISB_UNCERTAINTY) {
-        SET(ReceiverInterSignalBiasUncertaintyNanos,
-            measurement_V2_1->receiverInterSignalBiasUncertaintyNs);
+    if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_FULL_ISB_UNCERTAINTY) {
+        SET(FullInterSignalBiasUncertaintyNanos,
+            measurement_V2_1->fullInterSignalBiasUncertaintyNs);
     }
 
     if (measurement_V2_1->flags & GnssMeasurementFlags::HAS_SATELLITE_ISB) {
