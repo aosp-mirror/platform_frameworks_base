@@ -1066,8 +1066,9 @@ public abstract class CameraMetadata<TKey> {
      * <li>One Jpeg ImageReader, any resolution: the camera device is
      *    allowed to slow down JPEG output speed by 50% if there is any ongoing offline
      *    session.</li>
-     * <li>One ImageWriter surface of private format, any resolution if the device supports
-     *    PRIVATE_REPROCESSING capability</li>
+     * <li>If the device supports PRIVATE_REPROCESSING, one pair of ImageWriter/ImageReader
+     *    surfaces of private format, with the same resolution that is larger or equal to
+     *    the JPEG ImageReader resolution above.</li>
      * </ol>
      * </li>
      * <li>Alternatively, the active camera session above can be replaced by an legacy
