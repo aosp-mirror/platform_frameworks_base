@@ -213,7 +213,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         @Override
-        public void onCancelled() {
+        public void onFinished(WindowInsetsAnimationController controller) {
+        }
+
+        @Override
+        public void onCancelled(WindowInsetsAnimationController controller) {
             // Animator can be null when it is cancelled before onReady() completes.
             if (mAnimator != null) {
                 mAnimator.cancel();
@@ -583,7 +587,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             boolean fromIme, long durationMs, @Nullable Interpolator interpolator,
             @AnimationType int animationType) {
         if (!checkDisplayFramesForControlling()) {
-            listener.onCancelled();
+            listener.onCancelled(null);
             return;
         }
         controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
@@ -608,7 +612,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             boolean useInsetsAnimationThread) {
         if (types == 0) {
             // nothing to animate.
-            listener.onCancelled();
+            listener.onCancelled(null);
             return;
         }
         cancelExistingControllers(types);
@@ -641,7 +645,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         if (typesReady == 0) {
-            listener.onCancelled();
+            listener.onCancelled(null);
             return;
         }
 
@@ -756,7 +760,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void abortPendingImeControlRequest() {
         if (mPendingImeControlRequest != null) {
-            mPendingImeControlRequest.listener.onCancelled();
+            mPendingImeControlRequest.listener.onCancelled(null);
             mPendingImeControlRequest = null;
             mHandler.removeCallbacks(mPendingControlTimeout);
         }
