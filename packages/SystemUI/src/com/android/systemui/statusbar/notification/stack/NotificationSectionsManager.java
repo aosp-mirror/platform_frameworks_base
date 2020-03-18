@@ -447,7 +447,6 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
         }
     }
 
-
     @VisibleForTesting
     ExpandableView getGentleHeaderView() {
         return mGentleHeader;
@@ -471,7 +470,7 @@ public class NotificationSectionsManager implements StackScrollAlgorithm.Section
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener() {
         @Override
         public void onLocaleListChanged() {
-            mGentleHeader.reinflateContents();
+            reinflateViews(LayoutInflater.from(mParent.getContext()));
         }
     };
 
