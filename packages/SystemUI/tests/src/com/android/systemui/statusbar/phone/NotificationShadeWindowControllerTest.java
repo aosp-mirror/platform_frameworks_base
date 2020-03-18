@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.app.IActivityManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -109,5 +111,14 @@ public class NotificationShadeWindowControllerTest extends SysuiTestCase {
     @Test
     public void testSetForcePluginOpen_beforeStatusBarInitialization() {
         mNotificationShadeWindowController.setForcePluginOpen(true);
+    }
+
+    @Test
+    public void setBackgroundBlurRadius_expandedWithBlurs() {
+        mNotificationShadeWindowController.setBackgroundBlurRadius(10);
+        verify(mNotificationShadeWindowView).setVisibility(eq(View.VISIBLE));
+
+        mNotificationShadeWindowController.setBackgroundBlurRadius(0);
+        verify(mNotificationShadeWindowView).setVisibility(eq(View.INVISIBLE));
     }
 }

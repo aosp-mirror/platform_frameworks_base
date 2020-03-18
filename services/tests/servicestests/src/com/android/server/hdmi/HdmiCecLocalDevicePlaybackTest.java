@@ -139,6 +139,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    @Ignore("b/151147315")
     public void doNotWakeUpOnHotPlug_PlugIn() {
         mWokenUp = false;
         mHdmiCecLocalDevicePlayback.onHotplug(0, true);
@@ -146,6 +147,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    @Ignore("b/151147315")
     public void doNotWakeUpOnHotPlug_PlugOut() {
         mWokenUp = false;
         mHdmiCecLocalDevicePlayback.onHotplug(0, false);

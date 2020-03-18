@@ -15,24 +15,24 @@
  */
 
 package android.telephony;
+
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Annotation.CallForwardingReason;
-import android.telephony.Annotation.CallForwardingStatus;
 
 import com.android.telephony.Rlog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
  * Defines the call forwarding information.
  * @hide
  */
-@SystemApi
 public final class CallForwardingInfo implements Parcelable {
     private static final String TAG = "CallForwardingInfo";
 
@@ -41,7 +41,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final int STATUS_INACTIVE = 0;
 
     /**
@@ -49,7 +48,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final int STATUS_ACTIVE = 1;
 
     /**
@@ -58,7 +56,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final int STATUS_FDN_CHECK_FAILURE = 2;
 
     /**
@@ -66,7 +63,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final int STATUS_UNKNOWN_ERROR = 3;
 
     /**
@@ -74,7 +70,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public static final int STATUS_NOT_SUPPORTED = 4;
 
     /**
@@ -83,7 +78,6 @@ public final class CallForwardingInfo implements Parcelable {
      *            and conditions +CCFC
      * @hide
      */
-    @SystemApi
     public static final int REASON_UNCONDITIONAL = 0;
 
     /**
@@ -92,7 +86,6 @@ public final class CallForwardingInfo implements Parcelable {
      *            and conditions +CCFC
      * @hide
      */
-    @SystemApi
     public static final int REASON_BUSY = 1;
 
     /**
@@ -101,7 +94,6 @@ public final class CallForwardingInfo implements Parcelable {
      *            and conditions +CCFC
      * @hide
      */
-    @SystemApi
     public static final int REASON_NO_REPLY = 2;
 
     /**
@@ -110,7 +102,6 @@ public final class CallForwardingInfo implements Parcelable {
      *            and conditions +CCFC
      * @hide
      */
-    @SystemApi
     public static final int REASON_NOT_REACHABLE = 3;
 
     /**
@@ -120,7 +111,6 @@ public final class CallForwardingInfo implements Parcelable {
      *            and conditions +CCFC
      * @hide
      */
-    @SystemApi
     public static final int REASON_ALL = 4;
 
     /**
@@ -130,20 +120,48 @@ public final class CallForwardingInfo implements Parcelable {
      *            and conditions +CCFC
      * @hide
      */
-    @SystemApi
     public static final int REASON_ALL_CONDITIONAL = 5;
+
+    /**
+     * Call forwarding function status
+     */
+    @IntDef(prefix = { "STATUS_" }, value = {
+        STATUS_ACTIVE,
+        STATUS_INACTIVE,
+        STATUS_UNKNOWN_ERROR,
+        STATUS_NOT_SUPPORTED,
+        STATUS_FDN_CHECK_FAILURE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallForwardingStatus {
+    }
+
+    /**
+     * Call forwarding reason types
+     */
+    @IntDef(flag = true, prefix = { "REASON_" }, value = {
+        REASON_UNCONDITIONAL,
+        REASON_BUSY,
+        REASON_NO_REPLY,
+        REASON_NOT_REACHABLE,
+        REASON_ALL,
+        REASON_ALL_CONDITIONAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallForwardingReason {
+    }
 
     /**
      * The call forwarding status.
      */
-    private @CallForwardingStatus int mStatus;
+    private int mStatus;
 
     /**
      * The call forwarding reason indicates the condition under which calls will be forwarded.
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
      */
-    private @CallForwardingReason int mReason;
+    private int mReason;
 
     /**
      * The phone number to which calls will be forwarded.
@@ -166,7 +184,6 @@ public final class CallForwardingInfo implements Parcelable {
      * @param timeSeconds the timeout (in seconds) before the forwarding is attempted
      * @hide
      */
-    @SystemApi
     public CallForwardingInfo(@CallForwardingStatus int status, @CallForwardingReason int reason,
             @Nullable String number, int timeSeconds) {
         mStatus = status;
@@ -182,7 +199,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public @CallForwardingStatus int getStatus() {
         return mStatus;
     }
@@ -196,7 +212,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     public @CallForwardingReason int getReason() {
         return mReason;
     }
@@ -209,7 +224,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     @Nullable
     public String getNumber() {
         return mNumber;
@@ -227,7 +241,6 @@ public final class CallForwardingInfo implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
     @SuppressLint("MethodNameUnits")
     public int getTimeoutSeconds() {
         return mTimeSeconds;

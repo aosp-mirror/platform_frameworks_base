@@ -115,6 +115,10 @@ final class CoreSettingsObserver extends ContentObserver {
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE,
                 WidgetFlags.KEY_ENABLE_CURSOR_DRAG_FROM_ANYWHERE, boolean.class,
                 WidgetFlags.ENABLE_CURSOR_DRAG_FROM_ANYWHERE_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Integer>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.FINGER_TO_CURSOR_DISTANCE,
+                WidgetFlags.KEY_FINGER_TO_CURSOR_DISTANCE, int.class,
+                WidgetFlags.FINGER_TO_CURSOR_DISTANCE_DEFAULT));
         sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_INSERTION_HANDLE_GESTURES,
                 WidgetFlags.KEY_ENABLE_INSERTION_HANDLE_GESTURES, boolean.class,

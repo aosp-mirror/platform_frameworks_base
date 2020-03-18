@@ -60,7 +60,7 @@
         android:background="@null"
         android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textSize="14sp"
-        android:textColor="@color/resolver_tabs_active_color"
+        android:textColor="?attr/colorAccent"
         android:layout_centerHorizontal="true" />
     <ProgressBar
         android:id="@+id/resolver_empty_state_progress"
@@ -71,5 +71,5 @@
         android:indeterminate="true"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/resolver_empty_state_subtitle"
-        android:indeterminateTint="@color/resolver_tabs_active_color"/>
+        android:indeterminateTint="?attr/colorAccent"/>
 </RelativeLayout>

@@ -64,24 +64,34 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer.BatchableNotificationHandler;
+import com.android.systemui.statusbar.notification.collection.notifcollection.CleanUpEntryEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CollectionReadyForBuildListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.DismissedByUserStats;
+import com.android.systemui.statusbar.notification.collection.notifcollection.EntryAddedEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.EntryRemovedEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.EntryUpdatedEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.InitEntryEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionLogger;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
+import com.android.systemui.statusbar.notification.collection.notifcollection.NotifEvent;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
+import com.android.systemui.statusbar.notification.collection.notifcollection.RankingAppliedEvent;
+import com.android.systemui.statusbar.notification.collection.notifcollection.RankingUpdatedEvent;
 import com.android.systemui.util.Assert;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -124,6 +134,8 @@ public class NotifCollection implements Dumpable {
     private final List<NotifLifetimeExtender> mLifetimeExtenders = new ArrayList<>();
     private final List<NotifDismissInterceptor> mDismissInterceptors = new ArrayList<>();
 
+    private Queue<NotifEvent> mEventQueue = new ArrayDeque<>();
+
     private boolean mAttached = false;
     private boolean mAmDispatchingToOtherCode;
 
@@ -160,8 +172,8 @@ public class NotifCollection implements Dumpable {
         mBuildListener = buildListener;
     }
 
-    /** @see NotifPipeline#getActiveNotifs() */
-    Collection<NotificationEntry> getActiveNotifs() {
+    /** @see NotifPipeline#getAllNotifs() */
+    Collection<NotificationEntry> getAllNotifs() {
         Assert.isMainThread();
         return mReadOnlyNotificationSet;
     }
@@ -242,7 +254,7 @@ public class NotifCollection implements Dumpable {
         }
 
         locallyDismissNotifications(entriesToLocallyDismiss);
-        rebuildList();
+        dispatchEventsAndRebuildList();
     }
 
     /**
@@ -251,8 +263,7 @@ public class NotifCollection implements Dumpable {
     public void dismissNotification(
             NotificationEntry entry,
             @NonNull DismissedByUserStats stats) {
-        dismissNotifications(List.of(
-                new Pair<NotificationEntry, DismissedByUserStats>(entry, stats)));
+        dismissNotifications(List.of(new Pair<>(entry, stats)));
     }
 
     /**
@@ -268,7 +279,7 @@ public class NotifCollection implements Dumpable {
             // system process is dead if we're here.
         }
 
-        final List<NotificationEntry> entries = new ArrayList(getActiveNotifs());
+        final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
         for (int i = entries.size() - 1; i >= 0; i--) {
             NotificationEntry entry = entries.get(i);
             if (!shouldDismissOnClearAll(entry, userId)) {
@@ -283,7 +294,7 @@ public class NotifCollection implements Dumpable {
         }
 
         locallyDismissNotifications(entries);
-        rebuildList();
+        dispatchEventsAndRebuildList();
     }
 
     /**
@@ -326,8 +337,9 @@ public class NotifCollection implements Dumpable {
     private void onNotificationPosted(StatusBarNotification sbn, RankingMap rankingMap) {
         Assert.isMainThread();
 
-        postNotification(sbn, requireRanking(rankingMap, sbn.getKey()), rankingMap);
-        rebuildList();
+        postNotification(sbn, requireRanking(rankingMap, sbn.getKey()));
+        applyRanking(rankingMap);
+        dispatchEventsAndRebuildList();
     }
 
     private void onNotificationGroupPosted(List<CoalescedEvent> batch) {
@@ -336,9 +348,9 @@ public class NotifCollection implements Dumpable {
         mLogger.logNotifGroupPosted(batch.get(0).getSbn().getGroupKey(), batch.size());
 
         for (CoalescedEvent event : batch) {
-            postNotification(event.getSbn(), event.getRanking(), null);
+            postNotification(event.getSbn(), event.getRanking());
         }
-        rebuildList();
+        dispatchEventsAndRebuildList();
     }
 
     private void onNotificationRemoved(
@@ -354,55 +366,49 @@ public class NotifCollection implements Dumpable {
             throw new IllegalStateException("No notification to remove with key " + sbn.getKey());
         }
         entry.mCancellationReason = reason;
-        applyRanking(rankingMap);
         tryRemoveNotification(entry);
-        rebuildList();
+        applyRanking(rankingMap);
+        dispatchEventsAndRebuildList();
     }
 
     private void onNotificationRankingUpdate(RankingMap rankingMap) {
         Assert.isMainThread();
+        mEventQueue.add(new RankingUpdatedEvent(rankingMap));
         applyRanking(rankingMap);
-        dispatchNotificationRankingUpdate(rankingMap);
-        rebuildList();
+        dispatchEventsAndRebuildList();
     }
 
     private void postNotification(
             StatusBarNotification sbn,
-            Ranking ranking,
-            @Nullable RankingMap rankingMap) {
+            Ranking ranking) {
         NotificationEntry entry = mNotificationSet.get(sbn.getKey());
 
         if (entry == null) {
             // A new notification!
-            mLogger.logNotifPosted(sbn.getKey());
-
             entry = new NotificationEntry(sbn, ranking);
             mNotificationSet.put(sbn.getKey(), entry);
-            dispatchOnEntryInit(entry);
 
-            if (rankingMap != null) {
-                applyRanking(rankingMap);
-            }
-
-            dispatchOnEntryAdded(entry);
+            mLogger.logNotifPosted(sbn.getKey());
+            mEventQueue.add(new InitEntryEvent(entry));
+            mEventQueue.add(new EntryAddedEvent(entry));
 
         } else {
             // Update to an existing entry
-            mLogger.logNotifUpdated(sbn.getKey());
 
             // Notification is updated so it is essentially re-added and thus alive again, so we
             // can reset its state.
+            // TODO: If a coalesced event ever gets here, it's possible to lose track of children,
+            //  since their rankings might have been updated earlier (and thus we may no longer
+            //  think a child is associated with this locally-dismissed entry).
             cancelLocalDismissal(entry);
             cancelLifetimeExtension(entry);
             cancelDismissInterception(entry);
             entry.mCancellationReason = REASON_NOT_CANCELED;
 
             entry.setSbn(sbn);
-            if (rankingMap != null) {
-                applyRanking(rankingMap);
-            }
 
-            dispatchOnEntryUpdated(entry);
+            mLogger.logNotifUpdated(sbn.getKey());
+            mEventQueue.add(new EntryUpdatedEvent(entry));
         }
     }
 
@@ -432,8 +438,8 @@ public class NotifCollection implements Dumpable {
         if (!isLifetimeExtended(entry)) {
             mNotificationSet.remove(entry.getKey());
             cancelDismissInterception(entry);
-            dispatchOnEntryRemoved(entry, entry.mCancellationReason);
-            dispatchOnEntryCleanUp(entry);
+            mEventQueue.add(new EntryRemovedEvent(entry, entry.mCancellationReason));
+            mEventQueue.add(new CleanUpEntryEvent(entry));
             return true;
         } else {
             return false;
@@ -466,9 +472,16 @@ public class NotifCollection implements Dumpable {
                 }
             }
         }
+        mEventQueue.add(new RankingAppliedEvent());
     }
 
-    private void rebuildList() {
+    private void dispatchEventsAndRebuildList() {
+        mAmDispatchingToOtherCode = true;
+        while (!mEventQueue.isEmpty()) {
+            mEventQueue.remove().dispatchTo(mNotifCollectionListeners);
+        }
+        mAmDispatchingToOtherCode = false;
+
         if (mBuildListener != null) {
             mBuildListener.onBuildList(mReadOnlyNotificationSet);
         }
@@ -491,7 +504,7 @@ public class NotifCollection implements Dumpable {
 
         if (!isLifetimeExtended(entry)) {
             if (tryRemoveNotification(entry)) {
-                rebuildList();
+                dispatchEventsAndRebuildList();
             }
         }
     }
@@ -660,57 +673,9 @@ public class NotifCollection implements Dumpable {
                 || entry.getSbn().getUser().getIdentifier() == userId;
     }
 
-    private void dispatchOnEntryInit(NotificationEntry entry) {
-        mAmDispatchingToOtherCode = true;
-        for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryInit(entry);
-        }
-        mAmDispatchingToOtherCode = false;
-    }
-
-    private void dispatchOnEntryAdded(NotificationEntry entry) {
-        mAmDispatchingToOtherCode = true;
-        for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryAdded(entry);
-        }
-        mAmDispatchingToOtherCode = false;
-    }
-
-    private void dispatchOnEntryUpdated(NotificationEntry entry) {
-        mAmDispatchingToOtherCode = true;
-        for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryUpdated(entry);
-        }
-        mAmDispatchingToOtherCode = false;
-    }
-
-    private void dispatchNotificationRankingUpdate(RankingMap map) {
-        mAmDispatchingToOtherCode = true;
-        for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onRankingUpdate(map);
-        }
-        mAmDispatchingToOtherCode = false;
-    }
-
-    private void dispatchOnEntryRemoved(NotificationEntry entry, @CancellationReason int reason) {
-        mAmDispatchingToOtherCode = true;
-        for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryRemoved(entry, reason);
-        }
-        mAmDispatchingToOtherCode = false;
-    }
-
-    private void dispatchOnEntryCleanUp(NotificationEntry entry) {
-        mAmDispatchingToOtherCode = true;
-        for (NotifCollectionListener listener : mNotifCollectionListeners) {
-            listener.onEntryCleanUp(entry);
-        }
-        mAmDispatchingToOtherCode = false;
-    }
-
     @Override
     public void dump(@NonNull FileDescriptor fd, PrintWriter pw, @NonNull String[] args) {
-        final List<NotificationEntry> entries = new ArrayList<>(getActiveNotifs());
+        final List<NotificationEntry> entries = new ArrayList<>(getAllNotifs());
 
         pw.println("\t" + TAG + " unsorted/unfiltered notifications:");
         if (entries.size() == 0) {
@@ -754,6 +719,7 @@ public class NotifCollection implements Dumpable {
     private static final String TAG = "NotifCollection";
 
     @IntDef(prefix = { "REASON_" }, value = {
+            REASON_NOT_CANCELED,
             REASON_UNKNOWN,
             REASON_CLICK,
             REASON_CANCEL_ALL,

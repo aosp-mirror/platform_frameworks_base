@@ -1650,7 +1650,6 @@ public class ServiceState implements Parcelable {
      * @return Current data network type
      * @hide
      */
-    @SystemApi
     @TestApi
     public @NetworkType int getDataNetworkType() {
         final NetworkRegistrationInfo iwlanRegInfo = getNetworkRegistrationInfo(

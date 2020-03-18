@@ -22,6 +22,9 @@ import androidx.test.runner.AndroidJUnit4
 import com.android.testutils.DevSdkIgnoreRule
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.assertParcelSane
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,5 +45,28 @@ class NetworkAgentConfigTest {
             setUnvalidatedConnectivityAcceptable(true)
         }.build()
         assertParcelSane(config, 9)
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    fun testBuilder() {
+        val config = NetworkAgentConfig.Builder().apply {
+            setExplicitlySelected(true)
+            setLegacyType(ConnectivityManager.TYPE_ETHERNET)
+            setSubscriberId("MySubId")
+            setPartialConnectivityAcceptable(false)
+            setUnvalidatedConnectivityAcceptable(true)
+            setLegacyTypeName("TEST_NETWORK")
+            disableNat64Detection()
+            disableProvisioningNotification()
+        }.build()
+
+        assertTrue(config.isExplicitlySelected())
+        assertEquals(ConnectivityManager.TYPE_ETHERNET, config.getLegacyType())
+        assertEquals("MySubId", config.getSubscriberId())
+        assertFalse(config.isPartialConnectivityAcceptable())
+        assertTrue(config.isUnvalidatedConnectivityAcceptable())
+        assertEquals("TEST_NETWORK", config.getLegacyTypeName())
+        assertFalse(config.isNat64DetectionEnabled())
+        assertFalse(config.isProvisioningNotificationEnabled())
     }
 }

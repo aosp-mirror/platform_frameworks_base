@@ -352,9 +352,19 @@ class TaskSnapshotController {
         }
         task.getBounds(mTmpRect);
         mTmpRect.offsetTo(0, 0);
+
+        SurfaceControl[] excludeLayers;
+        final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
+        if (imeWindow != null) {
+            excludeLayers = new SurfaceControl[1];
+            excludeLayers[0] = imeWindow.getSurfaceControl();
+        } else {
+            excludeLayers = new SurfaceControl[0];
+        }
         final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                SurfaceControl.captureLayers(
-                        task.getSurfaceControl(), mTmpRect, scaleFraction, pixelFormat);
+                SurfaceControl.captureLayersExcluding(
+                        task.getSurfaceControl(), mTmpRect, scaleFraction,
+                        pixelFormat, excludeLayers);
         if (outTaskSize != null) {
             outTaskSize.x = mTmpRect.width();
             outTaskSize.y = mTmpRect.height();

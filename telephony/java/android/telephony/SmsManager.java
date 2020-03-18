@@ -975,11 +975,7 @@ public final class SmsManager {
      *
      * @param packageName serves as the default package name if the package name that is
      *        associated with the user id is null.
-     *
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public void sendMultipartTextMessage(
             @NonNull String destinationAddress, @Nullable String scAddress,
             @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
@@ -2898,7 +2894,7 @@ public final class SmsManager {
                         getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return smsc;
     }
@@ -2920,7 +2916,7 @@ public final class SmsManager {
      * </p>
      *
      * @param smsc the SMSC address string.
-     * @return true for success, false otherwise.
+     * @return true for success, false otherwise. Failure can be due modem returning an error.
      */
     @SuppressAutoDoc // for carrier privileges and default SMS application.
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
@@ -2932,7 +2928,7 @@ public final class SmsManager {
                         smsc, getSubscriptionId(), null);
             }
         } catch (RemoteException ex) {
-            // ignore it
+            throw new RuntimeException(ex);
         }
         return false;
     }

@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
@@ -475,6 +476,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         if (!(container instanceof Task)) {
             throw new RuntimeException("Invalid token in task transaction");
         }
+        final Task task = (Task) container;
         // The "client"-facing API should prevent bad changes; however, just in case, sanitize
         // masks here.
         int configMask = change.getConfigSetMask();
@@ -495,6 +497,11 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         }
         if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_FOCUSABLE) != 0) {
             if (container.setFocusable(change.getFocusable())) {
+                effects |= TRANSACT_EFFECTS_LIFECYCLE;
+            }
+        }
+        if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
+            if (task.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, change.getHidden())) {
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
             }
         }

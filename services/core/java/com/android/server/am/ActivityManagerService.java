@@ -2179,9 +2179,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                Process.enableFreezer(false);
+            }
+
             if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                     "meminfo", pw)) return;
             PriorityDump.dump(mPriorityDumper, fd, pw, args);
+
+            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                Process.enableFreezer(true);
+            }
         }
     }
 
@@ -2193,9 +2201,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                Process.enableFreezer(false);
+            }
+
             if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                     "gfxinfo", pw)) return;
             mActivityManagerService.dumpGraphicsHardwareUsage(fd, pw, args);
+
+            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                Process.enableFreezer(true);
+            }
         }
     }
 
@@ -2207,9 +2223,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                Process.enableFreezer(false);
+            }
+
             if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                     "dbinfo", pw)) return;
             mActivityManagerService.dumpDbInfo(fd, pw, args);
+
+            if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
+                Process.enableFreezer(true);
+            }
         }
     }
 
