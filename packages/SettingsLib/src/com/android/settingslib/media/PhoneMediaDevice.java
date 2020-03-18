@@ -15,10 +15,16 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
+import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -43,7 +49,18 @@ public class PhoneMediaDevice extends MediaDevice {
 
     @Override
     public String getName() {
-        return mContext.getString(R.string.media_transfer_this_device_name);
+        CharSequence name;
+        switch (mRouteInfo.getType()) {
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+                name = mRouteInfo.getName();
+                break;
+            case TYPE_BUILTIN_SPEAKER:
+            default:
+                name = mContext.getString(R.string.media_transfer_this_device_name);
+                break;
+        }
+        return name.toString();
     }
 
     @Override
@@ -54,7 +71,23 @@ public class PhoneMediaDevice extends MediaDevice {
     @Override
     public Drawable getIcon() {
         return BluetoothUtils.buildBtRainbowDrawable(mContext,
-                mContext.getDrawable(R.drawable.ic_smartphone), getId().hashCode());
+                mContext.getDrawable(getDrawableResId()), getId().hashCode());
+    }
+
+    @VisibleForTesting
+    int getDrawableResId() {
+        int resId;
+        switch (mRouteInfo.getType()) {
+            case TYPE_WIRED_HEADSET:
+            case TYPE_WIRED_HEADPHONES:
+                resId = com.android.internal.R.drawable.ic_bt_headphones_a2dp;
+                break;
+            case TYPE_BUILTIN_SPEAKER:
+            default:
+                resId = R.drawable.ic_smartphone;
+                break;
+        }
+        return resId;
     }
 
     @Override
