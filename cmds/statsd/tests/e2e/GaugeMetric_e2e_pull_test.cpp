@@ -32,7 +32,7 @@ namespace statsd {
 namespace {
 
 const int64_t metricId = 123456;
-const int32_t ATOM_TAG = android::util::SUBSYSTEM_SLEEP_STATE;
+const int32_t ATOM_TAG = util::SUBSYSTEM_SLEEP_STATE;
 
 StatsdConfig CreateStatsdConfig(const GaugeMetric::SamplingType sampling_type,
                                 bool useCondition = true) {

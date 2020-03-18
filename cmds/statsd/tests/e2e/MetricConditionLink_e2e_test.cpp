@@ -48,12 +48,12 @@ StatsdConfig CreateStatsdConfig() {
     auto isSyncingPredicate = CreateIsSyncingPredicate();
     auto syncDimension = isSyncingPredicate.mutable_simple_predicate()->mutable_dimensions();
     *syncDimension = CreateAttributionUidDimensions(
-        android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+        util::SYNC_STATE_CHANGED, {Position::FIRST});
     syncDimension->add_child()->set_field(2 /* name field*/);
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
     *isInBackgroundPredicate.mutable_simple_predicate()->mutable_dimensions() =
-        CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */ });
+        CreateDimensions(util::ACTIVITY_FOREGROUND_STATE_CHANGED, {1 /* uid field */ });
 
     *config.add_predicate() = screenIsOffPredicate;
     *config.add_predicate() = isSyncingPredicate;
@@ -72,26 +72,26 @@ StatsdConfig CreateStatsdConfig() {
     countMetric->set_condition(combinationPredicate->id());
     // The metric is dimensioning by uid only.
     *countMetric->mutable_dimensions_in_what() =
-        CreateDimensions(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1});
+        CreateDimensions(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1});
     countMetric->set_bucket(FIVE_MINUTES);
 
     // Links between crash atom and condition of app is in syncing.
     auto links = countMetric->add_links();
     links->set_condition(isSyncingPredicate.id());
     auto dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    dimensionWhat->set_field(util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
     *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
-            android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+            util::SYNC_STATE_CHANGED, {Position::FIRST});
 
     // Links between crash atom and condition of app is in background.
     links = countMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
     dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    dimensionWhat->set_field(util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
     auto dimensionCondition = links->mutable_fields_in_condition();
-    dimensionCondition->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+    dimensionCondition->set_field(util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     dimensionCondition->add_child()->set_field(1);  // uid field.
     return config;
 }
@@ -211,7 +211,7 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks1) {
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(0).count(), 1);
     auto data = reports.reports(0).metrics(0).count_metrics().data(0);
     // Validate dimension value.
-    EXPECT_EQ(data.dimensions_in_what().field(), android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    EXPECT_EQ(data.dimensions_in_what().field(), util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     // Uid field.
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
@@ -332,7 +332,7 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks2) {
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(1).count(), 3);
     auto data = reports.reports(0).metrics(0).count_metrics().data(0);
     // Validate dimension value.
-    EXPECT_EQ(data.dimensions_in_what().field(), android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    EXPECT_EQ(data.dimensions_in_what().field(), util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     // Uid field.
     EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);

@@ -45,7 +45,7 @@ StatsdConfig CreateStatsdConfig() {
     countMetric->set_what(crashMatcher.id());
     countMetric->set_bucket(FIVE_MINUTES);
     countMetric->mutable_dimensions_in_what()->set_field(
-        android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+        util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     countMetric->mutable_dimensions_in_what()->add_child()->set_field(1);  // uid field
 
     auto metric_activation1 = config.add_metric_activation();
@@ -79,7 +79,7 @@ StatsdConfig CreateStatsdConfigWithOneDeactivation() {
     countMetric->set_what(crashMatcher.id());
     countMetric->set_bucket(FIVE_MINUTES);
     countMetric->mutable_dimensions_in_what()->set_field(
-        android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+        util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     countMetric->mutable_dimensions_in_what()->add_child()->set_field(1);  // uid field
 
     auto metric_activation1 = config.add_metric_activation();
@@ -117,7 +117,7 @@ StatsdConfig CreateStatsdConfigWithTwoDeactivations() {
     countMetric->set_what(crashMatcher.id());
     countMetric->set_bucket(FIVE_MINUTES);
     countMetric->mutable_dimensions_in_what()->set_field(
-        android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+        util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     countMetric->mutable_dimensions_in_what()->add_child()->set_field(1);  // uid field
 
     auto metric_activation1 = config.add_metric_activation();
@@ -153,7 +153,7 @@ StatsdConfig CreateStatsdConfigWithSameDeactivations() {
     countMetric->set_what(crashMatcher.id());
     countMetric->set_bucket(FIVE_MINUTES);
     countMetric->mutable_dimensions_in_what()->set_field(
-        android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+        util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     countMetric->mutable_dimensions_in_what()->add_child()->set_field(1);  // uid field
 
     auto metric_activation1 = config.add_metric_activation();
@@ -194,7 +194,7 @@ StatsdConfig CreateStatsdConfigWithTwoMetricsTwoDeactivations() {
     countMetric->set_what(crashMatcher.id());
     countMetric->set_bucket(FIVE_MINUTES);
     countMetric->mutable_dimensions_in_what()->set_field(
-        android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+        util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     countMetric->mutable_dimensions_in_what()->add_child()->set_field(1);  // uid field
 
     int64_t metricId2 = 234567;
@@ -203,7 +203,7 @@ StatsdConfig CreateStatsdConfigWithTwoMetricsTwoDeactivations() {
     countMetric->set_what(foregroundMatcher.id());
     countMetric->set_bucket(FIVE_MINUTES);
     countMetric->mutable_dimensions_in_what()->set_field(
-        android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
+        util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     countMetric->mutable_dimensions_in_what()->add_child()->set_field(1);  // uid field
 
     auto metric_activation1 = config.add_metric_activation();
@@ -398,7 +398,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_EQ(4, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -409,7 +409,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -420,7 +420,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -433,7 +433,7 @@ TEST(MetricActivationE2eTest, TestCountMetric) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(3);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -706,7 +706,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_EQ(5, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -717,7 +717,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -728,7 +728,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -741,7 +741,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(3);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -754,7 +754,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithOneDeactivation) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(4);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1040,7 +1040,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_EQ(5, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1051,7 +1051,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1062,7 +1062,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1075,7 +1075,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(3);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1088,7 +1088,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoDeactivations) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(4);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1264,7 +1264,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_EQ(3, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1275,7 +1275,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_EQ(firstDeactivation, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1286,7 +1286,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithSameDeactivation) {
     EXPECT_EQ(firstDeactivation, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1704,7 +1704,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(5, countMetrics.data_size());
 
     auto data = countMetrics.data(0);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1715,7 +1715,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1726,7 +1726,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1739,7 +1739,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(3);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1752,7 +1752,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(4);
-    EXPECT_EQ(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::PROCESS_LIFE_CYCLE_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1769,7 +1769,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(5, countMetrics.data_size());
 
     data = countMetrics.data(0);
-    EXPECT_EQ(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1780,7 +1780,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
-    EXPECT_EQ(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1791,7 +1791,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(2);
-    EXPECT_EQ(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1804,7 +1804,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(3);
-    EXPECT_EQ(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
@@ -1817,7 +1817,7 @@ TEST(MetricActivationE2eTest, TestCountMetricWithTwoMetricsTwoDeactivations) {
               data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(4);
-    EXPECT_EQ(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
+    EXPECT_EQ(util::ACTIVITY_FOREGROUND_STATE_CHANGED, data.dimensions_in_what().field());
     EXPECT_EQ(1, data.dimensions_in_what().value_tuple().dimensions_value_size());
     EXPECT_EQ(1 /* uid field */,
               data.dimensions_in_what().value_tuple().dimensions_value(0).field());
