@@ -3750,7 +3750,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenPullFailed) {
 //
 //    sp<ValueMetricProducer> valueProducer =
 //            ValueMetricProducerTestHelper::createValueProducerWithState(
-//                    pullerManager, metric, {android::util::SCREEN_STATE_CHANGED}, {});
+//                    pullerManager, metric, {util::SCREEN_STATE_CHANGED}, {});
 //
 //    // Set up StateManager and check that StateTrackers are initialized.
 //    StateManager::getInstance().clear();
@@ -3934,7 +3934,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenPullFailed) {
 //
 //    sp<ValueMetricProducer> valueProducer =
 //            ValueMetricProducerTestHelper::createValueProducerWithState(
-//                    pullerManager, metric, {android::util::SCREEN_STATE_CHANGED}, stateGroupMap);
+//                    pullerManager, metric, {util::SCREEN_STATE_CHANGED}, stateGroupMap);
 //
 //    // Set up StateManager and check that StateTrackers are initialized.
 //    StateManager::getInstance().clear();

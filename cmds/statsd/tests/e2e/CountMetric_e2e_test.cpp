@@ -365,7 +365,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
 
     auto appCrashMatcher =
-            CreateSimpleAtomMatcher("APP_CRASH_OCCURRED", android::util::APP_CRASH_OCCURRED);
+            CreateSimpleAtomMatcher("APP_CRASH_OCCURRED", util::APP_CRASH_OCCURRED);
     *config.add_atom_matcher() = appCrashMatcher;
 
     auto state = CreateUidProcessState();
@@ -381,7 +381,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields) {
     MetricStateLink* stateLink = countMetric->add_state_link();
     stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
     auto fieldsInWhat = stateLink->mutable_fields_in_what();
-    *fieldsInWhat = CreateDimensions(android::util::APP_CRASH_OCCURRED, {1 /*uid*/});
+    *fieldsInWhat = CreateDimensions(util::APP_CRASH_OCCURRED, {1 /*uid*/});
     auto fieldsInState = stateLink->mutable_fields_in_state();
     *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /*uid*/});
 
@@ -551,7 +551,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     config.add_allowed_log_source("AID_ROOT");  // LogEvent defaults to UID of root.
 
     auto appCrashMatcher =
-            CreateSimpleAtomMatcher("APP_CRASH_OCCURRED", android::util::APP_CRASH_OCCURRED);
+            CreateSimpleAtomMatcher("APP_CRASH_OCCURRED", util::APP_CRASH_OCCURRED);
     *config.add_atom_matcher() = appCrashMatcher;
 
     auto state1 = CreateScreenStateWithOnOffMap();
@@ -571,7 +571,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
     MetricStateLink* stateLink = countMetric->add_state_link();
     stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
     auto fieldsInWhat = stateLink->mutable_fields_in_what();
-    *fieldsInWhat = CreateDimensions(android::util::APP_CRASH_OCCURRED, {1 /*uid*/});
+    *fieldsInWhat = CreateDimensions(util::APP_CRASH_OCCURRED, {1 /*uid*/});
     auto fieldsInState = stateLink->mutable_fields_in_state();
     *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /*uid*/});
 
