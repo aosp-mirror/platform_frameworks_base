@@ -432,405 +432,341 @@ TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
     EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second.back().mConditionTrueNs);
 }
 
-///*
-// * Tests pulled atoms with no conditions and take absolute value after reset
-// */
-// TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
-//    metric.set_use_absolute_value_on_reset(true);
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(true));
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
-//
-//    vector<shared_ptr<LogEvent>> allData;
-//    allData.clear();
-//    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(11);
-//    event->init();
-//    allData.push_back(event);
-//
-//    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
-//    // has one slice
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    ValueMetricProducer::Interval curInterval =
-//    valueProducer->mCurrentSlicedBucket.begin()->second[0]; ValueMetricProducer::BaseInfo
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(11, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
-//
-//    allData.clear();
-//    event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(10);
-//    event->init();
-//    allData.push_back(event);
-//    valueProducer->onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
-//    // has one slice
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(10, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(10, curInterval.value.long_value);
-//    EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
-//    EXPECT_EQ(10, valueProducer->mPastBuckets.begin()->second.back().values[0].long_value);
-//    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second.back().mConditionTrueNs);
-//
-//    allData.clear();
-//    event = make_shared<LogEvent>(tagId, bucket4StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(36);
-//    event->init();
-//    allData.push_back(event);
-//    valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(36, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(26, curInterval.value.long_value);
-//    EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
-//    EXPECT_EQ(2UL, valueProducer->mPastBuckets.begin()->second.size());
-//    EXPECT_EQ(10, valueProducer->mPastBuckets.begin()->second[0].values[0].long_value);
-//    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second[0].mConditionTrueNs);
-//    EXPECT_EQ(26, valueProducer->mPastBuckets.begin()->second[1].values[0].long_value);
-//    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second[1].mConditionTrueNs);
-//}
-//
-///*
-// * Tests pulled atoms with no conditions and take zero value after reset
-// */
-// TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(false));
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
-//
-//    vector<shared_ptr<LogEvent>> allData;
-//    allData.clear();
-//    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(11);
-//    event->init();
-//    allData.push_back(event);
-//
-//    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
-//    // has one slice
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    ValueMetricProducer::Interval curInterval =
-//    valueProducer->mCurrentSlicedBucket.begin()->second[0]; ValueMetricProducer::BaseInfo
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(11, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
-//
-//    allData.clear();
-//    event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(10);
-//    event->init();
-//    allData.push_back(event);
-//    valueProducer->onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
-//    // has one slice
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(10, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
-//
-//    allData.clear();
-//    event = make_shared<LogEvent>(tagId, bucket4StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(36);
-//    event->init();
-//    allData.push_back(event);
-//    valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(36, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(26, curInterval.value.long_value);
-//    EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
-//    EXPECT_EQ(26, valueProducer->mPastBuckets.begin()->second[0].values[0].long_value);
-//    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second[0].mConditionTrueNs);
-//}
-//
-///*
-// * Test pulled event with non sliced condition.
-// */
-// TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 8);
-//                event->write(tagId);
-//                event->write(100);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-//                event->write(tagId);
-//                event->write(130);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
-//                event->write(tagId);
-//                event->write(180);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager,
-//            metric);
-//
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 8);
-//
-//    // has one slice
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    ValueMetricProducer::Interval curInterval =
-//    valueProducer->mCurrentSlicedBucket.begin()->second[0]; ValueMetricProducer::BaseInfo
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//    // startUpdated:false sum:0 start:100
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(100, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
-//
-//    vector<shared_ptr<LogEvent>> allData;
-//    allData.clear();
-//    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-//    event->write(1);
-//    event->write(110);
-//    event->init();
-//    allData.push_back(event);
-//    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
-//    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8});
-//
-//    // has one slice
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//    EXPECT_EQ(true, curBaseInfo.hasBase);
-//    EXPECT_EQ(110, curBaseInfo.base.long_value);
-//    EXPECT_EQ(false, curInterval.hasValue);
-//    EXPECT_EQ(10, curInterval.value.long_value);
-//
-//    valueProducer->onConditionChanged(false, bucket2StartTimeNs + 1);
-//    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8});
-//
-//    // has one slice
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
-//    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
-//    EXPECT_EQ(true, curInterval.hasValue);
-//    EXPECT_EQ(20, curInterval.value.long_value);
-//    EXPECT_EQ(false, curBaseInfo.hasBase);
-//
-//    valueProducer->onConditionChanged(true, bucket3StartTimeNs + 1);
-//    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10, 20}, {bucketSizeNs - 8, 1});
-//}
-//
-// TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
-//
-//    UidMap uidMap;
-//    SimpleAtomMatcher atomMatcher;
-//    atomMatcher.set_atom_id(tagId);
-//    sp<EventMatcherWizard> eventMatcherWizard =
-//            new EventMatcherWizard({new SimpleLogMatchingTracker(
-//                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
-//    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
-//                                      eventMatcherWizard, -1, bucketStartTimeNs,
-//                                      bucketStartTimeNs, pullerManager);
-//
-//    shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-//    event1->write(1);
-//    event1->write(10);
-//    event1->init();
-//    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
-//    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-//
-//    valueProducer.notifyAppUpgrade(bucketStartTimeNs + 150, "ANY.APP", 1, 1);
-//    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-//    EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
-//
-//    shared_ptr<LogEvent> event2 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 59 *
-//    NS_PER_SEC); event2->write(1); event2->write(10); event2->init();
-//    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event2);
-//    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-//    EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
-//
-//    // Next value should create a new bucket.
-//    shared_ptr<LogEvent> event3 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 65 *
-//    NS_PER_SEC); event3->write(1); event3->write(10); event3->init();
-//    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
-//    EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-//    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, valueProducer.mCurrentBucketStartTimeNs);
-//}
-//
-// TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
-//
-//    UidMap uidMap;
-//    SimpleAtomMatcher atomMatcher;
-//    atomMatcher.set_atom_id(tagId);
-//    sp<EventMatcherWizard> eventMatcherWizard =
-//            new EventMatcherWizard({new SimpleLogMatchingTracker(
-//                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
-//    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
-//    EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            .WillOnce(Return(true))
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs +
-//                149); event->write(tagId); event->write(120); event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
-//                                      eventMatcherWizard, tagId, bucketStartTimeNs,
-//                                      bucketStartTimeNs, pullerManager);
-//
-//    vector<shared_ptr<LogEvent>> allData;
-//    allData.clear();
-//    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(100);
-//    event->init();
-//    allData.push_back(event);
-//
-//    valueProducer.onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
-//    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-//
-//    valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150, "ANY.APP", 1, 1);
-//    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-//    EXPECT_EQ(bucket2StartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
-//    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20}, {150});
-//
-//    allData.clear();
-//    event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(150);
-//    event->init();
-//    allData.push_back(event);
-//    valueProducer.onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
-//    EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-//    EXPECT_EQ(bucket3StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
-//    EXPECT_EQ(20L,
-//              valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].values[0].long_value);
-//    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20, 30},
-//                                    {150, bucketSizeNs - 150});
-//}
-//
-// TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
-//    metric.set_split_bucket_for_app_upgrade(false);
-//
-//    UidMap uidMap;
-//    SimpleAtomMatcher atomMatcher;
-//    atomMatcher.set_atom_id(tagId);
-//    sp<EventMatcherWizard> eventMatcherWizard =
-//            new EventMatcherWizard({new SimpleLogMatchingTracker(
-//                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
-//    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
-//    EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(true));
-//    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
-//                                      eventMatcherWizard, tagId, bucketStartTimeNs,
-//                                      bucketStartTimeNs, pullerManager);
-//
-//    vector<shared_ptr<LogEvent>> allData;
-//    allData.clear();
-//    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
-//    event->write(tagId);
-//    event->write(100);
-//    event->init();
-//    allData.push_back(event);
-//
-//    valueProducer.onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
-//    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-//
-//    valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150, "ANY.APP", 1, 1);
-//    EXPECT_EQ(0UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-//    EXPECT_EQ(bucket2StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
-//}
-//
-// TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
-//                event->write(tagId);
-//                event->write(100);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs -
-//                100); event->write(tagId); event->write(120); event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager,
-//            metric);
-//
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 1);
-//
-//    valueProducer->onConditionChanged(false, bucket2StartTimeNs-100);
-//    EXPECT_FALSE(valueProducer->mCondition);
-//
-//    valueProducer->notifyAppUpgrade(bucket2StartTimeNs-50, "ANY.APP", 1, 1);
-//    // Expect one full buckets already done and starting a partial bucket.
-//    EXPECT_EQ(bucket2StartTimeNs-50, valueProducer->mCurrentBucketStartTimeNs);
-//    EXPECT_EQ(1UL, valueProducer->mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
-//    EXPECT_EQ(bucketStartTimeNs,
-//              valueProducer->mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
-//    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20},
-//                                    {(bucket2StartTimeNs - 100) - (bucketStartTimeNs + 1)});
-//    EXPECT_FALSE(valueProducer->mCondition);
-//}
-//
+/*
+ * Tests pulled atoms with no conditions and take absolute value after reset
+ */
+TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+    metric.set_use_absolute_value_on_reset(true);
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(true));
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 11));
+
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ValueMetricProducer::Interval curInterval =
+            valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
+
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs + 1, 10));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(10, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(10, curInterval.value.long_value);
+    EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(10, valueProducer->mPastBuckets.begin()->second.back().values[0].long_value);
+    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second.back().mConditionTrueNs);
+
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket4StartTimeNs + 1, 36));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(36, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(26, curInterval.value.long_value);
+    EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(2UL, valueProducer->mPastBuckets.begin()->second.size());
+    EXPECT_EQ(10, valueProducer->mPastBuckets.begin()->second[0].values[0].long_value);
+    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second[0].mConditionTrueNs);
+    EXPECT_EQ(26, valueProducer->mPastBuckets.begin()->second[1].values[0].long_value);
+    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second[1].mConditionTrueNs);
+}
+
+/*
+ * Tests pulled atoms with no conditions and take zero value after reset
+ */
+TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(false));
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 11));
+
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ValueMetricProducer::Interval curInterval =
+            valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(11, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
+
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs + 1, 10));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(10, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
+
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket4StartTimeNs + 1, 36));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket4StartTimeNs);
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(36, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(26, curInterval.value.long_value);
+    EXPECT_EQ(1UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(26, valueProducer->mPastBuckets.begin()->second[0].values[0].long_value);
+    EXPECT_EQ(bucketSizeNs, valueProducer->mPastBuckets.begin()->second[0].mConditionTrueNs);
+}
+
+/*
+ * Test pulled event with non sliced condition.
+ */
+TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 8, 100));
+                return true;
+            }))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 130));
+                return true;
+            }))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs + 1, 180));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 8);
+
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ValueMetricProducer::Interval curInterval =
+            valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    ValueMetricProducer::BaseInfo curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    // startUpdated:false sum:0 start:100
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(100, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(0UL, valueProducer->mPastBuckets.size());
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    allData.push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 1, 1, 110));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8});
+
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curBaseInfo.hasBase);
+    EXPECT_EQ(110, curBaseInfo.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(10, curInterval.value.long_value);
+
+    valueProducer->onConditionChanged(false, bucket2StartTimeNs + 1);
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10}, {bucketSizeNs - 8});
+
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    curInterval = valueProducer->mCurrentSlicedBucket.begin()->second[0];
+    curBaseInfo = valueProducer->mCurrentBaseInfo.begin()->second[0];
+    EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(20, curInterval.value.long_value);
+    EXPECT_EQ(false, curBaseInfo.hasBase);
+
+    valueProducer->onConditionChanged(true, bucket3StartTimeNs + 1);
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {10, 20}, {bucketSizeNs - 8, 1});
+}
+
+TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
+
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    CreateTwoValueLogEvent(&event1, tagId, bucketStartTimeNs + 10, 1, 10);
+    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+
+    valueProducer.notifyAppUpgrade(bucketStartTimeNs + 150, "ANY.APP", 1, 1);
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
+
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    CreateTwoValueLogEvent(&event2, tagId, bucketStartTimeNs + 59 * NS_PER_SEC, 1, 10);
+    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucketStartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
+
+    // Next value should create a new bucket.
+    LogEvent event3(/*uid=*/0, /*pid=*/0);
+    CreateTwoValueLogEvent(&event3, tagId, bucketStartTimeNs + 65 * NS_PER_SEC, 1, 10);
+    valueProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
+    EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, valueProducer.mCurrentBucketStartTimeNs);
+}
+
+TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Return(true))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 149, 120));
+                return true;
+            }));
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, tagId, bucketStartTimeNs,
+                                      bucketStartTimeNs, pullerManager);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 100));
+
+    valueProducer.onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+
+    valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150, "ANY.APP", 1, 1);
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucket2StartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20}, {150});
+
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket3StartTimeNs + 1, 150));
+    valueProducer.onDataPulled(allData, /** succeed */ true, bucket3StartTimeNs);
+    EXPECT_EQ(2UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucket3StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(20L,
+              valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].values[0].long_value);
+    assertPastBucketValuesSingleKey(valueProducer.mPastBuckets, {20, 30},
+                                    {150, bucketSizeNs - 150});
+}
+
+TEST(ValueMetricProducerTest, TestPulledWithAppUpgradeDisabled) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+    metric.set_split_bucket_for_app_upgrade(false);
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _)).WillOnce(Return(true));
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, tagId, bucketStartTimeNs,
+                                      bucketStartTimeNs, pullerManager);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 100));
+
+    valueProducer.onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+
+    valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150, "ANY.APP", 1, 1);
+    EXPECT_EQ(0UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucket2StartTimeNs, valueProducer.mCurrentBucketStartTimeNs);
+}
+
+TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 1, 100));
+                return true;
+            }))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs - 100, 120));
+                return true;
+            }));
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 1);
+
+    valueProducer->onConditionChanged(false, bucket2StartTimeNs - 100);
+    EXPECT_FALSE(valueProducer->mCondition);
+
+    valueProducer->notifyAppUpgrade(bucket2StartTimeNs - 50, "ANY.APP", 1, 1);
+    // Expect one full buckets already done and starting a partial bucket.
+    EXPECT_EQ(bucket2StartTimeNs - 50, valueProducer->mCurrentBucketStartTimeNs);
+    EXPECT_EQ(1UL, valueProducer->mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(bucketStartTimeNs,
+              valueProducer->mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
+    assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {20},
+                                    {(bucket2StartTimeNs - 100) - (bucketStartTimeNs + 1)});
+    EXPECT_FALSE(valueProducer->mCondition);
+}
+
 // TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
 //    ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
 //
