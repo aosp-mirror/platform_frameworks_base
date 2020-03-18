@@ -17,12 +17,14 @@
 package com.android.server.net;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
+import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.net.NetworkStack.checkNetworkStackPermission;
@@ -101,7 +103,7 @@ import android.net.NetworkTemplate;
 import android.net.TrafficStats;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
-import android.net.netstats.provider.NetworkStatsProviderCallback;
+import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.BestClock;
 import android.os.Binder;
 import android.os.DropBoxManager;
@@ -556,7 +558,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (RemoteException e) {
             // ignored; service lives in system_server
         }
-        invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.setAlert(mGlobalAlertBytes));
+        invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetAlert(mGlobalAlertBytes));
     }
 
     @Override
@@ -757,7 +759,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStatsHistory.Entry entry = history.getValues(start, end, now, null);
 
         final NetworkStats stats = new NetworkStats(end - start, 1);
-        stats.addEntry(new NetworkStats.Entry(IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE,
+        stats.insertEntry(new NetworkStats.Entry(IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE,
                 METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, entry.rxBytes, entry.rxPackets,
                 entry.txBytes, entry.txPackets, entry.operations));
         return stats;
@@ -1374,7 +1376,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         Trace.traceBegin(TRACE_TAG_NETWORK, "provider.requestStatsUpdate");
         final int registeredCallbackCount = mStatsProviderCbList.getRegisteredCallbackCount();
         mStatsProviderSem.drainPermits();
-        invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.requestStatsUpdate(0 /* unused */));
+        invokeForAllStatsProviderCallbacks(
+                (cb) -> cb.mProvider.onRequestStatsUpdate(0 /* unused */));
         try {
             mStatsProviderSem.tryAcquire(registeredCallbackCount,
                     MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS, TimeUnit.MILLISECONDS);
@@ -1549,7 +1552,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @Override
         public void setStatsProviderLimitAsync(@NonNull String iface, long quota) {
             Slog.v(TAG, "setStatsProviderLimitAsync(" + iface + "," + quota + ")");
-            invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.setLimit(iface, quota));
+            invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetLimit(iface, quota));
         }
     }
 
@@ -1793,6 +1796,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
+    // TODO: It is copied from ConnectivityService, consider refactor these check permission
+    //  functions to a proper util.
+    private boolean checkAnyPermissionOf(String... permissions) {
+        for (String permission : permissions) {
+            if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void enforceAnyPermissionOf(String... permissions) {
+        if (!checkAnyPermissionOf(permissions)) {
+            throw new SecurityException("Requires one of the following permissions: "
+                    + String.join(", ", permissions) + ".");
+        }
+    }
+
     /**
      * Registers a custom provider of {@link android.net.NetworkStats} to combine the network
      * statistics that cannot be seen by the kernel to system. To unregister, invoke the
@@ -1800,16 +1821,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      *
      * @param tag a human readable identifier of the custom network stats provider.
      * @param provider the {@link INetworkStatsProvider} binder corresponding to the
-     *                 {@link android.net.netstats.provider.AbstractNetworkStatsProvider} to be
-     *                 registered.
+     *                 {@link NetworkStatsProvider} to be registered.
      *
-     * @return a binder interface of
-     *         {@link android.net.netstats.provider.NetworkStatsProviderCallback}, which can be
-     *         used to report events to the system.
+     * @return a {@link INetworkStatsProviderCallback} binder
+     *         interface, which can be used to report events to the system.
      */
     public @NonNull INetworkStatsProviderCallback registerNetworkStatsProvider(
             @NonNull String tag, @NonNull INetworkStatsProvider provider) {
-        mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
+        enforceAnyPermissionOf(NETWORK_STATS_PROVIDER,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         Objects.requireNonNull(provider, "provider is null");
         Objects.requireNonNull(tag, "tag is null");
         try {
@@ -1910,7 +1930,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void onStatsUpdated(int token, @Nullable NetworkStats ifaceStats,
+        public void notifyStatsUpdated(int token, @Nullable NetworkStats ifaceStats,
                 @Nullable NetworkStats uidStats) {
             // TODO: 1. Use token to map ifaces to correct NetworkIdentity.
             //       2. Store the difference and store it directly to the recorder.
@@ -1922,12 +1942,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         @Override
-        public void onAlertReached() throws RemoteException {
+        public void notifyAlertReached() throws RemoteException {
             mAlertObserver.limitReached(LIMIT_GLOBAL_ALERT, null /* unused */);
         }
 
         @Override
-        public void onLimitReached() {
+        public void notifyLimitReached() {
             Log.d(TAG, mTag + ": onLimitReached");
             LocalServices.getService(NetworkPolicyManagerInternal.class)
                     .onStatsProviderLimitReached(mTag);

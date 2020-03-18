@@ -28,6 +28,7 @@ public interface QSHost {
     void forceCollapsePanels();
     void openPanels();
     Context getContext();
+    Context getUserContext();
     QSLogger getQSLogger();
     Collection<QSTile> getTiles();
     void addCallback(Callback callback);

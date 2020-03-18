@@ -39,7 +39,6 @@ import android.view.ActionMode;
 import android.view.textclassifier.ExtrasUtils;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.SelectionEvent.InvocationMethod;
-import android.view.textclassifier.SelectionSessionLogger;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationConstants;
 import android.view.textclassifier.TextClassificationContext;
@@ -705,7 +704,7 @@ public final class SelectionActionModeHelper {
         SelectionMetricsLogger(TextView textView) {
             Objects.requireNonNull(textView);
             mEditTextLogger = textView.isTextEditable();
-            mTokenIterator = SelectionSessionLogger.getTokenIterator(textView.getTextLocale());
+            mTokenIterator = BreakIterator.getWordInstance(textView.getTextLocale());
         }
 
         public void logSelectionStarted(

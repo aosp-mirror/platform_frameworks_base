@@ -257,11 +257,22 @@ public final class CompanionDeviceManager {
 
     /**
      * Check if a given package was {@link #associate associated} with a device with given
-     * mac address by given user.
+     * Wi-Fi MAC address for a given user.
      *
-     * @param packageName the package to check for
-     * @param macAddress the mac address or BSSID of the device to check for
-     * @param user the user to check for
+     * <p>This is a system API protected by the
+     * {@link andrioid.Manifest.permission#MANAGE_COMPANION_DEVICES} permission, that’s currently
+     * called by the Android Wi-Fi stack to determine whether user consent is required to connect
+     * to a Wi-Fi network. Devices that have been pre-registered as companion devices will not
+     * require user consent to connect.</p>
+     *
+     * <p>Note if the caller has the
+     * {@link android.Manifest.permission#COMPANION_APPROVE_WIFI_CONNECTIONS} permission, this
+     * method will return true by default.</p>
+     *
+     * @param packageName the name of the package that has the association with the companion device
+     * @param macAddress the Wi-Fi MAC address or BSSID of the companion device to check for
+     * @param user the user handle that currently hosts the package being queried for a companion
+     *             device association
      * @return whether a corresponding association record exists
      *
      * @hide

@@ -800,6 +800,7 @@
     <dimen name="resolver_empty_state_height_with_tabs">268dp</dimen>
     <dimen name="resolver_max_collapsed_height">192dp</dimen>
     <dimen name="resolver_max_collapsed_height_with_tabs">248dp</dimen>
+    <dimen name="resolver_tab_text_size">14sp</dimen>
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
 

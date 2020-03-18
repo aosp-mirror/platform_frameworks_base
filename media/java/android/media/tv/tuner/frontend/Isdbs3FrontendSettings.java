@@ -17,6 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
@@ -224,7 +225,8 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
     /**
      * Builder for {@link Isdbs3FrontendSettings}.
      */
-    public static class Builder extends FrontendSettings.Builder<Builder> {
+    public static class Builder {
+        private int mFrequency;
         private int mStreamId;
         private int mStreamIdType;
         private int mModulation;
@@ -233,6 +235,16 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
         private int mRolloff;
 
         private Builder() {
+        }
+
+        /**
+         * Sets frequency in Hz.
+         */
+        @NonNull
+        @IntRange(from = 1)
+        public Builder setFrequency(int frequency) {
+            mFrequency = frequency;
+            return this;
         }
 
         /**
@@ -291,11 +303,6 @@ public class Isdbs3FrontendSettings extends FrontendSettings {
         public Isdbs3FrontendSettings build() {
             return new Isdbs3FrontendSettings(mFrequency, mStreamId, mStreamIdType, mModulation,
                     mCodeRate, mSymbolRate, mRolloff);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 

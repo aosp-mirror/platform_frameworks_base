@@ -94,7 +94,10 @@ class NotificationsControllerImpl @Inject constructor(
         notifBindPipelineInitializer.initialize()
 
         if (featureFlags.isNewNotifPipelineEnabled) {
-            newNotifPipeline.get().initialize(notificationListener, notificationRowBinder)
+            newNotifPipeline.get().initialize(
+                    notificationListener,
+                    notificationRowBinder,
+                    listContainer)
         }
 
         if (featureFlags.isNewNotifPipelineRenderingEnabled) {

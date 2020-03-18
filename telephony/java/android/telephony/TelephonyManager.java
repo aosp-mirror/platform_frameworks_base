@@ -70,13 +70,12 @@ import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.Annotation.ApnType;
-import android.telephony.Annotation.CallForwardingReason;
 import android.telephony.Annotation.CallState;
-import android.telephony.Annotation.CallWaitingStatus;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.UiccAppType;
+import android.telephony.CallForwardingInfo.CallForwardingReason;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.ApnSetting.MvnoType;
@@ -1565,6 +1564,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SuppressLint("ActionValue")
     public static final String ACTION_EMERGENCY_CALLBACK_MODE_CHANGED =
             "android.intent.action.EMERGENCY_CALLBACK_MODE_CHANGED";
@@ -1786,6 +1786,7 @@ public class TelephonyManager {
      * @hide
      */
     @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SuppressLint("ActionValue")
     public static final String ACTION_EMERGENCY_CALL_STATE_CHANGED =
             "android.intent.action.EMERGENCY_CALL_STATE_CHANGED";
@@ -9977,18 +9978,30 @@ public class TelephonyManager {
     }
 
     /**
-     * Gets the default Respond Via Message application
-     * @param context context from the calling app
-     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * Gets the default Respond Via Message application, updating the cache if there is no
+     * respond-via-message application currently configured.
      * @return component name of the app and class to direct Respond Via Message intent to, or
      * {@code null} if the functionality is not supported.
      * @hide
      */
     @SystemApi
     @TestApi
-    public static @Nullable ComponentName getDefaultRespondViaMessageApplication(
-            @NonNull Context context, boolean updateIfNeeded) {
-        return SmsApplication.getDefaultRespondViaMessageApplication(context, updateIfNeeded);
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    public @Nullable ComponentName getAndUpdateDefaultRespondViaMessageApplication() {
+        return SmsApplication.getDefaultRespondViaMessageApplication(mContext, true);
+    }
+
+    /**
+     * Gets the default Respond Via Message application.
+     * @return component name of the app and class to direct Respond Via Message intent to, or
+     * {@code null} if the functionality is not supported.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS)
+    public @Nullable ComponentName getDefaultRespondViaMessageApplication() {
+        return SmsApplication.getDefaultRespondViaMessageApplication(mContext, false);
     }
 
     /**
@@ -11165,6 +11178,8 @@ public class TelephonyManager {
      * PackageManager.FEATURE_TELEPHONY system feature, which is available
      * on any device with a telephony radio, even if the device is
      * voice-only.
+     *
+     * @hide
      */
     public boolean isDataCapable() {
         if (mContext == null) return true;
@@ -12700,7 +12715,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @NonNull
     public CallForwardingInfo getCallForwarding(@CallForwardingReason int callForwardingReason) {
@@ -12747,7 +12761,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCallForwarding(@NonNull CallForwardingInfo callForwardingInfo) {
         if (callForwardingInfo == null) {
@@ -12788,7 +12801,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_ACTIVE = 1;
 
     /**
@@ -12796,7 +12808,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_INACTIVE = 2;
 
     /**
@@ -12804,7 +12815,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_UNKNOWN_ERROR = 3;
 
     /**
@@ -12812,8 +12822,22 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4;
+
+    /**
+     * Call waiting function status
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "CALL_WAITING_STATUS_" }, value = {
+        CALL_WAITING_STATUS_ACTIVE,
+        CALL_WAITING_STATUS_INACTIVE,
+        CALL_WAITING_STATUS_NOT_SUPPORTED,
+        CALL_WAITING_STATUS_UNKNOWN_ERROR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallWaitingStatus {
+    }
 
     /**
      * Gets the status of voice call waiting function. Call waiting function enables the waiting
@@ -12823,7 +12847,6 @@ public class TelephonyManager {
      * @return the status of call waiting function.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @CallWaitingStatus int getCallWaitingStatus() {
         try {
@@ -12849,7 +12872,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCallWaitingStatus(boolean isEnable) {
         try {

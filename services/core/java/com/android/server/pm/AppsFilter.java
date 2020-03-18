@@ -481,6 +481,12 @@ public class AppsFilter {
                         mQueriesViaPackage.add(newPkgSetting.appId, existingSetting.appId);
                     }
                 }
+                // if either package instruments the other, mark both as visible to one another
+                if (pkgInstruments(newPkgSetting, existingSetting)
+                        || pkgInstruments(existingSetting, newPkgSetting)) {
+                    mQueriesViaPackage.add(newPkgSetting.appId, existingSetting.appId);
+                    mQueriesViaPackage.add(existingSetting.appId, newPkgSetting.appId);
+                }
             }
 
             int existingSize = existingSettings.size();
@@ -715,19 +721,6 @@ public class AppsFilter {
                 Trace.endSection();
             }
 
-            if (callingPkgSetting != null) {
-                if (callingPkgInstruments(callingPkgSetting, targetPkgSetting, targetName)) {
-                    return false;
-                }
-            } else {
-                for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
-                    if (callingPkgInstruments(callingSharedPkgSettings.valueAt(i),
-                            targetPkgSetting, targetName)) {
-                        return false;
-                    }
-                }
-            }
-
             try {
                 Trace.beginSection("mOverlayReferenceMapper");
                 if (callingSharedPkgSettings != null) {
@@ -762,16 +755,16 @@ public class AppsFilter {
         }
     }
 
-    private static boolean callingPkgInstruments(PackageSetting callingPkgSetting,
-            PackageSetting targetPkgSetting,
-            String targetName) {
+    /** Returns {@code true} if the source package instruments the target package. */
+    private static boolean pkgInstruments(PackageSetting source, PackageSetting target) {
         try {
-            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "callingPkgInstruments");
-            final List<ParsedInstrumentation> inst = callingPkgSetting.pkg.getInstrumentations();
+            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "pkgInstruments");
+            final String packageName = target.pkg.getPackageName();
+            final List<ParsedInstrumentation> inst = source.pkg.getInstrumentations();
             for (int i = ArrayUtils.size(inst) - 1; i >= 0; i--) {
-                if (Objects.equals(inst.get(i).getTargetPackage(), targetName)) {
+                if (Objects.equals(inst.get(i).getTargetPackage(), packageName)) {
                     if (DEBUG_LOGGING) {
-                        log(callingPkgSetting, targetPkgSetting, "instrumentation");
+                        log(source, target, "instrumentation");
                     }
                     return true;
                 }

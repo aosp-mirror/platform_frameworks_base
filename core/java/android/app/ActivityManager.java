@@ -1315,7 +1315,8 @@ public class ActivityManager {
 
         /**
          * @return The in-memory or loaded icon that represents the current state of this task.
-         * @deprecated This call is no longer supported.
+         * @deprecated This call is no longer supported. The caller should keep track of any icons
+         *             it sets for the task descriptions internally.
          */
         @Deprecated
         public Bitmap getIcon() {
@@ -4242,8 +4243,6 @@ public class ActivityManager {
      *         {@code false} otherwise.
      * @hide
      */
-    @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION)
     public boolean updateMccMncConfiguration(@NonNull String mcc, @NonNull String mnc) {
         if (mcc == null || mnc == null) {

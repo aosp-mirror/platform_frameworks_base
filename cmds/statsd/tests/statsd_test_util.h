@@ -164,6 +164,29 @@ FieldMatcher CreateAttributionUidAndTagDimensions(const int atomId,
 FieldMatcher CreateAttributionUidDimensions(const int atomId,
                                             const std::vector<Position>& positions);
 
+shared_ptr<LogEvent> CreateTwoValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
+                                            int32_t value2);
+
+void CreateTwoValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs, int32_t value1,
+                            int32_t value2);
+
+shared_ptr<LogEvent> CreateThreeValueLogEvent(int atomId, int64_t eventTimeNs, int32_t value1,
+                                              int32_t value2, int32_t value3);
+
+void CreateThreeValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs, int32_t value1,
+                              int32_t value2, int32_t value3);
+
+// The repeated value log event helpers create a log event with two int fields, both
+// set to the same value. This is useful for testing metrics that are only interested
+// in the value of the second field but still need the first field to be populated.
+std::shared_ptr<LogEvent> CreateRepeatedValueLogEvent(int atomId, int64_t eventTimeNs,
+                                                      int32_t value);
+
+void CreateRepeatedValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs,
+                                 int32_t value);
+
+std::shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs);
+
 // Create log event for screen state changed.
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
         uint64_t timestampNs, const android::view::DisplayStateEnum state);

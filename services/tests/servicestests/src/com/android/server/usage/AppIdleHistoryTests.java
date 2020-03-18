@@ -20,7 +20,7 @@ import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_SYSTEM;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_FORCED_BY_USER;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_MAIN_USAGE;
-import static android.app.usage.UsageStatsManager.REASON_SUB_RESTRICT_BACKGROUND_RESOURCE_USAGE;
+import static android.app.usage.UsageStatsManager.REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
@@ -103,7 +103,8 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         aih.setAppStandbyBucket(PACKAGE_2, USER_ID, 2000, STANDBY_BUCKET_ACTIVE,
                 REASON_MAIN_USAGE);
         aih.setAppStandbyBucket(PACKAGE_3, USER_ID, 2500, STANDBY_BUCKET_RESTRICTED,
-                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_RESTRICT_BACKGROUND_RESOURCE_USAGE);
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
         aih.setAppStandbyBucket(PACKAGE_4, USER_ID, 2750, STANDBY_BUCKET_RESTRICTED,
                 REASON_MAIN_FORCED_BY_USER);
         aih.setAppStandbyBucket(PACKAGE_1, USER_ID, 3000, STANDBY_BUCKET_RARE,
@@ -114,7 +115,8 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         assertEquals(aih.getAppStandbyReason(PACKAGE_1, USER_ID, 3000), REASON_MAIN_TIMEOUT);
         assertEquals(aih.getAppStandbyBucket(PACKAGE_3, USER_ID, 3000), STANDBY_BUCKET_RESTRICTED);
         assertEquals(aih.getAppStandbyReason(PACKAGE_3, USER_ID, 3000),
-                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_RESTRICT_BACKGROUND_RESOURCE_USAGE);
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
         assertEquals(aih.getAppStandbyReason(PACKAGE_4, USER_ID, 3000),
                 REASON_MAIN_FORCED_BY_USER);
 
@@ -133,7 +135,8 @@ public class AppIdleHistoryTests extends AndroidTestCase {
         assertEquals(aih.getAppStandbyReason(PACKAGE_1, USER_ID, 5000), REASON_MAIN_TIMEOUT);
         assertEquals(aih.getAppStandbyBucket(PACKAGE_3, USER_ID, 3000), STANDBY_BUCKET_RESTRICTED);
         assertEquals(aih.getAppStandbyReason(PACKAGE_3, USER_ID, 3000),
-                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_RESTRICT_BACKGROUND_RESOURCE_USAGE);
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
         assertEquals(aih.getAppStandbyReason(PACKAGE_4, USER_ID, 3000),
                 REASON_MAIN_FORCED_BY_USER);
 

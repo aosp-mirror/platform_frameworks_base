@@ -347,6 +347,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
             Insets visibleInsets, int taskId, Consumer<Uri> finisher) {
         // TODO use taskId and visibleInsets
+        clearScreenshot("new screenshot requested");
         takeScreenshot(screenshot, finisher, screenshotScreenBounds);
     }
 

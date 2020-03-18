@@ -45,7 +45,7 @@ import java.util.concurrent.TimeUnit;
 @VisibleForTesting(visibility = Visibility.PACKAGE)
 public final class SystemTextClassifier implements TextClassifier {
 
-    private static final String LOG_TAG = "SystemTextClassifier";
+    private static final String LOG_TAG = TextClassifier.LOG_TAG;
 
     private final ITextClassifierService mManagerService;
     private final TextClassificationConstants mSettings;

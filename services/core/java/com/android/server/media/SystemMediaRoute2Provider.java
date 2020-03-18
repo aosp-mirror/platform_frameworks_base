@@ -103,32 +103,29 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             publishProviderState();
 
             boolean sessionInfoChanged;
-            synchronized (mLock) {
-                sessionInfoChanged = updateSessionInfosIfNeededLocked();
-            }
+            sessionInfoChanged = updateSessionInfosIfNeeded();
             if (sessionInfoChanged) {
                 notifySessionInfoUpdated();
             }
         });
-
-        mHandler.post(() -> notifyProviderState());
-
-        //TODO: clean up this
-        // This is required because it is not instantiated in the main thread and
-        // BluetoothRoutesUpdatedListener can be called before here
-        synchronized (mLock) {
-            updateSessionInfosIfNeededLocked();
-        }
+        updateSessionInfosIfNeeded();
 
         mContext.registerReceiver(new VolumeChangeReceiver(),
                 new IntentFilter(AudioManager.VOLUME_CHANGED_ACTION));
+
+        mHandler.post(() -> {
+            mBtRouteProvider.start();
+            notifyProviderState();
+        });
     }
 
     @Override
     public void requestCreateSession(long requestId, String packageName, String routeId,
             Bundle sessionHints) {
-        // Handle it as an internal transfer.
+
         transferToRoute(requestId, SYSTEM_SESSION_ID, routeId);
+        mCallback.onSessionCreated(this, requestId, mSessionInfos.get(0));
+        //TODO: We should call after the session info is changed.
     }
 
     @Override
@@ -218,36 +215,38 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     /**
      * Updates the mSessionInfo. Returns true if the session info is changed.
      */
-    boolean updateSessionInfosIfNeededLocked() {
-        // Prevent to execute this method before mBtRouteProvider is created.
-        if (mBtRouteProvider == null) return false;
-        RoutingSessionInfo oldSessionInfo = mSessionInfos.isEmpty() ? null : mSessionInfos.get(0);
+    boolean updateSessionInfosIfNeeded() {
+        synchronized (mLock) {
+            // Prevent to execute this method before mBtRouteProvider is created.
+            if (mBtRouteProvider == null) return false;
+            RoutingSessionInfo oldSessionInfo = mSessionInfos.isEmpty() ? null : mSessionInfos.get(
+                    0);
 
-        RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
-                SYSTEM_SESSION_ID, "" /* clientPackageName */)
-                .setSystemSession(true);
+            RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
+                    SYSTEM_SESSION_ID, "" /* clientPackageName */)
+                    .setSystemSession(true);
 
-        MediaRoute2Info selectedRoute = mBtRouteProvider.getSelectedRoute();
-        if (selectedRoute == null) {
-            selectedRoute = mDefaultRoute;
-        } else {
-            builder.addTransferableRoute(mDefaultRoute.getId());
-        }
-        mSelectedRouteId = selectedRoute.getId();
-        builder.addSelectedRoute(mSelectedRouteId);
+            MediaRoute2Info selectedRoute = mBtRouteProvider.getSelectedRoute();
+            if (selectedRoute == null) {
+                selectedRoute = mDefaultRoute;
+            } else {
+                builder.addTransferableRoute(mDefaultRoute.getId());
+            }
+            mSelectedRouteId = selectedRoute.getId();
+            builder.addSelectedRoute(mSelectedRouteId);
 
-        for (MediaRoute2Info route : mBtRouteProvider.getTransferableRoutes()) {
-            builder.addTransferableRoute(route.getId());
-        }
+            for (MediaRoute2Info route : mBtRouteProvider.getTransferableRoutes()) {
+                builder.addTransferableRoute(route.getId());
+            }
 
-
-        RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
-        if (Objects.equals(oldSessionInfo, newSessionInfo)) {
-            return false;
-        } else {
-            mSessionInfos.clear();
-            mSessionInfos.add(newSessionInfo);
-            return true;
+            RoutingSessionInfo newSessionInfo = builder.setProviderId(mUniqueId).build();
+            if (Objects.equals(oldSessionInfo, newSessionInfo)) {
+                return false;
+            } else {
+                mSessionInfos.clear();
+                mSessionInfos.add(newSessionInfo);
+                return true;
+            }
         }
     }
 
@@ -261,6 +260,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         synchronized (mLock) {
             sessionInfo = mSessionInfos.get(0);
         }
+
         mCallback.onSessionUpdated(this, sessionInfo);
     }
 

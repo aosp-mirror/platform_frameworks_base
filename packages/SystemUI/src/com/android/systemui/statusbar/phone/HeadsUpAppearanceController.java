@@ -269,7 +269,7 @@ public class HeadsUpAppearanceController implements OnHeadsUpChangedListener,
             }
             updateIsolatedIconLocation(false /* requireUpdate */);
             mNotificationIconAreaController.showIconIsolated(newEntry == null ? null
-                    : newEntry.icon, animateIsolation);
+                    : newEntry.getIcons().getStatusBarIcon(), animateIsolation);
         }
     }
 

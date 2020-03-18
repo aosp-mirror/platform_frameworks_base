@@ -71,7 +71,7 @@ public class FeatureFlagUtils {
         // introduced in R and will be removed in the next release (b/148367230).
         DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "false");
 
-        DEFAULT_FLAGS.put("settings_tether_all_in_one", "true");
+        DEFAULT_FLAGS.put("settings_tether_all_in_one", "false");
         DEFAULT_FLAGS.put(SETTINGS_SCHEDULES_FLAG, "false");
         DEFAULT_FLAGS.put("settings_contextual_home2", "false");
     }
