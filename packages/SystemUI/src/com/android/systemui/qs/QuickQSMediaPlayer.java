@@ -48,12 +48,13 @@ public class QuickQSMediaPlayer extends MediaControlPanel {
      * @param context
      * @param parent
      * @param manager
+     * @param foregroundExecutor
      * @param backgroundExecutor
      */
     public QuickQSMediaPlayer(Context context, ViewGroup parent, NotificationMediaManager manager,
-            Executor backgroundExecutor) {
+            Executor foregroundExecutor, Executor backgroundExecutor) {
         super(context, parent, manager, R.layout.qqs_media_panel, QQS_ACTION_IDS,
-                backgroundExecutor);
+                foregroundExecutor, backgroundExecutor);
     }
 
     /**
