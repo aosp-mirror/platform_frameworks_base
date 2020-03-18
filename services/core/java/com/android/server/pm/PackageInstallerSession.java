@@ -2582,12 +2582,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             if (manualStartAndDestroy) {
                                 // IncrementalFileStorages will call start after all files are
                                 // created in IncFS.
-                                dataLoader.start();
+                                dataLoader.start(dataLoaderId);
                             }
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_STARTED: {
                             dataLoader.prepareImage(
+                                    dataLoaderId,
                                     addedFiles.toArray(
                                             new InstallationFileParcel[addedFiles.size()]),
                                     removedFiles.toArray(new String[removedFiles.size()]));
@@ -2602,7 +2603,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                 dispatchStreamValidateAndCommit();
                             }
                             if (manualStartAndDestroy) {
-                                dataLoader.destroy();
+                                dataLoader.destroy(dataLoaderId);
                             }
                             break;
                         }
@@ -2612,7 +2613,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                     new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                             "Failed to prepare image."));
                             if (manualStartAndDestroy) {
-                                dataLoader.destroy();
+                                dataLoader.destroy(dataLoaderId);
                             }
                             break;
                         }

@@ -100,10 +100,11 @@ public:
                           const sp<IDataLoaderStatusListener>&) override {
         return binder::Status::ok();
     }
-    binder::Status start() override { return binder::Status::ok(); }
-    binder::Status stop() override { return binder::Status::ok(); }
-    binder::Status destroy() override { return binder::Status::ok(); }
-    binder::Status prepareImage(const std::vector<InstallationFileParcel>&,
+    binder::Status start(int32_t) override { return binder::Status::ok(); }
+    binder::Status stop(int32_t) override { return binder::Status::ok(); }
+    binder::Status destroy(int32_t) override { return binder::Status::ok(); }
+    binder::Status prepareImage(int32_t,
+                                const std::vector<InstallationFileParcel>&,
                                 const std::vector<std::string>&) override {
         return binder::Status::ok();
     }
