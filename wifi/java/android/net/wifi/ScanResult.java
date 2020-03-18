@@ -38,7 +38,7 @@ import java.util.Objects;
  * {@code quality}, {@code noise}, and {@code maxbitrate} attributes,
  * but does not currently report them to external clients.
  */
-public class ScanResult implements Parcelable {
+public final class ScanResult implements Parcelable {
     /**
      * The network name.
      */

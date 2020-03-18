@@ -16,7 +16,7 @@ package android.net.wifi {
     field public static final int EASY_CONNECT_EVENT_FAILURE_TIMEOUT = -6; // 0xfffffffa
   }
 
-  public class ScanResult implements android.os.Parcelable {
+  public final class ScanResult implements android.os.Parcelable {
     ctor public ScanResult(@NonNull android.net.wifi.ScanResult);
     ctor public ScanResult();
     method public int describeContents();
