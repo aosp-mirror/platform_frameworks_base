@@ -31,6 +31,7 @@ import android.util.Log;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.plugins.FalsingManager;
 
@@ -80,6 +81,9 @@ public abstract class SysuiTestCase {
         // None of them actually need it.
         mDependency.injectTestDependency(FalsingManager.class, new FalsingManagerFake());
         mDependency.injectMockDependency(KeyguardUpdateMonitor.class);
+
+        // TODO: b/151614195 investigate root cause of needing this mock dependency
+        mDependency.injectMockDependency(LocalBluetoothManager.class);
     }
 
     @After
