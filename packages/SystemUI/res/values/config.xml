@@ -532,4 +532,8 @@
     <!-- Respect drawable/rounded.xml intrinsic size for multiple radius corner path customization -->
     <bool name="config_roundedCornerMultipleRadius">false</bool>
 
+    <!-- Controls can query a preferred application for limited number of suggested controls.
+         This config value should contain the package name of that preferred application.
+    -->
+    <string translatable="false" name="config_controlsPreferredPackage"></string>
 </resources>
