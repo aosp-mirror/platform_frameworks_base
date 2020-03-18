@@ -80,6 +80,10 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
     @Captor
     private lateinit var structureInfoCaptor: ArgumentCaptor<StructureInfo>
+
+    @Captor
+    private lateinit var booleanConsumer: ArgumentCaptor<Consumer<Boolean>>
+
     @Captor
     private lateinit var controlLoadCallbackCaptor:
             ArgumentCaptor<ControlsBindingController.LoadCallback>
@@ -155,9 +159,13 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }
 
-    private fun builderFromInfo(controlInfo: ControlInfo): Control.StatelessBuilder {
+    private fun builderFromInfo(
+        controlInfo: ControlInfo,
+        structure: CharSequence = ""
+    ): Control.StatelessBuilder {
         return Control.StatelessBuilder(controlInfo.controlId, pendingIntent)
                 .setDeviceType(controlInfo.deviceType).setTitle(controlInfo.controlTitle)
+                .setStructure(structure)
     }
 
     @Test
@@ -745,5 +753,71 @@ class ControlsControllerImplTest : SysuiTestCase() {
         inOrder.verify(listingController).removeCallback(listingCallbackCaptor.value)
         inOrder.verify(persistenceWrapper).readFavorites()
         inOrder.verify(listingController).addCallback(listingCallbackCaptor.value)
+    }
+
+    @Test
+    fun testSeedFavoritesForComponent() {
+        var succeeded = false
+        val control = builderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure).build()
+
+        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
+            succeeded = accepted
+        })
+
+        verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
+                capture(controlLoadCallbackCaptor))
+
+        controlLoadCallbackCaptor.value.accept(listOf(control))
+
+        delayableExecutor.runAllReady()
+
+        assertEquals(listOf(TEST_STRUCTURE_INFO),
+            controller.getFavoritesForComponent(TEST_COMPONENT))
+        assertTrue(succeeded)
+    }
+
+    @Test
+    fun testSeedFavoritesForComponent_error() {
+        var succeeded = false
+
+        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
+            succeeded = accepted
+        })
+
+        verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
+                capture(controlLoadCallbackCaptor))
+
+        controlLoadCallbackCaptor.value.error("Error loading")
+
+        delayableExecutor.runAllReady()
+
+        assertEquals(listOf<StructureInfo>(), controller.getFavoritesForComponent(TEST_COMPONENT))
+        assertFalse(succeeded)
+    }
+
+    @Test
+    fun testSeedFavoritesForComponent_inProgressCallback() {
+        var succeeded = false
+        var seeded = false
+        val control = builderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure).build()
+
+        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
+            succeeded = accepted
+        })
+
+        verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
+                capture(controlLoadCallbackCaptor))
+
+        controller.addSeedingFavoritesCallback(Consumer { accepted ->
+            seeded = accepted
+        })
+        controlLoadCallbackCaptor.value.accept(listOf(control))
+
+        delayableExecutor.runAllReady()
+
+        assertEquals(listOf(TEST_STRUCTURE_INFO),
+            controller.getFavoritesForComponent(TEST_COMPONENT))
+        assertTrue(succeeded)
+        assertTrue(seeded)
     }
 }
