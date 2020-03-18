@@ -207,6 +207,56 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testBindAndLoadSuggested() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        controller.bindAndLoadSuggested(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoadSuggested(any())
+    }
+
+    @Test
+    fun testLoadSuggested_onCompleteRemovesTimeout() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        val subscription = mock(IControlsSubscription::class.java)
+
+        controller.bindAndLoadSuggested(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoadSuggested(capture(subscriberCaptor))
+        val b = Binder()
+        subscriberCaptor.value.onSubscribe(b, subscription)
+
+        subscriberCaptor.value.onComplete(b)
+        verify(providers[0]).cancelLoadTimeout()
+    }
+
+    @Test
+    fun testLoadSuggested_onErrorRemovesTimeout() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        val subscription = mock(IControlsSubscription::class.java)
+
+        controller.bindAndLoadSuggested(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoadSuggested(capture(subscriberCaptor))
+        val b = Binder()
+        subscriberCaptor.value.onSubscribe(b, subscription)
+
+        subscriberCaptor.value.onError(b, "")
+        verify(providers[0]).cancelLoadTimeout()
+    }
+
+    @Test
     fun testBindService() {
         controller.bindService(TEST_COMPONENT_NAME_1)
         executor.runAllReady()

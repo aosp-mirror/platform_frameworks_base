@@ -31,11 +31,13 @@ import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -92,6 +94,8 @@ import com.android.systemui.MultiListLayout;
 import com.android.systemui.MultiListLayout.MultiListAdapter;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.controls.ControlsServiceInfo;
+import com.android.systemui.controls.controller.ControlsController;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -147,6 +151,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private static final String GLOBAL_ACTION_KEY_LOGOUT = "logout";
     private static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
     private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
+
+    private static final String PREFS_CONTROLS_SEEDING_COMPLETED = "ControlsSeedingCompleted";
+    private static final String PREFS_CONTROLS_FILE = "controls_prefs";
 
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
@@ -215,7 +222,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             NotificationShadeWindowController notificationShadeWindowController,
             ControlsUiController controlsUiController, IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
-            ControlsListingController controlsListingController) {
+            ControlsListingController controlsListingController,
+            ControlsController controlsController) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -279,8 +287,45 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         });
 
-        mControlsListingController.addCallback(list -> mAnyControlsProviders = !list.isEmpty());
+        String preferredControlsPackage = mContext.getResources()
+                .getString(com.android.systemui.R.string.config_controlsPreferredPackage);
+        mControlsListingController.addCallback(list -> {
+            mAnyControlsProviders = !list.isEmpty();
+
+            /*
+             * See if any service providers match the preferred component. If they do,
+             * and there are no current favorites, and we haven't successfully loaded favorites to
+             * date, query the preferred component for a limited number of suggested controls.
+             */
+            ComponentName preferredComponent = null;
+            for (ControlsServiceInfo info : list) {
+                if (info.componentName.getPackageName().equals(preferredControlsPackage)) {
+                    preferredComponent = info.componentName;
+                    break;
+                }
+            }
+
+            if (preferredComponent == null) return;
+
+            SharedPreferences prefs = context.getSharedPreferences(PREFS_CONTROLS_FILE,
+                    Context.MODE_PRIVATE);
+            boolean isSeeded = prefs.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false);
+            boolean hasFavorites = controlsController.getFavorites().size() > 0;
+            if (!isSeeded && !hasFavorites) {
+                controlsController.seedFavoritesForComponent(
+                        preferredComponent,
+                        (accepted) -> {
+                            Log.i(TAG, "Controls seeded: " + accepted);
+                            prefs.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED,
+                                    accepted).apply();
+                        }
+                );
+            }
+        });
     }
+
+
+
 
     /**
      * Show the global actions dialog (creating if necessary)
