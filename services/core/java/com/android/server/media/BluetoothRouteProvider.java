@@ -85,7 +85,9 @@ class BluetoothRouteProvider {
         mListener = listener;
         mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         buildBluetoothRoutes();
+    }
 
+    public void start() {
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.A2DP);
         mBluetoothAdapter.getProfileProxy(mContext, mProfileListener, BluetoothProfile.HEARING_AID);
 
