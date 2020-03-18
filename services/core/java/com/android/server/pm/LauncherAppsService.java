@@ -824,6 +824,18 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public String getShortcutIconUri(String callingPackage, String packageName,
+                String shortcutId, int userId) {
+            ensureShortcutPermission(callingPackage);
+            if (!canAccessProfile(userId, "Cannot access shortcuts")) {
+                return null;
+            }
+
+            return mShortcutServiceInternal.getShortcutIconUri(getCallingUserId(), callingPackage,
+                    packageName, shortcutId, userId);
+        }
+
+        @Override
         public boolean hasShortcutHostPermission(String callingPackage) {
             verifyCallingPackage(callingPackage);
             return mShortcutServiceInternal.hasShortcutHostPermission(getCallingUserId(),
