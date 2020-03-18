@@ -79,7 +79,6 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -107,7 +106,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.PackageInstallerService.PackageInstallObserverAdapter;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.security.VerityUtils;
 
@@ -257,7 +255,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private final ArrayList<FileBridge> mBridges = new ArrayList<>();
 
     @GuardedBy("mLock")
-    private IPackageInstallObserver2 mRemoteObserver;
+    private IntentSender mRemoteStatusReceiver;
 
     /** Fields derived from commit parsing */
     @GuardedBy("mLock")
@@ -342,14 +340,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final String packageName = (String) args.arg1;
                     final String message = (String) args.arg2;
                     final Bundle extras = (Bundle) args.arg3;
-                    final IPackageInstallObserver2 observer = (IPackageInstallObserver2) args.arg4;
+                    final IntentSender statusReceiver = (IntentSender) args.arg4;
                     final int returnCode = args.argi1;
                     args.recycle();
 
-                    try {
-                        observer.onPackageInstalled(packageName, returnCode, message, extras);
-                    } catch (RemoteException ignored) {
-                    }
+                    PackageInstallerService.sendOnPackageInstalled(mContext,
+                            statusReceiver, sessionId,
+                            isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId,
+                            packageName, returnCode, message, extras);
 
                     break;
             }
@@ -959,10 +957,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotDestroyedLocked("commit");
 
-            final PackageInstallObserverAdapter adapter = new PackageInstallObserverAdapter(
-                    mContext, statusReceiver, sessionId,
-                    isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId);
-            mRemoteObserver = adapter.getBinder();
+            mRemoteStatusReceiver = statusReceiver;
 
             if (forTransfer) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES, null);
@@ -1299,11 +1294,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
             if (!success) {
-                try {
-                    mRemoteObserver.onPackageInstalled(
-                            null, failure.error, failure.getLocalizedMessage(), null);
-                } catch (RemoteException ignored) {
-                }
+                PackageInstallerService.sendOnPackageInstalled(mContext,
+                        mRemoteStatusReceiver, sessionId,
+                        isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId, null,
+                        failure.error, failure.getLocalizedMessage(), null);
                 return;
             }
             mPm.installStage(activeChildSessions);
@@ -1347,10 +1341,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
                     intent.setPackage(mPm.getPackageInstallerPackageName());
                     intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-                    try {
-                        mRemoteObserver.onUserActionRequired(intent);
-                    } catch (RemoteException ignored) {
-                    }
+
+                    PackageInstallerService.sendOnUserActionRequired(mContext,
+                            mRemoteStatusReceiver, sessionId, intent);
 
                     // Commit was keeping session marked as active until now; release
                     // that extra refcount so session appears idle.
@@ -2182,17 +2175,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void dispatchSessionFinished(int returnCode, String msg, Bundle extras) {
-        final IPackageInstallObserver2 observer;
+        final IntentSender statusReceiver;
         final String packageName;
         synchronized (mLock) {
             mFinalStatus = returnCode;
             mFinalMessage = msg;
 
-            observer = mRemoteObserver;
+            statusReceiver = mRemoteStatusReceiver;
             packageName = mPackageName;
         }
 
-        if (observer != null) {
+        if (statusReceiver != null) {
             // Execute observer.onPackageInstalled on different tread as we don't want callers
             // inside the system server have to worry about catching the callbacks while they are
             // calling into the session
@@ -2200,7 +2193,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             args.arg1 = packageName;
             args.arg2 = msg;
             args.arg3 = extras;
-            args.arg4 = observer;
+            args.arg4 = statusReceiver;
             args.argi1 = returnCode;
 
             mHandler.obtainMessage(MSG_ON_PACKAGE_INSTALLED, args).sendToTarget();
