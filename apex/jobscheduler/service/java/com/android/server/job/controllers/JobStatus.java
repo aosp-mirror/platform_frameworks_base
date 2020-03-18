@@ -131,10 +131,14 @@ public final class JobStatus {
     // TODO(b/129954980)
     private static final boolean STATS_LOG_ENABLED = false;
 
+    // No override.
+    public static final int OVERRIDE_NONE = 0;
+    // Override to improve sorting order. Does not affect constraint evaluation.
+    public static final int OVERRIDE_SORTING = 1;
     // Soft override: ignore constraints like time that don't affect API availability
-    public static final int OVERRIDE_SOFT = 1;
+    public static final int OVERRIDE_SOFT = 2;
     // Full override: ignore all constraints including API-affecting like connectivity
-    public static final int OVERRIDE_FULL = 2;
+    public static final int OVERRIDE_FULL = 3;
 
     /** If not specified, trigger update delay is 10 seconds. */
     public static final long DEFAULT_TRIGGER_UPDATE_DELAY = 10*1000;
@@ -304,7 +308,7 @@ public final class JobStatus {
     public int nextPendingWorkId = 1;
 
     // Used by shell commands
-    public int overrideState = 0;
+    public int overrideState = JobStatus.OVERRIDE_NONE;
 
     // When this job was enqueued, for ordering.  (in elapsedRealtimeMillis)
     public long enqueueTime;
