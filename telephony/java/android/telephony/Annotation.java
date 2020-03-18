@@ -571,6 +571,19 @@ public class Annotation {
     public @interface PreciseDisconnectCauses {
     }
 
+    /**
+     * Carrier Privilege Status.
+     */
+    @IntDef(prefix = { "CARRIER_PRIVILEGE_STATUS_" }, value = {
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS,
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS,
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED,
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CarrierPrivilegeStatus {
+    }
+
     @IntDef({
             Connection.AUDIO_CODEC_NONE,
             Connection.AUDIO_CODEC_AMR,

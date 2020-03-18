@@ -17,6 +17,8 @@
 package android.os;
 
 import android.annotation.RequiresPermission;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 
 /**
@@ -125,6 +127,7 @@ public final class ConfigUpdate {
     */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.UPDATE_CONFIG)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UPDATE_EMERGENCY_NUMBER_DB =
             "android.os.action.UPDATE_EMERGENCY_NUMBER_DB";
 
