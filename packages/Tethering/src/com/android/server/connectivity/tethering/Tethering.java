@@ -1494,7 +1494,7 @@ public class Tethering {
             } else {
                 dnsServers = mConfig.defaultIPv4DNS;
             }
-            final int netId = (network != null) ? network.netId : NETID_UNSET;
+            final int netId = (network != null) ? network.getNetId() : NETID_UNSET;
             try {
                 mNetd.tetherDnsSet(netId, dnsServers);
                 mLog.log(String.format(

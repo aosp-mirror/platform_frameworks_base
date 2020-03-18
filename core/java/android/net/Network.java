@@ -65,7 +65,7 @@ public class Network implements Parcelable {
      * The unique id of the network.
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     public final int netId;
 
     // Objects used to perform per-network operations such as getSocketFactory
@@ -168,6 +168,17 @@ public class Network implements Parcelable {
     @SystemApi
     public @NonNull Network getPrivateDnsBypassingCopy() {
         return new Network(netId, true);
+    }
+
+    /**
+     * Get the unique id of the network.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public int getNetId() {
+        return netId;
     }
 
     /**
