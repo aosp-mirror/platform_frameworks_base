@@ -1279,7 +1279,6 @@ public class TelephonyManager {
      * <p>Note: this is a protected intent that can only be sent by the system.
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SERVICE_PROVIDERS_UPDATED =
             "android.telephony.action.SERVICE_PROVIDERS_UPDATED";
@@ -1289,7 +1288,6 @@ public class TelephonyManager {
      * whether the PLMN should be shown.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SHOW_PLMN = "android.telephony.extra.SHOW_PLMN";
 
     /**
@@ -1297,7 +1295,6 @@ public class TelephonyManager {
      * the operator name of the registered network.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_PLMN = "android.telephony.extra.PLMN";
 
     /**
@@ -1305,7 +1302,6 @@ public class TelephonyManager {
      * whether the PLMN should be shown.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SHOW_SPN = "android.telephony.extra.SHOW_SPN";
 
     /**
@@ -1313,7 +1309,6 @@ public class TelephonyManager {
      * the service provider name.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SPN = "android.telephony.extra.SPN";
 
     /**
@@ -1321,7 +1316,6 @@ public class TelephonyManager {
      * the service provider name for data service.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_DATA_SPN = "android.telephony.extra.DATA_SPN";
 
     /**
