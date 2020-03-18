@@ -19,10 +19,12 @@ package com.android.server.wm.flicker;
 import static com.android.server.wm.flicker.CommonTransitions.appToSplitScreen;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -35,6 +37,8 @@ import org.junit.runners.Parameterized;
 @LargeTest
 @RunWith(Parameterized.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 151632128)
+@Ignore("Waiting bug feedback")
 public class OpenAppToSplitScreenTest extends NonRotationTestBase {
 
     public OpenAppToSplitScreenTest(String beginRotationName, int beginRotation) {
