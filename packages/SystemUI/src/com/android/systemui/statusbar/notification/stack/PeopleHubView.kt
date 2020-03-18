@@ -76,9 +76,7 @@ class PeopleHubView(context: Context, attrs: AttributeSet) :
             }
         }
 
-    override fun needsClippingToShelf(): Boolean {
-        return true
-    }
+    override fun needsClippingToShelf(): Boolean = true
 
     override fun applyContentTransformation(contentAlpha: Float, translationY: Float) {
         super.applyContentTransformation(contentAlpha, translationY)
