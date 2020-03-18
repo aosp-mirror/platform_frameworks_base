@@ -55,6 +55,10 @@ import java.util.Objects;
  * using the {@link JobInfo.Builder}.
  * The goal here is to provide the scheduler with high-level semantics about the work you want to
  * accomplish.
+ * <p> Prior to Android version {@link Build.VERSION_CODES#Q}, you had to specify at least one
+ * constraint on the JobInfo object that you are creating. Otherwise, the builder would throw an
+ * exception when building. From Android version {@link Build.VERSION_CODES#Q} and onwards, it is
+ * valid to schedule jobs with no constraints.
  */
 public class JobInfo implements Parcelable {
     private static String TAG = "JobInfo";
