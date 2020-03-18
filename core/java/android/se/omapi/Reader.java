@@ -160,7 +160,7 @@ public final class Reader {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED)
+    @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION)
     public boolean reset() {
         if (!mService.isConnected()) {
             Log.e(TAG, "service is not connected");
