@@ -7796,18 +7796,6 @@ public abstract class PackageManager {
     }
 
     /**
-     * @return the system defined telephony package names, or null if there's none.
-     *
-     * @hide
-     */
-    @Nullable
-    @TestApi
-    public String[] getTelephonyPackageNames() {
-        throw new UnsupportedOperationException(
-                "getTelephonyPackageNames not implemented in subclass");
-    }
-
-    /**
      * @return the system defined content capture service package name, or null if there's none.
      *
      * @hide
