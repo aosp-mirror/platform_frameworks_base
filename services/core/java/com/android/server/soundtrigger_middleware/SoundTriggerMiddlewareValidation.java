@@ -252,8 +252,21 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
      * @param permission The permission to check.
      */
     void enforcePermission(String permission) {
-        mContext.enforceCallingOrSelfPermission(permission,
-                String.format("Caller must have the %s permission.", permission));
+        final int status = PermissionChecker.checkCallingOrSelfPermissionForPreflight(mContext,
+                permission);
+        switch (status) {
+            case PermissionChecker.PERMISSION_GRANTED:
+                return;
+            case PermissionChecker.PERMISSION_HARD_DENIED:
+                throw new SecurityException(
+                        String.format("Caller must have the %s permission.", permission));
+            case PermissionChecker.PERMISSION_SOFT_DENIED:
+                throw new ServiceSpecificException(Status.TEMPORARY_PERMISSION_DENIED,
+                        String.format("Caller must have the %s permission.", permission));
+            default:
+                throw new InternalServerError(
+                        new RuntimeException("Unexpected perimission check result."));
+        }
     }
 
     @Override
