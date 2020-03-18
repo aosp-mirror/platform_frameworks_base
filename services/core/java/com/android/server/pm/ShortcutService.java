@@ -24,6 +24,8 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
+import android.app.IUriGrantsManager;
+import android.app.UriGrantsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.BroadcastReceiver;
@@ -65,6 +67,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.LocaleList;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
@@ -106,6 +109,7 @@ import com.android.internal.util.StatLogger;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import libcore.io.IoUtils;
 
@@ -327,6 +331,9 @@ public class ShortcutService extends IShortcutService.Stub {
     private final UserManagerInternal mUserManagerInternal;
     private final UsageStatsManagerInternal mUsageStatsManagerInternal;
     private final ActivityManagerInternal mActivityManagerInternal;
+    private final IUriGrantsManager mUriGrantsManager;
+    private final UriGrantsManagerInternal mUriGrantsManagerInternal;
+    private final IBinder mUriPermissionOwner;
 
     private final ShortcutRequestPinProcessor mShortcutRequestPinProcessor;
     private final ShortcutBitmapSaver mShortcutBitmapSaver;
@@ -448,6 +455,11 @@ public class ShortcutService extends IShortcutService.Stub {
                 LocalServices.getService(UsageStatsManagerInternal.class));
         mActivityManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
+
+        mUriGrantsManager = UriGrantsManager.getService();
+        mUriGrantsManagerInternal = Objects.requireNonNull(
+                LocalServices.getService(UriGrantsManagerInternal.class));
+        mUriPermissionOwner = mUriGrantsManagerInternal.newUriPermissionOwner(TAG);
 
         mShortcutRequestPinProcessor = new ShortcutRequestPinProcessor(this, mLock);
         mShortcutBitmapSaver = new ShortcutBitmapSaver(this);
@@ -1414,7 +1426,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     void saveIconAndFixUpShortcutLocked(ShortcutInfo shortcut) {
-        if (shortcut.hasIconFile() || shortcut.hasIconResource()) {
+        if (shortcut.hasIconFile() || shortcut.hasIconResource() || shortcut.hasIconUri()) {
             return;
         }
 
@@ -1438,6 +1450,15 @@ public class ShortcutService extends IShortcutService.Stub {
                         shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_RES);
                         return;
                     }
+                    case Icon.TYPE_URI:
+                        shortcut.setIconUri(icon.getUriString());
+                        shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_URI);
+                        return;
+                    case Icon.TYPE_URI_ADAPTIVE_BITMAP:
+                        shortcut.setIconUri(icon.getUriString());
+                        shortcut.addFlags(ShortcutInfo.FLAG_HAS_ICON_URI
+                                | ShortcutInfo.FLAG_ADAPTIVE_BITMAP);
+                        return;
                     case Icon.TYPE_BITMAP:
                         bitmap = icon.getBitmap(); // Don't recycle in this case.
                         break;
@@ -3129,6 +3150,59 @@ public class ShortcutService extends IShortcutService.Stub {
         }
 
         @Override
+        public String getShortcutIconUri(int launcherUserId, @NonNull String launcherPackage,
+                @NonNull String packageName, @NonNull String shortcutId, int userId) {
+            Objects.requireNonNull(launcherPackage, "launcherPackage");
+            Objects.requireNonNull(packageName, "packageName");
+            Objects.requireNonNull(shortcutId, "shortcutId");
+
+            synchronized (mLock) {
+                throwIfUserLockedL(userId);
+                throwIfUserLockedL(launcherUserId);
+
+                getLauncherShortcutsLocked(launcherPackage, userId, launcherUserId)
+                        .attemptToRestoreIfNeededAndSave();
+
+                final ShortcutPackage p = getUserShortcutsLocked(userId)
+                        .getPackageShortcutsIfExists(packageName);
+                if (p == null) {
+                    return null;
+                }
+
+                final ShortcutInfo shortcutInfo = p.findShortcutById(shortcutId);
+                if (shortcutInfo == null || !shortcutInfo.hasIconUri()) {
+                    return null;
+                }
+                String uri = shortcutInfo.getIconUri();
+                if (uri == null) {
+                    Slog.w(TAG, "null uri detected in getShortcutIconUri()");
+                    return null;
+                }
+
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    int packageUid = mPackageManagerInternal.getPackageUidInternal(packageName,
+                            PackageManager.MATCH_DIRECT_BOOT_AUTO, userId);
+                    // Grant read uri permission to the caller on behalf of the shortcut owner. All
+                    // granted permissions are revoked when the default launcher changes, or when
+                    // device is rebooted.
+                    // b/151572645 is tracking a bug where Uri permissions are persisted across
+                    // reboots, even when Intent#FLAG_GRANT_PERSISTABLE_URI_PERMISSION is not used.
+                    mUriGrantsManager.grantUriPermissionFromOwner(mUriPermissionOwner, packageUid,
+                            launcherPackage, Uri.parse(uri), Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                            userId, launcherUserId);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to grant uri access to " + launcherPackage + " for " + uri,
+                            e);
+                    uri = null;
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                return uri;
+            }
+        }
+
+        @Override
         public boolean hasShortcutHostPermission(int launcherUserId,
                 @NonNull String callingPackage, int callingPid, int callingUid) {
             return ShortcutService.this.hasShortcutHostPermission(callingPackage, launcherUserId,
@@ -3241,7 +3315,14 @@ public class ShortcutService extends IShortcutService.Stub {
                     user.clearLauncher();
                 }
                 if (Intent.ACTION_PREFERRED_ACTIVITY_CHANGED.equals(action)) {
-                    // Nothing farther to do.
+                    final ShortcutUser user = getUserShortcutsLocked(userId);
+                    final ComponentName lastLauncher = user.getLastKnownLauncher();
+                    final ComponentName currentLauncher = getDefaultLauncher(userId);
+                    if (currentLauncher == null || !currentLauncher.equals(lastLauncher)) {
+                        // Default launcher is removed or changed, revoke all URI permissions.
+                        mUriGrantsManagerInternal.revokeUriPermissionFromOwner(mUriPermissionOwner,
+                                null, ~0, 0);
+                    }
                     return;
                 }
 
