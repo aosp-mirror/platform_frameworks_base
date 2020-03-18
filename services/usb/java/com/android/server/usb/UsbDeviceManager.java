@@ -445,7 +445,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     abstract static class UsbHandler extends Handler {
 
         // current USB state
-        private boolean mConnected;
         private boolean mHostConnected;
         private boolean mSourcePower;
         private boolean mSinkPower;
@@ -473,6 +472,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private final UsbPermissionManager mPermissionManager;
         private NotificationManager mNotificationManager;
 
+        protected boolean mConnected;
         protected long mScreenUnlockedFunctions;
         protected boolean mBootCompleted;
         protected boolean mCurrentFunctionsApplied;
@@ -1794,7 +1794,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 case MSG_SET_FUNCTIONS_TIMEOUT:
                     Slog.e(TAG, "Set functions timed out! no reply from usb hal");
                     if (msg.arg1 != 1) {
-                        setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
+                        // Set this since default function may be selected from Developer options
+                        setEnabledFunctions(mScreenUnlockedFunctions, false);
                     }
                     break;
                 case MSG_GET_CURRENT_USB_FUNCTIONS:
@@ -1816,7 +1817,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                      * Dont force to default when the configuration is already set to default.
                      */
                     if (msg.arg1 != 1) {
-                        setEnabledFunctions(UsbManager.FUNCTION_NONE, !isAdbEnabled());
+                        // Set this since default function may be selected from Developer options
+                        setEnabledFunctions(mScreenUnlockedFunctions, false);
                     }
                     break;
                 case MSG_GADGET_HAL_REGISTERED:
@@ -1936,8 +1938,11 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                             SET_FUNCTIONS_TIMEOUT_MS - SET_FUNCTIONS_LEEWAY_MS);
                     sendMessageDelayed(MSG_SET_FUNCTIONS_TIMEOUT, chargingFunctions,
                             SET_FUNCTIONS_TIMEOUT_MS);
-                    sendMessageDelayed(MSG_FUNCTION_SWITCH_TIMEOUT, chargingFunctions,
-                            SET_FUNCTIONS_TIMEOUT_MS + ENUMERATION_TIME_OUT_MS);
+                    if (mConnected) {
+                        // Only queue timeout of enumeration when the USB is connected
+                        sendMessageDelayed(MSG_FUNCTION_SWITCH_TIMEOUT, chargingFunctions,
+                                SET_FUNCTIONS_TIMEOUT_MS + ENUMERATION_TIME_OUT_MS);
+                    }
                     if (DEBUG) Slog.d(TAG, "timeout message queued");
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remoteexception while calling setCurrentUsbFunctions", e);
