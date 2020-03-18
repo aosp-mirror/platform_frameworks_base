@@ -47,7 +47,6 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -698,18 +697,8 @@ public class AbstractAccessibilityServiceConnectionTest {
         assertThat(result, is(false));
     }
 
-    @Test
-    public void takeScreenshot_returnNull() {
-        // no checkAccessibilityAccess, should return null.
-        when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(true);
-        when(mMockSecurityPolicy.checkAccessibilityAccess(mServiceConnection)).thenReturn(false);
-        mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY, new RemoteCallback((result) -> {
-            assertNull(result);
-        }));
-    }
-
     @Test (expected = SecurityException.class)
-    public void takeScreenshot_throwSecurityException() {
+    public void takeScreenshot_withoutCapability_throwSecurityException() {
         // no canTakeScreenshot, should throw security exception.
         when(mMockSecurityPolicy.canTakeScreenshotLocked(mServiceConnection)).thenReturn(false);
         mServiceConnection.takeScreenshot(Display.DEFAULT_DISPLAY, new RemoteCallback((result) -> {

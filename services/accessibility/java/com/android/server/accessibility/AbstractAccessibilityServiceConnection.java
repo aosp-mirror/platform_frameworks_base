@@ -18,6 +18,7 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER;
+import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_STATUS;
 import static android.accessibilityservice.AccessibilityService.KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP;
 import static android.accessibilityservice.AccessibilityServiceInfo.DEFAULT;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
@@ -66,6 +67,7 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.ScreenshotGraphicBuffer;
 import android.view.View;
 import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityCache;
@@ -977,18 +979,22 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     }
 
     @Override
-    public boolean takeScreenshot(int displayId, RemoteCallback callback) {
+    public void takeScreenshot(int displayId, RemoteCallback callback) {
         final long currentTimestamp = SystemClock.uptimeMillis();
         if (mRequestTakeScreenshotTimestampMs != 0
                 && (currentTimestamp - mRequestTakeScreenshotTimestampMs)
                 <= AccessibilityService.ACCESSIBILITY_TAKE_SCREENSHOT_REQUEST_INTERVAL_TIMES_MS) {
-            return false;
+            sendScreenshotFailure(AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERVAL_TIME_SHORT,
+                    callback);
+            return;
         }
         mRequestTakeScreenshotTimestampMs = currentTimestamp;
 
         synchronized (mLock) {
             if (!hasRightsToCurrentUserLocked()) {
-                return false;
+                sendScreenshotFailure(AccessibilityService.ERROR_TAKE_SCREENSHOT_INTERNAL_ERROR,
+                        callback);
+                return;
             }
 
             if (!mSecurityPolicy.canTakeScreenshotLocked(this)) {
@@ -998,43 +1004,57 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
 
         if (!mSecurityPolicy.checkAccessibilityAccess(this)) {
-            return false;
+            sendScreenshotFailure(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_NO_ACCESSIBILITY_ACCESS,
+                    callback);
+            return;
         }
 
         final Display display = DisplayManagerGlobal.getInstance()
                 .getRealDisplay(displayId);
         if (display == null) {
-            return false;
+            sendScreenshotFailure(AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
+                    callback);
+            return;
         }
 
+        sendScreenshotSuccess(display, callback);
+    }
+
+    private ScreenshotGraphicBuffer takeScreenshotBuffer(Display display) {
+        final Point displaySize = new Point();
+        // TODO (b/145893483): calling new API with the display as a parameter
+        // when surface control supported.
+        final IBinder token = SurfaceControl.getInternalDisplayToken();
+        final Rect crop = new Rect(0, 0, displaySize.x, displaySize.y);
+        final int rotation = display.getRotation();
+        display.getRealSize(displaySize);
+
+        return SurfaceControl.screenshotToBuffer(token, crop, displaySize.x, displaySize.y,
+                false, rotation);
+    }
+
+    private void sendScreenshotSuccess(Display display, RemoteCallback callback) {
         final long identity = Binder.clearCallingIdentity();
         try {
             mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
-                final Point displaySize = new Point();
-                // TODO (b/145893483): calling new API with the display as a parameter
-                // when surface control supported.
-                final IBinder token = SurfaceControl.getInternalDisplayToken();
-                final Rect crop = new Rect(0, 0, displaySize.x, displaySize.y);
-                final int rotation = display.getRotation();
-                display.getRealSize(displaySize);
-
-                final SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer =
-                        SurfaceControl.screenshotToBufferWithSecureLayersUnsafe(token, crop,
-                                displaySize.x, displaySize.y, false,
-                                rotation);
+                final ScreenshotGraphicBuffer screenshotBuffer = takeScreenshotBuffer(display);
                 final GraphicBuffer graphicBuffer = screenshotBuffer.getGraphicBuffer();
                 try (HardwareBuffer hardwareBuffer =
-                        HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
+                             HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
                     final ParcelableColorSpace colorSpace =
                             new ParcelableColorSpace(screenshotBuffer.getColorSpace());
 
-                    // Send back the result.
                     final Bundle payload = new Bundle();
+                    payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
+                            AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
                     payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
                             hardwareBuffer);
                     payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
                     payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
                             SystemClock.uptimeMillis());
+
+                    // Send back the result.
                     callback.sendResult(payload);
                     hardwareBuffer.close();
                 }
@@ -1042,8 +1062,16 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
 
-        return true;
+    private void sendScreenshotFailure(@AccessibilityService.ScreenshotErrorCode int errorCode,
+            RemoteCallback callback) {
+        mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
+            final Bundle payload = new Bundle();
+            payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS, errorCode);
+            // Send back the result.
+            callback.sendResult(payload);
+        }, null).recycleOnUse());
     }
 
     @Override
