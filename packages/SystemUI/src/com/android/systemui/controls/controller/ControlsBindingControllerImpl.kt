@@ -44,6 +44,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     companion object {
         private const val TAG = "ControlsBindingControllerImpl"
+        private const val MAX_CONTROLS_REQUEST = 100000L
+        private const val SUGGESTED_CONTROLS_REQUEST = 4L
     }
 
     private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
@@ -97,24 +99,37 @@ open class ControlsBindingControllerImpl @Inject constructor(
         component: ComponentName,
         callback: ControlsBindingController.LoadCallback
     ): Runnable {
-        val subscriber = LoadSubscriber(callback)
+        val subscriber = LoadSubscriber(callback, MAX_CONTROLS_REQUEST)
         retrieveLifecycleManager(component).maybeBindAndLoad(subscriber)
         return subscriber.loadCancel()
+    }
+
+    override fun bindAndLoadSuggested(
+        component: ComponentName,
+        callback: ControlsBindingController.LoadCallback
+    ) {
+        val subscriber = LoadSubscriber(callback, SUGGESTED_CONTROLS_REQUEST)
+        retrieveLifecycleManager(component).maybeBindAndLoadSuggested(subscriber)
     }
 
     override fun subscribe(structureInfo: StructureInfo) {
         // make sure this has happened. only allow one active subscription
         unsubscribe()
 
-        statefulControlSubscriber = null
         val provider = retrieveLifecycleManager(structureInfo.componentName)
-        val scs = StatefulControlSubscriber(lazyController.get(), provider, backgroundExecutor)
+        val scs = StatefulControlSubscriber(
+            lazyController.get(),
+            provider,
+            backgroundExecutor,
+            MAX_CONTROLS_REQUEST
+        )
         statefulControlSubscriber = scs
         provider.maybeBindAndSubscribe(structureInfo.controls.map { it.controlId }, scs)
     }
 
     override fun unsubscribe() {
         statefulControlSubscriber?.cancel()
+        statefulControlSubscriber = null
     }
 
     override fun action(
@@ -201,10 +216,11 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
     private inner class OnSubscribeRunnable(
         token: IBinder,
-        val subscription: IControlsSubscription
+        val subscription: IControlsSubscription,
+        val requestLimit: Long
     ) : CallbackRunnable(token) {
         override fun doRun() {
-            provider?.startSubscription(subscription)
+            provider?.startSubscription(subscription, requestLimit)
         }
     }
 
@@ -234,7 +250,8 @@ open class ControlsBindingControllerImpl @Inject constructor(
     }
 
     private inner class LoadSubscriber(
-        val callback: ControlsBindingController.LoadCallback
+        val callback: ControlsBindingController.LoadCallback,
+        val requestLimit: Long
     ) : IControlsSubscriber.Stub() {
         val loadedControls = ArrayList<Control>()
         var hasError = false
@@ -246,7 +263,7 @@ open class ControlsBindingControllerImpl @Inject constructor(
 
         override fun onSubscribe(token: IBinder, subs: IControlsSubscription) {
             _loadCancelInternal = subs::cancel
-            backgroundExecutor.execute(OnSubscribeRunnable(token, subs))
+            backgroundExecutor.execute(OnSubscribeRunnable(token, subs, requestLimit))
         }
 
         override fun onNext(token: IBinder, c: Control) {
