@@ -2158,6 +2158,7 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @NonNull int[] getActiveSubscriptionIdList() {
         return getActiveSubscriptionIdList(/* visibleOnly */ true);
     }
@@ -2175,7 +2176,8 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
-    public @NonNull int[] getActiveAndHiddenSubscriptionIdList() {
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NonNull int[] getCompleteActiveSubscriptionIdList() {
         return getActiveSubscriptionIdList(/* visibleOnly */false);
     }
 
