@@ -248,7 +248,8 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Returns whether the given user requires credential entry at this time. This is used to
-     * intercept activity launches for work apps when the Work Challenge is present.
+     * intercept activity launches for locked work apps due to work challenge being triggered or
+     * when the profile user is yet to be unlocked.
      */
     public abstract boolean shouldConfirmCredentials(@UserIdInt int userId);
 
