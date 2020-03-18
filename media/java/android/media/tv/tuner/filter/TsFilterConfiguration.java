@@ -65,7 +65,7 @@ public final class TsFilterConfiguration extends FilterConfiguration {
      * Builder for {@link TsFilterConfiguration}.
      */
     public static final class Builder {
-        private int mTpid;
+        private int mTpid = 0;
         private Settings mSettings;
 
         private Builder() {
@@ -73,6 +73,8 @@ public final class TsFilterConfiguration extends FilterConfiguration {
 
         /**
          * Sets Tag Protocol ID.
+         *
+         * <p>Default value is 0.
          *
          * @param tpid the Tag Protocol ID.
          */
