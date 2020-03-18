@@ -503,7 +503,7 @@ public final class NetworkStats implements Parcelable {
         NetworkStats.Entry entry = null;
         for (int i = 0; i < size; i++) {
             entry = getValues(i, entry);
-            clone.addEntry(entry);
+            clone.insertEntry(entry);
         }
         return clone;
     }
@@ -530,26 +530,26 @@ public final class NetworkStats implements Parcelable {
 
     /** @hide */
     @VisibleForTesting
-    public NetworkStats addIfaceValues(
+    public NetworkStats insertEntry(
             String iface, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        return addEntry(
+        return insertEntry(
                 iface, UID_ALL, SET_DEFAULT, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets, 0L);
     }
 
     /** @hide */
     @VisibleForTesting
-    public NetworkStats addEntry(String iface, int uid, int set, int tag, long rxBytes,
+    public NetworkStats insertEntry(String iface, int uid, int set, int tag, long rxBytes,
             long rxPackets, long txBytes, long txPackets, long operations) {
-        return addEntry(new Entry(
+        return insertEntry(new Entry(
                 iface, uid, set, tag, rxBytes, rxPackets, txBytes, txPackets, operations));
     }
 
     /** @hide */
     @VisibleForTesting
-    public NetworkStats addEntry(String iface, int uid, int set, int tag, int metered, int roaming,
-            int defaultNetwork, long rxBytes, long rxPackets, long txBytes, long txPackets,
-            long operations) {
-        return addEntry(new Entry(
+    public NetworkStats insertEntry(String iface, int uid, int set, int tag, int metered,
+            int roaming, int defaultNetwork, long rxBytes, long rxPackets, long txBytes,
+            long txPackets, long operations) {
+        return insertEntry(new Entry(
                 iface, uid, set, tag, metered, roaming, defaultNetwork, rxBytes, rxPackets,
                 txBytes, txPackets, operations));
     }
@@ -559,7 +559,7 @@ public final class NetworkStats implements Parcelable {
      * object can be recycled across multiple calls.
      * @hide
      */
-    public NetworkStats addEntry(Entry entry) {
+    public NetworkStats insertEntry(Entry entry) {
         if (size >= capacity) {
             final int newLength = Math.max(size, 10) * 3 / 2;
             iface = Arrays.copyOf(iface, newLength);
@@ -702,7 +702,7 @@ public final class NetworkStats implements Parcelable {
                 entry.roaming, entry.defaultNetwork);
         if (i == -1) {
             // only create new entry when positive contribution
-            addEntry(entry);
+            insertEntry(entry);
         } else {
             rxBytes[i] += entry.rxBytes;
             rxPackets[i] += entry.rxPackets;
@@ -1040,7 +1040,7 @@ public final class NetworkStats implements Parcelable {
                 entry.operations = Math.max(entry.operations, 0);
             }
 
-            result.addEntry(entry);
+            result.insertEntry(entry);
         }
 
         return result;
