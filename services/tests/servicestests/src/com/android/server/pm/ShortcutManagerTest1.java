@@ -114,8 +114,11 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +136,16 @@ import java.util.function.BiConsumer;
  */
 @SmallTest
 public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
+
+    @Override
+    protected void tearDown() throws Exception {
+        deleteUriFile("file32x32.jpg");
+        deleteUriFile("file64x64.jpg");
+        deleteUriFile("file512x512.jpg");
+
+        super.tearDown();
+    }
+
     /**
      * Test for the first launch path, no settings file available.
      */
@@ -724,6 +737,17 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         final Icon bmp512x512 = Icon.createWithBitmap(BitmapFactory.decodeResource(
                 getTestContext().getResources(), R.drawable.black_512x512));
 
+        // The corresponding files will be deleted in tearDown()
+        final Icon uri32x32 = Icon.createWithContentUri(
+                getFileUriFromResource("file32x32.jpg", R.drawable.black_32x32));
+        final Icon uri64x64_maskable = Icon.createWithAdaptiveBitmapContentUri(
+                getFileUriFromResource("file64x64.jpg", R.drawable.black_64x64));
+        final Icon uri512x512 = Icon.createWithContentUri(
+                getFileUriFromResource("file512x512.jpg", R.drawable.black_512x512));
+
+        doReturn(mUriPermissionOwner.getExternalToken())
+                .when(mMockUriGrantsManagerInternal).newUriPermissionOwner(anyString());
+
         // Set from package 1
         setCaller(CALLING_PACKAGE_1);
         assertTrue(mManager.setDynamicShortcuts(list(
@@ -732,6 +756,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 makeShortcutWithIcon("bmp32x32", bmp32x32),
                 makeShortcutWithIcon("bmp64x64", bmp64x64_maskable),
                 makeShortcutWithIcon("bmp512x512", bmp512x512),
+                makeShortcutWithIcon("uri32x32", uri32x32),
+                makeShortcutWithIcon("uri64x64", uri64x64_maskable),
+                makeShortcutWithIcon("uri512x512", uri512x512),
                 makeShortcut("none")
         )));
 
@@ -742,6 +769,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 "bmp32x32",
                 "bmp64x64",
                 "bmp512x512",
+                "uri32x32",
+                "uri64x64",
+                "uri512x512",
                 "none");
 
         // Call from another caller with the same ID, just to make sure storage is per-package.
@@ -749,11 +779,15 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertTrue(mManager.setDynamicShortcuts(list(
                 makeShortcutWithIcon("res32x32", res512x512),
                 makeShortcutWithIcon("res64x64", res512x512),
+                makeShortcutWithIcon("uri32x32", uri512x512),
+                makeShortcutWithIcon("uri64x64", uri512x512),
                 makeShortcutWithIcon("none", res512x512)
         )));
         assertShortcutIds(assertAllNotHaveIcon(mManager.getDynamicShortcuts()),
                 "res32x32",
                 "res64x64",
+                "uri32x32",
+                "uri64x64",
                 "none");
 
         // Different profile.  Note the names and the contents don't match.
@@ -794,6 +828,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertShortcutIds(assertAllHaveIconFile(
                 list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "bmp512x512", USER_0))),
                 "bmp512x512");
+
+        assertShortcutIds(assertAllHaveIconUri(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "uri32x32", USER_0))),
+                "uri32x32");
+
+        assertShortcutIds(assertAllHaveIconUri(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "uri64x64", USER_0))),
+                "uri64x64");
+
+        assertShortcutIds(assertAllHaveIconUri(
+                list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "uri512x512", USER_0))),
+                "uri512x512");
 
         assertShortcutIds(assertAllHaveIconResId(
                 list(getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "res32x32", USER_P0))),
@@ -860,15 +906,37 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         bmp = pfdToBitmap(
                 mLauncherApps.getShortcutIconFd(CALLING_PACKAGE_1, "bmp32x32", HANDLE_USER_P0));
         assertBitmapSize(128, 128, bmp);
+/*
+        bmp = pfdToBitmap(mLauncherApps.getUriShortcutIconFd(
+                getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "uri32x32", USER_0)));
+        assertBitmapSize(32, 32, bmp);
 
-        Drawable dr = mLauncherApps.getShortcutIconDrawable(
+        bmp = pfdToBitmap(mLauncherApps.getUriShortcutIconFd(
+                getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "uri64x64", USER_0)));
+        assertBitmapSize(64, 64, bmp);
+
+        bmp = pfdToBitmap(mLauncherApps.getUriShortcutIconFd(
+                getShortcutInfoAsLauncher(CALLING_PACKAGE_1, "uri512x512", USER_0)));
+        assertBitmapSize(512, 512, bmp);
+*/
+
+        Drawable dr_bmp = mLauncherApps.getShortcutIconDrawable(
                 makeShortcutWithIcon("bmp64x64", bmp64x64_maskable), 0);
-        assertTrue(dr instanceof AdaptiveIconDrawable);
+        assertTrue(dr_bmp instanceof AdaptiveIconDrawable);
         float viewportPercentage = 1 / (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction());
         assertEquals((int) (bmp64x64_maskable.getBitmap().getWidth() * viewportPercentage),
-                dr.getIntrinsicWidth());
+                dr_bmp.getIntrinsicWidth());
         assertEquals((int) (bmp64x64_maskable.getBitmap().getHeight() * viewportPercentage),
-                dr.getIntrinsicHeight());
+                dr_bmp.getIntrinsicHeight());
+/*
+        Drawable dr_uri = mLauncherApps.getShortcutIconDrawable(
+                makeShortcutWithIcon("uri64x64", uri64x64_maskable), 0);
+        assertTrue(dr_uri instanceof AdaptiveIconDrawable);
+        assertEquals((int) (bmp64x64_maskable.getBitmap().getWidth() * viewportPercentage),
+                dr_uri.getIntrinsicWidth());
+        assertEquals((int) (bmp64x64_maskable.getBitmap().getHeight() * viewportPercentage),
+                dr_uri.getIntrinsicHeight());
+*/
     }
 
     public void testCleanupDanglingBitmaps() throws Exception {
@@ -1274,6 +1342,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     makeShortcut("s1")
             )));
 
+            // Set uri icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                            .setIcon(Icon.createWithContentUri("test_uri"))
+                            .build()
+            )));
+            mService.waitForBitmapSavesForTest();
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconUri());
+                        assertEquals("test_uri", si.getIconUri());
+                    });
             // Set resource icon
             assertTrue(mManager.updateShortcuts(list(
                     new ShortcutInfo.Builder(mClientContext, "s1")
@@ -1287,6 +1367,9 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertEquals(R.drawable.black_32x32, si.getIconResourceId());
                     });
             mService.waitForBitmapSavesForTest();
+
+            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
+
             // Set bitmap icon
             assertTrue(mManager.updateShortcuts(list(
                     new ShortcutInfo.Builder(mClientContext, "s1")
@@ -1300,9 +1383,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertTrue(si.hasIconFile());
                     });
 
-            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
-
-            // Do it again, with the reverse order (bitmap -> icon)
+            // Do it again, with the reverse order (bitmap -> resource -> uri)
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1")
             )));
@@ -1320,6 +1401,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         assertTrue(si.hasIconFile());
                     });
 
+            mInjectedCurrentTimeMillis += INTERVAL; // reset throttling
+
             // Set resource icon
             assertTrue(mManager.updateShortcuts(list(
                     new ShortcutInfo.Builder(mClientContext, "s1")
@@ -1331,6 +1414,18 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .forShortcutWithId("s1", si -> {
                         assertTrue(si.hasIconResource());
                         assertEquals(R.drawable.black_32x32, si.getIconResourceId());
+                    });
+            // Set uri icon
+            assertTrue(mManager.updateShortcuts(list(
+                    new ShortcutInfo.Builder(mClientContext, "s1")
+                            .setIcon(Icon.createWithContentUri("test_uri"))
+                            .build()
+            )));
+            mService.waitForBitmapSavesForTest();
+            assertWith(getCallerShortcuts())
+                    .forShortcutWithId("s1", si -> {
+                        assertTrue(si.hasIconUri());
+                        assertEquals("test_uri", si.getIconUri());
                     });
         });
     }
@@ -8497,6 +8592,28 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             for (int j = 0; j < expected.mCategories.length; j++) {
                 assertEquals(expected.mCategories[j], actual.mCategories[j]);
             }
+        }
+    }
+
+    private Uri getFileUriFromResource(String fileName, int resId) throws IOException {
+        File file = new File(getTestContext().getFilesDir(), fileName);
+        // Make sure we are not leaving phantom files behind.
+        assertFalse(file.exists());
+        try (InputStream source = getTestContext().getResources().openRawResource(resId);
+             OutputStream target = new FileOutputStream(file)) {
+            byte[] buffer = new byte[1024];
+            for (int len = source.read(buffer); len >= 0; len = source.read(buffer)) {
+                target.write(buffer, 0, len);
+            }
+        }
+        assertTrue(file.exists());
+        return Uri.fromFile(file);
+    }
+
+    private void deleteUriFile(String fileName) {
+        File file = new File(getTestContext().getFilesDir(), fileName);
+        if (file.exists()) {
+            file.delete();
         }
     }
 }
