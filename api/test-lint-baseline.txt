@@ -421,9 +421,9 @@ GetterSetterNames: android.location.GnssMeasurement#setCarrierFrequencyHz(float)
     
 GetterSetterNames: android.location.GnssMeasurement#setCodeType(String):
 
-GetterSetterNames: android.location.GnssMeasurement#setReceiverInterSignalBiasNanos(double):
+GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasNanos(double):
 
-GetterSetterNames: android.location.GnssMeasurement#setReceiverInterSignalBiasUncertaintyNanos(double):
+GetterSetterNames: android.location.GnssMeasurement#setFullInterSignalBiasUncertaintyNanos(double):
 
 GetterSetterNames: android.location.GnssMeasurement#setSatelliteInterSignalBiasNanos(double):
 
