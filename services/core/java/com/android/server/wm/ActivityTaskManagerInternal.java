@@ -290,6 +290,11 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
 
     /**
+     * Called when the device changes its dreaming state.
+     */
+    public abstract void notifyDreamStateChanged(boolean dreaming);
+
+    /**
      * Set a uid that is allowed to bypass stopped app switches, launching an app
      * whenever it wants.
      *
@@ -318,6 +323,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void clearHeavyWeightProcessIfEquals(WindowProcessController proc);
     public abstract void finishHeavyWeightApp();
 
+    public abstract boolean isDreaming();
     public abstract boolean isSleeping();
     public abstract boolean isShuttingDown();
     public abstract boolean shuttingDown(boolean booted, int timeout);

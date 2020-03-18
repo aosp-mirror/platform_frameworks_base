@@ -51,6 +51,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -75,6 +76,7 @@ public final class DreamManagerService extends SystemService {
     private final PowerManager mPowerManager;
     private final PowerManagerInternal mPowerManagerInternal;
     private final PowerManager.WakeLock mDozeWakeLock;
+    private final ActivityTaskManagerInternal mAtmInternal;
 
     private Binder mCurrentDreamToken;
     private ComponentName mCurrentDreamName;
@@ -97,6 +99,7 @@ public final class DreamManagerService extends SystemService {
 
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mPowerManagerInternal = getLocalService(PowerManagerInternal.class);
+        mAtmInternal = getLocalService(ActivityTaskManagerInternal.class);
         mDozeWakeLock = mPowerManager.newWakeLock(PowerManager.DOZE_WAKE_LOCK, TAG);
         mDozeConfig = new AmbientDisplayConfiguration(mContext);
     }
@@ -383,8 +386,10 @@ public final class DreamManagerService extends SystemService {
 
         PowerManager.WakeLock wakeLock = mPowerManager
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "startDream");
-        mHandler.post(wakeLock.wrap(
-                () -> mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock)));
+        mHandler.post(wakeLock.wrap(() -> {
+            mAtmInternal.notifyDreamStateChanged(true);
+            mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock);
+        }));
     }
 
     private void stopDreamLocked(final boolean immediate) {
@@ -422,6 +427,7 @@ public final class DreamManagerService extends SystemService {
         }
         mCurrentDreamDozeScreenState = Display.STATE_UNKNOWN;
         mCurrentDreamDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
+        mAtmInternal.notifyDreamStateChanged(false);
     }
 
     private void checkPermission(String permission) {

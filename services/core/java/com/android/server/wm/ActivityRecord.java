@@ -36,6 +36,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 import static android.app.WaitResult.INVALID_DELAY;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -269,6 +270,8 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
+import android.service.dreams.DreamActivity;
+import android.service.dreams.DreamManagerInternal;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArraySet;
 import android.util.EventLog;
@@ -2035,6 +2038,26 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return false;
     }
 
+    static boolean canLaunchDreamActivity(String packageName) {
+        final DreamManagerInternal dreamManager =
+                LocalServices.getService(DreamManagerInternal.class);
+
+        // Verify that the package is the current active dream. The getActiveDreamComponent()
+        // call path does not acquire the DreamManager lock and thus is safe to use.
+        final ComponentName activeDream = dreamManager.getActiveDreamComponent(false /* doze */);
+        if (activeDream == null || activeDream.getPackageName() == null
+                || !activeDream.getPackageName().equals(packageName)) {
+            return false;
+        }
+
+        // Verify that the device is dreaming.
+        if (!LocalServices.getService(ActivityTaskManagerInternal.class).isDreaming()) {
+            return false;
+        }
+
+        return true;
+    }
+
     private void setActivityType(boolean componentSpecified, int launchedFromUid, Intent intent,
             ActivityOptions options, ActivityRecord sourceRecord) {
         int activityType = ACTIVITY_TYPE_UNDEFINED;
@@ -2054,6 +2077,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_ASSISTANT
                 && canLaunchAssistActivity(launchedFromPackage)) {
             activityType = ACTIVITY_TYPE_ASSISTANT;
+        } else if (options != null && options.getLaunchActivityType() == ACTIVITY_TYPE_DREAM
+                && canLaunchDreamActivity(launchedFromPackage)
+                && DreamActivity.class.getName() == info.name) {
+            activityType = ACTIVITY_TYPE_DREAM;
         }
         setActivityType(activityType);
     }

@@ -599,6 +599,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private boolean mSleeping = false;
 
     /**
+     * The mDreaming state is set by the {@link DreamManagerService} when it receives a request to
+     * start/stop the dream. It is set to true shortly  before the {@link DreamService} is started.
+     * It is set to false after the {@link DreamService} is stopped.
+     */
+    private boolean mDreaming = false;
+
+    /**
      * The process state used for processes that are running the top activities.
      * This changes between TOP and TOP_SLEEPING to following mSleeping.
      */
@@ -6331,6 +6338,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public void notifyDreamStateChanged(boolean dreaming) {
+            synchronized (mGlobalLock) {
+                mDreaming = dreaming;
+            }
+        }
+
+        @Override
         public void setAllowAppSwitches(@NonNull String type, int uid, int userId) {
             if (!mAmInternal.isUserRunning(userId, ActivityManager.FLAG_OR_STOPPED)) {
                 return;
@@ -6429,6 +6443,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
                 ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(
                         mHeavyWeightProcess);
+            }
+        }
+
+        @Override
+        public boolean isDreaming() {
+            synchronized (mGlobalLock) {
+                return mDreaming;
             }
         }
 
