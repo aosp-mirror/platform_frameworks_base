@@ -18,6 +18,8 @@ package com.android.server.power;
 
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT;
+import static android.os.PowerManagerInternal.MODE_DEVICE_IDLE;
+import static android.os.PowerManagerInternal.MODE_DISPLAY_INACTIVE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
@@ -42,8 +44,6 @@ import android.hardware.SystemSensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
-import android.hardware.power.Boost;
-import android.hardware.power.Mode;
 import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -2975,6 +2975,8 @@ public final class PowerManagerService extends SystemService
             synchronized (mLock) {
                 if (mDisplayState != state) {
                     mDisplayState = state;
+                    setPowerModeInternal(MODE_DISPLAY_INACTIVE,
+                            !Display.isActiveState(state));
                     if (state == Display.STATE_OFF) {
                         if (!mDecoupleHalInteractiveModeFromDisplayConfig) {
                             setHalInteractiveModeLocked(false);
@@ -3297,6 +3299,7 @@ public final class PowerManagerService extends SystemService
             }
             mDeviceIdleMode = enabled;
             updateWakeLockDisabledStatesLocked();
+            setPowerModeInternal(MODE_DEVICE_IDLE, mDeviceIdleMode || mLightDeviceIdleMode);
         }
         if (enabled) {
             EventLogTags.writeDeviceIdleOnPhase("power");
@@ -3310,6 +3313,7 @@ public final class PowerManagerService extends SystemService
         synchronized (mLock) {
             if (mLightDeviceIdleMode != enabled) {
                 mLightDeviceIdleMode = enabled;
+                setPowerModeInternal(MODE_DEVICE_IDLE, mDeviceIdleMode || mLightDeviceIdleMode);
                 return true;
             }
             return false;
