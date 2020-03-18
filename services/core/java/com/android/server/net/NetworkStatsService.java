@@ -17,6 +17,7 @@
 package com.android.server.net;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
+import static android.Manifest.permission.NETWORK_STATS_PROVIDER;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.content.Intent.ACTION_SHUTDOWN;
@@ -1828,7 +1829,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     public @NonNull INetworkStatsProviderCallback registerNetworkStatsProvider(
             @NonNull String tag, @NonNull INetworkStatsProvider provider) {
-        mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
+        enforceAnyPermissionOf(NETWORK_STATS_PROVIDER,
+                NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
         Objects.requireNonNull(provider, "provider is null");
         Objects.requireNonNull(tag, "tag is null");
         try {
