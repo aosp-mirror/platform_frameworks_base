@@ -3628,8 +3628,8 @@ package android.telephony {
     method public int getNumRtpPacketsTransmitted();
     method public int getNumRtpPacketsTransmittedLost();
     method public int getUplinkCallQualityLevel();
-    method public boolean isIncomingSilenceDetected();
-    method public boolean isOutgoingSilenceDetected();
+    method public boolean isIncomingSilenceDetectedAtCallSetup();
+    method public boolean isOutgoingSilenceDetectedAtCallSetup();
     method public boolean isRtpInactivityDetected();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CALL_QUALITY_BAD = 4; // 0x4
