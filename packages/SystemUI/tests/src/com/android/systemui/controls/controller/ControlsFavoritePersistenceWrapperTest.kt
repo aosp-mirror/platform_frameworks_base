@@ -59,7 +59,7 @@ class ControlsFavoritePersistenceWrapperTest : SysuiTestCase() {
             ComponentName.unflattenFromString("TEST_PKG/.TEST_CLS_1")!!,
             "",
             listOf(
-                ControlInfo("id1", "name_1", DeviceTypes.TYPE_UNKNOWN)
+                ControlInfo("id1", "name_1", "", DeviceTypes.TYPE_UNKNOWN)
             )
         )
 
@@ -67,8 +67,8 @@ class ControlsFavoritePersistenceWrapperTest : SysuiTestCase() {
             ComponentName.unflattenFromString("TEST_PKG/.TEST_CLS_2")!!,
             "structure1",
             listOf(
-                ControlInfo("id2", "name_2", DeviceTypes.TYPE_GENERIC_ON_OFF),
-                ControlInfo("id3", "name_3", DeviceTypes.TYPE_GENERIC_ON_OFF)
+                ControlInfo("id2", "name_2", "sub2", DeviceTypes.TYPE_GENERIC_ON_OFF),
+                ControlInfo("id3", "name_3", "sub3", DeviceTypes.TYPE_GENERIC_ON_OFF)
             )
         )
         val list = listOf(structureInfo1, structureInfo2)
