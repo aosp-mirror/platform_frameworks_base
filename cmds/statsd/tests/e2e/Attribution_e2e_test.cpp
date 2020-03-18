@@ -48,7 +48,7 @@ StatsdConfig CreateStatsdConfig(const Position position) {
     countMetric->set_what(wakelockAcquireMatcher.id());
     *countMetric->mutable_dimensions_in_what() =
         CreateAttributionUidAndTagDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {position});
+            util::WAKELOCK_STATE_CHANGED, {position});
     countMetric->set_bucket(FIVE_MINUTES);
     return config;
 }
@@ -164,7 +164,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
 
     auto data = countMetrics.data(0);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
-                                          android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
+                                          util::WAKELOCK_STATE_CHANGED, 111, "App1");
     EXPECT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
@@ -176,7 +176,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
 
     data = countMetrics.data(1);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
-                                          android::util::WAKELOCK_STATE_CHANGED, 222,
+                                          util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
     EXPECT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
@@ -188,7 +188,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
 
     data = countMetrics.data(2);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
-                                          android::util::WAKELOCK_STATE_CHANGED, 222,
+                                          util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule3");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
@@ -198,7 +198,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByFirstUid) {
 
     data = countMetrics.data(3);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
-                                          android::util::WAKELOCK_STATE_CHANGED, 444,
+                                          util::WAKELOCK_STATE_CHANGED, 444,
                                           "GMSCoreModule2");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
@@ -277,7 +277,7 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
 
     auto data = countMetrics.data(0);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(),
-                                          android::util::WAKELOCK_STATE_CHANGED, 222,
+                                          util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
     EXPECT_EQ(2, data.bucket_info_size());
     EXPECT_EQ(1, data.bucket_info(0).count());
@@ -289,26 +289,26 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     EXPECT_EQ(bucketStartTimeNs + 4 * bucketSizeNs, data.bucket_info(1).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(1);
-    ValidateUidDimension(data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 222);
+    ValidateUidDimension(data.dimensions_in_what(), 0, util::WAKELOCK_STATE_CHANGED, 222);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 0,
-                                          android::util::WAKELOCK_STATE_CHANGED, 222,
+                                          util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
-    ValidateUidDimension(data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateUidDimension(data.dimensions_in_what(), 1, util::WAKELOCK_STATE_CHANGED, 333);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 1,
-                                          android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
+                                          util::WAKELOCK_STATE_CHANGED, 333, "App3");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_elapsed_nanos(), bucketStartTimeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_elapsed_nanos(), bucketStartTimeNs + bucketSizeNs);
 
     data = countMetrics.data(2);
-    ValidateUidDimension(data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 444);
+    ValidateUidDimension(data.dimensions_in_what(), 0, util::WAKELOCK_STATE_CHANGED, 444);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 0,
-                                          android::util::WAKELOCK_STATE_CHANGED, 444,
+                                          util::WAKELOCK_STATE_CHANGED, 444,
                                           "GMSCoreModule2");
-    ValidateUidDimension(data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 222);
+    ValidateUidDimension(data.dimensions_in_what(), 1, util::WAKELOCK_STATE_CHANGED, 222);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 1,
-                                          android::util::WAKELOCK_STATE_CHANGED, 222,
+                                          util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
@@ -317,31 +317,31 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     EXPECT_EQ(bucketStartTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(3);
-    ValidateUidDimension(data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateUidDimension(data.dimensions_in_what(), 0, util::WAKELOCK_STATE_CHANGED, 111);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 0,
-                                          android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
-    ValidateUidDimension(data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 222);
+                                          util::WAKELOCK_STATE_CHANGED, 111, "App1");
+    ValidateUidDimension(data.dimensions_in_what(), 1, util::WAKELOCK_STATE_CHANGED, 222);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 1,
-                                          android::util::WAKELOCK_STATE_CHANGED, 222,
+                                          util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
-    ValidateUidDimension(data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateUidDimension(data.dimensions_in_what(), 2, util::WAKELOCK_STATE_CHANGED, 333);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 2,
-                                          android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
+                                          util::WAKELOCK_STATE_CHANGED, 333, "App3");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(bucketStartTimeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(4);
-    ValidateUidDimension(data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateUidDimension(data.dimensions_in_what(), 0, util::WAKELOCK_STATE_CHANGED, 111);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 0,
-                                          android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
-    ValidateUidDimension(data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 333);
+                                          util::WAKELOCK_STATE_CHANGED, 111, "App1");
+    ValidateUidDimension(data.dimensions_in_what(), 1, util::WAKELOCK_STATE_CHANGED, 333);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 1,
-                                          android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
-    ValidateUidDimension(data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 222);
+                                          util::WAKELOCK_STATE_CHANGED, 333, "App3");
+    ValidateUidDimension(data.dimensions_in_what(), 2, util::WAKELOCK_STATE_CHANGED, 222);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 2,
-                                          android::util::WAKELOCK_STATE_CHANGED, 222,
+                                          util::WAKELOCK_STATE_CHANGED, 222,
                                           "GMSCoreModule1");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
@@ -349,16 +349,16 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSliceByChain) {
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
 
     data = countMetrics.data(5);
-    ValidateUidDimension(data.dimensions_in_what(), 0, android::util::WAKELOCK_STATE_CHANGED, 111);
+    ValidateUidDimension(data.dimensions_in_what(), 0, util::WAKELOCK_STATE_CHANGED, 111);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 0,
-                                          android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
-    ValidateUidDimension(data.dimensions_in_what(), 1, android::util::WAKELOCK_STATE_CHANGED, 444);
+                                          util::WAKELOCK_STATE_CHANGED, 111, "App1");
+    ValidateUidDimension(data.dimensions_in_what(), 1, util::WAKELOCK_STATE_CHANGED, 444);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 1,
-                                          android::util::WAKELOCK_STATE_CHANGED, 444,
+                                          util::WAKELOCK_STATE_CHANGED, 444,
                                           "GMSCoreModule2");
-    ValidateUidDimension(data.dimensions_in_what(), 2, android::util::WAKELOCK_STATE_CHANGED, 333);
+    ValidateUidDimension(data.dimensions_in_what(), 2, util::WAKELOCK_STATE_CHANGED, 333);
     ValidateAttributionUidAndTagDimension(data.dimensions_in_what(), 2,
-                                          android::util::WAKELOCK_STATE_CHANGED, 333, "App3");
+                                          util::WAKELOCK_STATE_CHANGED, 333, "App3");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
