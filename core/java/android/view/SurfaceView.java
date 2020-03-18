@@ -496,8 +496,17 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         updateSurface();
         releaseSurfaces();
-        mHaveFrame = false;
 
+        // We don't release this as part of releaseSurfaces as
+        // that is also called on transient visibility changes. We can't
+        // recreate this Surface, so only release it when we are fully
+        // detached.
+        if (mSurfacePackage != null) {
+            mSurfacePackage.release();
+            mSurfacePackage = null;
+        }
+
+        mHaveFrame = false;
         super.onDetachedFromWindow();
     }
 
@@ -1546,7 +1555,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * Display the view-hierarchy embedded within a {@link SurfaceControlViewHost.SurfacePackage}
      * within this SurfaceView. If this SurfaceView is above it's host Surface (see
      * {@link #setZOrderOnTop} then the embedded Surface hierarchy will be able to receive
-     * input.
+     * input. This will take ownership of the SurfaceControl contained inside the SurfacePackage
+     * and free the caller of the obligation to call
+     * {@link SurfaceControlViewHost.SurfacePackage#release}.
      *
      * @param p The SurfacePackage to embed.
      */
@@ -1556,6 +1567,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             mSurfacePackage.getSurfaceControl() : null;
         if (mSurfaceControl != null && lastSc != null) {
             mTmpTransaction.reparent(lastSc, null).apply();
+            mSurfacePackage.release();
         } else if (mSurfaceControl != null) {
             reparentSurfacePackage(mTmpTransaction, p);
             mTmpTransaction.apply();
