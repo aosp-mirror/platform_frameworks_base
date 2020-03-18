@@ -189,6 +189,34 @@ genrule {
     ],
 }
 
+genrule {
+    name: "statslog_statsdtest.h",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --header $(genDir)/statslog_statsdtest.h --module statsdtest --namespace android,os,statsd,util",
+    out: [
+        "statslog_statsdtest.h",
+    ],
+}
+
+genrule {
+    name: "statslog_statsdtest.cpp",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --cpp $(genDir)/statslog_statsdtest.cpp --module statsdtest --namespace android,os,statsd,util --importHeader statslog_statsdtest.h",
+    out: [
+        "statslog_statsdtest.cpp",
+    ],
+}
+
+cc_library_static {
+    name: "libstatslog_statsdtest",
+    generated_sources: ["statslog_statsdtest.cpp"],
+    generated_headers: ["statslog_statsdtest.h"],
+    export_generated_headers: ["statslog_statsdtest.h"],
+    shared_libs: [
+        "libstatssocket",
+    ]
+}
+
 cc_library_static {
     name: "libstatslog_statsd",
     generated_sources: ["statslog_statsd.cpp"],
@@ -331,7 +359,7 @@ cc_test {
     static_libs: [
         "libgmock",
         "libplatformprotos",
-        "libstatslog", //TODO(b/150976524): remove this when the tests no longer hardcode atoms.
+        "libstatslog_statsdtest",
         "libstatssocket_private",
     ],
 
