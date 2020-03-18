@@ -42,4 +42,6 @@ message ApplicationExitInfoProto {
     optional int64 rss = 12;
     optional int64 timestamp = 13;
     optional string description = 14;
+    optional bytes state = 15;
+    optional string trace_file = 16;
 }
