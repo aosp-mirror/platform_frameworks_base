@@ -46,6 +46,7 @@ filegroup {
         // TODO(b/146011398) package android.net.wifi is now split amongst 2 jars: framework.jar and
         // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
         // to a separate package.
+        "java/android/net/wifi/SoftApConfToXmlMigrationUtil.java",
         "java/android/net/wifi/WifiNetworkScoreCache.java",
         "java/android/net/wifi/WifiMigration.java",
         "java/android/net/wifi/nl80211/*.java",
