@@ -940,7 +940,7 @@ bool IncrementalService::startDataLoader(MountId mountId) const {
     if (!dataloader) {
         return false;
     }
-    status = dataloader->start();
+    status = dataloader->start(mountId);
     if (!status.isOk()) {
         return false;
     }
