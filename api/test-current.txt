@@ -1355,8 +1355,8 @@ package android.location {
     method @Deprecated public void resetCarrierPhase();
     method @Deprecated public void resetCarrierPhaseUncertainty();
     method public void resetCodeType();
-    method public void resetReceiverInterSignalBiasNanos();
-    method public void resetReceiverInterSignalBiasUncertaintyNanos();
+    method public void resetFullInterSignalBiasNanos();
+    method public void resetFullInterSignalBiasUncertaintyNanos();
     method public void resetSatelliteInterSignalBiasNanos();
     method public void resetSatelliteInterSignalBiasUncertaintyNanos();
     method public void resetSnrInDb();
@@ -1373,13 +1373,13 @@ package android.location {
     method public void setCn0DbHz(double);
     method public void setCodeType(@NonNull String);
     method public void setConstellationType(int);
+    method public void setFullInterSignalBiasNanos(double);
+    method public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setMultipathIndicator(int);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
     method public void setReceivedSvTimeUncertaintyNanos(long);
-    method public void setReceiverInterSignalBiasNanos(double);
-    method public void setReceiverInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setSatelliteInterSignalBiasNanos(double);
     method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setSnrInDb(double);
