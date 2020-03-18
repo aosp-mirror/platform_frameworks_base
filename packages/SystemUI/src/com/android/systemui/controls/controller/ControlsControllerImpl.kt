@@ -31,6 +31,7 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.service.controls.Control
 import android.service.controls.actions.ControlAction
+import android.util.ArrayMap
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
@@ -73,6 +74,9 @@ class ControlsControllerImpl @Inject constructor (
     private var userChanging: Boolean = true
 
     private var loadCanceller: Runnable? = null
+
+    private var seedingInProgress = false
+    private val seedingCallbacks = mutableListOf<Consumer<Boolean>>()
 
     private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
     override val currentUserId
@@ -278,6 +282,84 @@ class ControlsControllerImpl @Inject constructor (
                     }
                 }
         )
+    }
+
+    override fun addSeedingFavoritesCallback(callback: Consumer<Boolean>): Boolean {
+        if (!seedingInProgress) return false
+        executor.execute {
+            // status may have changed by this point, so check again and inform the
+            // caller if necessary
+            if (seedingInProgress) seedingCallbacks.add(callback)
+            else callback.accept(false)
+        }
+        return true
+    }
+
+    override fun seedFavoritesForComponent(
+        componentName: ComponentName,
+        callback: Consumer<Boolean>
+    ) {
+        Log.i(TAG, "Beginning request to seed favorites for: $componentName")
+        if (!confirmAvailability()) {
+            if (userChanging) {
+                // Try again later, userChanging should not last forever. If so, we have bigger
+                // problems. This will return a runnable that allows to cancel the delayed version,
+                // it will not be able to cancel the load if
+                executor.executeDelayed(
+                    { seedFavoritesForComponent(componentName, callback) },
+                    USER_CHANGE_RETRY_DELAY,
+                    TimeUnit.MILLISECONDS
+                )
+            } else {
+                callback.accept(false)
+            }
+            return
+        }
+        seedingInProgress = true
+        bindingController.bindAndLoadSuggested(
+            componentName,
+            object : ControlsBindingController.LoadCallback {
+                override fun accept(controls: List<Control>) {
+                    executor.execute {
+                        val structureToControls =
+                            ArrayMap<CharSequence, MutableList<ControlInfo>>()
+
+                        controls.forEach {
+                            val structure = it.structure ?: ""
+                            val list = structureToControls.get(structure)
+                            ?: mutableListOf<ControlInfo>()
+                            list.add(ControlInfo(it.controlId, it.title, it.deviceType))
+                            structureToControls.put(structure, list)
+                        }
+
+                        structureToControls.forEach {
+                            (s, cs) -> Favorites.replaceControls(
+                                StructureInfo(componentName, s, cs))
+                        }
+
+                        persistenceWrapper.storeFavorites(Favorites.getAllStructures())
+                        callback.accept(true)
+                        endSeedingCall(true)
+                    }
+                }
+
+                override fun error(message: String) {
+                    Log.e(TAG, "Unable to seed favorites: $message")
+                    executor.execute {
+                        callback.accept(false)
+                        endSeedingCall(false)
+                    }
+                }
+            }
+        )
+    }
+
+    private fun endSeedingCall(state: Boolean) {
+        seedingInProgress = false
+        seedingCallbacks.forEach {
+            it.accept(state)
+        }
+        seedingCallbacks.clear()
     }
 
     override fun cancelLoad() {
