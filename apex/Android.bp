@@ -44,6 +44,12 @@ stubs_defaults {
     args: mainline_stubs_args,
     installable: false,
     sdk_version: "current",
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+    },
 }
 
 stubs_defaults {
@@ -52,6 +58,12 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "system_current",
+    check_api: {
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+        },
+    },
 }
 
 // The defaults for module_libs comes in two parts - defaults for API checks
@@ -65,6 +77,12 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    check_api: {
+        current: {
+            api_file: "api/module-lib-current.txt",
+            removed_api_file: "api/module-lib-removed.txt",
+        },
+    },
 }
 
 stubs_defaults {
