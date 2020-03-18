@@ -2464,8 +2464,8 @@ public class ConnectivityServiceTest {
             final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
                     mServiceContext, "testFactory", filter);
             // Register the factory and don't be surprised when the default request arrives.
-            testFactory.register();
             testFactory.expectAddRequestsWithScores(0);
+            testFactory.register();
             testFactory.waitForNetworkRequests(1);
 
             testFactory.setScoreFilter(42);
