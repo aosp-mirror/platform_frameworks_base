@@ -1313,7 +1313,8 @@ final class SettingsState {
             }
 
             // isValuePreservedInRestore shouldn't change back to false if it has been set to true.
-            boolean isPreserved = shouldPreserveSetting(overrideableByRestore, resetToDefault);
+            boolean isPreserved = shouldPreserveSetting(overrideableByRestore, resetToDefault,
+                    packageName, value);
 
             // Is something gonna change?
             if (Objects.equals(value, this.value)
@@ -1339,9 +1340,14 @@ final class SettingsState {
         }
 
         private boolean shouldPreserveSetting(boolean overrideableByRestore,
-                boolean resetToDefault) {
+                boolean resetToDefault, String packageName, String value) {
             if (resetToDefault) {
                 // By default settings are not marked as preserved.
+                return false;
+            }
+            if (value != null && value.equals(this.value)
+                    && SYSTEM_PACKAGE_NAME.equals(packageName)) {
+                // Do not mark preserved if it's the system reinitializing to the same value.
                 return false;
             }
 
