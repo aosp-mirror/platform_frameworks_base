@@ -2235,19 +2235,23 @@ class UserController implements Handler.Callback {
 
     /**
      * Returns whether the given user requires credential entry at this time. This is used to
-     * intercept activity launches for work apps when the Work Challenge is present.
+     * intercept activity launches for locked work apps due to work challenge being triggered
+     * or when the profile user is yet to be unlocked.
      */
     protected boolean shouldConfirmCredentials(@UserIdInt int userId) {
-        synchronized (mLock) {
-            if (mStartedUsers.get(userId) == null) {
-                return false;
-            }
-        }
-        if (!mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+        if (getStartedUserState(userId) == null) {
             return false;
         }
-        final KeyguardManager km = mInjector.getKeyguardManager();
-        return km.isDeviceLocked(userId) && km.isDeviceSecure(userId);
+        if (!getUserInfo(userId).isManagedProfile()) {
+            return false;
+        }
+        if (mLockPatternUtils.isSeparateProfileChallengeEnabled(userId)) {
+            final KeyguardManager km = mInjector.getKeyguardManager();
+            return km.isDeviceLocked(userId) && km.isDeviceSecure(userId);
+        } else {
+            // For unified challenge, need to confirm credential if user is RUNNING_LOCKED.
+            return isUserRunning(userId, ActivityManager.FLAG_AND_LOCKED);
+        }
     }
 
     boolean isLockScreenDisabled(@UserIdInt int userId) {
