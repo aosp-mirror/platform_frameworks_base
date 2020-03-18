@@ -166,8 +166,10 @@ java_library {
 
 android_test {
     name: "FrameworkStatsdTest",
-    sdk_version: "module_current",
+    platform_apis: true,
     srcs: [
+        // TODO(b/147705194): Use framework-statsd as a lib dependency instead.
+        ":framework-statsd-sources",
         "test/**/*.java",
     ],
     manifest: "test/AndroidManifest.xml",
@@ -178,7 +180,6 @@ android_test {
     libs: [
         "android.test.runner.stubs",
         "android.test.base.stubs",
-        "framework-statsd",
     ],
     test_suites: [
         "device-tests",
