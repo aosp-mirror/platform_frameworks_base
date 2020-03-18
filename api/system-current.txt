@@ -1612,7 +1612,6 @@ package android.content {
     field public static final String NETD_SERVICE = "netd";
     field public static final String NETWORK_POLICY_SERVICE = "netpolicy";
     field public static final String NETWORK_SCORE_SERVICE = "network_score";
-    field public static final String NETWORK_STACK_SERVICE = "network_stack";
     field public static final String OEM_LOCK_SERVICE = "oem_lock";
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
@@ -4740,6 +4739,7 @@ package android.net {
   }
 
   public class NetworkStack {
+    method @Nullable public static android.os.IBinder getService();
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 

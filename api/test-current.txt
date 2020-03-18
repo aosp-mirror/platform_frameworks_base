@@ -658,7 +658,6 @@ package android.content {
     field public static final String BUGREPORT_SERVICE = "bugreport";
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String ETHERNET_SERVICE = "ethernet";
-    field public static final String NETWORK_STACK_SERVICE = "network_stack";
     field public static final String PERMISSION_SERVICE = "permission";
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
@@ -1518,6 +1517,7 @@ package android.net {
   }
 
   public class NetworkStack {
+    method @Nullable public static android.os.IBinder getService();
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 
