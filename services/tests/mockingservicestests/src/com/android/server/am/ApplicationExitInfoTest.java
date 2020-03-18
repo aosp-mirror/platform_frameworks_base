@@ -46,6 +46,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
 import android.os.Debug;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
@@ -55,6 +56,7 @@ import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.appop.AppOpsService;
@@ -71,10 +73,17 @@ import org.junit.runners.model.Statement;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Random;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Test class for {@link android.app.ApplicationExitInfo}.
@@ -119,6 +128,8 @@ public class ApplicationExitInfoTest {
         setFieldValue(AppExitInfoTracker.class, mAppExitInfoTracker, "mAppExitInfoSourceLmkd",
                 spy(mAppExitInfoTracker.new AppExitInfoExternalSource("lmkd",
                 ApplicationExitInfo.REASON_LOW_MEMORY)));
+        setFieldValue(AppExitInfoTracker.class, mAppExitInfoTracker, "mAppTraceRetriever",
+                spy(mAppExitInfoTracker.new AppTraceRetriever()));
         setFieldValue(ProcessList.class, mProcessList, "mAppExitInfoTracker", mAppExitInfoTracker);
         mInjector = new TestInjector(mContext);
         mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
@@ -169,6 +180,11 @@ public class ApplicationExitInfoTest {
     public void testApplicationExitInfo() throws Exception {
         mAppExitInfoTracker.clearProcessExitInfo(true);
         mAppExitInfoTracker.mAppExitInfoLoaded = true;
+        mAppExitInfoTracker.mProcExitStoreDir = new File(mContext.getFilesDir(),
+                AppExitInfoTracker.APP_EXIT_STORE_DIR);
+        assertTrue(FileUtils.createDir(mAppExitInfoTracker.mProcExitStoreDir));
+        mAppExitInfoTracker.mProcExitInfoFile = new File(mAppExitInfoTracker.mProcExitStoreDir,
+                AppExitInfoTracker.APP_EXIT_INFO_FILE);
 
         // Test application calls System.exit()
         doNothing().when(mAppExitInfoTracker).schedulePersistProcessExitInfo(anyBoolean());
@@ -188,6 +204,10 @@ public class ApplicationExitInfoTest {
         final long app1Rss3 = 45680;
         final String app1ProcessName = "com.android.test.stub1:process";
         final String app1PackageName = "com.android.test.stub1";
+        final byte[] app1Cookie1 = {(byte) 0x01, (byte) 0x02, (byte) 0x03, (byte) 0x04,
+                (byte) 0x05, (byte) 0x06, (byte) 0x07, (byte) 0x08};
+        final byte[] app1Cookie2 = {(byte) 0x08, (byte) 0x07, (byte) 0x06, (byte) 0x05,
+                (byte) 0x04, (byte) 0x03, (byte) 0x02, (byte) 0x01};
 
         final long now1 = System.currentTimeMillis();
         ProcessRecord app = makeProcessRecord(
@@ -204,6 +224,9 @@ public class ApplicationExitInfoTest {
 
         // Case 1: basic System.exit() test
         int exitCode = 5;
+        mAppExitInfoTracker.setProcessStateSummary(app1Uid, app1Pid1, app1Cookie1);
+        assertTrue(ArrayUtils.equals(mAppExitInfoTracker.getProcessStateSummary(app1Uid,
+                app1Pid1), app1Cookie1, app1Cookie1.length));
         doReturn(new Pair<Long, Object>(now1, Integer.valueOf(makeExitStatus(exitCode))))
                 .when(mAppExitInfoTracker.mAppExitInfoSourceZygote)
                 .remove(anyInt(), anyInt());
@@ -235,6 +258,10 @@ public class ApplicationExitInfoTest {
                 IMPORTANCE_CACHED,                    // importance
                 null);                                // description
 
+        assertTrue(ArrayUtils.equals(info.getProcessStateSummary(), app1Cookie1,
+                app1Cookie1.length));
+        assertEquals(info.getTraceInputStream(), null);
+
         // Case 2: create another app1 process record with a different pid
         sleep(1);
         final long now2 = System.currentTimeMillis();
@@ -250,6 +277,12 @@ public class ApplicationExitInfoTest {
                 app1ProcessName,        // processName
                 app1PackageName);       // packageName
         exitCode = 6;
+
+        mAppExitInfoTracker.setProcessStateSummary(app1Uid, app1Pid2, app1Cookie1);
+        // Override with a different cookie
+        mAppExitInfoTracker.setProcessStateSummary(app1Uid, app1Pid2, app1Cookie2);
+        assertTrue(ArrayUtils.equals(mAppExitInfoTracker.getProcessStateSummary(app1Uid,
+                app1Pid2), app1Cookie2, app1Cookie2.length));
         doReturn(new Pair<Long, Object>(now2, Integer.valueOf(makeExitStatus(exitCode))))
                 .when(mAppExitInfoTracker.mAppExitInfoSourceZygote)
                 .remove(anyInt(), anyInt());
@@ -279,6 +312,12 @@ public class ApplicationExitInfoTest {
                 app1Rss2,                             // rss
                 IMPORTANCE_SERVICE,                   // importance
                 null);                                // description
+
+        assertTrue(ArrayUtils.equals(info.getProcessStateSummary(), app1Cookie2,
+                app1Cookie2.length));
+        info = list.get(1);
+        assertTrue(ArrayUtils.equals(info.getProcessStateSummary(), app1Cookie1,
+                app1Cookie1.length));
 
         // Case 3: Create an instance of app1 with different user, and died because of SIGKILL
         sleep(1);
@@ -702,9 +741,19 @@ public class ApplicationExitInfoTest {
                 app1PackageName);             // packageName
 
         mAppExitInfoTracker.mIsolatedUidRecords.addIsolatedUid(app1IsolatedUid2User2, app1UidUser2);
+
+        // Pretent it gets an ANR trace too (although the reason here should be REASON_ANR)
+        final File traceFile = new File(mContext.getFilesDir(), "anr_original.txt");
+        final int traceSize = 10240;
+        final int traceStart = 1024;
+        final int traceEnd = 8192;
+        createRandomFile(traceFile, traceSize);
+        assertEquals(traceSize, traceFile.length());
+        mAppExitInfoTracker.handleLogAnrTrace(app.pid, app.uid, app.getPackageList(),
+                traceFile, traceStart, traceEnd);
+
         noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
                 ApplicationExitInfo.SUBREASON_TOO_MANY_EMPTY, app1Description2);
-
         updateExitInfo(app);
         list.clear();
         mAppExitInfoTracker.getExitInfo(app1PackageName, app1UidUser2, app1Pid2User2, 1, list);
@@ -729,6 +778,10 @@ public class ApplicationExitInfoTest {
                 IMPORTANCE_CACHED,                            // importance
                 app1Description2);                            // description
 
+        // Verify if the traceFile get copied into the records correctly.
+        verifyTraceFile(traceFile, traceStart, info.getTraceFile(), 0, traceEnd - traceStart);
+        traceFile.delete();
+        info.getTraceFile().delete();
 
         // Case 9: User2 gets removed
         sleep(1);
@@ -801,8 +854,6 @@ public class ApplicationExitInfoTest {
         mAppExitInfoTracker.getExitInfo(null, app1Uid, 0, 0, original);
         assertTrue(original.size() > 0);
 
-        mAppExitInfoTracker.mProcExitInfoFile = new File(mContext.getFilesDir(),
-                AppExitInfoTracker.APP_EXIT_INFO_FILE);
         mAppExitInfoTracker.persistProcessExitInfo();
         assertTrue(mAppExitInfoTracker.mProcExitInfoFile.exists());
 
@@ -833,6 +884,37 @@ public class ApplicationExitInfoTest {
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
+        }
+    }
+
+    private static void createRandomFile(File file, int size) throws IOException {
+        try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+            Random random = new Random();
+            byte[] buf = random.ints('a', 'z').limit(size).collect(
+                    StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString().getBytes();
+            out.write(buf);
+        }
+    }
+
+    private static void verifyTraceFile(File originFile, int originStart, File traceFile,
+            int traceStart, int length) throws IOException {
+        assertTrue(originFile.exists());
+        assertTrue(traceFile.exists());
+        assertTrue(originStart < originFile.length());
+        try (GZIPInputStream traceIn = new GZIPInputStream(new FileInputStream(traceFile));
+            BufferedInputStream originIn = new BufferedInputStream(
+                    new FileInputStream(originFile))) {
+            assertEquals(traceStart, traceIn.skip(traceStart));
+            assertEquals(originStart, originIn.skip(originStart));
+            byte[] buf1 = new byte[8192];
+            byte[] buf2 = new byte[8192];
+            while (length > 0) {
+                int len = traceIn.read(buf1, 0, Math.min(buf1.length, length));
+                assertEquals(len, originIn.read(buf2, 0, len));
+                assertTrue(ArrayUtils.equals(buf1, buf2, len));
+                length -= len;
+            }
         }
     }
 
