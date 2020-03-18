@@ -66,7 +66,6 @@ public abstract class PackageManagerInternal {
     public static final int PACKAGE_CONFIGURATOR = 9;
     public static final int PACKAGE_INCIDENT_REPORT_APPROVER = 10;
     public static final int PACKAGE_APP_PREDICTOR = 11;
-    public static final int PACKAGE_TELEPHONY = 12;
     public static final int PACKAGE_WIFI = 13;
     public static final int PACKAGE_COMPANION = 14;
     public static final int PACKAGE_RETAIL_DEMO = 15;
@@ -124,7 +123,6 @@ public abstract class PackageManagerInternal {
         PACKAGE_CONFIGURATOR,
         PACKAGE_INCIDENT_REPORT_APPROVER,
         PACKAGE_APP_PREDICTOR,
-        PACKAGE_TELEPHONY,
         PACKAGE_WIFI,
         PACKAGE_COMPANION,
         PACKAGE_RETAIL_DEMO,
