@@ -721,7 +721,7 @@ public final class NetworkStats implements Parcelable {
      * @param entry the {@link Entry} to add.
      * @return a new constructed {@link NetworkStats} object that contains the result.
      */
-    public @NonNull NetworkStats addValues(@NonNull Entry entry) {
+    public @NonNull NetworkStats addEntry(@NonNull Entry entry) {
         return this.clone().combineValues(entry);
     }
 
