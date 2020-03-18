@@ -24,6 +24,7 @@ using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::IsEmpty;
+using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::SizeIs;
 using ::testing::StrEq;
@@ -38,6 +39,13 @@ class MockFileCollection : public io::IFileCollection {
   MOCK_METHOD0(Iterator, std::unique_ptr<io::IFileCollectionIterator>());
   MOCK_METHOD0(GetDirSeparator, char());
 };
+
+ResourceEntry* GetEntry(ResourceTable* table, const ResourceNameRef& res_name,
+                   uint32_t id) {
+  ResourceTablePackage* package = table->FindPackage(res_name.package);
+  ResourceTableType* type = package->FindType(res_name.type);
+  return  type->FindEntry(res_name.entry, id);
+}
 
 TEST(ProtoSerializeTest, SerializeSinglePackage) {
   std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
@@ -660,6 +668,169 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeNonDynamicReference) {
   Reference* actual_ref = ValueCast<Reference>(item.get());
   EXPECT_EQ(actual_ref->id.value().id, ref.id.value().id);
   EXPECT_FALSE(actual_ref->is_dynamic);
+}
+
+TEST(ProtoSerializeTest, CollapsingResourceNamesNoNameCollapseExemptionsSucceeds) {
+  const uint32_t id_one_id = 0x7f020000;
+  const uint32_t id_two_id = 0x7f020001;
+  const uint32_t id_three_id = 0x7f020002;
+  const uint32_t integer_three_id = 0x7f030000;
+  const uint32_t string_test_id = 0x7f040000;
+  const uint32_t layout_bar_id = 0x7f050000;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
+          .AddSimple("com.app.test:id/one", ResourceId(id_one_id))
+          .AddSimple("com.app.test:id/two", ResourceId(id_two_id))
+          .AddValue("com.app.test:id/three", ResourceId(id_three_id),
+                    test::BuildReference("com.app.test:id/one", ResourceId(id_one_id)))
+          .AddValue("com.app.test:integer/one", ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 1u))
+          .AddValue("com.app.test:integer/one", test::ParseConfigOrDie("v1"),
+                    ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 2u))
+          .AddString("com.app.test:string/test", ResourceId(string_test_id), "foo")
+          .AddFileReference("com.app.test:layout/bar", ResourceId(layout_bar_id),
+                            "res/layout/bar.xml")
+          .Build();
+
+  SerializeTableOptions options;
+  options.collapse_key_stringpool = true;
+
+  pb::ResourceTable pb_table;
+
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics(), options);
+  test::TestFile file_a("res/layout/bar.xml");
+  MockFileCollection files;
+  EXPECT_CALL(files, FindFile(Eq("res/layout/bar.xml")))
+      .WillRepeatedly(::testing::Return(&file_a));
+  ResourceTable new_table;
+  std::string error;
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error)) << error;
+  EXPECT_THAT(error, IsEmpty());
+
+  ResourceName real_id_resource(
+      "com.app.test", ResourceType::kId, "one");
+  EXPECT_THAT(GetEntry(&new_table, real_id_resource, id_one_id), IsNull());
+
+  ResourceName obfuscated_id_resource(
+      "com.app.test", ResourceType::kId, "0_resource_name_obfuscated");
+
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource,
+                  id_one_id), NotNull());
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource,
+                  id_two_id), NotNull());
+  ResourceEntry* entry = GetEntry(&new_table, obfuscated_id_resource, id_three_id);
+  EXPECT_THAT(entry, NotNull());
+  ResourceConfigValue* config_value = entry->FindValue({});
+  Reference* ref = ValueCast<Reference>(config_value->value.get());
+  EXPECT_THAT(ref->id.value(), Eq(id_one_id));
+
+  ResourceName obfuscated_integer_resource(
+      "com.app.test", ResourceType::kInteger, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_integer_resource, integer_three_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  BinaryPrimitive* bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(1u));
+
+  config_value = entry->FindValue(test::ParseConfigOrDie("v1"));
+  bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(2u));
+
+  ResourceName obfuscated_string_resource(
+      "com.app.test", ResourceType::kString, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_string_resource, string_test_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  String* s = ValueCast<String>(config_value->value.get());
+  EXPECT_THAT(*(s->value), Eq("foo"));
+
+  ResourceName obfuscated_layout_resource(
+      "com.app.test", ResourceType::kLayout, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_layout_resource, layout_bar_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  FileReference* f = ValueCast<FileReference>(config_value->value.get());
+  EXPECT_THAT(*(f->path), Eq("res/layout/bar.xml"));
+}
+
+TEST(ProtoSerializeTest, ObfuscatingResourceNamesWithNameCollapseExemptionsSucceeds) {
+  const uint32_t id_one_id = 0x7f020000;
+  const uint32_t id_two_id = 0x7f020001;
+  const uint32_t id_three_id = 0x7f020002;
+  const uint32_t integer_three_id = 0x7f030000;
+  const uint32_t string_test_id = 0x7f040000;
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
+          .AddSimple("com.app.test:id/one", ResourceId(id_one_id))
+          .AddSimple("com.app.test:id/two", ResourceId(id_two_id))
+          .AddValue("com.app.test:id/three", ResourceId(id_three_id),
+                    test::BuildReference("com.app.test:id/one", ResourceId(id_one_id)))
+          .AddValue("com.app.test:integer/one", ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 1u))
+          .AddValue("com.app.test:integer/one", test::ParseConfigOrDie("v1"),
+                    ResourceId(integer_three_id),
+                    util::make_unique<BinaryPrimitive>(
+                        uint8_t(android::Res_value::TYPE_INT_DEC), 2u))
+          .AddString("com.app.test:string/test", ResourceId(string_test_id), "foo")
+          .Build();
+
+  SerializeTableOptions options;
+  options.collapse_key_stringpool = true;
+  options.name_collapse_exemptions.insert(ResourceName({}, ResourceType::kId, "one"));
+  options.name_collapse_exemptions.insert(ResourceName({}, ResourceType::kString, "test"));
+  pb::ResourceTable pb_table;
+
+  SerializeTableToPb(*table, &pb_table, context->GetDiagnostics(), options);
+  MockFileCollection files;
+  ResourceTable new_table;
+  std::string error;
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error)) << error;
+  EXPECT_THAT(error, IsEmpty());
+
+  EXPECT_THAT(GetEntry(&new_table, ResourceName("com.app.test", ResourceType::kId, "one"),
+                       id_one_id), NotNull());
+  ResourceName obfuscated_id_resource(
+      "com.app.test", ResourceType::kId, "0_resource_name_obfuscated");
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource, id_one_id), IsNull());
+
+  ResourceName real_id_resource(
+      "com.app.test", ResourceType::kId, "two");
+  EXPECT_THAT(GetEntry(&new_table, real_id_resource, id_two_id), IsNull());
+  EXPECT_THAT(GetEntry(&new_table, obfuscated_id_resource, id_two_id), NotNull());
+
+  ResourceEntry* entry = GetEntry(&new_table, obfuscated_id_resource, id_three_id);
+  EXPECT_THAT(entry, NotNull());
+  ResourceConfigValue* config_value = entry->FindValue({});
+  Reference* ref = ValueCast<Reference>(config_value->value.get());
+  EXPECT_THAT(ref->id.value(), Eq(id_one_id));
+
+  // Note that this resource is also named "one", but it's a different type, so gets obfuscated.
+  ResourceName obfuscated_integer_resource(
+      "com.app.test", ResourceType::kInteger, "0_resource_name_obfuscated");
+  entry = GetEntry(&new_table, obfuscated_integer_resource, integer_three_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  BinaryPrimitive* bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(1u));
+
+  config_value = entry->FindValue(test::ParseConfigOrDie("v1"));
+  bp = ValueCast<BinaryPrimitive>(config_value->value.get());
+  EXPECT_THAT(bp->value.data, Eq(2u));
+
+  entry = GetEntry(&new_table, ResourceName("com.app.test", ResourceType::kString, "test"),
+                   string_test_id);
+  EXPECT_THAT(entry, NotNull());
+  config_value = entry->FindValue({});
+  String* s = ValueCast<String>(config_value->value.get());
+  EXPECT_THAT(*(s->value), Eq("foo"));
 }
 
 }  // namespace aapt

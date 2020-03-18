@@ -356,12 +356,21 @@ void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table
       }
       pb_type->set_name(to_string(type->type).to_string());
 
+      // hardcoded string uses characters which make it an invalid resource name
+      static const char* obfuscated_resource_name = "0_resource_name_obfuscated";
       for (const std::unique_ptr<ResourceEntry>& entry : type->entries) {
         pb::Entry* pb_entry = pb_type->add_entry();
         if (entry->id) {
           pb_entry->mutable_entry_id()->set_id(entry->id.value());
         }
-        pb_entry->set_name(entry->name);
+        ResourceName resource_name({}, type->type, entry->name);
+        if (options.collapse_key_stringpool &&
+            options.name_collapse_exemptions.find(resource_name) ==
+            options.name_collapse_exemptions.end()) {
+          pb_entry->set_name(obfuscated_resource_name);
+        } else {
+          pb_entry->set_name(entry->name);
+        }
 
         // Write the Visibility struct.
         pb::Visibility* pb_visibility = pb_entry->mutable_visibility();
