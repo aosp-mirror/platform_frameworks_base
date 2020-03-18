@@ -98,7 +98,10 @@ public class SurfaceControlViewHost {
         }
 
         /**
-         * Release the SurfaceControl associated with the SurfacePackage.
+         * Release the {@link SurfaceControl} associated with this package.
+         * It's not necessary to call this if you pass the package to
+         * {@link SurfaceView#setChildSurfacePackage} as {@link SurfaceView} will
+         * take ownership in that case.
          */
         public void release() {
             if (mSurfaceControl != null) {
@@ -230,7 +233,7 @@ public class SurfaceControlViewHost {
      * and render the object unusable.
      */
     public void release() {
-        mViewRoot.dispatchDetachedFromWindow();
+        mViewRoot.die(false /* immediate */);
         mSurfaceControl.release();
     }
 
