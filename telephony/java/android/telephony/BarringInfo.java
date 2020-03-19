@@ -62,38 +62,38 @@ public final class BarringInfo implements Parcelable {
     /* Applicabe to UTRAN */
     /** Barring indicator for circuit-switched service; applicable to UTRAN */
     public static final int BARRING_SERVICE_TYPE_CS_SERVICE =
-            android.hardware.radio.V1_5.BarringServiceType.CS_SERVICE;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.CS_SERVICE;
     /** Barring indicator for packet-switched service; applicable to UTRAN */
     public static final int BARRING_SERVICE_TYPE_PS_SERVICE =
-            android.hardware.radio.V1_5.BarringServiceType.PS_SERVICE;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.PS_SERVICE;
     /** Barring indicator for circuit-switched voice service; applicable to UTRAN */
     public static final int BARRING_SERVICE_TYPE_CS_VOICE =
-            android.hardware.radio.V1_5.BarringServiceType.CS_VOICE;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.CS_VOICE;
 
     /* Applicable to EUTRAN, NGRAN */
     /** Barring indicator for mobile-originated signalling; applicable to EUTRAN and NGRAN */
     public static final int BARRING_SERVICE_TYPE_MO_SIGNALLING =
-            android.hardware.radio.V1_5.BarringServiceType.MO_SIGNALLING;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.MO_SIGNALLING;
     /** Barring indicator for mobile-originated data traffic; applicable to EUTRAN and NGRAN */
     public static final int BARRING_SERVICE_TYPE_MO_DATA =
-            android.hardware.radio.V1_5.BarringServiceType.MO_DATA;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.MO_DATA;
     /** Barring indicator for circuit-switched fallback for voice; applicable to EUTRAN and NGRAN */
     public static final int BARRING_SERVICE_TYPE_CS_FALLBACK =
-            android.hardware.radio.V1_5.BarringServiceType.CS_FALLBACK;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.CS_FALLBACK;
     /** Barring indicator for MMTEL (IMS) voice; applicable to EUTRAN and NGRAN */
     public static final int BARRING_SERVICE_TYPE_MMTEL_VOICE =
-            android.hardware.radio.V1_5.BarringServiceType.MMTEL_VOICE;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.MMTEL_VOICE;
     /** Barring indicator for MMTEL (IMS) video; applicable to EUTRAN and NGRAN */
     public static final int BARRING_SERVICE_TYPE_MMTEL_VIDEO =
-            android.hardware.radio.V1_5.BarringServiceType.MMTEL_VIDEO;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.MMTEL_VIDEO;
 
     /* Applicable to UTRAN, EUTRAN, NGRAN */
     /** Barring indicator for emergency services; applicable to UTRAN, EUTRAN, and NGRAN */
     public static final int BARRING_SERVICE_TYPE_EMERGENCY =
-            android.hardware.radio.V1_5.BarringServiceType.EMERGENCY;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.EMERGENCY;
     /** Barring indicator for SMS sending; applicable to UTRAN, EUTRAN, and NGRAN */
     public static final int BARRING_SERVICE_TYPE_SMS =
-            android.hardware.radio.V1_5.BarringServiceType.SMS;
+            android.hardware.radio.V1_5.BarringInfo.ServiceType.SMS;
 
     //TODO: add barring constants for Operator-Specific barring codes
 
@@ -112,13 +112,14 @@ public final class BarringInfo implements Parcelable {
         public @interface BarringType {}
 
         /** Barring is inactive */
-        public static final int BARRING_TYPE_NONE = android.hardware.radio.V1_5.BarringType.NONE;
+        public static final int BARRING_TYPE_NONE =
+                android.hardware.radio.V1_5.BarringInfo.BarringType.NONE;
         /** The service is barred */
         public static final int BARRING_TYPE_UNCONDITIONAL =
-                android.hardware.radio.V1_5.BarringType.UNCONDITIONAL;
+                android.hardware.radio.V1_5.BarringInfo.BarringType.UNCONDITIONAL;
         /** The service may be barred based on additional factors */
         public static final int BARRING_TYPE_CONDITIONAL =
-                android.hardware.radio.V1_5.BarringType.CONDITIONAL;
+                android.hardware.radio.V1_5.BarringInfo.BarringType.CONDITIONAL;
 
         /** If a modem does not report barring info, then the barring type will be UNKNOWN */
         public static final int BARRING_TYPE_UNKNOWN = -1;
@@ -271,27 +272,29 @@ public final class BarringInfo implements Parcelable {
         SparseArray<BarringServiceInfo> serviceInfos = new SparseArray<>();
 
         for (android.hardware.radio.V1_5.BarringInfo halBarringInfo : halBarringInfos) {
-            if (halBarringInfo.type == android.hardware.radio.V1_5.BarringType.CONDITIONAL) {
-                if (halBarringInfo.typeSpecificInfo.getDiscriminator()
-                        != android.hardware.radio.V1_5.BarringTypeSpecificInfo
-                                .hidl_discriminator.conditionalBarringInfo) {
+            if (halBarringInfo.barringType
+                    == android.hardware.radio.V1_5.BarringInfo.BarringType.CONDITIONAL) {
+                if (halBarringInfo.barringTypeSpecificInfo.getDiscriminator()
+                        != android.hardware.radio.V1_5.BarringInfo.BarringTypeSpecificInfo
+                                .hidl_discriminator.conditional) {
                     // this is an error case where the barring info is conditional but the
                     // conditional barring fields weren't included
                     continue;
                 }
-                android.hardware.radio.V1_5.ConditionalBarringInfo conditionalInfo =
-                        halBarringInfo.typeSpecificInfo.conditionalBarringInfo();
+                android.hardware.radio.V1_5.BarringInfo.BarringTypeSpecificInfo
+                        .Conditional conditionalInfo =
+                        halBarringInfo.barringTypeSpecificInfo.conditional();
                 serviceInfos.put(
-                        halBarringInfo.service, new BarringServiceInfo(
-                                halBarringInfo.type, // will always be CONDITIONAL here
+                        halBarringInfo.serviceType, new BarringServiceInfo(
+                                halBarringInfo.barringType, // will always be CONDITIONAL here
                                 conditionalInfo.isBarred,
-                                conditionalInfo.barringFactor,
-                                conditionalInfo.barringTimeSeconds));
+                                conditionalInfo.factor,
+                                conditionalInfo.timeSeconds));
             } else {
                 // Barring type is either NONE or UNCONDITIONAL
                 serviceInfos.put(
-                        halBarringInfo.service, new BarringServiceInfo(halBarringInfo.type,
-                                false, 0, 0));
+                        halBarringInfo.serviceType, new BarringServiceInfo(
+                                halBarringInfo.barringType, false, 0, 0));
             }
         }
         return new BarringInfo(ci, serviceInfos);
