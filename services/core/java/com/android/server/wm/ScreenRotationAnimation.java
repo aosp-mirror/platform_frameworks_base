@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
 import static com.android.server.wm.AnimationSpecProto.ROTATE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
@@ -36,6 +38,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -205,8 +208,11 @@ class ScreenRotationAnimation {
             SurfaceControl.ScreenshotGraphicBuffer gb =
                     mService.mDisplayManagerInternal.screenshot(displayId);
             if (gb != null) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
+                        "ScreenRotationAnimation#getMedianBorderLuma");
                 mStartLuma = RotationAnimationUtils.getMedianBorderLuma(gb.getGraphicBuffer(),
                         gb.getColorSpace());
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 try {
                     surface.attachAndQueueBufferWithColorSpace(gb.getGraphicBuffer(),
                             gb.getColorSpace());
