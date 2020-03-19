@@ -94,7 +94,6 @@ package android {
     field public static final String INTERNAL_SYSTEM_WINDOW = "android.permission.INTERNAL_SYSTEM_WINDOW";
     field public static final String INVOKE_CARRIER_SETUP = "android.permission.INVOKE_CARRIER_SETUP";
     field public static final String KILL_UID = "android.permission.KILL_UID";
-    field public static final String LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH = "android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH";
     field public static final String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
     field public static final String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
     field public static final String LOOP_RADIO = "android.permission.LOOP_RADIO";
