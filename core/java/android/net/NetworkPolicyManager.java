@@ -31,6 +31,7 @@ import android.net.wifi.WifiInfo;
 import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
 import android.util.Pair;
 import android.util.Range;
@@ -381,5 +382,6 @@ public class NetworkPolicyManager {
         @Override public void onRestrictBackgroundChanged(boolean restrictBackground) { }
         @Override public void onUidPoliciesChanged(int uid, int uidPolicies) { }
         @Override public void onSubscriptionOverride(int subId, int overrideMask, int overrideValue) { }
+        @Override public void onSubscriptionPlansChanged(int subId, SubscriptionPlan[] plans) { }
     }
 }

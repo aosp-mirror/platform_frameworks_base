@@ -352,7 +352,6 @@ import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
-import com.android.server.pm.Installer.InstallerException;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
@@ -363,8 +362,6 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerService;
 import com.android.server.wm.WindowProcessController;
-
-import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
@@ -5203,26 +5200,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
             mCallFinishBooting = false;
-        }
-
-        ArraySet<String> completedIsas = new ArraySet<String>();
-        for (String abi : Build.SUPPORTED_ABIS) {
-            ZYGOTE_PROCESS.establishZygoteConnectionForAbi(abi);
-            final String instructionSet = VMRuntime.getInstructionSet(abi);
-            if (!completedIsas.contains(instructionSet)) {
-                try {
-                    mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi));
-                } catch (InstallerException e) {
-                    if (!VMRuntime.didPruneDalvikCache()) {
-                        // This is technically not the right filter, as different zygotes may
-                        // have made different pruning decisions. But the log is best effort,
-                        // anyways.
-                        Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
-                                e.getMessage() +")");
-                    }
-                }
-                completedIsas.add(instructionSet);
-            }
         }
 
         IntentFilter pkgFilter = new IntentFilter();

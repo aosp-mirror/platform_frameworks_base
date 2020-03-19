@@ -2571,6 +2571,12 @@
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_wifi_tcp_buffers" translatable="false">524288,1048576,2097152,262144,524288,1048576</string>
 
+    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
+         Default is carrier_config, but it should be set to modem if the modem is returning
+         predictive (instead of instantaneous) bandwidth estimate.
+         Values are carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">carrier_config</string>
+
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:
