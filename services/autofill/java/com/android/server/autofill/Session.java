@@ -311,6 +311,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     private final AssistDataReceiverImpl mAssistReceiver = new AssistDataReceiverImpl();
 
+    /**
+     * TODO(b/151867668): improve how asynchronous data dependencies are handled, without using
+     * CountDownLatch.
+     */
     private final class AssistDataReceiverImpl extends IAssistDataReceiver.Stub {
 
         @GuardedBy("mLock")
@@ -318,7 +322,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         @GuardedBy("mLock")
         private FillRequest mPendingFillRequest;
         @GuardedBy("mLock")
-        private CountDownLatch mCountDownLatch;
+        private CountDownLatch mCountDownLatch = new CountDownLatch(0);
 
         @Nullable Consumer<InlineSuggestionsRequest> newAutofillRequestLocked(
                 boolean isInlineRequest) {
@@ -327,6 +331,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mPendingInlineSuggestionsRequest = null;
             return isInlineRequest ? (inlineSuggestionsRequest) -> {
                 synchronized (mLock) {
+                    if (mCountDownLatch.getCount() == 0) {
+                        return;
+                    }
                     mPendingInlineSuggestionsRequest = inlineSuggestionsRequest;
                     mCountDownLatch.countDown();
                     maybeRequestFillLocked();
@@ -335,8 +342,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         void maybeRequestFillLocked() {
-            if (mCountDownLatch == null || mCountDownLatch.getCount() > 0
-                    || mPendingFillRequest == null) {
+            if (mCountDownLatch.getCount() > 0 || mPendingFillRequest == null) {
                 return;
             }
             if (mPendingInlineSuggestionsRequest != null) {
@@ -347,7 +353,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mRemoteFillService.onFillRequest(mPendingFillRequest);
             mPendingInlineSuggestionsRequest = null;
             mPendingFillRequest = null;
-            mCountDownLatch = null;
         }
 
         @Override
@@ -447,9 +452,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 request = new FillRequest(requestId, contexts, mClientState, flags,
                         /*inlineSuggestionsRequest=*/null);
 
-                mPendingFillRequest = request;
-                mCountDownLatch.countDown();
-                maybeRequestFillLocked();
+                if (mCountDownLatch.getCount() > 0) {
+                    mPendingFillRequest = request;
+                    mCountDownLatch.countDown();
+                    maybeRequestFillLocked();
+                } else {
+                    // TODO(b/151867668): ideally this case should not happen, but it was
+                    //  observed, we should figure out why and fix.
+                    mRemoteFillService.onFillRequest(request);
+                }
             }
 
             if (mActivityToken != null) {
