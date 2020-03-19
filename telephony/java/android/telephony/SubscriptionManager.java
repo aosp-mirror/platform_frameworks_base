@@ -2426,7 +2426,7 @@ public class SubscriptionManager {
      *            most important plan. Any additional plans are secondary and
      *            may not be displayed or used by decision making logic.
      *            The list of all plans must meet the requirements defined in
-     *            {@link SubscriptionPlan.Builder#setNetworkTypes(int[])}.
+     *            SubscriptionPlan.Builder#setNetworkTypes(int[]).
      * @throws SecurityException if the caller doesn't meet the requirements
      *             outlined above.
      * @throws IllegalArgumentException if plans don't meet the requirements
