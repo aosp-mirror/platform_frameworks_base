@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
@@ -125,6 +126,21 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
         getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
         app.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_STATUS_BAR));
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_NAVIGATION_BAR));
+    }
+
+    @Test
+    public void testStripForDispatch_multiwindow_alwaysOnTop() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+
+        getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
+        getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
+        app.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        app.setAlwaysOnTop(true);
 
         assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_STATUS_BAR));
         assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_NAVIGATION_BAR));
