@@ -92,7 +92,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
         IInstantAppResolver target = null;
         try {
             try {
-                target = getRemoteInstanceLazy(request.token);
+                target = getRemoteInstanceLazy(request.getToken());
             } catch (TimeoutException e) {
                 throw new ConnectionException(ConnectionException.FAILURE_BIND);
             } catch (InterruptedException e) {
@@ -126,7 +126,7 @@ final class InstantAppResolverConnection implements DeathRecipient {
             }
         };
         try {
-            getRemoteInstanceLazy(request.token)
+            getRemoteInstanceLazy(request.getToken())
                     .getInstantAppIntentFilterList(request, remoteCallback);
         } catch (TimeoutException e) {
             throw new ConnectionException(ConnectionException.FAILURE_BIND);
