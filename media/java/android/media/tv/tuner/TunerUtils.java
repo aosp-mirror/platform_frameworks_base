@@ -60,6 +60,7 @@ public final class TunerUtils {
      * @throws SecurityException if the caller doesn't have the permission.
      */
     public static void checkPermission(Context context, String permission) {
+        // TODO: remove checkPermission methods
         if (context.checkCallingOrSelfPermission(permission)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Caller must have " + permission + " permission.");
