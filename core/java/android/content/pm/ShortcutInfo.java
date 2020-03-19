@@ -123,6 +123,9 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_CACHED = 1 << 14;
 
     /** @hide */
+    public static final int FLAG_HAS_ICON_URI = 1 << 15;
+
+    /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_DYNAMIC,
             FLAG_PINNED,
@@ -139,6 +142,7 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_SHADOW,
             FLAG_LONG_LIVED,
             FLAG_CACHED,
+            FLAG_HAS_ICON_URI,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -401,6 +405,9 @@ public final class ShortcutInfo implements Parcelable {
     private String mIconResName;
 
     // Internal use only.
+    private String mIconUri;
+
+    // Internal use only.
     @Nullable
     private String mBitmapPath;
 
@@ -554,6 +561,7 @@ public final class ShortcutInfo implements Parcelable {
             if ((cloneFlags & CLONE_REMOVE_ICON) == 0) {
                 mIcon = source.mIcon;
                 mBitmapPath = source.mBitmapPath;
+                mIconUri = source.mIconUri;
             }
 
             mTitle = source.mTitle;
@@ -856,6 +864,7 @@ public final class ShortcutInfo implements Parcelable {
             mIconResId = 0;
             mIconResName = null;
             mBitmapPath = null;
+            mIconUri = null;
         }
         if (source.mTitle != null) {
             mTitle = source.mTitle;
@@ -916,6 +925,8 @@ public final class ShortcutInfo implements Parcelable {
             case Icon.TYPE_RESOURCE:
             case Icon.TYPE_BITMAP:
             case Icon.TYPE_ADAPTIVE_BITMAP:
+            case Icon.TYPE_URI:
+            case Icon.TYPE_URI_ADAPTIVE_BITMAP:
                 break; // OK
             default:
                 throw getInvalidIconException();
@@ -1792,6 +1803,15 @@ public final class ShortcutInfo implements Parcelable {
         return hasFlags(FLAG_HAS_ICON_RES);
     }
 
+    /**
+     * Return whether a shortcut's icon is provided via a URI.
+     *
+     * @hide internal/unit tests only
+     */
+    public boolean hasIconUri() {
+        return hasFlags(FLAG_HAS_ICON_URI);
+    }
+
     /** @hide */
     public boolean hasStringResources() {
         return (mTitleResId != 0) || (mTextResId != 0) || (mDisabledMessageResId != 0);
@@ -1909,6 +1929,19 @@ public final class ShortcutInfo implements Parcelable {
      */
     public int getIconResourceId() {
         return mIconResId;
+    }
+
+    /** @hide */
+    public void setIconUri(String iconUri) {
+        mIconUri = iconUri;
+    }
+
+    /**
+     * Get the Uri for the icon, valid only when {@link #hasIconUri()} } is true.
+     * @hide internal / tests only.
+     */
+    public String getIconUri() {
+        return mIconUri;
     }
 
     /**
@@ -2062,6 +2095,7 @@ public final class ShortcutInfo implements Parcelable {
 
         mPersons = source.readParcelableArray(cl, Person.class);
         mLocusId = source.readParcelable(cl);
+        mIconUri = source.readString();
     }
 
     @Override
@@ -2112,6 +2146,7 @@ public final class ShortcutInfo implements Parcelable {
 
         dest.writeParcelableArray(mPersons, flags);
         dest.writeParcelable(mLocusId, flags);
+        dest.writeString(mIconUri);
     }
 
     public static final @android.annotation.NonNull Creator<ShortcutInfo> CREATOR =
@@ -2202,6 +2237,12 @@ public final class ShortcutInfo implements Parcelable {
         }
         if (hasIconResource()) {
             sb.append("Ic-r");
+        }
+        if (hasIconUri()) {
+            sb.append("Ic-u");
+        }
+        if (hasAdaptiveBitmap()) {
+            sb.append("Ic-a");
         }
         if (hasKeyFieldsOnly()) {
             sb.append("Key");
@@ -2325,6 +2366,9 @@ public final class ShortcutInfo implements Parcelable {
 
             sb.append(", bitmapPath=");
             sb.append(mBitmapPath);
+
+            sb.append(", iconUri=");
+            sb.append(mIconUri);
         }
 
         if (mLocusId != null) {
@@ -2343,8 +2387,8 @@ public final class ShortcutInfo implements Parcelable {
             CharSequence disabledMessage, int disabledMessageResId, String disabledMessageResName,
             Set<String> categories, Intent[] intentsWithExtras, int rank, PersistableBundle extras,
             long lastChangedTimestamp,
-            int flags, int iconResId, String iconResName, String bitmapPath, int disabledReason,
-            Person[] persons, LocusId locusId) {
+            int flags, int iconResId, String iconResName, String bitmapPath, String iconUri,
+            int disabledReason, Person[] persons, LocusId locusId) {
         mUserId = userId;
         mId = id;
         mPackageName = packageName;
@@ -2369,6 +2413,7 @@ public final class ShortcutInfo implements Parcelable {
         mIconResId = iconResId;
         mIconResName = iconResName;
         mBitmapPath = bitmapPath;
+        mIconUri = iconUri;
         mDisabledReason = disabledReason;
         mPersons = persons;
         mLocusId = locusId;

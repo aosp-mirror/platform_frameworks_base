@@ -110,9 +110,9 @@ public final class TlvFilterConfiguration extends FilterConfiguration {
      * Builder for {@link TlvFilterConfiguration}.
      */
     public static final class Builder {
-        private int mPacketType;
-        private boolean mIsCompressedIpPacket;
-        private boolean mPassthrough;
+        private int mPacketType = PACKET_TYPE_NULL;
+        private boolean mIsCompressedIpPacket = false;
+        private boolean mPassthrough = false;
         private Settings mSettings;
 
         private Builder() {
@@ -122,6 +122,7 @@ public final class TlvFilterConfiguration extends FilterConfiguration {
          * Sets packet type.
          *
          * <p>The description of each packet type value is shown in ITU-R BT.1869 table 2.
+         * <p>Default value is {@link #PACKET_TYPE_NULL}.
          */
         @NonNull
         public Builder setPacketType(int packetType) {
@@ -130,6 +131,8 @@ public final class TlvFilterConfiguration extends FilterConfiguration {
         }
         /**
          * Sets whether the data is compressed IP packet.
+         *
+         * <p>Default value is {@code false}.
          */
         @NonNull
         public Builder setCompressedIpPacket(boolean isCompressedIpPacket) {
@@ -138,6 +141,8 @@ public final class TlvFilterConfiguration extends FilterConfiguration {
         }
         /**
          * Sets whether it's passthrough.
+         *
+         * <p>Default value is {@code false}.
          */
         @NonNull
         public Builder setPassthrough(boolean passthrough) {

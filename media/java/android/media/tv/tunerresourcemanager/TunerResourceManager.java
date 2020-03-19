@@ -17,6 +17,7 @@
 package android.media.tv.tunerresourcemanager;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -27,6 +28,8 @@ import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 
 /**
@@ -61,6 +64,24 @@ public class TunerResourceManager {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     public static final int INVALID_RESOURCE_HANDLE = -1;
+    /**
+     * Tuner resource type to help generate resource handle
+     */
+    @IntDef({
+        TUNER_RESOURCE_TYPE_FRONTEND,
+        TUNER_RESOURCE_TYPE_DEMUX,
+        TUNER_RESOURCE_TYPE_DESCRAMBLER,
+        TUNER_RESOURCE_TYPE_LNB,
+        TUNER_RESOURCE_TYPE_CAS_SESSION,
+     })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TunerResourceType {}
+
+    public static final int TUNER_RESOURCE_TYPE_FRONTEND = 0;
+    public static final int TUNER_RESOURCE_TYPE_DEMUX = 1;
+    public static final int TUNER_RESOURCE_TYPE_DESCRAMBLER = 2;
+    public static final int TUNER_RESOURCE_TYPE_LNB = 3;
+    public static final int TUNER_RESOURCE_TYPE_CAS_SESSION = 4;
 
     private final ITunerResourceManager mService;
     private final int mUserId;

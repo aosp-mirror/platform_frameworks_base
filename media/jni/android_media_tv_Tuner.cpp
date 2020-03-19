@@ -1410,6 +1410,10 @@ static sp<IDescrambler> getDescrambler(JNIEnv *env, jobject descrambler) {
     return (IDescrambler *)env->GetLongField(descrambler, gFields.descramblerContext);
 }
 
+static uint32_t getResourceIdFromHandle(jint handle) {
+    return (handle & 0x00ff0000) >> 16;
+}
+
 static DemuxPid getDemuxPid(int pidType, int pid) {
     DemuxPid demuxPid;
     if ((int)pidType == 1) {
@@ -1968,8 +1972,10 @@ static jobject android_media_tv_Tuner_get_frontend_ids(JNIEnv *env, jobject thiz
     return tuner->getFrontendIds();
 }
 
-static jobject android_media_tv_Tuner_open_frontend_by_id(JNIEnv *env, jobject thiz, jint id) {
+static jobject android_media_tv_Tuner_open_frontend_by_handle(
+        JNIEnv *env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
+    uint32_t id = getResourceIdFromHandle(handle);
     return tuner->openFrontendById(id);
 }
 
@@ -2045,8 +2051,9 @@ static jobject android_media_tv_Tuner_get_lnb_ids(JNIEnv *env, jobject thiz) {
     return tuner->getLnbIds();
 }
 
-static jobject android_media_tv_Tuner_open_lnb_by_id(JNIEnv *env, jobject thiz, jint id) {
+static jobject android_media_tv_Tuner_open_lnb_by_handle(JNIEnv *env, jobject thiz, jint handle) {
     sp<JTuner> tuner = getTuner(env, thiz);
+    uint32_t id = getResourceIdFromHandle(handle);
     return tuner->openLnbById(id);
 }
 
@@ -2924,8 +2931,8 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeSetup", "()V", (void *)android_media_tv_Tuner_native_setup },
     { "nativeGetFrontendIds", "()Ljava/util/List;",
             (void *)android_media_tv_Tuner_get_frontend_ids },
-    { "nativeOpenFrontendById", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
-            (void *)android_media_tv_Tuner_open_frontend_by_id },
+    { "nativeOpenFrontendByHandle", "(I)Landroid/media/tv/tuner/Tuner$Frontend;",
+            (void *)android_media_tv_Tuner_open_frontend_by_handle },
     { "nativeTune", "(ILandroid/media/tv/tuner/frontend/FrontendSettings;)I",
             (void *)android_media_tv_Tuner_tune },
     { "nativeStopTune", "()I", (void *)android_media_tv_Tuner_stop_tune },
@@ -2950,8 +2957,8 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_time_filter },
     { "nativeGetLnbIds", "()Ljava/util/List;",
             (void *)android_media_tv_Tuner_get_lnb_ids },
-    { "nativeOpenLnbById", "(I)Landroid/media/tv/tuner/Lnb;",
-            (void *)android_media_tv_Tuner_open_lnb_by_id },
+    { "nativeOpenLnbByHandle", "(I)Landroid/media/tv/tuner/Lnb;",
+            (void *)android_media_tv_Tuner_open_lnb_by_handle },
     { "nativeOpenLnbByName", "(Ljava/lang/String;)Landroid/media/tv/tuner/Lnb;",
             (void *)android_media_tv_Tuner_open_lnb_by_name },
     { "nativeOpenDescrambler", "()Landroid/media/tv/tuner/Descrambler;",

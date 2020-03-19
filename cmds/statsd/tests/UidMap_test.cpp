@@ -18,7 +18,7 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "hash.h"
-#include "statslog.h"
+#include "statslog_statsdtest.h"
 #include "statsd_test_util.h"
 
 #include <android/util/ProtoOutputStream.h>
@@ -49,7 +49,7 @@ const string kApp2 = "app2.sharing.1";
 //    StatsLogProcessor p(m, pullerManager, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
 //                        [](const ConfigKey& key) { return true; },
 //                        [](const int&, const vector<int64_t>&) {return true;});
-//    LogEvent addEvent(android::util::ISOLATED_UID_CHANGED, 1);
+//    LogEvent addEvent(util::ISOLATED_UID_CHANGED, 1);
 //    addEvent.write(100);  // parent UID
 //    addEvent.write(101);  // isolated UID
 //    addEvent.write(1);    // Indicates creation.
@@ -60,7 +60,7 @@ const string kApp2 = "app2.sharing.1";
 //    p.OnLogEvent(&addEvent);
 //    EXPECT_EQ(100, m->getHostUidOrSelf(101));
 //
-//    LogEvent removeEvent(android::util::ISOLATED_UID_CHANGED, 1);
+//    LogEvent removeEvent(util::ISOLATED_UID_CHANGED, 1);
 //    removeEvent.write(100);  // parent UID
 //    removeEvent.write(101);  // isolated UID
 //    removeEvent.write(0);    // Indicates removal.

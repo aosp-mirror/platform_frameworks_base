@@ -29,9 +29,9 @@ oneway interface IDataLoader {
    void create(int id, in DataLoaderParamsParcel params,
            in FileSystemControlParcel control,
            IDataLoaderStatusListener listener);
-   void start();
-   void stop();
-   void destroy();
+   void start(int id);
+   void stop(int id);
+   void destroy(int id);
 
-   void prepareImage(in InstallationFileParcel[] addedFiles, in @utf8InCpp String[] removedFiles);
+   void prepareImage(int id, in InstallationFileParcel[] addedFiles, in @utf8InCpp String[] removedFiles);
 }

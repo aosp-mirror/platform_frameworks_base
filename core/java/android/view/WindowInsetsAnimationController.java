@@ -139,10 +139,43 @@ public interface WindowInsetsAnimationController {
             @FloatRange(from = 0f, to = 1f) float fraction);
 
     /**
-     * Finishes the animation, and leaves the windows shown or hidden. After invoking
-     * {@link #finish(boolean)}, this instance is no longer valid.
+     * Finishes the animation, and leaves the windows shown or hidden.
+     * <p>
+     * After invoking {@link #finish(boolean)}, this instance is no longer {@link #isReady ready}.
+     *
      * @param shown if {@code true}, the windows will be shown after finishing the
      *              animation. Otherwise they will be hidden.
      */
     void finish(boolean shown);
+
+    /**
+     * Returns whether this instance is ready to be used to control window insets.
+     * <p>
+     * Instances are ready when passed in {@link WindowInsetsAnimationControlListener#onReady}
+     * and stop being ready when it is either {@link #isFinished() finished} or
+     * {@link #isCancelled() cancelled}.
+     *
+     * @return {@code true} if the instance is ready, {@code false} otherwise.
+     */
+    default boolean isReady() {
+        return !isFinished() && !isCancelled();
+    }
+
+    /**
+     * Returns whether this instance has been finished by a call to {@link #finish}.
+     *
+     * @see WindowInsetsAnimationControlListener#onFinished
+     * @return {@code true} if the instance is finished, {@code false} otherwise.
+     */
+    boolean isFinished();
+
+    /**
+     * Returns whether this instance has been cancelled by the system, or by invoking the
+     * {@link android.os.CancellationSignal} passed into
+     * {@link WindowInsetsController#controlWindowInsetsAnimation}.
+     *
+     * @see WindowInsetsAnimationControlListener#onCancelled
+     * @return {@code true} if the instance is cancelled, {@code false} otherwise.
+     */
+    boolean isCancelled();
 }

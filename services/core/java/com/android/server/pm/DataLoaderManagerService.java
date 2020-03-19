@@ -213,7 +213,7 @@ public class DataLoaderManagerService extends SystemService {
 
         void destroy() {
             try {
-                mDataLoader.destroy();
+                mDataLoader.destroy(mId);
             } catch (RemoteException ignored) {
             }
             mContext.unbindService(this);

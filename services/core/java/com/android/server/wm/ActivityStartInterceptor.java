@@ -178,7 +178,7 @@ class ActivityStartInterceptor {
             // before issuing the work challenge.
             return true;
         }
-        return interceptWorkProfileChallengeIfNeeded();
+        return interceptLockedManagedProfileIfNeeded();
     }
 
     private boolean hasCrossProfileAnimation() {
@@ -296,7 +296,7 @@ class ActivityStartInterceptor {
         return true;
     }
 
-    private boolean interceptWorkProfileChallengeIfNeeded() {
+    private boolean interceptLockedManagedProfileIfNeeded() {
         final Intent interceptingIntent = interceptWithConfirmCredentialsIfNeeded(mAInfo, mUserId);
         if (interceptingIntent == null) {
             return false;

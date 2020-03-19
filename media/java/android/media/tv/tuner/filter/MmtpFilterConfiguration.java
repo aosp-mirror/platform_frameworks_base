@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.TunerUtils;
 
 /**
@@ -67,7 +68,7 @@ public final class MmtpFilterConfiguration extends FilterConfiguration {
      * Builder for {@link IpFilterConfiguration}.
      */
     public static final class Builder {
-        private int mMmtpPid;
+        private int mMmtpPid = Tuner.INVALID_TS_PID;
         private Settings mSettings;
 
         private Builder() {
@@ -75,6 +76,8 @@ public final class MmtpFilterConfiguration extends FilterConfiguration {
 
         /**
          * Sets MMTP Packet ID.
+         *
+         * <p>Default value is {@link Tuner#INVALID_TS_PID}.
          */
         @NonNull
         public Builder setMmtpPacketId(int mmtpPid) {
