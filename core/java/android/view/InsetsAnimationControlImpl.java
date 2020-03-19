@@ -259,7 +259,6 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
                 false /* isScreenRound */,
                 false /* alwaysConsumeSystemBars */, null /* displayCutout */,
-                null /* legacyContentInsets */, null /* legacyStableInsets */,
                 LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
                 0 /* legacySystemUiFlags */, typeSideMap)
                .getInsets(mTypes);

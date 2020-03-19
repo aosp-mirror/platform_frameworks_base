@@ -80,6 +80,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -28746,7 +28747,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * content of the window.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
         final Rect mContentInsets = new Rect();
 
         /**
@@ -28754,7 +28756,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * actual visible parts of the window.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
         final Rect mVisibleInsets = new Rect();
 
         /**
@@ -28762,7 +28765,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * stable system windows.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
         final Rect mStableInsets = new Rect();
 
         final DisplayCutout.ParcelableWrapper mDisplayCutout =

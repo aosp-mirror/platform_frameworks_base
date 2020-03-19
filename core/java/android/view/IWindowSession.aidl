@@ -318,8 +318,7 @@ interface IWindowSession {
      * Called when the client has changed the local insets state, and now the server should reflect
      * that new state.
      */
-    void insetsModified(IWindow window, in InsetsState state);
-
+    oneway void insetsModified(IWindow window, in InsetsState state);
 
     /**
      * Called when the system gesture exclusion has changed.
