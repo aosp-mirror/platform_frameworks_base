@@ -130,12 +130,12 @@ private:
 /**
  * Section that calls text dumpsys on a system service, usually "dumpsys [service_name]".
  */
-class TextDumpsysSection : public WorkerThreadSection {
+class TextDumpsysSection : public Section {
 public:
     TextDumpsysSection(int id, const char* service, ...);
     virtual ~TextDumpsysSection();
 
-    virtual status_t BlockingCall(unique_fd& pipeWriteFd) const;
+    virtual status_t Execute(ReportWriter* writer) const;
 
 private:
     String16 mService;
