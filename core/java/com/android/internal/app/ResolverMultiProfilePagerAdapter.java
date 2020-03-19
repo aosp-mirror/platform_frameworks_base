@@ -167,7 +167,7 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
             View.OnClickListener listener) {
         showEmptyState(activeListAdapter,
                 R.drawable.ic_work_apps_off,
-                R.string.resolver_turn_on_work_apps_view,
+                R.string.resolver_turn_on_work_apps,
                 /* subtitleRes */ 0,
                 listener);
     }
@@ -186,6 +186,22 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
                 R.drawable.ic_sharing_disabled,
                 R.string.resolver_cant_access_personal_apps,
                 R.string.resolver_cant_access_personal_apps_explanation);
+    }
+
+    @Override
+    protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
+        showEmptyState(listAdapter,
+                R.drawable.ic_no_apps,
+                R.string.resolver_no_personal_apps_available_resolve,
+                /* subtitleRes */ 0);
+    }
+
+    @Override
+    protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
+        showEmptyState(listAdapter,
+                R.drawable.ic_no_apps,
+                R.string.resolver_no_work_apps_available_resolve,
+                /* subtitleRes */ 0);
     }
 
     class ResolverProfileDescriptor extends ProfileDescriptor {
