@@ -641,21 +641,21 @@ public class Tethering {
                 mEthernetIfaceRequest = em.requestTetheredInterface(mExecutor, mEthernetCallback);
             } else {
                 stopEthernetTetheringLocked();
-                if (mEthernetCallback != null) {
-                    mEthernetIfaceRequest.release();
-                    mEthernetCallback = null;
-                    mEthernetIfaceRequest = null;
-                }
             }
         }
         return TETHER_ERROR_NO_ERROR;
     }
 
     private void stopEthernetTetheringLocked() {
-        if (mConfiguredEthernetIface == null) return;
-        changeInterfaceState(mConfiguredEthernetIface, IpServer.STATE_AVAILABLE);
-        stopTrackingInterfaceLocked(mConfiguredEthernetIface);
-        mConfiguredEthernetIface = null;
+        if (mConfiguredEthernetIface != null) {
+            stopTrackingInterfaceLocked(mConfiguredEthernetIface);
+            mConfiguredEthernetIface = null;
+        }
+        if (mEthernetCallback != null) {
+            mEthernetIfaceRequest.release();
+            mEthernetCallback = null;
+            mEthernetIfaceRequest = null;
+        }
     }
 
     private class EthernetCallback implements EthernetManager.TetheredInterfaceCallback {
