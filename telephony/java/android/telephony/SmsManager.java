@@ -642,7 +642,7 @@ public final class SmsManager {
                         ISms iSms = getISmsServiceOrThrow();
                         if (iSms != null) {
                             iSms.sendTextForSubscriberWithOptions(subId,
-                                    null, destinationAddress,
+                                    null, null, destinationAddress,
                                     scAddress,
                                     text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                                     expectMore, finalValidity);
@@ -664,7 +664,7 @@ public final class SmsManager {
                 ISms iSms = getISmsServiceOrThrow();
                 if (iSms != null) {
                     iSms.sendTextForSubscriberWithOptions(getSubscriptionId(),
-                            null, destinationAddress,
+                            null, null, destinationAddress,
                             scAddress,
                             text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                             expectMore, finalValidity);
