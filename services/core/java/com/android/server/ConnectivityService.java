@@ -5400,6 +5400,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType,
             @NonNull String callingPackageName) {
+        if (legacyType != TYPE_NONE && !checkNetworkStackPermission()) {
+            throw new SecurityException("Insufficient permissions to specify legacy type");
+        }
         final int callingUid = Binder.getCallingUid();
         final NetworkRequest.Type type = (networkCapabilities == null)
                 ? NetworkRequest.Type.TRACK_DEFAULT
