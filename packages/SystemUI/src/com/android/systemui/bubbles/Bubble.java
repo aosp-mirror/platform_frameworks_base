@@ -216,11 +216,20 @@ class Bubble implements BubbleViewProvider {
         return mInflated;
     }
 
+    void stopInflation() {
+        if (mInflationTask == null) {
+            return;
+        }
+        mInflationTask.cancel(/* mayInterruptIfRunning */ true);
+        mIconView = null;
+        mExpandedView = null;
+        mInflated = false;
+    }
+
     void setViewInfo(BubbleViewInfoTask.BubbleViewInfo info) {
         if (!isInflated()) {
             mIconView = info.imageView;
             mExpandedView = info.expandedView;
-            mInflated = true;
         }
 
         mShortcutInfo = info.shortcutInfo;
@@ -231,8 +240,15 @@ class Bubble implements BubbleViewProvider {
         mDotColor = info.dotColor;
         mDotPath = info.dotPath;
 
-        mExpandedView.update(this);
-        mIconView.update(this);
+        if (mExpandedView != null && mIconView != null) {
+            mInflated = true;
+        }
+        if (mExpandedView != null) {
+            mExpandedView.update(/* bubble */ this);
+        }
+        if (mIconView != null) {
+            mIconView.update(/* bubble */ this);
+        }
     }
 
     void setInflated(boolean inflated) {
