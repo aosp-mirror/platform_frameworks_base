@@ -1713,7 +1713,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (checkSettingsPermission(callerPid, callerUid)) {
-            return lp.makeSensitiveFieldsParcelingCopy();
+            return new LinkProperties(lp, true /* parcelSensitiveFields */);
         }
 
         final LinkProperties newLp = new LinkProperties(lp);
