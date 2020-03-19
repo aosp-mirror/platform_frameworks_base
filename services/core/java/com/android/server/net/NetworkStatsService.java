@@ -27,6 +27,8 @@ import static android.content.Intent.EXTRA_UID;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
+import static android.net.NetworkIdentity.COMBINE_SUBTYPE_ENABLED;
+import static android.net.NetworkIdentity.SUBTYPE_COMBINED;
 import static android.net.NetworkStack.checkNetworkStackPermission;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
@@ -45,6 +47,7 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
+import static android.net.NetworkTemplate.getCollapsedRatType;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.os.Trace.TRACE_TAG_NETWORK;
@@ -64,6 +67,9 @@ import static android.provider.Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_DELETE_AGE;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE;
+import static android.telephony.PhoneStateListener.LISTEN_NONE;
+import static android.telephony.PhoneStateListener.LISTEN_SERVICE_STATE;
+import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -109,6 +115,7 @@ import android.os.Binder;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -125,6 +132,8 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
+import android.telephony.PhoneStateListener;
+import android.telephony.ServiceState;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
@@ -157,6 +166,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -173,6 +183,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int MSG_PERFORM_POLL = 1;
     // Perform polling, persist network, and register the global alert again.
     private static final int MSG_PERFORM_POLL_REGISTER_ALERT = 2;
+    private static final int MSG_UPDATE_IFACES = 3;
 
     /** Flags to control detail level of poll event. */
     private static final int FLAG_PERSIST_NETWORK = 0x1;
@@ -280,6 +291,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @GuardedBy("mStatsLock")
     private Network[] mDefaultNetworks = new Network[0];
 
+    /** Last states of all networks sent from ConnectivityService. */
+    @GuardedBy("mStatsLock")
+    @Nullable
+    private NetworkState[] mLastNetworkStates = null;
+
     private final DropBoxNonMonotonicObserver mNonMonotonicObserver =
             new DropBoxNonMonotonicObserver();
 
@@ -355,6 +371,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     performPoll(FLAG_PERSIST_ALL);
                     break;
                 }
+                case MSG_UPDATE_IFACES: {
+                    // If no cached states, ignore.
+                    if (mLastNetworkStates == null) break;
+                    updateIfaces(mDefaultNetworks, mLastNetworkStates, mActiveIface);
+                    break;
+                }
                 case MSG_PERFORM_POLL_REGISTER_ALERT: {
                     performPoll(FLAG_PERSIST_NETWORK);
                     registerGlobalAlert();
@@ -407,6 +429,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final HandlerThread handlerThread = mDeps.makeHandlerThread();
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
+        mPhoneListener = new NetworkTypeListener(new HandlerExecutor(mHandler));
     }
 
     /**
@@ -486,6 +509,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
                 mSettings.getPollInterval(), pollIntent);
 
+        // TODO: listen to changes from all subscriptions.
+        // watch for networkType changes
+        if (!COMBINE_SUBTYPE_ENABLED) {
+            mTeleManager.listen(mPhoneListener, LISTEN_SERVICE_STATE);
+        }
+
         registerGlobalAlert();
     }
 
@@ -505,6 +534,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.unregisterReceiver(mRemovedReceiver);
         mContext.unregisterReceiver(mUserReceiver);
         mContext.unregisterReceiver(mShutdownReceiver);
+
+        if (!COMBINE_SUBTYPE_ENABLED) {
+            mTeleManager.listen(mPhoneListener, LISTEN_NONE);
+        }
 
         final long currentTime = mClock.millis();
 
@@ -1156,6 +1189,38 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     };
 
+    /**
+     * Receiver that watches for {@link TelephonyManager} changes, such as
+     * transitioning between Radio Access Technology(RAT) types.
+     */
+    @NonNull
+    private final NetworkTypeListener mPhoneListener;
+
+    class NetworkTypeListener extends PhoneStateListener {
+        private volatile int mLastCollapsedRatType = NETWORK_TYPE_UNKNOWN;
+
+        NetworkTypeListener(@NonNull Executor executor) {
+            super(executor);
+        }
+
+        @Override
+        public void onServiceStateChanged(@NonNull ServiceState ss) {
+            final int networkType = ss.getDataNetworkType();
+            final int collapsedRatType = getCollapsedRatType(networkType);
+            if (collapsedRatType == mLastCollapsedRatType) return;
+
+            if (LOGV) {
+                Log.d(TAG, "subtype changed for mobile: "
+                        + mLastCollapsedRatType + " -> " + collapsedRatType);
+            }
+            // Protect service from frequently updating. Remove pending messages if any.
+            mHandler.removeMessages(MSG_UPDATE_IFACES);
+            mLastCollapsedRatType = collapsedRatType;
+            mHandler.sendMessageDelayed(
+                    mHandler.obtainMessage(MSG_UPDATE_IFACES), SECOND_IN_MILLIS);
+        }
+    }
+
     private void updateIfaces(
             Network[] defaultNetworks,
             NetworkState[] networkStates,
@@ -1177,7 +1242,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * they are combined under a single {@link NetworkIdentitySet}.
      */
     @GuardedBy("mStatsLock")
-    private void updateIfacesLocked(Network[] defaultNetworks, NetworkState[] states) {
+    private void updateIfacesLocked(@Nullable Network[] defaultNetworks,
+            @NonNull NetworkState[] states) {
         if (!mSystemReady) return;
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
 
@@ -1197,13 +1263,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mDefaultNetworks = defaultNetworks;
         }
 
+        mLastNetworkStates = states;
+
         final ArraySet<String> mobileIfaces = new ArraySet<>();
         for (NetworkState state : states) {
             if (state.networkInfo.isConnected()) {
                 final boolean isMobile = isNetworkTypeMobile(state.networkInfo.getType());
                 final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, state.network);
+                final int subType = getSubTypeForState(state);
                 final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
-                        isDefault);
+                        isDefault, subType);
 
                 // Traffic occurring on the base interface is always counted for
                 // both total usage and UID details.
@@ -1262,6 +1331,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         mMobileIfaces = mobileIfaces.toArray(new String[mobileIfaces.size()]);
+    }
+
+    /**
+     * If combine subtype is not enabled. For networks with {@code TRANSPORT_CELLULAR}, get
+     * subType that obtained through {@link PhoneStateListener}. Otherwise, return 0 given that
+     * other networks with different transport types do not actually fill this value.
+     */
+    private int getSubTypeForState(@NonNull NetworkState state) {
+        if (COMBINE_SUBTYPE_ENABLED) return SUBTYPE_COMBINED;
+
+        if (!state.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            return 0;
+        }
+
+        // TODO: return different subType for different subscriptions.
+        return mPhoneListener.mLastCollapsedRatType;
     }
 
     private static <K> NetworkIdentitySet findOrCreateNetworkIdentitySet(
