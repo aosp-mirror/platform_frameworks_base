@@ -71,6 +71,7 @@ import com.android.systemui.tests.R;
 import org.mockito.ArgumentCaptor;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -121,7 +122,8 @@ public class NotificationTestHelper {
                 mock(NotificationRemoteInputManager.class),
                 () -> mock(SmartReplyConstants.class),
                 () -> mock(SmartReplyController.class),
-                mock(ConversationNotificationProcessor.class));
+                mock(ConversationNotificationProcessor.class),
+                mock(Executor.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),
