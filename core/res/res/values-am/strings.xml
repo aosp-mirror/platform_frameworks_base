@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ይህ መተግበሪያ በማናቸውም ጊዜ ካሜራውን በመጠቀም ፎቶ ሊያነሳ እና ቪዲዮዎችን ሊቀርጽ ይችላል።"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ሥዕሎችን ለማንሣት እና ቪዲዮዎችን ለመቅረጽ እንዲችሉ ወደ ሥርዓት ካሜራዎች ለመተግበሪያ ወይም ለአገልግሎት መዳረሻ ይፍቀዱ"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ይህ ልዩ ፈቃድ ያለው | የሥርዓት መተግበሪያ በማናቸውም ጊዜ የሥርዓት ካሜራን በመጠቀም ሥዕሎችን ማንሣት እና ቪዲዮ መቅረጽ ይችላል። የ android.ፈቃድን ይጠይቃል። ካሜራ ፍቃድ በመተግበሪያውም ጭምር መያዝ ይኖርበታል"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"አንድ መተግበሪያ ወይም አገልግሎት እየተከፈቱ ወይም እየተዘጉ ስላሉ የካሜራ መሣሪያዎች መልሶ ጥሪዎችን እንዲቀበል ይፍቀዱ።"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ነዛሪ ተቆጣጠር"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"መተግበሪያው የንዝረት ሁኔታውን እንዲደርስ ያስችለዋል።"</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"መተግበሪያው የጥሪ ተሞክሮን እንዲያሻሽል ጥሪዎቹን በስርዓቱ በኩል እንዲያዞር ያስችለዋል።"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"በሥርዓቱ በኩል ጥሪዎችን ይመልከቱ እና ይቆጣጠሩ።"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"መተግበሪያው በመሣሪያው ላይ በመካሄድ ላይ ያሉ ጥሪዎችን እንዲመለከት እና እንዲቆጣጠር ይፈቅድለታል። ይህ ለጥሪዎች እንደ የጥሪ ቁጥሮች እና የጥሪዎች ሁኔታ የመሰለ መረጃን ያካትታል።"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ከኦዲዮ ቅጂ ገደቦች ያስወጡት"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"ኦዲዮን ለመቅዳት መተግበሪያውን ከገደቦች ያስወጡት።"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"በሌላ መተግበሪያ የተጀመረ ጥሪን መቀጠል"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"መተግበሪያው በሌላ መተግበሪያ ውስጥ የተጀመረ ጥሪ እንዲቀጥል ያስችለዋል።"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ስልክ ቁጥሮች ያንብቡ"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"ሰርዝ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ግቤት ስልት"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"የፅሁፍ እርምጃዎች"</string>
-    <string name="email" msgid="2503484245190492693">"ኢሜይል"</string>
-    <string name="email_desc" msgid="8291893932252173537">"ለተመረጡ አድራሻዎች ኢሜይል ላክ"</string>
-    <string name="dial" msgid="4954567785798679706">"ጥሪ"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"ወደ ተመረጠው ስልክ ቁጥር ደውል"</string>
-    <string name="map" msgid="6865483125449986339">"ካርታ"</string>
-    <string name="map_desc" msgid="1068169741300922557">"የተመረጠውን አድራሻ ያለበትን አግኝ"</string>
-    <string name="browse" msgid="8692753594669717779">"ክፈት"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"የተመረጠውን ዩአርኤል ክፈት"</string>
-    <string name="sms" msgid="3976991545867187342">"መልዕክት"</string>
-    <string name="sms_desc" msgid="997349906607675955">"ለተመረጠው ስልክ ቁጥር መልዕክት ላክ"</string>
-    <string name="add_contact" msgid="7404694650594333573">"አክል"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"ወደ እውቂያዎች ያክሉ"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"ይመልከቱ"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"የተመረጠውን ሰዓት በቀን መቁጠሪያ ውስጥ ይመልከቱ"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"መርሐግብር"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"ለተመረጠው ጊዜ የክስተት መርሐግብር ያስይዙ"</string>
-    <string name="view_flight" msgid="2042802613849690108">"ተከታተል"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"የተመረጠውን በረራ ይከታተሉ"</string>
-    <string name="translate" msgid="1416909787202727524">"ተርጉም"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"የተመረጠ ጽሑፍን ተርጉም"</string>
-    <string name="define" msgid="5214255850068764195">"ግለጽ"</string>
-    <string name="define_desc" msgid="6916651934713282645">"የተመረጠ ጽሑፍን ግለጽ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"የማከማቻ ቦታ እያለቀ ነው"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"አንዳንድ የስርዓት ተግባራት ላይሰሩ ይችላሉ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ለስርዓቱ የሚሆን በቂ ቦታ የለም። 250 ሜባ ነጻ ቦታ እንዳለዎት ያረጋግጡና ዳግም ያስጀምሩ።"</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"የተንቀሳቃሽ ስልክ አውታረ መረብ የበይነመረብ መዳረሻ የለውም"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"አውታረ መረብ የበይነመረብ መዳረሻ የለውም"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"የግል ዲኤንኤስ አገልጋይ ሊደረስበት አይችልም"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"ተገናኝቷል"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> የተገደበ ግንኙነት አለው"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ለማንኛውም ለማገናኘት መታ ያድርጉ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"ወደ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ተቀይሯል"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ድምጹ ከሚመከረው መጠን በላይ ከፍ ይበል?\n\nበከፍተኛ ድምጽ ለረጅም ጊዜ ማዳመጥ ጆሮዎን ሊጎዳው ይችላል።"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"የተደራሽነት አቋራጭ ጥቅም ላይ ይዋል?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"አቋራጩ ሲበራ ሁለቱንም የድምጽ አዝራሮች ለ3 ሰከንዶች ተጭኖ መቆየት የተደራሽነት ባህሪን ያስጀምረዋል።"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> ሙሉ የመሣሪያዎ ቁጥጥር እንዲኖረው ይፈቀድለት?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g>ን ካበሩት መሳሪያዎ የውሂብ ምስጠራን ለማላቅ የማያ ገጽ መቆለፊያዎን አይጠቀምም።"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ሙሉ ቁጥጥር ከተደራሽነት ፍላጎቶች ጋር እርስዎን ለሚያግዝዎት መተግበሪያዎች ተገቢ ነው ሆኖም ግን ለአብዛኛዎቹ መተግበሪያዎች አይሆንም።"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ማያ ገጽን ይመልከቱ እና ይቆጣጠሩ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"በማያ ገጹ ላይ ሁሉንም ይዘት ሊያነብ እና በሌሎች መተግበሪያዎች ላይ ይዘትን ሊያሳይ ይችላል።"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ይመልከቱ እና እርምጃዎችን ይውሰዱ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ከመተግበሪያ ጋር ወይም የሃርድዌር ዳሳሽ ጋር እርስዎ ያልዎትን መስተጋብሮች ዱካ መከታተል እና በእርስዎ ምትክ ከመተግበሪያዎች ጋር መስተጋብር መፈጸም ይችላል።"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ፍቀድ"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ከልክል"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"አንድ ባህሪን መጠቀም ለመጀመር መታ ያድርጉት፦"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"በተደራሽነት አዝራር የሚጠቀሙባቸው መተግበሪያዎች ይምረጡ"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"በድምፅ ቁልፍ አቋራጭ የሚጠቀሙባቸው መተግበሪያዎች ይምረጡ"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ጠፍቷል"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"አቋራጮችን አርትዕ ያድርጉ"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ይቅር"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ተከናውኗል"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"አቋራጩን አጥፋ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"አቋራጭ ይጠቀሙ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ተቃራኒ ቀለም"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"የተደራሽነት ምናሌ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> የሥዕል ገላጭ ጽሑፍ አሞሌ።"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ወደ የRESTRICTED ባልዲ ተከትቷል"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>፦"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ውይይት"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"የቡድን ውይይት"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"የግል"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ሥራ"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"የግል እይታ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"የስራ እይታ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"በሥራ መተግበሪያዎች ማጋራት አይቻልም"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"በግል መተግበሪያዎች ማጋራት አይቻልም"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"የእርስዎ አይቲ አስተዳዳሪ በግል እና በሥራ መገለጫዎች መካከል ማጋራትን አግደዋል"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"የሥራ መተግበሪያዎችን መድረስ አልተቻለም"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"የእርስዎ የአይቲ አስተዳዳሪ የግል ይዘትን በስራ መተግበሪያዎች ውስጥ እንዲመለከቱ አልፈቀዱልዎትም"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"የግል መተግበሪያዎችን መድረስ አይቻልም"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"የእርስዎ የአይቲ አስተዳዳሪ የሥራ ይዘትን በግል መተግበሪያዎች ውስጥ እንዲመለከቱ አልፈቀዱልዎትም"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"ይዘትን ለማጋራት የስራ መገለጫን ያብሩ"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"ይዘትን ለመመልከት የስራ መገለጫን ያብሩ"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ምንም መተግበሪያዎች አይገኙም"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"አብራ"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"በስልክ ጥሪዎች ላይ ኦዲዮን መቅዳት ወይም ማጫወት"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ይህ መተግበሪያ እንደ ነባሪ የመደወያ መተግበሪያ ሲመደብ በስልክ ጥሪዎች ላይ ኦዲዮን እንዲቀዳ ወይም እንዲያጫውት ያስችለዋል።"</string>
 </resources>

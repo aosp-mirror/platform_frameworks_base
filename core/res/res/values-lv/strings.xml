@@ -438,6 +438,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Šī lietotne jebkurā brīdī var uzņemt attēlus un ierakstīt videoklipus, izmantojot kameru."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Atļauja lietojumprogrammai vai pakalpojumam piekļūt sistēmas kamerām, lai uzņemtu attēlus un videoklipus"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Šī privileģētā/sistēmas lietotne var jebkurā brīdī uzņemt attēlus un ierakstīt videoklipus, izmantojot sistēmas kamerus. Lietotnei nepieciešama arī atļauja android.permission.CAMERA."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Atļaut lietojumprogrammai vai pakalpojumam saņemt atzvanus par kameras ierīču atvēršanu vai aizvēršanu"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolēt vibrosignālu"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ļauj lietotnei kontrolēt vibrosignālu."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ļauj lietotnei piekļūt vibrosignāla statusam."</string>
@@ -451,6 +454,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Ļauj lietotnei maršrutēt tās zvanus sistēmā, lai uzlabotu zvanīšanas pieredzi."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"skatīt un kontrolēt zvanus sistēmā."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Ļauj lietotnei ierīcē skatīt un kontrolēt aktīvos zvanus. Šeit ir ietverta tāda informācija kā zvanu tālruņa numuri un zvanu statuss."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"atbrīvošana no audio ierakstīšanas ierobežojumiem"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Atbrīvot lietotni no audio ierakstīšanas ierobežojumiem."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"turpināt zvanu no citas lietotnes"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Ļauj lietotnei turpināt zvanu, kas tika sākts citā lietotnē."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lasīt tālruņa numurus"</string>
@@ -1119,28 +1124,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Dzēst"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Ievades metode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Teksta darbības"</string>
-    <string name="email" msgid="2503484245190492693">"E-pasts"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Nosūtīt e-pasta ziņojumu uz atlasīto adresi"</string>
-    <string name="dial" msgid="4954567785798679706">"Zvans"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Zvanīt uz atlasīto tālruņa numuru"</string>
-    <string name="map" msgid="6865483125449986339">"Karte"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Atrast atlasīto adresi"</string>
-    <string name="browse" msgid="8692753594669717779">"Atvērt"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Atvērt atlasīto URL"</string>
-    <string name="sms" msgid="3976991545867187342">"Īsziņa"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Nosūtīt īsziņu uz atlasīto tālruņa numuru"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Pievienot"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Pievienot kontaktpersonām"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Skatīt"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Skatīt atlasīto laiku kalendārā"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Grafiks"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Ieplānot pasākumu konkrētā laikā"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Izsekot"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Izsekot atlasīto lidojumu"</string>
-    <string name="translate" msgid="1416909787202727524">"Tulkot"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Tulkot atlasīto tekstu"</string>
-    <string name="define" msgid="5214255850068764195">"Definēt"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Definēt atlasīto tekstu"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Paliek maz brīvas vietas"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Dažas sistēmas funkcijas var nedarboties."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sistēmai pietrūkst vietas. Atbrīvojiet vismaz 250 MB vietas un restartējiet ierīci."</string>
@@ -1279,7 +1262,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilajā tīklā nav piekļuves internetam."</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Tīklā nav piekļuves internetam."</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Nevar piekļūt privātam DNS serverim."</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Izveidots savienojums"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"Tīklā <xliff:g id="NETWORK_SSID">%1$s</xliff:g> ir ierobežota savienojamība"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Lai tik un tā izveidotu savienojumu, pieskarieties"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Pārslēdzās uz tīklu <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1653,14 +1635,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vai palielināt skaļumu virs ieteicamā līmeņa?\n\nIlgstoši klausoties skaņu lielā skaļumā, var tikt bojāta dzirde."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vai izmantot pieejamības saīsni?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kad īsinājumtaustiņš ir ieslēgts, nospiežot abas skaļuma pogas un 3 sekundes turot tās, tiks aktivizēta pieejamības funkcija."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vai atļaut pakalpojumam <xliff:g id="SERVICE">%1$s</xliff:g> pilnībā kontrolēt jūsu ierīci?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ja ieslēgsiet pakalpojumu <xliff:g id="SERVICE">%1$s</xliff:g>, ierīce neizmantos ekrāna bloķēšanu datu šifrēšanas uzlabošanai."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pilnīga kontrole ir piemērota lietotnēm, kas nepieciešamas lietotājiem ar īpašām vajadzībām, taču ne lielākajai daļai lietotņu."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skatīt un pārvaldīt ekrānu"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Tā var nolasīt visu ekrānā esošo saturu un attēlot saturu citām lietotnēm."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Darbību skatīšana un veikšana"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tā var izsekot jūsu mijiedarbību ar lietotni vai aparatūras sensoru un mijiedarboties ar lietotnēm jūsu vārdā."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Atļaut"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Neatļaut"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Pieskarieties funkcijai, lai sāktu to izmantot"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Izvēlieties lietotnes, ko izmantot ar pieejamības pogu"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Izvēlieties lietotnes, ko izmantot ar skaļuma pogu īsinājumtaustiņu"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Pakalpojums <xliff:g id="SERVICE_NAME">%s</xliff:g> ir izslēgts."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediģēt īsinājumtaustiņus"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Atcelt"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gatavs"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Izslēgt saīsni"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Izmantot saīsni"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Krāsu inversija"</string>
@@ -2065,31 +2054,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Pieejamības izvēlne"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> subtitru josla."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Pakotne “<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>” ir ievietota ierobežotā kopā."</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Saruna"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Grupas saruna"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Privātais profils"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Darba profils"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personisks skats"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Darba skats"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Nevar kopīgot ar darba lietotnēm"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Nevar kopīgot ar personīgajām lietotnēm"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"IT administrators bloķēja datu kopīgošanu starp personīgo un darba profilu."</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Nevar piekļūt darba lietotnēm"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"IT administrators neļauj skatīt personisko saturu darba lietotnēs."</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Nevar piekļūt personīgajām lietotnēm"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"IT administrators neļauj skatīt darba saturu personīgajās lietotnēs."</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Ieslēdziet darba profilu, lai kopīgotu saturu."</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Ieslēdziet darba profilu, lai skatītu saturu."</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Nav pieejamu lietotņu"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Ieslēgt"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Ierakstīt vai atskaņot audio tālruņa sarunās"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Ļauj šai lietotnei ierakstīt vai atskaņot audio tālruņa sarunās, kad tā ir iestatīta kā noklusējuma tālruņa lietojumprogramma."</string>
 </resources>

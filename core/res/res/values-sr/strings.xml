@@ -438,6 +438,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Ова апликација може да снима фотографије и видео снимке помоћу камере у било ком тренутку."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Дозволите некој апликацији или услузи да приступа камерама система да би снимала слике и видео снимке"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Ова привилегована | системска апликација може да снима слике и видео снимке помоћу камере система у било ком тренутку. Апликација треба да има и дозволу android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Дозволите апликацији или услузи да добија повратне позиве о отварању или затварању уређаја са камером."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"контрола вибрације"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дозвољава апликацији да приступа стању вибрирања."</string>
@@ -451,6 +454,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дозвољава апликацији да преусмерава позиве преко система да би побољшала доживљај позивања."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"преглед и контрола позива преко система."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Дозвољава апликацији да прегледа и контролише тренутне позиве на уређају. То обухвата информације попут бројева телефона и статуса позива."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"изузимање из ограничења за снимање звука"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Изузмите апликацију из ограничења за снимање звука."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"настави позив у другој апликацији"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Дозвољава апликацији да настави позив који је започет у другој апликацији."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"читање бројева телефона"</string>
@@ -1119,28 +1124,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Избриши"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Метод уноса"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Радње у вези са текстом"</string>
-    <string name="email" msgid="2503484245190492693">"Пошаљи имејл"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Пошаљите имејл на изабрану адресу"</string>
-    <string name="dial" msgid="4954567785798679706">"Позови"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Позовите изабрани број телефона"</string>
-    <string name="map" msgid="6865483125449986339">"Прикажи на мапи"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Пронађите изабрану адресу"</string>
-    <string name="browse" msgid="8692753594669717779">"Отвори"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Отворите изабрани URL"</string>
-    <string name="sms" msgid="3976991545867187342">"Пошаљи SMS"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Пошаљите SMS на изабрани број телефона"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Додај"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Додајте у контакте"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Прикажи"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Погледајте изабрано време у календару"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Закажи"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Закажите догађај у изабрано време"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Прати"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Пратите изабрани лет"</string>
-    <string name="translate" msgid="1416909787202727524">"Преведи"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Преведите изабрани текст"</string>
-    <string name="define" msgid="5214255850068764195">"Дефиниши"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Дефинишите изабрани текст"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Меморијски простор је на измаку"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Неке системске функције можда не функционишу"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Нема довољно меморијског простора за систем. Уверите се да имате 250 MB слободног простора и поново покрените."</string>
@@ -1279,7 +1262,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобилна мрежа нема приступ интернету"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Мрежа нема приступ интернету"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Приступ приватном DNS серверу није успео"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Повезано је"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> има ограничену везу"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Додирните да бисте се ипак повезали"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Прешли сте на тип мреже <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1653,14 +1635,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Желите да појачате звук изнад препорученог нивоа?\n\nСлушање гласне музике дуже време може да вам оштети слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Желите ли да користите пречицу за приступачност?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Када је пречица укључена, притисните оба дугмета за јачину звука да бисте покренули функцију приступачности."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Желите ли да дозволите да услуга <xliff:g id="SERVICE">%1$s</xliff:g> има потпуну контролу над уређајем?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Ако укључите услугу <xliff:g id="SERVICE">%1$s</xliff:g>, уређај неће користити закључавање екрана да би побољшао шифровање података."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Потпуна контрола је примерена за апликације које вам помажу код услуга приступачности, али не и за већину апликација."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Прегледај и контролиши екран"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да чита сав садржај на екрану и приказује га у другим апликацијама."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Прегледај и обављај радње"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да прати интеракције са апликацијом или сензором хардвера и користи апликације уместо вас."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Додирните неку функцију да бисте почели да је користите:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Одаберите апликације које ћете користити са дугметом Приступачност"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Одаберите апликације које ћете користити са тастером јачине звука као пречицом"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Услуга <xliff:g id="SERVICE_NAME">%s</xliff:g> је искључена"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Измените пречице"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Откажи"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Готово"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Искључи пречицу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Користи пречицу"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Инверзија боја"</string>
@@ -2065,31 +2054,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Мени Приступачност"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Трака са насловима апликације <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Пакет <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> је додат у сегмент ОГРАНИЧЕНО"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Конверзација"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Групна конверзација"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Лични"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Пословни"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Лични приказ"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Приказ за посао"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Не можете да делите садржај са апликацијама за посао"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Не можете да делите садржај са личним апликацијама"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"ИТ администратор је блокирао дељење између личних апликација и профила за Work"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Приступ апликацијама за посао није могућ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"ИТ администратор вам не дозвољава да у апликацијама за посао прегледате лични садржај"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Приступ личним апликацијама није могућ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"ИТ администратор вам не дозвољава да у личним апликацијама прегледате садржај за посао"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Укључите профил за Work да бисте делили садржај"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Укључите профил за Work да бисте прегледали садржај"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Нема доступних апликација"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Укључи"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Снимање или пуштање звука у телефонским позивима"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Омогућава овој апликацији, када је додељена као подразумевана апликација за позивање, да снима или пушта звук у телефонским позивима."</string>
 </resources>

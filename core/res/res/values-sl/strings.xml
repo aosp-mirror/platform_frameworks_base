@@ -441,6 +441,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Ta aplikacija lahko poljubno uporablja fotoaparat za snemanje fotografij ali videoposnetkov."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Aplikaciji ali storitvi dovoli dostop do vgrajenih fotoaparatov za snemanje fotografij in videoposnetkov"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Ta odobrena/sistemska aplikacija lahko z vgrajenim fotoaparatom kadar koli snema fotografije in videoposnetke. Aplikacija mora imeti omogočeno tudi dovoljenje android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Aplikaciji ali storitvi dovoli prejemanje povratnih klicev o odpiranju ali zapiranju naprav s fotoaparati."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"nadzor vibriranja"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Aplikaciji omogoča nadzor vibriranja."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Aplikaciji dovoljuje dostop do stanja vibriranja."</string>
@@ -454,6 +457,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Dovoli, da aplikacija usmeri klice prek sistema, da se tako izboljša izkušnja klicanja."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ogled in nadzor klicev prek sistema."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Aplikaciji dovoljuje, da si ogleda in nadzoruje aktivne klice v napravi. To vključuje informacije, kot so telefonske številke klicev in stanje klicev."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"izvzetje iz omejitev pri snemanju zvoka"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Za aplikacijo ne veljajo omejitve pri snemanju zvoka."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"Nadaljevanje klica iz druge aplikacije"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Aplikaciji dovoljuje nadaljevanje klica, ki se je začel v drugi aplikaciji."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"branje telefonskih številk"</string>
@@ -1139,28 +1144,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Izbriši"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Način vnosa"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Besedilna dejanja"</string>
-    <string name="email" msgid="2503484245190492693">"Pošlji e-pošto"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Pošlji na izbrani naslov"</string>
-    <string name="dial" msgid="4954567785798679706">"Pokliči"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Pokliči izbrano telefonsko številko"</string>
-    <string name="map" msgid="6865483125449986339">"Odpri zemljevid"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Poišči izbrani naslov na zemljevidu"</string>
-    <string name="browse" msgid="8692753594669717779">"Odpri"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Odpri izbrani URL"</string>
-    <string name="sms" msgid="3976991545867187342">"Pošlji SMS"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Pošlji sporočilo na izbrano telefonsko številko"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Dodaj"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Dodaj med stike"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Prikaži"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Prikaži izbrani čas v koledarju"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Dodaj na razpored"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Razporedi dogodek na izbrano uro"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Sledi"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Sledi izbranemu letu"</string>
-    <string name="translate" msgid="1416909787202727524">"Prevedi"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Prevedi izbrano besedilo"</string>
-    <string name="define" msgid="5214255850068764195">"Opredeli"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Opredeli izbrano besedilo"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Prostor za shranjevanje bo pošel"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Nekatere sistemske funkcije morda ne delujejo"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"V shrambi ni dovolj prostora za sistem. Sprostite 250 MB prostora in znova zaženite napravo."</string>
@@ -1299,7 +1282,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilno omrežje nima dostopa do interneta"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Omrežje nima dostopa do interneta"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Do zasebnega strežnika DNS ni mogoče dostopati"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Povezava je vzpostavljena"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"Povezljivost omrežja <xliff:g id="NETWORK_SSID">%1$s</xliff:g> je omejena"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Dotaknite se, da kljub temu vzpostavite povezavo"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Preklopljeno na omrežje vrste <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1675,14 +1657,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ali želite povečati glasnost nad priporočeno raven?\n\nDolgotrajno poslušanje pri veliki glasnosti lahko poškoduje sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite uporabljati bližnjico funkcij za ljudi s posebnimi potrebami?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Ko je bližnjica vklopljena, pritisnite gumba za glasnost in ju pridržite tri sekunde, če želite zagnati funkcijo za ljudi s posebnimi potrebami."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Ali storitvi <xliff:g id="SERVICE">%1$s</xliff:g> dovolite popoln nadzor nad svojo napravo?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Če vklopite storitev <xliff:g id="SERVICE">%1$s</xliff:g>, vaša naprava ne bo uporabljala zaklepanja zaslona za izboljšanje šifriranja podatkov."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Popoln nadzor je ustrezen za aplikacije, ki vam pomagajo pri funkcijah za ljudi s posebnimi potrebami, vendar ne za večino aplikacij."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ogledovanje in upravljanje zaslona"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Bere lahko vso vsebino na zaslonu ter prikaže vsebino prek drugih aplikacij."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ogledovanje in izvajanje dejanj"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Spremlja lahko vaše interakcije z aplikacijo ali senzorjem strojne opreme ter komunicira z aplikacijami v vašem imenu."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Dovoli"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Zavrni"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Če želite začeti uporabljati funkcijo, se je dotaknite:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Izberite aplikacije, ki jih želite uporabljati z gumbom za funkcije za ljudi s posebnimi potrebami"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Izberite aplikacije, ki jih želite uporabljati z bližnjico na tipki za glasnost"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Storitev <xliff:g id="SERVICE_NAME">%s</xliff:g> je izklopljena"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Uredi bližnjice"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Prekliči"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Končano"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Izklopi bližnjico"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Uporabi bližnjico"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija barv"</string>
@@ -2099,31 +2088,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Meni s funkcijami za ljudi s posebnimi potrebami"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Vrstica s podnapisi aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Paket <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> je bil dodan v segment OMEJENO"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Pogovor"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Skupinski pogovor"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Osebno"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Služba"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Pogled osebnega profila"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Pogled delovnega profila"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Deljenje z delovnimi aplikacijami ni mogoče"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Deljenje z osebnimi aplikacijami ni mogoče"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Skrbnik za IT je blokiral deljenje med osebnimi in delovnimi profili"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Dostop do delovnih aplikacij ni mogoč"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Skrbnik za IT vam ne dovoli ogleda vsebine osebnega profila v delovnih aplikacijah"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Dostop do osebnih aplikacij ni mogoč"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Skrbnik za IT vam ne dovoli ogleda vsebine delovnega profila v osebnih aplikacijah"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Vklopite delovni profil, če želite deliti vsebino"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Vklopite delovni profil, če si želite ogledati vsebino"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Na voljo ni nobena aplikacija"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Vklop"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Snemanje ali predvajanje zvoka med telefonskimi klici"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Tej aplikaciji dovoljuje snemanje ali predvajanje zvoka med telefonskimi klici, ko je nastavljena kot privzeta aplikacija za klicanje."</string>
 </resources>
