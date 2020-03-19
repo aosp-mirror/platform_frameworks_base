@@ -3018,7 +3018,7 @@
       <public name="allowAutoRevokePermissionsExemption" />
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
-      <public name="enableGwpAsan" />
+      <public name="gwpAsanMode" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
