@@ -511,14 +511,13 @@ final class InputMonitor {
 
             if (w.inPinnedWindowingMode()) {
                 if (mAddPipInputConsumerHandle) {
-                    // Update the bounds of the Pip input consumer to match the window bounds.
-                    w.getBounds(mTmpRect);
-                    mPipInputConsumer.layout(mInputTransaction, mTmpRect);
 
-                    // The touchable region is relative to the surface top-left
-                    mTmpRect.offsetTo(0, 0);
-                    mPipInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
-                    mPipInputConsumer.show(mInputTransaction, w);
+                    final Task rootTask = w.getTask().getRootTask();
+                    mPipInputConsumer.mWindowHandle.replaceTouchableRegionWithCrop(
+                            rootTask.getSurfaceControl());
+                    // We set the layer to z=MAX-1 so that it's always on top.
+                    mPipInputConsumer.reparent(mInputTransaction, rootTask);
+                    mPipInputConsumer.show(mInputTransaction, Integer.MAX_VALUE - 1);
                     mAddPipInputConsumerHandle = false;
                 }
             }
