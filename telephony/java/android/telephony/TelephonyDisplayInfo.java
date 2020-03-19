@@ -25,12 +25,12 @@ import android.telephony.Annotation.OverrideNetworkType;
 import java.util.Objects;
 
 /**
- * DisplayInfo contains telephony-related information used for display purposes only. This
+ * TelephonyDisplayInfo contains telephony-related information used for display purposes only. This
  * information is provided in accordance with carrier policy and branding preferences; it is not
  * necessarily a precise or accurate representation of the current state and should be treated
  * accordingly.
  */
-public final class DisplayInfo implements Parcelable {
+public final class TelephonyDisplayInfo implements Parcelable {
     /**
      * No override. {@link #getNetworkType()} should be used for display network
      * type.
@@ -81,13 +81,14 @@ public final class DisplayInfo implements Parcelable {
      *
      * @hide
      */
-    public DisplayInfo(@NetworkType int networkType, @OverrideNetworkType int overrideNetworkType) {
+    public TelephonyDisplayInfo(@NetworkType int networkType,
+            @OverrideNetworkType int overrideNetworkType) {
         mNetworkType = networkType;
         mOverrideNetworkType = overrideNetworkType;
     }
 
     /** @hide */
-    public DisplayInfo(Parcel p) {
+    public TelephonyDisplayInfo(Parcel p) {
         mNetworkType = p.readInt();
         mOverrideNetworkType = p.readInt();
     }
@@ -121,16 +122,16 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(mOverrideNetworkType);
     }
 
-    public static final @NonNull Parcelable.Creator<DisplayInfo> CREATOR =
-            new Parcelable.Creator<DisplayInfo>() {
+    public static final @NonNull Parcelable.Creator<TelephonyDisplayInfo> CREATOR =
+            new Parcelable.Creator<TelephonyDisplayInfo>() {
                 @Override
-                public DisplayInfo createFromParcel(Parcel source) {
-                    return new DisplayInfo(source);
+                public TelephonyDisplayInfo createFromParcel(Parcel source) {
+                    return new TelephonyDisplayInfo(source);
                 }
 
                 @Override
-                public DisplayInfo[] newArray(int size) {
-                    return new DisplayInfo[size];
+                public TelephonyDisplayInfo[] newArray(int size) {
+                    return new TelephonyDisplayInfo[size];
                 }
             };
 
@@ -143,7 +144,7 @@ public final class DisplayInfo implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DisplayInfo that = (DisplayInfo) o;
+        TelephonyDisplayInfo that = (TelephonyDisplayInfo) o;
         return mNetworkType == that.mNetworkType
                 && mOverrideNetworkType == that.mOverrideNetworkType;
     }
@@ -166,7 +167,7 @@ public final class DisplayInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "DisplayInfo {network=" + TelephonyManager.getNetworkTypeName(mNetworkType)
+        return "TelephonyDisplayInfo {network=" + TelephonyManager.getNetworkTypeName(mNetworkType)
                 + ", override=" + overrideNetworkTypeToString(mOverrideNetworkType);
     }
 }
