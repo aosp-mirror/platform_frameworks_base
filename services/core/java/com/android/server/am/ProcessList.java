@@ -1665,16 +1665,19 @@ public final class ProcessList {
 
     private int decideGwpAsanLevel(ProcessRecord app) {
         // Look at the process attribute first.
-        if (app.processInfo != null && app.processInfo.enableGwpAsan != null) {
-            return app.processInfo.enableGwpAsan ? Zygote.GWP_ASAN_LEVEL_ALWAYS
-                                                 : Zygote.GWP_ASAN_LEVEL_NEVER;
+       if (app.processInfo != null
+                && app.processInfo.gwpAsanMode != ApplicationInfo.GWP_ASAN_DEFAULT) {
+            return app.processInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_ALWAYS
+                    ? Zygote.GWP_ASAN_LEVEL_ALWAYS
+                    : Zygote.GWP_ASAN_LEVEL_NEVER;
         }
         // Then at the applicaton attribute.
-        if (app.info.isGwpAsanEnabled() != null) {
-            return app.info.isGwpAsanEnabled() ? Zygote.GWP_ASAN_LEVEL_ALWAYS
-                                               : Zygote.GWP_ASAN_LEVEL_NEVER;
+        if (app.info.getGwpAsanMode() != ApplicationInfo.GWP_ASAN_DEFAULT) {
+            return app.info.getGwpAsanMode() == ApplicationInfo.GWP_ASAN_ALWAYS
+                    ? Zygote.GWP_ASAN_LEVEL_ALWAYS
+                    : Zygote.GWP_ASAN_LEVEL_NEVER;
         }
-        // If the app does not specify enableGwpAsan, the default behavior is lottery among the
+        // If the app does not specify gwpAsanMode, the default behavior is lottery among the
         // system apps, and disabled for user apps, unless overwritten by the compat feature.
         if (mPlatformCompat.isChangeEnabled(GWP_ASAN, app.info)) {
             return Zygote.GWP_ASAN_LEVEL_ALWAYS;
