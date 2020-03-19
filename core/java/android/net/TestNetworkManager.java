@@ -30,6 +30,18 @@ import com.android.internal.util.Preconditions;
  */
 @TestApi
 public class TestNetworkManager {
+    /**
+     * Prefix for tun interfaces created by this class.
+     * @hide
+     */
+    public static final String TEST_TUN_PREFIX = "testtun";
+
+    /**
+     * Prefix for tap interfaces created by this class.
+     * @hide
+     */
+    public static final String TEST_TAP_PREFIX = "testtap";
+
     @NonNull private static final String TAG = TestNetworkManager.class.getSimpleName();
 
     @NonNull private final ITestNetworkManager mService;
