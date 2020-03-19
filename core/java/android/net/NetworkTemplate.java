@@ -34,9 +34,13 @@ import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.ROAMING_YES;
 import static android.net.wifi.WifiInfo.sanitizeSsid;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Annotation.NetworkType;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.BackupUtils;
 import android.util.Log;
 
@@ -72,6 +76,14 @@ public class NetworkTemplate implements Parcelable {
     public static final int MATCH_WIFI_WILDCARD = 7;
     public static final int MATCH_BLUETOOTH = 8;
     public static final int MATCH_PROXY = 9;
+
+    /**
+     * Include all network types when filtering. This is meant to merge in with the
+     * {@code TelephonyManager.NETWORK_TYPE_*} constants, and thus needs to stay in sync.
+     *
+     * @hide
+     */
+    public static final int NETWORK_TYPE_ALL = -1;
 
     private static boolean isKnownMatchRule(final int rule) {
         switch (rule) {
@@ -117,7 +129,22 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Template to match {@link ConnectivityManager#TYPE_MOBILE} networks,
+     * Template to match cellular networks with the given IMSI and {@code ratType}.
+     * Use {@link #NETWORK_TYPE_ALL} to include all network types when filtering.
+     * See {@code TelephonyManager.NETWORK_TYPE_*}.
+     */
+    public static NetworkTemplate buildTemplateMobileWithRatType(@Nullable String subscriberId,
+            @NetworkType int ratType) {
+        if (TextUtils.isEmpty(subscriberId)) {
+            return new NetworkTemplate(MATCH_MOBILE_WILDCARD, null, null, null,
+                    METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType);
+        }
+        return new NetworkTemplate(MATCH_MOBILE, subscriberId, new String[]{subscriberId}, null,
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, ratType);
+    }
+
+    /**
+     * Template to match metered {@link ConnectivityManager#TYPE_MOBILE} networks,
      * regardless of IMSI.
      */
     @UnsupportedAppUsage
@@ -126,7 +153,7 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Template to match all {@link ConnectivityManager#TYPE_WIFI} networks,
+     * Template to match all metered {@link ConnectivityManager#TYPE_WIFI} networks,
      * regardless of SSID.
      */
     @UnsupportedAppUsage
@@ -192,6 +219,7 @@ public class NetworkTemplate implements Parcelable {
     private final int mMetered;
     private final int mRoaming;
     private final int mDefaultNetwork;
+    private final int mSubType;
 
     @UnsupportedAppUsage
     public NetworkTemplate(int matchRule, String subscriberId, String networkId) {
@@ -201,11 +229,11 @@ public class NetworkTemplate implements Parcelable {
     public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
             String networkId) {
         this(matchRule, subscriberId, matchSubscriberIds, networkId, METERED_ALL, ROAMING_ALL,
-                DEFAULT_NETWORK_ALL);
+                DEFAULT_NETWORK_ALL, NETWORK_TYPE_ALL);
     }
 
     public NetworkTemplate(int matchRule, String subscriberId, String[] matchSubscriberIds,
-            String networkId, int metered, int roaming, int defaultNetwork) {
+            String networkId, int metered, int roaming, int defaultNetwork, int subType) {
         mMatchRule = matchRule;
         mSubscriberId = subscriberId;
         mMatchSubscriberIds = matchSubscriberIds;
@@ -213,6 +241,7 @@ public class NetworkTemplate implements Parcelable {
         mMetered = metered;
         mRoaming = roaming;
         mDefaultNetwork = defaultNetwork;
+        mSubType = subType;
 
         if (!isKnownMatchRule(matchRule)) {
             Log.e(TAG, "Unknown network template rule " + matchRule
@@ -228,6 +257,7 @@ public class NetworkTemplate implements Parcelable {
         mMetered = in.readInt();
         mRoaming = in.readInt();
         mDefaultNetwork = in.readInt();
+        mSubType = in.readInt();
     }
 
     @Override
@@ -239,6 +269,7 @@ public class NetworkTemplate implements Parcelable {
         dest.writeInt(mMetered);
         dest.writeInt(mRoaming);
         dest.writeInt(mDefaultNetwork);
+        dest.writeInt(mSubType);
     }
 
     @Override
@@ -271,13 +302,16 @@ public class NetworkTemplate implements Parcelable {
             builder.append(", defaultNetwork=").append(NetworkStats.defaultNetworkToString(
                     mDefaultNetwork));
         }
+        if (mSubType != NETWORK_TYPE_ALL) {
+            builder.append(", subType=").append(mSubType);
+        }
         return builder.toString();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mMatchRule, mSubscriberId, mNetworkId, mMetered, mRoaming,
-                mDefaultNetwork);
+                mDefaultNetwork, mSubType);
     }
 
     @Override
@@ -289,7 +323,8 @@ public class NetworkTemplate implements Parcelable {
                     && Objects.equals(mNetworkId, other.mNetworkId)
                     && mMetered == other.mMetered
                     && mRoaming == other.mRoaming
-                    && mDefaultNetwork == other.mDefaultNetwork;
+                    && mDefaultNetwork == other.mDefaultNetwork
+                    && mSubType == other.mSubType;
         }
         return false;
     }
@@ -376,6 +411,11 @@ public class NetworkTemplate implements Parcelable {
             || (mDefaultNetwork == DEFAULT_NETWORK_NO && !ident.mDefaultNetwork);
     }
 
+    private boolean matchesCollapsedRatType(NetworkIdentity ident) {
+        return mSubType == NETWORK_TYPE_ALL
+                || getCollapsedRatType(mSubType) == getCollapsedRatType(ident.mSubType);
+    }
+
     public boolean matchesSubscriberId(String subscriberId) {
         return ArrayUtils.contains(mMatchSubscriberIds, subscriberId);
     }
@@ -388,9 +428,52 @@ public class NetworkTemplate implements Parcelable {
             // TODO: consider matching against WiMAX subscriber identity
             return true;
         } else {
+            // Only metered mobile network would be matched regardless of metered filter.
+            // This is used to exclude non-metered APNs, e.g. IMS. See ag/908650.
+            // TODO: Respect metered filter and remove mMetered condition.
             return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
                     && !ArrayUtils.isEmpty(mMatchSubscriberIds)
-                    && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId);
+                    && ArrayUtils.contains(mMatchSubscriberIds, ident.mSubscriberId)
+                    && matchesCollapsedRatType(ident);
+        }
+    }
+
+    /**
+     * Get a Radio Access Technology(RAT) type that is representative of a group of RAT types.
+     * The mapping is corresponding to {@code TelephonyManager#NETWORK_CLASS_BIT_MASK_*}.
+     *
+     * @param ratType An integer defined in {@code TelephonyManager#NETWORK_TYPE_*}.
+     */
+    // TODO: 1. Consider move this to TelephonyManager if used by other modules.
+    //       2. Consider make this configurable.
+    //       3. Use TelephonyManager APIs when available.
+    public static int getCollapsedRatType(int ratType) {
+        switch (ratType) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+            case TelephonyManager.NETWORK_TYPE_GSM:
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return TelephonyManager.NETWORK_TYPE_GSM;
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return TelephonyManager.NETWORK_TYPE_UMTS;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return TelephonyManager.NETWORK_TYPE_LTE;
+            case TelephonyManager.NETWORK_TYPE_NR:
+                return TelephonyManager.NETWORK_TYPE_NR;
+            default:
+                return TelephonyManager.NETWORK_TYPE_UNKNOWN;
         }
     }
 
@@ -421,7 +504,8 @@ public class NetworkTemplate implements Parcelable {
         if (ident.mType == TYPE_WIMAX) {
             return true;
         } else {
-            return sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered);
+            return (sForceAllNetworkTypes || (ident.mType == TYPE_MOBILE && ident.mMetered))
+                    && matchesCollapsedRatType(ident);
         }
     }
 
