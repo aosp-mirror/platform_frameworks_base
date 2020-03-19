@@ -4875,7 +4875,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 telephony.sendVisualVoicemailSmsForSubscriber(
-                        mContext.getOpPackageName(), subId, number, port, text, sentIntent);
+                        mContext.getOpPackageName(), null, subId, number, port, text, sentIntent);
             }
         } catch (RemoteException ex) {
         }
