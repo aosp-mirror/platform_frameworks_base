@@ -77,7 +77,7 @@ class ControlViewHolder(
             Pair(it.getStatus(), it.getControlTemplate())
         } ?: run {
             title.setText(cws.ci.controlTitle)
-            subtitle.setText("")
+            subtitle.setText(cws.ci.controlSubtitle)
             Pair(Control.STATUS_UNKNOWN, ControlTemplate.NO_TEMPLATE)
         }
 
