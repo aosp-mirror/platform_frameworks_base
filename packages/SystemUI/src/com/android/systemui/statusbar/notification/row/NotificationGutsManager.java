@@ -29,7 +29,6 @@ import android.content.pm.ShortcutManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -109,6 +108,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final Lazy<StatusBar> mStatusBarLazy;
     private final Handler mMainHandler;
     private Runnable mOpenRunnable;
+    private final INotificationManager mNotificationManager;
+    private final LauncherApps mLauncherApps;
+    private final ShortcutManager mShortcutManager;
 
     /**
      * Injected constructor. See {@link NotificationsModule}.
@@ -116,13 +118,19 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
             Lazy<StatusBar> statusBarLazy, @Main Handler mainHandler,
             AccessibilityManager accessibilityManager,
-            HighPriorityProvider highPriorityProvider) {
+            HighPriorityProvider highPriorityProvider,
+            INotificationManager notificationManager,
+            LauncherApps launcherApps,
+            ShortcutManager shortcutManager) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
         mMainHandler = mainHandler;
         mAccessibilityManager = accessibilityManager;
         mHighPriorityProvider = highPriorityProvider;
+        mNotificationManager = notificationManager;
+        mLauncherApps = launcherApps;
+        mShortcutManager = shortcutManager;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -306,8 +314,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         UserHandle userHandle = sbn.getUser();
         PackageManager pmUser = StatusBar.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
-        INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick =
                 (View v, Intent intent) -> {
                     mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
@@ -328,7 +334,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
         notificationInfoView.bindNotification(
                 pmUser,
-                iNotificationManager,
+                mNotificationManager,
                 mVisualStabilityManager,
                 packageName,
                 row.getEntry().getChannel(),
@@ -358,10 +364,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         UserHandle userHandle = sbn.getUser();
         PackageManager pmUser = StatusBar.getPackageManagerForUser(
                 mContext, userHandle.getIdentifier());
-        LauncherApps launcherApps = mContext.getSystemService(LauncherApps.class);
-        ShortcutManager shortcutManager = mContext.getSystemService(ShortcutManager.class);
-        INotificationManager iNotificationManager = INotificationManager.Stub.asInterface(
-                ServiceManager.getService(Context.NOTIFICATION_SERVICE));
         final NotificationConversationInfo.OnAppSettingsClickListener onAppSettingsClick =
                 (View v, Intent intent) -> {
                     mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
@@ -386,15 +388,15 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             };
         }
         ConversationIconFactory iconFactoryLoader = new ConversationIconFactory(mContext,
-                launcherApps, pmUser, IconDrawableFactory.newInstance(mContext, false),
+                mLauncherApps, pmUser, IconDrawableFactory.newInstance(mContext, false),
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.notification_guts_conversation_icon_size));
 
         notificationInfoView.bindNotification(
-                shortcutManager,
-                launcherApps,
+                mShortcutManager,
+                mLauncherApps,
                 pmUser,
-                iNotificationManager,
+                mNotificationManager,
                 mVisualStabilityManager,
                 packageName,
                 row.getEntry().getChannel(),
