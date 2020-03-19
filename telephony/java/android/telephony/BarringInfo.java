@@ -239,6 +239,12 @@ public final class BarringInfo implements Parcelable {
         }
     }
 
+    private static final BarringServiceInfo BARRING_SERVICE_INFO_UNKNOWN =
+            new BarringServiceInfo(BarringServiceInfo.BARRING_TYPE_UNKNOWN);
+
+    private static final BarringServiceInfo BARRING_SERVICE_INFO_UNBARRED =
+            new BarringServiceInfo(BarringServiceInfo.BARRING_TYPE_NONE);
+
     private CellIdentity mCellIdentity;
 
     // A SparseArray potentially mapping each BarringService type to a BarringServiceInfo config
@@ -301,17 +307,6 @@ public final class BarringInfo implements Parcelable {
     }
 
     /**
-     * Return whether a service is currently barred based on the BarringInfo
-     *
-     * @param service the service to be checked.
-     * @return true if the service is currently being barred, otherwise false
-     */
-    public boolean isServiceBarred(@BarringServiceType int service) {
-        BarringServiceInfo bsi = mBarringServiceInfos.get(service);
-        return bsi != null && (bsi.isBarred());
-    }
-
-    /**
      * Get the BarringServiceInfo for a specified service.
      *
      * @return a BarringServiceInfo struct describing the current barring status for a service
@@ -322,9 +317,8 @@ public final class BarringInfo implements Parcelable {
         // type as UNKNOWN; if the modem reports barring info but doesn't report for a particular
         // service then we can safely assume that the service isn't barred (for instance because
         // that particular service isn't applicable to the current RAN).
-        return (bsi != null) ? bsi : new BarringServiceInfo(
-                mBarringServiceInfos.size() > 0 ? BarringServiceInfo.BARRING_TYPE_NONE :
-                        BarringServiceInfo.BARRING_TYPE_UNKNOWN);
+        return (bsi != null) ? bsi : mBarringServiceInfos.size() > 0
+                ? BARRING_SERVICE_INFO_UNBARRED : BARRING_SERVICE_INFO_UNKNOWN;
     }
 
     /** @hide */
