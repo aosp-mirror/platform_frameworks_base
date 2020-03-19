@@ -57,7 +57,6 @@ platform cert need to be included, as apps signed with the platform cert are exe
   <hidden-api-whitelisted-app package="com.android.terminal" />
   <hidden-api-whitelisted-app package="com.android.wallpaper" />
   <hidden-api-whitelisted-app package="jp.co.omronsoft.openwnn" />
-  <!-- STOPSHIP: Remove this when fixing all @hide usage for tethering.-->
-  <hidden-api-whitelisted-app package="com.android.networkstack.tethering" />
+  <!-- TODO: Remove NetworkStack whitelisting -->
   <hidden-api-whitelisted-app package="com.android.networkstack" />
 </config>
