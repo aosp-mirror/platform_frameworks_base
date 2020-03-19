@@ -41,6 +41,40 @@ static int write_java_q_logger_class(
     return 0;
 }
 
+static void write_annotations(
+        FILE* out, int argIndex,
+        const FieldNumberToAnnotations& fieldNumberToAnnotations) {
+    auto it = fieldNumberToAnnotations.find(argIndex);
+    if (it == fieldNumberToAnnotations.end()) {
+        return;
+    }
+    const set<shared_ptr<Annotation>>& annotations = it->second;
+    for (auto& annotation: annotations) {
+        // TODO(b/151744250): Group annotations for same atoms.
+        // TODO(b/151786433): Write atom constant name instead of atom id literal.
+        fprintf(out, "        if (code == %d) {\n", annotation->atomId);
+        switch(annotation->type) {
+            case ANNOTATION_TYPE_INT:
+                // TODO(b/151776731): Check for reset state annotation and only include reset state
+                // when field value == default state annotation value.
+                // TODO(b/151786433): Write annotation constant name instead of
+                // annotation id literal.
+                fprintf(out, "            builder.addIntAnnotation((byte) %d, %d);\n",
+                        annotation->annotationId, annotation->value.intValue);
+                break;
+            case ANNOTATION_TYPE_BOOL:
+                // TODO(b/151786433): Write annotation constant name instead of
+                // annotation id literal.
+                fprintf(out, "            builder.addBooleanAnnotation((byte) %d, %s);\n",
+                        annotation->annotationId,
+                        annotation->value.boolValue ? "true" : "false");
+                break;
+            default:
+                break;
+        }
+        fprintf(out, "        }\n");
+    }
+}
 
 static int write_java_methods(
         FILE* out,
@@ -52,7 +86,8 @@ static int write_java_methods(
             signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
         fprintf(out, "    public static void write(int code");
-        vector<java_type_t> signature = signatureInfoMapIt->first;
+        const vector<java_type_t>& signature = signatureInfoMapIt->first;
+        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt->second;
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature.begin();
                 arg != signature.end(); arg++) {
@@ -202,6 +237,7 @@ static int write_java_methods(
                 fprintf(stderr, "Encountered unsupported type.");
                 return 1;
             }
+            write_annotations(out, argIndex, fieldNumberToAnnotations);
             argIndex++;
         }
 
