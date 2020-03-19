@@ -20,12 +20,57 @@
 namespace android {
 namespace stats_log_api_gen {
 
+static void write_annotations(
+        FILE* out, int argIndex,
+        const FieldNumberToAnnotations& fieldNumberToAnnotations,
+        const string& methodPrefix,
+        const string& methodSuffix) {
+    auto fieldNumberToAnnotationsIt = fieldNumberToAnnotations.find(argIndex);
+    if (fieldNumberToAnnotationsIt == fieldNumberToAnnotations.end()) {
+        return;
+    }
+    const set<shared_ptr<Annotation>>& annotations =
+            fieldNumberToAnnotationsIt->second;
+    for (const shared_ptr<Annotation>& annotation : annotations) {
+        // TODO(b/151744250): Group annotations for same atoms.
+        // TODO(b/151786433): Write atom constant name instead of atom id literal.
+        fprintf(out, "    if (code == %d) {\n", annotation->atomId);
+        switch(annotation->type) {
+            // TODO(b/151776731): Check for reset state annotation and only include reset state
+            // when field value == default state annotation value.
+            case ANNOTATION_TYPE_INT:
+                // TODO(b/151786433): Write annotation constant name instead of
+                // annotation id literal.
+                fprintf(out, "        %saddInt32Annotation(%s%d, %d);\n",
+                        methodPrefix.c_str(),
+                        methodSuffix.c_str(),
+                        annotation->annotationId,
+                        annotation->value.intValue);
+                break;
+            case ANNOTATION_TYPE_BOOL:
+                // TODO(b/151786433): Write annotation constant name instead of
+                // annotation id literal.
+                fprintf(out, "        %saddBoolAnnotation(%s%d, %s);\n",
+                        methodPrefix.c_str(),
+                        methodSuffix.c_str(),
+                        annotation->annotationId,
+                        annotation->value.boolValue ? "true" : "false");
+                break;
+            default:
+                break;
+        }
+        fprintf(out, "    }\n");
+    }
+
+}
+
 static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
         const AtomDecl& attributionDecl, const bool supportQ) {
     fprintf(out, "\n");
     for (auto signatureInfoMapIt = atoms.signatureInfoMap.begin();
             signatureInfoMapIt != atoms.signatureInfoMap.end(); signatureInfoMapIt++) {
         vector<java_type_t> signature = signatureInfoMapIt->first;
+        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt->second;
         // Key value pairs not supported in native.
         if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
             continue;
@@ -72,6 +117,7 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                         fprintf(stderr, "Encountered unsupported type.");
                         return 1;
                 }
+                write_annotations(out, argIndex, fieldNumberToAnnotations, "event.", "");
                 argIndex++;
             }
             fprintf(out, "    return event.writeToSocket();\n");
@@ -118,6 +164,8 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                         fprintf(stderr, "Encountered unsupported type.");
                         return 1;
                 }
+                write_annotations(out, argIndex, fieldNumberToAnnotations, "AStatsEvent_",
+                        "event, ");
                 argIndex++;
             }
             fprintf(out, "    const int ret = AStatsEvent_write(event);\n");
