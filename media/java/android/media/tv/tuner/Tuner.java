@@ -245,6 +245,9 @@ public class Tuner implements AutoCloseable  {
         mContext = context;
         mTunerResourceManager = (TunerResourceManager)
                 context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+        if (mHandler == null) {
+            mHandler = createEventHandler();
+        }
 
         int[] clientId = new int[1];
         ResourceClientProfile profile = new ResourceClientProfile(tvInputSessionId, useCase);
