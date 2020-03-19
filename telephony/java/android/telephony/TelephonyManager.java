@@ -4923,7 +4923,8 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 telephony.sendVisualVoicemailSmsForSubscriber(
-                        mContext.getOpPackageName(), null, subId, number, port, text, sentIntent);
+                        mContext.getOpPackageName(), mContext.getAttributionTag(), subId, number,
+                        port, text, sentIntent);
             }
         } catch (RemoteException ex) {
         }
