@@ -152,42 +152,12 @@ public class DataManager {
     /** This method is called when a user is stopping. */
     public void onUserStopping(int userId) {
         synchronized (mLock) {
-            ContentResolver contentResolver = mContext.getContentResolver();
-            if (mUserDataArray.indexOfKey(userId) >= 0) {
-                mUserDataArray.get(userId).setUserStopped();
+            UserData userData = mUserDataArray.get(userId);
+            if (userData != null) {
+                userData.setUserStopped();
             }
-            if (mUsageStatsQueryFutures.indexOfKey(userId) >= 0) {
-                mUsageStatsQueryFutures.get(userId).cancel(true);
-            }
-            if (mBroadcastReceivers.indexOfKey(userId) >= 0) {
-                mContext.unregisterReceiver(mBroadcastReceivers.get(userId));
-            }
-            if (mContactsContentObservers.indexOfKey(userId) >= 0) {
-                contentResolver.unregisterContentObserver(mContactsContentObservers.get(userId));
-            }
-            if (mNotificationListeners.indexOfKey(userId) >= 0) {
-                try {
-                    mNotificationListeners.get(userId).unregisterAsSystemService();
-                } catch (RemoteException e) {
-                    // Should never occur for local calls.
-                }
-            }
-            if (mPackageMonitors.indexOfKey(userId) >= 0) {
-                mPackageMonitors.get(userId).unregister();
-            }
-            if (userId == UserHandle.USER_SYSTEM) {
-                if (mCallLogContentObserver != null) {
-                    contentResolver.unregisterContentObserver(mCallLogContentObserver);
-                    mCallLogContentObserver = null;
-                }
-                if (mMmsSmsContentObserver != null) {
-                    contentResolver.unregisterContentObserver(mMmsSmsContentObserver);
-                    mCallLogContentObserver = null;
-                }
-            }
-
-            DataMaintenanceService.cancelJob(mContext, userId);
         }
+        mScheduledExecutor.execute(() -> cleanupUser(userId));
     }
 
     /**
@@ -368,6 +338,47 @@ public class DataManager {
             }
 
             DataMaintenanceService.scheduleJob(mContext, userId);
+        }
+    }
+
+    private void cleanupUser(@UserIdInt int userId) {
+        synchronized (mLock) {
+            UserData userData = mUserDataArray.get(userId);
+            if (userData == null || userData.isUnlocked()) {
+                return;
+            }
+            ContentResolver contentResolver = mContext.getContentResolver();
+            if (mUsageStatsQueryFutures.indexOfKey(userId) >= 0) {
+                mUsageStatsQueryFutures.get(userId).cancel(true);
+            }
+            if (mBroadcastReceivers.indexOfKey(userId) >= 0) {
+                mContext.unregisterReceiver(mBroadcastReceivers.get(userId));
+            }
+            if (mContactsContentObservers.indexOfKey(userId) >= 0) {
+                contentResolver.unregisterContentObserver(mContactsContentObservers.get(userId));
+            }
+            if (mNotificationListeners.indexOfKey(userId) >= 0) {
+                try {
+                    mNotificationListeners.get(userId).unregisterAsSystemService();
+                } catch (RemoteException e) {
+                    // Should never occur for local calls.
+                }
+            }
+            if (mPackageMonitors.indexOfKey(userId) >= 0) {
+                mPackageMonitors.get(userId).unregister();
+            }
+            if (userId == UserHandle.USER_SYSTEM) {
+                if (mCallLogContentObserver != null) {
+                    contentResolver.unregisterContentObserver(mCallLogContentObserver);
+                    mCallLogContentObserver = null;
+                }
+                if (mMmsSmsContentObserver != null) {
+                    contentResolver.unregisterContentObserver(mMmsSmsContentObserver);
+                    mCallLogContentObserver = null;
+                }
+            }
+
+            DataMaintenanceService.cancelJob(mContext, userId);
         }
     }
 
