@@ -186,7 +186,6 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -882,7 +881,13 @@ public class WindowManagerService extends IWindowManager.Stub
                     FEATURE_FREEFORM_WINDOW_MANAGEMENT) || Settings.Global.getInt(
                     resolver, DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT, 0) != 0;
 
-            mAtmService.mSupportsFreeformWindowManagement = freeformWindowManagement;
+            if (mAtmService.mSupportsFreeformWindowManagement != freeformWindowManagement) {
+                mAtmService.mSupportsFreeformWindowManagement = freeformWindowManagement;
+                synchronized (mGlobalLock) {
+                    // Notify the root window container that the display settings value may change.
+                    mRoot.onSettingsRetrieved();
+                }
+            }
         }
 
         void updateForceResizableTasks() {
@@ -1162,9 +1167,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
 
-        mUseBLAST = DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
-                    WM_USE_BLAST_ADAPTER_FLAG, false);
+        mUseBLAST = true;
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);

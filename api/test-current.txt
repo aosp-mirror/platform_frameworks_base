@@ -83,7 +83,6 @@ package android.app {
     method public static void resumeAppSwitches() throws android.os.RemoteException;
     method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public void scheduleApplicationInfoChanged(java.util.List<java.lang.String>, int);
     method @RequiresPermission("android.permission.MANAGE_USERS") public boolean switchUser(@NonNull android.os.UserHandle);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
     field public static final int PROCESS_CAPABILITY_ALL = 7; // 0x7
     field public static final int PROCESS_CAPABILITY_ALL_EXPLICIT = 1; // 0x1
     field public static final int PROCESS_CAPABILITY_ALL_IMPLICIT = 6; // 0x6
@@ -965,7 +964,6 @@ package android.content.pm {
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
-    method @Nullable public String[] getTelephonyPackageNames();
     method @Nullable public String getWellbeingPackageName();
     method @RequiresPermission("android.permission.GRANT_RUNTIME_PERMISSIONS") public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @RequiresPermission("android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS") public abstract void removeOnPermissionsChangeListener(@NonNull android.content.pm.PackageManager.OnPermissionsChangedListener);
@@ -1008,7 +1006,6 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_OEM = 16384; // 0x4000
     field public static final int PROTECTION_FLAG_RETAIL_DEMO = 16777216; // 0x1000000
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
-    field public static final int PROTECTION_FLAG_TELEPHONY = 4194304; // 0x400000
     field public static final int PROTECTION_FLAG_VENDOR_PRIVILEGED = 32768; // 0x8000
     field public static final int PROTECTION_FLAG_WELLBEING = 131072; // 0x20000
     field @Nullable public final String backgroundPermission;
@@ -1356,8 +1353,8 @@ package android.location {
     method @Deprecated public void resetCarrierPhase();
     method @Deprecated public void resetCarrierPhaseUncertainty();
     method public void resetCodeType();
-    method public void resetReceiverInterSignalBiasNanos();
-    method public void resetReceiverInterSignalBiasUncertaintyNanos();
+    method public void resetFullInterSignalBiasNanos();
+    method public void resetFullInterSignalBiasUncertaintyNanos();
     method public void resetSatelliteInterSignalBiasNanos();
     method public void resetSatelliteInterSignalBiasUncertaintyNanos();
     method public void resetSnrInDb();
@@ -1374,13 +1371,13 @@ package android.location {
     method public void setCn0DbHz(double);
     method public void setCodeType(@NonNull String);
     method public void setConstellationType(int);
+    method public void setFullInterSignalBiasNanos(double);
+    method public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setMultipathIndicator(int);
     method public void setPseudorangeRateMetersPerSecond(double);
     method public void setPseudorangeRateUncertaintyMetersPerSecond(double);
     method public void setReceivedSvTimeNanos(long);
     method public void setReceivedSvTimeUncertaintyNanos(long);
-    method public void setReceiverInterSignalBiasNanos(double);
-    method public void setReceiverInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setSatelliteInterSignalBiasNanos(double);
     method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setSnrInDb(double);

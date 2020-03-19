@@ -102,4 +102,7 @@ interface ILauncherApps {
             in UserHandle user);
     void uncacheShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
             in UserHandle user);
+
+    String getShortcutIconUri(String callingPackage, String packageName, String shortcutId,
+            int userId);
 }

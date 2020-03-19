@@ -21,7 +21,7 @@
 #include "logd/LogEvent.h"
 #include "packages/UidMap.h"
 #include "storage/StorageManager.h"
-#include "statslog.h"
+#include "statslog_statsdtest.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

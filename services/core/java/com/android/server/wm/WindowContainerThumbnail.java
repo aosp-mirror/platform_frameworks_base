@@ -97,7 +97,7 @@ class WindowContainerThumbnail implements Animatable {
         // TODO: This should be attached as a child to the app token, once the thumbnail animations
         // use relative coordinates. Once we start animating task we can also consider attaching
         // this to the task.
-        mSurfaceControl = mWindowContainer.makeSurface()
+        mSurfaceControl = mWindowContainer.makeChildSurface(mWindowContainer.getTopChild())
                 .setName("thumbnail anim: " + mWindowContainer.toString())
                 .setBufferSize(mWidth, mHeight)
                 .setFormat(PixelFormat.TRANSLUCENT)
@@ -209,7 +209,7 @@ class WindowContainerThumbnail implements Animatable {
 
     @Override
     public Builder makeAnimationLeash() {
-        return mWindowContainer.makeSurface();
+        return mWindowContainer.makeChildSurface(mWindowContainer.getTopChild());
     }
 
     @Override

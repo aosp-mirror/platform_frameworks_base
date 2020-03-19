@@ -393,7 +393,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
                 "title", 0, "titleResName", "text", 0, "textResName",
                 "disabledMessage", 0, "disabledMessageResName",
                 null, null, 0, null, 0, 0,
-                0, "iconResName", "bitmapPath", 0,
+                0, "iconResName", "bitmapPath", null, 0,
                 null, null);
         return si;
     }

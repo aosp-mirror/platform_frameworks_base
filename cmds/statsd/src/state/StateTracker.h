@@ -30,7 +30,7 @@ namespace statsd {
 
 class StateTracker : public virtual RefBase {
 public:
-    StateTracker(const int32_t atomId, const util::StateAtomFieldOptions& stateAtomInfo);
+    StateTracker(const int32_t atomId, const android::util::StateAtomFieldOptions& stateAtomInfo);
 
     virtual ~StateTracker(){};
 

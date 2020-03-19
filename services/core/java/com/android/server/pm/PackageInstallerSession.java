@@ -51,6 +51,8 @@ import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
@@ -119,9 +121,11 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.apk.ApkSignatureVerifier;
 
+import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -440,8 +444,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     final int returnCode = args.argi1;
                     args.recycle();
 
-                    PackageInstallerService.sendOnPackageInstalled(mContext,
-                            statusReceiver, sessionId,
+                    sendOnPackageInstalled(mContext, statusReceiver, sessionId,
                             isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId,
                             packageName, returnCode, message, extras);
 
@@ -1636,8 +1639,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
             }
             if (!success) {
-                PackageInstallerService.sendOnPackageInstalled(mContext,
-                        mRemoteStatusReceiver, sessionId,
+                sendOnPackageInstalled(mContext, mRemoteStatusReceiver, sessionId,
                         isInstallerDeviceOwnerOrAffiliatedProfileOwnerLocked(), userId, null,
                         failure.error, failure.getLocalizedMessage(), null);
                 return;
@@ -1684,8 +1686,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     intent.setPackage(mPm.getPackageInstallerPackageName());
                     intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
 
-                    PackageInstallerService.sendOnUserActionRequired(mContext,
-                            mRemoteStatusReceiver, sessionId, intent);
+                    sendOnUserActionRequired(mContext, mRemoteStatusReceiver, sessionId, intent);
 
                     // Commit was keeping session marked as active until now; release
                     // that extra refcount so session appears idle.
@@ -2582,12 +2583,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                             if (manualStartAndDestroy) {
                                 // IncrementalFileStorages will call start after all files are
                                 // created in IncFS.
-                                dataLoader.start();
+                                dataLoader.start(dataLoaderId);
                             }
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_STARTED: {
                             dataLoader.prepareImage(
+                                    dataLoaderId,
                                     addedFiles.toArray(
                                             new InstallationFileParcel[addedFiles.size()]),
                                     removedFiles.toArray(new String[removedFiles.size()]));
@@ -2602,7 +2604,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                 dispatchStreamValidateAndCommit();
                             }
                             if (manualStartAndDestroy) {
-                                dataLoader.destroy();
+                                dataLoader.destroy(dataLoaderId);
                             }
                             break;
                         }
@@ -2612,7 +2614,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                     new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                                             "Failed to prepare image."));
                             if (manualStartAndDestroy) {
-                                dataLoader.destroy();
+                                dataLoader.destroy(dataLoaderId);
                             }
                             break;
                         }
@@ -2620,9 +2622,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.
                     // Just return from this method and allow caller to commit again.
-                    PackageInstallerService.sendPendingStreaming(mContext,
-                            mRemoteStatusReceiver,
-                            sessionId, new StreamingException(e));
+                    sendPendingStreaming(mContext, mRemoteStatusReceiver, sessionId,
+                            new StreamingException(e));
                 }
             }
         };
@@ -2922,6 +2923,75 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         pw.println();
 
         pw.decreaseIndent();
+    }
+
+    private static void sendOnUserActionRequired(Context context, IntentSender target,
+            int sessionId, Intent intent) {
+        final Intent fillIn = new Intent();
+        fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_USER_ACTION);
+        fillIn.putExtra(Intent.EXTRA_INTENT, intent);
+        try {
+            target.sendIntent(context, 0, fillIn, null, null);
+        } catch (IntentSender.SendIntentException ignored) {
+        }
+    }
+
+    private static void sendOnPackageInstalled(Context context, IntentSender target, int sessionId,
+            boolean showNotification, int userId, String basePackageName, int returnCode,
+            String msg, Bundle extras) {
+        if (PackageManager.INSTALL_SUCCEEDED == returnCode && showNotification) {
+            boolean update = (extras != null) && extras.getBoolean(Intent.EXTRA_REPLACING);
+            Notification notification = PackageInstallerService.buildSuccessNotification(context,
+                    context.getResources()
+                            .getString(update ? R.string.package_updated_device_owner :
+                                    R.string.package_installed_device_owner),
+                    basePackageName,
+                    userId);
+            if (notification != null) {
+                NotificationManager notificationManager = (NotificationManager)
+                        context.getSystemService(Context.NOTIFICATION_SERVICE);
+                notificationManager.notify(basePackageName,
+                        SystemMessageProto.SystemMessage.NOTE_PACKAGE_STATE,
+                        notification);
+            }
+        }
+        final Intent fillIn = new Intent();
+        fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, basePackageName);
+        fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
+                PackageManager.installStatusToPublicStatus(returnCode));
+        fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                PackageManager.installStatusToString(returnCode, msg));
+        fillIn.putExtra(PackageInstaller.EXTRA_LEGACY_STATUS, returnCode);
+        if (extras != null) {
+            final String existing = extras.getString(
+                    PackageManager.EXTRA_FAILURE_EXISTING_PACKAGE);
+            if (!TextUtils.isEmpty(existing)) {
+                fillIn.putExtra(PackageInstaller.EXTRA_OTHER_PACKAGE_NAME, existing);
+            }
+        }
+        try {
+            target.sendIntent(context, 0, fillIn, null, null);
+        } catch (IntentSender.SendIntentException ignored) {
+        }
+    }
+
+    private static void sendPendingStreaming(Context context, IntentSender target, int sessionId,
+            Throwable cause) {
+        final Intent intent = new Intent();
+        intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+        intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_STREAMING);
+        if (cause != null && !TextUtils.isEmpty(cause.getMessage())) {
+            intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
+                    "Staging Image Not Ready [" + cause.getMessage() + "]");
+        } else {
+            intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "Staging Image Not Ready");
+        }
+        try {
+            target.sendIntent(context, 0, intent, null, null);
+        } catch (IntentSender.SendIntentException ignored) {
+        }
     }
 
     private static void writeGrantedRuntimePermissionsLocked(XmlSerializer out,

@@ -70,13 +70,13 @@ import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.Annotation.ApnType;
-import android.telephony.Annotation.CallForwardingReason;
 import android.telephony.Annotation.CallState;
-import android.telephony.Annotation.CallWaitingStatus;
+import android.telephony.Annotation.CarrierPrivilegeStatus;
 import android.telephony.Annotation.NetworkType;
 import android.telephony.Annotation.RadioPowerState;
 import android.telephony.Annotation.SimActivationState;
 import android.telephony.Annotation.UiccAppType;
+import android.telephony.CallForwardingInfo.CallForwardingReason;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
 import android.telephony.data.ApnSetting;
 import android.telephony.data.ApnSetting.MvnoType;
@@ -4328,14 +4328,18 @@ public class TelephonyManager {
 
     /**
      * Returns the phone number string for line 1, for example, the MSISDN
-     * for a GSM phone. Return null if it is unavailable.
+     * for a GSM phone for a particular subscription. Return null if it is unavailable.
+     * <p>
+     * The default SMS app can also use this.
      *
      * <p>Requires Permission:
-     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE},
      *     {@link android.Manifest.permission#READ_SMS READ_SMS},
      *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
      *     that the caller is the default SMS app,
-     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges or default SMS app
     @RequiresPermission(anyOf = {
@@ -4352,6 +4356,15 @@ public class TelephonyManager {
      * for a GSM phone for a particular subscription. Return null if it is unavailable.
      * <p>
      * The default SMS app can also use this.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      *
      * @param subId whose phone number for line 1 is returned
      * @hide
@@ -4532,25 +4545,50 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the MSISDN string.
-     * for a GSM phone. Return null if it is unavailable.
+     * Returns the MSISDN string for a GSM phone. Return null if it is unavailable.
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
      *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.READ_PHONE_NUMBERS
+    })
     @UnsupportedAppUsage
     public String getMsisdn() {
         return getMsisdn(getSubId());
     }
 
     /**
-     * Returns the MSISDN string.
-     * for a GSM phone. Return null if it is unavailable.
+     * Returns the MSISDN string for a GSM phone. Return null if it is unavailable.
      *
      * @param subId for which msisdn is returned
+     *
+     * <p>Requires Permission:
+     *     {@link android.Manifest.permission#READ_SMS READ_SMS},
+     *     {@link android.Manifest.permission#READ_PHONE_NUMBERS READ_PHONE_NUMBERS},
+     *     that the caller is the default SMS app,
+     *     or that the caller has carrier privileges (see {@link #hasCarrierPrivileges})
+     *     for any API level.
+     *     {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     *     for apps targeting SDK API level 29 and below.
+     *
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.READ_PHONE_STATE,
+            android.Manifest.permission.READ_SMS,
+            android.Manifest.permission.READ_PHONE_NUMBERS
+    })
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getMsisdn(int subId) {
         try {
@@ -11145,8 +11183,6 @@ public class TelephonyManager {
                 retVal = telephony.isDataEnabled(subId);
         } catch (RemoteException e) {
             Log.e(TAG, "Error isDataConnectionAllowed", e);
-        } catch (NullPointerException e) {
-            return false;
         }
         return retVal;
     }
@@ -12435,7 +12471,7 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public int getCarrierPrivilegeStatus(int uid) {
+    public @CarrierPrivilegeStatus int getCarrierPrivilegeStatus(int uid) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
@@ -12700,7 +12736,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @NonNull
     public CallForwardingInfo getCallForwarding(@CallForwardingReason int callForwardingReason) {
@@ -12747,7 +12782,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCallForwarding(@NonNull CallForwardingInfo callForwardingInfo) {
         if (callForwardingInfo == null) {
@@ -12788,7 +12822,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_ACTIVE = 1;
 
     /**
@@ -12796,7 +12829,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_INACTIVE = 2;
 
     /**
@@ -12804,7 +12836,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_UNKNOWN_ERROR = 3;
 
     /**
@@ -12812,8 +12843,22 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4;
+
+    /**
+     * Call waiting function status
+     *
+     * @hide
+     */
+    @IntDef(prefix = { "CALL_WAITING_STATUS_" }, value = {
+        CALL_WAITING_STATUS_ACTIVE,
+        CALL_WAITING_STATUS_INACTIVE,
+        CALL_WAITING_STATUS_NOT_SUPPORTED,
+        CALL_WAITING_STATUS_UNKNOWN_ERROR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallWaitingStatus {
+    }
 
     /**
      * Gets the status of voice call waiting function. Call waiting function enables the waiting
@@ -12823,7 +12868,6 @@ public class TelephonyManager {
      * @return the status of call waiting function.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @CallWaitingStatus int getCallWaitingStatus() {
         try {
@@ -12849,7 +12893,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public boolean setCallWaitingStatus(boolean isEnable) {
         try {

@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
+import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
@@ -210,19 +211,21 @@ public class IsdbsFrontendSettings extends FrontendSettings {
      * Builder for {@link IsdbsFrontendSettings}.
      */
     public static class Builder {
-        private int mFrequency;
-        private int mStreamId;
-        private int mStreamIdType;
-        private int mModulation;
-        private int mCodeRate;
-        private int mSymbolRate;
-        private int mRolloff;
+        private int mFrequency = 0;
+        private int mStreamId = Tuner.INVALID_STREAM_ID;
+        private int mStreamIdType = STREAM_ID_TYPE_ID;
+        private int mModulation = MODULATION_UNDEFINED;
+        private int mCodeRate = CODERATE_UNDEFINED;
+        private int mSymbolRate = 0;
+        private int mRolloff = ROLLOFF_UNDEFINED;
 
         private Builder() {
         }
 
         /**
          * Sets frequency in Hz.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         @IntRange(from = 1)
@@ -233,6 +236,8 @@ public class IsdbsFrontendSettings extends FrontendSettings {
 
         /**
          * Sets Stream ID.
+         *
+         * <p>Default value is {@link Tuner#INVALID_STREAM_ID}.
          */
         @NonNull
         public Builder setStreamId(int streamId) {
@@ -241,6 +246,8 @@ public class IsdbsFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets StreamIdType.
+         *
+         * <p>Default value is {@link #STREAM_ID_TYPE_ID}.
          */
         @NonNull
         public Builder setStreamIdType(@StreamIdType int streamIdType) {
@@ -249,6 +256,8 @@ public class IsdbsFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets Modulation.
+         *
+         * <p>Default value is {@link #MODULATION_UNDEFINED}.
          */
         @NonNull
         public Builder setModulation(@Modulation int modulation) {
@@ -257,6 +266,8 @@ public class IsdbsFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets Code rate.
+         *
+         * <p>Default value is {@link #CODERATE_UNDEFINED}.
          */
         @NonNull
         public Builder setCodeRate(@CodeRate int codeRate) {
@@ -265,6 +276,8 @@ public class IsdbsFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets Symbol Rate in symbols per second.
+         *
+         * <p>Default value is 0.
          */
         @NonNull
         public Builder setSymbolRate(int symbolRate) {
@@ -273,6 +286,8 @@ public class IsdbsFrontendSettings extends FrontendSettings {
         }
         /**
          * Sets Roll off type.
+         *
+         * <p>Default value is {@link #ROLLOFF_UNDEFINED}.
          */
         @NonNull
         public Builder setRolloff(@Rolloff int rolloff) {

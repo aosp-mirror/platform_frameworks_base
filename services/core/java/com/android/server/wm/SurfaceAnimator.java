@@ -36,6 +36,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.function.Supplier;
 
 /**
  * A class that can run animations on objects that have a set of child surfaces. We do this by
@@ -145,7 +146,7 @@ class SurfaceAnimator {
         if (mLeash == null) {
             mLeash = createAnimationLeash(mAnimatable, surface, t, type,
                     mAnimatable.getSurfaceWidth(), mAnimatable.getSurfaceHeight(), 0 /* x */,
-                    0 /* y */, hidden);
+                    0 /* y */, hidden, mService.mTransactionFactory);
             mAnimatable.onAnimationLeashCreated(t, mLeash);
         }
         mAnimatable.onLeashAnimationStarting(t, mLeash);
@@ -374,13 +375,21 @@ class SurfaceAnimator {
 
     static SurfaceControl createAnimationLeash(Animatable animatable, SurfaceControl surface,
             Transaction t, @AnimationType int type, int width, int height, int x, int y,
-            boolean hidden) {
+            boolean hidden, Supplier<Transaction> transactionFactory) {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
-                .setHidden(hidden)
                 .setName(surface + " - animation-leash");
         final SurfaceControl leash = builder.build();
+        if (!hidden) {
+            // TODO(b/151665759) Defer reparent calls
+            // We want the leash to be visible immediately but we want to set the effects on
+            // the layer. Since the transaction used in this function may be deferred, we apply
+            // another transaction immediately with the correct visibility and effects.
+            // If this doesn't work, you will can see the 2/3 button nav bar flicker during
+            // seamless rotation.
+            transactionFactory.get().unsetColor(leash).show(leash).apply();
+        }
         t.setWindowCrop(leash, width, height);
         t.setPosition(leash, x, y);
         t.show(leash);

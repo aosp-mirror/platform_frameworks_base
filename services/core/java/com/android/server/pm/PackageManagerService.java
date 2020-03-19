@@ -1548,7 +1548,6 @@ public class PackageManagerService extends IPackageManager.Stub
     final @Nullable String mConfiguratorPackage;
     final @Nullable String mAppPredictionServicePackage;
     final @Nullable String mIncidentReportApproverPackage;
-    final @Nullable String[] mTelephonyPackages;
     final @Nullable String mServicesExtensionPackageName;
     final @Nullable String mSharedSystemSharedLibraryPackageName;
     final @Nullable String mRetailDemoPackage;
@@ -2653,9 +2652,13 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
-        PackageManager.invalidatePackageInfoCache();
         PackageManager.disableApplicationInfoCache();
         PackageManager.disablePackageInfoCache();
+
+        // Avoid invalidation-thrashing by preventing cache invalidations from causing property
+        // writes if the cache isn't enabled yet.  We re-enable writes later when we're
+        // done initializing.
+        PackageManager.corkPackageInfoCache();
 
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog(TAG + "Timing",
                 Trace.TRACE_TAG_PACKAGE_MANAGER);
@@ -3181,7 +3184,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mConfiguratorPackage = getDeviceConfiguratorPackageName();
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
-            mTelephonyPackages = getTelephonyPackageNames();
             mRetailDemoPackage = getRetailDemoPackageName();
 
             // Now that we know all of the shared libraries, update all clients to have
@@ -3436,6 +3438,9 @@ public class PackageManagerService extends IPackageManager.Stub
         // CHECKSTYLE:ON IndentationCheck
 
         mModuleInfoProvider = new ModuleInfoProvider(mContext, this);
+
+        // Uncork cache invalidations and allow clients to cache package information.
+        PackageManager.uncorkPackageInfoCache();
 
         // Now after opening every single application zip, make sure they
         // are all flushed.  Not really needed, but keeps things nice and
@@ -19941,16 +19946,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public String[] getTelephonyPackageNames() {
-        String names = mContext.getString(R.string.config_telephonyPackages);
-        String[] telephonyPackageNames = null;
-        if (!TextUtils.isEmpty(names)) {
-            telephonyPackageNames = names.trim().split(",");
-        }
-        return ensureSystemPackageNames(telephonyPackageNames);
-    }
-
-    @Override
     public String getContentCaptureServicePackageName() {
         final String flattenedContentCaptureService =
                 mContext.getString(R.string.config_defaultContentCaptureService);
@@ -23337,8 +23332,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     return filterOnlySystemPackages(mIncidentReportApproverPackage);
                 case PackageManagerInternal.PACKAGE_APP_PREDICTOR:
                     return filterOnlySystemPackages(mAppPredictionServicePackage);
-                case PackageManagerInternal.PACKAGE_TELEPHONY:
-                    return filterOnlySystemPackages(mTelephonyPackages);
                 case PackageManagerInternal.PACKAGE_COMPANION:
                     return filterOnlySystemPackages("com.android.companiondevicemanager");
                 case PackageManagerInternal.PACKAGE_RETAIL_DEMO:
