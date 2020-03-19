@@ -5967,20 +5967,20 @@ package android.media.tv.tuner.frontend {
   }
 
   public interface ScanCallback {
-    method public void onAnalogSifStandard(int);
-    method public void onAtsc3PlpInfos(@NonNull android.media.tv.tuner.frontend.Atsc3PlpInfo[]);
-    method public void onDvbsStandard(int);
-    method public void onDvbtStandard(int);
-    method public void onFrequenciesReport(@NonNull int[]);
-    method public void onGroupIds(@NonNull int[]);
-    method public void onHierarchy(int);
-    method public void onInputStreamIds(@NonNull int[]);
+    method public void onAnalogSifStandardReported(int);
+    method public void onAtsc3PlpInfosReported(@NonNull android.media.tv.tuner.frontend.Atsc3PlpInfo[]);
+    method public void onDvbsStandardReported(int);
+    method public void onDvbtStandardReported(int);
+    method public void onFrequenciesReported(@NonNull int[]);
+    method public void onGroupIdsReported(@NonNull int[]);
+    method public void onHierarchyReported(int);
+    method public void onInputStreamIdsReported(@NonNull int[]);
     method public void onLocked();
-    method public void onPlpIds(@NonNull int[]);
+    method public void onPlpIdsReported(@NonNull int[]);
     method public void onProgress(@IntRange(from=0, to=100) int);
     method public void onScanStopped();
-    method public void onSignalType(int);
-    method public void onSymbolRates(@NonNull int[]);
+    method public void onSignalTypeReported(int);
+    method public void onSymbolRatesReported(@NonNull int[]);
   }
 
 }
