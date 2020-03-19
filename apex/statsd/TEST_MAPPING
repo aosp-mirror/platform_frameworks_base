@@ -1,6 +1,9 @@
 {
   "presubmit" : [
     {
+      "name" : "FrameworkStatsdTest"
+    },
+    {
       "name" : "LibStatsPullTests"
     }
   ]
