@@ -19,7 +19,6 @@ package android.media.tv.tuner;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
@@ -173,10 +172,8 @@ public class Lnb implements AutoCloseable {
      * @param voltage the power voltage constant the Lnb to use.
      * @return result status of the operation.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
     public int setVoltage(@Voltage int voltage) {
-        TunerUtils.checkTunerPermission(mContext);
         return nativeSetVoltage(voltage);
     }
 
@@ -186,10 +183,8 @@ public class Lnb implements AutoCloseable {
      * @param tone the tone mode the Lnb to use.
      * @return result status of the operation.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
     public int setTone(@Tone int tone) {
-        TunerUtils.checkTunerPermission(mContext);
         return nativeSetTone(tone);
     }
 
@@ -199,10 +194,8 @@ public class Lnb implements AutoCloseable {
      * @param position the position the Lnb to use.
      * @return result status of the operation.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
     public int setSatellitePosition(@Position int position) {
-        TunerUtils.checkTunerPermission(mContext);
         return nativeSetSatellitePosition(position);
     }
 
@@ -216,19 +209,15 @@ public class Lnb implements AutoCloseable {
      *
      * @return result status of the operation.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @Result
     public int sendDiseqcMessage(@NonNull byte[] message) {
-        TunerUtils.checkTunerPermission(mContext);
         return nativeSendDiseqcMessage(message);
     }
 
     /**
      * Releases the LNB instance.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     public void close() {
-        TunerUtils.checkTunerPermission(mContext);
         nativeClose();
     }
 }

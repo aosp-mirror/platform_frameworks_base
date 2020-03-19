@@ -1666,7 +1666,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (newNc.getNetworkSpecifier() != null) {
             newNc.setNetworkSpecifier(newNc.getNetworkSpecifier().redact());
         }
-        newNc.setAdministratorUids(Collections.EMPTY_LIST);
+        newNc.setAdministratorUids(new int[0]);
 
         return newNc;
     }
@@ -1727,7 +1727,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nc.setSingleUid(callerUid);
         }
         nc.setRequestorUidAndPackageName(callerUid, callerPackageName);
-        nc.setAdministratorUids(Collections.EMPTY_LIST);
+        nc.setAdministratorUids(new int[0]);
 
         // Clear owner UID; this can never come from an app.
         nc.setOwnerUid(INVALID_UID);
@@ -7864,7 +7864,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void clearNetworkCapabilitiesUids(@NonNull NetworkCapabilities nc) {
         nc.setUids(null);
-        nc.setAdministratorUids(Collections.EMPTY_LIST);
+        nc.setAdministratorUids(new int[0]);
         nc.setOwnerUid(Process.INVALID_UID);
     }
 
@@ -7911,8 +7911,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         // Administrator UIDs also contains the Owner UID
-        if (nai.networkCapabilities.getAdministratorUids().contains(callbackUid)) {
-            return true;
+        final int[] administratorUids = nai.networkCapabilities.getAdministratorUids();
+        for (final int uid : administratorUids) {
+            if (uid == callbackUid) return true;
         }
 
         return false;

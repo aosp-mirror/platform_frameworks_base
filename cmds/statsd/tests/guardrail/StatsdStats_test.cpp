@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/guardrail/StatsdStats.h"
-#include "statslog.h"
+#include "statslog_statsdtest.h"
 #include "tests/statsd_test_util.h"
 
 #include <gtest/gtest.h>
@@ -222,11 +222,11 @@ TEST(StatsdStatsTest, TestAtomLog) {
     StatsdStats stats;
     time_t now = time(nullptr);
     // old event, we get it from the stats buffer. should be ignored.
-    stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, 1000);
+    stats.noteAtomLogged(util::SENSOR_STATE_CHANGED, 1000);
 
-    stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 1);
-    stats.noteAtomLogged(android::util::SENSOR_STATE_CHANGED, now + 2);
-    stats.noteAtomLogged(android::util::APP_CRASH_OCCURRED, now + 3);
+    stats.noteAtomLogged(util::SENSOR_STATE_CHANGED, now + 1);
+    stats.noteAtomLogged(util::SENSOR_STATE_CHANGED, now + 2);
+    stats.noteAtomLogged(util::APP_CRASH_OCCURRED, now + 3);
 
     vector<uint8_t> output;
     stats.dumpStats(&output, false);
@@ -239,10 +239,10 @@ TEST(StatsdStatsTest, TestAtomLog) {
     bool dropboxAtomGood = false;
 
     for (const auto& atomStats : report.atom_stats()) {
-        if (atomStats.tag() == android::util::SENSOR_STATE_CHANGED && atomStats.count() == 3) {
+        if (atomStats.tag() == util::SENSOR_STATE_CHANGED && atomStats.count() == 3) {
             sensorAtomGood = true;
         }
-        if (atomStats.tag() == android::util::APP_CRASH_OCCURRED && atomStats.count() == 1) {
+        if (atomStats.tag() == util::APP_CRASH_OCCURRED && atomStats.count() == 1) {
             dropboxAtomGood = true;
         }
     }
@@ -287,21 +287,21 @@ TEST(StatsdStatsTest, TestNonPlatformAtomLog) {
 TEST(StatsdStatsTest, TestPullAtomStats) {
     StatsdStats stats;
 
-    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 3333L);
-    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 2222L);
-    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 4444L);
+    stats.updateMinPullIntervalSec(util::DISK_SPACE, 3333L);
+    stats.updateMinPullIntervalSec(util::DISK_SPACE, 2222L);
+    stats.updateMinPullIntervalSec(util::DISK_SPACE, 4444L);
 
-    stats.notePull(android::util::DISK_SPACE);
-    stats.notePullTime(android::util::DISK_SPACE, 1111L);
-    stats.notePullDelay(android::util::DISK_SPACE, 1111L);
-    stats.notePull(android::util::DISK_SPACE);
-    stats.notePullTime(android::util::DISK_SPACE, 3333L);
-    stats.notePullDelay(android::util::DISK_SPACE, 3335L);
-    stats.notePull(android::util::DISK_SPACE);
-    stats.notePullFromCache(android::util::DISK_SPACE);
-    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, true);
-    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, false);
-    stats.notePullerCallbackRegistrationChanged(android::util::DISK_SPACE, true);
+    stats.notePull(util::DISK_SPACE);
+    stats.notePullTime(util::DISK_SPACE, 1111L);
+    stats.notePullDelay(util::DISK_SPACE, 1111L);
+    stats.notePull(util::DISK_SPACE);
+    stats.notePullTime(util::DISK_SPACE, 3333L);
+    stats.notePullDelay(util::DISK_SPACE, 3335L);
+    stats.notePull(util::DISK_SPACE);
+    stats.notePullFromCache(util::DISK_SPACE);
+    stats.notePullerCallbackRegistrationChanged(util::DISK_SPACE, true);
+    stats.notePullerCallbackRegistrationChanged(util::DISK_SPACE, false);
+    stats.notePullerCallbackRegistrationChanged(util::DISK_SPACE, true);
 
 
     vector<uint8_t> output;
@@ -312,7 +312,7 @@ TEST(StatsdStatsTest, TestPullAtomStats) {
 
     EXPECT_EQ(1, report.pulled_atom_stats_size());
 
-    EXPECT_EQ(android::util::DISK_SPACE, report.pulled_atom_stats(0).atom_id());
+    EXPECT_EQ(util::DISK_SPACE, report.pulled_atom_stats(0).atom_id());
     EXPECT_EQ(3, report.pulled_atom_stats(0).total_pull());
     EXPECT_EQ(1, report.pulled_atom_stats(0).total_pull_from_cache());
     EXPECT_EQ(2222L, report.pulled_atom_stats(0).min_pull_interval_sec());

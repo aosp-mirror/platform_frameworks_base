@@ -92,6 +92,22 @@ class ServiceWrapperTest : SysuiTestCase() {
     }
 
     @Test
+    fun testLoadSuggested_happyPath() {
+        val result = wrapper.loadSuggested(subscriber)
+
+        assertTrue(result)
+        verify(service).loadSuggested(subscriber)
+    }
+
+    @Test
+    fun testLoadSuggested_error() {
+        `when`(service.loadSuggested(any())).thenThrow(exception)
+        val result = wrapper.loadSuggested(subscriber)
+
+        assertFalse(result)
+    }
+
+    @Test
     fun testSubscribe_happyPath() {
         val list = listOf("TEST_ID")
         val result = wrapper.subscribe(list, subscriber)

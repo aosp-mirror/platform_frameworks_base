@@ -31,7 +31,6 @@ import java.util.Objects;
  */
 public final class TextClassificationContext implements Parcelable {
 
-    // NOTE: Modify packageName only in the constructor or in setSystemTextClassifierMetadata()
     private String mPackageName;
     private final String mWidgetType;
     @Nullable private final String mWidgetVersion;
@@ -47,7 +46,7 @@ public final class TextClassificationContext implements Parcelable {
     }
 
     /**
-     * Returns the package name for the calling package.
+     * Returns the package name of the app that this context originated in.
      */
     @NonNull
     public String getPackageName() {
@@ -57,14 +56,10 @@ public final class TextClassificationContext implements Parcelable {
     /**
      * Sets the information about the {@link SystemTextClassifier} that sent this request.
      *
-     * <p><b>NOTE: </b>This will override the value returned in {@link getPackageName()}.
      * @hide
      */
     void setSystemTextClassifierMetadata(@Nullable SystemTextClassifierMetadata systemTcMetadata) {
         mSystemTcMetadata = systemTcMetadata;
-        if (mSystemTcMetadata != null) {
-            mPackageName = mSystemTcMetadata.getCallingPackageName();
-        }
     }
 
     /**

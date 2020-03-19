@@ -52,7 +52,7 @@ public class SurfaceControlViewHost {
      * a SurfaceView by calling {@link SurfaceView#setChildSurfacePackage}.
      */
     public static final class SurfacePackage implements Parcelable {
-        private final SurfaceControl mSurfaceControl;
+        private SurfaceControl mSurfaceControl;
         private final IAccessibilityEmbeddedConnection mAccessibilityEmbeddedConnection;
 
         SurfacePackage(SurfaceControl sc, IAccessibilityEmbeddedConnection connection) {
@@ -95,6 +95,19 @@ public class SurfaceControlViewHost {
         public void writeToParcel(@NonNull Parcel out, int flags) {
             mSurfaceControl.writeToParcel(out, flags);
             out.writeStrongBinder(mAccessibilityEmbeddedConnection.asBinder());
+        }
+
+        /**
+         * Release the {@link SurfaceControl} associated with this package.
+         * It's not necessary to call this if you pass the package to
+         * {@link SurfaceView#setChildSurfacePackage} as {@link SurfaceView} will
+         * take ownership in that case.
+         */
+        public void release() {
+            if (mSurfaceControl != null) {
+                mSurfaceControl.release();
+             }
+             mSurfaceControl = null;
         }
 
         public static final @NonNull Creator<SurfacePackage> CREATOR
@@ -220,7 +233,7 @@ public class SurfaceControlViewHost {
      * and render the object unusable.
      */
     public void release() {
-        mViewRoot.dispatchDetachedFromWindow();
+        mViewRoot.die(false /* immediate */);
         mSurfaceControl.release();
     }
 

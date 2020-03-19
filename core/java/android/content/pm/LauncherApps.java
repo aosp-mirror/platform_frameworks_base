@@ -51,6 +51,7 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -67,8 +68,10 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.pooled.PooledLambda;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1198,6 +1201,35 @@ public class LauncherApps {
     }
 
     /**
+     * @hide internal/unit tests only
+     */
+    @VisibleForTesting
+    public ParcelFileDescriptor getUriShortcutIconFd(@NonNull ShortcutInfo shortcut) {
+        return getUriShortcutIconFd(shortcut.getPackage(), shortcut.getId(), shortcut.getUserId());
+    }
+
+    private ParcelFileDescriptor getUriShortcutIconFd(@NonNull String packageName,
+            @NonNull String shortcutId, int userId) {
+        String uri = null;
+        try {
+            uri = mService.getShortcutIconUri(mContext.getPackageName(), packageName, shortcutId,
+                    userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        if (uri == null) {
+            return null;
+        }
+        try {
+            return mContext.getContentResolver().openFileDescriptor(Uri.parse(uri), "r");
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "Icon file not found: " + uri);
+            return null;
+        }
+    }
+
+    /**
      * Returns the icon for this shortcut, without any badging for the profile.
      *
      * <p>The calling launcher application must be allowed to access the shortcut information,
@@ -1217,26 +1249,10 @@ public class LauncherApps {
     public Drawable getShortcutIconDrawable(@NonNull ShortcutInfo shortcut, int density) {
         if (shortcut.hasIconFile()) {
             final ParcelFileDescriptor pfd = getShortcutIconFd(shortcut);
-            if (pfd == null) {
-                return null;
-            }
-            try {
-                final Bitmap bmp = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
-                if (bmp != null) {
-                    BitmapDrawable dr = new BitmapDrawable(mContext.getResources(), bmp);
-                    if (shortcut.hasAdaptiveBitmap()) {
-                        return new AdaptiveIconDrawable(null, dr);
-                    } else {
-                        return dr;
-                    }
-                }
-                return null;
-            } finally {
-                try {
-                    pfd.close();
-                } catch (IOException ignore) {
-                }
-            }
+            return loadDrawableFromFileDescriptor(pfd, shortcut.hasAdaptiveBitmap());
+        } else if (shortcut.hasIconUri()) {
+            final ParcelFileDescriptor pfd = getUriShortcutIconFd(shortcut);
+            return loadDrawableFromFileDescriptor(pfd, shortcut.hasAdaptiveBitmap());
         } else if (shortcut.hasIconResource()) {
             return loadDrawableResourceFromPackage(shortcut.getPackage(),
                     shortcut.getIconResourceId(), shortcut.getUserHandle(), density);
@@ -1257,6 +1273,29 @@ public class LauncherApps {
             }
         } else {
             return null; // Has no icon.
+        }
+    }
+
+    private Drawable loadDrawableFromFileDescriptor(ParcelFileDescriptor pfd, boolean adaptive) {
+        if (pfd == null) {
+            return null;
+        }
+        try {
+            final Bitmap bmp = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+            if (bmp != null) {
+                BitmapDrawable dr = new BitmapDrawable(mContext.getResources(), bmp);
+                if (adaptive) {
+                    return new AdaptiveIconDrawable(null, dr);
+                } else {
+                    return dr;
+                }
+            }
+            return null;
+        } finally {
+            try {
+                pfd.close();
+            } catch (IOException ignore) {
+            }
         }
     }
 

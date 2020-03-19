@@ -65,6 +65,7 @@ import android.app.Activity;
 import android.app.Instrumentation;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.os.Bundle;
 import android.support.test.uiautomator.UiDevice;
 import android.text.InputType;
 import android.text.Selection;
@@ -75,6 +76,7 @@ import android.view.ActionMode;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
@@ -355,6 +357,20 @@ public class TextViewActivityTest {
         onView(withId(R.id.nonselectable_textview)).perform(clickOnTextAtIndex(0));
         sleepForFloatingToolbarPopup();
         assertFalse(textView.hasSelection());
+    }
+
+    @Test
+    public void testToolbarAppearsAccessibilityLongClick() throws Throwable {
+        final String text = "Toolbar appears after performing accessibility's ACTION_LONG_CLICK.";
+        mActivityRule.runOnUiThread(() -> {
+            final TextView textView = mActivity.findViewById(R.id.textview);
+            final Bundle args = new Bundle();
+            textView.performAccessibilityAction(AccessibilityNodeInfo.ACTION_LONG_CLICK, args);
+        });
+        mInstrumentation.waitForIdleSync();
+
+        sleepForFloatingToolbarPopup();
+        assertFloatingToolbarIsDisplayed();
     }
 
     @Test

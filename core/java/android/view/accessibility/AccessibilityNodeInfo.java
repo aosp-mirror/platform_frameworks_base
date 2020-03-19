@@ -2876,7 +2876,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Replaces any ClickableSpans in mText with placeholders.
+     * Replaces any ClickableSpan in the given {@code text} with placeholders.
      *
      * @param text The text.
      *
@@ -2910,7 +2910,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Replace any ImageSpans in mText with its content description.
+     * Replaces any ReplacementSpan in the given {@code text} if the object has content description.
      *
      * @param text The text.
      *

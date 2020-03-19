@@ -61,7 +61,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 //// State with no primary fields - ScreenStateChanged
 //std::shared_ptr<LogEvent> buildScreenEvent(int state) {
 //    std::shared_ptr<LogEvent> event =
-//            std::make_shared<LogEvent>(android::util::SCREEN_STATE_CHANGED, 1000 /*timestamp*/);
+//            std::make_shared<LogEvent>(util::SCREEN_STATE_CHANGED, 1000 /*timestamp*/);
 //    event->write((int32_t)state);
 //    event->init();
 //    return event;
@@ -70,7 +70,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 //// State with one primary field - UidProcessStateChanged
 //std::shared_ptr<LogEvent> buildUidProcessEvent(int uid, int state) {
 //    std::shared_ptr<LogEvent> event =
-//            std::make_shared<LogEvent>(android::util::UID_PROCESS_STATE_CHANGED, 1000 /*timestamp*/);
+//            std::make_shared<LogEvent>(util::UID_PROCESS_STATE_CHANGED, 1000 /*timestamp*/);
 //    event->write((int32_t)uid);
 //    event->write((int32_t)state);
 //    event->init();
@@ -85,7 +85,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 //    attr.set_uid(uid);
 //
 //    std::shared_ptr<LogEvent> event =
-//            std::make_shared<LogEvent>(android::util::WAKELOCK_STATE_CHANGED, 1000 /* timestamp */);
+//            std::make_shared<LogEvent>(util::WAKELOCK_STATE_CHANGED, 1000 /* timestamp */);
 //    event->write(chain);
 //    event->write((int32_t)1);  // PARTIAL_WAKE_LOCK
 //    event->write(tag);
@@ -97,7 +97,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 //// State with multiple primary fields - OverlayStateChanged
 //std::shared_ptr<LogEvent> buildOverlayEvent(int uid, const std::string& packageName, int state) {
 //    std::shared_ptr<LogEvent> event =
-//            std::make_shared<LogEvent>(android::util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
+//            std::make_shared<LogEvent>(util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
 //    event->write((int32_t)uid);
 //    event->write(packageName);
 //    event->write(true);  // using_alert_window
@@ -109,7 +109,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 //// Incorrect event - missing fields
 //std::shared_ptr<LogEvent> buildIncorrectOverlayEvent(int uid, const std::string& packageName, int state) {
 //    std::shared_ptr<LogEvent> event =
-//            std::make_shared<LogEvent>(android::util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
+//            std::make_shared<LogEvent>(util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
 //    event->write((int32_t)uid);
 //    event->write(packageName);
 //    event->write((int32_t)state);
@@ -120,7 +120,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 //// Incorrect event - exclusive state has wrong type
 //std::shared_ptr<LogEvent> buildOverlayEventBadStateType(int uid, const std::string& packageName) {
 //    std::shared_ptr<LogEvent> event =
-//            std::make_shared<LogEvent>(android::util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
+//            std::make_shared<LogEvent>(util::OVERLAY_STATE_CHANGED, 1000 /*timestamp*/);
 //    event->write((int32_t)uid);
 //    event->write(packageName);
 //    event->write(true);
@@ -136,7 +136,7 @@ int getStateInt(StateManager& mgr, int atomId, const HashableDimensionKey& query
 //    attr.set_uid(uid);
 //
 //    std::shared_ptr<LogEvent> event =
-//            std::make_shared<LogEvent>(android::util::BLE_SCAN_STATE_CHANGED, 1000);
+//            std::make_shared<LogEvent>(util::BLE_SCAN_STATE_CHANGED, 1000);
 //    event->write(chain);
 //    event->write(reset ? 2 : acquire ? 1 : 0);  // PARTIAL_WAKE_LOCK
 //    event->write(0);                            // filtered
@@ -216,7 +216,7 @@ TEST(StateManagerTest, TestStateManagerGetInstance) {
     StateManager& mgr = StateManager::getInstance();
     mgr.clear();
 
-    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1);
+    mgr.registerListener(util::SCREEN_STATE_CHANGED, listener1);
     EXPECT_EQ(1, mgr.getStateTrackersCount());
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
 }
@@ -236,22 +236,22 @@ TEST(StateTrackerTest, TestRegisterListener) {
 
     // Register listener to non-existing StateTracker
     EXPECT_EQ(0, mgr.getStateTrackersCount());
-    EXPECT_TRUE(mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1));
+    EXPECT_TRUE(mgr.registerListener(util::SCREEN_STATE_CHANGED, listener1));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
-    EXPECT_EQ(1, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(1, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
 
     // Register listener to existing StateTracker
-    EXPECT_TRUE(mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener2));
+    EXPECT_TRUE(mgr.registerListener(util::SCREEN_STATE_CHANGED, listener2));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
-    EXPECT_EQ(2, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(2, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
 
     // Register already registered listener to existing StateTracker
-    EXPECT_TRUE(mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener2));
+    EXPECT_TRUE(mgr.registerListener(util::SCREEN_STATE_CHANGED, listener2));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
-    EXPECT_EQ(2, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(2, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
 
     // Register listener to non-state atom
-    EXPECT_FALSE(mgr.registerListener(android::util::BATTERY_LEVEL_CHANGED, listener2));
+    EXPECT_FALSE(mgr.registerListener(util::BATTERY_LEVEL_CHANGED, listener2));
     EXPECT_EQ(1, mgr.getStateTrackersCount());
 }
 
@@ -270,28 +270,28 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 
     // Unregister listener from non-existing StateTracker
     EXPECT_EQ(0, mgr.getStateTrackersCount());
-    mgr.unregisterListener(android::util::SCREEN_STATE_CHANGED, listener1);
+    mgr.unregisterListener(util::SCREEN_STATE_CHANGED, listener1);
     EXPECT_EQ(0, mgr.getStateTrackersCount());
-    EXPECT_EQ(-1, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(-1, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
 
     // Unregister non-registered listener from existing StateTracker
-    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1);
+    mgr.registerListener(util::SCREEN_STATE_CHANGED, listener1);
     EXPECT_EQ(1, mgr.getStateTrackersCount());
-    EXPECT_EQ(1, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
-    mgr.unregisterListener(android::util::SCREEN_STATE_CHANGED, listener2);
+    EXPECT_EQ(1, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
+    mgr.unregisterListener(util::SCREEN_STATE_CHANGED, listener2);
     EXPECT_EQ(1, mgr.getStateTrackersCount());
-    EXPECT_EQ(1, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(1, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
 
     // Unregister second-to-last listener from StateTracker
-    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener2);
-    mgr.unregisterListener(android::util::SCREEN_STATE_CHANGED, listener1);
+    mgr.registerListener(util::SCREEN_STATE_CHANGED, listener2);
+    mgr.unregisterListener(util::SCREEN_STATE_CHANGED, listener1);
     EXPECT_EQ(1, mgr.getStateTrackersCount());
-    EXPECT_EQ(1, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(1, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
 
     // Unregister last listener from StateTracker
-    mgr.unregisterListener(android::util::SCREEN_STATE_CHANGED, listener2);
+    mgr.unregisterListener(util::SCREEN_STATE_CHANGED, listener2);
     EXPECT_EQ(0, mgr.getStateTrackersCount());
-    EXPECT_EQ(-1, mgr.getListenersCount(android::util::SCREEN_STATE_CHANGED));
+    EXPECT_EQ(-1, mgr.getListenersCount(util::SCREEN_STATE_CHANGED));
 }
 // TODO(b/149590301): Update these tests to use new socket schema.
 ///**
@@ -305,7 +305,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //TEST(StateTrackerTest, TestStateChangeNested) {
 //    sp<TestStateListener> listener = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::WAKELOCK_STATE_CHANGED, listener);
+//    mgr.registerListener(util::WAKELOCK_STATE_CHANGED, listener);
 //
 //    std::shared_ptr<LogEvent> event1 =
 //            buildPartialWakelockEvent(1000 /* uid */, "tag", true /*acquire*/);
@@ -342,7 +342,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //TEST(StateTrackerTest, TestStateChangeReset) {
 //    sp<TestStateListener> listener = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::BLE_SCAN_STATE_CHANGED, listener);
+//    mgr.registerListener(util::BLE_SCAN_STATE_CHANGED, listener);
 //
 //    std::shared_ptr<LogEvent> event1 =
 //            buildBleScanEvent(1000 /* uid */, true /*acquire*/, false /*reset*/);
@@ -375,7 +375,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //TEST(StateTrackerTest, TestStateChangeNoPrimaryFields) {
 //    sp<TestStateListener> listener1 = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1);
+//    mgr.registerListener(util::SCREEN_STATE_CHANGED, listener1);
 //
 //    // log event
 //    std::shared_ptr<LogEvent> event =
@@ -390,7 +390,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //    // check StateTracker was updated by querying for state
 //    HashableDimensionKey queryKey = DEFAULT_DIMENSION_KEY;
 //    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
-//              getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, queryKey));
+//              getStateInt(mgr, util::SCREEN_STATE_CHANGED, queryKey));
 //}
 //
 ///**
@@ -400,7 +400,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //TEST(StateTrackerTest, TestStateChangeOnePrimaryField) {
 //    sp<TestStateListener> listener1 = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::UID_PROCESS_STATE_CHANGED, listener1);
+//    mgr.registerListener(util::UID_PROCESS_STATE_CHANGED, listener1);
 //
 //    // log event
 //    std::shared_ptr<LogEvent> event =
@@ -416,13 +416,13 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //    HashableDimensionKey queryKey;
 //    getUidProcessKey(1000 /* uid */, &queryKey);
 //    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_TOP,
-//              getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey));
+//              getStateInt(mgr, util::UID_PROCESS_STATE_CHANGED, queryKey));
 //}
 //
 //TEST(StateTrackerTest, TestStateChangePrimaryFieldAttrChain) {
 //    sp<TestStateListener> listener1 = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::WAKELOCK_STATE_CHANGED, listener1);
+//    mgr.registerListener(util::WAKELOCK_STATE_CHANGED, listener1);
 //
 //    // Log event.
 //    std::shared_ptr<LogEvent> event =
@@ -430,7 +430,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //    mgr.onLogEvent(*event);
 //
 //    EXPECT_EQ(1, mgr.getStateTrackersCount());
-//    EXPECT_EQ(1, mgr.getListenersCount(android::util::WAKELOCK_STATE_CHANGED));
+//    EXPECT_EQ(1, mgr.getListenersCount(util::WAKELOCK_STATE_CHANGED));
 //
 //    // Check listener was updated.
 //    EXPECT_EQ(1, listener1->updates.size());
@@ -444,19 +444,19 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //    HashableDimensionKey queryKey;
 //    getPartialWakelockKey(1001 /* uid */, "tag1", &queryKey);
 //    EXPECT_EQ(WakelockStateChanged::ACQUIRE,
-//              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey));
+//              getStateInt(mgr, util::WAKELOCK_STATE_CHANGED, queryKey));
 //
 //    // No state stored for this query key.
 //    HashableDimensionKey queryKey2;
 //    getPartialWakelockKey(1002 /* uid */, "tag1", &queryKey2);
 //    EXPECT_EQ(WakelockStateChanged::RELEASE,
-//              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey2));
+//              getStateInt(mgr, util::WAKELOCK_STATE_CHANGED, queryKey2));
 //
 //    // Partial query fails.
 //    HashableDimensionKey queryKey3;
 //    getPartialWakelockKey(1001 /* uid */, &queryKey3);
 //    EXPECT_EQ(WakelockStateChanged::RELEASE,
-//              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey3));
+//              getStateInt(mgr, util::WAKELOCK_STATE_CHANGED, queryKey3));
 //}
 //
 ///**
@@ -466,7 +466,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //TEST(StateTrackerTest, TestStateChangeMultiplePrimaryFields) {
 //    sp<TestStateListener> listener1 = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::OVERLAY_STATE_CHANGED, listener1);
+//    mgr.registerListener(util::OVERLAY_STATE_CHANGED, listener1);
 //
 //    // log event
 //    std::shared_ptr<LogEvent> event =
@@ -482,7 +482,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //    HashableDimensionKey queryKey;
 //    getOverlayKey(1000 /* uid */, "package1", &queryKey);
 //    EXPECT_EQ(OverlayStateChanged::ENTERED,
-//              getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey));
+//              getStateInt(mgr, util::OVERLAY_STATE_CHANGED, queryKey));
 //}
 //
 ///**
@@ -493,7 +493,7 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //TEST(StateTrackerTest, TestStateChangeEventError) {
 //    sp<TestStateListener> listener1 = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::OVERLAY_STATE_CHANGED, listener1);
+//    mgr.registerListener(util::OVERLAY_STATE_CHANGED, listener1);
 //
 //    // log event
 //    std::shared_ptr<LogEvent> event1 =
@@ -513,10 +513,10 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //    sp<TestStateListener> listener3 = new TestStateListener();
 //    sp<TestStateListener> listener4 = new TestStateListener();
 //    StateManager mgr;
-//    mgr.registerListener(android::util::SCREEN_STATE_CHANGED, listener1);
-//    mgr.registerListener(android::util::UID_PROCESS_STATE_CHANGED, listener2);
-//    mgr.registerListener(android::util::OVERLAY_STATE_CHANGED, listener3);
-//    mgr.registerListener(android::util::WAKELOCK_STATE_CHANGED, listener4);
+//    mgr.registerListener(util::SCREEN_STATE_CHANGED, listener1);
+//    mgr.registerListener(util::UID_PROCESS_STATE_CHANGED, listener2);
+//    mgr.registerListener(util::OVERLAY_STATE_CHANGED, listener3);
+//    mgr.registerListener(util::WAKELOCK_STATE_CHANGED, listener4);
 //
 //    std::shared_ptr<LogEvent> event1 = buildUidProcessEvent(
 //            1000,
@@ -554,40 +554,40 @@ TEST(StateTrackerTest, TestUnregisterListener) {
 //    HashableDimensionKey queryKey1;
 //    getUidProcessKey(1001, &queryKey1);
 //    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_FOREGROUND_SERVICE,
-//              getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+//              getStateInt(mgr, util::UID_PROCESS_STATE_CHANGED, queryKey1));
 //
 //    // Query for UidProcessState of uid 1004 - not in state map
 //    HashableDimensionKey queryKey2;
 //    getUidProcessKey(1004, &queryKey2);
-//    EXPECT_EQ(-1, getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED,
+//    EXPECT_EQ(-1, getStateInt(mgr, util::UID_PROCESS_STATE_CHANGED,
 //                              queryKey2));  // default state
 //
 //    // Query for UidProcessState of uid 1001 - after change in state
 //    mgr.onLogEvent(*event4);
 //    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_TOP,
-//              getStateInt(mgr, android::util::UID_PROCESS_STATE_CHANGED, queryKey1));
+//              getStateInt(mgr, util::UID_PROCESS_STATE_CHANGED, queryKey1));
 //
 //    // Query for ScreenState
 //    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
-//              getStateInt(mgr, android::util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
+//              getStateInt(mgr, util::SCREEN_STATE_CHANGED, DEFAULT_DIMENSION_KEY));
 //
 //    // Query for OverlayState of uid 1000, package name "package2"
 //    HashableDimensionKey queryKey3;
 //    getOverlayKey(1000, "package2", &queryKey3);
 //    EXPECT_EQ(OverlayStateChanged::EXITED,
-//              getStateInt(mgr, android::util::OVERLAY_STATE_CHANGED, queryKey3));
+//              getStateInt(mgr, util::OVERLAY_STATE_CHANGED, queryKey3));
 //
 //    // Query for WakelockState of uid 1005, tag 2
 //    HashableDimensionKey queryKey4;
 //    getPartialWakelockKey(1005, "tag2", &queryKey4);
 //    EXPECT_EQ(WakelockStateChanged::RELEASE,
-//              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey4));
+//              getStateInt(mgr, util::WAKELOCK_STATE_CHANGED, queryKey4));
 //
 //    // Query for WakelockState of uid 1005, tag 1
 //    HashableDimensionKey queryKey5;
 //    getPartialWakelockKey(1005, "tag1", &queryKey5);
 //    EXPECT_EQ(WakelockStateChanged::ACQUIRE,
-//              getStateInt(mgr, android::util::WAKELOCK_STATE_CHANGED, queryKey5));
+//              getStateInt(mgr, util::WAKELOCK_STATE_CHANGED, queryKey5));
 //}
 
 }  // namespace statsd

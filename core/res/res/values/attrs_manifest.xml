@@ -296,9 +296,6 @@
             granted to the system app predictor -->
         <flag name="appPredictor" value="0x200000" />
         <!-- Additional flag from base permission type: this permission can be automatically
-            granted to the system telephony apps -->
-        <flag name="telephony" value="0x400000" />
-        <!-- Additional flag from base permission type: this permission can be automatically
             granted to the system companion device manager service -->
         <flag name="companion" value="0x800000" />
         <!-- Additional flag from base permission type: this permission will be granted to the
@@ -1835,7 +1832,7 @@
              revoked when the app is unused for an extended amount of time.
 
              The default value is {@code false}. -->
-        <attr name="requestDontAutoRevokePermissions" format="boolean" />
+        <attr name="requestAutoRevokePermissionsExemption" format="boolean" />
 
         <!-- If {@code true} its permissions shouldn't get automatically
              revoked when the app is unused for an extended amount of time.
@@ -1843,7 +1840,7 @@
              This implies {@code requestDontAutoRevokePermissions=true}
 
              The default value is {@code false}. -->
-        <attr name="allowDontAutoRevokePermissions" format="boolean" />
+        <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.

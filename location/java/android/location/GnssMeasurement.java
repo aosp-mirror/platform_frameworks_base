@@ -21,8 +21,8 @@ import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasuremen
 import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_CARRIER_FREQUENCY;
 import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_CARRIER_PHASE;
 import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_CARRIER_PHASE_UNCERTAINTY;
-import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_RECEIVER_ISB;
-import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_RECEIVER_ISB_UNCERTAINTY;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_FULL_ISB;
+import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_FULL_ISB_UNCERTAINTY;
 import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_SATELLITE_ISB;
 import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_SATELLITE_ISB_UNCERTAINTY;
 import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasurementFlags.HAS_SNR;
@@ -63,8 +63,8 @@ public final class GnssMeasurement implements Parcelable {
     private double mSnrInDb;
     private double mAutomaticGainControlLevelInDb;
     @NonNull private String mCodeType;
-    private double mReceiverInterSignalBiasNanos;
-    private double mReceiverInterSignalBiasUncertaintyNanos;
+    private double mFullInterSignalBiasNanos;
+    private double mFullInterSignalBiasUncertaintyNanos;
     private double mSatelliteInterSignalBiasNanos;
     private double mSatelliteInterSignalBiasUncertaintyNanos;
 
@@ -268,9 +268,9 @@ public final class GnssMeasurement implements Parcelable {
         mSnrInDb = measurement.mSnrInDb;
         mAutomaticGainControlLevelInDb = measurement.mAutomaticGainControlLevelInDb;
         mCodeType = measurement.mCodeType;
-        mReceiverInterSignalBiasNanos = measurement.mReceiverInterSignalBiasNanos;
-        mReceiverInterSignalBiasUncertaintyNanos =
-                measurement.mReceiverInterSignalBiasUncertaintyNanos;
+        mFullInterSignalBiasNanos = measurement.mFullInterSignalBiasNanos;
+        mFullInterSignalBiasUncertaintyNanos =
+                measurement.mFullInterSignalBiasUncertaintyNanos;
         mSatelliteInterSignalBiasNanos = measurement.mSatelliteInterSignalBiasNanos;
         mSatelliteInterSignalBiasUncertaintyNanos =
                 measurement.mSatelliteInterSignalBiasUncertaintyNanos;
@@ -1435,99 +1435,110 @@ public final class GnssMeasurement implements Parcelable {
     }
 
     /**
-     * Returns {@code true} if {@link #getReceiverInterSignalBiasNanos()} is available,
+     * Returns {@code true} if {@link #getFullInterSignalBiasNanos()} is available,
      * {@code false} otherwise.
      */
-    public boolean hasReceiverInterSignalBiasNanos() {
-        return isFlagSet(HAS_RECEIVER_ISB);
+    public boolean hasFullInterSignalBiasNanos() {
+        return isFlagSet(HAS_FULL_ISB);
     }
 
     /**
-     * Gets the GNSS measurement's receiver inter-signal bias in nanoseconds with sub-nanosecond
-     * accuracy.
+     * Gets the GNSS measurement's inter-signal bias in nanoseconds with sub-nanosecond accuracy.
      *
-     * <p>This value is the estimated receiver-side inter-system (different from the
-     * constellation in {@link GnssClock#getReferenceConstellationTypeForIsb()} bias and
-     * inter-frequency (different from the carrier frequency in
-     * {@link GnssClock#getReferenceCarrierFrequencyHzForIsb()}) bias. The reported receiver
-     * inter-signal bias must include signal delays caused by:
+     * <p>This value is the sum of the estimated receiver-side and the space-segment-side
+     * inter-system bias, inter-frequency bias and inter-code bias, including:
      *
      * <ul>
-     * <li>Receiver inter-constellation bias</li>
-     * <li>Receiver inter-frequency bias</li>
-     * <li>Receiver inter-code bias</li>
+     * <li>Receiver inter-constellation bias (with respect to the constellation in
+     * {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
+     * <li>Receiver inter-frequency bias (with respect to the carrier frequency in
+     * {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
+     * <li>Receiver inter-code bias (with respect to the code type in
+     * {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
+     * <li>Master clock bias (e.g., GPS-GAL Time Offset (GGTO), GPS-UTC Time Offset (TauGps),
+     * BDS-GLO Time Offset (BGTO))(with respect to the constellation in
+     * {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
+     * <li>Group delay (e.g., Total Group Delay (TGD))</li>
+     * <li>Satellite inter-frequency bias (GLO only) (with respect to the carrier frequency in
+     * {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
+     * <li>Satellite inter-code bias (e.g., Differential Code Bias (DCB)) (with respect to the code
+     * type in {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
      * </ul>
+     *
+     * <p>If a component of the above is already compensated in the provided
+     * {@link GnssMeasurement#getReceivedSvTimeNanos()}, then it must not be included in the
+     * reported full ISB.
      *
      * <p>The value does not include the inter-frequency Ionospheric bias.
      *
-     * <p>The value is only available if {@link #hasReceiverInterSignalBiasNanos()} is {@code true}.
+     * <p>The value is only available if {@link #hasFullInterSignalBiasNanos()} is {@code true}.
      */
-    public double getReceiverInterSignalBiasNanos() {
-        return mReceiverInterSignalBiasNanos;
+    public double getFullInterSignalBiasNanos() {
+        return mFullInterSignalBiasNanos;
     }
 
     /**
-     * Sets the GNSS measurement's receiver inter-signal bias in nanoseconds.
+     * Sets the GNSS measurement's inter-signal bias in nanoseconds.
      *
      * @hide
      */
     @TestApi
-    public void setReceiverInterSignalBiasNanos(double receiverInterSignalBiasNanos) {
-        setFlag(HAS_RECEIVER_ISB);
-        mReceiverInterSignalBiasNanos = receiverInterSignalBiasNanos;
+    public void setFullInterSignalBiasNanos(double fullInterSignalBiasNanos) {
+        setFlag(HAS_FULL_ISB);
+        mFullInterSignalBiasNanos = fullInterSignalBiasNanos;
     }
 
     /**
-     * Resets the GNSS measurement's receiver inter-signal bias in nanoseconds.
+     * Resets the GNSS measurement's inter-signal bias in nanoseconds.
      *
      * @hide
      */
     @TestApi
-    public void resetReceiverInterSignalBiasNanos() {
-        resetFlag(HAS_RECEIVER_ISB);
+    public void resetFullInterSignalBiasNanos() {
+        resetFlag(HAS_FULL_ISB);
     }
 
     /**
-     * Returns {@code true} if {@link #getReceiverInterSignalBiasUncertaintyNanos()} is available,
+     * Returns {@code true} if {@link #getFullInterSignalBiasUncertaintyNanos()} is available,
      * {@code false} otherwise.
      */
-    public boolean hasReceiverInterSignalBiasUncertaintyNanos() {
-        return isFlagSet(HAS_RECEIVER_ISB_UNCERTAINTY);
+    public boolean hasFullInterSignalBiasUncertaintyNanos() {
+        return isFlagSet(HAS_FULL_ISB_UNCERTAINTY);
     }
 
     /**
-     * Gets the GNSS measurement's receiver inter-signal bias uncertainty (1 sigma) in
+     * Gets the GNSS measurement's inter-signal bias uncertainty (1 sigma) in
      * nanoseconds with sub-nanosecond accuracy.
      *
-     * <p>The value is only available if {@link #hasReceiverInterSignalBiasUncertaintyNanos()} is
+     * <p>The value is only available if {@link #hasFullInterSignalBiasUncertaintyNanos()} is
      * {@code true}.
      */
     @FloatRange(from = 0.0)
-    public double getReceiverInterSignalBiasUncertaintyNanos() {
-        return mReceiverInterSignalBiasUncertaintyNanos;
+    public double getFullInterSignalBiasUncertaintyNanos() {
+        return mFullInterSignalBiasUncertaintyNanos;
     }
 
     /**
-     * Sets the GNSS measurement's receiver inter-signal bias uncertainty (1 sigma) in nanoseconds.
+     * Sets the GNSS measurement's inter-signal bias uncertainty (1 sigma) in nanoseconds.
      *
      * @hide
      */
     @TestApi
-    public void setReceiverInterSignalBiasUncertaintyNanos(@FloatRange(from = 0.0)
-            double receiverInterSignalBiasUncertaintyNanos) {
-        setFlag(HAS_RECEIVER_ISB_UNCERTAINTY);
-        mReceiverInterSignalBiasUncertaintyNanos = receiverInterSignalBiasUncertaintyNanos;
+    public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from = 0.0)
+            double fullInterSignalBiasUncertaintyNanos) {
+        setFlag(HAS_FULL_ISB_UNCERTAINTY);
+        mFullInterSignalBiasUncertaintyNanos = fullInterSignalBiasUncertaintyNanos;
     }
 
     /**
-     * Resets the GNSS measurement's receiver inter-signal bias uncertainty (1 sigma) in
+     * Resets the GNSS measurement's inter-signal bias uncertainty (1 sigma) in
      * nanoseconds.
      *
      * @hide
      */
     @TestApi
-    public void resetReceiverInterSignalBiasUncertaintyNanos() {
-        resetFlag(HAS_RECEIVER_ISB_UNCERTAINTY);
+    public void resetFullInterSignalBiasUncertaintyNanos() {
+        resetFlag(HAS_FULL_ISB_UNCERTAINTY);
     }
 
     /**
@@ -1542,17 +1553,18 @@ public final class GnssMeasurement implements Parcelable {
      * Gets the GNSS measurement's satellite inter-signal bias in nanoseconds with sub-nanosecond
      * accuracy.
      *
-     * <p>This value is the satellite-and-control-segment-side inter-system (different from the
-     * constellation in {@link GnssClock#getReferenceConstellationTypeForIsb()}) bias and
-     * inter-frequency (different from the carrier frequency in
-     * {@link GnssClock#getReferenceCarrierFrequencyHzForIsb()}) bias, including:
+     * <p>This value is the space-segment-side inter-system bias, inter-frequency bias and
+     * inter-code bias, including:
      *
      * <ul>
-     * <li>Master clock bias (e.g., GPS-GAL Time Offset (GGTO), GPT-UTC Time Offset (TauGps),
-     * BDS-GLO Time Offset (BGTO))</li>
+     * <li>Master clock bias (e.g., GPS-GAL Time Offset (GGTO), GPS-UTC Time Offset (TauGps),
+     * BDS-GLO Time Offset (BGTO))(with respect to the constellation in
+     * {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
      * <li>Group delay (e.g., Total Group Delay (TGD))</li>
-     * <li>Satellite inter-signal bias, which includes satellite inter-frequency bias (GLO only),
-     * and satellite inter-code bias (e.g., Differential Code Bias (DCB)).</li>
+     * <li>Satellite inter-frequency bias (GLO only) (with respect to the carrier frequency in
+     * {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
+     * <li>Satellite inter-code bias (e.g., Differential Code Bias (DCB)) (with respect to the code
+     * type in {@link GnssClock#getReferenceConstellationTypeForIsb())</li>
      * </ul>
      *
      * <p>The value is only available if {@link #hasSatelliteInterSignalBiasNanos()} is {@code
@@ -1654,8 +1666,8 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mAutomaticGainControlLevelInDb = parcel.readDouble();
             gnssMeasurement.mCodeType = parcel.readString();
             gnssMeasurement.mBasebandCn0DbHz = parcel.readDouble();
-            gnssMeasurement.mReceiverInterSignalBiasNanos = parcel.readDouble();
-            gnssMeasurement.mReceiverInterSignalBiasUncertaintyNanos = parcel.readDouble();
+            gnssMeasurement.mFullInterSignalBiasNanos = parcel.readDouble();
+            gnssMeasurement.mFullInterSignalBiasUncertaintyNanos = parcel.readDouble();
             gnssMeasurement.mSatelliteInterSignalBiasNanos = parcel.readDouble();
             gnssMeasurement.mSatelliteInterSignalBiasUncertaintyNanos = parcel.readDouble();
 
@@ -1692,8 +1704,8 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mAutomaticGainControlLevelInDb);
         parcel.writeString(mCodeType);
         parcel.writeDouble(mBasebandCn0DbHz);
-        parcel.writeDouble(mReceiverInterSignalBiasNanos);
-        parcel.writeDouble(mReceiverInterSignalBiasUncertaintyNanos);
+        parcel.writeDouble(mFullInterSignalBiasNanos);
+        parcel.writeDouble(mFullInterSignalBiasUncertaintyNanos);
         parcel.writeDouble(mSatelliteInterSignalBiasNanos);
         parcel.writeDouble(mSatelliteInterSignalBiasUncertaintyNanos);
     }
@@ -1778,14 +1790,14 @@ public final class GnssMeasurement implements Parcelable {
             builder.append(String.format(format, "CodeType", mCodeType));
         }
 
-        if (hasReceiverInterSignalBiasNanos() || hasReceiverInterSignalBiasUncertaintyNanos()) {
+        if (hasFullInterSignalBiasNanos() || hasFullInterSignalBiasUncertaintyNanos()) {
             builder.append(String.format(
                     formatWithUncertainty,
-                    "ReceiverInterSignalBiasNs",
-                    hasReceiverInterSignalBiasNanos() ? mReceiverInterSignalBiasNanos : null,
-                    "ReceiverInterSignalBiasUncertaintyNs",
-                    hasReceiverInterSignalBiasUncertaintyNanos()
-                            ? mReceiverInterSignalBiasUncertaintyNanos : null));
+                    "InterSignalBiasNs",
+                    hasFullInterSignalBiasNanos() ? mFullInterSignalBiasNanos : null,
+                    "InterSignalBiasUncertaintyNs",
+                    hasFullInterSignalBiasUncertaintyNanos()
+                            ? mFullInterSignalBiasUncertaintyNanos : null));
         }
 
         if (hasSatelliteInterSignalBiasNanos() || hasSatelliteInterSignalBiasUncertaintyNanos()) {
@@ -1824,8 +1836,8 @@ public final class GnssMeasurement implements Parcelable {
         resetAutomaticGainControlLevel();
         resetCodeType();
         resetBasebandCn0DbHz();
-        resetReceiverInterSignalBiasNanos();
-        resetReceiverInterSignalBiasUncertaintyNanos();
+        resetFullInterSignalBiasNanos();
+        resetFullInterSignalBiasUncertaintyNanos();
         resetSatelliteInterSignalBiasNanos();
         resetSatelliteInterSignalBiasUncertaintyNanos();
     }

@@ -6832,6 +6832,10 @@ public class DevicePolicyManager {
      * package will no longer be suspended. The admin can block this by using
      * {@link #setUninstallBlocked}.
      *
+     * <p>Some apps cannot be suspended, such as device admins, the active launcher, the required
+     * package installer, the required package uninstaller, the required package verifier, the
+     * default dialer, and the permission controller.
+     *
      * @param admin The name of the admin component to check, or {@code null} if the caller is a
      *            package access delegate.
      * @param packageNames The package names to suspend or unsuspend.
@@ -11919,13 +11923,17 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of an organization-owned managed profile to return
-     * whether Common Criteria mode is currently enabled for the device.
+     * Returns whether Common Criteria mode is currently enabled. Device owner and profile owner of
+     * an organization-owned managed profile can query its own Common Criteria mode setting by
+     * calling this method with its admin {@link ComponentName}. Any caller can obtain the
+     * aggregated device-wide Common Criteria mode state by passing {@code null} as the
+     * {@code admin} argument.
      *
-     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with, or
+     *     {@code null} if the caller is not a device admin.
      * @return {@code true} if Common Criteria mode is enabled, {@code false} otherwise.
      */
-    public boolean isCommonCriteriaModeEnabled(@NonNull ComponentName admin) {
+    public boolean isCommonCriteriaModeEnabled(@Nullable ComponentName admin) {
         throwIfParentInstance("isCommonCriteriaModeEnabled");
         if (mService != null) {
             try {

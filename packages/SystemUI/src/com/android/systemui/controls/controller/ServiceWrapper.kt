@@ -50,6 +50,12 @@ class ServiceWrapper(val service: IControlsProvider) {
         }
     }
 
+    fun loadSuggested(subscriber: IControlsSubscriber): Boolean {
+        return callThroughService {
+            service.loadSuggested(subscriber)
+        }
+    }
+
     fun subscribe(controlIds: List<String>, subscriber: IControlsSubscriber): Boolean {
         return callThroughService {
             service.subscribe(controlIds, subscriber)

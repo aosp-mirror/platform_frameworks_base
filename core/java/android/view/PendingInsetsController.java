@@ -172,7 +172,7 @@ public class PendingInsetsController implements WindowInsetsController {
             mReplayedInsetsController.controlWindowInsetsAnimation(types, durationMillis,
                     interpolator, cancellationSignal, listener);
         } else {
-            listener.onCancelled();
+            listener.onCancelled(null);
         }
     }
 

@@ -52,6 +52,7 @@ import com.android.systemui.R
 import dagger.Lazy
 
 import java.text.Collator
+import java.util.function.Consumer
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -89,6 +90,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private var popup: ListPopupWindow? = null
     private var activeDialog: Dialog? = null
     private val addControlsItem: SelectionItem
+    private var hidden = true
 
     init {
         val addDrawable = context.getDrawable(R.drawable.ic_add).apply {
@@ -134,11 +136,15 @@ class ControlsUiControllerImpl @Inject constructor (
     override fun show(parent: ViewGroup) {
         Log.d(ControlsUiController.TAG, "show()")
         this.parent = parent
+        hidden = false
 
         allStructures = controlsController.get().getFavorites()
         selectedStructure = loadPreference(allStructures)
 
-        if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
+        val cb = Consumer<Boolean> { _ -> reload(parent) }
+        if (controlsController.get().addSeedingFavoritesCallback(cb)) {
+            listingCallback = createCallback(::showSeedingView)
+        } else if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
             // only show initial view if there are really no favorites across any structure
             listingCallback = createCallback(::showInitialSetupView)
         } else {
@@ -152,6 +158,20 @@ class ControlsUiControllerImpl @Inject constructor (
         }
 
         controlsListingController.get().addCallback(listingCallback)
+    }
+
+    private fun reload(parent: ViewGroup) {
+        if (hidden) return
+        show(parent)
+    }
+
+    private fun showSeedingView(items: List<SelectionItem>) {
+        parent.removeAllViews()
+
+        val inflater = LayoutInflater.from(context)
+        inflater.inflate(R.layout.controls_no_favorites, parent, true)
+        val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
+        subtitle.setVisibility(View.VISIBLE)
     }
 
     private fun showInitialSetupView(items: List<SelectionItem>) {
@@ -320,13 +340,14 @@ class ControlsUiControllerImpl @Inject constructor (
                 selectedStructure = newSelection
                 updatePreferences(selectedStructure)
                 controlsListingController.get().removeCallback(listingCallback)
-                show(parent)
+                reload(parent)
             }
         }
     }
 
     override fun hide() {
         Log.d(ControlsUiController.TAG, "hide()")
+        hidden = true
         popup?.dismiss()
         activeDialog?.dismiss()
 

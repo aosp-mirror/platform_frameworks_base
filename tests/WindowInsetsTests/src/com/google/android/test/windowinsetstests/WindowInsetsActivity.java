@@ -114,7 +114,14 @@ public class WindowInsetsActivity extends AppCompatActivity {
                                         }
 
                                         @Override
-                                        public void onCancelled() {
+                                        public void onFinished(
+                                                WindowInsetsAnimationController controller) {
+                                            mAnimationController = null;
+                                        }
+
+                                        @Override
+                                        public void onCancelled(
+                                                WindowInsetsAnimationController controller) {
                                             mAnimationController = null;
                                         }
                                     });
@@ -230,7 +237,13 @@ public class WindowInsetsActivity extends AppCompatActivity {
                                         }
 
                                         @Override
-                                        public void onCancelled() {
+                                        public void onFinished(
+                                                WindowInsetsAnimationController controller) {
+                                        }
+
+                                        @Override
+                                        public void onCancelled(
+                                                WindowInsetsAnimationController controller) {
                                         }
                                     });
                         }
