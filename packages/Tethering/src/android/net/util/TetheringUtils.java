@@ -15,8 +15,11 @@
  */
 package android.net.util;
 
+import android.net.TetheringRequestParcel;
+
 import java.io.FileDescriptor;
 import java.net.SocketException;
+import java.util.Objects;
 
 /**
  * Native methods for tethering utilization.
@@ -37,5 +40,18 @@ public class TetheringUtils {
      */
     public static int uint16(short s) {
         return s & 0xffff;
+    }
+
+    /** Check whether two TetheringRequestParcels are the same. */
+    public static boolean isTetheringRequestEquals(final TetheringRequestParcel request,
+            final TetheringRequestParcel otherRequest) {
+        if (request == otherRequest) return true;
+
+        return request != null && otherRequest != null
+                && request.tetheringType == otherRequest.tetheringType
+                && Objects.equals(request.localIPv4Address, otherRequest.localIPv4Address)
+                && Objects.equals(request.staticClientAddress, otherRequest.staticClientAddress)
+                && request.exemptFromEntitlementCheck == otherRequest.exemptFromEntitlementCheck
+                && request.showProvisioningUi == otherRequest.showProvisioningUi;
     }
 }
