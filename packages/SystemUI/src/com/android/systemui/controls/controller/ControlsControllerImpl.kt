@@ -327,8 +327,9 @@ class ControlsControllerImpl @Inject constructor (
                         controls.forEach {
                             val structure = it.structure ?: ""
                             val list = structureToControls.get(structure)
-                            ?: mutableListOf<ControlInfo>()
-                            list.add(ControlInfo(it.controlId, it.title, it.deviceType))
+                                ?: mutableListOf<ControlInfo>()
+                            list.add(
+                                ControlInfo(it.controlId, it.title, it.subtitle, it.deviceType))
                             structureToControls.put(structure, list)
                         }
 
@@ -518,10 +519,12 @@ private object Favorites {
             s.controls.forEach { c ->
                 val (sName, ci) = controlsById.get(c.controlId)?.let { updatedControl ->
                     val controlInfo = if (updatedControl.title != c.controlTitle ||
+                        updatedControl.subtitle != c.controlSubtitle ||
                         updatedControl.deviceType != c.deviceType) {
                         changed = true
                         c.copy(
                             controlTitle = updatedControl.title,
+                            controlSubtitle = updatedControl.subtitle,
                             deviceType = updatedControl.deviceType
                         )
                     } else { c }
