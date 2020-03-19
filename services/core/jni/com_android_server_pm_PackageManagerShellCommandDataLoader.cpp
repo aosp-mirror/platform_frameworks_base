@@ -598,6 +598,9 @@ private:
     // IFS callbacks.
     void onPendingReads(dataloader::PendingReads pendingReads) final {
         std::lock_guard lock{mOutFdLock};
+        if (mOutFd < 0) {
+            return;
+        }
         CHECK(mIfs);
         for (auto&& pendingRead : pendingReads) {
             const android::dataloader::FileId& fileId = pendingRead.id;
@@ -611,13 +614,9 @@ private:
                       android::incfs::toString(fileId).c_str());
                 continue;
             }
-            if (mRequestedFiles.insert(fileIdx).second) {
-                if (!sendRequest(mOutFd, PREFETCH, fileIdx, blockIdx)) {
-                    ALOGE("Failed to request prefetch for fileid=%s. Ignore.",
-                          android::incfs::toString(fileId).c_str());
-                    mRequestedFiles.erase(fileIdx);
-                    mStatusListener->reportStatus(DATA_LOADER_NO_CONNECTION);
-                }
+            if (mRequestedFiles.insert(fileIdx).second &&
+                !sendRequest(mOutFd, PREFETCH, fileIdx, blockIdx)) {
+                mRequestedFiles.erase(fileIdx);
             }
             sendRequest(mOutFd, BLOCK_MISSING, fileIdx, blockIdx);
         }
@@ -634,7 +633,7 @@ private:
             }
             if (res < 0) {
                 ALOGE("Failed to poll. Abort.");
-                mStatusListener->reportStatus(DATA_LOADER_NO_CONNECTION);
+                mStatusListener->reportStatus(DATA_LOADER_UNRECOVERABLE);
                 break;
             }
             if (res == mEventFd) {
@@ -644,7 +643,7 @@ private:
             }
             if (!readChunk(inout, data)) {
                 ALOGE("Failed to read a message. Abort.");
-                mStatusListener->reportStatus(DATA_LOADER_NO_CONNECTION);
+                mStatusListener->reportStatus(DATA_LOADER_UNRECOVERABLE);
                 break;
             }
             auto remainingData = std::span(data);
