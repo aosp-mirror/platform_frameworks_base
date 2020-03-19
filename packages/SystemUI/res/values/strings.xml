@@ -2661,4 +2661,7 @@
     <!-- Message to tell the user to wait while systemui attempts to load a set of
          recommended controls [CHAR_LIMIT=30] -->
     <string name="controls_seeding_in_progress">Loading recommendations</string>
+
+    <!-- Close the controls associated with a specific media session [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_close_session">Close this media session</string>
 </resources>
