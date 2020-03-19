@@ -318,7 +318,6 @@ public final class BitmapRegionDecoder {
     private static native int nativeGetHeight(long lbm);
     private static native void nativeClean(long lbm);
 
-    @UnsupportedAppUsage
     private static native BitmapRegionDecoder nativeNewInstance(
             byte[] data, int offset, int length);
     private static native BitmapRegionDecoder nativeNewInstance(
