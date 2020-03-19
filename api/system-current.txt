@@ -2007,11 +2007,10 @@ package android.content.pm {
   }
 
   public class DataLoaderParams {
-    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String, @Nullable java.util.Map<java.lang.String,android.os.ParcelFileDescriptor>);
+    method @NonNull public static final android.content.pm.DataLoaderParams forIncremental(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public static final android.content.pm.DataLoaderParams forStreaming(@NonNull android.content.ComponentName, @NonNull String);
     method @NonNull public final String getArguments();
     method @NonNull public final android.content.ComponentName getComponentName();
-    method @NonNull public final java.util.Map<java.lang.String,android.os.ParcelFileDescriptor> getDynamicArgs();
     method @NonNull public final int getType();
   }
 
