@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
@@ -27,6 +28,7 @@ import android.os.Trace;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.SparseArray;
 import android.view.ViewTreeObserver.OnPreDrawListener;
 
 import com.android.internal.graphics.ColorUtils;
@@ -53,7 +55,7 @@ public class LockIcon extends KeyguardAffordanceView {
     private boolean mPulsing;
     private boolean mDozing;
     private boolean mKeyguardJustShown;
-    private boolean mScanningFace;
+    private final SparseArray<Drawable> mDrawableCache = new SparseArray<>();
 
     private final OnPreDrawListener mOnPreDrawListener = new OnPreDrawListener() {
         @Override
@@ -61,23 +63,15 @@ public class LockIcon extends KeyguardAffordanceView {
             getViewTreeObserver().removeOnPreDrawListener(this);
 
             int newState = mStateProvider.getState();
-            @LockAnimIndex final int lockAnimIndex =
-                    getAnimationIndexForTransition(mOldState, newState, mPulsing, mDozing,
-                            mKeyguardJustShown);
-
-            boolean isAnim = lockAnimIndex != -1;
-            int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex)
-                    : LockIcon.getIconForState(newState);
-
-            Drawable icon = getResources().getDrawable(iconRes);
-
+            Drawable icon = getIcon(newState);
             setImageDrawable(icon, false);
-            if (mScanningFace) {
+
+            if (newState == STATE_SCANNING_FACE) {
                 announceForAccessibility(getResources().getString(
                         R.string.accessibility_scanning_face));
             }
 
-            if (isAnim && icon instanceof AnimatedVectorDrawable) {
+            if (icon instanceof AnimatedVectorDrawable) {
                 final AnimatedVectorDrawable animation = (AnimatedVectorDrawable) icon;
                 animation.forceAnimationOnUI();
                 animation.clearAnimationCallbacks();
@@ -87,7 +81,7 @@ public class LockIcon extends KeyguardAffordanceView {
                             public void onAnimationEnd(Drawable drawable) {
                                 if (getDrawable() == animation
                                         && newState == mStateProvider.getState()
-                                        && lockAnimIndex == LockIcon.SCANNING) {
+                                        && newState == STATE_SCANNING_FACE) {
                                     animation.start();
                                 } else {
                                     Trace.endAsyncSection("LockIcon#Animation", newState);
@@ -108,6 +102,12 @@ public class LockIcon extends KeyguardAffordanceView {
 
     void setStateProvider(StateProvider stateProvider) {
         mStateProvider = stateProvider;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawableCache.clear();
     }
 
     /**
@@ -135,13 +135,11 @@ public class LockIcon extends KeyguardAffordanceView {
         return false;
     }
 
-    void update(int oldState, boolean pulsing, boolean dozing,
-            boolean keyguardJustShown, boolean scanningFace) {
+    void update(int oldState, boolean pulsing, boolean dozing, boolean keyguardJustShown) {
         mOldState = oldState;
         mPulsing = pulsing;
         mDozing = dozing;
         mKeyguardJustShown = keyguardJustShown;
-        mScanningFace = scanningFace;
 
         getViewTreeObserver().addOnPreDrawListener(mOnPreDrawListener);
     }
@@ -151,7 +149,8 @@ public class LockIcon extends KeyguardAffordanceView {
         updateDarkTint();
     }
 
-    void setIconColor(int iconColor) {
+    void onThemeChange(int iconColor) {
+        mDrawableCache.clear();
         mIconColor = iconColor;
         updateDarkTint();
     }
@@ -159,6 +158,21 @@ public class LockIcon extends KeyguardAffordanceView {
     private void updateDarkTint() {
         int color = ColorUtils.blendARGB(mIconColor, Color.WHITE, mDozeAmount);
         setImageTintList(ColorStateList.valueOf(color));
+    }
+
+    private Drawable getIcon(int newState) {
+        @LockAnimIndex final int lockAnimIndex =
+                getAnimationIndexForTransition(mOldState, newState, mPulsing, mDozing,
+                        mKeyguardJustShown);
+
+        boolean isAnim = lockAnimIndex != -1;
+        int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex) : getIconForState(newState);
+
+        if (!mDrawableCache.contains(iconRes)) {
+            mDrawableCache.put(iconRes, getResources().getDrawable(iconRes));
+        }
+
+        return mDrawableCache.get(iconRes);
     }
 
     static int getIconForState(int state) {
@@ -206,7 +220,7 @@ public class LockIcon extends KeyguardAffordanceView {
     @IntDef({ERROR, UNLOCK, LOCK, SCANNING})
     @interface LockAnimIndex {}
     static final int ERROR = 0, UNLOCK = 1, LOCK = 2, SCANNING = 3;
-    static final int[][] LOCK_ANIM_RES_IDS = new int[][] {
+    private static final int[][] LOCK_ANIM_RES_IDS = new int[][] {
             {
                     R.anim.lock_to_error,
                     R.anim.lock_unlock,

@@ -75,7 +75,6 @@ public class LockscreenLockIconController {
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
     private boolean mKeyguardShowing;
     private boolean mKeyguardJustShown;
-    private boolean mIsFaceUnlockState;
     private boolean mBlockUpdates;
     private boolean mPulsing;
     private boolean mDozing;
@@ -150,7 +149,7 @@ public class LockscreenLockIconController {
                     null, new int[]{ R.attr.wallpaperTextColor }, 0, 0);
             int iconColor = typedArray.getColor(0, Color.WHITE);
             typedArray.recycle();
-            mLockIcon.setIconColor(iconColor);
+            mLockIcon.onThemeChange(iconColor);
         }
 
         @Override
@@ -299,7 +298,7 @@ public class LockscreenLockIconController {
                         info.addAction(unlock);
                         info.setHintText(mResources.getString(
                                 R.string.accessibility_waiting_for_fingerprint));
-                    } else if (mIsFaceUnlockState) {
+                    } else if (getState() == STATE_SCANNING_FACE) {
                         //Avoid 'button' to be spoken for scanning face
                         info.setClassName(LockIcon.class.getName());
                         info.setContentDescription(mResources.getString(
@@ -458,15 +457,12 @@ public class LockscreenLockIconController {
 
     private void update(boolean force) {
         int state = getState();
-        mIsFaceUnlockState = state == STATE_SCANNING_FACE;
-
         boolean shouldUpdate = mLastState != state || force;
         if (mBlockUpdates && canBlockUpdates()) {
             shouldUpdate = false;
         }
         if (shouldUpdate && mLockIcon != null) {
-            mLockIcon.update(
-                    mLastState, mPulsing, mDozing, mKeyguardJustShown, mIsFaceUnlockState);
+            mLockIcon.update(mLastState, mPulsing, mDozing, mKeyguardJustShown);
         }
         mLastState = state;
         mKeyguardJustShown = false;
