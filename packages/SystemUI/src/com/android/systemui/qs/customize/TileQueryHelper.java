@@ -103,7 +103,9 @@ public class TileQueryHelper {
 
         final ArrayList<QSTile> tilesToAdd = new ArrayList<>();
         for (String spec : possibleTiles) {
-            // Only add current and stock tiles that can be created from QSFactoryImpl
+            // Only add current and stock tiles that can be created from QSFactoryImpl.
+            // Do not include CustomTile. Those will be created by `addPackageTiles`.
+            if (spec.startsWith(CustomTile.PREFIX)) continue;
             final QSTile tile = host.createTile(spec);
             if (tile == null) {
                 continue;

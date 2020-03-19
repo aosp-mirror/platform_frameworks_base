@@ -20,4 +20,6 @@
     <string name="hvac_min_text">Min</string>
     <!-- String to represent largest setting of an HVAC system [CHAR LIMIT=5]-->
     <string name="hvac_max_text">Max</string>
+    <!-- Text for voice recognition toast. [CHAR LIMIT=60] -->
+    <string name="voice_recognition_toast">Voice recognition now handled by connected Bluetooth device</string>
 </resources>

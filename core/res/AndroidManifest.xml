@@ -1291,6 +1291,14 @@
         android:description="@string/permdesc_camera"
         android:protectionLevel="dangerous|instant" />
 
+    <!-- Allows receiving the camera service notifications when a camera is opened
+            (by a certain application package) or closed.
+        @hide -->
+    <permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER"
+        android:permissionGroup="android.permission-group.UNDEFINED"
+        android:label="@string/permlab_cameraOpenCloseListener"
+        android:description="@string/permdesc_cameraOpenCloseListener"
+        android:protectionLevel="signature" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device sensors                           -->
@@ -4585,12 +4593,12 @@
     <!-- @SystemApi Allows to access all app shortcuts.
          @hide -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"
-        android:protectionLevel="signature|textClassifier" />
+        android:protectionLevel="signature|appPredictor" />
 
     <!-- @SystemApi Allows unlimited calls to shortcut mutation APIs.
          @hide -->
     <permission android:name="android.permission.UNLIMITED_SHORTCUTS_API_CALLS"
-        android:protectionLevel="signature|textClassifier" />
+        android:protectionLevel="signature|appPredictor" />
 
     <!-- @SystemApi Allows an application to read the runtime profiles of other apps.
          @hide <p>Not for use by third-party applications. -->

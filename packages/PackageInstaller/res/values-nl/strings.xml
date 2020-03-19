@@ -58,6 +58,7 @@
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Wil je deze app verwijderen voor de gebruiker <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Deze app vervangen door de fabrieksversie? Alle gegevens worden verwijderd."</string>
     <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Deze app vervangen door de fabrieksversie? Alle gegevens worden verwijderd. Dit geldt voor alle gebruikers van het apparaat, dus ook voor gebruikers met een werkprofiel."</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"Ook <xliff:g id="SIZE">%1$s</xliff:g> aan gekoppelde mediabestanden verwijderen."</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> aan app-gegevens behouden."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Actieve verwijderingen"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Mislukte verwijderingen"</string>

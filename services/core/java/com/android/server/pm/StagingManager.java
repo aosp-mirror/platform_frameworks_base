@@ -630,7 +630,7 @@ public class StagingManager {
         return false;
     }
 
-    void restoreSession(@NonNull PackageInstallerSession session) {
+    void restoreSession(@NonNull PackageInstallerSession session, boolean isDeviceUpgrading) {
         PackageInstallerSession sessionToResume = session;
         synchronized (mStagedSessions) {
             mStagedSessions.append(session.sessionId, session);
@@ -646,6 +646,13 @@ public class StagingManager {
                     sessionToResume = mStagedSessions.get(session.getParentSessionId());
                 }
             }
+        }
+        // The preconditions used during pre-reboot verification might have changed when device
+        // is upgrading. Updated staged sessions to activation failed before we resume the session.
+        if (isDeviceUpgrading && !sessionToResume.isStagedAndInTerminalState()) {
+            sessionToResume.setStagedSessionFailed(SessionInfo.STAGED_SESSION_ACTIVATION_FAILED,
+                        "Build fingerprint has changed");
+            return;
         }
         checkStateAndResume(sessionToResume);
     }

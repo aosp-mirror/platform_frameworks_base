@@ -1275,6 +1275,16 @@ public class UserManager {
     }
 
     /**
+     * @hide
+     * @return Whether the device is running in a headless system user mode. It means the headless
+     * user (system user) runs system services and system UI, but is not associated with any real
+     * person. Secondary users can be created to be associated with real person.
+     */
+    public static boolean isHeadlessSystemUserMode() {
+        return RoSystemProperties.MULTIUSER_HEADLESS_SYSTEM_USER;
+    }
+
+    /**
      * @return Whether guest user is always ephemeral
      * @hide
      */

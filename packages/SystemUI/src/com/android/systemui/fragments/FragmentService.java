@@ -20,11 +20,11 @@ import android.os.Handler;
 import android.util.ArrayMap;
 import android.view.View;
 
-import com.android.systemui.ConfigurationChangedReceiver;
 import com.android.systemui.Dumpable;
 import com.android.systemui.SystemUIRootComponent;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.statusbar.phone.NavigationBarFragment;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -41,7 +41,7 @@ import dagger.Subcomponent;
  * Also dispatches the configuration changes to all current FragmentHostStates.
  */
 @Singleton
-public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
+public class FragmentService implements Dumpable {
 
     private static final String TAG = "FragmentService";
 
@@ -50,10 +50,22 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
     private final Handler mHandler = new Handler();
     private final FragmentCreator mFragmentCreator;
 
+    private ConfigurationController.ConfigurationListener mConfigurationListener =
+            new ConfigurationController.ConfigurationListener() {
+                @Override
+                public void onConfigChanged(Configuration newConfig) {
+                    for (FragmentHostState state : mHosts.values()) {
+                        state.sendConfigurationChange(newConfig);
+                    }
+                }
+            };
+
     @Inject
-    public FragmentService(SystemUIRootComponent rootComponent) {
+    public FragmentService(SystemUIRootComponent rootComponent,
+            ConfigurationController configurationController) {
         mFragmentCreator = rootComponent.createFragmentCreator();
         initInjectionMap();
+        configurationController.addCallback(mConfigurationListener);
     }
 
     ArrayMap<String, Method> getInjectionMap() {
@@ -93,13 +105,6 @@ public class FragmentService implements ConfigurationChangedReceiver, Dumpable {
     public void destroyAll() {
         for (FragmentHostState state : mHosts.values()) {
             state.mFragmentHostManager.destroy();
-        }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        for (FragmentHostState state : mHosts.values()) {
-            state.sendConfigurationChange(newConfig);
         }
     }
 

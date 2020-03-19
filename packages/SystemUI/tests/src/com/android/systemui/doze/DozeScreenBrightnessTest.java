@@ -157,6 +157,20 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPulsing_withoutLightSensor_setsAoDDimmingScrimTransparent() throws Exception {
+        mScreen = new DozeScreenBrightness(mContext, mServiceFake, mSensorManager,
+                null /* sensor */, mHostFake, null /* handler */,
+                DEFAULT_BRIGHTNESS, SENSOR_TO_BRIGHTNESS, SENSOR_TO_OPACITY,
+                true /* debuggable */);
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE);
+
+        mScreen.transitionTo(DOZE, DOZE_REQUEST_PULSE);
+
+        assertEquals(0f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
+    }
+
+    @Test
     public void testDozingAfterPulsing_pausesLightSensor() throws Exception {
         mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
         mScreen.transitionTo(INITIALIZED, DOZE);
@@ -204,48 +218,6 @@ public class DozeScreenBrightnessTest extends SysuiTestCase {
 
         assertEquals(1, mServiceFake.screenBrightness);
         assertEquals(10/255f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
-    }
-
-    @Test
-    public void pausingAod_softBlanks() throws Exception {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
-
-        mSensor.sendSensorEvent(2);
-
-        mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
-        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
-
-        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
-
-        mSensor.sendSensorEvent(0);
-        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
-
-        mScreen.transitionTo(DOZE_AOD_PAUSED, DOZE_AOD);
-        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
-    }
-
-    @Test
-    public void pausingAod_softBlanks_withSpuriousSensorDuringPause() throws Exception {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
-        mScreen.transitionTo(DOZE_AOD, DOZE_AOD_PAUSING);
-        mScreen.transitionTo(DOZE_AOD_PAUSING, DOZE_AOD_PAUSED);
-
-        mSensor.sendSensorEvent(1);
-        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
-    }
-
-    @Test
-    public void screenOff_softBlanks() throws Exception {
-        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
-        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
-        mScreen.transitionTo(DOZE_AOD, DOZE);
-        assertEquals(1f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
-
-        mScreen.transitionTo(DOZE, DOZE_AOD);
-        mSensor.sendSensorEvent(2);
-        assertEquals(0f, mHostFake.aodDimmingScrimOpacity, 0.001f /* delta */);
     }
 
     @Test

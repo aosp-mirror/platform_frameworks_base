@@ -312,6 +312,7 @@
   <java-symbol type="bool" name="config_mobile_data_capable" />
   <java-symbol type="bool" name="config_suspendWhenScreenOffDueToProximity" />
   <java-symbol type="bool" name="config_swipeDisambiguation" />
+  <java-symbol type="bool" name="config_systemUserPackagesBlacklistSupported" />
   <java-symbol type="bool" name="config_syncstorageengine_masterSyncAutomatically" />
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
@@ -3702,6 +3703,8 @@
 
   <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
 
+  <java-symbol type="string" name="config_customCountryDetector" />
+
   <!-- For Foldables -->
   <java-symbol type="bool" name="config_lidControlsDisplayFold" />
   <java-symbol type="string" name="config_foldedArea" />
@@ -3826,6 +3829,7 @@
   <java-symbol type="drawable" name="iconfactory_adaptive_icon_drawable_wrapper"/>
   <java-symbol type="dimen" name="notification_min_height" />
   <java-symbol type="dimen" name="resolver_icon_size"/>
+  <java-symbol type="dimen" name="resolver_grid_icon_size"/>
   <java-symbol type="dimen" name="resolver_badge_size"/>
   <java-symbol type="dimen" name="resolver_button_bar_spacing"/>
   <java-symbol type="dimen" name="resolver_icon_margin"/>
@@ -3871,4 +3875,5 @@
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
   <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
+  <java-symbol type="bool" name="config_enableAutoSuspend" />
 </resources>

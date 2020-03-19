@@ -16,7 +16,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="4469836075319831821">"ပုံနှိပ်ရန်များ စီတန်းစနစ်"</string>
+    <string name="app_label" msgid="4469836075319831821">"စာထုတ်စရာများ စီတန်းသော စနစ်"</string>
     <string name="more_options_button" msgid="2243228396432556771">"နောက်ထပ် ရွေးစရာများ"</string>
     <string name="label_destination" msgid="9132510997381599275">"ဦးတည်ရာ"</string>
     <string name="label_copies" msgid="3634531042822968308">"မိတ္တူများ"</string>
@@ -86,8 +86,8 @@
     <string name="cancel" msgid="4373674107267141885">"မလုပ်တော့"</string>
     <string name="restart" msgid="2472034227037808749">"ပြန်စရန်"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"စာထုတ်စက်နဲ့ ဆက်သွယ်ထားမှု မရှိပါ"</string>
-    <string name="reason_unknown" msgid="5507940196503246139">"မသိ"</string>
-    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> ကိုသုံးမလား။"</string>
+    <string name="reason_unknown" msgid="5507940196503246139">"မသိပါ"</string>
+    <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g>ကိုသုံးမလား။"</string>
     <string name="print_service_security_warning_summary" msgid="1427434625361692006">"သင်၏ စာရွက်စာတမ်းများသည် ပရင်တာထံသို့ သွားစဉ် ဆာဗာ တစ်ခု သို့မဟုတ် ပိုများပြီး ဖြတ်ကျော်နိုင်ရသည်။"</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"အဖြူ အမည်း"</item>
@@ -99,7 +99,7 @@
     <item msgid="79513688117503758">"အနားသတ် အတို"</item>
   </string-array>
   <string-array name="orientation_labels">
-    <item msgid="4061931020926489228">"ဒေါင်လိုက်"</item>
+    <item msgid="4061931020926489228">"ထောင်လိုက်"</item>
     <item msgid="3199660090246166812">"အလျားလိုက်"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"ဖိုင်သို့ မရေးနိုင်ခဲ့"</string>

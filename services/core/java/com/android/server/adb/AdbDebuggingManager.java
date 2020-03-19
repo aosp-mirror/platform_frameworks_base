@@ -49,7 +49,6 @@ import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.net.wifi.WifiSsid;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -925,6 +924,11 @@ public class AdbDebuggingManager {
                 case MESSAGE_ADB_CLEAR: {
                     Slog.d(TAG, "Received a request to clear the adb authorizations");
                     mConnectedKeys.clear();
+                    // If the key store has not yet been instantiated then do so now; this avoids
+                    // the unnecessary creation of the key store when adb is not enabled.
+                    if (mAdbKeyStore == null) {
+                        mAdbKeyStore = new AdbKeyStore();
+                    }
                     mWifiConnectedKeys.clear();
                     mAdbKeyStore.deleteKeyStore();
                     cancelJobToUpdateAdbKeyStore();
@@ -1298,7 +1302,7 @@ public class AdbDebuggingManager {
                 ssid = wifiInfo.getPasspointProviderFriendlyName();
             } else {
                 ssid = wifiInfo.getSSID();
-                if (ssid == null || WifiSsid.NONE.equals(ssid)) {
+                if (ssid == null || WifiManager.UNKNOWN_SSID.equals(ssid)) {
                     // OK, it's not in the connectionInfo; we have to go hunting for it
                     List<WifiConfiguration> networks = wifiManager.getConfiguredNetworks();
                     int length = networks.size();
@@ -1849,7 +1853,6 @@ public class AdbDebuggingManager {
         public void removeKey(String key) {
             if (mKeyMap.containsKey(key)) {
                 mKeyMap.remove(key);
-                writeKeys(mKeyMap.keySet());
                 sendPersistKeyStoreMessage();
             }
         }
