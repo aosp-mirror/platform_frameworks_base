@@ -1074,11 +1074,6 @@ public class BubbleStackView extends FrameLayout {
      */
     private boolean maybeShowStackUserEducation() {
         if (mShouldShowUserEducation && mUserEducationView.getVisibility() != VISIBLE) {
-            Bubble b = mBubbleData.getSelectedBubble();
-            TextView description = mUserEducationView.findViewById(R.id.user_education_description);
-            description.setText(mContext.getString(
-                    R.string.bubbles_user_education_description, b.getAppName()));
-
             mUserEducationView.setAlpha(0);
             mUserEducationView.setVisibility(VISIBLE);
             // Post so we have height of mUserEducationView
