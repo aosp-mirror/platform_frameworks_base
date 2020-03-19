@@ -23,10 +23,8 @@ namespace stats_log_api_gen {
 
 static int write_java_q_logger_class(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const AtomDecl &attributionDecl,
-        const string& moduleName
-        ) {
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
+        const AtomDecl &attributionDecl) {
     fprintf(out, "\n");
     fprintf(out, "    // Write logging helper methods for statsd in Q and earlier.\n");
     fprintf(out, "    private static class QLogger {\n");
@@ -37,7 +35,7 @@ static int write_java_q_logger_class(
     fprintf(out, "\n");
     fprintf(out, "        // Write methods.\n");
     write_java_methods_q_schema(
-            out, signatures_to_modules, attributionDecl, moduleName, "        ");
+            out, signatureInfoMap, attributionDecl, "        ");
 
     fprintf(out, "    }\n");
     return 0;
@@ -46,21 +44,15 @@ static int write_java_q_logger_class(
 
 static int write_java_methods(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
         const AtomDecl &attributionDecl,
-        const string& moduleName,
         const bool supportQ
         ) {
-    for (auto signature_to_modules_it = signatures_to_modules.begin();
-            signature_to_modules_it != signatures_to_modules.end(); signature_to_modules_it++) {
-        // Skip if this signature is not needed for the module.
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-            continue;
-        }
-
+    for (auto signatureInfoMapIt = signatureInfoMap.begin();
+            signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
         fprintf(out, "    public static void write(int code");
-        vector<java_type_t> signature = signature_to_modules_it->first;
+        vector<java_type_t> signature = signatureInfoMapIt->first;
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature.begin();
                 arg != signature.end(); arg++) {
@@ -249,7 +241,7 @@ static int write_java_methods(
 }
 
 int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-                                    const string& moduleName, const string& javaClass,
+                                    const string& javaClass,
                                     const string& javaPackage, const bool supportQ,
                                     const bool supportWorkSource) {
     // Print prelude
@@ -273,24 +265,24 @@ int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attribut
     fprintf(out, " */\n");
     fprintf(out, "public class %s {\n", javaClass.c_str());
 
-    write_java_atom_codes(out, atoms, moduleName);
-    write_java_enum_values(out, atoms, moduleName);
+    write_java_atom_codes(out, atoms);
+    write_java_enum_values(out, atoms);
 
     int errors = 0;
 
     // Print write methods.
     fprintf(out, "    // Write methods\n");
     errors += write_java_methods(
-            out, atoms.signatures_to_modules, attributionDecl, moduleName, supportQ);
+            out, atoms.signatureInfoMap, attributionDecl, supportQ);
     errors += write_java_non_chained_methods(
-            out, atoms.non_chained_signatures_to_modules, moduleName);
+            out, atoms.nonChainedSignatureInfoMap);
     if (supportWorkSource) {
-        errors += write_java_work_source_methods(out, atoms.signatures_to_modules, moduleName);
+        errors += write_java_work_source_methods(out, atoms.signatureInfoMap);
     }
 
     if (supportQ) {
         errors += write_java_q_logger_class(
-                out, atoms.signatures_to_modules, attributionDecl, moduleName);
+                out, atoms.signatureInfoMap, attributionDecl);
     }
 
     fprintf(out, "}\n");
