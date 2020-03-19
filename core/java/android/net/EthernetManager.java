@@ -200,6 +200,21 @@ public class EthernetManager {
     }
 
     /**
+     * Whether to treat interfaces created by {@link TestNetworkManager#createTapInterface}
+     * as Ethernet interfaces. The effects of this method apply to any test interfaces that are
+     * already present on the system.
+     * @hide
+     */
+    @TestApi
+    public void setIncludeTestInterfaces(boolean include) {
+        try {
+            mService.setIncludeTestInterfaces(include);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * A request for a tethered interface.
      */
     public static class TetheredInterfaceRequest {
