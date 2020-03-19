@@ -1394,7 +1394,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public void notifyCarrierNetworkChange(boolean active) {
         // only CarrierService with carrier privilege rule should have the permission
         int[] subIds = Arrays.stream(SubscriptionManager.from(mContext)
-                    .getCompleteActiveSubscriptionIdList())
+                    .getActiveAndHiddenSubscriptionIdList())
                     .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(mContext,
                             i)).toArray();
         if (ArrayUtils.isEmpty(subIds)) {
