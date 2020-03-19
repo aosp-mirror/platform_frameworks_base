@@ -16,7 +16,6 @@
 
 package android.app;
 
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,9 +27,9 @@ import java.util.List;
  * An observer / callback to create and register by
  * {@link ActivityManager#registerHomeVisibilityObserver} so that it's triggered when
  * visibility of home page changes.
+ * TODO: b/144351078 expose as SystemApi
  * @hide
  */
-@SystemApi
 public abstract class HomeVisibilityObserver {
     private Context mContext;
     private ActivityManager mActivityManager;
