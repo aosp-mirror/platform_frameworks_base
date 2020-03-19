@@ -34,12 +34,10 @@ public class AccessNetworkUtils {
             return DUPLEX_MODE_UNKNOWN;
         }
 
-        if (band >= EutranBand.BAND_68) {
+        if (band > EutranBand.BAND_88) {
             return DUPLEX_MODE_UNKNOWN;
         } else if (band >= EutranBand.BAND_65) {
             return DUPLEX_MODE_FDD;
-        } else if (band >= EutranBand.BAND_47) {
-            return DUPLEX_MODE_UNKNOWN;
         } else if (band >= EutranBand.BAND_33) {
             return DUPLEX_MODE_TDD;
         } else if (band >= EutranBand.BAND_1) {
@@ -58,17 +56,53 @@ public class AccessNetworkUtils {
      * @return Operating band number, or {@link #INVALID_BAND} if no corresponding band exists
      */
     public static int getOperatingBandForEarfcn(int earfcn) {
-        if (earfcn > 67535) {
+        if (earfcn > 70645) {
             return INVALID_BAND;
+        } else if (earfcn >= 70596) {
+            return EutranBand.BAND_88;
+        } else if (earfcn >= 70546) {
+            return EutranBand.BAND_87;
+        } else if (earfcn >= 70366) {
+            return EutranBand.BAND_85;
+        } else if (earfcn > 69465) {
+            return INVALID_BAND;
+        } else if (earfcn >= 69036) {
+            return EutranBand.BAND_74;
+        } else if (earfcn >= 68986) {
+            return EutranBand.BAND_73;
+        } else if (earfcn >= 68936) {
+            return EutranBand.BAND_72;
+        } else if (earfcn >= 68586) {
+            return EutranBand.BAND_71;
+        } else if (earfcn >= 68336) {
+            return EutranBand.BAND_70;
+        } else if (earfcn > 67835) {
+            return INVALID_BAND;
+        } else if (earfcn >= 67536) {
+            return EutranBand.BAND_68;
         } else if (earfcn >= 67366) {
             return INVALID_BAND; // band 67 only for CarrierAgg
         } else if (earfcn >= 66436) {
             return EutranBand.BAND_66;
         } else if (earfcn >= 65536) {
             return EutranBand.BAND_65;
-        } else if (earfcn > 54339) {
+        } else if (earfcn > 60254) {
             return INVALID_BAND;
-        } else if (earfcn >= 46790 /* inferred from the end range of BAND_45 */) {
+        } else if (earfcn >= 60140) {
+            return EutranBand.BAND_53;
+        } else if (earfcn >= 59140) {
+            return EutranBand.BAND_52;
+        } else if (earfcn >= 59090) {
+            return EutranBand.BAND_51;
+        } else if (earfcn >= 58240) {
+            return EutranBand.BAND_50;
+        } else if (earfcn >= 56740) {
+            return EutranBand.BAND_49;
+        } else if (earfcn >= 55240) {
+            return EutranBand.BAND_48;
+        } else if (earfcn >= 54540) {
+            return EutranBand.BAND_47;
+        } else if (earfcn >= 46790) {
             return EutranBand.BAND_46;
         } else if (earfcn >= 46590) {
             return EutranBand.BAND_45;
