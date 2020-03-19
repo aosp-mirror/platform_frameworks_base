@@ -283,13 +283,14 @@ public class RecordSettings extends Settings {
     /**
      * Builder for {@link RecordSettings}.
      */
-    public static class Builder extends Settings.Builder<Builder> {
+    public static class Builder {
+        private final int mMainType;
         private int mTsIndexMask;
         private int mScIndexType;
         private int mScIndexMask;
 
         private Builder(int mainType) {
-            super(mainType);
+            mMainType = mainType;
         }
 
         /**
@@ -323,11 +324,6 @@ public class RecordSettings extends Settings {
         @NonNull
         public RecordSettings build() {
             return new RecordSettings(mMainType, mTsIndexMask, mScIndexType, mScIndexMask);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 
