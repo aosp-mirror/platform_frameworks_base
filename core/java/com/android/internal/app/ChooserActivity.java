@@ -2418,13 +2418,20 @@ public class ChooserActivity extends ResolverActivity implements
         if (isLayoutUpdated
                 || mLastNumberOfChildren != recyclerView.getChildCount()) {
             mCurrAvailableWidth = availableWidth;
-            if (isLayoutUpdated
-                    && mChooserMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
-                // This fixes b/150936654 - empty work tab in share sheet when swiping
-                mChooserMultiProfilePagerAdapter.getActiveAdapterView()
-                        .setAdapter(mChooserMultiProfilePagerAdapter.getCurrentRootAdapter());
+            if (isLayoutUpdated) {
+                // It is very important we call setAdapter from here. Otherwise in some cases
+                // the resolver list doesn't get populated, such as b/150922090, b/150918223
+                // and b/150936654
+                recyclerView.setAdapter(gridAdapter);
+                ((GridLayoutManager) recyclerView.getLayoutManager()).setSpanCount(
+                        gridAdapter.getMaxTargetsPerRow());
+            }
+
+            if (mChooserMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
                 return;
-            } else if (mChooserMultiProfilePagerAdapter.getCurrentUserHandle() != getUser()) {
+            }
+
+            if (mLastNumberOfChildren == recyclerView.getChildCount()) {
                 return;
             }
 
