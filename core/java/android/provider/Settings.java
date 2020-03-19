@@ -9718,6 +9718,8 @@ public final class Settings {
        public static final String NETSTATS_SAMPLE_ENABLED = "netstats_sample_enabled";
        /** {@hide} */
        public static final String NETSTATS_AUGMENT_ENABLED = "netstats_augment_enabled";
+       /** {@hide} */
+       public static final String NETSTATS_COMBINE_SUBTYPE_ENABLED = "netstats_combine_subtype_enabled";
 
        /** {@hide} */
        public static final String NETSTATS_DEV_BUCKET_DURATION = "netstats_dev_bucket_duration";
