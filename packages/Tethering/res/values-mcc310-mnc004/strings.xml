@@ -15,12 +15,16 @@
 -->
 <resources>
     <!-- String for no upstream notification title [CHAR LIMIT=200] -->
-    <string name="no_upstream_notification_title">Tethering &amp; Mobile Hotspot has no internet access</string>
+    <string name="no_upstream_notification_title">Hotspot has no internet</string>
+    <!-- String for no upstream notification title [CHAR LIMIT=200] -->
+    <string name="no_upstream_notification_message">Devices can\u2019t connect to internet</string>
+    <!-- String for cellular roaming notification disable button [CHAR LIMIT=200]  -->
+    <string name="no_upstream_notification_disable_button">Turn off hotspot</string>
 
     <!-- String for cellular roaming notification title [CHAR LIMIT=200]  -->
-    <string name="upstream_roaming_notification_title">Roaming</string>
+    <string name="upstream_roaming_notification_title">Hotspot is on</string>
     <!-- String for cellular roaming notification message [CHAR LIMIT=500]  -->
-    <string name="upstream_roaming_notification_message">You will be charged on a per MB basis for all data sent or received while using this service outside the Verizon Network. Please check our website for current international rates. To minimize charges, visit My Verizon periodically to monitor your usage, check your device settings to confirm which devices are connected, and consider using alternate data connections when available</string>
+    <string name="upstream_roaming_notification_message">Additional charges may apply while roaming</string>
     <!-- String for cellular roaming notification continue button [CHAR LIMIT=200]  -->
     <string name="upstream_roaming_notification_continue_button">Continue</string>
 </resources>
