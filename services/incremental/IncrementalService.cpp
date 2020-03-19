@@ -1247,14 +1247,6 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
     }
 
     switch (newStatus) {
-        case IDataLoaderStatusListener::DATA_LOADER_NO_CONNECTION: {
-            // TODO(b/150411019): handle data loader connection loss
-            break;
-        }
-        case IDataLoaderStatusListener::DATA_LOADER_CONNECTION_OK: {
-            // TODO(b/150411019): handle data loader connection loss
-            break;
-        }
         case IDataLoaderStatusListener::DATA_LOADER_CREATED: {
             if (startRequested) {
                 incrementalService.startDataLoader(mountId);
@@ -1274,6 +1266,10 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_IMAGE_NOT_READY: {
+            break;
+        }
+        case IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE: {
+            // Nothing for now. Rely on externalListener to handle this.
             break;
         }
         default: {
