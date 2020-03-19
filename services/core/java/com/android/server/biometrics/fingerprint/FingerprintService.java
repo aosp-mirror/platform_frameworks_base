@@ -163,6 +163,11 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
+        public boolean isStrongBiometric() {
+            return FingerprintService.this.isStrongBiometric();
+        }
+
+        @Override
         public int handleFailedAttempt() {
             final int currentUser = ActivityManager.getCurrentUser();
             mFailedAttempts.put(currentUser, mFailedAttempts.get(currentUser, 0) + 1);

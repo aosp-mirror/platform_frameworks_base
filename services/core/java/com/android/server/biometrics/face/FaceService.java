@@ -238,6 +238,11 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
+        public boolean isStrongBiometric() {
+            return FaceService.this.isStrongBiometric();
+        }
+
+        @Override
         public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
                 boolean authenticated, ArrayList<Byte> token) {
             final boolean result = super.onAuthenticated(identifier, authenticated, token);
