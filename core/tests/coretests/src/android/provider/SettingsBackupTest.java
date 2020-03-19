@@ -346,6 +346,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETSTATS_POLL_INTERVAL,
                     Settings.Global.NETSTATS_SAMPLE_ENABLED,
                     Settings.Global.NETSTATS_AUGMENT_ENABLED,
+                    Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED,
                     Settings.Global.NETSTATS_TIME_CACHE_MAX_AGE,
                     Settings.Global.NETSTATS_UID_BUCKET_DURATION,
                     Settings.Global.NETSTATS_UID_DELETE_AGE,
