@@ -297,6 +297,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetModuleInfo();
                 case "log-visibility":
                     return runLogVisibility();
+                case "bypass-staged-installer-check":
+                    return runBypassStagedInstallerCheck();
                 default: {
                     String nextArg = getNextArg();
                     if (nextArg == null) {
@@ -390,6 +392,20 @@ class PackageManagerShellCommand extends ShellCommand {
             return -1;
         }
         return 1;
+    }
+
+    private int runBypassStagedInstallerCheck() {
+        final PrintWriter pw = getOutPrintWriter();
+        try {
+            mInterface.getPackageInstaller()
+                    .bypassNextStagedInstallerCheck(Boolean.parseBoolean(getNextArg()));
+            return 0;
+        } catch (RemoteException e) {
+            pw.println("Failure ["
+                    + e.getClass().getName() + " - "
+                    + e.getMessage() + "]");
+            return -1;
+        }
     }
 
     private int uninstallSystemUpdates() {

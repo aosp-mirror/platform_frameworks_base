@@ -82,6 +82,7 @@ import com.android.internal.util.ImageUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.IoThread;
 import com.android.server.LocalServices;
+import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
@@ -151,6 +152,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private final Callbacks mCallbacks;
 
     private volatile boolean mOkToSendBroadcasts = false;
+    private volatile boolean mBypassNextStagedInstallerCheck = false;
 
     /**
      * File storing persisted {@link #mSessions} metadata.
@@ -541,7 +543,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
-        if (Build.IS_DEBUGGABLE || isDowngradeAllowedForCaller(callingUid)) {
+        if (Build.IS_DEBUGGABLE || isCalledBySystemOrShell(callingUid)) {
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
@@ -569,6 +571,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 throw new IllegalArgumentException(
                     "APEX files can only be installed as part of a staged session.");
             }
+        }
+
+        if (mBypassNextStagedInstallerCheck) {
+            mBypassNextStagedInstallerCheck = false;
+        } else if (params.isStaged
+                && !isCalledBySystemOrShell(callingUid)
+                && !isWhitelistedStagedInstaller(requestedInstallerPackageName)) {
+            throw new SecurityException("Installer not allowed to commit staged install");
         }
 
         if (!params.isMultiPackage) {
@@ -683,9 +693,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         return sessionId;
     }
 
-    private boolean isDowngradeAllowedForCaller(int callingUid) {
+    private boolean isCalledBySystemOrShell(int callingUid) {
         return callingUid == Process.SYSTEM_UID || callingUid == Process.ROOT_UID
                 || callingUid == Process.SHELL_UID;
+    }
+
+    private boolean isWhitelistedStagedInstaller(String installerName) {
+        return SystemConfig.getInstance().getWhitelistedStagedInstallers().contains(installerName);
     }
 
     @Override
@@ -961,6 +975,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         synchronized (mSessions) {
             return mSessions.get(sessionId);
         }
+    }
+
+    @Override
+    public void bypassNextStagedInstallerCheck(boolean value) {
+        mBypassNextStagedInstallerCheck = value;
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,
