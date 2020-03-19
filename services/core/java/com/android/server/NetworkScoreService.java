@@ -760,12 +760,11 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     @Override
     public String getActiveScorerPackage() {
         enforceSystemOrHasScoreNetworks();
-        synchronized (mServiceConnectionLock) {
-            if (mServiceConnection != null) {
-                return mServiceConnection.getPackageName();
-            }
+        NetworkScorerAppData appData = mNetworkScorerAppManager.getActiveScorer();
+        if (appData == null) {
+          return null;
         }
-        return null;
+        return appData.getRecommendationServicePackageName();
     }
 
     /**
@@ -775,13 +774,7 @@ public class NetworkScoreService extends INetworkScoreService.Stub {
     public NetworkScorerAppData getActiveScorer() {
         // Only the system can access this data.
         enforceSystemOnly();
-        synchronized (mServiceConnectionLock) {
-            if (mServiceConnection != null) {
-                return mServiceConnection.getAppData();
-            }
-        }
-
-        return null;
+        return mNetworkScorerAppManager.getActiveScorer();
     }
 
     /**
