@@ -3623,28 +3623,24 @@ public abstract class PackageManager {
      * Constant for noting system app state as hidden before installation
      * @hide
      */
-    @SystemApi
     public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN = 0;
 
     /**
      * Constant for noting system app state as visible before installation
      * @hide
      */
-    @SystemApi
     public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE = 1;
 
     /**
      * Constant for noting system app state as installed
      * @hide
      */
-    @SystemApi
     public static final int SYSTEM_APP_STATE_INSTALLED = 2;
 
     /**
      * Constant for noting system app state as not installed
      * @hide
      */
-    @SystemApi
     public static final int SYSTEM_APP_STATE_UNINSTALLED = 3;
 
     /** {@hide} */
@@ -6834,7 +6830,6 @@ public abstract class PackageManager {
      * @param state State of the app.
      * @hide
      */
-    @SystemApi
     public void setSystemAppState(@NonNull String packageName, @SystemAppState int state) {
         throw new RuntimeException("Not implemented. Must override in a subclass");
     }
