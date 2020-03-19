@@ -209,6 +209,12 @@ public class ActivityOptions {
             "android.activity.pendingIntentLaunchFlags";
 
     /**
+     * See {@link #setTaskAlwaysOnTop}.
+     * @hide
+     */
+    private static final String KEY_TASK_ALWAYS_ON_TOP = "android.activity.alwaysOnTop";
+
+    /**
      * See {@link #setTaskOverlay}.
      * @hide
      */
@@ -337,6 +343,7 @@ public class ActivityOptions {
     private int mSplitScreenCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     private boolean mLockTaskMode = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
+    private boolean mTaskAlwaysOnTop;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
     private boolean mAvoidMoveToFront;
@@ -971,6 +978,7 @@ public class ActivityOptions {
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mPendingIntentLaunchFlags = opts.getInt(KEY_PENDING_INTENT_LAUNCH_FLAGS, 0);
+        mTaskAlwaysOnTop = opts.getBoolean(KEY_TASK_ALWAYS_ON_TOP, false);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
         mAvoidMoveToFront = opts.getBoolean(KEY_AVOID_MOVE_TO_FRONT, false);
@@ -1300,6 +1308,22 @@ public class ActivityOptions {
     }
 
     /**
+     * Set's whether the task for the activity launched with this option should always be on top.
+     * @hide
+     */
+    @TestApi
+    public void setTaskAlwaysOnTop(boolean alwaysOnTop) {
+        mTaskAlwaysOnTop = alwaysOnTop;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean getTaskAlwaysOnTop() {
+        return mTaskAlwaysOnTop;
+    }
+
+    /**
      * Set's whether the activity launched with this option should be a task overlay. That is the
      * activity will always be the top activity of the task.
      * @param canResume {@code false} if the task will also not be moved to the front of the stack.
@@ -1555,6 +1579,9 @@ public class ActivityOptions {
         }
         if (mPendingIntentLaunchFlags != 0) {
             b.putInt(KEY_PENDING_INTENT_LAUNCH_FLAGS, mPendingIntentLaunchFlags);
+        }
+        if (mTaskAlwaysOnTop) {
+            b.putBoolean(KEY_TASK_ALWAYS_ON_TOP, mTaskAlwaysOnTop);
         }
         if (mTaskOverlay) {
             b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
