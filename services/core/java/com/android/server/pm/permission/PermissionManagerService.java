@@ -24,6 +24,7 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
@@ -1587,7 +1588,8 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final int userSettableMask = FLAG_PERMISSION_USER_SET
                 | FLAG_PERMISSION_USER_FIXED
                 | FLAG_PERMISSION_REVOKED_COMPAT
-                | FLAG_PERMISSION_REVIEW_REQUIRED;
+                | FLAG_PERMISSION_REVIEW_REQUIRED
+                | FLAG_PERMISSION_ONE_TIME;
 
         final int policyOrSystemFlags = FLAG_PERMISSION_SYSTEM_FIXED
                 | FLAG_PERMISSION_POLICY_FIXED;
