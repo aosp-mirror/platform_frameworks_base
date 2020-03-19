@@ -21,7 +21,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ShellCommand;
+import android.text.TextUtils;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -391,5 +394,97 @@ public final class TelephonyTimeZoneSuggestion implements Parcelable {
             validate();
             return new TelephonyTimeZoneSuggestion(this);
         }
+    }
+
+    /** @hide */
+    public static TelephonyTimeZoneSuggestion parseCommandLineArg(@NonNull ShellCommand cmd)
+            throws IllegalArgumentException {
+        Integer slotIndex = null;
+        String zoneId = null;
+        Integer quality = null;
+        Integer matchType = null;
+        String opt;
+        while ((opt = cmd.getNextArg()) != null) {
+            switch (opt) {
+                case "--slot_index": {
+                    slotIndex = Integer.parseInt(cmd.getNextArgRequired());
+                    break;
+                }
+                case "--zone_id": {
+                    zoneId = cmd.getNextArgRequired();
+                    break;
+                }
+                case "--quality": {
+                    quality = parseQualityCommandLineArg(cmd.getNextArgRequired());
+                    break;
+                }
+                case "--match_type": {
+                    matchType = parseMatchTypeCommandLineArg(cmd.getNextArgRequired());
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException("Unknown option: " + opt);
+                }
+            }
+        }
+
+        if (slotIndex == null) {
+            throw new IllegalArgumentException("No slotIndex specified.");
+        }
+
+        Builder builder = new Builder(slotIndex);
+        if (!(TextUtils.isEmpty(zoneId) || "_".equals(zoneId))) {
+            builder.setZoneId(zoneId);
+        }
+        if (quality != null) {
+            builder.setQuality(quality);
+        }
+        if (matchType != null) {
+            builder.setMatchType(matchType);
+        }
+        builder.addDebugInfo("Command line injection");
+        return builder.build();
+    }
+
+    private static int parseQualityCommandLineArg(@NonNull String arg) {
+        switch (arg) {
+            case "single":
+                return QUALITY_SINGLE_ZONE;
+            case "multiple_same":
+                return QUALITY_MULTIPLE_ZONES_WITH_SAME_OFFSET;
+            case "multiple_different":
+                return QUALITY_MULTIPLE_ZONES_WITH_DIFFERENT_OFFSETS;
+            default:
+                throw new IllegalArgumentException("Unrecognized quality: " + arg);
+        }
+    }
+
+    private static int parseMatchTypeCommandLineArg(@NonNull String arg) {
+        switch (arg) {
+            case "emulator":
+                return MATCH_TYPE_EMULATOR_ZONE_ID;
+            case "country_with_offset":
+                return MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET;
+            case "country":
+                return MATCH_TYPE_NETWORK_COUNTRY_ONLY;
+            case "test_network":
+                return MATCH_TYPE_TEST_NETWORK_OFFSET_ONLY;
+            default:
+                throw new IllegalArgumentException("Unrecognized match_type: " + arg);
+        }
+    }
+
+    /** @hide */
+    public static void printCommandLineOpts(@NonNull PrintWriter pw) {
+        pw.println("Telephony suggestion options:");
+        pw.println("  --slot_index <number>");
+        pw.println("  To withdraw a previous suggestion:");
+        pw.println("    [--zone_id \"_\"]");
+        pw.println("  To make a new suggestion:");
+        pw.println("    --zone_id <Olson ID>");
+        pw.println("    --quality <single|multiple_same|multiple_different>");
+        pw.println("    --match_type <emulator|country_with_offset|country|test_network>");
+        pw.println();
+        pw.println("See " + TelephonyTimeZoneSuggestion.class.getName() + " for more information");
     }
 }
