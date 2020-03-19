@@ -97,6 +97,7 @@ cc_defaults {
         "src/stats_log_util.cpp",
         "src/statscompanion_util.cpp",
         "src/statsd_config.proto",
+        "src/statsd_metadata.proto",
         "src/StatsLogProcessor.cpp",
         "src/StatsService.cpp",
         "src/storage/StorageManager.cpp",
