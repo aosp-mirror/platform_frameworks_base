@@ -1169,6 +1169,10 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
             // If one lib file fails to be created, abort others as well
             break;
         }
+        // If it is a zero-byte file, skip data writing
+        if (uncompressedLen == 0) {
+            continue;
+        }
 
         // Write extracted data to new file
         std::vector<uint8_t> libData(uncompressedLen);
