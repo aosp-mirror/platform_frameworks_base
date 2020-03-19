@@ -110,14 +110,13 @@ public final class WindowInsetsAnimation {
      * and 1.
      * </p>
      * @see #getFraction() for raw fraction.
-     * @return The current interpolated progress of this animation. -1 if interpolator isn't
-     *         specified.
+     * @return The current interpolated progress of this animation.
      */
     public float getInterpolatedFraction() {
         if (mInterpolator != null) {
             return mInterpolator.getInterpolation(mFraction);
         }
-        return -1;
+        return mFraction;
     }
 
     /**
