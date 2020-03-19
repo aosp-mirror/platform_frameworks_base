@@ -496,17 +496,20 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     }
 
     /**
-     * Get the CustomerId of the device.
+     * Get the HiSyncId (unique hearing aid device identifier) of the device.
+     *
+     * <a href=https://source.android.com/devices/bluetooth/asha#hisyncid>HiSyncId documentation
+     * can be found here</a>
      *
      * @param device Bluetooth device
-     * @return the CustomerId of the device
+     * @return the HiSyncId of the device
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public long getHiSyncId(@Nullable BluetoothDevice device) {
         if (VDBG) {
-            log("getCustomerId(" + device + ")");
+            log("getHiSyncId(" + device + ")");
         }
         final IBluetoothHearingAid service = getService();
         try {
