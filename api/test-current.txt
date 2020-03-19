@@ -3169,6 +3169,7 @@ package android.service.autofill {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public android.os.Bundle onGetInlineSuggestionsRendererInfo();
     method @Nullable public android.view.View onRenderSuggestion(@NonNull android.service.autofill.InlinePresentation, int, int);
+    method public final void startIntentSender(@NonNull android.content.IntentSender);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.InlineSuggestionRenderService";
   }
 
