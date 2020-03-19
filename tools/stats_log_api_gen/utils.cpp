@@ -323,10 +323,10 @@ int write_java_non_chained_methods(
         for (vector<java_type_t>::const_iterator arg = signature.begin();
                 arg != signature.end(); arg++) {
             if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                // Non chained signatures should not have attribution chains.
+                fprintf(stderr, "Non chained signatures should not have attribution chains.\n");
                 return 1;
             } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                // Module logging does not yet support key value pair.
+                fprintf(stderr, "Module logging does not yet support key value pair.\n");
                 return 1;
             } else {
                 fprintf(out, ", %s arg%d", java_type_name(*arg), argIndex);
