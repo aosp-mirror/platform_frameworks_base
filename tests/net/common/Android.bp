@@ -20,6 +20,7 @@ java_library {
     name: "FrameworksNetCommonTests",
     srcs: ["java/**/*.java", "java/**/*.kt"],
     static_libs: [
+        "androidx.core_core",
         "androidx.test.rules",
         "junit",
         "mockito-target-minus-junit4",

@@ -17,19 +17,29 @@
 package android.view;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.inputmethod.EditorInfo;
 
 /**
- * Interface that informs the client about {@link WindowInsetsAnimationController} state changes.
+ * Listener that encapsulates a request to
+ * {@link WindowInsetsController#controlWindowInsetsAnimation}.
+ *
+ * <p>
+ * Insets can be controlled with the supplied {@link WindowInsetsAnimationController} from
+ * {@link #onReady} until either {@link #onFinished} or {@link #onCancelled}.
+ *
+ * <p>
+ * Once the control over insets is finished or cancelled, it will not be regained until a new
+ * request to {@link WindowInsetsController#controlWindowInsetsAnimation} is made.
+ *
+ * <p>
+ * The request to control insets can fail immediately. In that case {@link #onCancelled} will be
+ * invoked without a preceding {@link #onReady}.
+ *
+ * @see WindowInsetsController#controlWindowInsetsAnimation
  */
 public interface WindowInsetsAnimationControlListener {
-
-    /**
-     * @hide
-     */
-    default void onPrepare(int types) {
-    }
 
     /**
      * Called when the animation is ready to be controlled. This may be delayed when the IME needs
@@ -41,14 +51,40 @@ public interface WindowInsetsAnimationControlListener {
      *              {@link WindowInsetsController#controlWindowInsetsAnimation} in case the window
      *              wasn't able to gain the controls because it wasn't the IME target or not
      *              currently the window that's controlling the system bars.
+     * @see WindowInsetsAnimationController#isReady
      */
     void onReady(@NonNull WindowInsetsAnimationController controller, @InsetsType int types);
 
     /**
-     * Called when the window no longer has control over the requested types. If it loses control
-     * over one type, the whole control will be cancelled. If none of the requested types were
-     * available when requesting the control, the animation control will be cancelled immediately
-     * without {@link #onReady} being called.
+     * Called when the request for control over the insets has
+     * {@link WindowInsetsAnimationController#finish finished}.
+     *
+     * Once this callback is invoked, the supplied {@link WindowInsetsAnimationController}
+     * is no longer {@link WindowInsetsAnimationController#isReady() ready}.
+     *
+     * Control will not be regained until a new request
+     * to {@link WindowInsetsController#controlWindowInsetsAnimation} is made.
+     *
+     * @param controller the controller which has finished.
+     * @see WindowInsetsAnimationController#isFinished
      */
-    void onCancelled();
+    void onFinished(@NonNull WindowInsetsAnimationController controller);
+
+    /**
+     * Called when the request for control over the insets has been cancelled, either
+     * because the {@link android.os.CancellationSignal} associated with the
+     * {@link WindowInsetsController#controlWindowInsetsAnimation request} has been invoked, or
+     * the window has lost control over the insets (e.g. because it lost focus).
+     *
+     * Once this callback is invoked, the supplied {@link WindowInsetsAnimationController}
+     * is no longer {@link WindowInsetsAnimationController#isReady() ready}.
+     *
+     * Control will not be regained until a new request
+     * to {@link WindowInsetsController#controlWindowInsetsAnimation} is made.
+     *
+     * @param controller the controller which has been cancelled, or null if the request
+     *                   was cancelled before {@link #onReady} was invoked.
+     * @see WindowInsetsAnimationController#isCancelled
+     */
+    void onCancelled(@Nullable WindowInsetsAnimationController controller);
 }

@@ -200,6 +200,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */);
         mFinished = true;
+        mListener.onFinished(this);
 
         mShownOnFinish = shown;
     }
@@ -216,11 +217,17 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             return;
         }
         mCancelled = true;
-        mListener.onCancelled();
+        mListener.onCancelled(this);
 
         releaseLeashes();
     }
 
+    @Override
+    public boolean isFinished() {
+        return mFinished;
+    }
+
+    @Override
     public boolean isCancelled() {
         return mCancelled;
     }

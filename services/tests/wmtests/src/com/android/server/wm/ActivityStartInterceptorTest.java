@@ -246,7 +246,7 @@ public class ActivityStartInterceptorTest {
     }
 
     @Test
-    public void testWorkChallenge() {
+    public void testLockedManagedProfile() {
         // GIVEN that the user the activity is starting as is currently locked
         when(mAmInternal.shouldConfirmCredentials(TEST_USER_ID)).thenReturn(true);
 

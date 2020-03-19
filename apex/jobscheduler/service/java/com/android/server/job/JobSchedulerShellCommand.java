@@ -136,6 +136,7 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         checkPermission("force scheduled jobs");
 
         boolean force = false;
+        boolean satisfied = false;
         int userId = UserHandle.USER_SYSTEM;
 
         String opt;
@@ -144,6 +145,11 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                 case "-f":
                 case "--force":
                     force = true;
+                    break;
+
+                case "-s":
+                case "--satisfied":
+                    satisfied = true;
                     break;
 
                 case "-u":
@@ -157,12 +163,17 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             }
         }
 
+        if (force && satisfied) {
+            pw.println("Cannot specify both --force and --satisfied");
+            return -1;
+        }
+
         final String pkgName = getNextArgRequired();
         final int jobId = Integer.parseInt(getNextArgRequired());
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            int ret = mInternal.executeRunCommand(pkgName, userId, jobId, force);
+            int ret = mInternal.executeRunCommand(pkgName, userId, jobId, satisfied, force);
             if (printError(ret, pkgName, userId, jobId)) {
                 return ret;
             }
@@ -424,11 +435,18 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         pw.println("Job scheduler (jobscheduler) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  run [-f | --force] [-u | --user USER_ID] PACKAGE JOB_ID");
-        pw.println("    Trigger immediate execution of a specific scheduled job.");
+        pw.println("  run [-f | --force] [-s | --satisfied] [-u | --user USER_ID] PACKAGE JOB_ID");
+        pw.println("    Trigger immediate execution of a specific scheduled job. For historical");
+        pw.println("    reasons, some constraints, such as battery, are ignored when this");
+        pw.println("    command is called. If you don't want any constraints to be ignored,");
+        pw.println("    include the -s flag.");
         pw.println("    Options:");
         pw.println("      -f or --force: run the job even if technical constraints such as");
-        pw.println("         connectivity are not currently met");
+        pw.println("         connectivity are not currently met. This is incompatible with -f ");
+        pw.println("         and so an error will be reported if both are given.");
+        pw.println("      -s or --satisfied: run the job only if all constraints are met.");
+        pw.println("         This is incompatible with -f and so an error will be reported");
+        pw.println("         if both are given.");
         pw.println("      -u or --user: specify which user's job is to be run; the default is");
         pw.println("         the primary or system user");
         pw.println("  timeout [-u | --user USER_ID] [PACKAGE] [JOB_ID]");

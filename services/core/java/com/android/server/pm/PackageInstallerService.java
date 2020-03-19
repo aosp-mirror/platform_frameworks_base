@@ -47,7 +47,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -1038,80 +1037,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
-    static void sendPendingStreaming(Context context, IntentSender target, int sessionId,
-            Throwable cause) {
-        final Intent intent = new Intent();
-        intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_STREAMING);
-        if (cause != null && !TextUtils.isEmpty(cause.getMessage())) {
-            intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
-                    "Staging Image Not Ready [" + cause.getMessage() + "]");
-        } else {
-            intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "Staging Image Not Ready");
-        }
-        try {
-            target.sendIntent(context, 0, intent, null, null);
-        } catch (SendIntentException ignored) {
-        }
-    }
-
-    static void sendOnUserActionRequired(Context context, IntentSender target, int sessionId,
-            Intent intent) {
-        final Intent fillIn = new Intent();
-        fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_USER_ACTION);
-        fillIn.putExtra(Intent.EXTRA_INTENT, intent);
-        try {
-            target.sendIntent(context, 0, fillIn, null, null);
-        } catch (SendIntentException ignored) {
-        }
-    }
-
-    static void sendOnPackageInstalled(Context context, IntentSender target, int sessionId,
-            boolean showNotification, int userId, String basePackageName, int returnCode,
-            String msg, Bundle extras) {
-        if (PackageManager.INSTALL_SUCCEEDED == returnCode && showNotification) {
-            boolean update = (extras != null) && extras.getBoolean(Intent.EXTRA_REPLACING);
-            Notification notification = buildSuccessNotification(context,
-                    context.getResources()
-                            .getString(update ? R.string.package_updated_device_owner :
-                                    R.string.package_installed_device_owner),
-                    basePackageName,
-                    userId);
-            if (notification != null) {
-                NotificationManager notificationManager = (NotificationManager)
-                        context.getSystemService(Context.NOTIFICATION_SERVICE);
-                notificationManager.notify(basePackageName,
-                        SystemMessage.NOTE_PACKAGE_STATE,
-                        notification);
-            }
-        }
-        final Intent fillIn = new Intent();
-        fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, basePackageName);
-        fillIn.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
-                PackageManager.installStatusToPublicStatus(returnCode));
-        fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE,
-                PackageManager.installStatusToString(returnCode, msg));
-        fillIn.putExtra(PackageInstaller.EXTRA_LEGACY_STATUS, returnCode);
-        if (extras != null) {
-            final String existing = extras.getString(
-                    PackageManager.EXTRA_FAILURE_EXISTING_PACKAGE);
-            if (!TextUtils.isEmpty(existing)) {
-                fillIn.putExtra(PackageInstaller.EXTRA_OTHER_PACKAGE_NAME, existing);
-            }
-        }
-        try {
-            target.sendIntent(context, 0, fillIn, null, null);
-        } catch (SendIntentException ignored) {
-        }
-    }
-
     /**
      * Build a notification for package installation / deletion by device owners that is shown if
      * the operation succeeds.
      */
-    private static Notification buildSuccessNotification(Context context, String contentText,
+    static Notification buildSuccessNotification(Context context, String contentText,
             String basePackageName, int userId) {
         PackageInfo packageInfo = null;
         try {

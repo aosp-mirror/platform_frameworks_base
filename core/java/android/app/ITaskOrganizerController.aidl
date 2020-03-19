@@ -32,6 +32,11 @@ interface ITaskOrganizerController {
     void registerTaskOrganizer(ITaskOrganizer organizer, int windowingMode);
 
     /**
+     * Unregisters a previously registered task organizer.
+     */
+    void unregisterTaskOrganizer(ITaskOrganizer organizer);
+
+    /**
      * Apply multiple WindowContainer operations at once.
      * @param organizer If non-null this transaction will use the synchronization
      *        scheme described in BLASTSyncEngine.java. The SurfaceControl transaction

@@ -19,15 +19,17 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.os.IBinder;
+import android.os.ServiceManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 /**
- *
- * Constants for client code communicating with the network stack service.
+ * Constants and utilities for client code communicating with the network stack service.
  * @hide
  */
 @SystemApi
@@ -42,6 +44,17 @@ public class NetworkStack {
     @TestApi
     public static final String PERMISSION_MAINLINE_NETWORK_STACK =
             "android.permission.MAINLINE_NETWORK_STACK";
+
+    /**
+     * Get an {@link IBinder} representing the NetworkStack stable AIDL Interface, if registered.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @TestApi
+    public static IBinder getService() {
+        return ServiceManager.getService(Context.NETWORK_STACK_SERVICE);
+    }
 
     private NetworkStack() {}
 

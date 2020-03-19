@@ -22,7 +22,7 @@
 
 #include "../metrics/metrics_test_helper.h"
 #include "stats_event.h"
-#include "statslog.h"
+#include "statslog_statsdtest.h"
 
 #ifdef __ANDROID__
 
@@ -39,9 +39,9 @@ using testing::Contains;
  * Test merge isolated and host uid
  */
 namespace {
-int uidAtomTagId = android::util::CPU_CLUSTER_TIME;
+int uidAtomTagId = util::CPU_CLUSTER_TIME;
 const vector<int> uidAdditiveFields = {3};
-int nonUidAtomTagId = android::util::SYSTEM_UPTIME;
+int nonUidAtomTagId = util::SYSTEM_UPTIME;
 int timestamp = 1234;
 int isolatedUid = 30;
 int isolatedAdditiveData = 31;

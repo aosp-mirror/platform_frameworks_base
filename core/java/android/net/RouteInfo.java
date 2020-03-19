@@ -527,6 +527,26 @@ public final class RouteInfo implements Parcelable {
     }
 
     /**
+     * Compares this RouteInfo object against the specified object and indicates if the
+     * destinations of both routes are equal.
+     * @return {@code true} if the route destinations are equal, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public boolean isSameDestinationAs(@Nullable Object obj) {
+        if (this == obj) return true;
+
+        if (!(obj instanceof RouteInfo)) return false;
+
+        RouteInfo target = (RouteInfo) obj;
+
+        if (Objects.equals(mDestination, target.getDestination())) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      *  Returns a hashcode for this <code>RouteInfo</code> object.
      */
     public int hashCode() {

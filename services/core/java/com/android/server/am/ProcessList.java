@@ -71,7 +71,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.ProcessInfo;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.net.LocalSocket;
@@ -99,7 +98,6 @@ import android.provider.DeviceConfig;
 import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.LongSparseArray;
 import android.util.Pair;
@@ -138,10 +136,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Activity manager code dealing with processes.
@@ -511,13 +507,6 @@ public final class ProcessList {
      * The buffer to be used to receive the SIGCHLD data, it includes pid/uid/status.
      */
     private final int[] mZygoteSigChldMessage = new int[3];
-
-    interface LmkdKillListener {
-        /**
-         * Called when there is a process kill by lmkd.
-         */
-        void onLmkdKillOccurred(int pid, int uid);
-    }
 
     final class IsolatedUidRange {
         @VisibleForTesting
@@ -2192,11 +2181,12 @@ public final class ProcessList {
                 app.setHasForegroundActivities(true);
             }
 
+            StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                    StorageManagerInternal.class);
             final Map<String, Pair<String, Long>> pkgDataInfoMap;
             boolean bindMountAppStorageDirs = false;
 
             if (shouldIsolateAppData(app)) {
-                bindMountAppStorageDirs = mVoldAppDataIsolationEnabled;
                 // Get all packages belongs to the same shared uid. sharedPackages is empty array
                 // if it doesn't have shared uid.
                 final PackageManagerInternal pmInt = mService.getPackageManagerInternalLocked();
@@ -2206,9 +2196,9 @@ public final class ProcessList {
                         ? new String[]{app.info.packageName} : sharedPackages, uid);
 
                 int userId = UserHandle.getUserId(uid);
-                if (mVoldAppDataIsolationEnabled) {
-                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                            StorageManagerInternal.class);
+                if (mVoldAppDataIsolationEnabled && UserHandle.isApp(app.uid) &&
+                        !storageManagerInternal.isExternalStorageService(uid)) {
+                    bindMountAppStorageDirs = true;
                     if (!storageManagerInternal.prepareStorageDirs(userId, pkgDataInfoMap.keySet(),
                             app.processName)) {
                         // Cannot prepare Android/app and Android/obb directory,

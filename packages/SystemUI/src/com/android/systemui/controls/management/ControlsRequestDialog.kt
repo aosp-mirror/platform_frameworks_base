@@ -55,7 +55,7 @@ class ControlsRequestDialog @Inject constructor(
     private lateinit var control: Control
     private var dialog: Dialog? = null
     private val callback = object : ControlsListingController.ControlsListingCallback {
-        override fun onServicesUpdated(candidates: List<ControlsServiceInfo>) {}
+        override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {}
     }
 
     private val currentUserTracker = object : CurrentUserTracker(broadcastDispatcher) {

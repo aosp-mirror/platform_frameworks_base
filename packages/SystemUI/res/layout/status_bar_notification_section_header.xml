@@ -35,7 +35,34 @@
         android:forceHasOverlappingRendering="false"
         android:clipChildren="false"
         >
-        <include layout="@layout/status_bar_notification_section_header_contents"/>
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start|center_vertical"
+            android:layout_weight="1">
+
+            <TextView
+                style="@style/TextAppearance.NotificationSectionHeaderButton"
+                android:id="@+id/header_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:forceHasOverlappingRendering="false"
+                android:text="@string/notification_section_header_gentle"
+            />
+
+        </FrameLayout>
+        <ImageView
+            android:id="@+id/btn_clear_all"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/status_bar_notification_section_header_clear_btn"
+            android:contentDescription="@string/accessibility_notification_section_header_gentle_clear_all"
+            android:scaleType="center"
+            android:tint="?attr/wallpaperTextColor"
+            android:tintMode="src_in"
+            android:visibility="gone"
+            android:forceHasOverlappingRendering="false"
+        />
     </LinearLayout>
 
 </com.android.systemui.statusbar.notification.stack.SectionHeaderView>

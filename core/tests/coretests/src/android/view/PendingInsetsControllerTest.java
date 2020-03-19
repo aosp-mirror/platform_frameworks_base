@@ -99,7 +99,7 @@ public class PendingInsetsControllerTest {
         CancellationSignal cancellationSignal = new CancellationSignal();
         mPendingInsetsController.controlWindowInsetsAnimation(
                 systemBars(), 0, new LinearInterpolator(), cancellationSignal, listener);
-        verify(listener).onCancelled();
+        verify(listener).onCancelled(null);
         assertFalse(cancellationSignal.isCanceled());
     }
 

@@ -456,14 +456,14 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
 
     auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
     // The predicate is dimensioning by first attribution node by uid.
-    FieldMatcher dimensions = CreateAttributionUidDimensions(android::util::WAKELOCK_STATE_CHANGED,
+    FieldMatcher dimensions = CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED,
                                                              {Position::FIRST});
     *holdingWakelockPredicate.mutable_simple_predicate()->mutable_dimensions() = dimensions;
     *config.add_predicate() = holdingWakelockPredicate;
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
     *isInBackgroundPredicate.mutable_simple_predicate()->mutable_dimensions() =
-            CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
+            CreateDimensions(util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
     *config.add_predicate() = isInBackgroundPredicate;
 
     auto durationMetric = config.add_duration_metric();
@@ -473,17 +473,17 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
     durationMetric->set_aggregation_type(DurationMetric::SUM);
     // The metric is dimensioning by first attribution node and only by uid.
     *durationMetric->mutable_dimensions_in_what() = CreateAttributionUidDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     durationMetric->set_bucket(FIVE_MINUTES);
 
     // Links between wakelock state atom and condition of app is in background.
     auto links = durationMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
     auto dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(android::util::WAKELOCK_STATE_CHANGED);
+    dimensionWhat->set_field(util::WAKELOCK_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
     *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
-            android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
+            util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
 
     ConfigKey cfgKey;
     uint64_t bucketStartTimeNs = 10000000000;
@@ -536,7 +536,7 @@ TEST(DurationMetricE2eTest, TestWithSlicedCondition) {
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
-                                    android::util::WAKELOCK_STATE_CHANGED, appUid);
+                                    util::WAKELOCK_STATE_CHANGED, appUid);
     // Validate bucket info.
     EXPECT_EQ(1, data.bucket_info_size());
 
@@ -558,14 +558,14 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
 
     auto holdingWakelockPredicate = CreateHoldingWakelockPredicate();
     // The predicate is dimensioning by first attribution node by uid.
-    FieldMatcher dimensions = CreateAttributionUidDimensions(android::util::WAKELOCK_STATE_CHANGED,
+    FieldMatcher dimensions = CreateAttributionUidDimensions(util::WAKELOCK_STATE_CHANGED,
                                                              {Position::FIRST});
     *holdingWakelockPredicate.mutable_simple_predicate()->mutable_dimensions() = dimensions;
     *config.add_predicate() = holdingWakelockPredicate;
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
     *isInBackgroundPredicate.mutable_simple_predicate()->mutable_dimensions() =
-            CreateDimensions(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
+            CreateDimensions(util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
     *config.add_predicate() = isInBackgroundPredicate;
 
     auto durationMetric = config.add_duration_metric();
@@ -575,17 +575,17 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
     durationMetric->set_aggregation_type(DurationMetric::SUM);
     // The metric is dimensioning by first attribution node and only by uid.
     *durationMetric->mutable_dimensions_in_what() = CreateAttributionUidDimensions(
-            android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
+            util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     durationMetric->set_bucket(FIVE_MINUTES);
 
     // Links between wakelock state atom and condition of app is in background.
     auto links = durationMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
     auto dimensionWhat = links->mutable_fields_in_what();
-    dimensionWhat->set_field(android::util::WAKELOCK_STATE_CHANGED);
+    dimensionWhat->set_field(util::WAKELOCK_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
     *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
-            android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
+            util::ACTIVITY_FOREGROUND_STATE_CHANGED, {Position::FIRST});
 
     auto metric_activation1 = config.add_metric_activation();
     metric_activation1->set_metric_id(durationMetric->id());
@@ -694,7 +694,7 @@ TEST(DurationMetricE2eTest, TestWithActivationAndSlicedCondition) {
     auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
     // Validate dimension value.
     ValidateAttributionUidDimension(data.dimensions_in_what(),
-                                    android::util::WAKELOCK_STATE_CHANGED, appUid);
+                                    util::WAKELOCK_STATE_CHANGED, appUid);
     // Validate bucket info.
     EXPECT_EQ(2, data.bucket_info_size());
 

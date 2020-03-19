@@ -699,6 +699,20 @@
         <item name="*android:colorPopupBackground">@color/control_list_popup_background</item>
     </style>
 
+    <style name="TextAppearance.ControlSetup">
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+        <item name="android:textColor">@color/control_primary_text</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="TextAppearance.ControlSetup.Title">
+        <item name="android:textSize">25sp</item>
+    </style>
+
+    <style name="TextAppearance.ControlSetup.Subtitle">
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="Theme.ControlsRequestDialog" parent="@style/Theme.SystemUI.MediaProjectionAlertDialog"/>
 
 </resources>
