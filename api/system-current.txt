@@ -4658,11 +4658,11 @@ package android.net {
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
-    method @NonNull public java.util.List<java.lang.Integer> getAdministratorUids();
+    method @NonNull public int[] getAdministratorUids();
     method @Nullable public String getSSID();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
-    method @NonNull public android.net.NetworkCapabilities setAdministratorUids(@NonNull java.util.List<java.lang.Integer>);
+    method @NonNull public android.net.NetworkCapabilities setAdministratorUids(@NonNull int[]);
     method @NonNull public android.net.NetworkCapabilities setRequestorPackageName(@NonNull String);
     method @NonNull public android.net.NetworkCapabilities setRequestorUid(int);
     method @NonNull public android.net.NetworkCapabilities setSSID(@Nullable String);
