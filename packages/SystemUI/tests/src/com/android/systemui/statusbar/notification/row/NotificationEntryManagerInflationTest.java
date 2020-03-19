@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SbnBuilder;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationClicker;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -183,7 +184,8 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 cache,
                 mRemoteInputManager,
                 () -> mock(SmartReplyConstants.class),
-                () -> mock(SmartReplyController.class));
+                () -> mock(SmartReplyController.class),
+                mock(ConversationNotificationProcessor.class));
         RowContentBindStage stage = new RowContentBindStage(
                 binder,
                 mock(NotifInflationErrorManager.class),
