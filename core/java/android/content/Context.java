@@ -3430,7 +3430,7 @@ public abstract class Context {
             TELEPHONY_SUBSCRIPTION_SERVICE,
             CARRIER_CONFIG_SERVICE,
             EUICC_SERVICE,
-            MMS_SERVICE,
+            //@hide: MMS_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -4344,6 +4344,7 @@ public abstract class Context {
      *
      * @see #getSystemService(String)
      * @see android.telephony.MmsManager
+     * @hide
      */
     public static final String MMS_SERVICE = "mms";
 
