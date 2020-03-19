@@ -281,7 +281,9 @@ public class Tuner implements AutoCloseable  {
      * @param tuner the Tuner instance to share frontend resource with.
      */
     public void shareFrontendFromTuner(@NonNull Tuner tuner) {
-        // TODO: implementation.
+        mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
+        mFrontendHandle = tuner.mFrontendHandle;
+        nativeOpenFrontendByHandle(mFrontendHandle);
     }
 
     /**
@@ -296,7 +298,7 @@ public class Tuner implements AutoCloseable  {
      * @param niceValue the nice value.
      */
     public void updateResourcePriority(int priority, int niceValue) {
-        // TODO: implementation.
+        mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
     }
 
     private long mNativeContext; // used by native jMediaTuner
@@ -306,7 +308,14 @@ public class Tuner implements AutoCloseable  {
      */
     @Override
     public void close() {
-        // TODO: implementation.
+        if (mFrontendHandle != null) {
+            mTunerResourceManager.releaseFrontend(mFrontendHandle);
+            mFrontendHandle = null;
+        }
+        if (mLnb != null) {
+            mTunerResourceManager.releaseLnb(mLnbHandle);
+            mLnb = null;
+        }
     }
 
     /**
@@ -806,7 +815,6 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
-        // TODO: update JNI code for LNB handle,
         return nativeOpenLnbByHandle(mLnbHandle);
     }
 
