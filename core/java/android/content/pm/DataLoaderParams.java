@@ -22,9 +22,7 @@ import android.annotation.SystemApi;
 import android.content.ComponentName;
 import android.os.ParcelFileDescriptor;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * This class represents the parameters used to configure a Data Loader.
@@ -54,12 +52,10 @@ public class DataLoaderParams {
      *
      * @param componentName Data Loader component supporting Incremental installation.
      * @param arguments free form installation arguments
-     * @param namedFds TODO(b/146080380) remove
      */
     public static final @NonNull DataLoaderParams forIncremental(
-            @NonNull ComponentName componentName, @NonNull String arguments,
-            @Nullable Map<String, ParcelFileDescriptor> namedFds) {
-        return new DataLoaderParams(DataLoaderType.INCREMENTAL, componentName, arguments, namedFds);
+            @NonNull ComponentName componentName, @NonNull String arguments) {
+        return new DataLoaderParams(DataLoaderType.INCREMENTAL, componentName, arguments, null);
     }
 
     /** @hide */
@@ -114,13 +110,5 @@ public class DataLoaderParams {
      */
     public final @NonNull String getArguments() {
         return mData.arguments;
-    }
-
-    /**
-     * @return data loader's dynamic arguments such as file descriptors TODO: remove
-     */
-    public final @NonNull Map<String, ParcelFileDescriptor> getDynamicArgs() {
-        return Arrays.stream(mData.dynamicArgs).collect(
-                Collectors.toMap(p -> p.name, p -> p.fd));
     }
 }
