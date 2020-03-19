@@ -1049,6 +1049,7 @@ public class DreamService extends Service implements Window.Callback {
         // DreamServiceWrapper.onActivityCreated.
         if (!mWindowless) {
             Intent i = new Intent(this, DreamActivity.class);
+            i.setPackage(getApplicationContext().getPackageName());
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.putExtra(DreamActivity.EXTRA_CALLBACK, mDreamServiceWrapper);
 
