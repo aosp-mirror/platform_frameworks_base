@@ -9341,7 +9341,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAlwaysAllowMmsData(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setAlwaysReportSignalStrength(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallForwarding(@NonNull android.telephony.CallForwardingInfo);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallWaitingStatus(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
