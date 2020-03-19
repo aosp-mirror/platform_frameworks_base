@@ -66,7 +66,6 @@ import java.util.regex.Pattern;
 public class ConversationLayout extends FrameLayout
         implements ImageMessageConsumer, IMessagingLayout {
 
-    public static final boolean CONVERSATION_LAYOUT_ENABLED = true;
     private static final float COLOR_SHIFT_AMOUNT = 60;
     /**
      *  Pattren for filter some ingonable characters.

@@ -48,7 +48,9 @@ import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Intent;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.provider.Settings;
@@ -113,6 +115,9 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
     @Mock private StatusBar mStatusBar;
     @Mock private AccessibilityManager mAccessibilityManager;
     @Mock private HighPriorityProvider mHighPriorityProvider;
+    @Mock private INotificationManager mINotificationManager;
+    @Mock private LauncherApps mLauncherApps;
+    @Mock private ShortcutManager mShortcutManager;
 
     @Before
     public void setUp() {
@@ -128,7 +133,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
-                () -> mStatusBar, mHandler, mAccessibilityManager, mHighPriorityProvider);
+                () -> mStatusBar, mHandler, mAccessibilityManager, mHighPriorityProvider,
+                mINotificationManager, mLauncherApps, mShortcutManager);
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
