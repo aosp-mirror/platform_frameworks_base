@@ -163,6 +163,7 @@ class WebViewUpdateServiceImpl {
     }
 
     void prepareWebViewInSystemServer() {
+        mSystemInterface.notifyZygote(isMultiProcessEnabled());
         try {
             synchronized (mLock) {
                 mCurrentWebViewPackage = findPreferredWebViewPackage();
@@ -198,12 +199,6 @@ class WebViewUpdateServiceImpl {
             } else {
                 Slog.e(TAG, "No valid provider and no fallback available.");
             }
-        }
-
-        boolean multiProcessEnabled = isMultiProcessEnabled();
-        mSystemInterface.notifyZygote(multiProcessEnabled);
-        if (multiProcessEnabled) {
-            AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
         }
     }
 
@@ -357,6 +352,12 @@ class WebViewUpdateServiceImpl {
             } else {
                 mWebViewPackageDirty = true;
             }
+        }
+
+        // Once we've notified the system that the provider has changed and started RELRO creation,
+        // try to restart the zygote so that it will be ready when apps use it.
+        if (isMultiProcessEnabled()) {
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
         }
     }
 
