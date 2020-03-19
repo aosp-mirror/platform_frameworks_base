@@ -13,12 +13,12 @@
 // limitations under the License.
 
 java_library_static {
-    name: "networkstackprotosnano",
+    name: "networkstackprotos",
     proto: {
-        type: "nano",
+        type: "lite",
     },
     srcs: [
         "network_stack.proto",
     ],
-    sdk_version: "system_current",
+    sdk_version: "system_29",
 }

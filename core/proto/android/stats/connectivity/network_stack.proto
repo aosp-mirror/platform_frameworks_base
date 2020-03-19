@@ -20,6 +20,160 @@ package android.stats.connectivity;
 option java_multiple_files = true;
 option java_outer_classname = "NetworkStackProto";
 
+enum DhcpRenewResult {
+    RR_UNKNOWN = 0;
+    RR_SUCCESS = 1;
+    RR_ERROR_NAK = 2;
+    RR_ERROR_IP_MISMATCH = 3;
+    RR_ERROR_IP_EXPIRE = 4;
+}
+
+enum DisconnectCode {
+    DC_NONE = 0;
+    DC_NORMAL_TERMINATION = 1;
+    DC_PROVISIONING_FAIL = 2;
+    DC_ERROR_STARTING_IPV4 = 4;
+    DC_ERROR_STARTING_IPV6 = 5;
+    DC_ERROR_STARTING_IPREACHABILITYMONITOR = 6;
+    DC_INVALID_PROVISIONING = 7;
+    DC_INTERFACE_NOT_FOUND = 8;
+    DC_PROVISIONING_TIMEOUT = 9;
+}
+
+enum TransportType {
+    TT_UNKNOWN = 0;
+    // Indicates this network uses a Cellular transport
+    TT_CELLULAR = 1;
+    // Indicates this network uses a Wi-Fi transport
+    TT_WIFI = 2;
+    // Indicates this network uses a Bluetooth transport
+    TT_BLUETOOTH = 3;
+    // Indicates this network uses an Ethernet transport
+    TT_ETHERNET = 4;
+    // Indicates this network uses a Wi-Fi Aware transport
+    TT_WIFI_AWARE = 5;
+    // Indicates this network uses a LoWPAN transport
+    TT_LOWPAN = 6;
+    // Indicates this network uses a Cellular+VPN transport
+    TT_CELLULAR_VPN = 7;
+    // Indicates this network uses a Wi-Fi+VPN transport
+    TT_WIFI_VPN = 8;
+    // Indicates this network uses a Bluetooth+VPN transport
+    TT_BLUETOOTH_VPN = 9;
+    // Indicates this network uses an Ethernet+VPN transport
+    TT_ETHERNET_VPN = 10;
+    // Indicates this network uses a Wi-Fi+Cellular+VPN transport
+    TT_WIFI_CELLULAR_VPN = 11;
+    // Indicates this network uses for test only
+    TT_TEST = 12;
+}
+
+enum DhcpFeature {
+    DF_UNKNOWN = 0;
+    // DHCP INIT-REBOOT state
+    DF_INITREBOOT = 1;
+    // DHCP rapid commit option
+    DF_RAPIDCOMMIT  = 2;
+    // Duplicate address detection
+    DF_DAD = 3;
+    // Fast initial Link setup
+    DF_FILS = 4;
+}
+
+enum HostnameTransResult {
+    HTR_UNKNOWN = 0;
+    HTR_SUCCESS = 1;
+    HTR_FAILURE = 2;
+    HTR_DISABLE = 3;
+}
+
+enum ProbeResult {
+    PR_UNKNOWN = 0;
+    PR_SUCCESS = 1;
+    PR_FAILURE = 2;
+    PR_PORTAL = 3;
+    // DNS query for the probe host returned a private IP address
+    PR_PRIVATE_IP_DNS = 4;
+}
+
+enum ValidationResult {
+    VR_UNKNOWN = 0;
+    VR_SUCCESS = 1;
+    VR_FAILURE = 2;
+    VR_PORTAL = 3;
+    VR_PARTIAL = 4;
+}
+
+enum ProbeType {
+    PT_UNKNOWN = 0;
+    PT_DNS       = 1;
+    PT_HTTP      = 2;
+    PT_HTTPS     = 3;
+    PT_PAC       = 4;
+    PT_FALLBACK  = 5;
+    PT_PRIVDNS   = 6;
+    PT_CAPPORT_API = 7;
+}
+
+// The Dhcp error code is defined in android.net.metrics.DhcpErrorEvent
+enum DhcpErrorCode {
+    ET_UNKNOWN = 0;
+    ET_L2_ERROR = 1;
+    ET_L3_ERROR = 2;
+    ET_L4_ERROR = 3;
+    ET_DHCP_ERROR = 4;
+    ET_MISC_ERROR = 5;
+    /* Reserve for error type
+    // ET_L2_ERROR_TYPE = ET_L2_ERROR << 8;
+    ET_L2_ERROR_TYPE = 256;
+    // ET_L3_ERROR_TYPE = ET_L3_ERROR << 8;
+    ET_L3_ERROR_TYPE = 512;
+    // ET_L4_ERROR_TYPE = ET_L4_ERROR << 8;
+    ET_L4_ERROR_TYPE = 768;
+    // ET_DHCP_ERROR_TYPE = ET_DHCP_ERROR << 8;
+    ET_DHCP_ERROR_TYPE = 1024;
+    // ET_MISC_ERROR_TYPE = ET_MISC_ERROR << 8;
+    ET_MISC_ERROR_TYPE = 1280;
+    */
+    // ET_L2_TOO_SHORT = (ET_L2_ERROR_TYPE | 0x1) << 16;
+    ET_L2_TOO_SHORT = 16842752;
+    // ET_L2_WRONG_ETH_TYPE = (ET_L2_ERROR_TYPE | 0x2) << 16;
+    ET_L2_WRONG_ETH_TYPE = 16908288;
+    // ET_L3_TOO_SHORT = (ET_L3_ERROR_TYPE | 0x1) << 16;
+    ET_L3_TOO_SHORT = 33619968;
+    // ET_L3_NOT_IPV4 = (ET_L3_ERROR_TYPE | 0x2) << 16;
+    ET_L3_NOT_IPV4 = 33685504;
+    // ET_L3_INVALID_IP = (ET_L3_ERROR_TYPE | 0x3) << 16;
+    ET_L3_INVALID_IP = 33751040;
+    // ET_L4_NOT_UDP = (ET_L4_ERROR_TYPE | 0x1) << 16;
+    ET_L4_NOT_UDP = 50397184;
+    // ET_L4_WRONG_PORT = (ET_L4_ERROR_TYPE | 0x2) << 16;
+    ET_L4_WRONG_PORT = 50462720;
+    // ET_BOOTP_TOO_SHORT = (ET_DHCP_ERROR_TYPE | 0x1) << 16;
+    ET_BOOTP_TOO_SHORT = 67174400;
+    // ET_DHCP_BAD_MAGIC_COOKIE = (ET_DHCP_ERROR_TYPE | 0x2) << 16;
+    ET_DHCP_BAD_MAGIC_COOKIE = 67239936;
+    // ET_DHCP_INVALID_OPTION_LENGTH = (ET_DHCP_ERROR_TYPE | 0x3) << 16;
+    ET_DHCP_INVALID_OPTION_LENGTH = 67305472;
+    // ET_DHCP_NO_MSG_TYPE = (ET_DHCP_ERROR_TYPE | 0x4) << 16;
+    ET_DHCP_NO_MSG_TYPE = 67371008;
+    // ET_DHCP_UNKNOWN_MSG_TYPE = (ET_DHCP_ERROR_TYPE | 0x5) << 16;
+    ET_DHCP_UNKNOWN_MSG_TYPE = 67436544;
+    // ET_DHCP_NO_COOKIE = (ET_DHCP_ERROR_TYPE | 0x6) << 16;
+    ET_DHCP_NO_COOKIE = 67502080;
+    // ET_BUFFER_UNDERFLOW = (ET_MISC_ERROR_TYPE | 0x1) << 16;
+    ET_BUFFER_UNDERFLOW = 83951616;
+    // ET_RECEIVE_ERROR = (ET_MISC_ERROR_TYPE | 0x2) << 16;
+    ET_RECEIVE_ERROR = 84017152;
+    // ET_PARSING_ERROR = (ET_MISC_ERROR_TYPE | 0x3) << 16;
+    ET_PARSING_ERROR = 84082688;
+}
+
+enum NetworkQuirkEvent {
+    QE_UNKNOWN = 0;
+    QE_IPV6_PROVISIONING_ROUTER_LOST = 1;
+}
+
 message NetworkStackEventData {
 
 }
