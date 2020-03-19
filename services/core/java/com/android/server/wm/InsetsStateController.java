@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
@@ -87,7 +88,8 @@ class InsetsStateController {
         final InsetsSourceProvider provider = target.getControllableInsetProvider();
         final @InternalInsetsType int type = provider != null
                 ? provider.getSource().getType() : ITYPE_INVALID;
-        return getInsetsForTypeAndWindowingMode(type, target.getWindowingMode());
+        return getInsetsForTypeAndWindowingMode(type, target.getWindowingMode(),
+                target.isAlwaysOnTop());
     }
 
     InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
@@ -95,7 +97,9 @@ class InsetsStateController {
         final WindowToken token = mDisplayContent.getWindowToken(attrs.token);
         final @WindowingMode int windowingMode = token != null
                 ? token.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
-        return getInsetsForTypeAndWindowingMode(type, windowingMode);
+        final boolean alwaysOnTop = token != null
+                ? token.isAlwaysOnTop() : false;
+        return getInsetsForTypeAndWindowingMode(type, windowingMode, alwaysOnTop);
     }
 
     private static @InternalInsetsType int getInsetsTypeForWindowType(int type) {
@@ -113,7 +117,7 @@ class InsetsStateController {
 
     /** @see #getInsetsForDispatch */
     private InsetsState getInsetsForTypeAndWindowingMode(@InternalInsetsType int type,
-            @WindowingMode int windowingMode) {
+            @WindowingMode int windowingMode, boolean isAlwaysOnTop) {
         InsetsState state = mState;
 
         if (type != ITYPE_INVALID) {
@@ -147,7 +151,8 @@ class InsetsStateController {
             }
         }
 
-        if (WindowConfiguration.isFloating(windowingMode)) {
+        if (WindowConfiguration.isFloating(windowingMode)
+                || (windowingMode == WINDOWING_MODE_MULTI_WINDOW && isAlwaysOnTop)) {
             state = new InsetsState(state);
             state.removeSource(ITYPE_STATUS_BAR);
             state.removeSource(ITYPE_NAVIGATION_BAR);
