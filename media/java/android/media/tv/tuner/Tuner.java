@@ -450,7 +450,6 @@ public class Tuner implements AutoCloseable  {
      * @see #setOnTuneEventListener(Executor, OnTuneEventListener)
      */
     public void clearOnTuneEventListener() {
-        TunerUtils.checkTunerPermission(mContext);
         mOnTuneEventListener = null;
         mOnTunerEventExecutor = null;
 
@@ -497,7 +496,6 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int cancelTuning() {
-        TunerUtils.checkTunerPermission(mContext);
         return nativeStopTune();
     }
 
