@@ -3686,29 +3686,29 @@ public class ConnectivityManager {
     /**
      * Helper function to request a network with a particular legacy type.
      *
-     * @deprecated This is temporarily public for tethering to backwards compatibility that uses
-     * the NetworkRequest API to request networks with legacy type and relies on
-     * CONNECTIVITY_ACTION broadcasts instead of NetworkCallbacks. New caller should use
+     * This API is only for use in internal system code that requests networks with legacy type and
+     * relies on CONNECTIVITY_ACTION broadcasts instead of NetworkCallbacks. New caller should use
      * {@link #requestNetwork(NetworkRequest, NetworkCallback, Handler)} instead.
      *
-     * TODO: update said system code to rely on NetworkCallbacks and make this method private.
-
      * @param request {@link NetworkRequest} describing this request.
-     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
-     *                        the callback must not be shared - it uniquely specifies this request.
      * @param timeoutMs The time in milliseconds to attempt looking for a suitable network
      *                  before {@link NetworkCallback#onUnavailable()} is called. The timeout must
      *                  be a positive value (i.e. >0).
      * @param legacyType to specify the network type(#TYPE_*).
      * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
+     *                        the callback must not be shared - it uniquely specifies this request.
      *
      * @hide
      */
     @SystemApi
-    @Deprecated
+    @RequiresPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK)
     public void requestNetwork(@NonNull NetworkRequest request,
-            @NonNull NetworkCallback networkCallback, int timeoutMs, int legacyType,
-            @NonNull Handler handler) {
+            int timeoutMs, int legacyType, @NonNull Handler handler,
+            @NonNull NetworkCallback networkCallback) {
+        if (legacyType == TYPE_NONE) {
+            throw new IllegalArgumentException("TYPE_NONE is meaningless legacy type");
+        }
         CallbackHandler cbHandler = new CallbackHandler(handler);
         NetworkCapabilities nc = request.networkCapabilities;
         sendRequestForNetwork(nc, networkCallback, timeoutMs, REQUEST, legacyType, cbHandler);
@@ -3807,7 +3807,8 @@ public class ConnectivityManager {
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler) {
         CallbackHandler cbHandler = new CallbackHandler(handler);
-        requestNetwork(request, networkCallback, 0, TYPE_NONE, cbHandler);
+        NetworkCapabilities nc = request.networkCapabilities;
+        sendRequestForNetwork(nc, networkCallback, 0, REQUEST, TYPE_NONE, cbHandler);
     }
 
     /**
@@ -3840,7 +3841,9 @@ public class ConnectivityManager {
     public void requestNetwork(@NonNull NetworkRequest request,
             @NonNull NetworkCallback networkCallback, int timeoutMs) {
         checkTimeout(timeoutMs);
-        requestNetwork(request, networkCallback, timeoutMs, TYPE_NONE, getDefaultHandler());
+        NetworkCapabilities nc = request.networkCapabilities;
+        sendRequestForNetwork(nc, networkCallback, timeoutMs, REQUEST, TYPE_NONE,
+                getDefaultHandler());
     }
 
     /**
@@ -3866,7 +3869,8 @@ public class ConnectivityManager {
             @NonNull NetworkCallback networkCallback, @NonNull Handler handler, int timeoutMs) {
         checkTimeout(timeoutMs);
         CallbackHandler cbHandler = new CallbackHandler(handler);
-        requestNetwork(request, networkCallback, timeoutMs, TYPE_NONE, cbHandler);
+        NetworkCapabilities nc = request.networkCapabilities;
+        sendRequestForNetwork(nc, networkCallback, timeoutMs, REQUEST, TYPE_NONE, cbHandler);
     }
 
     /**
