@@ -1365,7 +1365,6 @@ public final class Telephony {
      * Base column for the table that contain Carrier Public key.
      * @hide
      */
-    @SystemApi
     public interface CarrierColumns extends BaseColumns {
 
         /**
@@ -4865,7 +4864,6 @@ public final class Telephony {
          * Contains mappings between matching rules with carrier id for all carriers.
          * @hide
          */
-        @SystemApi
         public static final class All implements BaseColumns {
 
             /**
