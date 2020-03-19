@@ -138,7 +138,8 @@ droidstubs {
 }
 
 java_library {
-    name: "services-stubs",
+    name: "android_system_server_stubs_current",
     srcs: [":services-stubs.sources"],
     installable: false,
+    static_libs: ["android_module_lib_stubs_current"],
 }
