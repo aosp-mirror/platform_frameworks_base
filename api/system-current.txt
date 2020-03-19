@@ -4354,6 +4354,26 @@ package android.media {
     method @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getClientUid();
   }
 
+  public class AudioTrack implements android.media.AudioRouting android.media.VolumeAutomation {
+    field @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public static final int ENCAPSULATION_MODE_HANDLE = 2; // 0x2
+  }
+
+  public static class AudioTrack.Builder {
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.Builder setTunerConfiguration(@NonNull android.media.AudioTrack.TunerConfiguration);
+  }
+
+  public static class AudioTrack.TunerConfiguration {
+    method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getContentId();
+    method @IntRange(from=1) @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public int getSyncId();
+  }
+
+  public static class AudioTrack.TunerConfiguration.Builder {
+    ctor public AudioTrack.TunerConfiguration.Builder();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration build();
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration.Builder setContentId(@IntRange(from=1) int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioTrack.TunerConfiguration.Builder setSyncId(@IntRange(from=1) int);
+  }
+
   public class HwAudioSource {
     method public boolean isPlaying();
     method public void start();

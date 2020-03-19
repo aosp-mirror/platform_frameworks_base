@@ -425,9 +425,9 @@ public final class AudioDeviceInfo {
     /**
      * Returns an array of supported encapsulation modes for the device.
      *
-     * The array can include any of
-     * {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM},
-     * {@link AudioTrack#ENCAPSULATION_MODE_HANDLE}.
+     * The array can include any of the {@code AudioTrack} encapsulation modes,
+     * e.g. {@link AudioTrack#ENCAPSULATION_MODE_NONE},
+     * or {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM}.
      *
      * @return An array of supported encapsulation modes for the device.  This
      *     may be an empty array if no encapsulation modes are supported.
