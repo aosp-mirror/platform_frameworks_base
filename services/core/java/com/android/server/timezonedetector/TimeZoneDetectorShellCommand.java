@@ -37,9 +37,9 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         }
 
         switch (cmd) {
-            case "suggestTelephonyTimeZone":
+            case "suggest_telephony_time_zone":
                 return runSuggestTelephonyTimeZone();
-            case "suggestManualTimeZone":
+            case "suggest_manual_time_zone":
                 return runSuggestManualTimeZone();
             default: {
                 return handleDefaultCommands(cmd);
@@ -105,9 +105,9 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.println("Time Zone Detector (time_zone_detector) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  suggestTelephonyTimeZone");
+        pw.println("  suggest_telephony_time_zone");
         pw.println("    --suggestion <telephony suggestion opts>");
-        pw.println("  suggestManualTimeZone");
+        pw.println("  suggest_manual_time_zone");
         pw.println("    --suggestion <manual suggestion opts>");
         pw.println();
         ManualTimeZoneSuggestion.printCommandLineOpts(pw);
