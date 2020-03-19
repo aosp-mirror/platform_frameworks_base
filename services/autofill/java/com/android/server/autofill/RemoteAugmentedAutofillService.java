@@ -37,7 +37,6 @@ import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.Dataset;
-import android.service.autofill.InlineAction;
 import android.service.autofill.augmented.AugmentedAutofillService;
 import android.service.autofill.augmented.IAugmentedAutofillService;
 import android.service.autofill.augmented.IFillCallback;
@@ -167,12 +166,12 @@ final class RemoteAugmentedAutofillService
                             focusedId, focusedValue, requestTime, inlineSuggestionsRequest,
                             new IFillCallback.Stub() {
                                 @Override
-                                public void onSuccess(@Nullable List<Dataset> inlineSuggestionsData,
-                                        @Nullable List<InlineAction> inlineActions) {
+                                public void onSuccess(
+                                        @Nullable List<Dataset> inlineSuggestionsData) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
-                                            inlineActions, focusedId, inlineSuggestionsCallback,
+                                            focusedId, inlineSuggestionsCallback,
                                             client, onErrorCallback, remoteRenderService);
                                     requestAutofill.complete(null);
                                 }
@@ -237,8 +236,7 @@ final class RemoteAugmentedAutofillService
 
     private void maybeRequestShowInlineSuggestions(int sessionId,
             @Nullable InlineSuggestionsRequest request,
-            @Nullable List<Dataset> inlineSuggestionsData,
-            @Nullable List<InlineAction> inlineActions, @NonNull AutofillId focusedId,
+            @Nullable List<Dataset> inlineSuggestionsData, @NonNull AutofillId focusedId,
             @Nullable Function<InlineSuggestionsResponse, Boolean> inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
@@ -251,7 +249,7 @@ final class RemoteAugmentedAutofillService
 
         final InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
-                        request, inlineSuggestionsData, inlineActions, focusedId,
+                        request, inlineSuggestionsData, focusedId,
                         dataset -> {
                             mCallbacks.logAugmentedAutofillSelected(sessionId,
                                     dataset.getId());
@@ -260,8 +258,13 @@ final class RemoteAugmentedAutofillService
                                 final int size = fieldIds.size();
                                 final boolean hideHighlight = size == 1
                                         && fieldIds.get(0).equals(focusedId);
-                                client.autofill(sessionId, fieldIds, dataset.getFieldValues(),
-                                        hideHighlight);
+                                if (dataset.getAuthentication() != null) {
+                                    client.startIntentSender(dataset.getAuthentication(),
+                                            new Intent());
+                                } else {
+                                    client.autofill(sessionId, fieldIds, dataset.getFieldValues(),
+                                            hideHighlight);
+                                }
                             } catch (RemoteException e) {
                                 Slog.w(TAG, "Encounter exception autofilling the values");
                             }

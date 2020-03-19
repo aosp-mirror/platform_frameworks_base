@@ -40,7 +40,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillEventHistory;
-import android.service.autofill.InlineAction;
 import android.service.autofill.augmented.PresentationParams.SystemPopupPresentationParams;
 import android.util.Log;
 import android.util.Pair;
@@ -559,10 +558,9 @@ public abstract class AugmentedAutofillService extends Service {
             }
         }
 
-        void reportResult(@Nullable List<Dataset> inlineSuggestionsData,
-                @Nullable List<InlineAction> inlineActions) {
+        void reportResult(@Nullable List<Dataset> inlineSuggestionsData) {
             try {
-                mCallback.onSuccess(inlineSuggestionsData, inlineActions);
+                mCallback.onSuccess(inlineSuggestionsData);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling back with the inline suggestions data: " + e);
             }

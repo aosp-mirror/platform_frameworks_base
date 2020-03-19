@@ -2737,8 +2737,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(
-                        inlineSuggestionsRequest.get(),
-                        response, filterText, response.getInlineActions(), mCurrentViewId,
+                        inlineSuggestionsRequest.get(), response, filterText, mCurrentViewId,
                         this, () -> {
                             synchronized (mLock) {
                                 mInlineSuggestionSession.hideInlineSuggestionsUi(mCurrentViewId);
