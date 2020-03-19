@@ -95,11 +95,6 @@ public class KeyguardCoordinator implements Coordinator {
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             final StatusBarNotification sbn = entry.getSbn();
 
-            // FILTER OUT the notification when the notification isn't for the current profile
-            if (!mLockscreenUserManager.isCurrentProfile(sbn.getUserId())) {
-                return true;
-            }
-
             // FILTER OUT the notification when the keyguard is showing and...
             if (mKeyguardStateController.isShowing()) {
                 // ... user settings or the device policy manager doesn't allow lockscreen

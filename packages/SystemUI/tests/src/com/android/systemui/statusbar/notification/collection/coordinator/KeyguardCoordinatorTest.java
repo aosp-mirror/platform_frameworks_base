@@ -102,16 +102,6 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
     }
 
     @Test
-    public void notificationNotForCurrentProfile() {
-        // GIVEN the notification isn't for the given user
-        setupUnfilteredState(mEntry);
-        when(mLockscreenUserManager.isCurrentProfile(NOTIF_USER_ID)).thenReturn(false);
-
-        // THEN filter out the entry
-        assertTrue(mKeyguardFilter.shouldFilterOut(mEntry, 0));
-    }
-
-    @Test
     public void keyguardNotShowing() {
         // GIVEN the lockscreen isn't showing
         setupUnfilteredState(mEntry);
@@ -229,9 +219,6 @@ public class KeyguardCoordinatorTest extends SysuiTestCase {
      * KeyguardNotificationCoordinator when the keyguard is showing.
      */
     private void setupUnfilteredState(NotificationEntry entry) {
-        // notification is for current profile
-        when(mLockscreenUserManager.isCurrentProfile(NOTIF_USER_ID)).thenReturn(true);
-
         // keyguard is showing
         when(mKeyguardStateController.isShowing()).thenReturn(true);
 
