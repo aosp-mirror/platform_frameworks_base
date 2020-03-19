@@ -1518,6 +1518,7 @@ package android.net {
 
   public class NetworkStack {
     method @Nullable public static android.os.IBinder getService();
+    method public static void setServiceForTest(@Nullable android.os.IBinder);
     field public static final String PERMISSION_MAINLINE_NETWORK_STACK = "android.permission.MAINLINE_NETWORK_STACK";
   }
 
