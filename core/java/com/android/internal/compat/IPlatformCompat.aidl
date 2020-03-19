@@ -222,6 +222,14 @@ interface IPlatformCompat
     CompatibilityChangeInfo[] listAllChanges();
 
     /**
+    * List the compatibility changes that should be present in the UI.
+    * Filters out certain changes like e.g. logging only.
+    *
+    * @return An array of {@link CompatChangeInfo}.
+    */
+    CompatibilityChangeInfo[] listUIChanges();
+
+    /**
      * Get an instance that can determine whether a changeid can be overridden for a package name.
      */
     IOverrideValidator getOverrideValidator();
