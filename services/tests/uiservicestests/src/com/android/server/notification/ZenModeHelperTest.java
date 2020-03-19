@@ -559,6 +559,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_SYSTEM)) != 0);
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_ALARM)) != 0);
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_MUSIC)) != 0);
+        assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_ASSISTANT)) != 0);
     }
 
     @Test
@@ -579,6 +580,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_SYSTEM)) != 0);
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_ALARM)) == 0);
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_MUSIC)) == 0);
+        assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_ASSISTANT)) == 0);
 
         // even when ringer is muted (since all ringer sounds cannot bypass DND),
         // system stream is still affected by ringer mode
@@ -601,6 +603,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 != 0);
         assertTrue((ringerMutedRingerModeAffectedStreams & (1 << AudioSystem.STREAM_ALARM)) == 0);
         assertTrue((ringerMutedRingerModeAffectedStreams & (1 << AudioSystem.STREAM_MUSIC)) == 0);
+        assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_ASSISTANT)) == 0);
     }
 
     @Test
