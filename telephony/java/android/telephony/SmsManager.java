@@ -1676,6 +1676,7 @@ public final class SmsManager {
      * @throws IllegalArgumentException if pdu is null.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean copyMessageToIcc(
             @Nullable byte[] smsc, @NonNull byte[] pdu, @StatusOnIcc int status) {
@@ -1720,6 +1721,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
@@ -1800,6 +1802,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public @NonNull List<SmsMessage> getMessagesFromIcc() {
         return getAllMessagesFromIcc();
