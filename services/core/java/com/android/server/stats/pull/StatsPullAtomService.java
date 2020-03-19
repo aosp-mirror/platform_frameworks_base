@@ -1292,7 +1292,7 @@ public class StatsPullAtomService extends SystemService {
     int pullSystemUptime(int atomTag, List<StatsEvent> pulledData) {
         StatsEvent e = StatsEvent.newBuilder()
                 .setAtomId(atomTag)
-                .writeLong(SystemClock.elapsedRealtime())
+                .writeLong(SystemClock.uptimeMillis())
                 .build();
         pulledData.add(e);
         return StatsManager.PULL_SUCCESS;
