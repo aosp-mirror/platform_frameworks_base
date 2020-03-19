@@ -85,11 +85,13 @@ abstract class AbstractListenerManager<TRequest, TListener> {
         }
     }
 
-    @GuardedBy("mListeners")
-    private final ArrayMap<Object, Registration<TRequest, TListener>> mListeners =
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    private volatile ArrayMap<Object, Registration<TRequest, TListener>> mListeners =
             new ArrayMap<>();
 
-    @GuardedBy("mListeners")
+    @GuardedBy("mLock")
     @Nullable
     private TRequest mMergedRequest;
 
@@ -129,10 +131,16 @@ abstract class AbstractListenerManager<TRequest, TListener> {
             throws RemoteException {
         Preconditions.checkNotNull(registration);
 
-        synchronized (mListeners) {
+        synchronized (mLock) {
             boolean initialRequest = mListeners.isEmpty();
 
-            Registration<TRequest, TListener> oldRegistration = mListeners.put(key, registration);
+            ArrayMap<Object, Registration<TRequest, TListener>> newListeners = new ArrayMap<>(
+                    mListeners.size() + 1);
+            newListeners.putAll(mListeners);
+            Registration<TRequest, TListener> oldRegistration = newListeners.put(key,
+                    registration);
+            mListeners = newListeners;
+
             if (oldRegistration != null) {
                 oldRegistration.unregister();
             }
@@ -151,8 +159,12 @@ abstract class AbstractListenerManager<TRequest, TListener> {
     }
 
     public void removeListener(Object listener) throws RemoteException {
-        synchronized (mListeners) {
-            Registration<TRequest, TListener> oldRegistration = mListeners.remove(listener);
+        synchronized (mLock) {
+            ArrayMap<Object, Registration<TRequest, TListener>> newListeners = new ArrayMap<>(
+                    mListeners);
+            Registration<TRequest, TListener> oldRegistration = newListeners.remove(listener);
+            mListeners = newListeners;
+
             if (oldRegistration == null) {
                 return;
             }
@@ -190,18 +202,16 @@ abstract class AbstractListenerManager<TRequest, TListener> {
     }
 
     protected void execute(Consumer<TListener> operation) {
-        synchronized (mListeners) {
-            for (Registration<TRequest, TListener> registration : mListeners.values()) {
-                registration.execute(operation);
-            }
+        for (Registration<TRequest, TListener> registration : mListeners.values()) {
+            registration.execute(operation);
         }
     }
 
-    @GuardedBy("mListeners")
+    @GuardedBy("mLock")
     @SuppressWarnings("unchecked")
     @Nullable
     private TRequest mergeRequests() {
-        Preconditions.checkState(Thread.holdsLock(mListeners));
+        Preconditions.checkState(Thread.holdsLock(mLock));
 
         if (mListeners.isEmpty()) {
             return null;
