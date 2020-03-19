@@ -2756,6 +2756,17 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * @hide
+     * @deprecated Use {@link #getNetworkCountryIso(int)} instead.
+     */
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q,
+            publicAlternatives = "Use {@link #getNetworkCountryIso(int)} instead.")
+    public String getNetworkCountryIsoForPhone(int phoneId) {
+        return getNetworkCountryIso(phoneId);
+    }
+
     /*
      * When adding a network type to the list below, make sure to add the correct icon to
      * MobileSignalController.mapIconSets() as well as NETWORK_TYPES
