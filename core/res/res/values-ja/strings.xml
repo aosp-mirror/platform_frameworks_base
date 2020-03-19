@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"権限を付与されたこのシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"通話環境の改善のために、システム経由での通話転送をアプリに許可します。"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"システム経由の通話の表示と操作。"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"デバイスで進行中の通話の表示と操作をアプリに許可します。通話の電話番号や状態などの情報も含まれます。"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"録音制限からの除外"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"このアプリを録音制限から除外します。"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"別のアプリでの通話の続行"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"別のアプリで通話を続行することをこのアプリに許可します。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"電話番号の読み取り"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"削除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"テキスト操作"</string>
-    <string name="email" msgid="2503484245190492693">"メール"</string>
-    <string name="email_desc" msgid="8291893932252173537">"選択したメールアドレスにメールを送信します"</string>
-    <string name="dial" msgid="4954567785798679706">"電話"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"選択した電話番号に電話をかけます"</string>
-    <string name="map" msgid="6865483125449986339">"地図"</string>
-    <string name="map_desc" msgid="1068169741300922557">"選択した住所を探します"</string>
-    <string name="browse" msgid="8692753594669717779">"開く"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"選択した URL を開きます"</string>
-    <string name="sms" msgid="3976991545867187342">"メッセージ"</string>
-    <string name="sms_desc" msgid="997349906607675955">"選択した電話番号に SMS を送信します"</string>
-    <string name="add_contact" msgid="7404694650594333573">"追加"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"連絡先に追加します"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"表示"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"カレンダーで選択した日時を表示します"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"予定を作成"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"選択した日時に予定を設定します"</string>
-    <string name="view_flight" msgid="2042802613849690108">"フライト"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"選択したフライトをチェックします"</string>
-    <string name="translate" msgid="1416909787202727524">"翻訳"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"選択したテキストを翻訳します"</string>
-    <string name="define" msgid="5214255850068764195">"辞書で調べる"</string>
-    <string name="define_desc" msgid="6916651934713282645">"選択したテキストを辞書で調べます"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"モバイル ネットワークがインターネットに接続されていません"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ネットワークがインターネットに接続されていません"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"プライベート DNS サーバーにアクセスできません"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"接続しました"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> の接続が制限されています"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"接続するにはタップしてください"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"「<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>」に切り替えました"</string>
@@ -1631,11 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ユーザー補助機能のショートカットの使用"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ショートカットが ON の場合、両方の音量ボタンを 3 秒ほど長押しするとユーザー補助機能が起動します。"</string>
-    <string name="accessibility_select_shortcut_menu_title" msgid="7310194076629867377">"使用するユーザー補助アプリをタップ"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="6096484087245145325">"ユーザー補助機能ボタンで使用できるアプリを選択"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="4849108668454490699">"音量キーのショートカットで使用できるアプリを選択"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"アプリやハードウェア センサーの操作を記録したり、自動的にアプリを操作したりできます。"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"許可"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"許可しない"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"ユーザー補助機能ボタンで使用するアプリを選択"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"音量キーのショートカットで使用するアプリを選択"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"キャンセル"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ショートカットを OFF にする"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色反転"</string>
@@ -2028,6 +2020,9 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ユーザー補助機能メニュー"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"会話"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"グループの会話"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"個人用"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"仕事用"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人用ビュー"</string>

@@ -439,6 +439,10 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"यह ऐप्लिकेशन किसी भी समय कैमरे का उपयोग करके चित्र ले सकता है और वीडियो रिकॉर्ड कर सकता है."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"तस्वीरें और वीडियो लेने के लिए ऐप्लिकेशन या सेवा को सिस्टम के कैमरे का ऐक्सेस दें"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"यह सिस्टम ऐप्लिकेशन तस्वीरें लेने और वीडियो रिकॉर्ड करने के लिए जब चाहे, सिस्टम के कैमरे का इस्तेमाल कर सकता है. ऐप्लिकेशन को android.permission.CAMERA की अनुमति देना भी ज़रूरी है"</string>
+    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <skip />
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"इससे ऐप्लिकेशन, डिवाइस का वाइब्रेटर ऐक्सेस कर पाएगा."</string>
@@ -452,6 +456,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"कॉल करने के अनुभव को बेहतर बनाने के लिए ऐप्लिकेशन को सिस्टम के माध्यम से उसके कॉल रूट करने देती है."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"सिस्टम के ज़रिए कॉल देखना और नियंत्रित करना."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ऐप्लिकेशन को डिवाइस पर चल रहे कॉल देखने और नियंत्रित करने देती है. इसमें कॉल के नंबर और उनकी स्थिति से जुड़ी जानकारी शामिल है."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ऑडियो रिकॉर्ड करने की पाबंदी लागू न करें"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"इस ऐप्लिकेशन पर, ऑडियो को रिकॉर्ड करने की पाबंदी लागू न करें."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"दूसरे ऐप्लिकेशन से शुरू किया गया कॉल जारी रखें"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"इसके ज़रिए आप, किसी ऐप्लिकेशन में शुरू किया गया कॉल दूसरे ऐप्लिकेशन में जारी रख सकते हैं."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फ़ोन नंबर पढ़ना"</string>
@@ -1103,28 +1109,6 @@
     <string name="deleteText" msgid="4200807474529938112">"मिटाएं"</string>
     <string name="inputMethod" msgid="1784759500516314751">"इनपुट विधि"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"लेख क्रियाएं"</string>
-    <string name="email" msgid="2503484245190492693">"ईमेल करें"</string>
-    <string name="email_desc" msgid="8291893932252173537">"चुने गए पते पर ईमेल भेजें"</string>
-    <string name="dial" msgid="4954567785798679706">"कॉल करें"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"चुने गए फ़ोन नंबर पर कॉल करें"</string>
-    <string name="map" msgid="6865483125449986339">"मैप"</string>
-    <string name="map_desc" msgid="1068169741300922557">"चुना गया पता मैप पर दिखाएं"</string>
-    <string name="browse" msgid="8692753594669717779">"खोलें"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"चुना गया यूआरएल खोलें"</string>
-    <string name="sms" msgid="3976991545867187342">"मैसेज"</string>
-    <string name="sms_desc" msgid="997349906607675955">"चुने गए फ़ोन नंबर को मैसेज करें"</string>
-    <string name="add_contact" msgid="7404694650594333573">"जोड़ें"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"संपर्क सूची में जोड़ें"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"देखें"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"चुना गया समय कैलेंडर में देखें"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"शेड्यूल करें"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"चुने गए समय के लिए इवेंट शेड्यूल करें"</string>
-    <string name="view_flight" msgid="2042802613849690108">"मौजूदा स्थिति जानें"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"चुनी गई फ़्लाइट की मौजूदा स्थिति देखें"</string>
-    <string name="translate" msgid="1416909787202727524">"अनुवाद करें"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"चुने गए टेक्स्ट का अनुवाद करें"</string>
-    <string name="define" msgid="5214255850068764195">"परिभाषित करें"</string>
-    <string name="define_desc" msgid="6916651934713282645">"चुना गया टेक्स्ट परिभाषित करें"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"मेमोरी में जगह नहीं बची है"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"हो सकता है कुछ सिस्टम फ़ंक्शन काम नहीं करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"सिस्टम के लिए ज़रूरी मेमोरी नहीं है. पक्का करें कि आपके पास 250एमबी की खाली जगह है और फिर से शुरू करें."</string>
@@ -1263,7 +1247,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"मोबाइल नेटवर्क पर इंटरनेट ऐक्सेस नहीं है"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"इस नेटवर्क पर इंटरनेट ऐक्सेस नहीं है"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"निजी डीएनएस सर्वर को ऐक्सेस नहीं किया जा सकता"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"जुड़ गया है"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> की कनेक्टिविटी सीमित है"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"फिर भी कनेक्ट करने के लिए टैप करें"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> पर ले जाया गया"</string>
@@ -1635,14 +1618,28 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"वॉल्यूम को सुझाए गए स्तर से ऊपर बढ़ाएं?\n\nअत्यधिक वॉल्यूम पर ज़्यादा समय तक सुनने से आपकी सुनने की क्षमता को नुकसान हो सकता है."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"सुलभता शॉर्टकट का इस्तेमाल करना चाहते हैं?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट के चालू होने पर, दाेनाें वॉल्यूम बटन (आवाज़ कम या ज़्यादा करने वाले बटन) को तीन सेकंड तक दबाने से, सुलभता सुविधा शुरू हाे जाएगी."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
+    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
     <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
+    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
     <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"पूरी तरह नियंत्रित करने की अनुमति उन ऐप्लिकेशन के लिए ठीक है जो सुलभता से जुड़ी ज़रूरतों के लिए बने हैं, लेकिन ज़्यादातर ऐप्लिकेशन के लिए यह ठीक नहीं है."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रीन को देखें और नियंत्रित करें"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यह स्क्रीन पर दिखने वाली हर तरह की सामग्री को पढ़ सकता है और उसे दूसरे ऐप्लिकेशन पर दिखा सकता है."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"देखें और कार्रवाई करें"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यह आपके और किसी ऐप्लिकेशन या हार्डवेयर सेंसर के बीच होने वाले इंटरैक्शन को ट्रैक कर सकता है और आपकी तरफ़ से ऐप्लिकेशन के साथ इंटरैक्ट कर सकता है."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दें"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इंकार करें"</string>
+    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
+    <skip />
+    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
     <skip />
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"शॉर्टकट में बदलाव करें"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"अभी नहीं"</string>
+    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
+    <skip />
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"शॉर्टकट बंद करें"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"शॉर्टकट का उपयोग करें"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रंग बदलने की सुविधा"</string>
@@ -2036,6 +2033,9 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"सुलभता मेन्यू"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> का कैप्शन बार."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> को प्रतिबंधित बकेट में रखा गया है"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"बातचीत"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ग्रुप में बातचीत"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"निजी प्रोफ़ाइल"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"वर्क प्रोफ़ाइल"</string>
     <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->

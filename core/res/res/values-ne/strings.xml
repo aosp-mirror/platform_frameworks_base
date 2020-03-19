@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"यस अनुप्रयोगले जुनसुकै समय क्यामेराको प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"अनुप्रयोग वा सेवालाई तस्बिर र भिडियो खिच्न प्रणालीका क्यामेराहरूमाथि पहुँच राख्न दिनुहोस्"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"यस विशेषाधिकार प्राप्त अनुप्रयोगले जुनसुकै समय प्रणालीको क्यामेरा प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ। अनुप्रयोगसँग पनि android.permission.CAMERA सम्बन्धी अनुमति हुनु पर्छ"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"कुनै अनुप्रयोग वा सेवालाई खोलिँदै वा बन्द गरिँदै गरेका क्यामेरा यन्त्रहरूका बारेमा कलब्याक प्राप्त गर्ने अनुमति दिनुहोस्।"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"कम्पन नियन्त्रण गर्नुहोस्"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अनुप्रयोगलाई भाइब्रेटर नियन्त्रण गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"यो अनुप्रयोगलाई कम्पनको स्थितिमाथि पहुँच राख्न दिनुहोस्।"</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"कल गर्दाको अनुभवलाई सुधार्न यस अनुप्रयोगलाई प्रणाली मार्फत कलहरू गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"प्रणालीमार्फत कलहरू हेर्नुका साथै तिनीहरूलाई नियन्त्रण गर्नुहोस्‌।"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"अनुप्रयोगलाई यन्त्रमा जारी रहेका कलहरू हेर्नुका साथै तिनीहरूलाई गर्ने अनुमति दिनुहोस्‌। यसमा गरिएका कलहरूको सङ्ख्या र कलहरूको अवस्था जस्ता जानकारी समावेश हुन्छन्‌।"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"अडियो रेकर्ड गर्ने कार्यमा लगाइएका प्रतिबन्धहरूबाट छुट दिनुहोस्"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"यो अनुप्रयोगलाई अडियो रेकर्ड गर्ने कार्यमा लगाइएका प्रतिबन्धहरूबाट छुट दिनुहोस्।"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्नुहोस्"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"यस अनुप्रयोगलाई अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फोन नम्बरहरू पढ्ने"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"मेट्नुहोस्"</string>
     <string name="inputMethod" msgid="1784759500516314751">"निवेश विधि"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"पाठ कार्यहरू"</string>
-    <string name="email" msgid="2503484245190492693">"इमेल गर्नुहोस्"</string>
-    <string name="email_desc" msgid="8291893932252173537">"चयन गरिएको ठेगानामा इमेल पठाउनुहोस्"</string>
-    <string name="dial" msgid="4954567785798679706">"कल गर्नुहोस्"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"चयन गरिएको फोन नम्बरमा कल गर्नुहोस्"</string>
-    <string name="map" msgid="6865483125449986339">"नक्सा अनुप्रयोग खोल्नुहोस्"</string>
-    <string name="map_desc" msgid="1068169741300922557">"चयन गरिएको ठेगाना पत्ता लगाउनुहोस्"</string>
-    <string name="browse" msgid="8692753594669717779">"खोल्नुहोस्"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"चयन गरिएको URL खोल्नुहोस्"</string>
-    <string name="sms" msgid="3976991545867187342">"सन्देश पठाउनुहोस्"</string>
-    <string name="sms_desc" msgid="997349906607675955">"चयन गरिएको फोन नम्बरमा सन्देश पठाउनुहोस्‌"</string>
-    <string name="add_contact" msgid="7404694650594333573">"थप्नुहोस्"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"सम्पर्क सूचीमा थप्नुहोस्"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"हेर्नुहोस्"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"पात्रोमा चयन गरिएको समय हेर्नुहोस्"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"समयतालिका बनाउनुहोस्"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"चयन गरिएको समयका लागि कार्यक्रमको समयतालिका बनाउनुहोस्‌"</string>
-    <string name="view_flight" msgid="2042802613849690108">"ट्र्याक गर्नुहोस्"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"चयन गरिएको उडान ट्रयाक गर्नुहोस्"</string>
-    <string name="translate" msgid="1416909787202727524">"अनुवाद गर्नुहोस्"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"चयन गरिएको पाठको अनुवाद गर्नुहोस्"</string>
-    <string name="define" msgid="5214255850068764195">"परिभाषा दिनुहोस्"</string>
-    <string name="define_desc" msgid="6916651934713282645">"चयन गरिएको पाठको परिभाषा दिनुहोस्"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"भण्डारण ठाउँ सकिँदै छ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"सायद केही प्रणाली कार्यक्रमहरूले काम गर्दैनन्"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"प्रणालीको लागि पर्याप्त भण्डारण छैन। तपाईँसँग २५० मेगा बाइट ठाउँ खाली भएको निश्चित गर्नुहोस् र फेरि सुरु गर्नुहोस्।"</string>
@@ -1265,7 +1248,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"मोबाइल नेटवर्कको इन्टरनेटमाथि पहुँच छैन"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"नेटवर्कको इन्टरनेटमाथि पहुँच छैन"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"निजी DNS सर्भरमाथि पहुँच प्राप्त गर्न सकिँदैन"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"जोडियो"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> को जडान सीमित छ"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"जसरी भए पनि जडान गर्न ट्याप गर्नुहोस्"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> मा बदल्नुहोस्"</string>
@@ -1637,14 +1619,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"यो सर्टकट सक्रिय हुँदा, ३ सेकेन्डसम्म दुवै भोल्युम बटन थिच्नुले पहुँचसम्बन्धी कुनै सुविधा सुरु गर्ने छ।"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> लाई तपाईंको यन्त्र पूर्ण रूपमा नियन्त्रण गर्न दिने हो?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तपाईंले <xliff:g id="SERVICE">%1$s</xliff:g> सक्रिय गर्नुभयो भने तपाईंको यन्त्रले डेटा इन्क्रिप्ट गर्ने सुविधाको स्तरोन्नति गर्न तपाईंको स्क्रिन लक सुविधाको प्रयोग गर्ने छैन।"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"तपाईंलाई पहुँच राख्न आवश्यक पर्ने कुरामा सहयोग गर्ने अनुप्रयोगहरूमाथि पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश अनुप्रयोगहरूका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रिन हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य अनुप्रयोगहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"कारबाहीहरू हेर्नुहोस् र तिनमा कार्य गर्नुहोस्"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै अनुप्रयोग वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रियाको ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट अनुप्रयोगहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दिनुहोस्"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इन्कार गर्नु⋯"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"कुनै सुविधा प्रयोग गर्न थाल्न उक्त सुविधामा ट्याप गर्नुहोस्:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"पहुँचको बटनमार्फत प्रयोग गरिने अनुप्रयोगहरू छनौट गर्नुहोस्"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"भोल्युम कुञ्जीको सर्टकटमार्फत प्रयोग गरिने अनुप्रयोगहरू छनौट गर्नुहोस्"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> निष्क्रिय पारिएको छ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"सर्टकटहरू सम्पादन गर्नुहोस्"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"रद्द गर्नुहोस्"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"सम्पन्न भयो"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"सर्टकटलाई निष्क्रिय पार्नुहोस्"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
@@ -1865,8 +1854,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"वर्गीकरण नगरिएको"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"तपाईंले यी सूचनाहरूको महत्त्व सेट गर्नुहोस् ।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"यसमा सङ्लग्न भएका मानिसहरूको कारणले गर्दा यो महत्वपूर्ण छ।"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"अनुप्रयोगसम्बन्धी आफ्नो रोजाइअनुसारको सूचना"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="ACCOUNT">%2$s</xliff:g> (यस खाताको प्रयोगकर्ता पहिले नै अवस्थित छ) मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="ACCOUNT">%2$s</xliff:g> मा नयाँ प्रयोगकर्ता सिर्जना गर्न <xliff:g id="APP">%1$s</xliff:g> लाई अनुमति दिने हो?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"भाषा थप्नुहोस्"</string>
@@ -2038,31 +2026,27 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"पहुँचसम्बन्धी मेनु"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> को क्याप्सन बार।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> लाई प्रतिबन्धित बाल्टीमा राखियो"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"व्यक्तिगत"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"काम"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"व्यक्तिगत दृश्य"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"कार्य दृश्य"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"कामसम्बन्धी अनुप्रयोगहरूसँग आदान प्रदान गर्न सकिँदैन"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"व्यक्तिगत अनुप्रयोगहरूसँग आदान प्रदान गर्न सकिँदैन"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"तपाईंका IT प्रशासकले व्यक्तिगत र कामसम्बन्धी कार्य प्रोफाइलहरूबिच आदान प्रदान गर्ने सुविधामाथि रोक लगाउनुभयो"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"कामसम्बन्धी अनुप्रयोगहरूमाथि पहुँच राख्न सकिएन"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"तपाईंका IT प्रशासकले तपाईंलाई कामसम्बन्धी अनुप्रयोगहरूमा व्यक्तिगत सामग्री हेर्ने अनुमति दिनुभएको छैन"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"व्यक्तिगत अनुप्रयोगहरूमाथि पहुँच राख्न सकिएन"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"तपाईंका IT प्रशासकले तपाईंलाई व्यक्तिगत अनुप्रयोगहरूमा कामसम्बन्धी सामग्री हेर्ने अनुमति दिनुभएको छैन"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"सामग्री आदान प्रदान गर्न कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"सामग्री हेर्न कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"कुनै पनि अनुप्रयोग उपलब्ध छैन"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"सक्रिय गर्नुहोस्"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"टेलिफोन कल गर्दै गर्दा अडियो रेकर्ड गर्नुहोस् वा प्ले गर्नुहोस्"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"यस अनुप्रयोगलाई पूर्वनिर्धारित डायलर अनुप्रयोग निर्धारण गर्दा टेलिफोन कलको अडियो रेकर्ड गर्ने र प्ले गर्ने अनुमति दिन्छ।"</string>
 </resources>

@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"این برنامه می‌تواند در هرزمانی با استفاده از دوربین عکس و فیلم بگیرد."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"به برنامه یا سرویسی اجازه دهید برای عکس‌برداری و فیلم‌برداری به دوربین‌های سیستم دسترسی داشته باشد"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"‏این برنامه سیستم که دارای امتیاز دسترسی است می‌تواند با استفاده از دوربین سیستم در هر زمانی عکس‌برداری و فیلم‌برداری کند. برنامه به مجوز android.permission.CAMERA هم نیاز دارد."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"مجاز کردن برنامه یا سرویس برای دریافت پاسخ تماس درباره دستگاه‌های دوربینی که باز یا بسته می‌شوند."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"کنترل لرزش"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"به برنامه اجازه می‌دهد تا به وضعیت لرزاننده دسترسی داشته باشد."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"به برنامه امکان می‌دهد برای بهبود تجربه تماس، تماس‌هایش را ازطریق سیستم برقرار کند."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"دیدن و کنترل تماس‌ها ازطریق سیستم."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"به برنامه‌ها اجازه می‌دهد تماس‌های درحال انجام را در این دستگاه ببیند و کنترل کند. این مورد شامل اطلاعاتی مانند شماره تلفن برای تماس‌ها و وضعیت تماس‌ها است."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"معافیت از محدودیت‌های مربوط به ضبط صدا"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"برنامه را از محدودیت‌های مربوط به ضبط صدا معاف کنید."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ادامه دادن تماس از برنامه‌ای دیگر"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"به برنامه اجازه می‌دهد تماسی را که در برنامه دیگری شروع شده ادامه دهد."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"خواندن شماره تلفن‌ها"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"حذف"</string>
     <string name="inputMethod" msgid="1784759500516314751">"روش ورودی"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"کنش‌های متنی"</string>
-    <string name="email" msgid="2503484245190492693">"فرستادن ایمیل"</string>
-    <string name="email_desc" msgid="8291893932252173537">"ارسال ایمیل به نشانی انتخابی"</string>
-    <string name="dial" msgid="4954567785798679706">"تماس گرفتن"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"تماس با شماره تلفن انتخابی"</string>
-    <string name="map" msgid="6865483125449986339">"نقشه"</string>
-    <string name="map_desc" msgid="1068169741300922557">"مکان‌یابی نشانی انتخاب‌شده"</string>
-    <string name="browse" msgid="8692753594669717779">"باز کردن"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"باز کردن نشانی وب انتخابی"</string>
-    <string name="sms" msgid="3976991545867187342">"فرستادن پیام"</string>
-    <string name="sms_desc" msgid="997349906607675955">"ارسال پیام به شماره تلفن انتخابی"</string>
-    <string name="add_contact" msgid="7404694650594333573">"افزودن"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"افزودن به مخاطبین"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"مشاهده"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"مشاهده زمان انتخابی در تقویم"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"زمان‌بندی کردن"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"زمان‌بندی رویداد برای زمان انتخابی"</string>
-    <string name="view_flight" msgid="2042802613849690108">"انجام پیگیری"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"ردیابی پرواز انتخابی"</string>
-    <string name="translate" msgid="1416909787202727524">"ترجمه کردن"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"ترجمه کردن نوشتار انتخاب‌شده"</string>
-    <string name="define" msgid="5214255850068764195">"تعریف کردن"</string>
-    <string name="define_desc" msgid="6916651934713282645">"تعریف نوشتار انتخابی"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"حافظه درحال پر شدن است"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"برخی از عملکردهای سیستم ممکن است کار نکنند"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"فضای ذخیره‌سازی سیستم کافی نیست. اطمینان حاصل کنید که دارای ۲۵۰ مگابایت فضای خالی هستید و سیستم را راه‌اندازی مجدد کنید."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"شبکه تلفن همراه به اینترنت دسترسی ندارد"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"شبکه به اینترنت دسترسی ندارد"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"‏سرور DNS خصوصی قابل دسترسی نیست"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"متصل"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> اتصال محدودی دارد"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"به‌هرصورت، برای اتصال ضربه بزنید"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"به <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> تغییر کرد"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"از میان‌بر دسترس‌پذیری استفاده شود؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"وقتی میان‌بر روشن باشد، با فشار دادن هردو دکمه صدا به‌مدت ۳ ثانیه ویژگی دسترس‌پذیری فعال می‌شود."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"به <xliff:g id="SERVICE">%1$s</xliff:g> اجازه می‌دهید بر دستگاهتان کنترل کامل داشته باشد؟"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"اگر <xliff:g id="SERVICE">%1$s</xliff:g> را روشن کنید، دستگاه شما از قفل صفحه شما جهت بهبود رمزگذاری اطلاعات استفاده نخواهد کرد."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"کنترل کامل برای بیشتر برنامه‌ها مناسب نیست، به‌جز برنامه‌هایی که به شما در زمینه نیازهای دسترس‌پذیری کمک می‌کند."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"مشاهده و کنترل صفحه"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"می‌تواند همه محتوای صفحه را بخواند و آن را روی بقیه برنامه‌ها نمایش دهد."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"مشاهده و انجام کنش‌ها"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"این عملکرد می‌تواند با برنامه یا حسگری سخت‌افزاری تعاملاتتان را ردیابی کند و ازطرف شما با برنامه‌ها تعامل داشته باشد."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"مجاز"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رد کردن"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"برای استفاده از ویژگی، روی آن ضربه بزنید:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"انتخاب برنامه‌های موردنظر برای استفاده با دکمه دسترس‌پذیری"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"انتخاب برنامه‌های موردنظر برای استفاده با میان‌بر کلید میزان صدا"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> خاموش شده است"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ویرایش میان‌برها"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"لغو"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تمام"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"خاموش کردن میان‌بر"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استفاده از میان‌بر"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"وارونگی رنگ"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"منوی دسترس‌پذیری"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"نوار شرح <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> در سطل «محدودشده» قرار گرفت"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"مکالمه"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"مکالمه گروهی"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"شخصی"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"کاری"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"نمای شخصی"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"نمای کاری"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"هم‌رسانی بااستفاده از «برنامه‌های کاری» امکان‌پذیر نیست"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"هم‌رسانی بااستفاده از برنامه‌های شخصی امکان‌پذیر نیست"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"سرپرست فناوری اطلاعات هم‌رسانی بین نمایه‌های شخصی و کاری را مسدود کرده است"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"دسترسی به برنامه‌های کاری ممکن نیست"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"سرپرست فناوری اطلاعات اجازه نمی‌دهد محتوای شخصی را در برنامه‌های کاری مشاهده کنید"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"دسترسی به برنامه‌های شخصی ممکن نیست"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"سرپرست فناوری اطلاعات اجازه نمی‌دهد محتوای کاری را در برنامه‌های شخصی مشاهده کنید"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"برای هم‌رسانی محتوا، نمایه کاری را روشن کنید"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"برای مشاهده محتوا، نمایه کاری را روشن کنید"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"هیچ برنامه‌ای در دسترس نیست"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"روشن کردن"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ضبط یا پخش صدا در تماس‌های تلفنی"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"به این برنامه اجازه می‌دهد وقتی به‌عنوان برنامه شماره‌گیر پیش‌فرض تنظیم شده است، در تماس‌های تلفنی صدا ضبط یا پخش کند."</string>
 </resources>

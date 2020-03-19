@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Denne appen kan når som helst ta bilder og spille inn videoer ved hjelp av kameraet."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Gi en app eller tjeneste tilgang til systemkameraene for å ta bilder og spille inn videoer"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Denne privilegerte | systemappen kan når som helst ta bilder og spille inn videoer med et systemkamera. Dette krever at appen også har tillatelsen android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillat at en app eller tjeneste mottar tilbakekallinger om kameraenheter som åpnes eller lukkes."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrollere vibreringen"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lar appen kontrollere vibreringsfunksjonen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Gir appen tilgang til vibreringstilstanden."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Lar appen sende anrop gjennom systemet for å forbedre anropsopplevelsen."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"se og kontrollere anrop i systemet."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Lar appen se og kontrollere anrop som pågår på enheten. Dette inkluderer informasjon som anropsnumre og tilstanden til anropene."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"fritatt fra begrensningene om å ta opp lyd"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Frita appen fra begrensningene om å ta opp lyd."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"fortsette et anrop fra en annen app"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Lar appen fortsette et anrop som ble startet i en annen app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"les telefonnumre"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Slett"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Inndatametode"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Teksthandlinger"</string>
-    <string name="email" msgid="2503484245190492693">"Send e-post"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Send e-post til den valgte adressen"</string>
-    <string name="dial" msgid="4954567785798679706">"Ring"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Ring det valgte telefonnummeret"</string>
-    <string name="map" msgid="6865483125449986339">"Se Kart"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Finn den valgte adressen"</string>
-    <string name="browse" msgid="8692753594669717779">"Åpne"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Åpne den valgte nettadressen"</string>
-    <string name="sms" msgid="3976991545867187342">"Send melding"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Send melding til det valgte telefonnummeret"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Legg til"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Legg til i kontakter"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Se"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Se det valgte klokkeslettet i kalenderen"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Planlegg"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Planlegg aktivitet for valgt klokkeslett"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Spor"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Spor den valgte flyvningen"</string>
-    <string name="translate" msgid="1416909787202727524">"Oversett"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Oversett den valgte teksten"</string>
-    <string name="define" msgid="5214255850068764195">"Definer"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Definer den valgte teksten"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Lite ledig lagringsplass"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Enkelte systemfunksjoner fungerer muligens ikke slik de skal"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Det er ikke nok lagringsplass for systemet. Kontrollér at du har 250 MB ledig plass, og start på nytt."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobilnettverket har ingen internettilgang"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Nettverket har ingen internettilgang"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Den private DNS-tjeneren kan ikke nås"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Tilkoblet"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> har begrenset tilkobling"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Trykk for å koble til likevel"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Byttet til <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vil du øke volumet til over anbefalt nivå?\n\nHvis du hører på et høyt volum over lengre perioder, kan det skade hørselen din."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vil du bruke tilgjengelighetssnarveien?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når snarveien er på, starter en tilgjengelighetsfunksjon når du trykker inn begge volumknappene i tre sekunder."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Vil du gi <xliff:g id="SERVICE">%1$s</xliff:g> full kontroll over enheten din?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Hvis du slår på <xliff:g id="SERVICE">%1$s</xliff:g>, bruker ikke enheten skjermlåsen til å forbedre datakryptering."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full kontroll er passende for apper som hjelper deg med tilgjengelighetsbehov, men ikke for de fleste apper."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Se og kontrollér skjermen"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Den kan lese alt innhold på skjermen og vise innhold over andre apper."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Se og utfør handlinger"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Den kan spore kommunikasjonen din med en app eller maskinvaresensor og kommunisere med apper på dine vegne."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Tillat"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Avvis"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Trykk på en funksjon for å begynne å bruke den:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Velg appene du vil bruke med Tilgjengelighet-knappen"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Velg appene du vil bruke med volumtastsnarveien"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> er slått av"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Endre snarveier"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Avbryt"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Ferdig"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Slå av snarveien"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Bruk snarveien"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Fargeinvertering"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Tilgjengelighet-meny"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Tekstingsfelt i <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> er blitt plassert i TILGANGSBEGRENSET-toppmappen"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Samtale"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Gruppesamtale"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personlig"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Jobb"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personlig visning"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Jobbvisning"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Kan ikke dele med jobbapper"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Kan ikke dele med personlige apper"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"IT-administratoren din har blokkert deling mellom personlige profiler og jobbprofiler"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Får ikke tilgang til jobbapper"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"IT-administratoren din lar deg ikke se personlig innhold i jobbapper"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Får ikke tilgang til personlige apper"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"IT-administratoren din lar deg ikke se jobbinnhold i personlige apper"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Slå på jobbprofilen for å dele innhold"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Slå på jobbprofilen for å se innhold"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Ingen apper er tilgjengelige"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Slå på"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Ta opp eller spill av lyd i telefonsamtaler"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Tillater at denne appen tar opp eller spiller av lyd i telefonsamtaler når den er angitt som standard ringeapp."</string>
 </resources>

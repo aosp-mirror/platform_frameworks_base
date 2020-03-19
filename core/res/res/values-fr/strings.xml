@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Cette application peut utiliser l\'appareil photo pour prendre des photos et enregistrer des vidéos à tout moment."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Autoriser une application ou un service à accéder aux caméras système pour prendre des photos et enregistrer des vidéos"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Cette application privilégiée ou système peut utiliser une caméra photo système pour prendre des photos et enregistrer des vidéos à tout moment. Pour cela, l\'application doit également disposer de l\'autorisation android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Autoriser une application ou un service à recevoir des rappels liés à l\'ouverture ou à la fermeture de caméras"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"contrôler le vibreur"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet à l\'application d\'accéder à l\'état du vibreur."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Autorise l\'application à acheminer les appels via le système afin d\'optimiser le confort d\'utilisation."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"voir et contrôler les appels via le système."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Permet à l\'application de voir et contrôler les appels en cours sur l\'appareil. Cela inclut des informations telles que les numéros associés aux appels et l\'état des appels."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"Lever les restrictions portant sur l\'enregistrement audio"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Exemptez l\'application des restrictions portant sur l\'enregistrement audio."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"continuer un appel issu d\'une autre application"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Autorise l\'application à continuer un appel qui a été démarré dans une autre application."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"lire les numéros de téléphone"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Supprimer"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Mode de saisie"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Actions sur le texte"</string>
-    <string name="email" msgid="2503484245190492693">"Envoyer un e-mail"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Envoyer un e-mail à l\'adresse sélectionnée"</string>
-    <string name="dial" msgid="4954567785798679706">"Appeler"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Appeler le numéro de téléphone sélectionné"</string>
-    <string name="map" msgid="6865483125449986339">"Ouvrir une carte"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Localiser l\'adresse sélectionnée"</string>
-    <string name="browse" msgid="8692753594669717779">"Ouvrir"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Ouvrir l\'URL sélectionnée"</string>
-    <string name="sms" msgid="3976991545867187342">"Envoyer un SMS"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Envoyer un SMS au numéro de téléphone sélectionné"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Ajouter"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Ajouter aux contacts"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Afficher"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Afficher l\'heure sélectionnée dans l\'agenda"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Planifier"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Planifier un événement à l\'heure sélectionnée"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Suivre"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Obtenir des informations sur le vol sélectionné"</string>
-    <string name="translate" msgid="1416909787202727524">"Traduire"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Traduire le texte sélectionné"</string>
-    <string name="define" msgid="5214255850068764195">"Définir"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Définir le texte sélectionné"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Espace de stockage bientôt saturé"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Il est possible que certaines fonctionnalités du système ne soient pas opérationnelles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Espace de stockage insuffisant pour le système. Assurez-vous de disposer de 250 Mo d\'espace libre, puis redémarrez."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Le réseau mobile ne dispose d\'aucun accès à Internet"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Le réseau ne dispose d\'aucun accès à Internet"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Impossible d\'accéder au serveur DNS privé"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Connecté"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"La connectivité de <xliff:g id="NETWORK_SSID">%1$s</xliff:g> est limitée"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Appuyer pour se connecter quand même"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Nouveau réseau : <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Augmenter le volume au dessus du niveau recommandé ?\n\nL\'écoute prolongée à un volume élevé peut endommager vos facultés auditives."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Utiliser le raccourci d\'accessibilité ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quand le raccourci est activé, appuyez sur les deux boutons de volume pendant trois secondes pour démarrer une fonctionnalité d\'accessibilité."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Accorder le contrôle total de votre appareil au service <xliff:g id="SERVICE">%1$s</xliff:g> ?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si vous activez <xliff:g id="SERVICE">%1$s</xliff:g>, votre appareil n\'utilisera pas le verrouillage de l\'écran pour améliorer le chiffrement des données."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Le contrôle total convient aux applications qui répondent à vos besoins d\'accessibilité. Il ne convient pas à la plupart des applications."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Afficher et contrôler l\'écran"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Cette fonctionnalité peut lire l\'intégralité du contenu à l\'écran et afficher du contenu par-dessus d\'autres applications."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Afficher et effectuer des actions"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut effectuer le suivi de vos interactions avec une application ou un capteur matériel, et interagir avec les applications en votre nom."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Autoriser"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuser"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Appuyez sur une fonctionnalité pour commencer à l\'utiliser :"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Choisir les applications à utiliser avec le bouton Accessibilité"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Choisir les applications à utiliser avec le raccourci des touches de volume"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Le service <xliff:g id="SERVICE_NAME">%s</xliff:g> a été désactivé"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Modifier les raccourcis"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Annuler"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Désactiver le raccourci"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utiliser le raccourci"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversion des couleurs"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menu d\'accessibilité"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barre de légende de l\'application <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> a été placé dans le bucket RESTRICTED"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g> :"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversation"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversation de groupe"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personnel"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Professionnel"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Vue personnelle"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vue professionnelle"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Partage impossible avec les applications professionnelles"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Partage impossible avec les applications personnelles"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Votre administrateur informatique a bloqué le partage entre vos profils personnels et professionnels"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Impossible d\'accéder aux applications professionnelles"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Votre administrateur informatique a bloqué l\'affichage du contenu personnel dans les applications professionnelles"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Impossible d\'accéder aux applications personnelles"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Votre administrateur informatique a bloqué l\'affichage du contenu professionnel dans les applications personnelles"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Activez le profil professionnel pour partager du contenu"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Activez le profil professionnel pour afficher du contenu"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Aucune application disponible"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activer"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Enregistrer ou lire du contenu audio lors des appels téléphoniques"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permet à cette application d\'enregistrer ou de lire du contenu audio lors des appels téléphoniques lorsqu\'elle est définie comme clavier par défaut."</string>
 </resources>
