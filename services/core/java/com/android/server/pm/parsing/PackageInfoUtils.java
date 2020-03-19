@@ -393,7 +393,7 @@ public class PackageInfoUtils {
             ParsedProcess proc = procs.get(key);
             retProcs.put(proc.getName(),
                     new ProcessInfo(proc.getName(), new ArraySet<>(proc.getDeniedPermissions()),
-                            proc.getEnableGwpAsan()));
+                            proc.getGwpAsanMode()));
         }
         return retProcs;
     }
