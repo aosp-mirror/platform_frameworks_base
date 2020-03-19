@@ -63,7 +63,7 @@ public abstract class ReplacementSpan extends MetricAffectingSpan {
                               int top, int y, int bottom, @NonNull Paint paint);
 
     /**
-     * Gets a brief description of this ImageSpan for use in accessibility support.
+     * Gets a brief description of this ReplacementSpan for use in accessibility support.
      *
      * @return The content description.
      */
@@ -73,7 +73,7 @@ public abstract class ReplacementSpan extends MetricAffectingSpan {
     }
 
     /**
-     * Sets the specific content description into ImageSpan.
+     * Sets the specific content description into ReplacementSpan.
      * ReplacementSpans are shared with accessibility services,
      * but only the content description is available from them.
      *
