@@ -3793,7 +3793,7 @@ package android.telephony {
     method public void notifyDataActivityChanged(int, int);
     method public void notifyDataConnectionForSubscriber(int, int, int, @Nullable android.telephony.PreciseDataConnectionState);
     method public void notifyDisconnectCause(int, int, int, int);
-    method public void notifyDisplayInfoChanged(int, int, @NonNull android.telephony.DisplayInfo);
+    method public void notifyDisplayInfoChanged(int, int, @NonNull android.telephony.TelephonyDisplayInfo);
     method public void notifyEmergencyNumberList(int, int);
     method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
     method public void notifyMessageWaitingChanged(int, int, boolean);
