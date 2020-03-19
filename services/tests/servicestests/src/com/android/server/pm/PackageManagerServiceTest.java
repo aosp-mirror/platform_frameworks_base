@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.content.IIntentReceiver;
 import android.os.Bundle;
+import android.util.SparseArray;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -47,7 +48,7 @@ public class PackageManagerServiceTest {
             public void sendPackageBroadcast(final String action, final String pkg,
                     final Bundle extras, final int flags, final String targetPkg,
                     final IIntentReceiver finishedReceiver, final int[] userIds,
-                    int[] instantUserIds) {
+                    int[] instantUserIds, SparseArray<int[]> broadcastWhitelist) {
             }
 
             public void sendPackageAddedForNewUsers(String packageName,
