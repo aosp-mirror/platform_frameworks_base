@@ -32,4 +32,14 @@
     Internet" settings page. That is currently the tether_settings_title_all string. -->
     <!-- String for tether notification channel name [CHAR LIMIT=200] -->
     <string name="notification_channel_tethering_status">Hotspot &amp; tethering status</string>
+
+    <!-- String for no upstream notification title [CHAR LIMIT=200] -->
+    <string name="no_upstream_notification_title"></string>
+
+    <!-- String for cellular roaming notification title [CHAR LIMIT=200]  -->
+    <string name="upstream_roaming_notification_title"></string>
+    <!-- String for cellular roaming notification message [CHAR LIMIT=500]  -->
+    <string name="upstream_roaming_notification_message"></string>
+    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200]  -->
+    <string name="upstream_roaming_notification_continue_button"></string>
 </resources>
