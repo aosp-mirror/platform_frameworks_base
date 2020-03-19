@@ -42,7 +42,9 @@ import java.nio.ByteOrder;
 import java.nio.ReadOnlyBufferException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -1957,7 +1959,7 @@ final public class MediaCodec {
 
     /**
      * If this codec is to be used with {@link LinearBlock} and/or {@link
-     * GraphicBlock}, pass this flag.
+     * HardwareBuffer}, pass this flag.
      * <p>
      * When this flag is set, the following APIs throw {@link IncompatibleWithBlockModelException}.
      * <ul>
@@ -1989,6 +1991,19 @@ final public class MediaCodec {
      * Thrown when the codec is configured for block model and an incompatible API is called.
      */
     public class IncompatibleWithBlockModelException extends RuntimeException {
+        IncompatibleWithBlockModelException() { }
+
+        IncompatibleWithBlockModelException(String message) {
+            super(message);
+        }
+
+        IncompatibleWithBlockModelException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        IncompatibleWithBlockModelException(Throwable cause) {
+            super(cause);
+        }
     }
 
     /**
@@ -2532,7 +2547,9 @@ final public class MediaCodec {
         throws CryptoException {
         synchronized(mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("queueInputBuffer() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getQueueRequest() to queue buffers");
             }
             invalidateByteBuffer(mCachedInputBuffers, index);
             mDequeuedInputBuffers.remove(index);
@@ -2784,7 +2801,9 @@ final public class MediaCodec {
             int flags) throws CryptoException {
         synchronized(mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("queueSecureInputBuffer() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getQueueRequest() to queue buffers");
             }
             invalidateByteBuffer(mCachedInputBuffers, index);
             mDequeuedInputBuffers.remove(index);
@@ -2819,7 +2838,9 @@ final public class MediaCodec {
     public final int dequeueInputBuffer(long timeoutUs) {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("dequeueInputBuffer() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use MediaCodec.Callback objectes to get input buffer slots.");
             }
         }
         int res = native_dequeueInputBuffer(timeoutUs);
@@ -2989,178 +3010,21 @@ final public class MediaCodec {
     }
 
     /**
-     * Section of memory that represents a graphic block. Applications may
-     * acquire a block via {@link GraphicBlock#obtain} and queue
-     * the block as an input buffer to a codec, or get a block allocated by
-     * codec as an output buffer from {@link OutputFrame}.
+     * Map a {@link HardwareBuffer} object into {@link Image}, so that the content of the buffer is
+     * accessible. Depending on the usage and pixel format of the hardware buffer, it may not be
+     * mappable; this method returns null in that case.
      *
-     * {@see QueueRequest#setGraphicBlock}
-     * {@see OutputFrame#getGraphicBlock}
+     * @param hardwareBuffer {@link HardwareBuffer} to map.
+     * @return Mapped {@link Image} object, or null if the buffer is not mappable.
      */
-    public static final class GraphicBlock {
-        // No public constructors.
-        private GraphicBlock() {}
-
-        /**
-         * Returns true if the buffer is mappable.
-         * @throws IllegalStateException if invalid
-         */
-        public boolean isMappable() {
-            synchronized (mLock) {
-                if (!mValid) {
-                    throw new IllegalStateException("The graphic block is invalid");
-                }
-                return mMappable;
-            }
-        }
-
-        /**
-         * Map the memory and return the mapped region.
-         * <p>
-         * Calling {@link #recycle} or
-         * {@link QueueRequest#setGraphicBlock} causes the returned
-         * {@link Image} object to be closed, if not already.
-         *
-         * @return mapped memory region as {@link Image} object
-         * @throws IllegalStateException if not mappable or invalid
-         */
-        public @NonNull Image map() {
-            synchronized (mLock) {
-                if (!mValid) {
-                    throw new IllegalStateException("The graphic block is invalid");
-                }
-                if (!mMappable) {
-                    throw new IllegalStateException("The graphic block is not mappable");
-                }
-                if (mMapped == null) {
-                    mMapped = native_map();
-                }
-                return mMapped;
-            }
-        }
-
-        private native Image native_map();
-
-        /**
-         * Mark this block as ready to be recycled by the framework once it is
-         * no longer in use. All operations to this object after
-         * this call will cause exceptions, as well as attempt to access the
-         * previously mapped memory region. Caller should clear all references
-         * to this object after this call.
-         * <p>
-         * To avoid excessive memory consumption, it is recommended that callers
-         * recycle buffers as soon as they no longer need the buffers.
-         *
-         * @throws IllegalStateException if invalid
-         */
-        public void recycle() {
-            synchronized (mLock) {
-                if (!mValid) {
-                    throw new IllegalStateException("The graphic block is invalid");
-                }
-                if (mMapped != null) {
-                    mMapped.close();
-                    mMapped = null;
-                }
-                native_recycle();
-                mValid = false;
-                mNativeContext = 0;
-            }
-            sPool.offer(this);
-        }
-
-        private native void native_recycle();
-
-        /**
-         * Returns true if it is possible to allocate a graphic block that
-         * can be passed to all listed codecs as an input buffer without
-         * copying.
-         * <p>
-         * Note that even if this function returns true, {@link #obtain}
-         * may still throw due to invalid arguments or allocation failure.
-         * In addition, choosing a format that is not natively supported by the
-         * codec may cause color conversion.
-         *
-         * @param codecNames  list of codecs that the client wants to use a
-         *                    graphic block without copying. Null entries are
-         *                    ignored.
-         */
-        public static boolean isCodecCopyFreeCompatible(@NonNull String[] codecNames) {
-            return native_checkCompatible(codecNames);
-        }
-
-        private static native boolean native_checkCompatible(@NonNull String[] codecNames);
-
-        // Called from native
-        private void setInternalStateLocked(long context, boolean isMappable) {
-            mNativeContext = context;
-            mMappable = isMappable;
-            mValid = (context != 0);
-        }
-
-        private static final BlockingQueue<GraphicBlock> sPool =
-                new LinkedBlockingQueue<>();
-
-        /**
-         * Obtain a graphic block object of dimension
-         * {@code width}x{@code height}.
-         * If {@link #isCodecCopyFreeCompatible} with the same
-         * {@code codecNames} returned true, the returned
-         * {@link GraphicBlock} object can be queued to the listed codecs
-         * without copying. The returned {@link GraphicBlock} object is always
-         * read/write mappable.
-         *
-         * @param width requested width of the graphic block
-         * @param height requested height of the graphic block
-         * @param format the format of pixels. One of the {@code COLOR_Format}
-         *               values from {@link MediaCodecInfo.CodecCapabilities}.
-         * @param usage the usage of the buffer. @HardwareBuffer.Usage
-         * @param codecNames  list of codecs that the client wants to use this
-         *                    graphic block without copying. Null entries are
-         *                    ignored.
-         * @return  a graphic block object.
-         * @throws IllegalArgumentException if the parameters are invalid or
-         *     not supported
-         * @throws IOException if an error occurred while allocating a buffer
-         */
-        public static @NonNull GraphicBlock obtain(
-                int width,
-                int height,
-                int format,
-                @HardwareBuffer.Usage long usage,
-                @NonNull String[] codecNames) {
-            GraphicBlock buffer = sPool.poll();
-            if (buffer == null) {
-                buffer = new GraphicBlock();
-            }
-            if (width <= 0 || height <= 0) {
-                throw new IllegalArgumentException(
-                        "non-positive width or height: " + width + "x" + height);
-            }
-            synchronized (buffer.mLock) {
-                buffer.native_obtain(width, height, format, usage, codecNames);
-            }
-            return buffer;
-        }
-
-        private native void native_obtain(
-                int width,
-                int height,
-                int format,
-                @HardwareBuffer.Usage long usage,
-                @NonNull String[] codecNames);
-
-        @Override
-        protected void finalize() {
-            native_recycle();
-        }
-
-        private final Object mLock = new Object();
-        private boolean mValid = false;
-        private boolean mMappable = false;
-        private Image mMapped = null;
-        private long mNativeContext = 0;
+    public static @Nullable Image mapHardwareBuffer(@NonNull HardwareBuffer hardwareBuffer) {
+        return native_mapHardwareBuffer(hardwareBuffer);
     }
+
+    private static native @Nullable Image native_mapHardwareBuffer(
+            @NonNull HardwareBuffer hardwareBuffer);
+
+    private static native void native_closeMediaImage(long context);
 
     /**
      * Builder-like class for queue requests. Use this class to prepare a
@@ -3185,7 +3049,7 @@ final public class MediaCodec {
          * @param offset The byte offset into the input buffer at which the data starts.
          * @param size The number of bytes of valid input data.
          * @param cryptoInfo Metadata describing the structure of the encrypted input sample.
-         *                   may be null if clear.
+         *                   may be null for non-encrypted content.
          * @return this object
          * @throws IllegalStateException if a buffer is already set
          */
@@ -3197,7 +3061,7 @@ final public class MediaCodec {
             if (!isAccessible()) {
                 throw new IllegalStateException("The request is stale");
             }
-            if (mLinearBlock != null || mGraphicBlock != null) {
+            if (mLinearBlock != null || mHardwareBuffer != null) {
                 throw new IllegalStateException("Cannot set block twice");
             }
             mLinearBlock = block;
@@ -3208,22 +3072,27 @@ final public class MediaCodec {
         }
 
         /**
-         * Set a graphic block to this queue request. Exactly one buffer must
+         * Set a harware graphic buffer to this queue request. Exactly one buffer must
          * be set for a queue request before calling {@link #queue}.
+         * <p>
+         * Note: buffers should have format {@link HardwareBuffer#YCBCR_420_888},
+         * a single layer, and an appropriate usage ({@link HardwareBuffer#USAGE_CPU_READ_OFTEN}
+         * for software codecs and {@link HardwareBuffer#USAGE_VIDEO_ENCODE} for hardware)
+         * for codecs to recognize.  Codecs may throw exception if the buffer is not recognizable.
          *
-         * @param block The graphic block object
+         * @param buffer The hardware graphic buffer object
          * @return this object
          * @throws IllegalStateException if a buffer is already set
          */
-        public @NonNull QueueRequest setGraphicBlock(
-                @NonNull GraphicBlock block) {
+        public @NonNull QueueRequest setHardwareBuffer(
+                @NonNull HardwareBuffer buffer) {
             if (!isAccessible()) {
                 throw new IllegalStateException("The request is stale");
             }
-            if (mLinearBlock != null || mGraphicBlock != null) {
+            if (mLinearBlock != null || mHardwareBuffer != null) {
                 throw new IllegalStateException("Cannot set block twice");
             }
-            mGraphicBlock = block;
+            mHardwareBuffer = buffer;
             return this;
         }
 
@@ -3375,7 +3244,7 @@ final public class MediaCodec {
             if (!isAccessible()) {
                 throw new IllegalStateException("The request is stale");
             }
-            if (mLinearBlock == null && mGraphicBlock == null) {
+            if (mLinearBlock == null && mHardwareBuffer == null) {
                 throw new IllegalStateException("No block is set");
             }
             setAccessible(false);
@@ -3384,9 +3253,9 @@ final public class MediaCodec {
                         mIndex, mLinearBlock, mOffset, mSize, mCryptoInfo,
                         mPresentationTimeUs, mFlags,
                         mTuningKeys, mTuningValues);
-            } else if (mGraphicBlock != null) {
-                mCodec.native_queueGraphicBlock(
-                        mIndex, mGraphicBlock, mPresentationTimeUs, mFlags,
+            } else if (mHardwareBuffer != null) {
+                mCodec.native_queueHardwareBuffer(
+                        mIndex, mHardwareBuffer, mPresentationTimeUs, mFlags,
                         mTuningKeys, mTuningValues);
             }
             clear();
@@ -3397,7 +3266,7 @@ final public class MediaCodec {
             mOffset = 0;
             mSize = 0;
             mCryptoInfo = null;
-            mGraphicBlock = null;
+            mHardwareBuffer = null;
             mPresentationTimeUs = 0;
             mFlags = 0;
             mTuningKeys.clear();
@@ -3420,7 +3289,7 @@ final public class MediaCodec {
         private int mOffset = 0;
         private int mSize = 0;
         private MediaCodec.CryptoInfo mCryptoInfo = null;
-        private GraphicBlock mGraphicBlock = null;
+        private HardwareBuffer mHardwareBuffer = null;
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
         private final ArrayList<String> mTuningKeys = new ArrayList<>();
@@ -3440,9 +3309,9 @@ final public class MediaCodec {
             @NonNull ArrayList<String> keys,
             @NonNull ArrayList<Object> values);
 
-    private native void native_queueGraphicBlock(
+    private native void native_queueHardwareBuffer(
             int index,
-            @NonNull GraphicBlock block,
+            @NonNull HardwareBuffer buffer,
             long presentationTimeUs,
             int flags,
             @NonNull ArrayList<String> keys,
@@ -3535,7 +3404,9 @@ final public class MediaCodec {
             @NonNull BufferInfo info, long timeoutUs) {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("dequeueOutputBuffer() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use MediaCodec.Callback objects to get output buffer slots.");
             }
         }
         int res = native_dequeueOutputBuffer(info, timeoutUs);
@@ -3917,7 +3788,10 @@ final public class MediaCodec {
     public ByteBuffer[] getInputBuffers() {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("getInputBuffers() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please obtain MediaCodec.LinearBlock or HardwareBuffer "
+                        + "objects and attach to QueueRequest objects.");
             }
             if (mCachedInputBuffers == null) {
                 throw new IllegalStateException();
@@ -3953,7 +3827,9 @@ final public class MediaCodec {
     public ByteBuffer[] getOutputBuffers() {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("getOutputBuffers() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getOutputFrame to get output frames.");
             }
             if (mCachedOutputBuffers == null) {
                 throw new IllegalStateException();
@@ -3985,7 +3861,10 @@ final public class MediaCodec {
     public ByteBuffer getInputBuffer(int index) {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("getInputBuffer() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please obtain MediaCodec.LinearBlock or HardwareBuffer "
+                        + "objects and attach to QueueRequest objects.");
             }
         }
         ByteBuffer newBuffer = getBuffer(true /* input */, index);
@@ -4019,7 +3898,10 @@ final public class MediaCodec {
     public Image getInputImage(int index) {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("getInputImage() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please obtain MediaCodec.LinearBlock or HardwareBuffer "
+                        + "objects and attach to QueueRequest objects.");
             }
         }
         Image newImage = getImage(true /* input */, index);
@@ -4053,7 +3935,9 @@ final public class MediaCodec {
     public ByteBuffer getOutputBuffer(int index) {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("getOutputBuffer() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getOutputFrame() to get output frames.");
             }
         }
         ByteBuffer newBuffer = getBuffer(false /* input */, index);
@@ -4086,7 +3970,9 @@ final public class MediaCodec {
     public Image getOutputImage(int index) {
         synchronized (mBufferLock) {
             if (mBufferMode == BUFFER_MODE_BLOCK) {
-                throw new IncompatibleWithBlockModelException();
+                throw new IncompatibleWithBlockModelException("getOutputImage() "
+                        + "is not compatible with CONFIGURE_FLAG_USE_BLOCK_MODEL. "
+                        + "Please use getOutputFrame() to get output frames.");
             }
         }
         Image newImage = getImage(false /* input */, index);
@@ -4112,22 +3998,22 @@ final public class MediaCodec {
          * @throws IllegalStateException if this output frame is not linear.
          */
         public @Nullable LinearBlock getLinearBlock() {
-            if (mGraphicBlock != null) {
+            if (mHardwareBuffer != null) {
                 throw new IllegalStateException("This output frame is not linear");
             }
             return mLinearBlock;
         }
 
         /**
-         * Returns the output graphic block, or null if this frame is empty.
+         * Returns the output hardware graphic buffer, or null if this frame is empty.
          *
          * @throws IllegalStateException if this output frame is not graphic.
          */
-        public @Nullable GraphicBlock getGraphicBlock() {
+        public @Nullable HardwareBuffer getHardwareBuffer() {
             if (mLinearBlock != null) {
                 throw new IllegalStateException("This output frame is not graphic");
             }
-            return mGraphicBlock;
+            return mHardwareBuffer;
         }
 
         /**
@@ -4153,21 +4039,24 @@ final public class MediaCodec {
         }
 
         /**
-         * Populate {@code keys} with the name of entries that has changed from
+         * Returns an unmodifiable set of the names of entries that has changed from
          * the previous frame. The entries may have been removed/changed/added.
          * Client can find out what the change is by querying {@link MediaFormat}
          * object returned from {@link #getFormat}.
          */
-        public void retrieveChangedKeys(@NonNull Set<String> keys) {
-            keys.clear();
-            keys.addAll(mChangedKeys);
+        public @NonNull Set<String> getChangedKeys() {
+            if (mKeySet.isEmpty() && !mChangedKeys.isEmpty()) {
+                mKeySet.addAll(mChangedKeys);
+            }
+            return Collections.unmodifiableSet(mKeySet);
         }
 
         void clear() {
             mLinearBlock = null;
-            mGraphicBlock = null;
+            mHardwareBuffer = null;
             mFormat = null;
             mChangedKeys.clear();
+            mKeySet.clear();
             mLoaded = false;
         }
 
@@ -4194,11 +4083,12 @@ final public class MediaCodec {
 
         private final int mIndex;
         private LinearBlock mLinearBlock = null;
-        private GraphicBlock mGraphicBlock = null;
+        private HardwareBuffer mHardwareBuffer = null;
         private long mPresentationTimeUs = 0;
         private @BufferFlag int mFlags = 0;
         private MediaFormat mFormat = null;
         private final ArrayList<String> mChangedKeys = new ArrayList<>();
+        private final Set<String> mKeySet = new HashSet<>();
         private boolean mAccessible = false;
         private boolean mLoaded = false;
     }
@@ -4773,6 +4663,7 @@ final public class MediaCodec {
         private final ByteBuffer mInfo;
         private final int mXOffset;
         private final int mYOffset;
+        private final long mBufferContext;
 
         private final static int TYPE_YUV = 1;
 
@@ -4828,6 +4719,9 @@ final public class MediaCodec {
                 if (mBuffer != null) {
                     java.nio.NioUtils.freeDirectBuffer(mBuffer);
                 }
+                if (mBufferContext != 0) {
+                    native_closeMediaImage(mBufferContext);
+                }
                 mIsImageValid = false;
             }
         }
@@ -4859,6 +4753,8 @@ final public class MediaCodec {
             mXOffset = xOffset;
             mYOffset = yOffset;
             mInfo = info;
+
+            mBufferContext = 0;
 
             // read media-info.  See MediaImage2
             if (info.remaining() == 104) {
@@ -4921,7 +4817,7 @@ final public class MediaCodec {
 
         public MediaImage(
                 @NonNull Image.Plane[] planes, int width, int height, int format, boolean readOnly,
-                long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect) {
+                long timestamp, int xOffset, int yOffset, @Nullable Rect cropRect, long context) {
             mWidth = width;
             mHeight = height;
             mFormat = format;
@@ -4941,6 +4837,8 @@ final public class MediaCodec {
             }
             cropRect.offset(-xOffset, -yOffset);
             super.setCropRect(cropRect);
+
+            mBufferContext = context;
         }
 
         private class MediaPlane extends Plane {
