@@ -27,163 +27,174 @@
     android:background="@drawable/qs_media_background"
     >
 
-    <!-- Header section -->
+    <!-- Buttons to remove this view when no longer needed -->
+    <include
+        layout="@layout/qs_media_panel_options"
+        android:visibility="gone"/>
+
     <LinearLayout
-        android:orientation="horizontal"
+        android:id="@+id/media_guts"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-    >
-
-        <ImageView
-            android:id="@+id/album_art"
-            android:layout_width="@dimen/qs_media_album_size"
-            android:layout_height="@dimen/qs_media_album_size"
-            android:layout_marginRight="16dp"
-            android:layout_weight="0"
-        />
-
+        android:layout_height="match_parent">
+        <!-- Header section -->
         <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/qs_media_album_size"
-            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
         >
+
+            <ImageView
+                android:id="@+id/album_art"
+                android:layout_width="@dimen/qs_media_album_size"
+                android:layout_height="@dimen/qs_media_album_size"
+                android:layout_marginRight="16dp"
+                android:layout_weight="0"
+            />
+
             <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/qs_media_album_size"
+                android:layout_weight="1"
             >
-                <com.android.internal.widget.CachingIconView
-                    android:id="@+id/icon"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginEnd="5dp"
-                />
-                <TextView
-                    android:id="@+id/app_name"
+                <LinearLayout
+                    android:orientation="horizontal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
+                >
+                    <com.android.internal.widget.CachingIconView
+                        android:id="@+id/icon"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginEnd="5dp"
+                    />
+                    <TextView
+                        android:id="@+id/app_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:singleLine="true"
+                    />
+                </LinearLayout>
+
+                <!-- Song name -->
+                <TextView
+                    android:id="@+id/header_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+                    android:textSize="18sp"
+                    android:paddingBottom="6dp"
+                    android:gravity="center"/>
+
+                <!-- Artist name -->
+                <TextView
+                    android:id="@+id/header_artist"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@*android:string/config_bodyFontFamily"
                     android:textSize="14sp"
                     android:singleLine="true"
                 />
             </LinearLayout>
 
-            <!-- Song name -->
-            <TextView
-                android:id="@+id/header_title"
-                android:layout_width="wrap_content"
+            <!-- Output chip -->
+            <LinearLayout
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-                android:textSize="18sp"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                android:paddingTop="6dp"
                 android:paddingBottom="6dp"
-                android:gravity="center"/>
-
-            <!-- Artist name -->
-            <TextView
-                android:id="@+id/header_artist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@*android:string/config_bodyFontFamily"
-                android:textSize="14sp"
-                android:singleLine="true"
-            />
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:gravity="center"
+                android:id="@+id/media_seamless"
+                android:background="@*android:drawable/media_seamless_background"
+                android:layout_weight="1"
+            >
+                <ImageView
+                    android:layout_width="@dimen/qs_seamless_icon_size"
+                    android:layout_height="@dimen/qs_seamless_icon_size"
+                    android:src="@*android:drawable/ic_media_seamless"
+                    android:layout_marginRight="8dp"
+                    android:id="@+id/media_seamless_image"
+                />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@*android:string/config_bodyFontFamily"
+                    android:text="@*android:string/ext_media_seamless_action"
+                    android:textSize="14sp"
+                    android:id="@+id/media_seamless_text"
+                    android:singleLine="true"
+                />
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- Output chip -->
+        <!-- Controls -->
         <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:id="@+id/media_actions"
             android:orientation="horizontal"
-            android:visibility="gone"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
+            android:layoutDirection="ltr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:gravity="center"
-            android:id="@+id/media_seamless"
-            android:background="@*android:drawable/media_seamless_background"
-            android:layout_weight="1"
-        >
-            <ImageView
-                android:layout_width="@dimen/qs_seamless_icon_size"
-                android:layout_height="@dimen/qs_seamless_icon_size"
-                android:src="@*android:drawable/ic_media_seamless"
-                android:layout_marginRight="8dp"
-                android:id="@+id/media_seamless_image"
+            >
+            <ImageButton
+                style="@android:style/Widget.Material.Button.Borderless.Small"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:id="@+id/action0"
             />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@*android:string/config_bodyFontFamily"
-                android:text="@*android:string/ext_media_seamless_action"
-                android:textSize="14sp"
-                android:id="@+id/media_seamless_text"
-                android:singleLine="true"
+            <ImageButton
+                style="@android:style/Widget.Material.Button.Borderless.Small"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:id="@+id/action1"
+            />
+            <ImageButton
+                style="@android:style/Widget.Material.Button.Borderless.Small"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:id="@+id/action2"
+            />
+            <ImageButton
+                style="@android:style/Widget.Material.Button.Borderless.Small"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:id="@+id/action3"
+            />
+            <ImageButton
+                style="@android:style/Widget.Material.Button.Borderless.Small"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="center"
+                android:visibility="gone"
+                android:id="@+id/action4"
             />
         </LinearLayout>
-    </LinearLayout>
-
-    <!-- Controls -->
-    <LinearLayout
-        android:id="@+id/media_actions"
-        android:orientation="horizontal"
-        android:layoutDirection="ltr"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        >
-        <ImageButton
-            style="@android:style/Widget.Material.Button.Borderless.Small"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:visibility="gone"
-            android:id="@+id/action0"
-        />
-        <ImageButton
-            style="@android:style/Widget.Material.Button.Borderless.Small"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:visibility="gone"
-            android:id="@+id/action1"
-        />
-        <ImageButton
-            style="@android:style/Widget.Material.Button.Borderless.Small"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:visibility="gone"
-            android:id="@+id/action2"
-        />
-        <ImageButton
-            style="@android:style/Widget.Material.Button.Borderless.Small"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:visibility="gone"
-            android:id="@+id/action3"
-        />
-        <ImageButton
-            style="@android:style/Widget.Material.Button.Borderless.Small"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:gravity="center"
-            android:visibility="gone"
-            android:id="@+id/action4"
-        />
     </LinearLayout>
 </LinearLayout>
