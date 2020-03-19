@@ -473,8 +473,8 @@ interface ITelephony {
      * Send a visual voicemail SMS. Internal use only.
      * Requires caller to be the default dialer and have SEND_SMS permission
      */
-    void sendVisualVoicemailSmsForSubscriber(in String callingPackage, in int subId,
-            in String number, in int port, in String text, in PendingIntent sentIntent);
+    void sendVisualVoicemailSmsForSubscriber(in String callingPackage, String callingAttributeTag,
+            in int subId, in String number, in int port, in String text, in PendingIntent sentIntent);
 
     // Send the special dialer code. The IPC caller must be the current default dialer.
     void sendDialerSpecialCode(String callingPackageName, String inputCode);
