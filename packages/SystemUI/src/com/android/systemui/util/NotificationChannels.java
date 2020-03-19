@@ -53,7 +53,7 @@ public class NotificationChannels extends SystemUI {
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION_EVENT)
                 .build());
-        batteryChannel.setBlockableSystem(true);
+        batteryChannel.setBlockable(true);
 
         final NotificationChannel alerts = new NotificationChannel(
                 ALERTS,
@@ -118,7 +118,7 @@ public class NotificationChannels extends SystemUI {
 
         screenshotChannel.setSound(null, // silent
                 new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
-        screenshotChannel.setBlockableSystem(true);
+        screenshotChannel.setBlockable(true);
 
         if (legacySS != null) {
             // Respect any user modified fields from the old channel.
