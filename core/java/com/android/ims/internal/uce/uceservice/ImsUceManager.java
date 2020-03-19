@@ -50,6 +50,16 @@ public class ImsUceManager {
     public static final String ACTION_UCE_SERVICE_DOWN =
                                         "com.android.ims.internal.uce.UCE_SERVICE_DOWN";
 
+    /**
+     * Uce Service status received in IUceListener.setStatus() callback
+     */
+    public static final int UCE_SERVICE_STATUS_FAILURE = 0;
+    /** indicate UI to call Presence/Options API.   */
+    public static final int UCE_SERVICE_STATUS_ON = 1;
+    /** Indicate UI destroy Presence/Options   */
+    public static final int UCE_SERVICE_STATUS_CLOSED = 2;
+    /** Service up and trying to register for network events  */
+    public static final int UCE_SERVICE_STATUS_READY = 3;
 
     /**
      * Gets the instance of UCE Manager
