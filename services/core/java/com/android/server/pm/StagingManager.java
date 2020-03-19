@@ -114,18 +114,17 @@ public class StagingManager {
      * Validates the signature used to sign the container of the new apex package
      *
      * @param newApexPkg The new apex package that is being installed
-     * @param installFlags flags related to the session
      * @throws PackageManagerException
      */
-    private void validateApexSignature(PackageInfo newApexPkg, int installFlags)
+    private void validateApexSignature(PackageInfo newApexPkg)
             throws PackageManagerException {
         // Get signing details of the new package
         final String apexPath = newApexPkg.applicationInfo.sourceDir;
         final String packageName = newApexPkg.packageName;
 
-        final SigningDetails signingDetails;
+        final SigningDetails newSigningDetails;
         try {
-            signingDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
+            newSigningDetails = ApkSignatureVerifier.verify(apexPath, SignatureSchemeVersion.JAR);
         } catch (PackageParserException e) {
             throw new PackageManagerException(SessionInfo.STAGED_SESSION_VERIFICATION_FAILED,
                     "Failed to parse APEX package " + apexPath, e);
@@ -150,16 +149,10 @@ public class StagingManager {
         }
 
         // Verify signing details for upgrade
-        if (signingDetails.checkCapability(existingSigningDetails,
-                PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
-            return;
-        }
-
-        // Verify signing details for downgrade
-        // Allow downgrading from B to A iff it is possible to upgrade from A to B
-        if (existingApexPkg.getLongVersionCode() > newApexPkg.getLongVersionCode()
-                && existingSigningDetails.checkCapability(signingDetails,
-                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
+        if (newSigningDetails.checkCapability(existingSigningDetails,
+                SigningDetails.CertCapabilities.INSTALLED_DATA)
+                || existingSigningDetails.checkCapability(newSigningDetails,
+                SigningDetails.CertCapabilities.ROLLBACK)) {
             return;
         }
 
@@ -832,8 +825,7 @@ public class StagingManager {
                     final List<PackageInfo> apexPackages =
                             submitSessionToApexService(session);
                     for (PackageInfo apexPackage : apexPackages) {
-                        validateApexSignature(
-                                apexPackage, session.params.installFlags);
+                        validateApexSignature(apexPackage);
                     }
                 } catch (PackageManagerException e) {
                     session.setStagedSessionFailed(e.error, e.getMessage());
