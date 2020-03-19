@@ -51,20 +51,14 @@ void write_java_q_logging_constants(FILE* out, const string& indent) {
 
 int write_java_methods_q_schema(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
         const AtomDecl &attributionDecl,
-        const string& moduleName,
         const string& indent) {
     int requiredHelpers = 0;
-    for (auto signature_to_modules_it = signatures_to_modules.begin();
-            signature_to_modules_it != signatures_to_modules.end(); signature_to_modules_it++) {
-        // Skip if this signature is not needed for the module.
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-            continue;
-        }
-
+    for (auto signatureInfoMapIt = signatureInfoMap.begin();
+            signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
-        vector<java_type_t> signature = signature_to_modules_it->first;
+        vector<java_type_t> signature = signatureInfoMapIt->first;
         fprintf(out, "%spublic static void write(int code", indent.c_str());
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature.begin();
@@ -568,7 +562,7 @@ void write_java_helpers_for_q_schema_methods(
 // This method is called in main.cpp to generate StatsLog for modules that's compatible with
 // Q at compile-time.
 int write_stats_log_java_q_for_module(FILE* out, const Atoms& atoms,
-                                      const AtomDecl &attributionDecl, const string& moduleName,
+                                      const AtomDecl &attributionDecl,
                                       const string& javaClass, const string& javaPackage,
                                       const bool supportWorkSource) {
     // Print prelude
@@ -589,19 +583,18 @@ int write_stats_log_java_q_for_module(FILE* out, const Atoms& atoms,
 
     write_java_q_logging_constants(out, "    ");
 
-    write_java_atom_codes(out, atoms, moduleName);
+    write_java_atom_codes(out, atoms);
 
-    write_java_enum_values(out, atoms, moduleName);
+    write_java_enum_values(out, atoms);
 
     int errors = 0;
     // Print write methods
     fprintf(out, "    // Write methods\n");
-    errors += write_java_methods_q_schema(out, atoms.signatures_to_modules, attributionDecl,
-            moduleName, "    ");
-    errors += write_java_non_chained_methods(out, atoms.non_chained_signatures_to_modules,
-            moduleName);
+    errors += write_java_methods_q_schema(out, atoms.signatureInfoMap, attributionDecl,
+            "    ");
+    errors += write_java_non_chained_methods(out, atoms.nonChainedSignatureInfoMap);
     if (supportWorkSource) {
-        errors += write_java_work_source_methods(out, atoms.signatures_to_modules, moduleName);
+        errors += write_java_work_source_methods(out, atoms.signatureInfoMap);
     }
 
     fprintf(out, "}\n");
