@@ -710,11 +710,11 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUiccApplicationsEnabled(int, boolean);
     field @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS) public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED = "android.telephony.action.SUBSCRIPTION_PLANS_CHANGED";
     field @NonNull public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
-    field public static final int PROFILE_CLASS_DEFAULT = -1; // 0xffffffff
-    field public static final int PROFILE_CLASS_OPERATIONAL = 2; // 0x2
-    field public static final int PROFILE_CLASS_PROVISIONING = 1; // 0x1
-    field public static final int PROFILE_CLASS_TESTING = 0; // 0x0
-    field public static final int PROFILE_CLASS_UNSET = -1; // 0xffffffff
+    field @Deprecated public static final int PROFILE_CLASS_DEFAULT;
+    field public static final int PROFILE_CLASS_OPERATIONAL;
+    field public static final int PROFILE_CLASS_PROVISIONING;
+    field public static final int PROFILE_CLASS_TESTING;
+    field public static final int PROFILE_CLASS_UNSET;
     field @NonNull public static final android.net.Uri VT_ENABLED_CONTENT_URI;
     field @NonNull public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
     field @NonNull public static final android.net.Uri WFC_MODE_CONTENT_URI;
