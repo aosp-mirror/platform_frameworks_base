@@ -266,8 +266,8 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testSubscribe() {
-        val controlInfo1 = ControlInfo("id_1", "", DeviceTypes.TYPE_UNKNOWN)
-        val controlInfo2 = ControlInfo("id_2", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo1 = ControlInfo("id_1", "", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo2 = ControlInfo("id_2", "", "", DeviceTypes.TYPE_UNKNOWN)
         val structure =
             StructureInfo(TEST_COMPONENT_NAME_1, "Home", listOf(controlInfo1, controlInfo2))
 
@@ -296,8 +296,8 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testUnsubscribe_refreshing() {
-        val controlInfo1 = ControlInfo("id_1", "", DeviceTypes.TYPE_UNKNOWN)
-        val controlInfo2 = ControlInfo("id_2", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo1 = ControlInfo("id_1", "", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo2 = ControlInfo("id_2", "", "", DeviceTypes.TYPE_UNKNOWN)
         val structure =
             StructureInfo(TEST_COMPONENT_NAME_1, "Home", listOf(controlInfo1, controlInfo2))
 
