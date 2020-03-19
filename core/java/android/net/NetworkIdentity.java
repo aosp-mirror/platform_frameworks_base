@@ -25,6 +25,7 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.service.NetworkIdentityProto;
+import android.telephony.Annotation.NetworkType;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
@@ -42,11 +43,8 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     /**
      * When enabled, combine all {@link #mSubType} together under
      * {@link #SUBTYPE_COMBINED}.
-     *
-     * @deprecated we no longer offer to collect statistics on a per-subtype
-     *             basis; this is always disabled.
      */
-    @Deprecated
+    // TODO: make this flag configurable through settings. See http://b/146415925
     public static final boolean COMBINE_SUBTYPE_ENABLED = true;
 
     public static final int SUBTYPE_COMBINED = -1;
@@ -187,13 +185,14 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
     }
 
     /**
-     * Build a {@link NetworkIdentity} from the given {@link NetworkState},
-     * assuming that any mobile networks are using the current IMSI.
+     * Build a {@link NetworkIdentity} from the given {@link NetworkState} and {@code subType},
+     * assuming that any mobile networks are using the current IMSI. The subType if applicable,
+     * should be set as one of the TelephonyManager.NETWORK_TYPE_* constants, or
+     * {@link android.telephony.TelephonyManager#NETWORK_TYPE_UNKNOWN} if not.
      */
     public static NetworkIdentity buildNetworkIdentity(Context context, NetworkState state,
-            boolean defaultNetwork) {
+            boolean defaultNetwork, @NetworkType int subType) {
         final int type = state.networkInfo.getType();
-        final int subType = state.networkInfo.getSubtype();
 
         String subscriberId = null;
         String networkId = null;
