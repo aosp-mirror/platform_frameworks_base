@@ -212,8 +212,8 @@ public class UpstreamNetworkMonitorTest {
         mUNM.updateMobileRequiresDun(true);
         mUNM.registerMobileNetworkRequest();
         verify(mCM, times(1)).requestNetwork(
-                any(NetworkRequest.class), any(NetworkCallback.class), anyInt(), anyInt(),
-                any(Handler.class));
+                any(NetworkRequest.class), anyInt(), anyInt(), any(Handler.class),
+                any(NetworkCallback.class));
 
         assertTrue(mUNM.mobileNetworkRequested());
         assertUpstreamTypeRequested(TYPE_MOBILE_DUN);
@@ -649,8 +649,8 @@ public class UpstreamNetworkMonitorTest {
         }
 
         @Override
-        public void requestNetwork(NetworkRequest req, NetworkCallback cb,
-                int timeoutMs, int legacyType, Handler h) {
+        public void requestNetwork(NetworkRequest req,
+                int timeoutMs, int legacyType, Handler h, NetworkCallback cb) {
             assertFalse(allCallbacks.containsKey(cb));
             allCallbacks.put(cb, h);
             assertFalse(requested.containsKey(cb));
