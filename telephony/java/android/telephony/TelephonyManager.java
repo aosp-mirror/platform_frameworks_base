@@ -13107,7 +13107,6 @@ public class TelephonyManager {
      * This should only be called from system Uid.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyUserActivity() {
         try {
