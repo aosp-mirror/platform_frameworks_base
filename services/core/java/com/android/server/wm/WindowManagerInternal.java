@@ -577,4 +577,13 @@ public abstract class WindowManagerInternal {
      */
     public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
             int displayId);
+
+    /**
+     *
+     * Returns the window name associated to the given binder.
+     *
+     * @param binder The {@link IBinder} object
+     * @return The corresponding {@link WindowState#getName()}
+     */
+    public abstract String getWindowName(@NonNull IBinder binder);
 }
