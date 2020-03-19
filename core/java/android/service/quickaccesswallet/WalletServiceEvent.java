@@ -40,10 +40,16 @@ public final class WalletServiceEvent implements Parcelable {
     public static final int TYPE_NFC_PAYMENT_STARTED = 1;
 
     /**
+     * Indicates that the wallet cards have changed and should be refreshed.
+     * @hide
+     */
+    public static final int TYPE_WALLET_CARDS_UPDATED = 2;
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({TYPE_NFC_PAYMENT_STARTED})
+    @IntDef({TYPE_NFC_PAYMENT_STARTED, TYPE_WALLET_CARDS_UPDATED})
     public @interface EventType {
     }
 
