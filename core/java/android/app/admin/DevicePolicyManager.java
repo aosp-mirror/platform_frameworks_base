@@ -8658,11 +8658,11 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public boolean isSecondaryLockscreenEnabled(int userId) {
+    public boolean isSecondaryLockscreenEnabled(@NonNull UserHandle userHandle) {
         throwIfParentInstance("isSecondaryLockscreenEnabled");
         if (mService != null) {
             try {
-                return mService.isSecondaryLockscreenEnabled(userId);
+                return mService.isSecondaryLockscreenEnabled(userHandle);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
