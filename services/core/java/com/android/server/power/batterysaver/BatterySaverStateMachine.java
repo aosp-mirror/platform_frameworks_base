@@ -828,7 +828,7 @@ public class BatterySaverStateMachine {
         NotificationChannel channel = new NotificationChannel(
                 channelId, mContext.getText(nameId), NotificationManager.IMPORTANCE_DEFAULT);
         channel.setSound(null, null);
-        channel.setBlockableSystem(true);
+        channel.setBlockable(true);
         manager.createNotificationChannel(channel);
     }
 
