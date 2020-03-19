@@ -11492,7 +11492,11 @@ public class DevicePolicyManager {
 
     /**
      * Deprecated. Use {@code markProfileOwnerOnOrganizationOwnedDevice} instead.
-     * Throws UnsupportedOperationException when called.
+     * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#Q} or
+     * below, will behave the same as {@link #markProfileOwnerOnOrganizationOwnedDevice}.
+     *
+     * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#R}
+     * or above, will throw an UnsupportedOperationException when called.
      *
      * @deprecated Use {@link #markProfileOwnerOnOrganizationOwnedDevice} instead.
      *
@@ -11503,9 +11507,14 @@ public class DevicePolicyManager {
     @RequiresPermission(value = android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS,
             conditional = true)
     public void setProfileOwnerCanAccessDeviceIds(@NonNull ComponentName who) {
-        throw new UnsupportedOperationException(
-                "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice instead"
-                        + ".");
+        ApplicationInfo ai = mContext.getApplicationInfo();
+        if (ai.targetSdkVersion > Build.VERSION_CODES.Q) {
+            throw new UnsupportedOperationException(
+                    "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice"
+                    + " instead.");
+        } else {
+            markProfileOwnerOnOrganizationOwnedDevice(who);
+        }
     }
 
     /**
