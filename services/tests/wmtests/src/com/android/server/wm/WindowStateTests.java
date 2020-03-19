@@ -251,11 +251,9 @@ public class WindowStateTests extends WindowTestsBase {
 
         // b/145812508: special legacy use-case for transparent/translucent windows.
         appWindow.mAttrs.format = PixelFormat.TRANSPARENT;
-        appWindow.mAttrs.alpha = 0;
         assertTrue(appWindow.canBeImeTarget());
 
         appWindow.mAttrs.format = PixelFormat.OPAQUE;
-        appWindow.mAttrs.alpha = 1;
         appWindow.mAttrs.flags &= ~FLAG_ALT_FOCUSABLE_IM;
         assertFalse(appWindow.canBeImeTarget());
         appWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
