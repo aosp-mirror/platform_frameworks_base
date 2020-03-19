@@ -3353,6 +3353,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * existing plans; it simply lets the debug package define new plans.
      */
     void setSubscriptionPlansOwner(int subId, String packageName) {
+        mContext.enforceCallingOrSelfPermission(NETWORK_SETTINGS, TAG);
         SystemProperties.set(PROP_SUB_PLAN_OWNER + "." + subId, packageName);
     }
 
