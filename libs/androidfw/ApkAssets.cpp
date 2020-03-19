@@ -77,7 +77,8 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
     return {};
   }
 
-  return LoadImpl({} /*fd*/, loaded_idmap->OverlayApkPath(),
+  auto apkPath = loaded_idmap->OverlayApkPath();
+  return LoadImpl({} /*fd*/, apkPath,
                   std::move(idmap_asset),
                   std::move(loaded_idmap),
                   PROPERTY_OVERLAY | (system ? PROPERTY_SYSTEM : 0U));
