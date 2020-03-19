@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
@@ -104,7 +105,8 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mock(NotificationRemoteInputManager.class),
                 () -> smartReplyConstants,
                 () -> smartReplyController,
-                mConversationNotificationProcessor);
+                mConversationNotificationProcessor,
+                mock(Executor.class));
     }
 
     @Test
@@ -191,6 +193,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         result.packageContext = mContext;
         CountDownLatch countDownLatch = new CountDownLatch(1);
         NotificationContentInflater.applyRemoteView(
+                AsyncTask.SERIAL_EXECUTOR,
                 false /* inflateSynchronously */,
                 result,
                 FLAG_CONTENT_VIEW_EXPANDED,
