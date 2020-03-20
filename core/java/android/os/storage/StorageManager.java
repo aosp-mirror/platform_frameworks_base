@@ -162,7 +162,12 @@ public class StorageManager {
     /** {@hide} */
     public static final String PROP_SETTINGS_FUSE = FeatureFlagUtils.PERSIST_PREFIX
             + FeatureFlagUtils.SETTINGS_FUSE_FLAG;
-
+    /**
+     * Property that determines whether {@link OP_LEGACY_STORAGE} is sticky for
+     * legacy apps.
+     * @hide
+     */
+    public static final String PROP_LEGACY_OP_STICKY = "persist.sys.legacy_storage_sticky";
 
     /** {@hide} */
     public static final String UUID_PRIVATE_INTERNAL = null;

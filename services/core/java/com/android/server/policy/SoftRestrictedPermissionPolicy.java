@@ -26,6 +26,7 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INST
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.storage.StorageManager.PROP_LEGACY_OP_STICKY;
 
 import static java.lang.Integer.min;
 
@@ -36,6 +37,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
 
@@ -62,6 +64,9 @@ public abstract class SoftRestrictedPermissionPolicy {
                     return true;
                 }
             };
+
+    private static final boolean isLegacyStorageAppOpStickyGlobal = SystemProperties.getBoolean(
+            PROP_LEGACY_OP_STICKY, /*defaultValue*/true);
 
     /**
      * TargetSDK is per package. To make sure two apps int the same shared UID do not fight over
@@ -136,9 +141,12 @@ public abstract class SoftRestrictedPermissionPolicy {
                     shouldPreserveLegacyExternalStorage = pkg.hasPreserveLegacyExternalStorage()
                             && smInternal.hasLegacyExternalStorage(appInfo.uid);
                     targetSDK = getMinimumTargetSDK(context, appInfo, user);
+                    // LEGACY_STORAGE op is normally sticky for apps targetig <= Q.
+                    // However, this device can be configured to make it non-sticky.
+                    boolean isLegacyAppOpSticky = isLegacyStorageAppOpStickyGlobal
+                            && targetSDK <= Build.VERSION_CODES.Q;
                     shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
-                            || (targetSDK > Build.VERSION_CODES.Q
-                            && !shouldPreserveLegacyExternalStorage);
+                            || (!isLegacyAppOpSticky && !shouldPreserveLegacyExternalStorage);
                 } else {
                     isWhiteListed = false;
                     shouldApplyRestriction = false;
