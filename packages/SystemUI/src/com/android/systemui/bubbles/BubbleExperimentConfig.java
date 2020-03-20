@@ -256,8 +256,7 @@ public class BubbleExperimentConfig {
             }
         }
         if (intent != null) {
-            return new Notification.BubbleMetadata.Builder()
-                    .createIntentBubble(intent, icon)
+            return new Notification.BubbleMetadata.Builder(intent, icon)
                     .setDesiredHeight(BUBBLE_HEIGHT)
                     .build();
         }
@@ -265,9 +264,8 @@ public class BubbleExperimentConfig {
     }
 
     static Notification.BubbleMetadata createForShortcut(String shortcutId) {
-        return new Notification.BubbleMetadata.Builder()
+        return new Notification.BubbleMetadata.Builder(shortcutId)
                 .setDesiredHeight(BUBBLE_HEIGHT)
-                .createShortcutBubble(shortcutId)
                 .build();
     }
 
