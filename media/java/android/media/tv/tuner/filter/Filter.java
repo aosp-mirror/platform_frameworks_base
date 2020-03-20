@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner.Result;
-import android.media.tv.tuner.TunerUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -239,13 +238,12 @@ public class Filter implements AutoCloseable {
      */
     @Result
     public int configure(@NonNull FilterConfiguration config) {
-        // TODO: validate main type, subtype, config, settings
-        int subType;
         Settings s = config.getSettings();
-        if (s != null) {
-            subType = s.getType();
-        } else {
-            subType = TunerUtils.getFilterSubtype(mMainType, mSubtype);
+        int subType = (s == null) ? mSubtype : s.getType();
+        if (mMainType != config.getType() || mSubtype != subType) {
+            throw new IllegalArgumentException("Invalid filter config. filter main type="
+                    + mMainType + ", filter subtype=" + mSubtype + ". config main type="
+                    + config.getType() + ", config subtype=" + subType);
         }
         return nativeConfigureFilter(config.getType(), subType, config);
     }
