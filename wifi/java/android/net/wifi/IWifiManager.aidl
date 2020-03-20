@@ -34,7 +34,6 @@ import android.net.wifi.IScanResultsCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ISuggestionConnectionStatusListener;
 import android.net.wifi.ITrafficStateCallback;
-import android.net.wifi.ITxPacketCountListener;
 import android.net.wifi.IWifiConnectedNetworkScorer;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SoftApConfiguration;
@@ -245,8 +244,6 @@ interface IWifiManager
     oneway void save(in WifiConfiguration config, in IBinder binder, in IActionListener listener, int callbackIdentifier);
 
     oneway void forget(int netId, in IBinder binder, in IActionListener listener, int callbackIdentifier);
-
-    oneway void getTxPacketCount(String packageName, in IBinder binder, in ITxPacketCountListener listener, int callbackIdentifier);
 
     void registerScanResultsCallback(in IScanResultsCallback callback);
 
