@@ -2937,7 +2937,7 @@ public class ApplicationPackageManager extends PackageManager {
             if (mInstaller == null) {
                 try {
                     mInstaller = new PackageInstaller(mPM.getPackageInstaller(),
-                            mContext.getPackageName(), getUserId());
+                            mContext.getPackageName(), mContext.getAttributionTag(), getUserId());
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
                 }

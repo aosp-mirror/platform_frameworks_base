@@ -472,15 +472,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     @Override
-    public int createSession(SessionParams params, String installerPackageName, int userId) {
+    public int createSession(SessionParams params, String installerPackageName,
+            String callingAttributionTag, int userId) {
         try {
-            return createSessionInternal(params, installerPackageName, userId);
+            return createSessionInternal(params, installerPackageName, callingAttributionTag,
+                    userId);
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }
     }
 
-    private int createSessionInternal(SessionParams params, String installerPackageName, int userId)
+    private int createSessionInternal(SessionParams params, String installerPackageName,
+            String installerAttributionTag, int userId)
             throws IOException {
         final int callingUid = Binder.getCallingUid();
         mPermissionManager.enforceCrossUserPermission(
@@ -659,7 +662,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
         InstallSource installSource = InstallSource.create(installerPackageName,
-                originatingPackageName, requestedInstallerPackageName);
+                originatingPackageName, requestedInstallerPackageName,
+                installerAttributionTag);
         session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
                 mInstallThread.getLooper(), mStagingManager, sessionId, userId, callingUid,
                 installSource, params, createdMillis,

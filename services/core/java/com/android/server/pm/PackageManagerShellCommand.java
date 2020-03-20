@@ -3054,7 +3054,8 @@ class PackageManagerShellCommand extends ShellCommand {
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_SYSTEM, "doCreateSession");
         final int sessionId = mInterface.getPackageInstaller()
-                .createSession(params, installerPackageName, translatedUserId);
+                .createSession(params, installerPackageName, null /*installerAttributionTag*/,
+                        translatedUserId);
         return sessionId;
     }
 

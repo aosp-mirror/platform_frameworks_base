@@ -634,7 +634,7 @@ public class StagingManager {
         try {
             int apkSessionId = mPi.createSession(
                     params, originalSession.getInstallerPackageName(),
-                    0 /* UserHandle.SYSTEM */);
+                    originalSession.getInstallerAttributionTag(), 0 /* UserHandle.SYSTEM */);
             PackageInstallerSession apkSession = mPi.getSession(apkSessionId);
             apkSession.open();
             for (String apkFilePath : apkFilePaths) {
@@ -693,7 +693,7 @@ public class StagingManager {
             }
             // TODO(b/129744602): use the userid from the original session.
             final int apkParentSessionId = mPi.createSession(
-                    params, session.getInstallerPackageName(),
+                    params, session.getInstallerPackageName(), session.getInstallerAttributionTag(),
                     0 /* UserHandle.SYSTEM */);
             final PackageInstallerSession apkParentSession = mPi.getSession(apkParentSessionId);
             try {
