@@ -80,7 +80,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
             mAllMetricProducers, mAllAnomalyTrackers, mAllPeriodicAlarmTrackers,
             mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
             mActivationAtomTrackerToMetricMap, mDeactivationAtomTrackerToMetricMap,
-            mMetricIndexesWithActivation, mNoReportMetricIds);
+            mAlertTrackerMap, mMetricIndexesWithActivation, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
     mVersionStringsInReport = config.version_strings_in_metric_report();
