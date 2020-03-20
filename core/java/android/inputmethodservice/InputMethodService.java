@@ -2284,7 +2284,9 @@ public class InputMethodService extends AbstractInputMethodService {
             // When insets API is enabled, it is responsible for client and server side
             // visibility of IME window.
             if (isVisibilityAppliedUsingInsetsConsumer()) {
-                mInputView.dispatchWindowVisibilityChanged(View.GONE);
+                if (mInputView != null) {
+                    mInputView.dispatchWindowVisibilityChanged(View.GONE);
+                }
             } else {
                 mWindow.hide();
             }
