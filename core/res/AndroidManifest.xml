@@ -734,7 +734,7 @@
     <!-- ====================================================================== -->
     <eat-comment />
 
-    <!-- @SystemApi Allows accessing the messages on ICC
+    <!-- Allows accessing the messages on ICC
          @hide Used internally. -->
     <permission android:name="android.permission.ACCESS_MESSAGES_ON_ICC"
         android:protectionLevel="signature" />
