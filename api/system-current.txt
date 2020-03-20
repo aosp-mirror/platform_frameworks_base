@@ -1779,6 +1779,7 @@ package android.content {
   }
 
   public abstract class ContentResolver {
+    method public int checkUriPermission(@NonNull android.net.Uri, int, int);
     method @NonNull public static android.net.Uri decodeFromFile(@NonNull java.io.File);
     method @NonNull public static java.io.File encodeToFile(@NonNull android.net.Uri);
     method @Nullable @RequiresPermission("android.permission.CACHE_CONTENT") public android.os.Bundle getCache(@NonNull android.net.Uri);
