@@ -17,7 +17,7 @@
 package com.android.keyguard;
 
 import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
-import static android.telephony.SubscriptionManager.NAME_SOURCE_DEFAULT;
+import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -83,11 +83,11 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private static final int TEST_CARRIER_ID = 1;
     private static final String TEST_GROUP_UUID = "59b5c870-fc4c-47a4-a99e-9db826b48b24";
     private static final SubscriptionInfo TEST_SUBSCRIPTION = new SubscriptionInfo(1, "", 0,
-            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_DEFAULT, 0xFFFFFF, "",
+            TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", false, TEST_GROUP_UUID,
             TEST_CARRIER_ID, 0);
     private static final SubscriptionInfo TEST_SUBSCRIPTION_2 = new SubscriptionInfo(2, "", 0,
-            TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_DEFAULT, 0xFFFFFF, "",
+            TEST_CARRIER, TEST_CARRIER_2, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_DISABLE, null, null, null, null, false, null, "", true, TEST_GROUP_UUID,
             TEST_CARRIER_ID, 0);
     @Mock
