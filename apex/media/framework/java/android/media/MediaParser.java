@@ -484,6 +484,31 @@ public final class MediaParser {
 
     // MediaParser parameters.
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(
+            prefix = {"PARAMETER_"},
+            value = {
+                PARAMETER_ADTS_ENABLE_CBR_SEEKING,
+                PARAMETER_AMR_ENABLE_CBR_SEEKING,
+                PARAMETER_FLAC_DISABLE_ID3,
+                PARAMETER_MP4_IGNORE_EDIT_LISTS,
+                PARAMETER_MP4_IGNORE_TFDT_BOX,
+                PARAMETER_MP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES,
+                PARAMETER_MATROSKA_DISABLE_CUES_SEEKING,
+                PARAMETER_MP3_DISABLE_ID3,
+                PARAMETER_MP3_ENABLE_CBR_SEEKING,
+                PARAMETER_MP3_ENABLE_INDEX_SEEKING,
+                PARAMETER_TS_MODE,
+                PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES,
+                PARAMETER_TS_IGNORE_AAC_STREAM,
+                PARAMETER_TS_IGNORE_AVC_STREAM,
+                PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM,
+                PARAMETER_TS_DETECT_ACCESS_UNITS,
+                PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS
+            })
+    public @interface ParameterName {}
+
     /**
      * Sets whether constant bitrate seeking should be enabled for ADTS parsing. {@code boolean}
      * expected. Default value is {@code false}.
@@ -701,7 +726,8 @@ public final class MediaParser {
      * @throws IllegalStateException If called after calling {@link #advance} on the same instance.
      */
     @NonNull
-    public MediaParser setParameter(@NonNull String parameterName, @NonNull Object value) {
+    public MediaParser setParameter(
+            @NonNull @ParameterName String parameterName, @NonNull Object value) {
         if (mExtractor != null) {
             throw new IllegalStateException(
                     "setParameters() must be called before the first advance() call.");
@@ -729,7 +755,7 @@ public final class MediaParser {
      *     constants.
      * @return Whether the given {@code parameterName} is supported.
      */
-    public boolean supportsParameter(@NonNull String parameterName) {
+    public boolean supportsParameter(@NonNull @ParameterName String parameterName) {
         return EXPECTED_TYPE_BY_PARAMETER_NAME.containsKey(parameterName);
     }
 
