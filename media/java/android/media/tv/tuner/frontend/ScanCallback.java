@@ -38,36 +38,36 @@ public interface ScanCallback {
     void onProgress(@IntRange(from = 0, to = 100) int percent);
 
     /** Signal frequencies in Hertz */
-    void onFrequenciesReport(@NonNull int[] frequency);
+    void onFrequenciesReported(@NonNull int[] frequency);
 
     /** Symbols per second */
-    void onSymbolRates(@NonNull int[] rate);
+    void onSymbolRatesReported(@NonNull int[] rate);
 
     /** Locked Plp Ids for DVBT2 frontend. */
-    void onPlpIds(@NonNull int[] plpIds);
+    void onPlpIdsReported(@NonNull int[] plpIds);
 
     /** Locked group Ids for DVBT2 frontend. */
-    void onGroupIds(@NonNull int[] groupIds);
+    void onGroupIdsReported(@NonNull int[] groupIds);
 
     /** Stream Ids. */
-    void onInputStreamIds(@NonNull int[] inputStreamIds);
+    void onInputStreamIdsReported(@NonNull int[] inputStreamIds);
 
     /** Locked signal standard for DVBS. */
-    void onDvbsStandard(@DvbsFrontendSettings.Standard int dvbsStandard);
+    void onDvbsStandardReported(@DvbsFrontendSettings.Standard int dvbsStandard);
 
     /** Locked signal standard. for DVBT */
-    void onDvbtStandard(@DvbtFrontendSettings.Standard int dvbtStandard);
+    void onDvbtStandardReported(@DvbtFrontendSettings.Standard int dvbtStandard);
 
     /** Locked signal SIF standard for Analog. */
-    void onAnalogSifStandard(@AnalogFrontendSettings.SifStandard int sif);
+    void onAnalogSifStandardReported(@AnalogFrontendSettings.SifStandard int sif);
 
     /** PLP status in a tuned frequency band for ATSC3 frontend. */
-    void onAtsc3PlpInfos(@NonNull Atsc3PlpInfo[] atsc3PlpInfos);
+    void onAtsc3PlpInfosReported(@NonNull Atsc3PlpInfo[] atsc3PlpInfos);
 
     /** Frontend hierarchy. */
-    void onHierarchy(@DvbtFrontendSettings.Hierarchy int hierarchy);
+    void onHierarchyReported(@DvbtFrontendSettings.Hierarchy int hierarchy);
 
     /** Frontend signal type. */
-    void onSignalType(@AnalogFrontendSettings.SignalType int signalType);
+    void onSignalTypeReported(@AnalogFrontendSettings.SignalType int signalType);
 
 }
