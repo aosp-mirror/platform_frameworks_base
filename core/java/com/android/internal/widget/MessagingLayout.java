@@ -16,6 +16,9 @@
 
 package com.android.internal.widget;
 
+import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_AT_END;
+import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
+
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -447,7 +450,9 @@ public class MessagingLayout extends FrameLayout
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
             }
-            newGroup.setDisplayImagesAtEnd(mDisplayImagesAtEnd);
+            newGroup.setImageDisplayLocation(mDisplayImagesAtEnd
+                    ? IMAGE_DISPLAY_LOCATION_AT_END
+                    : IMAGE_DISPLAY_LOCATION_INLINE);
             newGroup.setIsInConversation(false);
             newGroup.setLayoutColor(mLayoutColor);
             newGroup.setTextColors(mSenderTextColor, mMessageTextColor);
@@ -598,5 +603,10 @@ public class MessagingLayout extends FrameLayout
 
     public ArrayList<MessagingGroup> getMessagingGroups() {
         return mGroups;
+    }
+
+    @Override
+    public void setMessagingClippingDisabled(boolean clippingDisabled) {
+        // Don't do anything, this is only used for the ConversationLayout
     }
 }
