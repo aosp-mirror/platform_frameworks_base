@@ -106,6 +106,38 @@ public final class StorageSessionController {
     }
 
     /**
+     * Notifies the Storage Service that volume state for {@code vol} is changed.
+     * A session may already be created for this volume if it is mounted before or the volume state
+     * has changed to mounted.
+     *
+     * Does nothing if {@link #shouldHandle} is {@code false}
+     *
+     * Blocks until the Storage Service processes/scans the volume or fails in doing so.
+     *
+     * @throws ExternalStorageServiceException if it fails to connect to ExternalStorageService
+     */
+    public void notifyVolumeStateChanged(VolumeInfo vol) throws ExternalStorageServiceException {
+        if (!shouldHandle(vol)) {
+            return;
+        }
+        String sessionId = vol.getId();
+        int userId = vol.getMountUserId();
+
+        StorageUserConnection connection = null;
+        synchronized (mLock) {
+            connection = mConnections.get(userId);
+            if (connection != null) {
+                Slog.i(TAG, "Notifying volume state changed for session with id: " + sessionId);
+                connection.notifyVolumeStateChanged(sessionId,
+                        vol.buildStorageVolume(mContext, userId, false));
+            } else {
+                Slog.w(TAG, "No available storage user connection for userId : " + userId);
+            }
+        }
+    }
+
+
+    /**
      * Removes and returns the {@link StorageUserConnection} for {@code vol}.
      *
      * Does nothing if {@link #shouldHandle} is {@code false}
