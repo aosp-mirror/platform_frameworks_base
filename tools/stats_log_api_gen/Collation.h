@@ -147,8 +147,6 @@ struct AtomDecl {
 
     bool whitelisted = false;
 
-    vector<int> binaryFields;
-
     AtomDecl();
     AtomDecl(const AtomDecl& that);
     AtomDecl(int code, const string& name, const string& message);
