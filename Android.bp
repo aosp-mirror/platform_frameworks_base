@@ -418,7 +418,6 @@ java_defaults {
         "app-compat-annotations",
         "ext",
         "unsupportedappusage",
-        "framework-updatable-stubs-module_libs_api",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -492,6 +491,7 @@ java_library {
         "services-platform-compat-config",
         "documents-ui-compat-config",
     ],
+    libs: ["framework-updatable-stubs-module_libs_api"],
     static_libs: [
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -545,6 +545,7 @@ java_library {
     visibility: [
         // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
         "//external/robolectric-shadows:__subpackages__",
+        "//frameworks/base",
         "//frameworks/layoutlib:__subpackages__",
     ],
 }
