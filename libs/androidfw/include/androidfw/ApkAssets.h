@@ -37,49 +37,46 @@ class LoadedIdmap;
 
 // Holds an APK.
 class ApkAssets {
+  // This means the data extends to the end of the file.
+  static constexpr off64_t kUnknownLength = -1;
+
  public:
-  // Creates an ApkAssets.
-  // If `system` is true, the package is marked as a system package, and allows some functions to
-  // filter out this package when computing what configurations/resources are available.
-  static std::unique_ptr<const ApkAssets> Load(const std::string& path, bool system = false,
-                                               bool for_loader = false);
-
-  // Creates an ApkAssets, but forces any package with ID 0x7f to be loaded as a shared library.
-  // If `system` is true, the package is marked as a system package, and allows some functions to
-  // filter out this package when computing what configurations/resources are available.
-  static std::unique_ptr<const ApkAssets> LoadAsSharedLibrary(const std::string& path,
-                                                              bool system = false);
-
-  // Creates an ApkAssets from an IDMAP, which contains the original APK path, and the overlay
-  // data.
-  // If `system` is true, the package is marked as a system package, and allows some functions to
-  // filter out this package when computing what configurations/resources are available.
-  static std::unique_ptr<const ApkAssets> LoadOverlay(const std::string& idmap_path,
-                                                      bool system = false);
+  // Creates an ApkAssets from the zip path.
+  static std::unique_ptr<const ApkAssets> Load(const std::string& path,
+                                               package_property_t flags = 0U);
 
   // Creates an ApkAssets from the given file descriptor, and takes ownership of the file
   // descriptor. The `friendly_name` is some name that will be used to identify the source of
   // this ApkAssets in log messages and other debug scenarios.
-  // If `system` is true, the package is marked as a system package, and allows some functions to
-  // filter out this package when computing what configurations/resources are available.
-  // If `force_shared_lib` is true, any package with ID 0x7f is loaded as a shared library.
+  // If `length` equals kUnknownLength, offset must equal 0; otherwise, the apk data will be read
+  // using the `offset` into the file descriptor and will be `length` bytes long.
   static std::unique_ptr<const ApkAssets> LoadFromFd(base::unique_fd fd,
-                                                     const std::string& friendly_name, bool system,
-                                                     bool force_shared_lib,
-                                                     bool for_loader = false);
+                                                     const std::string& friendly_name,
+                                                     package_property_t flags = 0U,
+                                                     off64_t offset = 0,
+                                                     off64_t length = kUnknownLength);
 
-  // Creates an empty wrapper ApkAssets from the given path which points to an .arsc.
-  static std::unique_ptr<const ApkAssets> LoadArsc(const std::string& path,
-                                                   bool for_loader = false);
+  // Creates an ApkAssets from the given path which points to a resources.arsc.
+  static std::unique_ptr<const ApkAssets> LoadTable(const std::string& path,
+                                                    package_property_t flags = 0U);
 
-  // Creates an empty wrapper ApkAssets from the given file descriptor which points to an .arsc,
-  // Takes ownership of the file descriptor.
-  static std::unique_ptr<const ApkAssets> LoadArsc(base::unique_fd fd,
-                                                   const std::string& friendly_name,
-                                                   bool for_loader = false);
+  // Creates an ApkAssets from the given file descriptor which points to an resources.arsc, and
+  // takes ownership of the file descriptor.
+  // If `length` equals kUnknownLength, offset must equal 0; otherwise, the .arsc data will be read
+  // using the `offset` into the file descriptor and will be `length` bytes long.
+  static std::unique_ptr<const ApkAssets> LoadTableFromFd(base::unique_fd fd,
+                                                          const std::string& friendly_name,
+                                                          package_property_t flags = 0U,
+                                                          off64_t offset = 0,
+                                                          off64_t length = kUnknownLength);
+
+  // Creates an ApkAssets from an IDMAP, which contains the original APK path, and the overlay
+  // data.
+  static std::unique_ptr<const ApkAssets> LoadOverlay(const std::string& idmap_path,
+                                                      package_property_t flags = 0U);
 
   // Creates a totally empty ApkAssets with no resources table and no file entries.
-  static std::unique_ptr<const ApkAssets> LoadEmpty(bool for_loader = false);
+  static std::unique_ptr<const ApkAssets> LoadEmpty(package_property_t flags = 0U);
 
   std::unique_ptr<Asset> Open(const std::string& path,
                               Asset::AccessMode mode = Asset::AccessMode::ACCESS_RANDOM) const;
@@ -105,28 +102,38 @@ class ApkAssets {
   }
 
   inline bool IsOverlay() const {
-    return (property_flags_ & PROPERTY_OVERLAY) != 0;
+    return loaded_idmap_ != nullptr;
   }
 
   bool IsUpToDate() const;
 
-  // Creates an Asset from any file on the file system.
+  // Creates an Asset from a file on disk.
   static std::unique_ptr<Asset> CreateAssetFromFile(const std::string& path);
 
+  // Creates an Asset from a file descriptor.
+  //
+  // The asset takes ownership of the file descriptor. If `length` equals kUnknownLength, offset
+  // must equal 0; otherwise, the asset data will be read using the `offset` into the file
+  // descriptor and will be `length` bytes long.
+  static std::unique_ptr<Asset> CreateAssetFromFd(base::unique_fd fd,
+                                                  const char* path,
+                                                  off64_t offset = 0,
+                                                  off64_t length = kUnknownLength);
  private:
   DISALLOW_COPY_AND_ASSIGN(ApkAssets);
 
-  static std::unique_ptr<const ApkAssets> LoadImpl(base::unique_fd fd, const std::string& path,
+  static std::unique_ptr<const ApkAssets> LoadImpl(ZipArchiveHandle unmanaged_handle,
+                                                   const std::string& path,
                                                    std::unique_ptr<Asset> idmap_asset,
-                                                   std::unique_ptr<const LoadedIdmap> loaded_idmap,
+                                                   std::unique_ptr<const LoadedIdmap> idmap,
                                                    package_property_t property_flags);
 
-  static std::unique_ptr<const ApkAssets> LoadArscImpl(base::unique_fd fd,
-                                                       const std::string& path,
-                                                       package_property_t property_flags);
+  static std::unique_ptr<const ApkAssets> LoadTableImpl(std::unique_ptr<Asset> resources_asset,
+                                                        const std::string& path,
+                                                        package_property_t property_flags);
 
   ApkAssets(ZipArchiveHandle unmanaged_handle,
-            const std::string& path,
+            std::string path,
             time_t last_mod_time,
             package_property_t property_flags);
 

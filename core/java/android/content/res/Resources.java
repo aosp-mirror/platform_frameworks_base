@@ -2388,6 +2388,9 @@ public class Resources {
      * Adds a loader to the list of loaders. If the loader is already present in the list, the list
      * will not be modified.
      *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * loader changes.
+     *
      * @param loaders the loaders to add
      */
     public void addLoaders(@NonNull ResourcesLoader... loaders) {
@@ -2419,6 +2422,9 @@ public class Resources {
      * Removes loaders from the list of loaders. If the loader is not present in the list, the list
      * will not be modified.
      *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * loader changes.
+     *
      * @param loaders the loaders to remove
      */
     public void removeLoaders(@NonNull ResourcesLoader... loaders) {
@@ -2448,6 +2454,9 @@ public class Resources {
 
     /**
      * Removes all {@link ResourcesLoader ResourcesLoader(s)}.
+     *
+     * <p>This should only be called from the UI thread to avoid lock contention when propagating
+     * loader changes.
      * @hide
      */
     @VisibleForTesting
