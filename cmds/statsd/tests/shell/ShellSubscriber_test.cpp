@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
+#include "src/shell/ShellSubscriber.h"
 
+#include <gtest/gtest.h>
+#include <stdio.h>
 #include <unistd.h>
+
+#include <vector>
+
 #include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_data.pb.h"
-#include "src/shell/ShellSubscriber.h"
 #include "stats_event.h"
 #include "tests/metrics/metrics_test_helper.h"
-
-#include <stdio.h>
-#include <vector>
+#include "tests/statsd_test_util.h"
 
 using namespace android::os::statsd;
 using android::sp;
@@ -118,18 +120,9 @@ TEST(ShellSubscriberTest, testPushedSubscription) {
     vector<std::shared_ptr<LogEvent>> pushedList;
 
     // Create the LogEvent from an AStatsEvent
-    AStatsEvent* statsEvent = AStatsEvent_obtain();
-    AStatsEvent_setAtomId(statsEvent, 29 /*screen_state_atom_id*/);
-    AStatsEvent_overwriteTimestamp(statsEvent, 1000);
-    AStatsEvent_writeInt32(statsEvent, ::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
-    AStatsEvent_build(statsEvent);
-    size_t size;
-    uint8_t* buffer = AStatsEvent_getBuffer(statsEvent, &size);
-    std::shared_ptr<LogEvent> logEvent = std::make_shared<LogEvent>(/*uid=*/0, /*pid=*/0);
-    logEvent->parseBuffer(buffer, size);
-    AStatsEvent_release(statsEvent);
-
-    pushedList.push_back(logEvent);
+    std::unique_ptr<LogEvent> logEvent = CreateScreenStateChangedEvent(
+            1000 /*timestamp*/, ::android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    pushedList.push_back(std::move(logEvent));
 
     // create a simple config to get screen events
     ShellSubscription config;
