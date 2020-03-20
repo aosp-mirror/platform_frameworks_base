@@ -25,6 +25,7 @@ import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.IntDef;
 import android.annotation.MainThread;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
@@ -208,6 +209,13 @@ public final class MultiClientInputMethodManagerService {
                         public void registerInputMethodListListener(
                                 InputMethodListListener listener) {
                             reportNotSupported();
+                        }
+
+                        @Override
+                        public boolean transferTouchFocusToImeWindow(
+                                @NonNull IBinder sourceInputToken, int displayId) {
+                            reportNotSupported();
+                            return false;
                         }
                     });
         }
