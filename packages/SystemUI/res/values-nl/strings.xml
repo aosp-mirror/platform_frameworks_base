@@ -699,7 +699,8 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Trekt je aandacht met geluid of trillingen."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen recente ballonnen"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Recente bubbels en gesloten bubbels worden hier weergegeven."</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Deze meldingen kunnen niet worden aangepast."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Deze groep meldingen kan hier niet worden geconfigureerd"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Melding via proxy"</string>
@@ -969,13 +970,8 @@
     <string name="device_services" msgid="1549944177856658705">"Apparaatservices"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Geen titel"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Tik om deze app opnieuw te starten en te openen op het volledige scherm."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> openen"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Instellingen voor <xliff:g id="APP_NAME">%1$s</xliff:g>-ballonnen"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Ballonnen van <xliff:g id="APP_NAME">%1$s</xliff:g> toestaan?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Beheren"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Weigeren"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Toestaan"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Later vragen"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> van <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> van <xliff:g id="APP_NAME">%2$s</xliff:g> en nog <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Verplaatsen"</string>
@@ -984,9 +980,17 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Naar linksonder verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Naar rechtsonder verplaatsen"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Sluiten"</string>
-    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Chats op de voorgrond houden"</string>
-    <string name="bubbles_user_education_description" msgid="6663205638091146934">"Nieuwe chats van <xliff:g id="APP_NAME">%1$s</xliff:g> worden weergegeven als bubbels. Tik op een bubbel om deze te openen. Sleep om deze te verplaatsen.\n\nTik op de bubbel"</string>
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tik op Beheren om bubbels van deze app uit te schakelen"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systeemnavigatie geüpdatet. Als je wijzigingen wilt aanbrengen, ga je naar Instellingen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ga naar Instellingen om de systeemnavigatie te updaten"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stand-by"</string>
@@ -1012,5 +1016,7 @@
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Geef de pincode op"</string>
     <string name="controls_structure_tooltip" msgid="1392966215435667434">"Swipe om andere gebouwen te bekijken"</string>
     <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
     <skip />
 </resources>
