@@ -1918,7 +1918,6 @@ class Task extends WindowContainer<WindowContainer> {
         super.onConfigurationChanged(newParentConfig);
         if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
-            updateShadowsRadius(isFocused(), getPendingTransaction());
         }
 
         final int newWinMode = getWindowingMode();
@@ -3325,6 +3324,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         updateSurfaceCrop();
+        updateShadowsRadius(isFocused(), getPendingTransaction());
 
         if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
@@ -4149,26 +4149,40 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     /**
+     * @return true if the task is visible and has at least one visible child.
+     */
+    private boolean hasVisibleChildren() {
+        if (!isAttached() || isForceHidden()) {
+            return false;
+        }
+
+        return getActivity(ActivityRecord::isVisible) != null;
+    }
+
+    /**
      * @return the desired shadow radius in pixels for the current task.
      */
     private float getShadowRadius(boolean taskIsFocused) {
-        if (mDisplayContent == null) {
+        int elevation = 0;
+
+        // Get elevation for a specific windowing mode.
+        if (inPinnedWindowingMode()) {
+            elevation = PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
+        } else if (ENABLE_FREEFORM_COMPOSITOR_SHADOWS && inFreeformWindowingMode()) {
+            // TODO(b/149585281) remove when root task has the correct bounds for freeform
+            elevation = taskIsFocused
+                    ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
+        } else {
+            // For all other windowing modes, do not draw a shadow.
             return 0;
         }
 
-        if (inPinnedWindowingMode()) {
-            return dipToPixel(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP,
-                    mDisplayContent.getDisplayMetrics());
-        }
-        // TODO(b/149585281) remove when root task has the correct bounds for freeform
-        if (ENABLE_FREEFORM_COMPOSITOR_SHADOWS && inFreeformWindowingMode()) {
-            final int elevation = taskIsFocused
-                    ? DECOR_SHADOW_FOCUSED_HEIGHT_IN_DIP : DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP;
-            return dipToPixel(elevation, mDisplayContent.getDisplayMetrics());
+        // If the task has no visible children, do not draw a shadow.
+        if (!hasVisibleChildren()) {
+            return 0;
         }
 
-        // For all other windowing modes, do not draw a shadow.
-        return 0;
+        return dipToPixel(elevation, getDisplayContent().getDisplayMetrics());
     }
 
     /**
