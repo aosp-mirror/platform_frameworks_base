@@ -82,6 +82,7 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
         if (supportQ) {
             fprintf(out, "    StatsEventCompat event;\n");
             fprintf(out, "    event.setAtomId(code);\n");
+            write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAnnotations, "event.", "");
             for (vector<java_type_t>::const_iterator arg = signature.begin();
                     arg != signature.end(); arg++) {
                 switch (*arg) {
@@ -124,6 +125,8 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
         } else {
             fprintf(out, "    AStatsEvent* event = AStatsEvent_obtain();\n");
             fprintf(out, "    AStatsEvent_setAtomId(event, code);\n");
+            write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAnnotations, "AStatsEvent_",
+                    "event, ");
             for (vector<java_type_t>::const_iterator arg = signature.begin();
                     arg != signature.end(); arg++) {
                 switch (*arg) {

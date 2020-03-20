@@ -121,6 +121,7 @@ static int write_java_methods(
 
         // Write atom code.
         fprintf(out, "%s        builder.setAtomId(code);\n", indent.c_str());
+        write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAnnotations);
 
         // Write the args.
         argIndex = 1;

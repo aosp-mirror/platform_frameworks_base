@@ -52,6 +52,8 @@ const int STATE_OPTION_EXCLUSIVE = os::statsd::StateField::EXCLUSIVE_STATE;
 const int STATE_OPTION_PRIMARY_FIELD_FIRST_UID = os::statsd::StateField::PRIMARY_FIELD_FIRST_UID;
 const int STATE_OPTION_PRIMARY = os::statsd::StateField::PRIMARY_FIELD;
 
+const int ATOM_ID_FIELD_NUMBER = -1;
+
 const string DEFAULT_MODULE_NAME = "DEFAULT";
 
 /**
@@ -146,6 +148,8 @@ struct AtomDecl {
     int uidField = 0;
 
     bool whitelisted = false;
+
+    bool truncateTimestamp = false;
 
     AtomDecl();
     AtomDecl(const AtomDecl& that);
