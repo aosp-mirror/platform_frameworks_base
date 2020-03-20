@@ -7075,7 +7075,7 @@ package android.net.wifi {
     field @Deprecated public byte id;
   }
 
-  public class ScanResult implements android.os.Parcelable {
+  public final class ScanResult implements android.os.Parcelable {
     field public static final int CIPHER_CCMP = 3; // 0x3
     field public static final int CIPHER_GCMP_256 = 4; // 0x4
     field public static final int CIPHER_NONE = 0; // 0x0
