@@ -60,9 +60,6 @@ public:
     ShellSubscriber(sp<UidMap> uidMap, sp<StatsPullerManager> pullerMgr)
         : mUidMap(uidMap), mPullerMgr(pullerMgr){};
 
-    /**
-     * Start a new subscription.
-     */
     void startNewSubscription(int inFd, int outFd, int timeoutSec);
 
     void onLogEvent(const LogEvent& event);
@@ -76,16 +73,28 @@ private:
         int64_t mInterval;
         int64_t mPrevPullElapsedRealtimeMs;
     };
-    bool readConfig();
 
-    void updateConfig(const ShellSubscription& config);
+    struct SubscriptionInfo {
+        SubscriptionInfo(const int& inputFd, const int& outputFd)
+            : mInputFd(inputFd), mOutputFd(outputFd), mClientAlive(true) {
+        }
 
-    void startPull(int64_t token, int64_t intervalMillis);
+        int mInputFd;
+        int mOutputFd;
+        std::vector<SimpleAtomMatcher> mPushedMatchers;
+        std::vector<PullInfo> mPulledInfo;
+        int mPullIntervalMin;
+        bool mClientAlive;
+    };
 
-    void cleanUpLocked();
+    int claimToken();
 
-    void writeToOutputLocked(const vector<std::shared_ptr<LogEvent>>& data,
-                             const SimpleAtomMatcher& matcher);
+    bool readConfig(std::shared_ptr<SubscriptionInfo> subscriptionInfo);
+
+    void startPull(int64_t myToken);
+
+    bool writePulledAtomsLocked(const vector<std::shared_ptr<LogEvent>>& data,
+                                const SimpleAtomMatcher& matcher);
 
     sp<UidMap> mUidMap;
 
@@ -95,19 +104,11 @@ private:
 
     mutable std::mutex mMutex;
 
-    std::condition_variable mShellDied;  // semaphore for waiting until shell exits.
+    std::condition_variable mSubscriptionShouldEnd;
 
-    int mInput = -1;  // The input file descriptor
+    std::shared_ptr<SubscriptionInfo> mSubscriptionInfo = nullptr;
 
-    int mOutput = -1;  // The output file descriptor
-
-    std::vector<SimpleAtomMatcher> mPushedMatchers;
-
-    std::vector<PullInfo> mPulledInfo;
-
-    int64_t mSubscriberId = 0; // A unique id to identify a subscriber.
-
-    int64_t mPullToken = 0;  // A unique token to identify a puller thread.
+    int mToken;
 };
 
 }  // namespace statsd
