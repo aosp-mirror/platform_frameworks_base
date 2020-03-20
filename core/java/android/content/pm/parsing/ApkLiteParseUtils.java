@@ -413,7 +413,7 @@ public class ApkLiteParseUtils {
         }
 
         // Check to see if overlay should be excluded based on system property condition
-        if (!PackageParser.checkRequiredSystemProperty(requiredSystemPropertyName,
+        if (!PackageParser.checkRequiredSystemProperties(requiredSystemPropertyName,
                 requiredSystemPropertyValue)) {
             Slog.i(TAG, "Skipping target and overlay pair " + targetPackage + " and "
                     + codePath + ": overlay ignored due to required system property: "
