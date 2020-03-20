@@ -15,7 +15,6 @@
  */
 package android.hardware.face;
 
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceReceiverInternal;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.face.IFaceServiceReceiver;
@@ -52,10 +51,6 @@ interface IFaceService {
 
     // Start face enrollment
     void enroll(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
-            String opPackageName, in int [] disabledFeatures, in IBiometricNativeHandle windowId);
-
-    // Start remote face enrollment
-    void enrollRemotely(int userId, IBinder token, in byte [] cryptoToken, IFaceServiceReceiver receiver,
             String opPackageName, in int [] disabledFeatures);
 
     // Cancel enrollment in progress
