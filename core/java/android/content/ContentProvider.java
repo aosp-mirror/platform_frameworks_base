@@ -1585,6 +1585,10 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * This method is typically used when the provider implements more dynamic
      * access controls that cannot be expressed with {@code <path-permission>}
      * style static rules.
+     * <p>
+     * Because validation of these dynamic access controls has significant
+     * system health impact, this feature is only available to providers that
+     * are built into the system.
      *
      * @param uri the {@link Uri} to perform an access check on.
      * @param uid the UID to check the permission for.
