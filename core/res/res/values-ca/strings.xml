@@ -1624,7 +1624,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denega"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toca una funció per començar a utilitzar-la:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Tria les aplicacions que vols fer servir amb el botó d\'accessibilitat"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Tria les aplicacions que vols fer servir amb la drecera de les tecles de volum"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Tria les aplicacions que vols fer servir amb la drecera per a tecles de volum"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> s\'ha desactivat"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edita les dreceres"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fet"</string>
@@ -1635,6 +1635,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"La drecera d\'accessibilitat ha activat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"La drecera d\'accessibilitat ha desactivat <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premudes les dues tecles de volum durant 3 segons per fer servir <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for accessibility_button_prompt_text (29591089269861261) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (1950992471955288772) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1754236312534510178) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (1761210320049107435) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (6207697277963860927) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (8774465424241303774) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliació"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuari actual: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"S\'està canviant a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2025,19 +2037,33 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversa de grup"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Feina"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visualització personal"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visualització de treball"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"No es pot compartir amb les aplicacions de treball"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"No es pot compartir amb les aplicacions personals"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"L\'administrador de TI ha bloquejat la compartició entre perfils personals i de treball"</string>
-    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"No es pot accedir a les aplicacions de treball"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"L\'administrador de TI no et permet veure el contingut personal a les aplicacions de treball"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"No es pot accedir a les aplicacions personals"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"L\'administrador de TI no et permet veure el contingut de feina a les aplicacions personals"</string>
-    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Activa el perfil de treball per compartir contingut"</string>
-    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Activa el perfil de treball per veure contingut"</string>
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"No hi ha cap aplicació disponible"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
+    <skip />
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activa"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Gravar o reproduir àudio en trucades"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permet que l\'aplicació gravi o reprodueixi àudio en trucades si està assignada com a aplicació de marcador predeterminada."</string>
 </resources>

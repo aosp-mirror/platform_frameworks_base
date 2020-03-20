@@ -451,10 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"കോളിംഗ് അനുഭവം ‌മെച്ചപ്പെടുത്തുന്നതിനായി തങ്ങളുടെ ‌കോളുകൾ സിസ്റ്റത്തിലേയ്ക്ക് വഴിതിരിച്ചുവിടാൻ ആപ്പുകളെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"സിസ്‌റ്റത്തിലൂടെ കോളുകൾ കാണുകയും നിയന്ത്രിക്കുകയും ചെയ്യുക."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ഉപകരണത്തിൽ നിലവിലുള്ള കോളുകൾ കാണാനും നിയന്തിക്കാനും ആപ്പിനെ അനുവദിക്കുന്നു. കോളുകൾക്കുള്ള നമ്പറുകളും അവയുടെ നിലയും പോലെയുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
-    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
-    <skip />
-    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
-    <skip />
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുന്നതിനുള്ള നിയന്ത്രണങ്ങളിൽ നിന്ന് ഒഴിവാക്കുക"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"ഓഡിയോ റെക്കോർഡ് ചെയ്യുന്നതിനുള്ള നിയന്ത്രണങ്ങളിൽ നിന്ന് ആപ്പിനെ ഒഴിവാക്കുക."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"മറ്റൊരു ആപ്പിൽ നിന്നുള്ള കോൾ തുടരുക"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
@@ -1637,6 +1635,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓൺ ചെയ്തിരിക്കുന്നു"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ഉപയോഗസഹായിക്കുള്ള കുറുക്കുവഴി <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫ് ചെയ്തിരിക്കുന്നു"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഉപയോഗിക്കാൻ, രണ്ട് വോളിയം കീകളും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക"</string>
+    <!-- no translation found for accessibility_button_prompt_text (29591089269861261) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (1950992471955288772) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1754236312534510178) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (1761210320049107435) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (6207697277963860927) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (8774465424241303774) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"മാഗ്നിഫിക്കേഷൻ"</string>
     <string name="user_switched" msgid="7249833311585228097">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
@@ -2022,27 +2032,38 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ഉപയോഗസഹായി മെനു"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> എന്നതിന്റെ അടിക്കുറിപ്പ് ബാർ."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> നിയന്ത്രിത ബക്കറ്റിലേക്ക് നീക്കി"</string>
-    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
-    <skip />
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"സംഭാഷണം"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ഗ്രൂപ്പ് സംഭാഷണം"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"വ്യക്തിപരമായത്"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ജോലിസ്ഥലം"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"വ്യക്തിപര കാഴ്‌ച"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ഔദ്യോഗിക കാഴ്‌ച"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ഔദ്യോഗിക ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"വ്യക്തിപരമാക്കിയ ആപ്പുകൾ ഉപയോഗിച്ച് പങ്കിടാനാവില്ല"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"വ്യക്തിപരവും ഔദ്യോഗികവുമായ പ്രൊഫെെലുകൾക്കിടയിലെ പങ്കിടലിനെ ഐടി അഡ്‌മിൻ ബ്ലോക്ക് ചെയ്‌തു"</string>
-    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"ഔദ്യോഗിക ആപ്പുകൾ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"ഔദ്യോഗിക ആപ്പുകളിൽ വ്യക്തിപര ഉള്ളടക്കം കാണാൻ ഐടി അഡ്‌മിൻ നിങ്ങളെ അനുവദിക്കുന്നില്ല"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"വ്യക്തിപര ആപ്പുകൾ ആക്‌സസ് ചെയ്യാനാകില്ല"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"വ്യക്തിപര ആപ്പുകളിൽ ഔദ്യോഗിക ഉള്ളടക്കം കാണാൻ ഐടി അഡ്‌മിൻ നിങ്ങളെ അനുവദിക്കുന്നില്ല"</string>
-    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"ഉള്ളടക്കം പങ്കിടാൻ ഔദ്യോഗിക പ്രൊഫെെൽ ഓണാക്കുക"</string>
-    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"ഉള്ളടക്കം കാണാൻ ഔദ്യോഗിക പ്രൊഫെെൽ ഓണാക്കുക"</string>
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"ആപ്പുകളൊന്നും ലഭ്യമല്ല"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
+    <skip />
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ഓണാക്കുക"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യുക അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യുക"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ഡിഫോൾട്ട് ഡയലർ ആപ്പായി അസെെൻ ചെയ്യുന്ന സമയത്ത്, ടെലിഫോൺ കോളുകൾ ചെയ്യുമ്പോൾ റെക്കോർഡ് ചെയ്യാൻ അല്ലെങ്കിൽ ഓഡിയോ പ്ലേ ചെയ്യാൻ ഈ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
 </resources>
