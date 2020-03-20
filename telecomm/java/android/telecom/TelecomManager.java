@@ -848,7 +848,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2;
 
     /**
@@ -856,7 +855,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_SOURCE_EMERGENCY_DIALPAD = 1;
 
     /**
@@ -864,7 +862,6 @@ public class TelecomManager {
      *
      * @hide
      */
-    @SystemApi
     public static final int CALL_SOURCE_UNSPECIFIED = 0;
 
     /**
