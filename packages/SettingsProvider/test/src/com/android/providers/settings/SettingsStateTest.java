@@ -47,6 +47,7 @@ public class SettingsStateTest extends AndroidTestCase {
             "日本語";
 
     private static final String TEST_PACKAGE = "package";
+    private static final String SYSTEM_PACKAGE = "android";
     private static final String SETTING_NAME = "test_setting";
 
     private final Object mLock = new Object();
@@ -251,6 +252,26 @@ public class SettingsStateTest extends AndroidTestCase {
         settingsState.resetSettingLocked(SETTING_NAME);
         assertFalse(settingsState.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
 
+    }
+
+    public void testModifySettingBySystemPackage_sameValue_preserveFlagNotSet() {
+        SettingsState settingsState = getSettingStateObject();
+        // Initialize the setting.
+        settingsState.insertSettingLocked(SETTING_NAME, "1", null, false, SYSTEM_PACKAGE);
+        // Update the setting.
+        settingsState.insertSettingLocked(SETTING_NAME, "1", null, false, SYSTEM_PACKAGE);
+
+        assertFalse(settingsState.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
+    }
+
+    public void testModifySettingBySystemPackage_newValue_preserveFlagSet() {
+        SettingsState settingsState = getSettingStateObject();
+        // Initialize the setting.
+        settingsState.insertSettingLocked(SETTING_NAME, "1", null, false, SYSTEM_PACKAGE);
+        // Update the setting.
+        settingsState.insertSettingLocked(SETTING_NAME, "2", null, false, SYSTEM_PACKAGE);
+
+        assertTrue(settingsState.getSettingLocked(SETTING_NAME).isValuePreservedInRestore());
     }
 
     private SettingsState getSettingStateObject() {
