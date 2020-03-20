@@ -222,6 +222,7 @@ public class Tuner implements AutoCloseable  {
 
     private Integer mDemuxHandle;
     private Integer mDescramblerHandle;
+    private Descrambler mDescrambler;
 
     private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
             new TunerResourceManager.ResourcesReclaimListener() {
@@ -249,6 +250,7 @@ public class Tuner implements AutoCloseable  {
             mHandler = createEventHandler();
         }
 
+        mHandler = createEventHandler();
         int[] clientId = new int[1];
         ResourceClientProfile profile = new ResourceClientProfile(tvInputSessionId, useCase);
         mTunerResourceManager.registerClientProfile(
@@ -286,7 +288,7 @@ public class Tuner implements AutoCloseable  {
     public void shareFrontendFromTuner(@NonNull Tuner tuner) {
         mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
         mFrontendHandle = tuner.mFrontendHandle;
-        nativeOpenFrontendByHandle(mFrontendHandle);
+        mFrontend = nativeOpenFrontendByHandle(mFrontendHandle);
     }
 
     /**
@@ -319,6 +321,7 @@ public class Tuner implements AutoCloseable  {
             mTunerResourceManager.releaseLnb(mLnbHandle);
             mLnb = null;
         }
+        nativeClose();
     }
 
     /**
@@ -359,12 +362,15 @@ public class Tuner implements AutoCloseable  {
     private native Lnb nativeOpenLnbByHandle(int handle);
     private native Lnb nativeOpenLnbByName(String name);
 
-    private native Descrambler nativeOpenDescrambler();
+    private native Descrambler nativeOpenDescramblerByHandle(int handle);
+    private native Descrambler nativeOpenDemuxByhandle(int handle);
 
     private native DvrRecorder nativeOpenDvrRecorder(long bufferSize);
     private native DvrPlayback nativeOpenDvrPlayback(long bufferSize);
 
     private static native DemuxCapabilities nativeGetDemuxCapabilities();
+
+    private native int nativeClose();
 
 
     /**
@@ -554,6 +560,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestFrontend(request, feHandle);
         if (granted) {
             mFrontendHandle = feHandle[0];
+            mFrontend = nativeOpenFrontendByHandle(mFrontendHandle);
         }
         return granted;
     }
@@ -819,7 +826,7 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
-        return nativeOpenLnbByHandle(mLnbHandle);
+        return mLnb;
     }
 
     /**
@@ -837,7 +844,6 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(name, "LNB name must not be null");
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
         return nativeOpenLnbByName(name);
     }
 
@@ -847,6 +853,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestLnb(request, lnbHandle);
         if (granted) {
             mLnbHandle = lnbHandle[0];
+            mLnb = nativeOpenLnbByHandle(mLnbHandle);
         }
         return granted;
     }
@@ -877,7 +884,7 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     public Descrambler openDescrambler() {
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DESCRAMBLER);
-        return nativeOpenDescrambler();
+        return mDescrambler;
     }
 
     /**
@@ -930,6 +937,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestDemux(request, demuxHandle);
         if (granted) {
             mDemuxHandle = demuxHandle[0];
+            nativeOpenDemuxByhandle(mDemuxHandle);
         }
         return granted;
     }
@@ -940,6 +948,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestDescrambler(request, descramblerHandle);
         if (granted) {
             mDescramblerHandle = descramblerHandle[0];
+            nativeOpenDescramblerByHandle(mDescramblerHandle);
         }
         return granted;
     }
