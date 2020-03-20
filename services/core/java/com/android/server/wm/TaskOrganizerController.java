@@ -67,6 +67,21 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
     private static final int TRANSACT_EFFECTS_CLIENT_CONFIG = 1;
     private static final int TRANSACT_EFFECTS_LIFECYCLE = 1 << 1;
 
+    /**
+     * Masks specifying which configurations task-organizers can control. Incoming transactions
+     * will be filtered to only include these.
+     */
+    private static final int CONTROLLABLE_CONFIGS = ActivityInfo.CONFIG_WINDOW_CONFIGURATION
+                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE;
+    private static final int CONTROLLABLE_WINDOW_CONFIGS = WindowConfiguration.WINDOW_CONFIG_BOUNDS
+                | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
+    /**
+     * Masks specifying which configurations are important to report back to an organizer when
+     * changed.
+     */
+    private static final int REPORT_CONFIGS = CONTROLLABLE_CONFIGS;
+    private static final int REPORT_WINDOW_CONFIGS = CONTROLLABLE_WINDOW_CONFIGS;
+
     private final WindowManagerGlobalLock mGlobalLock;
 
     private class DeathRecipient implements IBinder.DeathRecipient {
@@ -321,11 +336,23 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         if (mTmpTaskInfo == null) {
             mTmpTaskInfo = new RunningTaskInfo();
         }
+        mTmpTaskInfo.configuration.unset();
         task.fillTaskInfo(mTmpTaskInfo);
         boolean changed = lastInfo == null
                 || mTmpTaskInfo.topActivityType != lastInfo.topActivityType
                 || mTmpTaskInfo.isResizable() != lastInfo.isResizable()
                 || mTmpTaskInfo.pictureInPictureParams != lastInfo.pictureInPictureParams;
+        if (!changed) {
+            int cfgChanges = mTmpTaskInfo.configuration.diff(lastInfo.configuration);
+            final int winCfgChanges = (cfgChanges & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0
+                    ? (int) mTmpTaskInfo.configuration.windowConfiguration.diff(
+                            lastInfo.configuration.windowConfiguration,
+                            true /* compareUndefined */) : 0;
+            if ((winCfgChanges & REPORT_WINDOW_CONFIGS) == 0) {
+                cfgChanges &= ~ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
+            }
+            changed = (cfgChanges & REPORT_CONFIGS) != 0;
+        }
         if (!(changed || force)) {
             return;
         }
@@ -480,12 +507,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         final Task task = (Task) container;
         // The "client"-facing API should prevent bad changes; however, just in case, sanitize
         // masks here.
-        int configMask = change.getConfigSetMask();
-        int windowMask = change.getWindowSetMask();
-        configMask &= ActivityInfo.CONFIG_WINDOW_CONFIGURATION
-                | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE;
-        windowMask &= (WindowConfiguration.WINDOW_CONFIG_BOUNDS
-                | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS);
+        final int configMask = change.getConfigSetMask() & CONTROLLABLE_CONFIGS;
+        final int windowMask = change.getWindowSetMask() & CONTROLLABLE_WINDOW_CONFIGS;
         int effects = 0;
         if (configMask != 0) {
             Configuration c = new Configuration(container.getRequestedOverrideConfiguration());
@@ -672,7 +695,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
                                 false /* preserveWindow */);
                         try {
                             for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
-                                haveConfigChanges.valueAt(i).forAllActivities(f);
+                                final WindowContainer wc = haveConfigChanges.valueAt(i);
+                                final Task task = wc.asTask();
+                                final TaskTile tile = task != null ? task.asTile() : null;
+                                if (tile != null) {
+                                    // Special case for tile. Can't override normal forAllActivities
+                                    // because it generates duplicate calls and messes up existing
+                                    // code-paths.
+                                    tile.forAllTileActivities(f);
+                                } else {
+                                    wc.forAllActivities(f);
+                                }
                             }
                         } finally {
                             f.recycle();
