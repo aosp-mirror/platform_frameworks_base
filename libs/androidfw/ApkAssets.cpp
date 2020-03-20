@@ -41,28 +41,85 @@ using base::unique_fd;
 static const std::string kResourcesArsc("resources.arsc");
 
 ApkAssets::ApkAssets(ZipArchiveHandle unmanaged_handle,
-                     const std::string& path,
+                     std::string path,
                      time_t last_mod_time,
                      package_property_t property_flags)
-    : zip_handle_(unmanaged_handle, ::CloseArchive), path_(path), last_mod_time_(last_mod_time),
+    : zip_handle_(unmanaged_handle, ::CloseArchive),
+      path_(std::move(path)),
+      last_mod_time_(last_mod_time),
       property_flags_(property_flags) {
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path, bool system,
-                                                 bool for_loader) {
-  package_property_t flags = (system ? PROPERTY_SYSTEM : 0U) |
-                             (for_loader ? PROPERTY_LOADER : 0U);
-  return LoadImpl({} /*fd*/, path, nullptr, nullptr, flags);
+std::unique_ptr<const ApkAssets> ApkAssets::Load(const std::string& path,
+                                                 const package_property_t flags) {
+  ::ZipArchiveHandle unmanaged_handle;
+  const int32_t result = ::OpenArchive(path.c_str(), &unmanaged_handle);
+  if (result != 0) {
+    LOG(ERROR) << "Failed to open APK '" << path << "' " << ::ErrorCodeString(result);
+    ::CloseArchive(unmanaged_handle);
+    return {};
+  }
+
+  return LoadImpl(unmanaged_handle,  path, nullptr /*idmap_asset*/, nullptr /*loaded_idmap*/,
+                  flags);
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadAsSharedLibrary(const std::string& path,
-                                                                bool system) {
-  package_property_t flags = PROPERTY_DYNAMIC | (system ? PROPERTY_SYSTEM : 0U);
-  return LoadImpl({} /*fd*/, path, nullptr, nullptr, flags);
+std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
+                                                       const std::string& friendly_name,
+                                                       const package_property_t flags,
+                                                       const off64_t offset,
+                                                       const off64_t length) {
+  CHECK(length >= kUnknownLength) << "length must be greater than or equal to " << kUnknownLength;
+  CHECK(length != kUnknownLength || offset == 0) << "offset must be 0 if length is "
+                                                 << kUnknownLength;
+
+  ::ZipArchiveHandle unmanaged_handle;
+  const int32_t result = (length == kUnknownLength)
+      ? ::OpenArchiveFd(fd.release(), friendly_name.c_str(), &unmanaged_handle)
+      : ::OpenArchiveFdRange(fd.release(), friendly_name.c_str(), &unmanaged_handle, length,
+                             offset);
+
+  if (result != 0) {
+    LOG(ERROR) << "Failed to open APK '" << friendly_name << "' through FD with offset " << offset
+               << " and length " << length << ": " << ::ErrorCodeString(result);
+    ::CloseArchive(unmanaged_handle);
+    return {};
+  }
+
+  return LoadImpl(unmanaged_handle, friendly_name, nullptr /*idmap_asset*/,
+                  nullptr /*loaded_idmap*/, flags);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadTable(const std::string& path,
+                                                      const package_property_t flags) {
+  auto resources_asset = CreateAssetFromFile(path);
+  if (!resources_asset) {
+    LOG(ERROR) << "Failed to open ARSC '" << path;
+    return {};
+  }
+
+  return LoadTableImpl(std::move(resources_asset), path, flags);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadTableFromFd(unique_fd fd,
+                                                            const std::string& friendly_name,
+                                                            const package_property_t flags,
+                                                            const off64_t offset,
+                                                            const off64_t length) {
+  auto resources_asset = CreateAssetFromFd(std::move(fd), nullptr /* path */, offset, length);
+  if (!resources_asset) {
+    LOG(ERROR) << "Failed to open ARSC '" << friendly_name << "' through FD with offset " << offset
+               << " and length " << length;
+    return {};
+  }
+
+  return LoadTableImpl(std::move(resources_asset), friendly_name, flags);
 }
 
 std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap_path,
-                                                        bool system) {
+                                                        const package_property_t flags) {
+  CHECK((flags & PROPERTY_LOADER) == 0U) << "Cannot load RROs through loaders";
+
   std::unique_ptr<Asset> idmap_asset = CreateAssetFromFile(idmap_path);
   if (idmap_asset == nullptr) {
     return {};
@@ -77,75 +134,74 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadOverlay(const std::string& idmap
     return {};
   }
 
-  auto apkPath = loaded_idmap->OverlayApkPath();
-  return LoadImpl({} /*fd*/, apkPath,
-                  std::move(idmap_asset),
-                  std::move(loaded_idmap),
-                  PROPERTY_OVERLAY | (system ? PROPERTY_SYSTEM : 0U));
-}
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadFromFd(unique_fd fd,
-                                                       const std::string& friendly_name,
-                                                       bool system, bool force_shared_lib,
-                                                       bool for_loader) {
-  package_property_t flags = (system ? PROPERTY_SYSTEM : 0U) |
-                             (force_shared_lib ? PROPERTY_DYNAMIC : 0U) |
-                             (for_loader ? PROPERTY_LOADER : 0U);
-  return LoadImpl(std::move(fd), friendly_name, nullptr /*idmap_asset*/, nullptr /*loaded_idmap*/,
-                  flags);
-}
-
-std::unique_ptr<const ApkAssets> ApkAssets::LoadArsc(const std::string& path,
-                                                     bool for_loader) {
-  return LoadArscImpl({} /*fd*/, path, for_loader ? PROPERTY_LOADER : 0U);
-}
-
-std::unique_ptr<const ApkAssets> ApkAssets::LoadArsc(unique_fd fd,
-                                                     const std::string& friendly_name,
-                                                     bool for_loader) {
-  return LoadArscImpl(std::move(fd), friendly_name, for_loader ? PROPERTY_LOADER : 0U);
-}
-
-std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
-  unique_fd fd(base::utf8::open(path.c_str(), O_RDONLY | O_BINARY | O_CLOEXEC));
-  if (fd == -1) {
-    LOG(ERROR) << "Failed to open file '" << path << "': " << SystemErrorCodeToString(errno);
-    return {};
-  }
-
-  const off64_t file_len = lseek64(fd, 0, SEEK_END);
-  if (file_len < 0) {
-    LOG(ERROR) << "Failed to get size of file '" << path << "': " << SystemErrorCodeToString(errno);
-    return {};
-  }
-
-  std::unique_ptr<FileMap> file_map = util::make_unique<FileMap>();
-  if (!file_map->create(path.c_str(), fd, 0, static_cast<size_t>(file_len), true /*readOnly*/)) {
-    LOG(ERROR) << "Failed to mmap file '" << path << "': " << SystemErrorCodeToString(errno);
-    return {};
-  }
-  return Asset::createFromUncompressedMap(std::move(file_map), Asset::AccessMode::ACCESS_RANDOM);
-}
-
-std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
-    unique_fd fd, const std::string& path, std::unique_ptr<Asset> idmap_asset,
-    std::unique_ptr<const LoadedIdmap> loaded_idmap, package_property_t property_flags) {
   ::ZipArchiveHandle unmanaged_handle;
-  int32_t result;
-  if (fd >= 0) {
-    result =
-        ::OpenArchiveFd(fd.release(), path.c_str(), &unmanaged_handle, true /*assume_ownership*/);
-  } else {
-    result = ::OpenArchive(path.c_str(), &unmanaged_handle);
-  }
-
+  auto overlay_path = loaded_idmap->OverlayApkPath();
+  const int32_t result = ::OpenArchive(overlay_path.c_str(), &unmanaged_handle);
   if (result != 0) {
-    LOG(ERROR) << "Failed to open APK '" << path << "' " << ::ErrorCodeString(result);
+    LOG(ERROR) << "Failed to open overlay APK '" << overlay_path << "' "
+               << ::ErrorCodeString(result);
     ::CloseArchive(unmanaged_handle);
     return {};
   }
 
-  time_t last_mod_time = getFileModDate(path.c_str());
+  return LoadImpl(unmanaged_handle, overlay_path, std::move(idmap_asset), std::move(loaded_idmap),
+                  flags | PROPERTY_OVERLAY);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadEmpty(const package_property_t flags) {
+  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(nullptr, "empty", -1, flags));
+  loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
+  // Need to force a move for mingw32.
+  return std::move(loaded_apk);
+}
+
+std::unique_ptr<Asset> ApkAssets::CreateAssetFromFile(const std::string& path) {
+  unique_fd fd(base::utf8::open(path.c_str(), O_RDONLY | O_BINARY | O_CLOEXEC));
+  if (!fd.ok()) {
+    LOG(ERROR) << "Failed to open file '" << path << "': " << SystemErrorCodeToString(errno);
+    return {};
+  }
+
+  return CreateAssetFromFd(std::move(fd), path.c_str());
+}
+
+std::unique_ptr<Asset> ApkAssets::CreateAssetFromFd(base::unique_fd fd,
+                                                    const char* path,
+                                                    off64_t offset,
+                                                    off64_t length) {
+  CHECK(length >= kUnknownLength) << "length must be greater than or equal to " << kUnknownLength;
+  CHECK(length != kUnknownLength || offset == 0) << "offset must be 0 if length is "
+                                                 << kUnknownLength;
+  if (length == kUnknownLength) {
+    length = lseek64(fd, 0, SEEK_END);
+    if (length < 0) {
+      LOG(ERROR) << "Failed to get size of file '" << ((path) ? path : "anon") << "': "
+                 << SystemErrorCodeToString(errno);
+      return {};
+    }
+  }
+
+  std::unique_ptr<FileMap> file_map = util::make_unique<FileMap>();
+  if (!file_map->create(path, fd, offset, static_cast<size_t>(length), true /*readOnly*/)) {
+    LOG(ERROR) << "Failed to mmap file '" << ((path) ? path : "anon") << "': "
+               << SystemErrorCodeToString(errno);
+    return {};
+  }
+
+  // If `path` is set, do not pass ownership of the `fd` to the new Asset since
+  // Asset::openFileDescriptor can use `path` to create new file descriptors.
+  return Asset::createFromUncompressedMap(std::move(file_map),
+                                          (path) ? base::unique_fd(-1) : std::move(fd),
+                                          Asset::AccessMode::ACCESS_RANDOM);
+}
+
+std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(ZipArchiveHandle unmanaged_handle,
+                                                     const std::string& path,
+                                                     std::unique_ptr<Asset> idmap_asset,
+                                                     std::unique_ptr<const LoadedIdmap> idmap,
+                                                     package_property_t property_flags) {
+  const time_t last_mod_time = getFileModDate(path.c_str());
 
   // Wrap the handle in a unique_ptr so it gets automatically closed.
   std::unique_ptr<ApkAssets>
@@ -153,7 +209,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
 
   // Find the resource table.
   ::ZipEntry entry;
-  result = ::FindEntry(loaded_apk->zip_handle_.get(), kResourcesArsc, &entry);
+  int32_t result = ::FindEntry(loaded_apk->zip_handle_.get(), kResourcesArsc, &entry);
   if (result != 0) {
     // There is no resources.arsc, so create an empty LoadedArsc and return.
     loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
@@ -173,7 +229,7 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
 
   // Must retain ownership of the IDMAP Asset so that all pointers to its mmapped data remain valid.
   loaded_apk->idmap_asset_ = std::move(idmap_asset);
-  loaded_apk->loaded_idmap_ = std::move(loaded_idmap);
+  loaded_apk->loaded_idmap_ = std::move(idmap);
 
   const StringPiece data(
       reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
@@ -189,24 +245,10 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   return std::move(loaded_apk);
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadArscImpl(unique_fd fd,
-                                                         const std::string& path,
-                                                         package_property_t property_flags) {
-  std::unique_ptr<Asset> resources_asset;
-
-  if (fd >= 0) {
-    resources_asset = std::unique_ptr<Asset>(Asset::createFromFd(fd.release(), nullptr,
-        Asset::AccessMode::ACCESS_BUFFER));
-  } else {
-    resources_asset = CreateAssetFromFile(path);
-  }
-
-  if (resources_asset == nullptr) {
-    LOG(ERROR) << "Failed to open ARSC '" << path;
-    return {};
-  }
-
-  time_t last_mod_time = getFileModDate(path.c_str());
+std::unique_ptr<const ApkAssets> ApkAssets::LoadTableImpl(std::unique_ptr<Asset> resources_asset,
+                                                          const std::string& path,
+                                                          package_property_t property_flags) {
+  const time_t last_mod_time = getFileModDate(path.c_str());
 
   std::unique_ptr<ApkAssets> loaded_apk(
       new ApkAssets(nullptr, path, last_mod_time, property_flags));
@@ -225,13 +267,6 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadArscImpl(unique_fd fd,
   return std::move(loaded_apk);
 }
 
-std::unique_ptr<const ApkAssets> ApkAssets::LoadEmpty(bool for_loader) {
-  std::unique_ptr<ApkAssets> loaded_apk(new ApkAssets(nullptr, "", -1, for_loader));
-  loaded_apk->loaded_arsc_ = LoadedArsc::CreateEmpty();
-  // Need to force a move for mingw32.
-  return std::move(loaded_apk);
-}
-
 std::unique_ptr<Asset> ApkAssets::Open(const std::string& path, Asset::AccessMode mode) const {
   // If this is a resource loader from an .arsc, there will be no zip handle
   if (zip_handle_ == nullptr) {
@@ -244,10 +279,12 @@ std::unique_ptr<Asset> ApkAssets::Open(const std::string& path, Asset::AccessMod
     return {};
   }
 
+  const int fd = ::GetFileDescriptor(zip_handle_.get());
+  const off64_t fd_offset = ::GetFileDescriptorOffset(zip_handle_.get());
   if (entry.method == kCompressDeflated) {
     std::unique_ptr<FileMap> map = util::make_unique<FileMap>();
-    if (!map->create(path_.c_str(), ::GetFileDescriptor(zip_handle_.get()), entry.offset,
-                     entry.compressed_length, true /*readOnly*/)) {
+    if (!map->create(path_.c_str(), fd, fd_offset + entry.offset, entry.compressed_length,
+                     true /*readOnly*/)) {
       LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << path_ << "'";
       return {};
     }
@@ -261,13 +298,18 @@ std::unique_ptr<Asset> ApkAssets::Open(const std::string& path, Asset::AccessMod
     return asset;
   } else {
     std::unique_ptr<FileMap> map = util::make_unique<FileMap>();
-    if (!map->create(path_.c_str(), ::GetFileDescriptor(zip_handle_.get()), entry.offset,
-                     entry.uncompressed_length, true /*readOnly*/)) {
+    if (!map->create(path_.c_str(), fd, fd_offset + entry.offset, entry.uncompressed_length,
+                     true /*readOnly*/)) {
       LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << path_ << "'";
       return {};
     }
 
-    std::unique_ptr<Asset> asset = Asset::createFromUncompressedMap(std::move(map), mode);
+    // TODO: apks created from file descriptors residing in RAM currently cannot open file
+    //  descriptors to the assets they contain. This is because the Asset::openFileDeescriptor uses
+    //  the zip path on disk to create a new file descriptor. This is fixed in a future change
+    //  in the change topic.
+    std::unique_ptr<Asset> asset = Asset::createFromUncompressedMap(std::move(map),
+        unique_fd(-1) /* fd*/, mode);
     if (asset == nullptr) {
       LOG(ERROR) << "Failed to mmap file '" << path << "' in APK '" << path_ << "'";
       return {};
