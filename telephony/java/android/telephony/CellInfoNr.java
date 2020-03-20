@@ -53,6 +53,14 @@ public final class CellInfoNr extends CellInfo {
         mCellSignalStrength = new CellSignalStrengthNr(cil.signalStrength);
     }
 
+    /** @hide */
+    public CellInfoNr(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_5.CellInfoNr cil = ci.ratSpecificInfo.nr();
+        mCellIdentity = new CellIdentityNr(cil.cellIdentityNr);
+        mCellSignalStrength = new CellSignalStrengthNr(cil.signalStrengthNr);
+    }
+
     /**
      * @return a {@link CellIdentityNr} instance.
      */
