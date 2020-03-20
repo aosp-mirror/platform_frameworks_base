@@ -264,6 +264,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.io.IoUtils;
@@ -394,6 +395,7 @@ public class NotificationManagerService extends SystemService {
     private static final long CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK = 128611929L;
 
     private IActivityManager mAm;
+    private ActivityTaskManagerInternal mAtm;
     private ActivityManager mActivityManager;
     private IPackageManager mPackageManager;
     private PackageManager mPackageManagerClient;
@@ -1861,10 +1863,10 @@ public class NotificationManagerService extends SystemService {
             ICompanionDeviceManager companionManager, SnoozeHelper snoozeHelper,
             NotificationUsageStats usageStats, AtomicFile policyFile,
             ActivityManager activityManager, GroupHelper groupHelper, IActivityManager am,
-            UsageStatsManagerInternal appUsageStats, DevicePolicyManagerInternal dpm,
-            IUriGrantsManager ugm, UriGrantsManagerInternal ugmInternal, AppOpsManager appOps,
-            UserManager userManager, NotificationHistoryManager historyManager,
-            StatsManager statsManager) {
+            ActivityTaskManagerInternal atm, UsageStatsManagerInternal appUsageStats,
+            DevicePolicyManagerInternal dpm, IUriGrantsManager ugm,
+            UriGrantsManagerInternal ugmInternal, AppOpsManager appOps, UserManager userManager,
+            NotificationHistoryManager historyManager, StatsManager statsManager) {
         mHandler = handler;
         Resources resources = getContext().getResources();
         mMaxPackageEnqueueRate = Settings.Global.getFloat(getContext().getContentResolver(),
@@ -1874,6 +1876,7 @@ public class NotificationManagerService extends SystemService {
         mAccessibilityManager =
                 (AccessibilityManager) getContext().getSystemService(Context.ACCESSIBILITY_SERVICE);
         mAm = am;
+        mAtm = atm;
         mUgm = ugm;
         mUgmInternal = ugmInternal;
         mPackageManager = packageManager;
@@ -2060,6 +2063,7 @@ public class NotificationManagerService extends SystemService {
                         systemDir, "notification_policy.xml"), "notification-policy"),
                 (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE),
                 getGroupHelper(), ActivityManager.getService(),
+                LocalServices.getService(ActivityTaskManagerInternal.class),
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 LocalServices.getService(DevicePolicyManagerInternal.class),
                 UriGrantsManager.getService(),
@@ -2796,7 +2800,9 @@ public class NotificationManagerService extends SystemService {
                 return;
             }
 
-            if (callback != null && !appIsForeground && !isSystemToast && isCustom) {
+            boolean isAppRenderedToast = (callback != null);
+            if (isAppRenderedToast && isCustom && !isSystemToast
+                    && !isPackageInForegroundForToast(pkg, callingUid)) {
                 boolean block;
                 long id = Binder.clearCallingIdentity();
                 try {
@@ -2872,6 +2878,28 @@ public class NotificationManagerService extends SystemService {
                     Binder.restoreCallingIdentity(callingId);
                 }
             }
+        }
+
+        /**
+         * Implementation note: Our definition of foreground for toasts is an implementation matter
+         * and should strike a balance between functionality and anti-abuse effectiveness. We
+         * currently worry about the following cases:
+         * <ol>
+         *     <li>App with fullscreen activity: Allow toasts
+         *     <li>App behind translucent activity from other app: Block toasts
+         *     <li>App in multi-window: Allow toasts
+         *     <li>App with expanded bubble: Allow toasts
+         *     <li>App posting toasts on onCreate(), onStart(), onResume(): Allow toasts
+         *     <li>App posting toasts on onPause(), onStop(), onDestroy(): Block toasts
+         * </ol>
+         * Checking if the UID has any resumed activities satisfy use-cases above.
+         *
+         * <p>Checking if {@code mActivityManager.getUidImportance(callingUid) ==
+         * IMPORTANCE_FOREGROUND} does not work because it considers the app in foreground if it has
+         * any visible activities, failing case 2 in list above.
+         */
+        private boolean isPackageInForegroundForToast(String pkg, int callingUid) {
+            return mAtm.hasResumedActivity(callingUid);
         }
 
         @Override
