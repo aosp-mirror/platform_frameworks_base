@@ -55,6 +55,17 @@
           "include-filter": "android.appsecurity.cts.PrivilegedUpdateTests"
         }
       ]
+    },
+    {
+      "name": "FrameworksCoreTests",
+      "options": [
+        {
+          "include-filter": "android.content.pm.PackageManagerTests"
+        },
+        {
+            "exclude-annotation": "androidx.test.filters.Suppress"
+        }
+      ]
     }
   ],
   "postsubmit": [
