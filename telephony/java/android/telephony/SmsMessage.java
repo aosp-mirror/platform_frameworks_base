@@ -1198,6 +1198,7 @@ public class SmsMessage {
     /**
      * Returns the recipient address(receiver) of this SMS message in String form or null if
      * unavailable.
+     * {@hide}
      */
     @Nullable
     public String getRecipientAddress() {
