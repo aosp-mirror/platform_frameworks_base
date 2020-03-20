@@ -670,15 +670,19 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         // TODO: remove this toast after feature development is done
-        // If the procstate is foreground service and while-in-use permission is denied, show a
-        // toast message to ask user to file a bugreport so we know how many apps are impacted by
-        // the new background started foreground service while-in-use permission restriction.
+        // For DEBUG_FGS_ALLOW_WHILE_IN_USE, if the procstate is foreground service and while-in-use
+        // permission is denied, show a toast message and generate a WTF log so we know
+        // how many apps are impacted by the new background started foreground service while-in-use
+        // permission restriction.
+        // For DEBUG_FGS_ENFORCE_TYPE, The process has a foreground service that does not have
+        // camera/microphone foregroundServiceType in manifest file, and the process is asking
+        // AppOps for camera/microphone ops, show a toast message and generate a WTF log.
         void maybeShowWhileInUseDebugToast(int op, int mode) {
-            if (state != UID_STATE_FOREGROUND_SERVICE) {
+            if (mode == DEBUG_FGS_ALLOW_WHILE_IN_USE && state != UID_STATE_FOREGROUND_SERVICE) {
                 return;
             }
             final long now = System.currentTimeMillis();
-            if (lastTimeShowDebugToast == 0 ||  now - lastTimeShowDebugToast > 3600000) {
+            if (lastTimeShowDebugToast == 0 ||  now - lastTimeShowDebugToast > 600000) {
                 lastTimeShowDebugToast = now;
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         ActivityManagerInternal::showWhileInUseDebugToast,
