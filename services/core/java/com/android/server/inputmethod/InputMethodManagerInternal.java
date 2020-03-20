@@ -18,6 +18,7 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InputMethodInfo;
 
@@ -92,6 +93,16 @@ public abstract class InputMethodManagerInternal {
     public abstract void registerInputMethodListListener(InputMethodListListener listener);
 
     /**
+     * Transfers input focus from a given input token to that of the IME window.
+     *
+     * @param sourceInputToken The source token.
+     * @param displayId The display hosting the IME window.
+     * @return {@code true} if the transfer is successful.
+     */
+    public abstract boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
+            int displayId);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -123,6 +134,12 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void registerInputMethodListListener(InputMethodListListener listener) {
+                }
+
+                @Override
+                public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
+                        int displayId) {
+                    return false;
                 }
             };
 
