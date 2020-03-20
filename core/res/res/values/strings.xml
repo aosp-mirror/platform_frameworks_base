@@ -5377,7 +5377,7 @@
     </plurals>
 
     <!-- ChooserActivity - No direct share targets are available. [CHAR LIMIT=NONE] -->
-    <string name="chooser_no_direct_share_targets">Direct share not available</string>
+    <string name="chooser_no_direct_share_targets">No recommended people to share with</string>
 
     <!-- ChooserActivity - Alphabetically sorted apps list label. [CHAR LIMIT=NONE] -->
     <string name="chooser_all_apps_button_label">Apps list</string>
