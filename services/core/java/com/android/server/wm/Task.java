@@ -1938,7 +1938,12 @@ class Task extends WindowContainer<WindowContainer> {
         // TODO: Should also take care of Pip mode changes here.
 
         saveLaunchingStateIfNeeded();
-        updateTaskOrganizerState(false /* forceUpdate */);
+        final boolean taskOrgChanged = updateTaskOrganizerState(false /* forceUpdate */);
+        // If the task organizer has changed, then it will already be receiving taskAppeared with
+        // the latest task-info thus the task-info won't have changed.
+        if (!taskOrgChanged && mTaskOrganizer != null) {
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, false /* force */);
+        }
     }
 
     /**
@@ -4043,15 +4048,16 @@ class Task extends WindowContainer<WindowContainer> {
         }
    }
 
-    void setTaskOrganizer(ITaskOrganizer organizer) {
+    boolean setTaskOrganizer(ITaskOrganizer organizer) {
         if (mTaskOrganizer == organizer) {
-            return;
+            return false;
         }
         // Let the old organizer know it has lost control.
         sendTaskVanished();
         mTaskOrganizer = organizer;
         sendTaskAppeared();
         onTaskOrganizerChanged();
+        return true;
     }
 
     // Called on Binder death.
@@ -4068,10 +4074,11 @@ class Task extends WindowContainer<WindowContainer> {
      * @param forceUpdate Updates the task organizer to the one currently specified in the task
      *                    org controller for the task's windowing mode, ignoring the cached
      *                    windowing mode checks.
+     * @return {@code true} if task organizer changed.
      */
-    void updateTaskOrganizerState(boolean forceUpdate) {
+    boolean updateTaskOrganizerState(boolean forceUpdate) {
         if (!isRootTask()) {
-            return;
+            return false;
         }
 
         final int windowingMode = getWindowingMode();
@@ -4080,7 +4087,7 @@ class Task extends WindowContainer<WindowContainer> {
             // with our old organizer. This lets us implement the semantic
             // where SysUI can continue to manage it's old tasks
             // while CTS temporarily takes over the registration.
-            return;
+            return false;
         }
         /*
          * Different windowing modes may be managed by different task organizers. If
@@ -4089,8 +4096,9 @@ class Task extends WindowContainer<WindowContainer> {
          */
         final ITaskOrganizer org =
                 mWmService.mAtmService.mTaskOrganizerController.getTaskOrganizer(windowingMode);
-        setTaskOrganizer(org);
+        final boolean result = setTaskOrganizer(org);
         mLastTaskOrganizerWindowingMode = windowingMode;
+        return result;
     }
 
     private void onTaskOrganizerChanged() {
