@@ -17,6 +17,7 @@
 package com.android.systemui.util;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -40,7 +41,7 @@ public class ProximitySensor {
     private final Sensor mSensor;
     private final AsyncSensorManager mSensorManager;
     private final boolean mUsingBrightnessSensor;
-    private final float mMaxRange;
+    private final float mThreshold;
 
     private SensorEventListener mSensorEventListener = new SensorEventListener() {
         @Override
@@ -59,7 +60,7 @@ public class ProximitySensor {
     @Inject
     public ProximitySensor(Context context, AsyncSensorManager sensorManager) {
         mSensorManager = sensorManager;
-        Sensor sensor = findBrightnessSensor(context, sensorManager);
+        Sensor sensor = findCustomProxSensor(context, sensorManager);
 
         if (sensor == null) {
             mUsingBrightnessSensor = false;
@@ -69,9 +70,13 @@ public class ProximitySensor {
         }
         mSensor = sensor;
         if (mSensor != null) {
-            mMaxRange = mSensor.getMaximumRange();
+            if (mUsingBrightnessSensor) {
+                mThreshold = getBrightnessSensorThreshold(context.getResources());
+            } else {
+                mThreshold = mSensor.getMaximumRange();
+            }
         } else {
-            mMaxRange = 0;
+            mThreshold = 0;
         }
     }
 
@@ -79,8 +84,18 @@ public class ProximitySensor {
         mTag = tag;
     }
 
-    private Sensor findBrightnessSensor(Context context, SensorManager sensorManager) {
-        String sensorType = context.getString(R.string.doze_brightness_sensor_type);
+    /**
+     * Returns a brightness sensor that can be used for proximity purposes.
+     *
+     * @deprecated This method exists for legacy purposes. Use the containing class directly.
+     */
+    @Deprecated
+    public static Sensor findCustomProxSensor(Context context, SensorManager sensorManager) {
+        String sensorType = context.getString(R.string.proximity_sensor_type);
+        if (sensorType.isEmpty()) {
+            return null;
+        }
+
         List<Sensor> sensorList = sensorManager.getSensorList(Sensor.TYPE_ALL);
         Sensor sensor = null;
         for (Sensor s : sensorList) {
@@ -91,6 +106,16 @@ public class ProximitySensor {
         }
 
         return sensor;
+    }
+
+    /**
+     * Returns a threshold value that can be used along with {@link #findCustomProxSensor}
+     *
+     * @deprecated This method exists for legacy purposes. Use the containing class directly.
+     */
+    @Deprecated
+    public static float getBrightnessSensorThreshold(Resources resources) {
+        return resources.getFloat(R.dimen.proximity_sensor_threshold);
     }
 
     /**
@@ -141,11 +166,11 @@ public class ProximitySensor {
     }
 
     private void onSensorEvent(SensorEvent event) {
-        boolean near = event.values[0] < mMaxRange;
         if (mUsingBrightnessSensor) {
-            near = event.values[0] == 0;
+            mNear = event.values[0] <= mThreshold;
+        } else {
+            mNear = event.values[0] < mThreshold;
         }
-        mNear = near;
         mListeners.forEach(proximitySensorListener ->
                 proximitySensorListener.onProximitySensorEvent(
                         new ProximityEvent(mNear, event.timestamp)));

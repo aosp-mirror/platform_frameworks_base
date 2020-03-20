@@ -160,6 +160,12 @@ public final class PlaybackActivityMonitor
                 new AudioPlaybackConfiguration(pic, newPiid,
                         Binder.getCallingUid(), Binder.getCallingPid());
         apc.init();
+        synchronized (mAllowedCapturePolicies) {
+            int uid = apc.getClientUid();
+            if (mAllowedCapturePolicies.containsKey(uid)) {
+                updateAllowedCapturePolicy(apc, mAllowedCapturePolicies.get(uid));
+            }
+        }
         sEventLogger.log(new NewPlayerEvent(apc));
         synchronized(mPlayerLock) {
             mPlayers.put(newPiid, apc);
@@ -169,6 +175,13 @@ public final class PlaybackActivityMonitor
 
     public void playerAttributes(int piid, @NonNull AudioAttributes attr, int binderUid) {
         final boolean change;
+        synchronized (mAllowedCapturePolicies) {
+            if (mAllowedCapturePolicies.containsKey(binderUid)
+                    && attr.getAllowedCapturePolicy() < mAllowedCapturePolicies.get(binderUid)) {
+                attr = new AudioAttributes.Builder(attr)
+                        .setAllowedCapturePolicy(mAllowedCapturePolicies.get(binderUid)).build();
+            }
+        }
         synchronized(mPlayerLock) {
             final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
             if (checkConfigurationCaller(piid, apc, binderUid)) {
@@ -284,6 +297,69 @@ public final class PlaybackActivityMonitor
         }
     }
 
+    /**
+     * A map of uid to capture policy.
+     */
+    private final HashMap<Integer, Integer> mAllowedCapturePolicies =
+            new HashMap<Integer, Integer>();
+
+    /**
+     * Cache allowed capture policy, which specifies whether the audio played by the app may or may
+     * not be captured by other apps or the system.
+     *
+     * @param uid the uid of requested app
+     * @param capturePolicy one of
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_NONE}.
+     */
+    public void setAllowedCapturePolicy(int uid, int capturePolicy) {
+        synchronized (mAllowedCapturePolicies) {
+            if (capturePolicy == AudioAttributes.ALLOW_CAPTURE_BY_ALL) {
+                // When the capture policy is ALLOW_CAPTURE_BY_ALL, it is okay to
+                // remove it from cached capture policy as it is the default value.
+                mAllowedCapturePolicies.remove(uid);
+                return;
+            } else {
+                mAllowedCapturePolicies.put(uid, capturePolicy);
+            }
+        }
+        synchronized (mPlayerLock) {
+            for (AudioPlaybackConfiguration apc : mPlayers.values()) {
+                if (apc.getClientUid() == uid) {
+                    updateAllowedCapturePolicy(apc, capturePolicy);
+                }
+            }
+        }
+    }
+
+    /**
+     * Return the capture policy for given uid.
+     * @param uid the uid to query its cached capture policy.
+     * @return cached capture policy for given uid or AudioAttributes.ALLOW_CAPTURE_BY_ALL
+     *         if there is not cached capture policy.
+     */
+    public int getAllowedCapturePolicy(int uid) {
+        return mAllowedCapturePolicies.getOrDefault(uid, AudioAttributes.ALLOW_CAPTURE_BY_ALL);
+    }
+
+    /**
+     * Return all cached capture policies.
+     */
+    public HashMap<Integer, Integer> getAllAllowedCapturePolicies() {
+        return mAllowedCapturePolicies;
+    }
+
+    private void updateAllowedCapturePolicy(AudioPlaybackConfiguration apc, int capturePolicy) {
+        AudioAttributes attr = apc.getAudioAttributes();
+        if (attr.getAllowedCapturePolicy() >= capturePolicy) {
+            return;
+        }
+        apc.handleAudioAttributesEvent(
+                new AudioAttributes.Builder(apc.getAudioAttributes())
+                        .setAllowedCapturePolicy(capturePolicy).build());
+    }
+
     // Implementation of AudioPlaybackConfiguration.PlayerDeathMonitor
     @Override
     public void playerDeath(int piid) {
@@ -330,6 +406,12 @@ public final class PlaybackActivityMonitor
             pw.println("\n");
             // log
             sEventLogger.dump(pw);
+        }
+        synchronized (mAllowedCapturePolicies) {
+            pw.println("\n  allowed capture policies:");
+            for (HashMap.Entry<Integer, Integer> entry : mAllowedCapturePolicies.entrySet()) {
+                pw.println("  uid: " + entry.getKey() + " policy: " + entry.getValue());
+            }
         }
     }
 

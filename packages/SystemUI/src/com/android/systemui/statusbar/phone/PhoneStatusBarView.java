@@ -46,6 +46,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.Objects;
 
@@ -59,7 +60,6 @@ public class PhoneStatusBarView extends PanelBar {
     StatusBar mBar;
 
     boolean mIsFullyOpenedPanel = false;
-    private final PhoneStatusBarTransitions mBarTransitions;
     private ScrimController mScrimController;
     private float mMinFraction;
     private Runnable mHideExpandedRunnable = new Runnable() {
@@ -72,6 +72,7 @@ public class PhoneStatusBarView extends PanelBar {
     };
     private DarkReceiver mBattery;
     private int mLastOrientation;
+    private int mRotationOrientation;
     @Nullable
     private View mCenterIconSpace;
     @Nullable
@@ -82,17 +83,13 @@ public class PhoneStatusBarView extends PanelBar {
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
      */
     private int mCutoutSideNudge = 0;
+    private int mStatusBarHeight;
     private boolean mHeadsUpVisible;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mBarTransitions = new PhoneStatusBarTransitions(this);
         mCommandQueue = getComponent(context, CommandQueue.class);
-    }
-
-    public BarTransitions getBarTransitions() {
-        return mBarTransitions;
     }
 
     public void setBar(StatusBar bar) {
@@ -105,7 +102,6 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public void onFinishInflate() {
-        mBarTransitions.init();
         mBattery = findViewById(R.id.battery);
         mCutoutSpace = findViewById(R.id.cutout_space_view);
         mCenterIconSpace = findViewById(R.id.centered_icon_area);
@@ -162,6 +158,7 @@ public class PhoneStatusBarView extends PanelBar {
                 changed = true;
                 mLastOrientation = newOrientation;
             }
+            mRotationOrientation = RotationUtils.getExactRotation(mContext);
         }
 
         if (!Objects.equals(getRootWindowInsets().getDisplayCutout(), mDisplayCutout)) {
@@ -296,14 +293,14 @@ public class PhoneStatusBarView extends PanelBar {
                 R.dimen.display_cutout_margin_consumption);
 
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
-        layoutParams.height = getResources().getDimensionPixelSize(
-                R.dimen.status_bar_height);
+        mStatusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
+        layoutParams.height = mStatusBarHeight;
         setLayoutParams(layoutParams);
     }
 
     private void updateLayoutForCutout() {
         Pair<Integer, Integer> cornerCutoutMargins = cornerCutoutMargins(mDisplayCutout,
-                getDisplay());
+                getDisplay(), mRotationOrientation, mStatusBarHeight);
         updateCutoutLocation(cornerCutoutMargins);
         updateSafeInsets(cornerCutoutMargins);
     }
@@ -339,15 +336,13 @@ public class PhoneStatusBarView extends PanelBar {
         // or letterboxing from the right or left sides.
 
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
-        if (mDisplayCutout == null || mDisplayCutout.isEmpty()
-                || mLastOrientation != ORIENTATION_PORTRAIT || cornerCutoutMargins == null) {
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty() || cornerCutoutMargins == null) {
             lp.leftMargin = 0;
             lp.rightMargin = 0;
             return;
         }
-
-        lp.leftMargin = Math.max(lp.leftMargin, cornerCutoutMargins.first);
-        lp.rightMargin = Math.max(lp.rightMargin, cornerCutoutMargins.second);
+        lp.leftMargin = cornerCutoutMargins.first;
+        lp.rightMargin = cornerCutoutMargins.second;
 
         // If we're already inset enough (e.g. on the status bar side), we can have 0 margin
         WindowInsets insets = getRootWindowInsets();
@@ -361,8 +356,19 @@ public class PhoneStatusBarView extends PanelBar {
         }
     }
 
+    /**
+     * Returns a Pair of integers where
+     *  - Pair.first is the left margin inset
+     *  - Pair.second is the right margin inset
+     *  This method always assumes the cutout is on the top when the device is in portrait mode.
+     */
     public static Pair<Integer, Integer> cornerCutoutMargins(DisplayCutout cutout,
             Display display) {
+        return cornerCutoutMargins(cutout, display, RotationUtils.ROTATION_NONE, -1);
+    }
+
+    private static Pair<Integer, Integer> cornerCutoutMargins(DisplayCutout cutout,
+            Display display, int rotationOrientation, int statusBarHeight) {
         if (cutout == null) {
             return null;
         }
@@ -370,14 +376,33 @@ public class PhoneStatusBarView extends PanelBar {
         display.getRealSize(size);
 
         Rect bounds = new Rect();
-        boundsFromDirection(cutout, Gravity.TOP, bounds);
+        switch (rotationOrientation) {
+            case RotationUtils.ROTATION_LANDSCAPE:
+                boundsFromDirection(cutout, Gravity.LEFT, bounds);
+                break;
+            case RotationUtils.ROTATION_SEASCAPE:
+                boundsFromDirection(cutout, Gravity.RIGHT, bounds);
+                break;
+            case RotationUtils.ROTATION_NONE:
+                boundsFromDirection(cutout, Gravity.TOP, bounds);
+                break;
+            case RotationUtils.ROTATION_UPSIDE_DOWN:
+                // we assume the cutout is always on top in portrait mode
+                return null;
+        }
+
+        if (statusBarHeight >= 0 && bounds.top > statusBarHeight) {
+            return null;
+        }
 
         if (bounds.left <= 0) {
             return new Pair<>(bounds.right, 0);
         }
+
         if (bounds.right >= size.x) {
             return new Pair<>(0, size.x - bounds.left);
         }
+
         return null;
     }
 

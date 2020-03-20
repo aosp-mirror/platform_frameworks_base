@@ -1717,6 +1717,9 @@
          This feature should be disabled for most devices. -->
     <integer name="config_virtualKeyQuietTimeMillis">0</integer>
 
+    <!-- Flag indicating whether system user specific blacklist/whitelist is supported -->
+    <bool name="config_systemUserPackagesBlacklistSupported">false</bool>
+
     <!-- A list of potential packages, in priority order, that may contain an
          ephemeral resolver. Each package will be be queried for a component
          that has been granted the PACKAGE_EPHEMERAL_AGENT permission.
@@ -4368,4 +4371,11 @@
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- Boolean indicating that the system will use autoSuspend. If set to false, autoSuspend
+         is not used and the system will only suspend upon an explicit request. -->
+    <bool translatable="false" name="config_enableAutoSuspend">true</bool>
+
+    <!-- Class name of the custom country detector to be used. -->
+    <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
 </resources>

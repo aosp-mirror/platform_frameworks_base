@@ -3444,7 +3444,7 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG =
-            "data_switch_validation_min_gap_LONG";
+            "data_switch_validation_min_gap_long";
 
     /**
     * A boolean property indicating whether this subscription should be managed as an opportunistic

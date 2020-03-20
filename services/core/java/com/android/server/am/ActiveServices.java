@@ -3178,8 +3178,11 @@ public final class ActiveServices {
                 }
             }
 
-            // If unbound while waiting to start, remove the pending service
-            mPendingServices.remove(s);
+            // If unbound while waiting to start and there is no connection left in this service,
+            // remove the pending service
+            if (s.getConnections().isEmpty()) {
+                mPendingServices.remove(s);
+            }
 
             if ((c.flags&Context.BIND_AUTO_CREATE) != 0) {
                 boolean hasAutoCreate = s.hasAutoCreateConnections();

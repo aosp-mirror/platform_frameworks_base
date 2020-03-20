@@ -30,8 +30,8 @@
               android:background="?attr/selectableItemBackgroundBorderless">
 
     <ImageView android:id="@+id/icon"
-               android:layout_width="@dimen/resolver_icon_size"
-               android:layout_height="@dimen/resolver_icon_size"
+               android:layout_width="@dimen/resolver_grid_icon_size"
+               android:layout_height="@dimen/resolver_grid_icon_size"
                android:scaleType="fitCenter" />
 
     <!-- Size manually tuned to match specs -->

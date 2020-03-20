@@ -208,6 +208,7 @@ import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.ConditionVariable;
 import android.os.Debug;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -1019,6 +1020,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private File mCacheDir;
 
     private Future<?> mPrepareAppDataFuture;
+
+    private final ConditionVariable mBlockDeleteOnUserRemoveForTest = new ConditionVariable(true);
 
     private static class IFVerificationParams {
         PackageParser.Package pkg;
@@ -2359,33 +2362,59 @@ public class PackageManagerService extends IPackageManager.Stub
         return m;
     }
 
+    private boolean isSystemUserPackagesBlacklistSupported() {
+        return Resources.getSystem().getBoolean(
+              R.bool.config_systemUserPackagesBlacklistSupported);
+    }
+
     private void enableSystemUserPackages() {
-        if (!UserManager.isSplitSystemUser()) {
+        if (!isSystemUserPackagesBlacklistSupported()) {
+            Log.i(TAG, "Skipping system user blacklist since "
+                    + "config_systemUserPackagesBlacklistSupported is false");
             return;
         }
-        // For system user, enable apps based on the following conditions:
-        // - app is whitelisted or belong to one of these groups:
-        //   -- system app which has no launcher icons
-        //   -- system app which has INTERACT_ACROSS_USERS permission
-        //   -- system IME app
-        // - app is not in the blacklist
-        AppsQueryHelper queryHelper = new AppsQueryHelper(this);
+
+        boolean isHeadlessSystemUserMode = UserManager.isHeadlessSystemUserMode();
+        if (!isHeadlessSystemUserMode && !UserManager.isSplitSystemUser()) {
+            Log.i(TAG, "Skipping system user blacklist on 'regular' device type");
+            return;
+        }
+
+        Log.i(TAG, "blacklisting packages for system user");
+
         Set<String> enableApps = new ArraySet<>();
-        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
-                | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM
-                | AppsQueryHelper.GET_IMES, /* systemAppsOnly */ true, UserHandle.SYSTEM));
-        ArraySet<String> wlApps = SystemConfig.getInstance().getSystemUserWhitelistedApps();
-        enableApps.addAll(wlApps);
-        enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER,
-                /* systemAppsOnly */ false, UserHandle.SYSTEM));
-        ArraySet<String> blApps = SystemConfig.getInstance().getSystemUserBlacklistedApps();
-        enableApps.removeAll(blApps);
-        Log.i(TAG, "Applications installed for system user: " + enableApps);
+        AppsQueryHelper queryHelper = new AppsQueryHelper(this);
         List<String> allAps = queryHelper.queryApps(0, /* systemAppsOnly */ false,
                 UserHandle.SYSTEM);
+
+        if (isHeadlessSystemUserMode) {
+            enableApps.addAll(allAps);
+        } else {
+            // For split system user, select apps based on the following conditions:
+            //   -- system app which has no launcher icons
+            //   -- system app which has INTERACT_ACROSS_USERS permission
+            //   -- system IME app
+            enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_NON_LAUNCHABLE_APPS
+                    | AppsQueryHelper.GET_APPS_WITH_INTERACT_ACROSS_USERS_PERM
+                    | AppsQueryHelper.GET_IMES, /* systemAppsOnly */ true, UserHandle.SYSTEM));
+            enableApps.addAll(queryHelper.queryApps(AppsQueryHelper.GET_REQUIRED_FOR_SYSTEM_USER,
+                    /* systemAppsOnly */ false, UserHandle.SYSTEM));
+
+            // Apply whitelist for split system user
+            ArraySet<String> whitelistedSystemUserApps = SystemConfig.getInstance()
+                    .getSystemUserWhitelistedApps();
+            enableApps.addAll(whitelistedSystemUserApps);
+            Log.i(TAG, "Whitelisted packages: " + whitelistedSystemUserApps);
+        }
+        // Apply blacklist for split system user/headless system user
+        ArraySet<String> blacklistedSystemUserApps = SystemConfig.getInstance()
+                .getSystemUserBlacklistedApps();
+        enableApps.removeAll(blacklistedSystemUserApps);
+        Log.i(TAG, "Blacklisted packages: " + blacklistedSystemUserApps);
+
         final int allAppsSize = allAps.size();
         synchronized (mPackages) {
-            for (int i = 0; i < allAppsSize; i++) {
+            for  (int i = 0; i < allAppsSize; i++) {
                 String pName = allAps.get(i);
                 PackageSetting pkgSetting = mSettings.mPackages.get(pName);
                 // Should not happen, but we shouldn't be failing if it does
@@ -3004,8 +3033,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
             mWellbeingPackage = getWellbeingPackageName();
             mDocumenterPackage = getDocumenterPackageName();
-            mConfiguratorPackage =
-                    mContext.getString(R.string.config_deviceConfiguratorPackageName);
+            mConfiguratorPackage = getDeviceConfiguratorPackageName();
             mAppPredictionServicePackage = getAppPredictionServicePackageName();
             mIncidentReportApproverPackage = getIncidentReportApproverPackageName();
             mTelephonyPackages = getTelephonyPackageNames();
@@ -17556,36 +17584,48 @@ public class PackageManagerService extends IPackageManager.Stub
         int count = 0;
         final String packageName = pkg.packageName;
 
+        boolean handlesWebUris = false;
+        final boolean alreadyVerified;
         synchronized (mPackages) {
             // If this is a new install and we see that we've already run verification for this
             // package, we have nothing to do: it means the state was restored from backup.
-            if (!replacing) {
-                IntentFilterVerificationInfo ivi =
-                        mSettings.getIntentFilterVerificationLPr(packageName);
-                if (ivi != null) {
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.i(TAG, "Package " + packageName+ " already verified: status="
-                                + ivi.getStatusString());
-                    }
-                    return;
+            final IntentFilterVerificationInfo ivi =
+                    mSettings.getIntentFilterVerificationLPr(packageName);
+            alreadyVerified = (ivi != null);
+            if (!replacing && alreadyVerified) {
+                if (DEBUG_DOMAIN_VERIFICATION) {
+                    Slog.i(TAG, "Package " + packageName + " already verified: status="
+                            + ivi.getStatusString());
                 }
+                return;
             }
 
-            // If any filters need to be verified, then all need to be.
+            // If any filters need to be verified, then all need to be.  In addition, we need to
+            // know whether an updating app has any web navigation intent filters, to re-
+            // examine handling policy even if not re-verifying.
             boolean needToVerify = false;
             for (PackageParser.Activity a : pkg.activities) {
                 for (ActivityIntentInfo filter : a.intents) {
+                    if (filter.handlesWebUris(true)) {
+                        handlesWebUris = true;
+                    }
                     if (filter.needsVerification() && needsNetworkVerificationLPr(filter)) {
                         if (DEBUG_DOMAIN_VERIFICATION) {
                             Slog.d(TAG,
                                     "Intent filter needs verification, so processing all filters");
                         }
                         needToVerify = true;
+                        // It's safe to break out here because filter.needsVerification()
+                        // can only be true if filter.handlesWebUris(true) returns true, so
+                        // we've already noted that.
                         break;
                     }
                 }
             }
 
+            // Note whether this app publishes any web navigation handling support at all,
+            // and whether there are any web-nav filters that fit the profile for running
+            // a verification pass now.
             if (needToVerify) {
                 final int verificationId = mIntentFilterVerificationToken++;
                 for (PackageParser.Activity a : pkg.activities) {
@@ -17603,13 +17643,23 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (count > 0) {
+            // count > 0 means that we're running a full verification pass
             if (DEBUG_DOMAIN_VERIFICATION) Slog.d(TAG, "Starting " + count
                     + " IntentFilter verification" + (count > 1 ? "s" : "")
                     +  " for userId:" + userId);
             mIntentFilterVerifier.startVerifications(userId);
+        } else if (alreadyVerified && handlesWebUris) {
+            // App used autoVerify in the past, no longer does, but still handles web
+            // navigation starts.
+            if (DEBUG_DOMAIN_VERIFICATION) {
+                Slog.d(TAG, "App changed web filters but no longer verifying - resetting policy");
+            }
+            synchronized (mPackages) {
+                clearIntentFilterVerificationsLPw(packageName, userId);
+            }
         } else {
             if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(TAG, "No filters or not all autoVerify for " + packageName);
+                Slog.d(TAG, "No web filters or no prior verify policy for " + packageName);
             }
         }
     }
@@ -20515,7 +20565,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String getSystemTextClassifierPackageName() {
-        return mContext.getString(R.string.config_defaultTextClassifierPackage);
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_defaultTextClassifierPackage));
     }
 
     @Override
@@ -20525,7 +20576,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (flattenedComponentName != null) {
             ComponentName componentName = ComponentName.unflattenFromString(flattenedComponentName);
             if (componentName != null && componentName.getPackageName() != null) {
-                return componentName.getPackageName();
+                return ensureSystemPackageName(componentName.getPackageName());
             }
         }
         return null;
@@ -20550,9 +20601,15 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @Nullable
+    private String getDeviceConfiguratorPackageName() {
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_deviceConfiguratorPackageName));
+    }
+
     @Override
     public String getWellbeingPackageName() {
-        return mContext.getString(R.string.config_defaultWellbeingPackage);
+        return ensureSystemPackageName(mContext.getString(R.string.config_defaultWellbeingPackage));
     }
 
     @Override
@@ -20567,7 +20624,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (appPredictionServiceComponentName == null) {
             return null;
         }
-        return appPredictionServiceComponentName.getPackageName();
+        return ensureSystemPackageName(appPredictionServiceComponentName.getPackageName());
     }
 
     @Override
@@ -20584,11 +20641,33 @@ public class PackageManagerService extends IPackageManager.Stub
         if (systemCaptionsServiceComponentName == null) {
             return null;
         }
-        return systemCaptionsServiceComponentName.getPackageName();
+        return ensureSystemPackageName(systemCaptionsServiceComponentName.getPackageName());
     }
 
     public String getIncidentReportApproverPackageName() {
-        return mContext.getString(R.string.config_incidentReportApproverPackage);
+        return ensureSystemPackageName(mContext.getString(
+                R.string.config_incidentReportApproverPackage));
+    }
+
+    @Nullable
+    private String ensureSystemPackageName(@Nullable String packageName) {
+        if (packageName == null) {
+            return null;
+        }
+        long token = Binder.clearCallingIdentity();
+        try {
+            if (getPackageInfo(packageName, MATCH_FACTORY_ONLY, UserHandle.USER_SYSTEM) == null) {
+                PackageInfo packageInfo = getPackageInfo(packageName, 0, UserHandle.USER_SYSTEM);
+                if (packageInfo != null) {
+                    EventLog.writeEvent(0x534e4554, "145981139", packageInfo.applicationInfo.uid,
+                            "");
+                }
+                return null;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+        return packageName;
     }
 
     @Override
@@ -21646,6 +21725,18 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
                 mSettings.dumpPackagesLPr(pw, packageName, permissionNames, dumpState, checkin);
+
+                boolean systemUserPackagesBlacklistSupported =
+                        isSystemUserPackagesBlacklistSupported();
+                pw.println("isSystemUserPackagesBlacklistSupported: "
+                        + systemUserPackagesBlacklistSupported);
+                if (systemUserPackagesBlacklistSupported) {
+                    SystemConfig sysconfig = SystemConfig.getInstance();
+                    dumpPackagesList(pw, "  ", "whitelist",
+                            sysconfig.getSystemUserWhitelistedApps());
+                    dumpPackagesList(pw, "  ", "blacklist",
+                            sysconfig.getSystemUserBlacklistedApps());
+                }
             }
 
             if (dumpState.isDumping(DumpState.DUMP_SHARED_USERS)) {
@@ -21752,6 +21843,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
         if (!checkin && dumpState.isDumping(DumpState.DUMP_APEX)) {
             mApexManager.dump(pw, packageName);
+        }
+    }
+
+    private void dumpPackagesList(PrintWriter pw, String prefix, String name,
+            ArraySet<String> list) {
+        pw.print(prefix); pw.print(name); pw.print(": ");
+        int size = list.size();
+        if (size == 0) {
+            pw.println("empty");
+            return;
+        }
+        pw.print(size); pw.println(" packages");
+        String prefix2 = prefix + "  ";
+        for (int i = 0; i < size; i++) {
+            pw.print(prefix2); pw.println(list.valueAt(i));
         }
     }
 
@@ -23094,8 +23200,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.i(TAG, "  Removing package " + packageName);
                 }
                 //end run
-                mHandler.post(() -> deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
-                        userHandle, 0));
+                mHandler.post(() -> {
+                    if (!mBlockDeleteOnUserRemoveForTest.block(30000 /* 30 seconds*/)) {
+                        mBlockDeleteOnUserRemoveForTest.open();
+                    }
+                    deletePackageX(packageName, PackageManager.VERSION_CODE_HIGHEST,
+                            userHandle, 0);
+                });
             }
         }
     }
@@ -24464,6 +24575,16 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
             }
+        }
+
+        @Override
+        public void notifyingOnNextUserRemovalForTest() {
+            mBlockDeleteOnUserRemoveForTest.close();
+        }
+
+        @Override
+        public void userRemovedForTest() {
+            mBlockDeleteOnUserRemoveForTest.open();
         }
     }
 

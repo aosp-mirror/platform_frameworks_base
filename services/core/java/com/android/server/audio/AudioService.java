@@ -1049,6 +1049,27 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        // Restore capture policies
+        synchronized (mPlaybackMonitor) {
+            HashMap<Integer, Integer> allowedCapturePolicies =
+                    mPlaybackMonitor.getAllAllowedCapturePolicies();
+            for (HashMap.Entry<Integer, Integer> entry : allowedCapturePolicies.entrySet()) {
+                int result = AudioSystem.setAllowedCapturePolicy(
+                        entry.getKey(),
+                        AudioAttributes.capturePolicyToFlags(entry.getValue(), 0x0));
+                if (result != AudioSystem.AUDIO_STATUS_OK) {
+                    Log.e(TAG, "Failed to restore capture policy, uid: "
+                            + entry.getKey() + ", capture policy: " + entry.getValue()
+                            + ", result: " + result);
+                    // When restoring capture policy failed, set the capture policy as
+                    // ALLOW_CAPTURE_BY_ALL, which will result in removing the cached
+                    // capture policy in PlaybackActivityMonitor.
+                    mPlaybackMonitor.setAllowedCapturePolicy(
+                            entry.getKey(), AudioAttributes.ALLOW_CAPTURE_BY_ALL);
+                }
+            }
+        }
+
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
         AudioSystem.setParameters("restarting=false");
@@ -2811,10 +2832,6 @@ public class AudioService extends IAudioService.Stub
                 setSystemAudioMute(mute);
                 AudioSystem.setMasterMute(mute);
                 sendMasterMuteUpdate(mute, flags);
-
-                Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
-                intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, mute);
-                sendBroadcastToAll(intent);
             }
         }
     }
@@ -7296,6 +7313,43 @@ public class AudioService extends IAudioService.Stub
 
     public void releasePlayer(int piid) {
         mPlaybackMonitor.releasePlayer(piid, Binder.getCallingUid());
+    }
+
+    /**
+     * Specifies whether the audio played by this app may or may not be captured by other apps or
+     * the system.
+     *
+     * @param capturePolicy one of
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_NONE}.
+     * @return AudioSystem.AUDIO_STATUS_OK if set allowed capture policy succeed.
+     * @throws IllegalArgumentException if the argument is not a valid value.
+     */
+    public int setAllowedCapturePolicy(int capturePolicy) {
+        int callingUid = Binder.getCallingUid();
+        int flags = AudioAttributes.capturePolicyToFlags(capturePolicy, 0x0);
+        final long identity = Binder.clearCallingIdentity();
+        synchronized (mPlaybackMonitor) {
+            int result = AudioSystem.setAllowedCapturePolicy(callingUid, flags);
+            if (result == AudioSystem.AUDIO_STATUS_OK) {
+                mPlaybackMonitor.setAllowedCapturePolicy(callingUid, capturePolicy);
+            }
+            Binder.restoreCallingIdentity(identity);
+            return result;
+        }
+    }
+
+    /**
+     * Return the capture policy.
+     * @return the cached capture policy for the calling uid.
+     */
+    public int getAllowedCapturePolicy() {
+        int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        int capturePolicy = mPlaybackMonitor.getAllowedCapturePolicy(callingUid);
+        Binder.restoreCallingIdentity(identity);
+        return capturePolicy;
     }
 
     //======================

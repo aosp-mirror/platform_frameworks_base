@@ -195,20 +195,32 @@ public class AppOpsControllerImpl implements AppOpsController,
             mNotedItems.remove(item);
             if (DEBUG) Log.w(TAG, "Removed item: " + item.toString());
         }
-        notifySuscribers(code, uid, packageName, false);
+        boolean active;
+        // Check if the item is also active
+        synchronized (mActiveItems) {
+            active = getAppOpItem(mActiveItems, code, uid, packageName) != null;
+        }
+        if (!active) {
+            notifySuscribers(code, uid, packageName, false);
+        }
     }
 
-    private void addNoted(int code, int uid, String packageName) {
+    private boolean addNoted(int code, int uid, String packageName) {
         AppOpItem item;
+        boolean createdNew = false;
         synchronized (mNotedItems) {
             item = getAppOpItem(mNotedItems, code, uid, packageName);
             if (item == null) {
                 item = new AppOpItem(code, uid, packageName, System.currentTimeMillis());
                 mNotedItems.add(item);
                 if (DEBUG) Log.w(TAG, "Added item: " + item.toString());
+                createdNew = true;
             }
         }
+        // We should keep this so we make sure it cannot time out.
+        mBGHandler.removeCallbacksAndMessages(item);
         mBGHandler.scheduleRemoval(item, NOTED_OP_TIME_DELAY_MS);
+        return createdNew;
     }
 
     /**
@@ -255,23 +267,46 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     @Override
     public void onOpActiveChanged(int code, int uid, String packageName, boolean active) {
-        if (updateActives(code, uid, packageName, active)) {
-            notifySuscribers(code, uid, packageName, active);
+        if (DEBUG) {
+            Log.w(TAG, String.format("onActiveChanged(%d,%d,%s,%s", code, uid, packageName,
+                    Boolean.toString(active)));
+        }
+        boolean activeChanged = updateActives(code, uid, packageName, active);
+        if (!activeChanged) return; // early return
+        // Check if the item is also noted, in that case, there's no update.
+        boolean alsoNoted;
+        synchronized (mNotedItems) {
+            alsoNoted = getAppOpItem(mNotedItems, code, uid, packageName) != null;
+        }
+        // If active is true, we only send the update if the op is not actively noted (already true)
+        // If active is false, we only send the update if the op is not actively noted (prevent
+        // early removal)
+        if (!alsoNoted) {
+            mBGHandler.post(() -> notifySuscribers(code, uid, packageName, active));
         }
     }
 
     @Override
     public void onOpNoted(int code, int uid, String packageName, int result) {
         if (DEBUG) {
-            Log.w(TAG, "Op: " + code + " with result " + AppOpsManager.MODE_NAMES[result]);
+            Log.w(TAG, "Noted op: " + code + " with result "
+                    + AppOpsManager.MODE_NAMES[result] + " for package " + packageName);
         }
         if (result != AppOpsManager.MODE_ALLOWED) return;
-        addNoted(code, uid, packageName);
-        notifySuscribers(code, uid, packageName, true);
+        boolean notedAdded = addNoted(code, uid, packageName);
+        if (!notedAdded) return; // early return
+        boolean alsoActive;
+        synchronized (mActiveItems) {
+            alsoActive = getAppOpItem(mActiveItems, code, uid, packageName) != null;
+        }
+        if (!alsoActive) {
+            mBGHandler.post(() -> notifySuscribers(code, uid, packageName, true));
+        }
     }
 
     private void notifySuscribers(int code, int uid, String packageName, boolean active) {
         if (mCallbacksByCode.containsKey(code)) {
+            if (DEBUG) Log.d(TAG, "Notifying of change in package " + packageName);
             for (Callback cb: mCallbacksByCode.get(code)) {
                 cb.onActiveStateChanged(code, uid, packageName, active);
             }
@@ -295,7 +330,7 @@ public class AppOpsControllerImpl implements AppOpsController,
 
     }
 
-    protected final class H extends Handler {
+    protected class H extends Handler {
         H(Looper looper) {
             super(looper);
         }

@@ -157,7 +157,6 @@ public class ExternalVibration implements Parcelable {
         out.writeInt(mUid);
         out.writeString(mPkg);
         writeAudioAttributes(mAttrs, out, flags);
-        out.writeParcelable(mAttrs, flags);
         out.writeStrongBinder(mController.asBinder());
         out.writeStrongBinder(mToken);
     }

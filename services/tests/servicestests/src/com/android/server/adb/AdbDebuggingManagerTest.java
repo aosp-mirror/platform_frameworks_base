@@ -673,28 +673,27 @@ public final class AdbDebuggingManagerTest {
     }
 
     @Test
-    public void testAdbKeyStore_removeKey() throws Exception {
-        // Accept the test key with the 'Always allow' option selected.
-        runAdbTest(TEST_KEY_1, true, true, false);
-        runAdbTest(TEST_KEY_2, true, true, false);
+    public void testClearAuthorizationsBeforeAdbEnabled() throws Exception {
+        // The adb key store is not instantiated until adb is enabled; however if the user attempts
+        // to clear the adb authorizations when adb is disabled after a boot a NullPointerException
+        // was thrown as deleteKeyStore is invoked against the key store. This test ensures the
+        // key store can be successfully cleared when adb is disabled.
+        mHandler = mManager.new AdbDebuggingHandler(FgThread.get().getLooper());
 
-        // Set the connection time to 0 to restore the original behavior.
-        setAllowedConnectionTime(0);
+        clearKeyStore();
+    }
 
-        // Verify that the key is in the adb_keys file to ensure subsequent connections are
-        // automatically allowed by adbd.
-        persistKeyStore();
-        assertTrue("The key was not in the adb_keys file after persisting the keystore",
-                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
-        assertTrue("The key was not in the adb_keys file after persisting the keystore",
-                isKeyInFile(TEST_KEY_2, mAdbKeyFile));
+    @Test
+    public void testClearAuthorizationsDeletesKeyFiles() throws Exception {
+        mAdbKeyFile.createNewFile();
+        mAdbKeyXmlFile.createNewFile();
 
-        // Now remove one of the keys and make sure the other key is still there
-        mKeyStore.removeKey(TEST_KEY_1);
-        assertFalse("The key was still in the adb_keys file after removing the key",
-                isKeyInFile(TEST_KEY_1, mAdbKeyFile));
-        assertTrue("The key was not in the adb_keys file after removing a different key",
-                isKeyInFile(TEST_KEY_2, mAdbKeyFile));
+        clearKeyStore();
+
+        assertFalse("The adb key file should have been deleted after revocation of the grants",
+                mAdbKeyFile.exists());
+        assertFalse("The adb xml key file should have been deleted after revocation of the grants",
+                mAdbKeyXmlFile.exists());
     }
 
     /**

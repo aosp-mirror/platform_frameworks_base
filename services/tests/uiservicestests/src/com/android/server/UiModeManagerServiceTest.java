@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -66,12 +67,14 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     TwilightManager mTwilightManager;
     @Mock
     PowerManager.WakeLock mWakeLock;
+    @Mock
+    PowerManager mPowerManager;
     private Set<BroadcastReceiver> mScreenOffRecievers;
 
     @Before
     public void setUp() {
         mUiManagerService = new UiModeManagerService(mContext, mWindowManager, mWakeLock,
-                mTwilightManager, true);
+                mTwilightManager, mPowerManager, true);
         mScreenOffRecievers = new HashSet<>();
         mService = mUiManagerService.getService();
         when(mContext.checkCallingOrSelfPermission(anyString()))

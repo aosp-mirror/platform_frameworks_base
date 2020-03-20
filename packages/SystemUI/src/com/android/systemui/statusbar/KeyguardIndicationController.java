@@ -166,7 +166,8 @@ public class KeyguardIndicationController implements StateListener,
         mStatusBarStateController = statusBarStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDockManager = dockManager;
-        mDockManager.addAlignmentStateListener(this::handleAlignStateChanged);
+        mDockManager.addAlignmentStateListener(
+                alignState -> mHandler.post(() -> handleAlignStateChanged(alignState)));
         // lock icon is not used on all form factors.
         if (mLockIcon != null) {
             mLockIcon.setOnLongClickListener(this::handleLockLongClick);
