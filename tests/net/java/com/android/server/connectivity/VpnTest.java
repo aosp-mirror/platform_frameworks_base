@@ -28,11 +28,11 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
-import static android.net.RouteInfo.RTN_UNREACHABLE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -43,6 +43,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,21 +59,28 @@ import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
+import android.net.Ikev2VpnProfile;
+import android.net.InetAddresses;
 import android.net.IpPrefix;
+import android.net.IpSecManager;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo.DetailedState;
 import android.net.RouteInfo;
 import android.net.UidRange;
+import android.net.VpnManager;
 import android.net.VpnService;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.INetworkManagementService;
 import android.os.Looper;
-import android.os.SystemClock;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
+import android.security.Credentials;
+import android.security.KeyStore;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -81,6 +89,8 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnProfile;
+import com.android.server.IpSecService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -91,8 +101,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -124,6 +132,11 @@ public class VpnTest {
         managedProfileA.profileGroupId = primaryUser.id;
     }
 
+    static final String TEST_VPN_PKG = "com.dummy.vpn";
+    private static final String TEST_VPN_SERVER = "1.2.3.4";
+    private static final String TEST_VPN_IDENTITY = "identity";
+    private static final byte[] TEST_VPN_PSK = "psk".getBytes();
+
     /**
      * Names and UIDs for some fake packages. Important points:
      *  - UID is ordered increasing.
@@ -147,25 +160,45 @@ public class VpnTest {
     @Mock private AppOpsManager mAppOps;
     @Mock private NotificationManager mNotificationManager;
     @Mock private Vpn.SystemServices mSystemServices;
+    @Mock private Vpn.Ikev2SessionCreator mIkev2SessionCreator;
     @Mock private ConnectivityManager mConnectivityManager;
+    @Mock private IpSecService mIpSecService;
+    @Mock private KeyStore mKeyStore;
+    private final VpnProfile mVpnProfile;
+
+    private IpSecManager mIpSecManager;
+
+    public VpnTest() throws Exception {
+        // Build an actual VPN profile that is capable of being converted to and from an
+        // Ikev2VpnProfile
+        final Ikev2VpnProfile.Builder builder =
+                new Ikev2VpnProfile.Builder(TEST_VPN_SERVER, TEST_VPN_IDENTITY);
+        builder.setAuthPsk(TEST_VPN_PSK);
+        mVpnProfile = builder.build().toVpnProfile();
+    }
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mIpSecManager = new IpSecManager(mContext, mIpSecService);
+
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         setMockedPackages(mPackages);
 
-        when(mContext.getPackageName()).thenReturn(Vpn.class.getPackage().getName());
+        when(mContext.getPackageName()).thenReturn(TEST_VPN_PKG);
+        when(mContext.getOpPackageName()).thenReturn(TEST_VPN_PKG);
         when(mContext.getSystemService(eq(Context.USER_SERVICE))).thenReturn(mUserManager);
         when(mContext.getSystemService(eq(Context.APP_OPS_SERVICE))).thenReturn(mAppOps);
         when(mContext.getSystemService(eq(Context.NOTIFICATION_SERVICE)))
                 .thenReturn(mNotificationManager);
         when(mContext.getSystemService(eq(Context.CONNECTIVITY_SERVICE)))
                 .thenReturn(mConnectivityManager);
+        when(mContext.getSystemService(eq(Context.IPSEC_SERVICE))).thenReturn(mIpSecManager);
         when(mContext.getString(R.string.config_customVpnAlwaysOnDisconnectedDialogComponent))
                 .thenReturn(Resources.getSystem().getString(
                         R.string.config_customVpnAlwaysOnDisconnectedDialogComponent));
+        when(mSystemServices.isCallerSystem()).thenReturn(true);
 
         // Used by {@link Notification.Builder}
         ApplicationInfo applicationInfo = new ApplicationInfo();
@@ -175,6 +208,10 @@ public class VpnTest {
                 .thenReturn(applicationInfo);
 
         doNothing().when(mNetService).registerObserver(any());
+
+        // Deny all appops by default.
+        when(mAppOps.noteOpNoThrow(anyInt(), anyInt(), anyString()))
+                .thenReturn(AppOpsManager.MODE_IGNORED);
     }
 
     @Test
@@ -251,17 +288,17 @@ public class VpnTest {
         assertFalse(vpn.getLockdown());
 
         // Set always-on without lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false, Collections.emptyList()));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false, Collections.emptyList(), mKeyStore));
         assertTrue(vpn.getAlwaysOn());
         assertFalse(vpn.getLockdown());
 
         // Set always-on with lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, Collections.emptyList()));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, Collections.emptyList(), mKeyStore));
         assertTrue(vpn.getAlwaysOn());
         assertTrue(vpn.getLockdown());
 
         // Remove always-on configuration.
-        assertTrue(vpn.setAlwaysOnPackage(null, false, Collections.emptyList()));
+        assertTrue(vpn.setAlwaysOnPackage(null, false, Collections.emptyList(), mKeyStore));
         assertFalse(vpn.getAlwaysOn());
         assertFalse(vpn.getLockdown());
     }
@@ -275,11 +312,11 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
 
         // Set always-on without lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false, null));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], false, null, mKeyStore));
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1], user.start + PKG_UIDS[2], user.start + PKG_UIDS[3]);
 
         // Set always-on with lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, null));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, null, mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
             new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
             new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
@@ -288,7 +325,7 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[1]);
 
         // Switch to another app.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true, null));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true, null, mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
             new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
             new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
@@ -307,7 +344,8 @@ public class VpnTest {
         final UidRange user = UidRange.createForUser(primaryUser.id);
 
         // Set always-on with lockdown and whitelist app PKGS[2] from lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, Collections.singletonList(PKGS[2])));
+        assertTrue(vpn.setAlwaysOnPackage(
+                PKGS[1], true, Collections.singletonList(PKGS[2]), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
                 new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
                 new UidRange(user.start + PKG_UIDS[2] + 1, user.stop)
@@ -316,7 +354,8 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[2]);
 
         // Change whitelisted app to PKGS[3].
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[1], true, Collections.singletonList(PKGS[3])));
+        assertTrue(vpn.setAlwaysOnPackage(
+                PKGS[1], true, Collections.singletonList(PKGS[3]), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
                 new UidRange(user.start + PKG_UIDS[2] + 1, user.stop)
         }));
@@ -328,7 +367,8 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[1], user.start + PKG_UIDS[3]);
 
         // Change the VPN app.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, Collections.singletonList(PKGS[3])));
+        assertTrue(vpn.setAlwaysOnPackage(
+                PKGS[0], true, Collections.singletonList(PKGS[3]), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
                 new UidRange(user.start, user.start + PKG_UIDS[1] - 1),
                 new UidRange(user.start + PKG_UIDS[1] + 1, user.start + PKG_UIDS[3] - 1)
@@ -341,7 +381,7 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[3]);
 
         // Remove the whitelist.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, null));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, null, mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
                 new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[3] - 1),
                 new UidRange(user.start + PKG_UIDS[3] + 1, user.stop)
@@ -354,7 +394,8 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[0]);
 
         // Add the whitelist.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true, Collections.singletonList(PKGS[1])));
+        assertTrue(vpn.setAlwaysOnPackage(
+                PKGS[0], true, Collections.singletonList(PKGS[1]), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[] {
                 new UidRange(user.start + PKG_UIDS[0] + 1, user.stop)
         }));
@@ -366,12 +407,13 @@ public class VpnTest {
         assertUnblocked(vpn, user.start + PKG_UIDS[0], user.start + PKG_UIDS[1]);
 
         // Try whitelisting a package with a comma, should be rejected.
-        assertFalse(vpn.setAlwaysOnPackage(PKGS[0], true, Collections.singletonList("a.b,c.d")));
+        assertFalse(vpn.setAlwaysOnPackage(
+                PKGS[0], true, Collections.singletonList("a.b,c.d"), mKeyStore));
 
         // Pass a non-existent packages in the whitelist, they (and only they) should be ignored.
         // Whitelisted package should change from PGKS[1] to PKGS[2].
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[0], true,
-                Arrays.asList("com.foo.app", PKGS[2], "com.bar.app")));
+        assertTrue(vpn.setAlwaysOnPackage(
+                PKGS[0], true, Arrays.asList("com.foo.app", PKGS[2], "com.bar.app"), mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(new UidRange[]{
                 new UidRange(user.start + PKG_UIDS[0] + 1, user.start + PKG_UIDS[1] - 1),
                 new UidRange(user.start + PKG_UIDS[1] + 1, user.stop)
@@ -396,7 +438,7 @@ public class VpnTest {
         final UidRange profile = UidRange.createForUser(tempProfile.id);
 
         // Set lockdown.
-        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true, null));
+        assertTrue(vpn.setAlwaysOnPackage(PKGS[3], true, null, mKeyStore));
         verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(new UidRange[] {
             new UidRange(user.start, user.start + PKG_UIDS[3] - 1),
             new UidRange(user.start + PKG_UIDS[3] + 1, user.stop)
@@ -464,12 +506,12 @@ public class VpnTest {
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(entireUser));
 
         // When a new VPN package is set the rules should change to cover that package.
-        vpn.prepare(null, PKGS[0]);
+        vpn.prepare(null, PKGS[0], VpnManager.TYPE_VPN_SERVICE);
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(entireUser));
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(exceptPkg0));
 
         // When that VPN package is unset, everything should be undone again in reverse.
-        vpn.prepare(null, VpnConfig.LEGACY_VPN);
+        vpn.prepare(null, VpnConfig.LEGACY_VPN, VpnManager.TYPE_VPN_SERVICE);
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(false), aryEq(exceptPkg0));
         order.verify(mNetService).setAllowOnlyVpnForUids(eq(true), aryEq(entireUser));
     }
@@ -490,22 +532,22 @@ public class VpnTest {
                 .thenReturn(Collections.singletonList(resInfo));
 
         // null package name should return false
-        assertFalse(vpn.isAlwaysOnPackageSupported(null));
+        assertFalse(vpn.isAlwaysOnPackageSupported(null, mKeyStore));
 
         // Pre-N apps are not supported
         appInfo.targetSdkVersion = VERSION_CODES.M;
-        assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0]));
+        assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0], mKeyStore));
 
         // N+ apps are supported by default
         appInfo.targetSdkVersion = VERSION_CODES.N;
-        assertTrue(vpn.isAlwaysOnPackageSupported(PKGS[0]));
+        assertTrue(vpn.isAlwaysOnPackageSupported(PKGS[0], mKeyStore));
 
         // Apps that opt out explicitly are not supported
         appInfo.targetSdkVersion = VERSION_CODES.CUR_DEVELOPMENT;
         Bundle metaData = new Bundle();
         metaData.putBoolean(VpnService.SERVICE_META_DATA_SUPPORTS_ALWAYS_ON, false);
         svcInfo.metaData = metaData;
-        assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0]));
+        assertFalse(vpn.isAlwaysOnPackageSupported(PKGS[0], mKeyStore));
     }
 
     @Test
@@ -522,7 +564,7 @@ public class VpnTest {
                 .cancelAsUser(anyString(), anyInt(), eq(userHandle));
 
         // Start showing a notification for disconnected once always-on.
-        vpn.setAlwaysOnPackage(PKGS[0], false, null);
+        vpn.setAlwaysOnPackage(PKGS[0], false, null, mKeyStore);
         order.verify(mNotificationManager)
                 .notifyAsUser(anyString(), anyInt(), any(), eq(userHandle));
 
@@ -536,7 +578,7 @@ public class VpnTest {
                 .notifyAsUser(anyString(), anyInt(), any(), eq(userHandle));
 
         // Notification should be cleared after unsetting always-on package.
-        vpn.setAlwaysOnPackage(null, false, null);
+        vpn.setAlwaysOnPackage(null, false, null, mKeyStore);
         order.verify(mNotificationManager).cancelAsUser(anyString(), anyInt(), eq(userHandle));
     }
 
@@ -632,10 +674,347 @@ public class VpnTest {
     }
 
     /**
+     * The profile name should NOT change between releases for backwards compatibility
+     *
+     * <p>If this is changed between releases, the {@link Vpn#getVpnProfilePrivileged()} method MUST
+     * be updated to ensure backward compatibility.
+     */
+    @Test
+    public void testGetProfileNameForPackage() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+        setMockedUsers(primaryUser);
+
+        final String expected = Credentials.PLATFORM_VPN + primaryUser.id + "_" + TEST_VPN_PKG;
+        assertEquals(expected, vpn.getProfileNameForPackage(TEST_VPN_PKG));
+    }
+
+    private Vpn createVpnAndSetupUidChecks(int... grantedOps) throws Exception {
+        return createVpnAndSetupUidChecks(primaryUser, grantedOps);
+    }
+
+    private Vpn createVpnAndSetupUidChecks(UserInfo user, int... grantedOps) throws Exception {
+        final Vpn vpn = createVpn(user.id);
+        setMockedUsers(user);
+
+        when(mPackageManager.getPackageUidAsUser(eq(TEST_VPN_PKG), anyInt()))
+                .thenReturn(Process.myUid());
+
+        for (final int op : grantedOps) {
+            when(mAppOps.noteOpNoThrow(op, Process.myUid(), TEST_VPN_PKG))
+                    .thenReturn(AppOpsManager.MODE_ALLOWED);
+        }
+
+        return vpn;
+    }
+
+    private void checkProvisionVpnProfile(Vpn vpn, boolean expectedResult, int... checkedOps) {
+        assertEquals(expectedResult, vpn.provisionVpnProfile(TEST_VPN_PKG, mVpnProfile, mKeyStore));
+
+        // The profile should always be stored, whether or not consent has been previously granted.
+        verify(mKeyStore)
+                .put(
+                        eq(vpn.getProfileNameForPackage(TEST_VPN_PKG)),
+                        eq(mVpnProfile.encode()),
+                        eq(Process.SYSTEM_UID),
+                        eq(0));
+
+        for (final int checkedOp : checkedOps) {
+            verify(mAppOps).noteOpNoThrow(checkedOp, Process.myUid(), TEST_VPN_PKG);
+        }
+    }
+
+    @Test
+    public void testProvisionVpnProfilePreconsented() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        checkProvisionVpnProfile(
+                vpn, true /* expectedResult */, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+    }
+
+    @Test
+    public void testProvisionVpnProfileNotPreconsented() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks();
+
+        // Expect that both the ACTIVATE_VPN and ACTIVATE_PLATFORM_VPN were tried, but the caller
+        // had neither.
+        checkProvisionVpnProfile(vpn, false /* expectedResult */,
+                AppOpsManager.OP_ACTIVATE_PLATFORM_VPN, AppOpsManager.OP_ACTIVATE_VPN);
+    }
+
+    @Test
+    public void testProvisionVpnProfileVpnServicePreconsented() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks(AppOpsManager.OP_ACTIVATE_VPN);
+
+        checkProvisionVpnProfile(vpn, true /* expectedResult */, AppOpsManager.OP_ACTIVATE_VPN);
+    }
+
+    @Test
+    public void testProvisionVpnProfileTooLarge() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        final VpnProfile bigProfile = new VpnProfile("");
+        bigProfile.name = new String(new byte[Vpn.MAX_VPN_PROFILE_SIZE_BYTES + 1]);
+
+        try {
+            vpn.provisionVpnProfile(TEST_VPN_PKG, bigProfile, mKeyStore);
+            fail("Expected IAE due to profile size");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
+    public void testProvisionVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.provisionVpnProfile(TEST_VPN_PKG, mVpnProfile, mKeyStore);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testDeleteVpnProfile() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks();
+
+        vpn.deleteVpnProfile(TEST_VPN_PKG, mKeyStore);
+
+        verify(mKeyStore)
+                .delete(eq(vpn.getProfileNameForPackage(TEST_VPN_PKG)), eq(Process.SYSTEM_UID));
+    }
+
+    @Test
+    public void testDeleteVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.deleteVpnProfile(TEST_VPN_PKG, mKeyStore);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testGetVpnProfilePrivileged() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks();
+
+        when(mKeyStore.get(vpn.getProfileNameForPackage(TEST_VPN_PKG)))
+                .thenReturn(new VpnProfile("").encode());
+
+        vpn.getVpnProfilePrivileged(TEST_VPN_PKG, mKeyStore);
+
+        verify(mKeyStore).get(eq(vpn.getProfileNameForPackage(TEST_VPN_PKG)));
+    }
+
+    @Test
+    public void testStartVpnProfile() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        when(mKeyStore.get(vpn.getProfileNameForPackage(TEST_VPN_PKG)))
+                .thenReturn(mVpnProfile.encode());
+
+        vpn.startVpnProfile(TEST_VPN_PKG, mKeyStore);
+
+        verify(mKeyStore).get(eq(vpn.getProfileNameForPackage(TEST_VPN_PKG)));
+        verify(mAppOps)
+                .noteOpNoThrow(
+                        eq(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
+                        eq(Process.myUid()),
+                        eq(TEST_VPN_PKG));
+    }
+
+    @Test
+    public void testStartVpnProfileVpnServicePreconsented() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks(AppOpsManager.OP_ACTIVATE_VPN);
+
+        when(mKeyStore.get(vpn.getProfileNameForPackage(TEST_VPN_PKG)))
+                .thenReturn(mVpnProfile.encode());
+
+        vpn.startVpnProfile(TEST_VPN_PKG, mKeyStore);
+
+        // Verify that the the ACTIVATE_VPN appop was checked, but no error was thrown.
+        verify(mAppOps).noteOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, Process.myUid(), TEST_VPN_PKG);
+    }
+
+    @Test
+    public void testStartVpnProfileNotConsented() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks();
+
+        try {
+            vpn.startVpnProfile(TEST_VPN_PKG, mKeyStore);
+            fail("Expected failure due to no user consent");
+        } catch (SecurityException expected) {
+        }
+
+        // Verify both appops were checked.
+        verify(mAppOps)
+                .noteOpNoThrow(
+                        eq(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
+                        eq(Process.myUid()),
+                        eq(TEST_VPN_PKG));
+        verify(mAppOps).noteOpNoThrow(AppOpsManager.OP_ACTIVATE_VPN, Process.myUid(), TEST_VPN_PKG);
+
+        // Keystore should never have been accessed.
+        verify(mKeyStore, never()).get(any());
+    }
+
+    @Test
+    public void testStartVpnProfileMissingProfile() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        when(mKeyStore.get(vpn.getProfileNameForPackage(TEST_VPN_PKG))).thenReturn(null);
+
+        try {
+            vpn.startVpnProfile(TEST_VPN_PKG, mKeyStore);
+            fail("Expected failure due to missing profile");
+        } catch (IllegalArgumentException expected) {
+        }
+
+        verify(mKeyStore).get(vpn.getProfileNameForPackage(TEST_VPN_PKG));
+        verify(mAppOps)
+                .noteOpNoThrow(
+                        eq(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
+                        eq(Process.myUid()),
+                        eq(TEST_VPN_PKG));
+    }
+
+    @Test
+    public void testStartVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.startVpnProfile(TEST_VPN_PKG, mKeyStore);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testStopVpnProfileRestrictedUser() throws Exception {
+        final Vpn vpn =
+                createVpnAndSetupUidChecks(
+                        restrictedProfileA, AppOpsManager.OP_ACTIVATE_PLATFORM_VPN);
+
+        try {
+            vpn.stopVpnProfile(TEST_VPN_PKG);
+            fail("Expected SecurityException due to restricted user");
+        } catch (SecurityException expected) {
+        }
+    }
+
+    @Test
+    public void testSetPackageAuthorizationVpnService() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks();
+
+        assertTrue(vpn.setPackageAuthorization(TEST_VPN_PKG, VpnManager.TYPE_VPN_SERVICE));
+        verify(mAppOps)
+                .setMode(
+                        eq(AppOpsManager.OP_ACTIVATE_VPN),
+                        eq(Process.myUid()),
+                        eq(TEST_VPN_PKG),
+                        eq(AppOpsManager.MODE_ALLOWED));
+    }
+
+    @Test
+    public void testSetPackageAuthorizationPlatformVpn() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks();
+
+        assertTrue(vpn.setPackageAuthorization(TEST_VPN_PKG, VpnManager.TYPE_VPN_PLATFORM));
+        verify(mAppOps)
+                .setMode(
+                        eq(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
+                        eq(Process.myUid()),
+                        eq(TEST_VPN_PKG),
+                        eq(AppOpsManager.MODE_ALLOWED));
+    }
+
+    @Test
+    public void testSetPackageAuthorizationRevokeAuthorization() throws Exception {
+        final Vpn vpn = createVpnAndSetupUidChecks();
+
+        assertTrue(vpn.setPackageAuthorization(TEST_VPN_PKG, VpnManager.TYPE_VPN_NONE));
+        verify(mAppOps)
+                .setMode(
+                        eq(AppOpsManager.OP_ACTIVATE_VPN),
+                        eq(Process.myUid()),
+                        eq(TEST_VPN_PKG),
+                        eq(AppOpsManager.MODE_IGNORED));
+        verify(mAppOps)
+                .setMode(
+                        eq(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN),
+                        eq(Process.myUid()),
+                        eq(TEST_VPN_PKG),
+                        eq(AppOpsManager.MODE_IGNORED));
+    }
+
+    private void setAndVerifyAlwaysOnPackage(Vpn vpn, int uid, boolean lockdownEnabled) {
+        assertTrue(vpn.setAlwaysOnPackage(TEST_VPN_PKG, lockdownEnabled, null, mKeyStore));
+
+        verify(mKeyStore).get(eq(vpn.getProfileNameForPackage(TEST_VPN_PKG)));
+        verify(mAppOps).setMode(
+                eq(AppOpsManager.OP_ACTIVATE_PLATFORM_VPN), eq(uid), eq(TEST_VPN_PKG),
+                eq(AppOpsManager.MODE_ALLOWED));
+
+        verify(mSystemServices).settingsSecurePutStringForUser(
+                eq(Settings.Secure.ALWAYS_ON_VPN_APP), eq(TEST_VPN_PKG), eq(primaryUser.id));
+        verify(mSystemServices).settingsSecurePutIntForUser(
+                eq(Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN), eq(lockdownEnabled ? 1 : 0),
+                eq(primaryUser.id));
+        verify(mSystemServices).settingsSecurePutStringForUser(
+                eq(Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN_WHITELIST), eq(""), eq(primaryUser.id));
+    }
+
+    @Test
+    public void testSetAndStartAlwaysOnVpn() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+        setMockedUsers(primaryUser);
+
+        // UID checks must return a different UID; otherwise it'll be treated as already prepared.
+        final int uid = Process.myUid() + 1;
+        when(mPackageManager.getPackageUidAsUser(eq(TEST_VPN_PKG), anyInt()))
+                .thenReturn(uid);
+        when(mKeyStore.get(vpn.getProfileNameForPackage(TEST_VPN_PKG)))
+                .thenReturn(mVpnProfile.encode());
+
+        setAndVerifyAlwaysOnPackage(vpn, uid, false);
+        assertTrue(vpn.startAlwaysOnVpn(mKeyStore));
+
+        // TODO: Test the Ikev2VpnRunner started up properly. Relies on utility methods added in
+        // a subsequent CL.
+    }
+
+    @Test
+    public void testStartLegacyVpn() throws Exception {
+        final Vpn vpn = createVpn(primaryUser.id);
+        setMockedUsers(primaryUser);
+
+        // Dummy egress interface
+        final String egressIface = "DUMMY0";
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(egressIface);
+
+        final RouteInfo defaultRoute = new RouteInfo(new IpPrefix(Inet4Address.ANY, 0),
+                        InetAddresses.parseNumericAddress("192.0.2.0"), egressIface);
+        lp.addRoute(defaultRoute);
+
+        vpn.startLegacyVpn(mVpnProfile, mKeyStore, lp);
+
+        // TODO: Test the Ikev2VpnRunner started up properly. Relies on utility methods added in
+        // a subsequent CL.
+    }
+
+    /**
      * Mock some methods of vpn object.
      */
     private Vpn createVpn(@UserIdInt int userId) {
-        return new Vpn(Looper.myLooper(), mContext, mNetService, userId, mSystemServices);
+        return new Vpn(Looper.myLooper(), mContext, mNetService,
+                userId, mKeyStore, mSystemServices, mIkev2SessionCreator);
     }
 
     private static void assertBlocked(Vpn vpn, int... uids) {

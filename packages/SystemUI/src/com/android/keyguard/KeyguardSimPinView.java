@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import android.annotation.NonNull;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
@@ -26,8 +27,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.os.RemoteException;
-import android.os.ServiceManager;
+import android.telephony.PinResult;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -37,10 +37,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.systemui.R;
 
 /**
@@ -138,11 +136,11 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
 
         // Sending empty PIN here to query the number of remaining PIN attempts
         new CheckSimPin("", mSubId) {
-            void onSimCheckResponse(final int result, final int attemptsRemaining) {
-                Log.d(LOG_TAG, "onSimCheckResponse " + " dummy One result" + result +
-                        " attemptsRemaining=" + attemptsRemaining);
-                if (attemptsRemaining >= 0) {
-                    mRemainingAttempts = attemptsRemaining;
+            void onSimCheckResponse(final PinResult result) {
+                Log.d(LOG_TAG, "onSimCheckResponse " + " dummy One result "
+                        + result.toString());
+                if (result.getAttemptsRemaining() >= 0) {
+                    mRemainingAttempts = result.getAttemptsRemaining();
                     setLockedSimMessage();
                 }
             }
@@ -250,31 +248,33 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
             mSubId = subId;
         }
 
-        abstract void onSimCheckResponse(final int result, final int attemptsRemaining);
+        abstract void onSimCheckResponse(@NonNull PinResult result);
 
         @Override
         public void run() {
-            try {
-                if (DEBUG) {
-                    Log.v(TAG, "call supplyPinReportResultForSubscriber(subid=" + mSubId + ")");
-                }
-                final int[] result = ITelephony.Stub.asInterface(ServiceManager
-                        .checkService("phone")).supplyPinReportResultForSubscriber(mSubId, mPin);
-                if (DEBUG) {
-                    Log.v(TAG, "supplyPinReportResult returned: " + result[0] + " " + result[1]);
-                }
+            if (DEBUG) {
+                Log.v(TAG, "call supplyPinReportResultForSubscriber(subid=" + mSubId + ")");
+            }
+            TelephonyManager telephonyManager =
+                    ((TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE))
+                            .createForSubscriptionId(mSubId);
+            final PinResult result = telephonyManager.supplyPinReportPinResult(mPin);
+            if (result == null) {
+                Log.e(TAG, "Error result for supplyPinReportResult.");
                 post(new Runnable() {
                     @Override
                     public void run() {
-                        onSimCheckResponse(result[0], result[1]);
+                        onSimCheckResponse(PinResult.getDefaultFailedResult());
                     }
                 });
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException for supplyPinReportResult:", e);
+            } else {
+                if (DEBUG) {
+                    Log.v(TAG, "supplyPinReportResult returned: " + result.toString());
+                }
                 post(new Runnable() {
                     @Override
                     public void run() {
-                        onSimCheckResponse(PhoneConstants.PIN_GENERAL_FAILURE, -1);
+                        onSimCheckResponse(result);
                     }
                 });
             }
@@ -327,17 +327,18 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         if (mCheckSimPinThread == null) {
             mCheckSimPinThread = new CheckSimPin(mPasswordEntry.getText(), mSubId) {
                 @Override
-                void onSimCheckResponse(final int result, final int attemptsRemaining) {
+                void onSimCheckResponse(final PinResult result) {
                     post(new Runnable() {
                         @Override
                         public void run() {
-                            mRemainingAttempts = attemptsRemaining;
+                            mRemainingAttempts = result.getAttemptsRemaining();
                             if (mSimUnlockProgressDialog != null) {
                                 mSimUnlockProgressDialog.hide();
                             }
                             resetPasswordText(true /* animate */,
-                                    result != PhoneConstants.PIN_RESULT_SUCCESS /* announce */);
-                            if (result == PhoneConstants.PIN_RESULT_SUCCESS) {
+                                    /* announce */
+                                    result.getType() != PinResult.PIN_RESULT_TYPE_SUCCESS);
+                            if (result.getType() == PinResult.PIN_RESULT_TYPE_SUCCESS) {
                                 KeyguardUpdateMonitor.getInstance(getContext())
                                         .reportSimUnlocked(mSubId);
                                 mRemainingAttempts = -1;
@@ -347,14 +348,16 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                 }
                             } else {
                                 mShowDefaultMessage = false;
-                                if (result == PhoneConstants.PIN_PASSWORD_INCORRECT) {
-                                    if (attemptsRemaining <= 2) {
+                                if (result.getType() == PinResult.PIN_RESULT_TYPE_INCORRECT) {
+                                    if (result.getAttemptsRemaining() <= 2) {
                                         // this is getting critical - show dialog
-                                        getSimRemainingAttemptsDialog(attemptsRemaining).show();
+                                        getSimRemainingAttemptsDialog(
+                                                result.getAttemptsRemaining()).show();
                                     } else {
                                         // show message
                                         mSecurityMessageDisplay.setMessage(
-                                                getPinPasswordErrorMessage(attemptsRemaining, false));
+                                                getPinPasswordErrorMessage(
+                                                        result.getAttemptsRemaining(), false));
                                     }
                                 } else {
                                     // "PIN operation failed!" - no idea what this was and no way to
@@ -364,7 +367,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
                                 }
                                 if (DEBUG) Log.d(LOG_TAG, "verifyPasswordAndUnlock "
                                         + " CheckSimPin.onSimCheckResponse: " + result
-                                        + " attemptsRemaining=" + attemptsRemaining);
+                                        + " attemptsRemaining=" + result.getAttemptsRemaining());
                             }
                             mCallback.userActivity();
                             mCheckSimPinThread = null;

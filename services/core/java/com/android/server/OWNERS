@@ -1,5 +1,5 @@
 # Connectivity / Networking
-per-file ConnectivityService.java,NetworkManagementService.java,NsdService.java = codewiz@google.com, ek@google.com, jchalard@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
+per-file ConnectivityService.java,NetworkManagementService.java,NsdService.java = codewiz@google.com, ek@google.com, jchalard@google.com, junyulai@google.com, lorenzo@google.com, reminv@google.com, satk@google.com
 
 # Vibrator / Threads
 per-file VibratorService.java, DisplayThread.java = michaelwr@google.com

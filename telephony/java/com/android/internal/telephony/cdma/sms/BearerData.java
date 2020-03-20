@@ -16,8 +16,8 @@
 
 package com.android.internal.telephony.cdma.sms;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
-import android.telephony.Rlog;
 import android.telephony.SmsCbCmasInfo;
 import android.telephony.cdma.CdmaSmsCbProgramData;
 import android.telephony.cdma.CdmaSmsCbProgramResults;
@@ -30,9 +30,9 @@ import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.uicc.IccUtils;
 import com.android.internal.util.BitwiseInputStream;
 import com.android.internal.util.BitwiseOutputStream;
+import com.android.telephony.Rlog;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
-
+import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -248,10 +248,10 @@ public final class BearerData {
         public int hour;
         public int monthDay;
 
-        /** Month [0-11] */
-        public int month;
+        /** Month in the range 1(Jan) - 12(Dec). */
+        public int monthOrdinal;
 
-        /** Full year. For example, 1970. */
+        /** Full year in the range 1996 - 2095. */
         public int year;
 
         private ZoneId mZoneId;
@@ -269,7 +269,7 @@ public final class BearerData {
             ts.year = year >= 96 ? year + 1900 : year + 2000;
             int month = IccUtils.cdmaBcdByteToInt(data[1]);
             if (month < 1 || month > 12) return null;
-            ts.month = month - 1;
+            ts.monthOrdinal = month;
             int day = IccUtils.cdmaBcdByteToInt(data[2]);
             if (day < 1 || day > 31) return null;
             ts.monthDay = day;
@@ -285,9 +285,36 @@ public final class BearerData {
             return ts;
         }
 
+        public static TimeStamp fromMillis(long timeInMillis) {
+            TimeStamp ts = new TimeStamp();
+            LocalDateTime localDateTime =
+                    Instant.ofEpochMilli(timeInMillis).atZone(ts.mZoneId).toLocalDateTime();
+            int year = localDateTime.getYear();
+            if (year < 1996 || year > 2095) return null;
+            ts.year = year;
+            ts.monthOrdinal = localDateTime.getMonthValue();
+            ts.monthDay = localDateTime.getDayOfMonth();
+            ts.hour = localDateTime.getHour();
+            ts.minute = localDateTime.getMinute();
+            ts.second = localDateTime.getSecond();
+            return ts;
+        }
+
+        public byte[] toByteArray() {
+            int year = this.year % 100; // 00 - 99
+            ByteArrayOutputStream outStream = new ByteArrayOutputStream(6);
+            outStream.write((((year / 10) & 0x0F) << 4) | ((year % 10) & 0x0F));
+            outStream.write((((monthOrdinal / 10) << 4) & 0xF0) | ((monthOrdinal % 10) & 0x0F));
+            outStream.write((((monthDay / 10) << 4) & 0xF0) | ((monthDay % 10) & 0x0F));
+            outStream.write((((hour / 10) << 4) & 0xF0) | ((hour % 10) & 0x0F));
+            outStream.write((((minute / 10) << 4) & 0xF0) | ((minute % 10) & 0x0F));
+            outStream.write((((second / 10) << 4) & 0xF0) | ((second % 10) & 0x0F));
+            return outStream.toByteArray();
+        }
+
         public long toMillis() {
             LocalDateTime localDateTime =
-                    LocalDateTime.of(year, month + 1, monthDay, hour, minute, second);
+                    LocalDateTime.of(year, monthOrdinal, monthDay, hour, minute, second);
             Instant instant = localDateTime.toInstant(mZoneId.getRules().getOffset(localDateTime));
             return instant.toEpochMilli();
         }
@@ -298,7 +325,7 @@ public final class BearerData {
             StringBuilder builder = new StringBuilder();
             builder.append("TimeStamp ");
             builder.append("{ year=" + year);
-            builder.append(", month=" + month);
+            builder.append(", month=" + monthOrdinal);
             builder.append(", day=" + monthDay);
             builder.append(", hour=" + hour);
             builder.append(", minute=" + minute);
@@ -958,6 +985,12 @@ public final class BearerData {
         }
     }
 
+    private static void encodeMsgCenterTimeStamp(BearerData bData, BitwiseOutputStream outStream)
+            throws BitwiseOutputStream.AccessException {
+        outStream.write(8, 6);
+        outStream.writeByteArray(8 * 6, bData.msgCenterTimeStamp.toByteArray());
+    };
+
     /**
      * Create serialized representation for BearerData object.
      * (See 3GPP2 C.R1001-F, v1.0, section 4.5 for layout details)
@@ -1021,6 +1054,10 @@ public final class BearerData {
             if (bData.serviceCategoryProgramResults != null) {
                 outStream.write(8, SUBPARAM_SERVICE_CATEGORY_PROGRAM_RESULTS);
                 encodeScpResults(bData, outStream);
+            }
+            if (bData.msgCenterTimeStamp != null) {
+                outStream.write(8, SUBPARAM_MESSAGE_CENTER_TIME_STAMP);
+                encodeMsgCenterTimeStamp(bData, outStream);
             }
             return outStream.toByteArray();
         } catch (BitwiseOutputStream.AccessException ex) {

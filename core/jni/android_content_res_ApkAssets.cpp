@@ -78,12 +78,13 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, jobject file_descri
     return 0;
   }
 
+  auto dup_fd_id = dup_fd.get();
   std::unique_ptr<const ApkAssets> apk_assets = ApkAssets::LoadFromFd(std::move(dup_fd),
                                                                       friendly_name_utf8.c_str(),
                                                                       system, force_shared_lib);
   if (apk_assets == nullptr) {
     std::string error_msg = base::StringPrintf("Failed to load asset path %s from fd %d",
-                                               friendly_name_utf8.c_str(), dup_fd.get());
+                                               friendly_name_utf8.c_str(), dup_fd_id);
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }

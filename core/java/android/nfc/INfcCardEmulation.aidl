@@ -39,4 +39,5 @@ interface INfcCardEmulation
     boolean setPreferredService(in ComponentName service);
     boolean unsetPreferredService();
     boolean supportsAidPrefixRegistration();
+    ApduServiceInfo getPreferredPaymentService(int userHandle);
 }

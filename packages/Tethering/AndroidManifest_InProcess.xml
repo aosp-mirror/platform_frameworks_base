@@ -22,11 +22,9 @@
           android:process="system">
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29" />
     <application>
-        <!-- TODO: Using MAINLINE_NETWORK_STACK instead of NETWORK_STACK when tethering run in the
-                   same process with networkstack -->
         <service android:name="com.android.server.connectivity.tethering.TetheringService"
                  android:process="system"
-                 android:permission="android.permission.NETWORK_STACK">
+                 android:permission="android.permission.MAINLINE_NETWORK_STACK">
             <intent-filter>
                 <action android:name="android.net.ITetheringConnector.InProcess"/>
             </intent-filter>

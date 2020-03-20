@@ -402,7 +402,7 @@ public class ZoneGetter {
         private static List<String> extractTimeZoneIds(List<TimeZoneMapping> timeZoneMappings) {
             final List<String> zoneIds = new ArrayList<>(timeZoneMappings.size());
             for (TimeZoneMapping timeZoneMapping : timeZoneMappings) {
-                zoneIds.add(timeZoneMapping.timeZoneId);
+                zoneIds.add(timeZoneMapping.getTimeZoneId());
             }
             return Collections.unmodifiableList(zoneIds);
         }

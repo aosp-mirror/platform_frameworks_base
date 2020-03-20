@@ -29,6 +29,7 @@ import static android.os.BatteryManager.EXTRA_MAX_CHARGING_VOLTAGE;
 import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.BatteryManager.EXTRA_STATUS;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
+import static android.telephony.TelephonyManager.MODEM_COUNT_DUAL_MODEM;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
@@ -77,6 +78,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.telephony.CarrierConfigManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -89,7 +91,6 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.IccCardConstants.State;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
@@ -257,6 +258,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mLogoutEnabled;
     // If the user long pressed the lock icon, disabling face auth for the current session.
     private boolean mLockIconPressed;
+    private int mActiveMobileDataSubscription = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -392,9 +394,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     };
 
-    private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+    @VisibleForTesting
+    public PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
         @Override
         public void onActiveDataSubscriptionIdChanged(int subId) {
+            mActiveMobileDataSubscription = subId;
             mHandler.sendEmptyMessage(MSG_SIM_SUBSCRIPTION_INFO_CHANGED);
         }
     };
@@ -496,7 +500,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    /** @return List of SubscriptionInfo records, maybe empty but never null */
+    /**
+     * @return List of SubscriptionInfo records, maybe empty but never null.
+     */
     public List<SubscriptionInfo> getSubscriptionInfo(boolean forceReload) {
         List<SubscriptionInfo> sil = mSubscriptionInfo;
         if (sil == null || forceReload) {
@@ -508,7 +514,42 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         } else {
             mSubscriptionInfo = sil;
         }
-        return mSubscriptionInfo;
+        return new ArrayList<>(mSubscriptionInfo);
+    }
+
+    /**
+     * This method returns filtered list of SubscriptionInfo from {@link #getSubscriptionInfo}.
+     * above. Maybe empty but never null.
+     *
+     * In DSDS mode if both subscriptions are grouped and one is opportunistic, we filter out one
+     * of them based on carrier config. e.g. In this case we should only show one carrier name
+     * on the status bar and quick settings.
+     */
+    public List<SubscriptionInfo> getFilteredSubscriptionInfo(boolean forceReload) {
+        List<SubscriptionInfo> subscriptions = getSubscriptionInfo(false);
+        if (subscriptions.size() == MODEM_COUNT_DUAL_MODEM) {
+            SubscriptionInfo info1 = subscriptions.get(0);
+            SubscriptionInfo info2 = subscriptions.get(1);
+            if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
+                // If both subscriptions are primary, show both.
+                if (!info1.isOpportunistic() && !info2.isOpportunistic()) return subscriptions;
+
+                // If carrier required, always show signal bar of primary subscription.
+                // Otherwise, show whichever subscription is currently active for Internet.
+                boolean alwaysShowPrimary = CarrierConfigManager.getDefaultConfig()
+                        .getBoolean(CarrierConfigManager
+                        .KEY_ALWAYS_SHOW_PRIMARY_SIGNAL_BAR_IN_OPPORTUNISTIC_NETWORK_BOOLEAN);
+                if (alwaysShowPrimary) {
+                    subscriptions.remove(info1.isOpportunistic() ? info1 : info2);
+                } else {
+                    subscriptions.remove(info1.getSubscriptionId() == mActiveMobileDataSubscription
+                            ? info2 : info1);
+                }
+
+            }
+        }
+
+        return subscriptions;
     }
 
     @Override
@@ -1061,7 +1102,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 // keep compatibility with apps that aren't direct boot aware.
                 // SysUI should just ignore this broadcast because it was already received
                 // and processed previously.
-                if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
+                if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                     // Guarantee mTelephonyCapable state after SysUI crash and restart
                     if (args.simState == State.ABSENT) {
                         mHandler.obtainMessage(MSG_TELEPHONY_CAPABLE, true).sendToTarget();
@@ -1087,7 +1128,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 dispatchBootCompleted();
             } else if (TelephonyIntents.ACTION_SERVICE_STATE_CHANGED.equals(action)) {
                 ServiceState serviceState = ServiceState.newFromBundle(intent.getExtras());
-                int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
                 if (DEBUG) {
                     Log.v(TAG, "action " + action + " serviceState=" + serviceState + " subId="
@@ -1239,9 +1280,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             if (!TelephonyIntents.ACTION_SIM_STATE_CHANGED.equals(intent.getAction())) {
                 throw new IllegalArgumentException("only handles intent ACTION_SIM_STATE_CHANGED");
             }
-            String stateExtra = intent.getStringExtra(IccCardConstants.INTENT_KEY_ICC_STATE);
-            int slotId = intent.getIntExtra(PhoneConstants.PHONE_KEY, 0);
-            int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+            String stateExtra = intent.getStringExtra(Intent.EXTRA_SIM_STATE);
+            int slotId = intent.getIntExtra(SubscriptionManager.EXTRA_SLOT_INDEX, 0);
+            int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                     SubscriptionManager.INVALID_SUBSCRIPTION_ID);
             if (IccCardConstants.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
                 final String absentReason = intent
@@ -2637,6 +2678,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 pw.println("    " + mSubscriptionInfo.get(i));
             }
         }
+        pw.println("  Current active data subId=" + mActiveMobileDataSubscription);
         pw.println("  Service states:");
         for (int subId : mServiceStates.keySet()) {
             pw.println("    " + subId + "=" + mServiceStates.get(subId));

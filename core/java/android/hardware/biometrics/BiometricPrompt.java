@@ -32,6 +32,7 @@ import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.security.identity.IdentityCredential;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -401,6 +402,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
             super(mac);
         }
 
+        public CryptoObject(@NonNull IdentityCredential credential) {
+            super(credential);
+        }
+
         /**
          * Get {@link Signature} object.
          * @return {@link Signature} object or null if this doesn't contain one.
@@ -423,6 +428,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          */
         public Mac getMac() {
             return super.getMac();
+        }
+
+        /**
+         * Get {@link IdentityCredential} object.
+         * @return {@link IdentityCredential} object or null if this doesn't contain one.
+         */
+        public @Nullable IdentityCredential getIdentityCredential() {
+            return super.getIdentityCredential();
         }
     }
 

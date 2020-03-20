@@ -16,7 +16,7 @@
 
 package android.app;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.content.pm.IPackageInstallObserver2;
 import android.os.Bundle;

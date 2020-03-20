@@ -1,0 +1,114 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package {
+    default_visibility: [ ":__pkg__" ]
+}
+
+filegroup {
+    name: "framework-sdkextensions-sources",
+    srcs: [
+        "java/**/*.java",
+    ],
+    path: "java",
+    visibility: [ "//frameworks/base" ] // For the "global" stubs.
+}
+
+java_library {
+    name: "framework-sdkextensions",
+    srcs: [ ":framework-sdkextensions-sources" ],
+    sdk_version: "system_current",
+    libs: [ "framework-annotations-lib" ],
+    permitted_packages: [ "android.os.ext" ],
+    installable: true,
+    plugins: ["java_api_finder"],
+    visibility: [
+        "//frameworks/base/apex/sdkextensions",
+        "//frameworks/base/apex/sdkextensions/testing",
+    ],
+    hostdex: true, // for hiddenapi check
+    apex_available: [
+        "com.android.sdkext",
+        "test_com.android.sdkext",
+    ],
+}
+
+stubs_defaults {
+    name: "framework-sdkextensions-stubs-defaults",
+    srcs: [ ":framework-sdkextensions-sources" ],
+    libs: [ "framework-annotations-lib" ],
+    sdk_version: "system_current",
+}
+
+droidstubs {
+    name: "framework-sdkextensions-stubs-srcs-publicapi",
+    defaults: [
+        "framework-module-stubs-defaults-publicapi",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+droidstubs {
+    name: "framework-sdkextensions-stubs-srcs-systemapi",
+    defaults: [
+        "framework-module-stubs-defaults-systemapi",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+droidstubs {
+    name: "framework-sdkextensions-api-module_libs_api",
+    defaults: [
+        "framework-module-api-defaults-module_libs_api",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+droidstubs {
+    name: "framework-sdkextensions-stubs-srcs-module_libs_api",
+    defaults: [
+        "framework-module-stubs-defaults-module_libs_api",
+        "framework-sdkextensions-stubs-defaults",
+    ]
+}
+
+java_library {
+    name: "framework-sdkextensions-stubs-publicapi",
+    srcs: [":framework-sdkextensions-stubs-srcs-publicapi"],
+    sdk_version: "current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
+    ]
+}
+
+java_library {
+    name: "framework-sdkextensions-stubs-systemapi",
+    srcs: [":framework-sdkextensions-stubs-srcs-systemapi"],
+    sdk_version: "system_current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
+    ]
+}
+
+java_library {
+    name: "framework-sdkextensions-stubs-module_libs_api",
+    srcs: [":framework-sdkextensions-stubs-srcs-module_libs_api"],
+    sdk_version: "system_current",
+    visibility: [
+        "//frameworks/base", // Framework
+        "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
+    ]
+}

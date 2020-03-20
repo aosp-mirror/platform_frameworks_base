@@ -5,6 +5,16 @@ AcronymName: android.app.NotificationChannel#setImportanceLockedByOEM(boolean):
     
 
 
+// Tethering broadcast action / extras cannot change name for backwards compatibility
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
+
 ActionValue: android.telephony.ims.ImsCallProfile#EXTRA_ADDITIONAL_CALL_INFO:
     Inconsistent extra value; expected `android.telephony.ims.extra.ADDITIONAL_CALL_INFO`, was `AdditionalCallInfo`
 ActionValue: android.telephony.ims.ImsCallProfile#EXTRA_CALL_RAT_TYPE:

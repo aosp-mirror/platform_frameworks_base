@@ -16,7 +16,7 @@
 
 package android.test;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import junit.framework.TestCase;
 

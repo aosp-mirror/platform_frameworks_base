@@ -15,7 +15,8 @@
  */
 package com.android.internal.telephony;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+import android.telephony.data.ApnSetting;
 
 /**
  * @hide
@@ -49,6 +50,7 @@ public class PhoneConstants {
       * <ul>
       * <li>CONNECTED = IP traffic should be available</li>
       * <li>CONNECTING = Currently setting up data connection</li>
+      * <li>DISCONNECTING = IP temporarily available</li>
       * <li>DISCONNECTED = IP not available</li>
       * <li>SUSPENDED = connection is created but IP traffic is
       *                 temperately not available. i.e. voice call is in place
@@ -65,7 +67,8 @@ public class PhoneConstants {
         @UnsupportedAppUsage
         DISCONNECTED,
         @UnsupportedAppUsage
-        SUSPENDED;
+        SUSPENDED,
+        DISCONNECTING;
     };
 
     public static final String STATE_KEY = "state";
@@ -98,19 +101,8 @@ public class PhoneConstants {
 
     public static final String PHONE_NAME_KEY = "phoneName";
     public static final String DATA_NETWORK_TYPE_KEY = "networkType";
-    public static final String DATA_FAILURE_CAUSE_KEY = "failCause";
     public static final String DATA_APN_TYPE_KEY = "apnType";
     public static final String DATA_APN_KEY = "apn";
-    public static final String DATA_LINK_PROPERTIES_KEY = "linkProperties";
-    public static final String DATA_NETWORK_CAPABILITIES_KEY = "networkCapabilities";
-
-    public static final String DATA_IFACE_NAME_KEY = "iface";
-    public static final String NETWORK_UNAVAILABLE_KEY = "networkUnvailable";
-    public static final String DATA_NETWORK_ROAMING_KEY = "networkRoaming";
-    public static final String PHONE_IN_ECM_STATE = "phoneinECMState";
-    public static final String PHONE_IN_EMERGENCY_CALL = "phoneInEmergencyCall";
-
-    public static final String REASON_LINK_PROPERTIES_CHANGED = "linkPropertiesChanged";
 
     /**
      * Return codes for supplyPinReturnResult and
@@ -137,32 +129,32 @@ public class PhoneConstants {
      * APN_TYPE_ALL is a special type to indicate that this APN entry can
      * service all data connections.
      */
-    public static final String APN_TYPE_ALL = "*";
+    public static final String APN_TYPE_ALL = ApnSetting.TYPE_ALL_STRING;
     /** APN type for default data traffic */
-    public static final String APN_TYPE_DEFAULT = "default";
+    public static final String APN_TYPE_DEFAULT = ApnSetting.TYPE_DEFAULT_STRING;
     /** APN type for MMS traffic */
-    public static final String APN_TYPE_MMS = "mms";
+    public static final String APN_TYPE_MMS = ApnSetting.TYPE_MMS_STRING;
     /** APN type for SUPL assisted GPS */
-    public static final String APN_TYPE_SUPL = "supl";
+    public static final String APN_TYPE_SUPL = ApnSetting.TYPE_SUPL_STRING;
     /** APN type for DUN traffic */
-    public static final String APN_TYPE_DUN = "dun";
+    public static final String APN_TYPE_DUN = ApnSetting.TYPE_DUN_STRING;
     /** APN type for HiPri traffic */
-    public static final String APN_TYPE_HIPRI = "hipri";
+    public static final String APN_TYPE_HIPRI = ApnSetting.TYPE_HIPRI_STRING;
     /** APN type for FOTA */
-    public static final String APN_TYPE_FOTA = "fota";
+    public static final String APN_TYPE_FOTA = ApnSetting.TYPE_FOTA_STRING;
     /** APN type for IMS */
-    public static final String APN_TYPE_IMS = "ims";
+    public static final String APN_TYPE_IMS = ApnSetting.TYPE_IMS_STRING;
     /** APN type for CBS */
-    public static final String APN_TYPE_CBS = "cbs";
+    public static final String APN_TYPE_CBS = ApnSetting.TYPE_CBS_STRING;
     /** APN type for IA Initial Attach APN */
-    public static final String APN_TYPE_IA = "ia";
+    public static final String APN_TYPE_IA = ApnSetting.TYPE_IA_STRING;
     /** APN type for Emergency PDN. This is not an IA apn, but is used
      * for access to carrier services in an emergency call situation. */
-    public static final String APN_TYPE_EMERGENCY = "emergency";
+    public static final String APN_TYPE_EMERGENCY = ApnSetting.TYPE_EMERGENCY_STRING;
     /** APN type for Mission Critical Services */
-    public static final String APN_TYPE_MCX = "mcx";
+    public static final String APN_TYPE_MCX = ApnSetting.TYPE_MCX_STRING;
     /** APN type for XCAP */
-    public static final String APN_TYPE_XCAP = "xcap";
+    public static final String APN_TYPE_XCAP = ApnSetting.TYPE_XCAP_STRING;
     /** Array of all APN types */
     public static final String[] APN_TYPES = {APN_TYPE_DEFAULT,
             APN_TYPE_MMS,

@@ -27,17 +27,25 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.net.LinkProperties.CompareResult;
 import android.net.LinkProperties.ProvisioningChange;
+import android.net.util.LinkPropertiesUtils.CompareResult;
+import android.os.Build;
 import android.system.OsConstants;
 import android.util.ArraySet;
 
+import androidx.core.os.BuildCompat;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
+
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +57,9 @@ import java.util.Set;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class LinkPropertiesTest {
+    @Rule
+    public final DevSdkIgnoreRule ignoreRule = new DevSdkIgnoreRule();
+
     private static final InetAddress ADDRV4 = address("75.208.6.1");
     private static final InetAddress ADDRV6 = address("2001:0db8:85a3:0000:0000:8a2e:0370:7334");
     private static final InetAddress DNS1 = address("75.208.7.1");
@@ -65,6 +76,7 @@ public class LinkPropertiesTest {
     private static final InetAddress GATEWAY62 = address("fe80::6:22%lo");
     private static final InetAddress TESTIPV4ADDR = address("192.168.47.42");
     private static final InetAddress TESTIPV6ADDR = address("fe80::7:33%43");
+    private static final Inet4Address DHCPSERVER = (Inet4Address) address("192.0.2.1");
     private static final String NAME = "qmi0";
     private static final String DOMAINS = "google.com";
     private static final String PRIV_DNS_SERVER_NAME = "private.dns.com";
@@ -73,9 +85,22 @@ public class LinkPropertiesTest {
     private static final LinkAddress LINKADDRV4 = new LinkAddress(ADDRV4, 32);
     private static final LinkAddress LINKADDRV6 = new LinkAddress(ADDRV6, 128);
     private static final LinkAddress LINKADDRV6LINKLOCAL = new LinkAddress("fe80::1/64");
+    private static final Uri CAPPORT_API_URL = Uri.parse("https://test.example.com/capportapi");
+
+    // CaptivePortalData cannot be in a constant as it does not exist on Q.
+    // The test runner also crashes when scanning for tests if it is a return type.
+    private static Object getCaptivePortalData() {
+        return new CaptivePortalData.Builder()
+                .setVenueInfoUrl(Uri.parse("https://test.example.com/venue")).build();
+    }
 
     private static InetAddress address(String addrString) {
         return InetAddresses.parseNumericAddress(addrString);
+    }
+
+    private static boolean isAtLeastR() {
+        // BuildCompat.isAtLeastR is documented to return false on release SDKs (including R)
+        return Build.VERSION.SDK_INT > Build.VERSION_CODES.Q || BuildCompat.isAtLeastR();
     }
 
     private void checkEmpty(final LinkProperties lp) {
@@ -97,7 +122,13 @@ public class LinkPropertiesTest {
         assertFalse(lp.isIpv4Provisioned());
         assertFalse(lp.isIpv6Provisioned());
         assertFalse(lp.isPrivateDnsActive());
-        assertFalse(lp.isWakeOnLanSupported());
+
+        if (isAtLeastR()) {
+            assertNull(lp.getDhcpServerAddress());
+            assertFalse(lp.isWakeOnLanSupported());
+            assertNull(lp.getCaptivePortalApiUrl());
+            assertNull(lp.getCaptivePortalData());
+        }
     }
 
     private LinkProperties makeTestObject() {
@@ -119,7 +150,12 @@ public class LinkPropertiesTest {
         lp.setMtu(MTU);
         lp.setTcpBufferSizes(TCP_BUFFER_SIZES);
         lp.setNat64Prefix(new IpPrefix("2001:db8:0:64::/96"));
-        lp.setWakeOnLanSupported(true);
+        if (isAtLeastR()) {
+            lp.setDhcpServerAddress(DHCPSERVER);
+            lp.setWakeOnLanSupported(true);
+            lp.setCaptivePortalApiUrl(CAPPORT_API_URL);
+            lp.setCaptivePortalData((CaptivePortalData) getCaptivePortalData());
+        }
         return lp;
     }
 
@@ -158,8 +194,19 @@ public class LinkPropertiesTest {
         assertTrue(source.isIdenticalTcpBufferSizes(target));
         assertTrue(target.isIdenticalTcpBufferSizes(source));
 
-        assertTrue(source.isIdenticalWakeOnLan(target));
-        assertTrue(target.isIdenticalWakeOnLan(source));
+        if (isAtLeastR()) {
+            assertTrue(source.isIdenticalDhcpServerAddress(target));
+            assertTrue(source.isIdenticalDhcpServerAddress(source));
+
+            assertTrue(source.isIdenticalWakeOnLan(target));
+            assertTrue(target.isIdenticalWakeOnLan(source));
+
+            assertTrue(source.isIdenticalCaptivePortalApiUrl(target));
+            assertTrue(target.isIdenticalCaptivePortalApiUrl(source));
+
+            assertTrue(source.isIdenticalCaptivePortalData(target));
+            assertTrue(target.isIdenticalCaptivePortalData(source));
+        }
 
         // Check result of equals().
         assertTrue(source.equals(target));
@@ -298,7 +345,7 @@ public class LinkPropertiesTest {
         source.addDnsServer(DNS1);
         source.addDnsServer(DNS2);
         // set 2 gateways
-        source.addRoute(new RouteInfo(GATEWAY1));
+        source.addRoute(new RouteInfo(LINKADDRV4, GATEWAY1));
         source.addRoute(new RouteInfo(GATEWAY2));
         source.setMtu(MTU);
 
@@ -310,7 +357,7 @@ public class LinkPropertiesTest {
         target.addDnsServer(DNS2);
         target.addDnsServer(DNS1);
         target.addRoute(new RouteInfo(GATEWAY2));
-        target.addRoute(new RouteInfo(GATEWAY1));
+        target.addRoute(new RouteInfo(LINKADDRV4, GATEWAY1));
         target.setMtu(MTU);
 
         assertLinkPropertiesEqual(source, target);
@@ -347,12 +394,13 @@ public class LinkPropertiesTest {
 
     @Test
     public void testRouteInterfaces() {
-        LinkAddress prefix = new LinkAddress(address("2001:db8::"), 32);
+        LinkAddress prefix1 = new LinkAddress(address("2001:db8:1::"), 48);
+        LinkAddress prefix2 = new LinkAddress(address("2001:db8:2::"), 48);
         InetAddress address = ADDRV6;
 
         // Add a route with no interface to a LinkProperties with no interface. No errors.
         LinkProperties lp = new LinkProperties();
-        RouteInfo r = new RouteInfo(prefix, address, null);
+        RouteInfo r = new RouteInfo(prefix1, address, null);
         assertTrue(lp.addRoute(r));
         assertEquals(1, lp.getRoutes().size());
         assertAllRoutesHaveInterface(null, lp);
@@ -362,7 +410,7 @@ public class LinkPropertiesTest {
         assertEquals(1, lp.getRoutes().size());
 
         // Add a route with an interface. Expect an exception.
-        r = new RouteInfo(prefix, address, "wlan0");
+        r = new RouteInfo(prefix2, address, "wlan0");
         try {
           lp.addRoute(r);
           fail("Adding wlan0 route to LP with no interface, expect exception");
@@ -381,7 +429,7 @@ public class LinkPropertiesTest {
         } catch (IllegalArgumentException expected) {}
 
         // If the interface name matches, the route is added.
-        r = new RouteInfo(prefix, null, "wlan0");
+        r = new RouteInfo(prefix2, null, "wlan0");
         lp.setInterfaceName("wlan0");
         lp.addRoute(r);
         assertEquals(2, lp.getRoutes().size());
@@ -406,10 +454,12 @@ public class LinkPropertiesTest {
         assertEquals(3, lp.compareAllRoutes(lp2).added.size());
         assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
 
-        // Check remove works
-        lp.removeRoute(new RouteInfo(prefix, address, null));
+        // Remove route with incorrect interface, no route removed.
+        lp.removeRoute(new RouteInfo(prefix2, null, null));
         assertEquals(3, lp.getRoutes().size());
-        lp.removeRoute(new RouteInfo(prefix, address, "wlan0"));
+
+        // Check remove works when interface is correct.
+        lp.removeRoute(new RouteInfo(prefix2, null, "wlan0"));
         assertEquals(2, lp.getRoutes().size());
         assertAllRoutesHaveInterface("wlan0", lp);
         assertAllRoutesNotHaveInterface("p2p0", lp);
@@ -923,8 +973,7 @@ public class LinkPropertiesTest {
         assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
     }
 
-    @Test
-    public void testLinkPropertiesParcelable() throws Exception {
+    private static LinkProperties makeLinkPropertiesForParceling() {
         LinkProperties source = new LinkProperties();
         source.setInterfaceName(NAME);
 
@@ -958,16 +1007,39 @@ public class LinkPropertiesTest {
 
         source.setNat64Prefix(new IpPrefix("2001:db8:1:2:64:64::/96"));
 
-        source.setWakeOnLanSupported(true);
-
         final LinkProperties stacked = new LinkProperties();
         stacked.setInterfaceName("test-stacked");
         source.addStackedLink(stacked);
 
-        assertParcelSane(source, 15 /* fieldCount */);
+        return source;
     }
 
-    @Test
+    @Test @IgnoreAfter(Build.VERSION_CODES.Q)
+    public void testLinkPropertiesParcelable_Q() throws Exception {
+        final LinkProperties source = makeLinkPropertiesForParceling();
+        assertParcelSane(source, 14 /* fieldCount */);
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testLinkPropertiesParcelable() throws Exception {
+        final LinkProperties source = makeLinkPropertiesForParceling();
+
+        source.setWakeOnLanSupported(true);
+        source.setCaptivePortalApiUrl(CAPPORT_API_URL);
+        source.setCaptivePortalData((CaptivePortalData) getCaptivePortalData());
+        source.setDhcpServerAddress((Inet4Address) GATEWAY1);
+        assertParcelSane(new LinkProperties(source, true /* parcelSensitiveFields */),
+                18 /* fieldCount */);
+
+        // Verify that without using a sensitiveFieldsParcelingCopy, sensitive fields are cleared.
+        final LinkProperties sanitized = new LinkProperties(source);
+        sanitized.setCaptivePortalApiUrl(null);
+        sanitized.setCaptivePortalData(null);
+        assertEquals(sanitized, parcelingRoundTrip(source));
+    }
+
+    // Parceling of the scope was broken until Q-QPR2
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testLinkLocalDnsServerParceling() throws Exception {
         final String strAddress = "fe80::1%lo";
         final LinkProperties lp = new LinkProperties();
@@ -1090,12 +1162,39 @@ public class LinkPropertiesTest {
         assertFalse(lp.isPrivateDnsActive());
     }
 
-    @Test
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testDhcpServerAddress() {
+        final LinkProperties lp = makeTestObject();
+        assertEquals(DHCPSERVER, lp.getDhcpServerAddress());
+
+        lp.clear();
+        assertNull(lp.getDhcpServerAddress());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
     public void testWakeOnLanSupported() {
         final LinkProperties lp = makeTestObject();
         assertTrue(lp.isWakeOnLanSupported());
 
         lp.clear();
         assertFalse(lp.isWakeOnLanSupported());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testCaptivePortalApiUrl() {
+        final LinkProperties lp = makeTestObject();
+        assertEquals(CAPPORT_API_URL, lp.getCaptivePortalApiUrl());
+
+        lp.clear();
+        assertNull(lp.getCaptivePortalApiUrl());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testCaptivePortalData() {
+        final LinkProperties lp = makeTestObject();
+        assertEquals(getCaptivePortalData(), lp.getCaptivePortalData());
+
+        lp.clear();
+        assertNull(lp.getCaptivePortalData());
     }
 }

@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -33,6 +34,7 @@ import android.util.Log;
  * wrapper methods in this class return a boolean that callers can use to determine whether
  * RemoteException was thrown.
  */
+@Hide
 public class NetworkMonitorManager {
 
     @NonNull private final INetworkMonitor mNetworkMonitor;

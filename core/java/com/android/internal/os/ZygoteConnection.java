@@ -23,7 +23,7 @@ import static android.system.OsConstants.POLLIN;
 import static com.android.internal.os.ZygoteConnectionConstants.CONNECTION_TIMEOUT_MILLIS;
 import static com.android.internal.os.ZygoteConnectionConstants.WRAPPED_PID_TIMEOUT_MILLIS;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.net.Credentials;
 import android.net.LocalSocket;
@@ -257,7 +257,7 @@ class ZygoteConnection {
         pid = Zygote.forkAndSpecialize(parsedArgs.mUid, parsedArgs.mGid, parsedArgs.mGids,
                 parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
                 parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
-                parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mTargetSdkVersion);
+                parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mIsTopApp);
 
         try {
             if (pid == 0) {
@@ -346,7 +346,7 @@ class ZygoteConnection {
             if (zygoteServer.isUsapPoolEnabled()) {
                 Runnable fpResult =
                         zygoteServer.fillUsapPool(
-                                new int[]{mSocket.getFileDescriptor().getInt$()});
+                                new int[]{mSocket.getFileDescriptor().getInt$()}, false);
 
                 if (fpResult != null) {
                     zygoteServer.setForkChild();
@@ -485,9 +485,7 @@ class ZygoteConnection {
 
         closeSocket();
 
-        if (parsedArgs.mNiceName != null) {
-            Process.setArgV0(parsedArgs.mNiceName);
-        }
+        Zygote.setAppProcessName(parsedArgs, TAG);
 
         // End of the postFork event.
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);

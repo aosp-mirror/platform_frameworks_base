@@ -16,12 +16,11 @@
 
 package com.google.android.gles_jni;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.SurfaceTexture;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;

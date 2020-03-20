@@ -379,8 +379,11 @@ public class PhoneStatusBarPolicy
                 mContext.getString(R.string.accessibility_quick_settings_bluetooth_on);
         boolean bluetoothVisible = false;
         if (mBluetooth != null) {
-            if (mBluetooth.isBluetoothConnected()) {
-                contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
+            if (mBluetooth.isBluetoothConnected()
+                    && (mBluetooth.isBluetoothAudioActive()
+                    || !mBluetooth.isBluetoothAudioProfileOnly())) {
+                contentDescription = mContext.getString(
+                        R.string.accessibility_bluetooth_connected);
                 bluetoothVisible = mBluetooth.isBluetoothEnabled();
             }
         }
@@ -605,8 +608,7 @@ public class PhoneStatusBarPolicy
                     break;
                 case TelephonyIntents.ACTION_SIM_STATE_CHANGED:
                     // Avoid rebroadcast because SysUI is direct boot aware.
-                    if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK,
-                            false)) {
+                    if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                         break;
                     }
                     updateSimState(intent);

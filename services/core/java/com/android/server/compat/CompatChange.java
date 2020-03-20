@@ -17,6 +17,7 @@
 package com.android.server.compat;
 
 import android.annotation.Nullable;
+import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.pm.ApplicationInfo;
 
@@ -39,6 +40,13 @@ import java.util.Map;
 public final class CompatChange extends CompatibilityChangeInfo {
 
     /**
+     * A change ID to be used only in the CTS test for this SystemApi
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = 1234) // Needs to be > test APK targetSdkVersion.
+    private static final long CTS_SYSTEM_API_CHANGEID = 149391281; // This is a bug id.
+
+    /**
      * Callback listener for when compat changes are updated for a package.
      * See {@link #registerListener(ChangeListener)} for more details.
      */
@@ -55,7 +63,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
     private Map<String, Boolean> mPackageOverrides;
 
     public CompatChange(long changeId) {
-        this(changeId, null, -1, false, null);
+        this(changeId, null, -1, false, false, null);
     }
 
     /**
@@ -66,8 +74,8 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * @param disabled If {@code true}, overrides any {@code enableAfterTargetSdk} set.
      */
     public CompatChange(long changeId, @Nullable String name, int enableAfterTargetSdk,
-            boolean disabled, String description) {
-        super(changeId, name, enableAfterTargetSdk, disabled, description);
+            boolean disabled, boolean loggingOnly, String description) {
+        super(changeId, name, enableAfterTargetSdk, disabled, loggingOnly, description);
     }
 
     /**
@@ -75,7 +83,7 @@ public final class CompatChange extends CompatibilityChangeInfo {
      */
     public CompatChange(Change change) {
         super(change.getId(), change.getName(), change.getEnableAfterTargetSdk(),
-                change.getDisabled(), change.getDescription());
+                change.getDisabled(), change.getLoggingOnly(), change.getDescription());
     }
 
     void registerListener(ChangeListener listener) {
@@ -97,6 +105,10 @@ public final class CompatChange extends CompatibilityChangeInfo {
      * @param enabled Whether or not to enable the change.
      */
     void addPackageOverride(String pname, boolean enabled) {
+        if (getLoggingOnly()) {
+            throw new IllegalArgumentException(
+                    "Can't add overrides for a logging only change " + toString());
+        }
         if (mPackageOverrides == null) {
             mPackageOverrides = new HashMap<>();
         }
@@ -139,6 +151,15 @@ public final class CompatChange extends CompatibilityChangeInfo {
         return true;
     }
 
+    /**
+     * Checks whether a change has an override for a package.
+     * @param packageName name of the package
+     * @return true if there is such override
+     */
+    boolean hasOverride(String packageName) {
+        return mPackageOverrides != null && mPackageOverrides.containsKey(packageName);
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ChangeId(")
@@ -151,6 +172,9 @@ public final class CompatChange extends CompatibilityChangeInfo {
         }
         if (getDisabled()) {
             sb.append("; disabled");
+        }
+        if (getLoggingOnly()) {
+            sb.append("; loggingOnly");
         }
         if (mPackageOverrides != null && mPackageOverrides.size() > 0) {
             sb.append("; packageOverrides=").append(mPackageOverrides);

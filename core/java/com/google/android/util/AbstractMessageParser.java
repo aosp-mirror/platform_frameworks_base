@@ -16,7 +16,7 @@
 
 package com.google.android.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.util.ArrayList;
 import java.util.HashMap;

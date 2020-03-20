@@ -20,10 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.uicc.IccUtils;
+import com.android.telephony.Rlog;
 
 import java.util.Objects;
 

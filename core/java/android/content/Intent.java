@@ -28,8 +28,8 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.AppGlobals;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ComponentInfo;
@@ -2689,6 +2689,9 @@ public class Intent implements Parcelable, Cloneable {
      * that application is first launched (that is the first time it is moved
      * out of the stopped state).  The data contains the name of the package.
      *
+     * <p>When the application is first launched, the application itself doesn't receive this
+     * broadcast.</p>
+     *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      */
@@ -4011,6 +4014,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p>
      * @see #EXTRA_SIM_STATE
      * @see #EXTRA_SIM_LOCKED_REASON
+     * @see #EXTRA_REBROADCAST_ON_UNLOCK
      *
      * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED} or
      * {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
@@ -4185,6 +4189,18 @@ public class Intent implements Parcelable, Cloneable {
     @Deprecated
     @SystemApi
     public static final String SIM_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
+
+    /**
+     * The extra used with {@link #ACTION_SIM_STATE_CHANGED} for indicating whether this broadcast
+     * is a rebroadcast on unlock. Defaults to {@code false} if not specified.
+     *
+     * @hide
+     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED} or
+     * {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
+     */
+    @Deprecated
+    @SystemApi
+    public static final String EXTRA_REBROADCAST_ON_UNLOCK = "rebroadcastOnUnlock";
 
     /**
      * Broadcast Action: indicate that the phone service state has changed.
@@ -4498,12 +4514,6 @@ public class Intent implements Parcelable, Cloneable {
     @Deprecated
     @SystemApi
     public static final String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
-
-    /**
-     * An parcelable extra used with {@link #ACTION_SERVICE_STATE} representing the service state.
-     * @hide
-     */
-    public static final String EXTRA_SERVICE_STATE = "android.intent.extra.SERVICE_STATE";
 
     /**
      * The name of the extra used to define the text to be processed, as a
@@ -6617,7 +6627,7 @@ public class Intent implements Parcelable, Cloneable {
                     this.mClipData = new ClipData(o.mClipData);
                 }
             } else {
-                if (o.mExtras != null && !o.mExtras.maybeIsEmpty()) {
+                if (o.mExtras != null && !o.mExtras.isDefinitelyEmpty()) {
                     this.mExtras = Bundle.STRIPPED;
                 }
 

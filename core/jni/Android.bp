@@ -207,6 +207,8 @@ cc_library_shared {
         "com_android_internal_os_AtomicDirectory.cpp",
         "com_android_internal_os_ClassLoaderFactory.cpp",
         "com_android_internal_os_FuseAppLoop.cpp",
+        "com_android_internal_os_KernelCpuUidBpfMapReader.cpp",
+        "com_android_internal_os_KernelSingleUidTimeReader.cpp",
         "com_android_internal_os_Zygote.cpp",
         "com_android_internal_os_ZygoteInit.cpp",
         "com_android_internal_util_VirtualRefBasePtr.cpp",
@@ -233,6 +235,7 @@ cc_library_shared {
 
     static_libs: [
         "libasync_safe",
+        "libbinderthreadstateutils",
         "libdmabufinfo",
         "libgif",
         "libseccomp_policy",
@@ -302,6 +305,7 @@ cc_library_shared {
         "libdl",
         "libdl_android",
         "libstatslog",
+        "libtimeinstate",
         "server_configurable_flags",
     ],
 

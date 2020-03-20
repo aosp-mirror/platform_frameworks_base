@@ -16,7 +16,7 @@
 
 package com.android.internal.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Debug;
 import android.os.StrictMode;
 
@@ -107,9 +107,12 @@ public final class MemInfoReader {
      * Amount of RAM that is in use by the kernel for actual allocations.
      */
     public long getKernelUsedSizeKb() {
-        return mInfos[Debug.MEMINFO_SHMEM] + mInfos[Debug.MEMINFO_SLAB_UNRECLAIMABLE]
-                + mInfos[Debug.MEMINFO_VM_ALLOC_USED] + mInfos[Debug.MEMINFO_PAGE_TABLES]
-                + mInfos[Debug.MEMINFO_KERNEL_STACK];
+        long size = mInfos[Debug.MEMINFO_SHMEM] + mInfos[Debug.MEMINFO_SLAB_UNRECLAIMABLE]
+                + mInfos[Debug.MEMINFO_VM_ALLOC_USED] + mInfos[Debug.MEMINFO_PAGE_TABLES];
+        if (!Debug.isVmapStack()) {
+            size += mInfos[Debug.MEMINFO_KERNEL_STACK];
+        }
+        return size;
     }
 
     public long getSwapTotalSizeKb() {

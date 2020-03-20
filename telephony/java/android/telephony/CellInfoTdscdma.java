@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.telephony.Rlog;
+
 import java.util.Objects;
 
 /**
@@ -71,6 +73,14 @@ public final class CellInfoTdscdma extends CellInfo implements Parcelable {
     public CellInfoTdscdma(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
         super(ci, timeStamp);
         final android.hardware.radio.V1_2.CellInfoTdscdma cit = ci.info.tdscdma();
+        mCellIdentityTdscdma = new CellIdentityTdscdma(cit.cellIdentityTdscdma);
+        mCellSignalStrengthTdscdma = new CellSignalStrengthTdscdma(cit.signalStrengthTdscdma);
+    }
+
+    /** @hide */
+    public CellInfoTdscdma(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_5.CellInfoTdscdma cit = ci.ratSpecificInfo.tdscdma();
         mCellIdentityTdscdma = new CellIdentityTdscdma(cit.cellIdentityTdscdma);
         mCellSignalStrengthTdscdma = new CellSignalStrengthTdscdma(cit.signalStrengthTdscdma);
     }

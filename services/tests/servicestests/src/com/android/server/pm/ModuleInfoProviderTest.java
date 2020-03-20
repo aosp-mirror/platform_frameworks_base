@@ -17,6 +17,7 @@ package com.android.server.pm;
 
 import android.content.Context;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageManager;
 import android.test.InstrumentationTestCase;
 
 import com.android.frameworks.servicestests.R;
@@ -28,7 +29,7 @@ public class ModuleInfoProviderTest extends InstrumentationTestCase {
     public void testSuccessfulParse() {
         ModuleInfoProvider provider = getProvider(R.xml.well_formed_metadata);
 
-        List<ModuleInfo> mi = provider.getInstalledModules(0);
+        List<ModuleInfo> mi = provider.getInstalledModules(PackageManager.MATCH_ALL);
         assertEquals(2, mi.size());
 
         Collections.sort(mi, (ModuleInfo m1, ModuleInfo m2) ->
@@ -49,18 +50,18 @@ public class ModuleInfoProviderTest extends InstrumentationTestCase {
 
     public void testParseFailure_incorrectTopLevelElement() {
         ModuleInfoProvider provider = getProvider(R.xml.unparseable_metadata1);
-        assertEquals(0, provider.getInstalledModules(0).size());
+        assertEquals(0, provider.getInstalledModules(PackageManager.MATCH_ALL).size());
     }
 
     public void testParseFailure_incorrectModuleElement() {
         ModuleInfoProvider provider = getProvider(R.xml.unparseable_metadata2);
-        assertEquals(0, provider.getInstalledModules(0).size());
+        assertEquals(0, provider.getInstalledModules(PackageManager.MATCH_ALL).size());
     }
 
     public void testParse_unknownAttributesIgnored() {
         ModuleInfoProvider provider = getProvider(R.xml.well_formed_metadata);
 
-        List<ModuleInfo> mi = provider.getInstalledModules(0);
+        List<ModuleInfo> mi = provider.getInstalledModules(PackageManager.MATCH_ALL);
         assertEquals(2, mi.size());
 
         ModuleInfo mi1 = provider.getModuleInfo("com.android.module1", 0);

@@ -17,7 +17,7 @@
 package android.view;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Region;
 import android.os.Bundle;

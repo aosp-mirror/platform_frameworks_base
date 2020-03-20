@@ -20,6 +20,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="6933439408719203102">"La SIM no està proporcionada a MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="6367773216941648568">"La SIM no és compatible a MM#3"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="6178029798083341927">"La SIM no està proporcionada a MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="6084322234976891423">"La SIM no és compatible a MM#3"</string>
 </resources>

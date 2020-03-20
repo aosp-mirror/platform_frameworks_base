@@ -18,6 +18,8 @@
     <string name="notification_install_inprogress">Install in progress</string>
     <!-- Displayed on notification: Dynamic System installation failed [CHAR LIMIT=128] -->
     <string name="notification_install_failed">Install failed</string>
+    <!-- Displayed on notification: Image validation failed [CHAR LIMIT=128] -->
+    <string name="notification_image_validation_failed">Image validation failed. Abort installation.</string>
     <!-- Displayed on notification: We are running in Dynamic System [CHAR LIMIT=128] -->
     <string name="notification_dynsystem_in_use">Currently running a dynamic system. Restart to use the original Android version.</string>
 
@@ -25,14 +27,18 @@
     <string name="notification_action_cancel">Cancel</string>
     <!-- Action on notification: Discard installation [CHAR LIMIT=16] -->
     <string name="notification_action_discard">Discard</string>
-    <!-- Action on notification: Uninstall Dynamic System [CHAR LIMIT=16] -->
-    <string name="notification_action_uninstall">Uninstall</string>
     <!-- Action on notification: Restart to Dynamic System [CHAR LIMIT=16] -->
     <string name="notification_action_reboot_to_dynsystem">Restart</string>
+    <!-- Action on notification: Restart to original Android version [CHAR LIMIT=16] -->
+    <string name="notification_action_reboot_to_origin">Restart</string>
+
 
     <!-- Toast when installed Dynamic System is discarded [CHAR LIMIT=64] -->
     <string name="toast_dynsystem_discarded">Discarded dynamic system</string>
     <!-- Toast when we fail to launch into Dynamic System [CHAR LIMIT=64] -->
     <string name="toast_failed_to_reboot_to_dynsystem">Can\u2019t restart or load dynamic system</string>
+
+    <!-- URL of Dynamic System Key Revocation List [DO NOT TRANSLATE] -->
+    <string name="key_revocation_list_url" translatable="false">https://dl.google.com/developers/android/gsi/gsi-keyblacklist.json</string>
 
 </resources>

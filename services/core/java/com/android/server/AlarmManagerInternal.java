@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import android.app.PendingIntent;
+
 public interface AlarmManagerInternal {
     // Some other components in the system server need to know about
     // broadcast alarms currently in flight
@@ -30,4 +32,10 @@ public interface AlarmManagerInternal {
     boolean isIdling();
     public void removeAlarmsForUid(int uid);
     public void registerInFlightListener(InFlightListener callback);
+
+    /**
+     * Removes any alarm with the given pending intent with equality determined using
+     * {@link android.app.PendingIntent#equals(java.lang.Object) PendingIntent.equals}
+     */
+    void remove(PendingIntent rec);
 }

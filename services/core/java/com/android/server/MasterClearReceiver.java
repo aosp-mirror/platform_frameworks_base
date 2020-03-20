@@ -82,7 +82,7 @@ public class MasterClearReceiver extends BroadcastReceiver {
             }
         };
 
-        if (mWipeExternalStorage || mWipeEsims) {
+        if (mWipeExternalStorage) {
             // thr will be started at the end of this task.
             new WipeDataTask(context, thr).execute();
         } else {

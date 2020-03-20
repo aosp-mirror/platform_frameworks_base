@@ -19,7 +19,7 @@ package android.view.accessibility;
 import static com.android.internal.util.CollectionUtils.isEmpty;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcelable;
 import android.view.View;
 

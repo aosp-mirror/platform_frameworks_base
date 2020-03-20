@@ -305,6 +305,8 @@ std::unique_ptr<XmlResource> Inflate(const void* data, size_t len, std::string* 
         if (pending_element == nullptr) {
           pending_element = util::make_unique<Element>();
         }
+        // pending_element is not nullptr
+        // NOLINTNEXTLINE(bugprone-use-after-move)
         pending_element->namespace_decls.push_back(std::move(decl));
         break;
       }

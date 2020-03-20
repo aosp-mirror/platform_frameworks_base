@@ -15,7 +15,7 @@
  */
 package android.text.method;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * TransformationMethod2 extends the TransformationMethod interface

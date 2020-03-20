@@ -16,16 +16,16 @@
 
 package android.location;
 
-import java.util.HashMap;
-
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.HashMap;
 
 /**
  * This class provides access to the system country detector service. This

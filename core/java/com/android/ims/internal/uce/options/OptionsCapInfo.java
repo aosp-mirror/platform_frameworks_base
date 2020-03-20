@@ -15,11 +15,11 @@
  */
 package com.android.ims.internal.uce.options;
 
-import android.annotation.UnsupportedAppUsage;
-import com.android.ims.internal.uce.common.CapInfo;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
+import com.android.ims.internal.uce.common.CapInfo;
 
 /** @hide  */
 public class OptionsCapInfo implements Parcelable {

@@ -17,11 +17,10 @@
 
 package com.google.android.mms.pdu;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.text.TextUtils;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -746,7 +745,9 @@ public class PduComposer {
             return PDU_COMPOSE_CONTENT_ERROR;
         }
 
-        // X-Mms-Report-Allowed Optional (not support)
+        // X-Mms-Report-Allowed Optional
+        appendHeader(PduHeaders.REPORT_ALLOWED);
+
         return PDU_COMPOSE_SUCCESS;
     }
 

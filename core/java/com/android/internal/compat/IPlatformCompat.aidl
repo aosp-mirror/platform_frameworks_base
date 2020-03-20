@@ -17,6 +17,7 @@
 package com.android.internal.compat;
 
 import android.content.pm.ApplicationInfo;
+import com.android.internal.compat.IOverrideValidator;
 import java.util.Map;
 
 parcelable CompatibilityChangeConfig;
@@ -163,6 +164,30 @@ interface IPlatformCompat
     boolean clearOverride(long changeId, String packageName);
 
     /**
+     * Enable all compatibility changes which have enabledAfterTargetSdk ==
+     * {@param targetSdkVersion} for an app, subject to the policy. Kills the app to allow the
+     * changes to take effect.
+     *
+     * @param packageName The package name of the app whose compatibility changes will be enabled.
+     * @param targetSdkVersion The targetSdkVersion for filtering the changes to be enabled.
+     *
+     * @return The number of changes that were enabled.
+     */
+    int enableTargetSdkChanges(in String packageName, int targetSdkVersion);
+
+    /**
+     * Disable all compatibility changes which have enabledAfterTargetSdk ==
+     * {@param targetSdkVersion} for an app, subject to the policy. Kills the app to allow the
+     * changes to take effect.
+     *
+     * @param packageName The package name of the app whose compatibility changes will be disabled.
+     * @param targetSdkVersion The targetSdkVersion for filtering the changes to be disabled.
+     *
+     * @return The number of changes that were disabled.
+     */
+    int disableTargetSdkChanges(in String packageName, int targetSdkVersion);
+
+    /**
      * Revert overrides to compatibility changes. Kills the app to allow the changes to take effect.
      *
      * @param packageName The package name of the app whose overrides will be cleared.
@@ -195,4 +220,17 @@ interface IPlatformCompat
      * @return An array of {@link CompatChangeInfo} known to the service.
      */
     CompatibilityChangeInfo[] listAllChanges();
+
+    /**
+    * List the compatibility changes that should be present in the UI.
+    * Filters out certain changes like e.g. logging only.
+    *
+    * @return An array of {@link CompatChangeInfo}.
+    */
+    CompatibilityChangeInfo[] listUIChanges();
+
+    /**
+     * Get an instance that can determine whether a changeid can be overridden for a package name.
+     */
+    IOverrideValidator getOverrideValidator();
 }

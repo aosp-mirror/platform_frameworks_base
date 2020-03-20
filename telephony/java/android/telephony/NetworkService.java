@@ -32,6 +32,7 @@ import android.telephony.NetworkRegistrationInfo.Domain;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.telephony.Rlog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -232,6 +233,9 @@ public abstract class NetworkService extends Service {
      * Create the instance of {@link NetworkServiceProvider}. Network service provider must override
      * this method to facilitate the creation of {@link NetworkServiceProvider} instances. The system
      * will call this method after binding the network service for each active SIM slot id.
+     *
+     * This methead is guaranteed to be invoked in {@link NetworkService}'s internal handler thread
+     * whose looper can be retrieved with {@link Looper.myLooper()} when override this method.
      *
      * @param slotIndex SIM slot id the network service associated with.
      * @return Network service object. Null if failed to create the provider (e.g. invalid slot

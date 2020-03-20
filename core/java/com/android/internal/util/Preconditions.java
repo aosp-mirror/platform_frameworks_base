@@ -18,7 +18,7 @@ package com.android.internal.util;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.text.TextUtils;
 
 import java.util.Collection;
@@ -126,7 +126,9 @@ public class Preconditions {
      * @param reference an object reference
      * @return the non-null reference that was validated
      * @throws NullPointerException if {@code reference} is null
+     * @deprecated - use {@link java.util.Objects.requireNonNull} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static @NonNull <T> T checkNotNull(final T reference) {
         if (reference == null) {
@@ -144,31 +146,13 @@ public class Preconditions {
      *     be converted to a string using {@link String#valueOf(Object)}
      * @return the non-null reference that was validated
      * @throws NullPointerException if {@code reference} is null
+     * @deprecated - use {@link java.util.Objects.requireNonNull} instead.
      */
+    @Deprecated
     @UnsupportedAppUsage
     public static @NonNull <T> T checkNotNull(final T reference, final Object errorMessage) {
         if (reference == null) {
             throw new NullPointerException(String.valueOf(errorMessage));
-        }
-        return reference;
-    }
-
-    /**
-     * Ensures that an object reference passed as a parameter to the calling
-     * method is not null.
-     *
-     * @param reference an object reference
-     * @param messageTemplate a printf-style message template to use if the check fails; will
-     *     be converted to a string using {@link String#format(String, Object...)}
-     * @param messageArgs arguments for {@code messageTemplate}
-     * @return the non-null reference that was validated
-     * @throws NullPointerException if {@code reference} is null
-     */
-    public static @NonNull <T> T checkNotNull(final T reference,
-            final String messageTemplate,
-            final Object... messageArgs) {
-        if (reference == null) {
-            throw new NullPointerException(String.format(messageTemplate, messageArgs));
         }
         return reference;
     }

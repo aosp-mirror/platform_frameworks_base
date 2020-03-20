@@ -16,7 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Native implementation of the service manager.  Most clients will only
@@ -87,6 +87,15 @@ class ServiceManagerProxy implements IServiceManager {
     }
 
     public boolean isDeclared(String name) throws RemoteException {
+        throw new RemoteException();
+    }
+
+    public void registerClientCallback(String name, IBinder service, IClientCallback cb)
+            throws RemoteException {
+        throw new RemoteException();
+    }
+
+    public void tryUnregisterService(String name, IBinder service) throws RemoteException {
         throw new RemoteException();
     }
 

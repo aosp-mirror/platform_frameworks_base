@@ -263,6 +263,10 @@
          before automatically restore the default connection.  Set -1 if the connection
          does not require auto-restore. -->
     <!-- the 6th element indicates boot-time dependency-met value. -->
+    <!-- NOTE: The telephony module is no longer reading the configuration below for available
+         APN types.  The set of APN types and relevant settings are specified within the telephony
+         module and are non-configurable.  Whether or not data connectivity over a cellular network
+         is available at all is controlled by the flag: config_moble_data_capable. -->
     <string-array translatable="false" name="networkAttributes">
         <item>"wifi,1,1,1,-1,true"</item>
         <item>"mobile,0,0,0,-1,true"</item>
@@ -2026,6 +2030,12 @@
          Note: This config is deprecated, please use config_defaultSms instead. -->
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
+    <!-- Flag indicating whether the current device allows data.
+         If true, this means that the device supports data connectivity through
+         the telephony network.
+         This can be overridden to false for devices that support voice and/or sms . -->
+    <bool name="config_mobile_data_capable">true</bool>
+
     <!-- Default web browser.  This is the package name of the application that will
          be the default browser when the device first boots.  Afterwards the user
          can select whatever browser app they wish to use as the default.
@@ -2266,9 +2276,6 @@
     <!-- Number of times to try again with the shorter interval, before backing
          off until the normal polling interval. A value < 0 indicates infinite. -->
     <integer name="config_ntpRetry">3</integer>
-    <!-- If the time difference is greater than this threshold in milliseconds,
-         then update the time. -->
-    <integer name="config_ntpThreshold">5000</integer>
     <!-- Timeout to wait for NTP server response in milliseconds. -->
     <integer name="config_ntpTimeout">5000</integer>
 
@@ -2589,6 +2596,12 @@
          rmem_min,rmem_def,rmem_max,wmem_min,wmem_def,wmem_max -->
     <string name="config_wifi_tcp_buffers" translatable="false">524288,1048576,2097152,262144,524288,1048576</string>
 
+    <!-- What source to use to estimate link upstream and downstream bandwidth capacities.
+         Default is carrier_config, but it should be set to modem if the modem is returning
+         predictive (instead of instantaneous) bandwidth estimate.
+         Values are carrier_config and modem. -->
+    <string name="config_bandwidthEstimateSource">carrier_config</string>
+
     <!-- Whether WiFi display is supported by this device.
          There are many prerequisites for this feature to work correctly.
          Here are a few of them:
@@ -2711,7 +2724,23 @@
     <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingSecondaryUserActivity</string>
 
-    <!-- Name of the dialog that is used to request the user's consent to VPN connection -->
+    <!-- Name of the activity or service that prompts the user to reject, accept, or whitelist
+         a wireless network for wireless debugging.
+         Can be customized for other product types -->
+    <string name="config_customAdbWifiNetworkConfirmationComponent"
+            >com.android.systemui/com.android.systemui.wifi.WifiDebuggingActivity</string>
+
+    <!-- Name of the activity that prompts the secondary user to acknowledge she/he needs to
+         switch to the primary user to enable wireless debugging.
+         Can be customized for other product types -->
+    <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
+            >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
+
+    <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
+    <string name="config_platformVpnConfirmDialogComponent" translatable="false"
+            >com.android.vpndialogs/com.android.vpndialogs.PlatformVpnConfirmDialog</string>
+
+    <!-- Name of the dialog that is used to request the user's consent for a VpnService VPN -->
     <string name="config_customVpnConfirmDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.ConfirmDialog</string>
 
@@ -3020,6 +3049,10 @@
     <!-- Whether to use voip audio mode for ims call -->
     <bool name="config_use_voip_mode_for_ims">false</bool>
 
+    <!-- Boolean indicating USSD over IMS is allowed.
+     If it is not supported due to modem limitations, USSD send over the CS pipe instead.-->
+    <bool name="config_allow_ussd_over_ims">false</bool>
+
     <!-- String array containing numbers that shouldn't be logged. Country-specific. -->
     <string-array name="unloggable_phone_numbers" />
 
@@ -3238,7 +3271,9 @@
 
          The path is assumed to be specified in display coordinates with pixel units and in
          the display's native orientation, with the origin of the coordinate system at the
-         center top of the display.
+         center top of the display. Optionally, you can append either `@left` or `@right` to the
+         end of the path string, in order to change the path origin to either the top left,
+         or top right of the display.
 
          To facilitate writing device-independent emulation overlays, the marker `@dp` can be
          appended after the path string to interpret coordinates in dp instead of px units.
@@ -3517,8 +3552,8 @@
     <!-- True if home app should be pinned via Pinner Service -->
     <bool name="config_pinnerHomeApp">false</bool>
 
-    <!-- List of files pinned by the Pinner Service with the apex boot image b/119800099 -->
-    <string-array translatable="false" name="config_apexBootImagePinnerServiceFiles">
+    <!-- List of files pinned by the Pinner Service with the JIT Zygote boot image b/119800099 -->
+    <string-array translatable="false" name="config_jitzygoteBootImagePinnerServiceFiles">
     </string-array>
 
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
@@ -4325,4 +4360,12 @@
          create additional screen real estate outside beyond the keyboard. Note that the user needs
          to have a confirmed way to dismiss the keyboard when desired. -->
     <bool name="config_automotiveHideNavBarForKeyboard">false</bool>
+
+    <!-- Component name that accepts ACTION_SEND intents for nearby (proximity-based) sharing.
+         Used by ChooserActivity. -->
+    <string translatable="false" name="config_defaultNearbySharingComponent"></string>
+
+    <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
+         check after reboot or airplane mode toggling -->
+    <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
 </resources>

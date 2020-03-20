@@ -17,9 +17,8 @@
 package android.media;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.media.PlayerBase;
 import android.net.Uri;
 import android.os.PowerManager;
 import android.os.SystemClock;

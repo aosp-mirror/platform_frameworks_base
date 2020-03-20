@@ -16,14 +16,19 @@
 
 package android.telecom;
 
+import static android.Manifest.permission.MODIFY_PHONE_STATE;
+
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Notification;
 import android.bluetooth.BluetoothDevice;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
@@ -376,8 +381,31 @@ public abstract class Connection extends Conferenceable {
     /** Call supports the deflect feature. */
     public static final int CAPABILITY_SUPPORT_DEFLECT = 0x02000000;
 
+    /**
+     * When set, indicates that this {@link Connection} supports initiation of a conference call
+     * by directly adding participants using {@link #onAddConferenceParticipants(List)}.
+     * @hide
+     */
+    public static final int CAPABILITY_ADD_PARTICIPANT = 0x04000000;
+
+    /**
+     * Indicates that this {@code Connection} can be transferred to another
+     * number.
+     * Connection supports the blind and assured call transfer feature.
+     * @hide
+     */
+    public static final int CAPABILITY_TRANSFER = 0x08000000;
+
+    /**
+     * Indicates that this {@code Connection} can be transferred to another
+     * ongoing {@code Connection}.
+     * Connection supports the consultative call transfer feature.
+     * @hide
+     */
+    public static final int CAPABILITY_TRANSFER_CONSULTATIVE = 0x10000000;
+
     //**********************************************************************************************
-    // Next CAPABILITY value: 0x04000000
+    // Next CAPABILITY value: 0x20000000
     //**********************************************************************************************
 
     /**
@@ -474,7 +502,7 @@ public abstract class Connection extends Conferenceable {
      *
      * @see TelecomManager#EXTRA_USE_ASSISTED_DIALING
      */
-    public static final int PROPERTY_ASSISTED_DIALING_USED = 1 << 9;
+    public static final int PROPERTY_ASSISTED_DIALING = 1 << 9;
 
     /**
      * Set by the framework to indicate that the network has identified a Connection as an emergency
@@ -497,55 +525,129 @@ public abstract class Connection extends Conferenceable {
     @TestApi
     public static final int PROPERTY_REMOTELY_HOSTED = 1 << 11;
 
+    /**
+     * Set by the framework to indicate that it is an adhoc conference call.
+     * <p>
+     * This is used for Outgoing and incoming conference calls.
+     * @hide
+     */
+    public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
+
+
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<12
+    // Next PROPERTY value: 1<<13
     //**********************************************************************************************
 
     /**
-     * Define IMS Audio Codec
+     * Indicates that the audio codec is currently not specified or is unknown.
      */
-    // Current audio codec is NONE
     public static final int AUDIO_CODEC_NONE = ImsStreamMediaProfile.AUDIO_QUALITY_NONE; // 0
-    // Current audio codec is AMR
+    /**
+     * Adaptive Multi-rate audio codec.
+     */
     public static final int AUDIO_CODEC_AMR = ImsStreamMediaProfile.AUDIO_QUALITY_AMR; // 1
-    // Current audio codec is AMR_WB
+    /**
+     * Adaptive Multi-rate wideband audio codec.
+     */
     public static final int AUDIO_CODEC_AMR_WB = ImsStreamMediaProfile.AUDIO_QUALITY_AMR_WB; // 2
-    // Current audio codec is QCELP13K
+    /**
+     * Qualcomm code-excited linear prediction 13 kilobit audio codec.
+     */
     public static final int AUDIO_CODEC_QCELP13K = ImsStreamMediaProfile.AUDIO_QUALITY_QCELP13K; //3
-    // Current audio codec is EVRC
+    /**
+     * Enhanced Variable Rate Codec.  See 3GPP2 C.S0014-A.
+     */
     public static final int AUDIO_CODEC_EVRC = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC; // 4
-    // Current audio codec is EVRC_B
+    /**
+     * Enhanced Variable Rate Codec B.  Commonly used on CDMA networks.
+     */
     public static final int AUDIO_CODEC_EVRC_B = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_B; // 5
-    // Current audio codec is EVRC_WB
+    /**
+     * Enhanced Variable Rate Wideband Codec.  See RFC5188.
+     */
     public static final int AUDIO_CODEC_EVRC_WB = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_WB; // 6
-    // Current audio codec is EVRC_NW
+    /**
+     * Enhanced Variable Rate Narrowband-Wideband Codec.
+     */
     public static final int AUDIO_CODEC_EVRC_NW = ImsStreamMediaProfile.AUDIO_QUALITY_EVRC_NW; // 7
-    // Current audio codec is GSM_EFR
+    /**
+     * GSM Enhanced Full-Rate audio codec, also known as GSM-EFR, GSM 06.60, or simply EFR.
+     */
     public static final int AUDIO_CODEC_GSM_EFR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_EFR; // 8
-    // Current audio codec is GSM_FR
+    /**
+     * GSM Full-Rate audio codec, also known as GSM-FR, GSM 06.10, GSM, or simply FR.
+     */
     public static final int AUDIO_CODEC_GSM_FR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_FR; // 9
-    // Current audio codec is GSM_HR
+    /**
+     * GSM Half Rate audio codec.
+     */
     public static final int AUDIO_CODEC_GSM_HR = ImsStreamMediaProfile.AUDIO_QUALITY_GSM_HR; // 10
-    // Current audio codec is G711U
+    /**
+     * ITU-T G711U audio codec.
+     */
     public static final int AUDIO_CODEC_G711U = ImsStreamMediaProfile.AUDIO_QUALITY_G711U; // 11
-    // Current audio codec is G723
+    /**
+     * ITU-T G723 audio codec.
+     */
     public static final int AUDIO_CODEC_G723 = ImsStreamMediaProfile.AUDIO_QUALITY_G723; // 12
-    // Current audio codec is G711A
+    /**
+     * ITU-T G711A audio codec.
+     */
     public static final int AUDIO_CODEC_G711A = ImsStreamMediaProfile.AUDIO_QUALITY_G711A; // 13
-    // Current audio codec is G722
+    /**
+     * ITU-T G722 audio codec.
+     */
     public static final int AUDIO_CODEC_G722 = ImsStreamMediaProfile.AUDIO_QUALITY_G722; // 14
-    // Current audio codec is G711AB
+    /**
+     * ITU-T G711AB audio codec.
+     */
     public static final int AUDIO_CODEC_G711AB = ImsStreamMediaProfile.AUDIO_QUALITY_G711AB; // 15
-    // Current audio codec is G729
+    /**
+     * ITU-T G729 audio codec.
+     */
     public static final int AUDIO_CODEC_G729 = ImsStreamMediaProfile.AUDIO_QUALITY_G729; // 16
-    // Current audio codec is EVS_NB
+    /**
+     * Enhanced Voice Services Narrowband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_NB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_NB; // 17
-    // Current audio codec is EVS_WB
+    /**
+     * Enhanced Voice Services Wideband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_WB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_WB; // 18
-    // Current audio codec is EVS_SWB
+    /**
+     * Enhanced Voice Services Super-Wideband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_SWB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_SWB; // 19
-    // Current audio codec is EVS_FB
+    /**
+     * Enhanced Voice Services Fullband audio codec.  See 3GPP TS 26.441.
+     */
     public static final int AUDIO_CODEC_EVS_FB = ImsStreamMediaProfile.AUDIO_QUALITY_EVS_FB; // 20
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "AUDIO_CODEC_", value = {
+            AUDIO_CODEC_NONE,
+            AUDIO_CODEC_AMR,
+            AUDIO_CODEC_AMR_WB,
+            AUDIO_CODEC_QCELP13K,
+            AUDIO_CODEC_EVRC,
+            AUDIO_CODEC_EVRC_B,
+            AUDIO_CODEC_EVRC_WB,
+            AUDIO_CODEC_EVRC_NW,
+            AUDIO_CODEC_GSM_EFR,
+            AUDIO_CODEC_GSM_FR,
+            AUDIO_CODEC_GSM_HR,
+            AUDIO_CODEC_G711U,
+            AUDIO_CODEC_G723,
+            AUDIO_CODEC_G711A,
+            AUDIO_CODEC_G722,
+            AUDIO_CODEC_G711AB,
+            AUDIO_CODEC_G729,
+            AUDIO_CODEC_EVS_NB,
+            AUDIO_CODEC_EVS_SWB,
+            AUDIO_CODEC_EVS_FB
+    })
+    public @interface AudioCodec {}
 
     /**
      * Connection extra key used to store the last forwarded number associated with the current
@@ -640,10 +742,10 @@ public abstract class Connection extends Conferenceable {
             "android.telecom.extra.IS_RTT_AUDIO_PRESENT";
 
     /**
-     * The audio codec in use for the current {@link Connection}, if known. Valid values include
-     * {@link #AUDIO_CODEC_AMR_WB} and {@link #AUDIO_CODEC_EVS_WB}.
+     * The audio codec in use for the current {@link Connection}, if known.  Examples of valid
+     * values include {@link #AUDIO_CODEC_AMR_WB} and {@link #AUDIO_CODEC_EVS_WB}.
      */
-    public static final String EXTRA_AUDIO_CODEC =
+    public static final @AudioCodec String EXTRA_AUDIO_CODEC =
             "android.telecom.extra.AUDIO_CODEC";
 
     /**
@@ -879,7 +981,16 @@ public abstract class Connection extends Conferenceable {
         if ((capabilities & CAPABILITY_SUPPORT_DEFLECT) == CAPABILITY_SUPPORT_DEFLECT) {
             builder.append(isLong ? " CAPABILITY_SUPPORT_DEFLECT" : " sup_def");
         }
-
+        if ((capabilities & CAPABILITY_ADD_PARTICIPANT) == CAPABILITY_ADD_PARTICIPANT) {
+            builder.append(isLong ? " CAPABILITY_ADD_PARTICIPANT" : " add_participant");
+        }
+        if ((capabilities & CAPABILITY_TRANSFER) == CAPABILITY_TRANSFER) {
+            builder.append(isLong ? " CAPABILITY_TRANSFER" : " sup_trans");
+        }
+        if ((capabilities & CAPABILITY_TRANSFER_CONSULTATIVE)
+                == CAPABILITY_TRANSFER_CONSULTATIVE) {
+            builder.append(isLong ? " CAPABILITY_TRANSFER_CONSULTATIVE" : " sup_cTrans");
+        }
         builder.append("]");
         return builder.toString();
     }
@@ -951,6 +1062,10 @@ public abstract class Connection extends Conferenceable {
 
         if ((properties & PROPERTY_REMOTELY_HOSTED) == PROPERTY_REMOTELY_HOSTED) {
             builder.append(isLong ? " PROPERTY_REMOTELY_HOSTED" : " remote_hst");
+        }
+
+        if ((properties & PROPERTY_IS_ADHOC_CONFERENCE) == PROPERTY_IS_ADHOC_CONFERENCE) {
+            builder.append(isLong ? " PROPERTY_IS_ADHOC_CONFERENCE" : " adhoc_conf");
         }
 
         builder.append("]");
@@ -2031,19 +2146,24 @@ public abstract class Connection extends Conferenceable {
      */
     @SystemApi
     @TestApi
-    public final long getConnectTimeMillis() {
+    public final @IntRange(from = 0) long getConnectTimeMillis() {
         return mConnectTimeMillis;
     }
 
     /**
      * Retrieves the connection start time of the {@link Connection}, if specified.  A value of
      * {@link Conference#CONNECT_TIME_NOT_SPECIFIED} indicates that Telecom should determine the
-     * start time of the conference.
+     * start time of the connection.
      * <p>
      * Based on the value of {@link SystemClock#elapsedRealtime()}, which ensures that wall-clock
      * changes do not impact the call duration.
      * <p>
      * Used internally in Telephony when migrating conference participant data for IMS conferences.
+     * <p>
+     * The value returned is the same one set using
+     * {@link #setConnectionStartElapsedRealtimeMillis(long)}.  This value is never updated from
+     * the Telecom framework, so no permission enforcement occurs when retrieving the value with
+     * this method.
      *
      * @return The time at which the {@link Connection} was connected.
      *
@@ -2051,7 +2171,7 @@ public abstract class Connection extends Conferenceable {
      */
     @SystemApi
     @TestApi
-    public final long getConnectElapsedTimeMillis() {
+    public final @ElapsedRealtimeLong long getConnectionStartElapsedRealtimeMillis() {
         return mConnectElapsedTimeMillis;
     }
 
@@ -2472,6 +2592,9 @@ public abstract class Connection extends Conferenceable {
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
      * <p>
+     * This time corresponds to the date/time of connection and is stored in the call log in
+     * {@link android.provider.CallLog.Calls#DATE}.
+     * <p>
      * Used by telephony to maintain calls associated with an IMS Conference.
      *
      * @param connectTimeMillis The connection time, in milliseconds.  Should be set using a value
@@ -2481,7 +2604,8 @@ public abstract class Connection extends Conferenceable {
      */
     @SystemApi
     @TestApi
-    public final void setConnectTimeMillis(long connectTimeMillis) {
+    @RequiresPermission(MODIFY_PHONE_STATE)
+    public final void setConnectTimeMillis(@IntRange(from = 0) long connectTimeMillis) {
         mConnectTimeMillis = connectTimeMillis;
     }
 
@@ -2489,15 +2613,23 @@ public abstract class Connection extends Conferenceable {
      * Sets the time at which a call became active on this Connection. This is set only
      * when a conference call becomes active on this connection.
      * <p>
+     * This time is used to establish the duration of a call.  It uses
+     * {@link SystemClock#elapsedRealtime()} to ensure that the call duration is not impacted by
+     * time zone changes during a call.  The difference between the current
+     * {@link SystemClock#elapsedRealtime()} and the value set at the connection start time is used
+     * to populate {@link android.provider.CallLog.Calls#DURATION} in the call log.
+     * <p>
      * Used by telephony to maintain calls associated with an IMS Conference.
+     *
      * @param connectElapsedTimeMillis The connection time, in milliseconds.  Stored in the format
      *                              {@link SystemClock#elapsedRealtime()}.
-     *
      * @hide
      */
     @SystemApi
     @TestApi
-    public final void setConnectionStartElapsedRealTime(long connectElapsedTimeMillis) {
+    @RequiresPermission(MODIFY_PHONE_STATE)
+    public final void setConnectionStartElapsedRealtimeMillis(
+            @ElapsedRealtimeLong long connectElapsedTimeMillis) {
         mConnectElapsedTimeMillis = connectElapsedTimeMillis;
     }
 
@@ -2875,6 +3007,14 @@ public abstract class Connection extends Conferenceable {
     public void onSeparate() {}
 
     /**
+     * Supports initiation of a conference call by directly adding participants to an ongoing call.
+     *
+     * @param participants with which conference call will be formed.
+     * @hide
+     */
+    public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
+
+    /**
      * Notifies this Connection of a request to abort.
      */
     public void onAbort() {}
@@ -2959,10 +3099,41 @@ public abstract class Connection extends Conferenceable {
     public void onReject() {}
 
     /**
+     * Notifies this Connection, which is in {@link #STATE_RINGING}, of a request to reject.
+     * <p>
+     * For managed {@link ConnectionService}s, this will be called when the user rejects a call via
+     * the default dialer's {@link InCallService} using {@link Call#reject(int)}.
+     * @param rejectReason the reason the user provided for rejecting the call.
+     */
+    public void onReject(@android.telecom.Call.RejectReason int rejectReason) {
+        // to be implemented by ConnectionService.
+    }
+
+    /**
      * Notifies this Connection, which is in {@link #STATE_RINGING}, of
      * a request to reject with a message.
      */
     public void onReject(String replyMessage) {}
+
+    /**
+     * Notifies this Connection, a request to transfer to a target number.
+     * @param number the number to transfer this {@link Connection} to.
+     * @param isConfirmationRequired when {@code true}, the {@link ConnectionService}
+     * should wait until the transfer has successfully completed before disconnecting
+     * the current {@link Connection}.
+     * When {@code false}, the {@link ConnectionService} should signal the network to
+     * perform the transfer, but should immediately disconnect the call regardless of
+     * the outcome of the transfer.
+     * @hide
+     */
+    public void onTransfer(@NonNull Uri number, boolean isConfirmationRequired) {}
+
+    /**
+     * Notifies this Connection, a request to transfer to another Connection.
+     * @param otherConnection the {@link Connection} to transfer this call to.
+     * @hide
+     */
+    public void onTransfer(@NonNull Connection otherConnection) {}
 
     /**
      * Notifies this Connection of a request to silence the ringer.
@@ -3187,7 +3358,6 @@ public abstract class Connection extends Conferenceable {
         private boolean mImmutable = false;
         public FailureSignalingConnection(DisconnectCause disconnectCause) {
             setDisconnected(disconnectCause);
-            mImmutable = true;
         }
 
         public void checkImmutable() {
@@ -3405,7 +3575,7 @@ public abstract class Connection extends Conferenceable {
      * ATIS-1000082.
      * @return the verification status.
      */
-    public @VerificationStatus int getCallerNumberVerificationStatus() {
+    public final @VerificationStatus int getCallerNumberVerificationStatus() {
         return mCallerNumberVerificationStatus;
     }
 
@@ -3417,7 +3587,7 @@ public abstract class Connection extends Conferenceable {
      * by
      * {@link ConnectionService#onCreateIncomingConnection(PhoneAccountHandle, ConnectionRequest)}.
      */
-    public void setCallerNumberVerificationStatus(
+    public final void setCallerNumberVerificationStatus(
             @VerificationStatus int callerNumberVerificationStatus) {
         mCallerNumberVerificationStatus = callerNumberVerificationStatus;
     }

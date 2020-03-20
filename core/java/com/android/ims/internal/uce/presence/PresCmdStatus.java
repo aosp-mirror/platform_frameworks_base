@@ -16,11 +16,11 @@
 
 package com.android.ims.internal.uce.presence;
 
-import com.android.ims.internal.uce.common.StatusCode;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.ims.internal.uce.common.StatusCode;
 
 
 /** @hide  */

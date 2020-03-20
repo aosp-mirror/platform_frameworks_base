@@ -60,6 +60,9 @@
     <uses-permission android:name="android.permission.GET_APP_OPS_STATS" />
     <uses-permission android:name="android.permission.USE_RESERVED_DISK" />
 
+    <!-- to invoke ContentSuggestionsService -->
+    <uses-permission android:name="android.permission.MANAGE_CONTENT_SUGGESTIONS"/>
+
     <!-- Networking and telephony -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
@@ -72,7 +75,7 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.OVERRIDE_WIFI_CONFIG" />
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
-    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.TETHER_PRIVILEGED" />
     <uses-permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY" />
@@ -366,6 +369,10 @@
         <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
             android:exported="false" />
 
+        <!-- Callback for invoking a smart action from the screenshot notification. -->
+        <receiver android:name=".screenshot.GlobalScreenshot$SmartActionsReceiver"
+                  android:exported="false"/>
+
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"
@@ -425,6 +432,25 @@
             android:exported="true">
         </activity-alias>
         <activity android:name=".usb.UsbDebuggingSecondaryUserActivity"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+
+        <!-- started from WirelessDebuggingManager -->
+        <activity android:name=".wifi.WifiDebuggingActivity"
+            android:permission="android.permission.MANAGE_DEBUGGING"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+        </activity>
+        <activity-alias
+            android:name=".WifiDebuggingActivityAlias"
+            android:permission="android.permission.DUMP"
+            android:targetActivity=".wifi.WifiDebuggingActivity"
+            android:exported="true">
+        </activity-alias>
+        <activity android:name=".wifi.WifiDebuggingSecondaryUserActivity"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">

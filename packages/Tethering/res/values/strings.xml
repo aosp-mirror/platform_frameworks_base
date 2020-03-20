@@ -1,16 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!-- Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- Shown when the device is tethered -->
-    <!-- Strings for tethered notification title [CHAR LIMIT=200] -->
+    <!-- String for tethered notification title [CHAR LIMIT=200] -->
     <string name="tethered_notification_title">Tethering or hotspot active</string>
-    <!-- Strings for tethered notification message [CHAR LIMIT=200] -->
+    <!-- String for tethered notification message [CHAR LIMIT=200] -->
     <string name="tethered_notification_message">Tap to set up.</string>
+    <!-- String for tethered notification title with client number info. -->
+    <plurals name="tethered_notification_title_with_client_number">
+    </plurals>
 
     <!-- This notification is shown when tethering has been disabled on a user's device.
     The device is managed by the user's employer. Tethering can't be turned on unless the
     IT administrator allows it. The noun "admin" is another reference for "IT administrator." -->
-    <!-- Strings for tether disabling notification title  [CHAR LIMIT=200] -->
+    <!-- String for tether disabling notification title [CHAR LIMIT=200] -->
     <string name="disable_tether_notification_title">Tethering is disabled</string>
-    <!-- Strings for tether disabling notification message  [CHAR LIMIT=200] -->
+    <!-- String for tether disabling notification message [CHAR LIMIT=200] -->
     <string name="disable_tether_notification_message">Contact your admin for details</string>
+
+    <!-- This string should be consistent with the "Hotspot & tethering" text in the "Network and
+    Internet" settings page. That is currently the tether_settings_title_all string. -->
+    <!-- String for tether notification channel name [CHAR LIMIT=200] -->
+    <string name="notification_channel_tethering_status">Hotspot &amp; tethering status</string>
+
+    <!-- String for no upstream notification title [CHAR LIMIT=200] -->
+    <string name="no_upstream_notification_title"></string>
+    <!-- String for no upstream notification message [CHAR LIMIT=200] -->
+    <string name="no_upstream_notification_message"></string>
+    <!-- String for cellular roaming notification disable button [CHAR LIMIT=200]  -->
+    <string name="no_upstream_notification_disable_button"></string>
+
+    <!-- String for cellular roaming notification title [CHAR LIMIT=200]  -->
+    <string name="upstream_roaming_notification_title"></string>
+    <!-- String for cellular roaming notification message [CHAR LIMIT=500]  -->
+    <string name="upstream_roaming_notification_message"></string>
+    <!-- String for cellular roaming notification continue button [CHAR LIMIT=200]  -->
+    <string name="upstream_roaming_notification_continue_button"></string>
 </resources>

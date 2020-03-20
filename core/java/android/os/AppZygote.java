@@ -21,6 +21,8 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import dalvik.system.VMRuntime;
+
 /**
  * AppZygote is responsible for interfacing with an application-specific zygote.
  *
@@ -113,7 +115,7 @@ public class AppZygote {
                     "app_zygote",  // seInfo
                     abi,  // abi
                     abi, // acceptedAbiList
-                    null, // instructionSet
+                    VMRuntime.getInstructionSet(abi), // instructionSet
                     mZygoteUidGidMin,
                     mZygoteUidGidMax);
 

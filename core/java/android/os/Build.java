@@ -22,21 +22,21 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.app.Application;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.View;
-
-import com.android.internal.telephony.TelephonyProperties;
 
 import dalvik.system.VMRuntime;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Information about the current build, extracted from system properties.
@@ -99,7 +99,8 @@ public class Build {
      * {@link #getRadioVersion} instead.
      */
     @Deprecated
-    public static final String RADIO = getString(TelephonyProperties.PROPERTY_BASEBAND_VERSION);
+    public static final String RADIO = joinListOrElse(
+            TelephonyProperties.baseband_version(), UNKNOWN);
 
     /** The name of the hardware (from the kernel command line or /proc). */
     public static final String HARDWARE = getString("ro.hardware");
@@ -160,7 +161,7 @@ public class Build {
         try {
             Application application = ActivityThread.currentApplication();
             String callingPackage = application != null ? application.getPackageName() : null;
-            return service.getSerialForPackage(callingPackage);
+            return service.getSerialForPackage(callingPackage, null);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
@@ -244,7 +245,8 @@ public class Build {
         public static final String BASE_OS = SystemProperties.get("ro.build.version.base_os", "");
 
         /**
-         * The user-visible security patch level.
+         * The user-visible security patch level. This value represents the date when the device
+         * most recently applied a security patch.
          */
         public static final String SECURITY_PATCH = SystemProperties.get(
                 "ro.build.version.security_patch", "");
@@ -1088,7 +1090,8 @@ public class Build {
         final String requiredBootloader = SystemProperties.get("ro.build.expect.bootloader");
         final String currentBootloader = SystemProperties.get("ro.bootloader");
         final String requiredRadio = SystemProperties.get("ro.build.expect.baseband");
-        final String currentRadio = SystemProperties.get("gsm.version.baseband");
+        final String currentRadio = joinListOrElse(
+                TelephonyProperties.baseband_version(), "");
 
         if (TextUtils.isEmpty(system)) {
             Slog.e(TAG, "Required ro.system.build.fingerprint is empty!");
@@ -1262,8 +1265,7 @@ public class Build {
      * null (if, for instance, the radio is not currently on).
      */
     public static String getRadioVersion() {
-        String propVal = SystemProperties.get(TelephonyProperties.PROPERTY_BASEBAND_VERSION);
-        return TextUtils.isEmpty(propVal) ? null : propVal;
+        return joinListOrElse(TelephonyProperties.baseband_version(), null);
     }
 
     @UnsupportedAppUsage
@@ -1287,5 +1289,11 @@ public class Build {
         } catch (NumberFormatException e) {
             return -1;
         }
+    }
+
+    private static <T> String joinListOrElse(List<T> list, String defaultValue) {
+        String ret = list.stream().map(elem -> elem == null ? "" : elem.toString())
+                .collect(Collectors.joining(","));
+        return ret.isEmpty() ? defaultValue : ret;
     }
 }

@@ -16,17 +16,19 @@
 
 package android.telecom;
 
+import static android.Manifest.permission.MODIFY_PHONE_STATE;
+
+import android.annotation.ElapsedRealtimeLong;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.telecom.Connection.VideoProvider;
-import android.telephony.Annotation.RilRadioTechnology;
-import android.telephony.ServiceState;
-import android.telephony.TelephonyManager;
 import android.util.ArraySet;
 
 import java.util.ArrayList;
@@ -72,6 +74,7 @@ public abstract class Conference extends Conferenceable {
         public void onConnectionEvent(Conference c, String event, Bundle extras) {}
         public void onCallerDisplayNameChanged(
                 Conference c, String callerDisplayName, int presentation) {}
+        public void onRingbackRequested(Conference c, boolean ringback) {}
     }
 
     private final Set<Listener> mListeners = new CopyOnWriteArraySet<>();
@@ -100,6 +103,7 @@ public abstract class Conference extends Conferenceable {
     private int mAddressPresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
+    private boolean mRingbackRequested = false;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -170,6 +174,15 @@ public abstract class Conference extends Conferenceable {
      */
     public final int getState() {
         return mState;
+    }
+
+    /**
+     * Returns whether this conference is requesting that the system play a ringback tone
+     * on its behalf.
+     * @hide
+     */
+    public final boolean isRingbackRequested() {
+        return mRingbackRequested;
     }
 
     /**
@@ -311,6 +324,44 @@ public abstract class Conference extends Conferenceable {
     public void onConnectionAdded(Connection connection) {}
 
     /**
+     * Notifies the {@link Conference} of a request to add a new participants to the conference call
+     * @param participants that will be added to this conference call
+     * @hide
+     */
+    public void onAddConferenceParticipants(@NonNull List<Uri> participants) {}
+
+    /**
+     * Notifies this Conference, which is in {@code STATE_RINGING}, of
+     * a request to accept.
+     * For managed {@link ConnectionService}s, this will be called when the user answers a call via
+     * the default dialer's {@link InCallService}.
+     *
+     * @param videoState The video state in which to answer the connection.
+     * @hide
+     */
+    public void onAnswer(int videoState) {}
+
+    /**
+     * Notifies this Conference, which is in {@code STATE_RINGING}, of
+     * a request to accept.
+     * For managed {@link ConnectionService}s, this will be called when the user answers a call via
+     * the default dialer's {@link InCallService}.
+     * @hide
+     */
+    public final void onAnswer() {
+         onAnswer(VideoProfile.STATE_AUDIO_ONLY);
+    }
+
+    /**
+     * Notifies this Conference, which is in {@code STATE_RINGING}, of
+     * a request to reject.
+     * For managed {@link ConnectionService}s, this will be called when the user rejects a call via
+     * the default dialer's {@link InCallService}.
+     * @hide
+     */
+    public void onReject() {}
+
+    /**
      * Sets state to be on hold.
      */
     public final void setOnHold() {
@@ -325,9 +376,18 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
+     * Sets state to be ringing.
+     * @hide
+     */
+    public final void setRinging() {
+        setState(Connection.STATE_RINGING);
+    }
+
+    /**
      * Sets state to be active.
      */
     public final void setActive() {
+        setRingbackRequested(false);
         setState(Connection.STATE_ACTIVE);
     }
 
@@ -436,6 +496,22 @@ public abstract class Conference extends Conferenceable {
             }
         }
         fireOnConferenceableConnectionsChanged();
+    }
+
+    /**
+     * Requests that the framework play a ringback tone. This is to be invoked by implementations
+     * that do not play a ringback tone themselves in the conference's audio stream.
+     *
+     * @param ringback Whether the ringback tone is to be played.
+     * @hide
+     */
+    public final void setRingbackRequested(boolean ringback) {
+        if (mRingbackRequested != ringback) {
+            mRingbackRequested = ringback;
+            for (Listener l : mListeners) {
+                l.onRingbackRequested(this, ringback);
+            }
+        }
     }
 
     /**
@@ -561,12 +637,12 @@ public abstract class Conference extends Conferenceable {
      * Should be specified in wall-clock time returned by {@link System#currentTimeMillis()}.
      * <p>
      * When setting the connection time, you should always set the connection elapsed time via
-     * {@link #setConnectionStartElapsedRealTime(long)} to ensure the duration is reflected.
+     * {@link #setConnectionStartElapsedRealtimeMillis(long)} to ensure the duration is reflected.
      *
      * @param connectionTimeMillis The connection time, in milliseconds, as returned by
      *                             {@link System#currentTimeMillis()}.
      */
-    public final void setConnectionTime(long connectionTimeMillis) {
+    public final void setConnectionTime(@IntRange(from = 0) long connectionTimeMillis) {
         mConnectTimeMillis = connectionTimeMillis;
     }
 
@@ -582,8 +658,28 @@ public abstract class Conference extends Conferenceable {
      *
      * @param connectionStartElapsedRealTime The connection time, as measured by
      * {@link SystemClock#elapsedRealtime()}.
+     * @deprecated use {@link #setConnectionStartElapsedRealtimeMillis(long)} instead.
      */
+    @Deprecated
     public final void setConnectionStartElapsedRealTime(long connectionStartElapsedRealTime) {
+        setConnectionStartElapsedRealtimeMillis(connectionStartElapsedRealTime);
+    }
+
+    /**
+     * Sets the start time of the {@link Conference} which is the basis for the determining the
+     * duration of the {@link Conference}.
+     * <p>
+     * You should use a value returned by {@link SystemClock#elapsedRealtime()} to ensure that time
+     * zone changes do not impact the conference duration.
+     * <p>
+     * When setting this, you should also set the connection time via
+     * {@link #setConnectionTime(long)}.
+     *
+     * @param connectionStartElapsedRealTime The connection time, as measured by
+     * {@link SystemClock#elapsedRealtime()}.
+     */
+    public final void setConnectionStartElapsedRealtimeMillis(
+            @ElapsedRealtimeLong long connectionStartElapsedRealTime) {
         mConnectionStartElapsedRealTime = connectionStartElapsedRealTime;
     }
 
@@ -604,7 +700,7 @@ public abstract class Conference extends Conferenceable {
      *
      * @return The time at which the {@code Conference} was connected.
      */
-    public final long getConnectionTime() {
+    public final @IntRange(from = 0) long getConnectionTime() {
         return mConnectTimeMillis;
     }
 
@@ -621,11 +717,8 @@ public abstract class Conference extends Conferenceable {
      * has no general use other than to the Telephony framework.
      *
      * @return The elapsed time at which the {@link Conference} was connected.
-     * @hide
      */
-    @SystemApi
-    @TestApi
-    public final long getConnectionStartElapsedRealTime() {
+    public final @ElapsedRealtimeLong long getConnectionStartElapsedRealtimeMillis() {
         return mConnectionStartElapsedRealTime;
     }
 
@@ -643,14 +736,6 @@ public abstract class Conference extends Conferenceable {
     }
 
     private void setState(int newState) {
-        if (newState != Connection.STATE_ACTIVE &&
-                newState != Connection.STATE_HOLDING &&
-                newState != Connection.STATE_DISCONNECTED) {
-            Log.w(this, "Unsupported state transition for Conference call.",
-                    Connection.stateToString(newState));
-            return;
-        }
-
         if (mState != newState) {
             int oldState = mState;
             mState = newState;
@@ -658,6 +743,38 @@ public abstract class Conference extends Conferenceable {
                 l.onStateChanged(this, oldState, newState);
             }
         }
+    }
+
+    private static class FailureSignalingConference extends Conference {
+        private boolean mImmutable = false;
+        public FailureSignalingConference(DisconnectCause disconnectCause,
+                PhoneAccountHandle phoneAccount) {
+            super(phoneAccount);
+            setDisconnected(disconnectCause);
+            mImmutable = true;
+        }
+        public void checkImmutable() {
+            if (mImmutable) {
+                throw new UnsupportedOperationException("Conference is immutable");
+            }
+        }
+    }
+
+    /**
+     * Return a {@code Conference} which represents a failed conference attempt. The returned
+     * {@code Conference} will have a {@link android.telecom.DisconnectCause} and as specified,
+     * and a {@link #getState()} of {@code STATE_DISCONNECTED}.
+     * <p>
+     * The returned {@code Conference} can be assumed to {@link #destroy()} itself when appropriate,
+     * so users of this method need not maintain a reference to its return value to destroy it.
+     *
+     * @param disconnectCause The disconnect cause, ({@see android.telecomm.DisconnectCause}).
+     * @return A {@code Conference} which indicates failure.
+     * @hide
+     */
+    public @NonNull static Conference createFailedConference(
+            @NonNull DisconnectCause disconnectCause, @NonNull PhoneAccountHandle phoneAccount) {
+        return new FailureSignalingConference(disconnectCause, phoneAccount);
     }
 
     private final void clearConferenceableList() {
@@ -670,11 +787,13 @@ public abstract class Conference extends Conferenceable {
     @Override
     public String toString() {
         return String.format(Locale.US,
-                "[State: %s,Capabilites: %s, VideoState: %s, VideoProvider: %s, ThisObject %s]",
+                "[State: %s,Capabilites: %s, VideoState: %s, VideoProvider: %s,"
+                + "isRingbackRequested: %s, ThisObject %s]",
                 Connection.stateToString(mState),
                 Call.Details.capabilitiesToString(mConnectionCapabilities),
                 getVideoState(),
                 getVideoProvider(),
+                isRingbackRequested() ? "Y" : "N",
                 super.toString());
     }
 
@@ -897,6 +1016,7 @@ public abstract class Conference extends Conferenceable {
      */
     @SystemApi
     @TestApi
+    @RequiresPermission(MODIFY_PHONE_STATE)
     public void setConferenceState(boolean isConference) {
         for (Listener l : mListeners) {
             l.onConferenceStateChanged(this, isConference);
@@ -917,6 +1037,7 @@ public abstract class Conference extends Conferenceable {
      */
     @SystemApi
     @TestApi
+    @RequiresPermission(MODIFY_PHONE_STATE)
     public final void setAddress(@NonNull Uri address,
             @TelecomManager.Presentation int presentation) {
         Log.d(this, "setAddress %s", address);
@@ -1023,12 +1144,52 @@ public abstract class Conference extends Conferenceable {
     }
 
     /**
-     * Sends an event associated with this {@code Conference} with associated event extras to the
-     * {@link InCallService} (note: this is identical in concept to
-     * {@link Connection#sendConnectionEvent(String, Bundle)}).
-     * @see Connection#sendConnectionEvent(String, Bundle)
+     * Sends an event associated with this {@link Conference} with associated event extras to the
+     * {@link InCallService}.
+     * <p>
+     * Connection events are used to communicate point in time information from a
+     * {@link ConnectionService} to an {@link InCallService} implementation.  An example of a
+     * custom connection event includes notifying the UI when a WIFI call has been handed over to
+     * LTE, which the InCall UI might use to inform the user that billing charges may apply.  The
+     * Android Telephony framework will send the {@link Connection#EVENT_MERGE_COMPLETE}
+     * connection event when a call to {@link Call#mergeConference()} has completed successfully.
+     * <p>
+     * Events are exposed to {@link InCallService} implementations via
+     * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * <p>
+     * No assumptions should be made as to how an In-Call UI or service will handle these events.
+     * The {@link ConnectionService} must assume that the In-Call UI could even chose to ignore
+     * some events altogether.
+     * <p>
+     * Events should be fully qualified (e.g. {@code com.example.event.MY_EVENT}) to avoid
+     * conflicts between {@link ConnectionService} implementations.  Further, custom
+     * {@link ConnectionService} implementations shall not re-purpose events in the
+     * {@code android.*} namespace, nor shall they define new event types in this namespace.  When
+     * defining a custom event type, ensure the contents of the extras {@link Bundle} is clearly
+     * defined.  Extra keys for this bundle should be named similar to the event type (e.g.
+     * {@code com.example.extra.MY_EXTRA}).
+     * <p>
+     * When defining events and the associated extras, it is important to keep their behavior
+     * consistent when the associated {@link ConnectionService} is updated.  Support for deprecated
+     * events/extras should me maintained to ensure backwards compatibility with older
+     * {@link InCallService} implementations which were built to support the older behavior.
+     * <p>
+     * Expected connection events from the Telephony stack are:
+     * <p>
+     * <ul>
+     *      <li>{@link Connection#EVENT_CALL_HOLD_FAILED} with {@code null} {@code extras} when the
+     *      {@link Conference} could not be held.</li>
+     *      <li>{@link Connection#EVENT_MERGE_START} with {@code null} {@code extras} when a new
+     *      call is being merged into the conference.</li>
+     *      <li>{@link Connection#EVENT_MERGE_COMPLETE} with {@code null} {@code extras} a new call
+     *      has completed being merged into the conference.</li>
+     *      <li>{@link Connection#EVENT_CALL_MERGE_FAILED} with {@code null} {@code extras} a new
+     *      call has failed to merge into the conference (the dialer app can determine which call
+     *      failed to merge based on the fact that the call still exists outside of the conference
+     *      at the end of the merge process).</li>
+     * </ul>
      *
-     * @param event The connection event.
+     * @param event The conference event.
      * @param extras Optional bundle containing extra information associated with the event.
      */
     public void sendConferenceEvent(@NonNull String event, @Nullable Bundle extras) {

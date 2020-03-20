@@ -292,19 +292,11 @@ static void JHwParcel_native_enforceInterface(
         return;
     }
 
-    const jchar *interfaceName = env->GetStringCritical(interfaceNameObj, NULL);
+    const char *interfaceName = env->GetStringUTFChars(interfaceNameObj, NULL);
     if (interfaceName) {
-        String8 interfaceNameCopy = String8(String16(
-                reinterpret_cast<const char16_t *>(interfaceName),
-                env->GetStringLength(interfaceNameObj)));
-
-        env->ReleaseStringCritical(interfaceNameObj, interfaceName);
-        interfaceName = NULL;
-
         hardware::Parcel *parcel =
             JHwParcel::GetNativeContext(env, thiz)->getParcel();
-
-        bool valid = parcel->enforceInterface(interfaceNameCopy.string());
+        bool valid = parcel->enforceInterface(interfaceName);
 
         if (!valid) {
             jniThrowException(
@@ -312,6 +304,7 @@ static void JHwParcel_native_enforceInterface(
                     "java/lang/SecurityException",
                     "HWBinder invocation to an incorrect interface");
         }
+        env->ReleaseStringUTFChars(interfaceNameObj, interfaceName);
     }
 }
 

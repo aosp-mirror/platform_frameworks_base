@@ -108,6 +108,7 @@ public class SystemNotificationChannels {
                 NETWORK_STATUS,
                 context.getString(R.string.notification_channel_network_status),
                 NotificationManager.IMPORTANCE_LOW);
+        network.setBlockableSystem(true);
         channelsList.add(network);
 
         final NotificationChannel networkAlertsChannel = new NotificationChannel(

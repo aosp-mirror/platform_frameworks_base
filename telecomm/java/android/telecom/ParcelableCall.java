@@ -16,27 +16,286 @@
 
 package android.telecom;
 
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.telecom.Call.Details.CallDirection;
 
+import com.android.internal.telecom.IVideoProvider;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.android.internal.telecom.IVideoProvider;
 
 /**
  * Information about a call that is used between InCallService and Telecom.
  * @hide
  */
 public final class ParcelableCall implements Parcelable {
+
+    public static class ParcelableCallBuilder {
+        private String mId;
+        private int mState;
+        private DisconnectCause mDisconnectCause;
+        private List<String> mCannedSmsResponses;
+        private int mCapabilities;
+        private int mProperties;
+        private int mSupportedAudioRoutes;
+        private long mConnectTimeMillis;
+        private Uri mHandle;
+        private int mHandlePresentation;
+        private String mCallerDisplayName;
+        private int mCallerDisplayNamePresentation;
+        private GatewayInfo mGatewayInfo;
+        private PhoneAccountHandle mAccountHandle;
+        private boolean mIsVideoCallProviderChanged;
+        private IVideoProvider mVideoCallProvider;
+        private boolean mIsRttCallChanged;
+        private ParcelableRttCall mRttCall;
+        private String mParentCallId;
+        private List<String> mChildCallIds;
+        private StatusHints mStatusHints;
+        private int mVideoState;
+        private List<String> mConferenceableCallIds;
+        private Bundle mIntentExtras;
+        private Bundle mExtras;
+        private long mCreationTimeMillis;
+        private int mCallDirection;
+        private int mCallerNumberVerificationStatus;
+        private String mContactDisplayName;
+        private String mActiveChildCallId;
+
+        public ParcelableCallBuilder setId(String id) {
+            mId = id;
+            return this;
+        }
+
+        public ParcelableCallBuilder setState(int state) {
+            mState = state;
+            return this;
+        }
+
+        public ParcelableCallBuilder setDisconnectCause(DisconnectCause disconnectCause) {
+            mDisconnectCause = disconnectCause;
+            return this;
+        }
+
+        public ParcelableCallBuilder setCannedSmsResponses(List<String> cannedSmsResponses) {
+            mCannedSmsResponses = cannedSmsResponses;
+            return this;
+        }
+
+        public ParcelableCallBuilder setCapabilities(int capabilities) {
+            mCapabilities = capabilities;
+            return this;
+        }
+
+        public ParcelableCallBuilder setProperties(int properties) {
+            mProperties = properties;
+            return this;
+        }
+
+        public ParcelableCallBuilder setSupportedAudioRoutes(int supportedAudioRoutes) {
+            mSupportedAudioRoutes = supportedAudioRoutes;
+            return this;
+        }
+
+        public ParcelableCallBuilder setConnectTimeMillis(long connectTimeMillis) {
+            mConnectTimeMillis = connectTimeMillis;
+            return this;
+        }
+
+        public ParcelableCallBuilder setHandle(Uri handle) {
+            mHandle = handle;
+            return this;
+        }
+
+        public ParcelableCallBuilder setHandlePresentation(int handlePresentation) {
+            mHandlePresentation = handlePresentation;
+            return this;
+        }
+
+        public ParcelableCallBuilder setCallerDisplayName(String callerDisplayName) {
+            mCallerDisplayName = callerDisplayName;
+            return this;
+        }
+
+        public ParcelableCallBuilder setCallerDisplayNamePresentation(
+                int callerDisplayNamePresentation) {
+            mCallerDisplayNamePresentation = callerDisplayNamePresentation;
+            return this;
+        }
+
+        public ParcelableCallBuilder setGatewayInfo(GatewayInfo gatewayInfo) {
+            mGatewayInfo = gatewayInfo;
+            return this;
+        }
+
+        public ParcelableCallBuilder setAccountHandle(PhoneAccountHandle accountHandle) {
+            mAccountHandle = accountHandle;
+            return this;
+        }
+
+        public ParcelableCallBuilder setIsVideoCallProviderChanged(
+                boolean isVideoCallProviderChanged) {
+            mIsVideoCallProviderChanged = isVideoCallProviderChanged;
+            return this;
+        }
+
+        public ParcelableCallBuilder setVideoCallProvider(IVideoProvider videoCallProvider) {
+            mVideoCallProvider = videoCallProvider;
+            return this;
+        }
+
+        public ParcelableCallBuilder setIsRttCallChanged(boolean isRttCallChanged) {
+            mIsRttCallChanged = isRttCallChanged;
+            return this;
+        }
+
+        public ParcelableCallBuilder setRttCall(ParcelableRttCall rttCall) {
+            mRttCall = rttCall;
+            return this;
+        }
+
+        public ParcelableCallBuilder setParentCallId(String parentCallId) {
+            mParentCallId = parentCallId;
+            return this;
+        }
+
+        public ParcelableCallBuilder setChildCallIds(List<String> childCallIds) {
+            mChildCallIds = childCallIds;
+            return this;
+        }
+
+        public ParcelableCallBuilder setStatusHints(StatusHints statusHints) {
+            mStatusHints = statusHints;
+            return this;
+        }
+
+        public ParcelableCallBuilder setVideoState(int videoState) {
+            mVideoState = videoState;
+            return this;
+        }
+
+        public ParcelableCallBuilder setConferenceableCallIds(
+                List<String> conferenceableCallIds) {
+            mConferenceableCallIds = conferenceableCallIds;
+            return this;
+        }
+
+        public ParcelableCallBuilder setIntentExtras(Bundle intentExtras) {
+            mIntentExtras = intentExtras;
+            return this;
+        }
+
+        public ParcelableCallBuilder setExtras(Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        public ParcelableCallBuilder setCreationTimeMillis(long creationTimeMillis) {
+            mCreationTimeMillis = creationTimeMillis;
+            return this;
+        }
+
+        public ParcelableCallBuilder setCallDirection(int callDirection) {
+            mCallDirection = callDirection;
+            return this;
+        }
+
+        public ParcelableCallBuilder setCallerNumberVerificationStatus(
+                int callerNumberVerificationStatus) {
+            mCallerNumberVerificationStatus = callerNumberVerificationStatus;
+            return this;
+        }
+
+        public ParcelableCallBuilder setContactDisplayName(String contactDisplayName) {
+            mContactDisplayName = contactDisplayName;
+            return this;
+        }
+
+        public ParcelableCallBuilder setActiveChildCallId(String activeChildCallId) {
+            mActiveChildCallId = activeChildCallId;
+            return this;
+        }
+
+        public ParcelableCall createParcelableCall() {
+            return new ParcelableCall(
+                    mId,
+                    mState,
+                    mDisconnectCause,
+                    mCannedSmsResponses,
+                    mCapabilities,
+                    mProperties,
+                    mSupportedAudioRoutes,
+                    mConnectTimeMillis,
+                    mHandle,
+                    mHandlePresentation,
+                    mCallerDisplayName,
+                    mCallerDisplayNamePresentation,
+                    mGatewayInfo,
+                    mAccountHandle,
+                    mIsVideoCallProviderChanged,
+                    mVideoCallProvider,
+                    mIsRttCallChanged,
+                    mRttCall,
+                    mParentCallId,
+                    mChildCallIds,
+                    mStatusHints,
+                    mVideoState,
+                    mConferenceableCallIds,
+                    mIntentExtras,
+                    mExtras,
+                    mCreationTimeMillis,
+                    mCallDirection,
+                    mCallerNumberVerificationStatus,
+                    mContactDisplayName,
+                    mActiveChildCallId);
+        }
+
+        public static ParcelableCallBuilder fromParcelableCall(ParcelableCall parcelableCall) {
+            ParcelableCallBuilder newBuilder = new ParcelableCallBuilder();
+            newBuilder.mId = parcelableCall.mId;
+            newBuilder.mState = parcelableCall.mState;
+            newBuilder.mDisconnectCause = parcelableCall.mDisconnectCause;
+            newBuilder.mCannedSmsResponses = parcelableCall.mCannedSmsResponses;
+            newBuilder.mCapabilities = parcelableCall.mCapabilities;
+            newBuilder.mProperties = parcelableCall.mProperties;
+            newBuilder.mSupportedAudioRoutes = parcelableCall.mSupportedAudioRoutes;
+            newBuilder.mConnectTimeMillis = parcelableCall.mConnectTimeMillis;
+            newBuilder.mHandle = parcelableCall.mHandle;
+            newBuilder.mHandlePresentation = parcelableCall.mHandlePresentation;
+            newBuilder.mCallerDisplayName = parcelableCall.mCallerDisplayName;
+            newBuilder.mCallerDisplayNamePresentation =
+                    parcelableCall.mCallerDisplayNamePresentation;
+            newBuilder.mGatewayInfo = parcelableCall.mGatewayInfo;
+            newBuilder.mAccountHandle = parcelableCall.mAccountHandle;
+            newBuilder.mIsVideoCallProviderChanged = parcelableCall.mIsVideoCallProviderChanged;
+            newBuilder.mVideoCallProvider = parcelableCall.mVideoCallProvider;
+            newBuilder.mIsRttCallChanged = parcelableCall.mIsRttCallChanged;
+            newBuilder.mRttCall = parcelableCall.mRttCall;
+            newBuilder.mParentCallId = parcelableCall.mParentCallId;
+            newBuilder.mChildCallIds = parcelableCall.mChildCallIds;
+            newBuilder.mStatusHints = parcelableCall.mStatusHints;
+            newBuilder.mVideoState = parcelableCall.mVideoState;
+            newBuilder.mConferenceableCallIds = parcelableCall.mConferenceableCallIds;
+            newBuilder.mIntentExtras = parcelableCall.mIntentExtras;
+            newBuilder.mExtras = parcelableCall.mExtras;
+            newBuilder.mCreationTimeMillis = parcelableCall.mCreationTimeMillis;
+            newBuilder.mCallDirection = parcelableCall.mCallDirection;
+            newBuilder.mCallerNumberVerificationStatus =
+                    parcelableCall.mCallerNumberVerificationStatus;
+            newBuilder.mContactDisplayName = parcelableCall.mContactDisplayName;
+            newBuilder.mActiveChildCallId = parcelableCall.mActiveChildCallId;
+            return newBuilder;
+        }
+    }
+
     private final String mId;
     private final int mState;
     private final DisconnectCause mDisconnectCause;
@@ -66,6 +325,8 @@ public final class ParcelableCall implements Parcelable {
     private final long mCreationTimeMillis;
     private final int mCallDirection;
     private final int mCallerNumberVerificationStatus;
+    private final String mContactDisplayName;
+    private final String mActiveChildCallId; // Only valid for CDMA conferences
 
     public ParcelableCall(
             String id,
@@ -95,7 +356,10 @@ public final class ParcelableCall implements Parcelable {
             Bundle extras,
             long creationTimeMillis,
             int callDirection,
-            int callerNumberVerificationStatus) {
+            int callerNumberVerificationStatus,
+            String contactDisplayName,
+            String activeChildCallId
+    ) {
         mId = id;
         mState = state;
         mDisconnectCause = disconnectCause;
@@ -124,6 +388,8 @@ public final class ParcelableCall implements Parcelable {
         mCreationTimeMillis = creationTimeMillis;
         mCallDirection = callDirection;
         mCallerNumberVerificationStatus = callerNumberVerificationStatus;
+        mContactDisplayName = contactDisplayName;
+        mActiveChildCallId = activeChildCallId;
     }
 
     /** The unique ID of the call. */
@@ -333,6 +599,21 @@ public final class ParcelableCall implements Parcelable {
         return mCallerNumberVerificationStatus;
     }
 
+    /**
+     * @return the name of the remote party as derived from a contacts DB lookup.
+     */
+    public @Nullable String getContactDisplayName() {
+        return mContactDisplayName;
+    }
+
+    /**
+     * @return On a CDMA conference with two participants, returns the ID of the child call that's
+     *         currently active.
+     */
+    public @Nullable String getActiveChildCallId() {
+        return mActiveChildCallId;
+    }
+
     /** Responsible for creating ParcelableCall objects for deserialized Parcels. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final @android.annotation.NonNull Parcelable.Creator<ParcelableCall> CREATOR =
@@ -372,35 +653,40 @@ public final class ParcelableCall implements Parcelable {
             long creationTimeMillis = source.readLong();
             int callDirection = source.readInt();
             int callerNumberVerificationStatus = source.readInt();
-            return new ParcelableCall(
-                    id,
-                    state,
-                    disconnectCause,
-                    cannedSmsResponses,
-                    capabilities,
-                    properties,
-                    supportedAudioRoutes,
-                    connectTimeMillis,
-                    handle,
-                    handlePresentation,
-                    callerDisplayName,
-                    callerDisplayNamePresentation,
-                    gatewayInfo,
-                    accountHandle,
-                    isVideoCallProviderChanged,
-                    videoCallProvider,
-                    isRttCallChanged,
-                    rttCall,
-                    parentCallId,
-                    childCallIds,
-                    statusHints,
-                    videoState,
-                    conferenceableCallIds,
-                    intentExtras,
-                    extras,
-                    creationTimeMillis,
-                    callDirection,
-                    callerNumberVerificationStatus);
+            String contactDisplayName = source.readString();
+            String activeChildCallId = source.readString();
+            return new ParcelableCallBuilder()
+                    .setId(id)
+                    .setState(state)
+                    .setDisconnectCause(disconnectCause)
+                    .setCannedSmsResponses(cannedSmsResponses)
+                    .setCapabilities(capabilities)
+                    .setProperties(properties)
+                    .setSupportedAudioRoutes(supportedAudioRoutes)
+                    .setConnectTimeMillis(connectTimeMillis)
+                    .setHandle(handle)
+                    .setHandlePresentation(handlePresentation)
+                    .setCallerDisplayName(callerDisplayName)
+                    .setCallerDisplayNamePresentation(callerDisplayNamePresentation)
+                    .setGatewayInfo(gatewayInfo)
+                    .setAccountHandle(accountHandle)
+                    .setIsVideoCallProviderChanged(isVideoCallProviderChanged)
+                    .setVideoCallProvider(videoCallProvider)
+                    .setIsRttCallChanged(isRttCallChanged)
+                    .setRttCall(rttCall)
+                    .setParentCallId(parentCallId)
+                    .setChildCallIds(childCallIds)
+                    .setStatusHints(statusHints)
+                    .setVideoState(videoState)
+                    .setConferenceableCallIds(conferenceableCallIds)
+                    .setIntentExtras(intentExtras)
+                    .setExtras(extras)
+                    .setCreationTimeMillis(creationTimeMillis)
+                    .setCallDirection(callDirection)
+                    .setCallerNumberVerificationStatus(callerNumberVerificationStatus)
+                    .setContactDisplayName(contactDisplayName)
+                    .setActiveChildCallId(activeChildCallId)
+                    .createParcelableCall();
         }
 
         @Override
@@ -447,6 +733,8 @@ public final class ParcelableCall implements Parcelable {
         destination.writeLong(mCreationTimeMillis);
         destination.writeInt(mCallDirection);
         destination.writeInt(mCallerNumberVerificationStatus);
+        destination.writeString(mContactDisplayName);
+        destination.writeString(mActiveChildCallId);
     }
 
     @Override

@@ -16,7 +16,7 @@
 
 package com.android.internal.widget;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 public class ScrollBarUtils {
 

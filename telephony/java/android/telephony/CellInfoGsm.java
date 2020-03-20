@@ -17,10 +17,11 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
+
+import com.android.telephony.Rlog;
 
 /**
  * A {@link CellInfo} representing a GSM cell that provides identity and measurement info.
@@ -68,6 +69,14 @@ public final class CellInfoGsm extends CellInfo implements Parcelable {
     public CellInfoGsm(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
         super(ci, timeStamp);
         final android.hardware.radio.V1_2.CellInfoGsm cig = ci.info.gsm();
+        mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
+        mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
+    }
+
+    /** @hide */
+    public CellInfoGsm(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_5.CellInfoGsm cig = ci.ratSpecificInfo.gsm();
         mCellIdentityGsm = new CellIdentityGsm(cig.cellIdentityGsm);
         mCellSignalStrengthGsm = new CellSignalStrengthGsm(cig.signalStrengthGsm);
     }

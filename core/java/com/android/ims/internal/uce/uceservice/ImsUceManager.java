@@ -18,16 +18,9 @@ package com.android.ims.internal.uce.uceservice;
 
 import android.content.Context;
 import android.content.Intent;
-
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Message;
-import android.os.ServiceManager;
 import android.os.RemoteException;
-
-import java.util.HashMap;
-import android.util.Log;
+import android.os.ServiceManager;
 
 /**
  * ImsUceManager Declaration
@@ -49,23 +42,16 @@ public class ImsUceManager {
     private IUceService mUceService = null;
     private UceServiceDeathRecipient mDeathReceipient = new UceServiceDeathRecipient();
     private Context mContext;
-    private int mPhoneId;
-    /**
-     * Stores the UceManager instaces of Clients identified by
-     * phoneId
-     * @hide
-     */
-    private static HashMap<Integer, ImsUceManager> sUceManagerInstances =
-                                                   new HashMap<Integer, ImsUceManager>();
+    private static final Object sLock = new Object();
+    private static ImsUceManager sUceManager;
 
     public static final String ACTION_UCE_SERVICE_UP =
                                        "com.android.ims.internal.uce.UCE_SERVICE_UP";
     public static final String ACTION_UCE_SERVICE_DOWN =
                                         "com.android.ims.internal.uce.UCE_SERVICE_DOWN";
 
-    /** Uce Service status received in IUceListener.setStatus()
-     *  callback
-     *  @hide
+    /**
+     * Uce Service status received in IUceListener.setStatus() callback
      */
     public static final int UCE_SERVICE_STATUS_FAILURE = 0;
     /** indicate UI to call Presence/Options API.   */
@@ -76,28 +62,15 @@ public class ImsUceManager {
     public static final int UCE_SERVICE_STATUS_READY = 3;
 
     /**
-     * Part of the ACTION_UCE_SERVICE_UP or _DOWN intents. A long
-     * value; the phone ID corresponding to the IMS service coming up or down.
-     * Internal use only.
-     * @hide
-     */
-    public static final String EXTRA_PHONE_ID = "android:phone_id";
-
-
-    /**
      * Gets the instance of UCE Manager
      * @hide
      */
-    public static ImsUceManager getInstance(Context context, int phoneId) {
-        //if (DBG) Log.d (LOG_TAG, "GetInstance Called");
-        synchronized (sUceManagerInstances) {
-            if (sUceManagerInstances.containsKey(phoneId)) {
-                return sUceManagerInstances.get(phoneId);
-            } else {
-                ImsUceManager uceMgr =  new ImsUceManager(context, phoneId);
-                sUceManagerInstances.put(phoneId, uceMgr);
-                return uceMgr;
+    public static ImsUceManager getInstance(Context context) {
+        synchronized (sLock) {
+            if (sUceManager == null && context != null) {
+                sUceManager =  new ImsUceManager(context);
             }
+            return sUceManager;
         }
     }
 
@@ -105,10 +78,9 @@ public class ImsUceManager {
      * Constructor
      * @hide
      */
-    private ImsUceManager(Context context, int phoneId) {
+    private ImsUceManager(Context context) {
         //if (DBG) Log.d (LOG_TAG, "Constructor");
         mContext = context;
-        mPhoneId = phoneId;
         createUceService(true);
     }
 
@@ -129,7 +101,7 @@ public class ImsUceManager {
      * Gets the UCE service name
      * @hide
      */
-    private String getUceServiceName(int phoneId) {
+    private String getUceServiceName() {
         return UCE_SERVICE;
     }
 
@@ -143,14 +115,14 @@ public class ImsUceManager {
     public void createUceService(boolean checkService) {
         //if (DBG) Log.d (LOG_TAG, "CreateUceService Called");
         if (checkService) {
-            IBinder binder = ServiceManager.checkService(getUceServiceName(mPhoneId));
+            IBinder binder = ServiceManager.checkService(getUceServiceName());
 
             if (binder == null) {
                 //if (DBG)Log.d (LOG_TAG, "Unable to find IBinder");
                 return;
             }
         }
-        IBinder b = ServiceManager.getService(getUceServiceName(mPhoneId));
+        IBinder b = ServiceManager.getService(getUceServiceName());
 
         if (b != null) {
             try {
@@ -174,12 +146,10 @@ public class ImsUceManager {
     private class UceServiceDeathRecipient implements IBinder.DeathRecipient {
         @Override
         public void binderDied() {
-            //if (DBG) Log.d (LOG_TAG, "found IBinder/IUceService Service Died");
             mUceService = null;
 
             if (mContext != null) {
                 Intent intent = new Intent(ACTION_UCE_SERVICE_DOWN);
-                intent.putExtra(EXTRA_PHONE_ID, mPhoneId);
                 mContext.sendBroadcast(new Intent(intent));
             }
         }

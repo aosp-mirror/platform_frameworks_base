@@ -19,11 +19,29 @@
 
     <!-- Broadcast actions that are currently exempted from O+ background
          delivery restrictions. -->
-    <allow-implicit-broadcast action="android.intent.action.SIM_STATE_CHANGED" />
-    <allow-implicit-broadcast action="android.intent.action.PACKAGE_CHANGED" />
+    <allow-implicit-broadcast action="android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED" />
+    <allow-implicit-broadcast action="android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED" />
+    <allow-implicit-broadcast action="android.intent.action.DATA_SMS_RECEIVED" />
     <allow-implicit-broadcast action="android.intent.action.MEDIA_SCANNER_SCAN_FILE" />
-    <allow-implicit-broadcast action="android.media.action.OPEN_AUDIO_EFFECT_CONTROL_SESSION" />
+    <allow-implicit-broadcast action="android.intent.action.PACKAGE_CHANGED" />
+    <allow-implicit-broadcast action="android.intent.action.SIM_STATE_CHANGED" />
     <allow-implicit-broadcast action="android.media.action.CLOSE_AUDIO_EFFECT_CONTROL_SESSION" />
+    <allow-implicit-broadcast action="android.media.action.OPEN_AUDIO_EFFECT_CONTROL_SESSION" />
+    <allow-implicit-broadcast action="android.provider.Telephony.SECRET_CODE" />
+    <allow-implicit-broadcast action="android.provider.Telephony.SMS_CB_RECEIVED" />
+    <allow-implicit-broadcast action="android.provider.Telephony.SMS_DELIVER" />
+    <allow-implicit-broadcast action="android.provider.Telephony.SMS_RECEIVED" />
+    <allow-implicit-broadcast action="android.provider.Telephony.SMS_REJECTED" />
+    <allow-implicit-broadcast action="android.provider.Telephony.WAP_PUSH_DELIVER" />
+    <allow-implicit-broadcast action="android.provider.Telephony.WAP_PUSH_RECEIVED" />
+    <allow-implicit-broadcast action="android.telephony.action.CARRIER_CONFIG_CHANGED" />
+    <allow-implicit-broadcast action="android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
+    <allow-implicit-broadcast action="android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED" />
+    <allow-implicit-broadcast action="android.telephony.action.SECRET_CODE" />
+    <allow-implicit-broadcast action="android.telephony.action.SIM_APPLICATION_STATE_CHANGED" />
+    <allow-implicit-broadcast action="android.telephony.action.SIM_CARD_STATE_CHANGED" />
+    <allow-implicit-broadcast action="android.telephony.action.SIM_SLOT_STATUS_CHANGED" />
+
 
     <!-- Whitelist of what components are permitted as backup data transports.  The
          'service' attribute here is a flattened ComponentName string. -->

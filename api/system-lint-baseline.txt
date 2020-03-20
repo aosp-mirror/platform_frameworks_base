@@ -1,4 +1,14 @@
 // Baseline format: 1.0
+// Tethering broadcast action / extras cannot change name for backwards compatibility
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
+
 ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
     
 
@@ -153,6 +163,12 @@ PublicTypedef: android.content.integrity.CompoundFormula.Connector: Don't expose
 PublicTypedef: android.content.integrity.Formula.Tag: Don't expose @IntDef: @Tag must be hidden.
 
 PublicTypedef: android.content.integrity.Rule.Effect: Don't expose @IntDef: @Effect must be hidden.
+
+
+ResourceValueFieldName: android.R.array#config_sms_enabled_locking_shift_tables:
+    Expected resource name in `android.R.array` to be in the `fooBarBaz` style, was `config_sms_enabled_locking_shift_tables`
+ResourceValueFieldName: android.R.array#config_sms_enabled_single_shift_tables:
+    Expected resource name in `android.R.array` to be in the `fooBarBaz` style, was `config_sms_enabled_single_shift_tables`
 
 
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):

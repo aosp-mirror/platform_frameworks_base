@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -1351,9 +1351,9 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public void sendOrderedBroadcast(Intent intent, String receiverPermission, String receiverAppOp,
-            Bundle options, BroadcastReceiver resultReceiver, Handler scheduler, int initialCode,
-            String initialData, @Nullable Bundle initialExtras) {
+    public void sendOrderedBroadcast(Intent intent, int initialCode, String receiverPermission,
+            String receiverAppOp, BroadcastReceiver resultReceiver, Handler scheduler,
+            String initialData, @Nullable Bundle initialExtras, Bundle options) {
         int intAppOp = AppOpsManager.OP_NONE;
         if (!TextUtils.isEmpty(receiverAppOp)) {
             intAppOp = AppOpsManager.strOpToOp(receiverAppOp);

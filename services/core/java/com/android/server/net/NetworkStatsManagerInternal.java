@@ -16,6 +16,7 @@
 
 package com.android.server.net;
 
+import android.annotation.NonNull;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 
@@ -34,4 +35,10 @@ public abstract class NetworkStatsManagerInternal {
 
     /** Force update of statistics. */
     public abstract void forceUpdate();
+
+    /**
+     * Set the quota limit to all registered custom network stats providers.
+     * Note that invocation of any interface will be sent to all providers.
+     */
+    public abstract void setStatsProviderLimitAsync(@NonNull String iface, long quota);
 }

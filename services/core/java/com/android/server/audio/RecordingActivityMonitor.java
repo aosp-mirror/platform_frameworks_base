@@ -86,6 +86,12 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
             return mIsActive && mConfig != null;
         }
 
+        void release() {
+            if (mDeathHandler != null) {
+                mDeathHandler.release();
+            }
+        }
+
         // returns true if status of an active recording has changed
         boolean setActive(boolean active) {
             if (mIsActive == active) return false;
@@ -417,6 +423,7 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                     break;
                 case AudioManager.RECORD_CONFIG_EVENT_RELEASE:
                     configChanged = state.isActiveConfiguration();
+                    state.release();
                     mRecordStates.remove(stateIndex);
                     break;
                 default:
@@ -518,6 +525,10 @@ public final class RecordingActivityMonitor implements AudioSystem.AudioRecordin
                 Log.w(TAG, "Could not link to recorder death", e);
                 return false;
             }
+        }
+
+        void release() {
+            mRecorderToken.unlinkToDeath(this, 0);
         }
     }
 

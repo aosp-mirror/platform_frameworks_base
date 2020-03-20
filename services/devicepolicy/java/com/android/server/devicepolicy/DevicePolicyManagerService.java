@@ -78,6 +78,7 @@ import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Telephony.Carriers.DPC_URI;
@@ -133,10 +134,6 @@ import android.app.admin.StartInstallingUpdateCallback;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.backup.IBackupManager;
-import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.TimeDetector;
-import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.TimeZoneDetector;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
@@ -206,6 +203,7 @@ import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.provider.Telephony;
 import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
@@ -246,6 +244,7 @@ import com.android.internal.telephony.SmsApplication;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.StatLogger;
@@ -401,7 +400,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      *  System property whose value is either "true" or "false", indicating whether
      *  device owner is present.
      */
-    private static final String PROPERTY_DEVICE_OWNER_PRESENT = "ro.device_owner";
+    private static final String PROPERTY_DEVICE_OWNER_PRESENT = "ro.organization_owned";
 
     private static final int STATUS_BAR_DISABLE_MASK =
             StatusBarManager.DISABLE_EXPAND |
@@ -432,6 +431,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         GLOBAL_SETTINGS_WHITELIST = new ArraySet<>();
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_ENABLED);
+        GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.ADB_WIFI_ENABLED);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.AUTO_TIME_ZONE);
         GLOBAL_SETTINGS_WHITELIST.add(Settings.Global.DATA_ROAMING);
@@ -1954,14 +1954,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return mContext.getSystemService(AlarmManager.class);
         }
 
-        TimeDetector getTimeDetector() {
-            return mContext.getSystemService(TimeDetector.class);
-        }
-
-        TimeZoneDetector getTimeZoneDetector() {
-            return mContext.getSystemService(TimeZoneDetector.class);
-        }
-
         ConnectivityManager getConnectivityManager() {
             return mContext.getSystemService(ConnectivityManager.class);
         }
@@ -2059,6 +2051,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         void binderWithCleanCallingIdentity(@NonNull ThrowingRunnable action) {
              Binder.withCleanCallingIdentity(action);
+        }
+
+        final <T> T binderWithCleanCallingIdentity(@NonNull ThrowingSupplier<T> action) {
+            return Binder.withCleanCallingIdentity(action);
         }
 
         final int userHandleGetCallingUserId() {
@@ -2469,11 +2465,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         if (!mInjector.systemPropertiesGet(PROPERTY_DEVICE_OWNER_PRESENT, "").isEmpty()) {
-            Slog.w(LOG_TAG, "Trying to set ro.device_owner, but it has already been set?");
+            Slog.w(LOG_TAG, "Trying to set ro.organization_owned, but it has already been set?");
         } else {
             final String value = Boolean.toString(hasDeviceOwner);
             mInjector.systemPropertiesSet(PROPERTY_DEVICE_OWNER_PRESENT, value);
-            Slog.i(LOG_TAG, "Set ro.device_owner property to " + value);
+            Slog.i(LOG_TAG, "Set ro.organization_owned property to " + value);
         }
     }
 
@@ -5551,6 +5547,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void enforceNetworkStackOrProfileOrDeviceOwner(ComponentName who) {
+        if (mContext.checkCallingPermission(PERMISSION_MAINLINE_NETWORK_STACK)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        enforceProfileOrDeviceOwner(who);
+    }
+
     @Override
     public boolean approveCaCert(String alias, int userId, boolean approval) {
         enforceManageUsers();
@@ -6478,7 +6482,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isAlwaysOnVpnLockdownEnabled(ComponentName admin) throws SecurityException {
-        enforceProfileOrDeviceOwner(admin);
+        enforceNetworkStackOrProfileOrDeviceOwner(admin);
 
         final int userId = mInjector.userHandleGetCallingUserId();
         final long token = mInjector.binderClearCallingIdentity();
@@ -10871,10 +10875,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME, 0) == 1) {
             return false;
         }
-        ManualTimeSuggestion manualTimeSuggestion = TimeDetector.createManualTimeSuggestion(
-                millis, "DevicePolicyManagerService: setTime");
-        mInjector.binderWithCleanCallingIdentity(
-                () -> mInjector.getTimeDetector().suggestManualTime(manualTimeSuggestion));
+        mInjector.binderWithCleanCallingIdentity(() -> mInjector.getAlarmManager().setTime(millis));
         return true;
     }
 
@@ -10886,11 +10887,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) == 1) {
             return false;
         }
-        ManualTimeZoneSuggestion manualTimeZoneSuggestion =
-                TimeZoneDetector.createManualTimeZoneSuggestion(
-                        timeZone, "DevicePolicyManagerService: setTimeZone");
         mInjector.binderWithCleanCallingIdentity(() ->
-                mInjector.getTimeZoneDetector().suggestManualTimeZone(manualTimeZoneSuggestion));
+                mInjector.getAlarmManager().setTimeZone(timeZone));
         return true;
     }
 
@@ -13936,23 +13934,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(apnSetting, "ApnSetting is null in addOverrideApn");
         enforceDeviceOwner(who);
 
-        int operatedId = -1;
-        Uri resultUri;
-        final long id = mInjector.binderClearCallingIdentity();
-        try {
-            resultUri = mContext.getContentResolver().insert(DPC_URI, apnSetting.toContentValues());
-        } finally {
-            mInjector.binderRestoreCallingIdentity(id);
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        if (tm != null) {
+            return mInjector.binderWithCleanCallingIdentity(
+                    () -> tm.addDevicePolicyOverrideApn(mContext, apnSetting));
+        } else {
+            Log.w(LOG_TAG, "TelephonyManager is null when trying to add override apn");
+            return Telephony.Carriers.INVALID_APN_ID;
         }
-        if (resultUri != null) {
-            try {
-                operatedId = Integer.parseInt(resultUri.getLastPathSegment());
-            } catch (NumberFormatException e) {
-                Slog.e(LOG_TAG, "Failed to parse inserted override APN id.", e);
-            }
-        }
-
-        return operatedId;
     }
 
     @Override
@@ -13968,13 +13957,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (apnId < 0) {
             return false;
         }
-        final long id = mInjector.binderClearCallingIdentity();
-        try {
-            return mContext.getContentResolver().update(
-                    Uri.withAppendedPath(DPC_URI, Integer.toString(apnId)),
-                    apnSetting.toContentValues(), null, null) > 0;
-        } finally {
-            mInjector.binderRestoreCallingIdentity(id);
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        if (tm != null) {
+            return mInjector.binderWithCleanCallingIdentity(
+                    () -> tm.modifyDevicePolicyOverrideApn(mContext, apnId, apnSetting));
+        } else {
+            Log.w(LOG_TAG, "TelephonyManager is null when trying to modify override apn");
+            return false;
         }
     }
 
@@ -14016,28 +14005,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private List<ApnSetting> getOverrideApnsUnchecked() {
-        final Cursor cursor;
-        final long id = mInjector.binderClearCallingIdentity();
-        try {
-            cursor = mContext.getContentResolver().query(DPC_URI, null, null, null, null);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(id);
+        TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
+        if (tm != null) {
+            return mInjector.binderWithCleanCallingIdentity(
+                    () -> tm.getDevicePolicyOverrideApns(mContext));
         }
-
-        if (cursor == null) {
-            return Collections.emptyList();
-        }
-        try {
-            List<ApnSetting> apnList = new ArrayList<ApnSetting>();
-            cursor.moveToPosition(-1);
-            while (cursor.moveToNext()) {
-                ApnSetting apn = ApnSetting.makeApnSetting(cursor);
-                apnList.add(apn);
-            }
-            return apnList;
-        } finally {
-            cursor.close();
-        }
+        Log.w(LOG_TAG, "TelephonyManager is null when trying to get override apns");
+        return Collections.emptyList();
     }
 
     @Override

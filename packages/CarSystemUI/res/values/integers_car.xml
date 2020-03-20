@@ -34,4 +34,9 @@
     <!-- The delay before the unlock dialog pops up -->
     <integer name="unlock_dialog_delay_ms">0</integer>
 
+    <!-- Timeout values in milliseconds for displaying volume dialog-->
+    <integer name="car_volume_dialog_display_normal_timeout">3000</integer>
+    <integer name="car_volume_dialog_display_hovering_timeout">16000</integer>
+    <integer name="car_volume_dialog_display_expanded_normal_timeout">6000</integer>
+    <integer name="car_volume_dialog_display_expanded_hovering_timeout">32000</integer>
 </resources>

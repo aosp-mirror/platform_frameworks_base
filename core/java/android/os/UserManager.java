@@ -25,18 +25,19 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
+import android.content.pm.UserInfo.UserInfoFlag;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -2006,18 +2007,20 @@ public class UserManager {
 
     /**
      * Creates a user with the specified name and options. For non-admin users, default user
-     * restrictions are going to be applied.
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     * restrictions will be applied.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
      * @param name the user's name
-     * @param flags flags that identify the type of user and other properties.
+     * @param flags UserInfo flags that identify the type of user and other properties.
      * @see UserInfo
      *
-     * @return the UserInfo object for the created user, or null if the user could not be created.
+     * @return the UserInfo object for the created user, or {@code null} if the user could not be
+     * created.
      * @hide
      */
     @UnsupportedAppUsage
-    public UserInfo createUser(String name, int flags) {
+    public @Nullable UserInfo createUser(@Nullable String name, @UserInfoFlag int flags) {
         UserInfo user = null;
         try {
             user = mService.createUser(name, flags);
@@ -2031,6 +2034,44 @@ public class UserManager {
             throw re.rethrowFromSystemServer();
         }
         return user;
+    }
+
+    /**
+     * Pre-creates a user with the specified name and options. For non-admin users, default user
+     * restrictions will be applied.
+     *
+     * <p>This method can be used by OEMs to "warm" up the user creation by pre-creating some users
+     * at the first boot, so they when the "real" user is created (for example,
+     * by {@link #createUser(String, int)} or {@link #createGuest(Context, String)}), it takes
+     * less time.
+     *
+     * <p>This method completes the majority of work necessary for user creation: it
+     * creates user data, CE and DE encryption keys, app data directories, initializes the user and
+     * grants default permissions. When pre-created users become "real" users, only then are
+     * components notified of new user creation by firing user creation broadcasts.
+     *
+     * <p>All pre-created users are removed during system upgrade.
+     *
+     * <p>Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
+     * @param flags UserInfo flags that identify the type of user and other properties.
+     * @see UserInfo
+     *
+     * @return the UserInfo object for the created user, or {@code null} if the user could not be
+     * created.
+     *
+     * @throw {@link IllegalArgumentException} if {@code flags} contains
+     * {@link UserInfo#FLAG_MANAGED_PROFILE}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public @Nullable UserInfo preCreateUser(@UserInfoFlag int flags) {
+        try {
+            return mService.preCreateUser(flags);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -2340,6 +2381,8 @@ public class UserManager {
 
     /**
      * Return the number of users currently created on the device.
+     * <p>This API is not for use by third-party apps. It requires the {@code MANAGE_USERS}
+     * permission.</p>
      */
     public int getUserCount() {
         List<UserInfo> users = getUsers();
@@ -2349,15 +2392,26 @@ public class UserManager {
     /**
      * Returns information for all users on this device, including ones marked for deletion.
      * To retrieve only users that are alive, use {@link #getUsers(boolean)}.
-     * <p>
-     * Requires {@link android.Manifest.permission#MANAGE_USERS} permission.
+     *
      * @return the list of users that exist on the device.
      * @hide
      */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public List<UserInfo> getUsers() {
+        return getUsers(/* excludeDying= */ false);
+    }
+
+    /**
+     * Returns information for all users on this device, based on the filtering parameters.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
+    public List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
+            boolean excludePreCreated) {
         try {
-            return mService.getUsers(false);
+            return mService.getUsers(excludePartial, excludeDying, excludePreCreated);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2373,16 +2427,12 @@ public class UserManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public long[] getSerialNumbersOfUsers(boolean excludeDying) {
-        try {
-            List<UserInfo> users = mService.getUsers(excludeDying);
-            long[] result = new long[users.size()];
-            for (int i = 0; i < result.length; i++) {
-                result[i] = users.get(i).serialNumber;
-            }
-            return result;
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+        List<UserInfo> users = getUsers(excludeDying);
+        long[] result = new long[users.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = users.get(i).serialNumber;
         }
+        return result;
     }
 
     /**
@@ -2768,11 +2818,8 @@ public class UserManager {
      */
     @UnsupportedAppUsage
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
-        try {
-            return mService.getUsers(excludeDying);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return getUsers(/*excludePartial= */ true, excludeDying,
+                /* excludePreCreated= */ true);
     }
 
     /**

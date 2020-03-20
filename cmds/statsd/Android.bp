@@ -50,6 +50,7 @@ cc_defaults {
 
     srcs: [
         ":statsd_aidl",
+        ":ICarStatsService.aidl",
         "src/active_config_list.proto",
         "src/statsd_config.proto",
         "src/uid_data.proto",
@@ -69,6 +70,7 @@ cc_defaults {
         "src/config/ConfigKey.cpp",
         "src/config/ConfigListener.cpp",
         "src/config/ConfigManager.cpp",
+        "src/external/CarStatsPuller.cpp",
         "src/external/GpuStatsPuller.cpp",
         "src/external/Perfetto.cpp",
         "src/external/StatsPuller.cpp",
@@ -138,10 +140,56 @@ cc_defaults {
         "android.hardware.power@1.1",
         "android.hardware.power.stats@1.0",
         "libpackagelistparser",
+        "libstatsmetadata",
         "libsysutils",
         "libcutils",
     ],
 }
+
+// ================
+// libstatsmetadata
+// ================
+
+genrule {
+    name: "atoms_info.h",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --atomsInfoHeader $(genDir)/atoms_info.h",
+    out: [
+        "atoms_info.h",
+    ],
+}
+
+genrule {
+    name: "atoms_info.cpp",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --atomsInfoCpp $(genDir)/atoms_info.cpp",
+    out: [
+        "atoms_info.cpp",
+    ],
+}
+
+cc_library_shared {
+    name: "libstatsmetadata",
+    host_supported: true,
+    generated_sources: [
+        "atoms_info.cpp",
+    ],
+    generated_headers: [
+        "atoms_info.h",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    export_generated_headers: [
+        "atoms_info.h",
+    ],
+    shared_libs: [
+        "libcutils",
+        "libstatslog",
+    ],
+}
+
 
 // =========
 // statsd
@@ -182,8 +230,6 @@ cc_binary {
     },
 
     shared_libs: ["libgtest_prod"],
-
-    vintf_fragments: ["android.frameworks.stats@1.0-service.xml"],
 
     init_rc: ["statsd.rc"],
 }

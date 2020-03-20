@@ -52,13 +52,6 @@ public class ISmsImplBase extends ISms.Stub {
     }
 
     @Override
-    public void sendDataForSubscriberWithSelfPermissions(int subId, String callingPkg,
-            String destAddr, String scAddr, int destPort, byte[] data, PendingIntent sentIntent,
-            PendingIntent deliveryIntent) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void sendTextForSubscriber(int subId, String callingPkg, String destAddr,
             String scAddr, String text, PendingIntent sentIntent,
             PendingIntent deliveryIntent, boolean persistMessageForNonDefaultSmsApp) {
@@ -66,17 +59,11 @@ public class ISmsImplBase extends ISms.Stub {
     }
 
     @Override
-    public void sendTextForSubscriberWithSelfPermissions(int subId, String callingPkg,
-            String destAddr, String scAddr, String text, PendingIntent sentIntent,
-            PendingIntent deliveryIntent, boolean persistMessage) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void sendTextForSubscriberWithOptions(int subId, String callingPkg, String destAddr,
-            String scAddr, String text, PendingIntent sentIntent,
-            PendingIntent deliveryIntent, boolean persistMessageForNonDefaultSmsApp,
-            int priority, boolean expectMore, int validityPeriod) {
+    public void sendTextForSubscriberWithOptions(int subId, String callingPkg,
+            String callingAttributionTag, String destAddr, String scAddr, String text,
+            PendingIntent sentIntent, PendingIntent deliveryIntent,
+            boolean persistMessageForNonDefaultSmsApp, int priority, boolean expectMore,
+            int validityPeriod) {
         throw new UnsupportedOperationException();
     }
 
@@ -186,6 +173,11 @@ public class ISmsImplBase extends ISms.Stub {
     }
 
     @Override
+    public Bundle getCarrierConfigValuesForSubscriber(int subId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public String createAppSpecificSmsToken(int subId, String callingPkg, PendingIntent intent) {
         throw new UnsupportedOperationException();
     }
@@ -197,8 +189,8 @@ public class ISmsImplBase extends ISms.Stub {
     }
 
     @Override
-    public int checkSmsShortCodeDestination(
-            int subid, String callingApk, String destAddress, String countryIso) {
+    public int checkSmsShortCodeDestination(int subid, String callingPackage,
+            String callingFeatureId, String destAddress, String countryIso) {
         throw new UnsupportedOperationException();
     }
 

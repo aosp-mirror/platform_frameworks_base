@@ -18,7 +18,7 @@ package com.android.internal.view.menu;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Parcelable;
 import android.view.ViewGroup;

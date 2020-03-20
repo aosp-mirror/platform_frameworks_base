@@ -21,8 +21,6 @@
 #include <string>
 
 #include "androidfw/ResourceTypes.h"
-#include "utils/String16.h"
-#include "utils/String8.h"
 
 namespace android {
 
@@ -38,14 +36,6 @@ std::string GetStringFromPool(const ResStringPool* pool, uint32_t idx);
 
 static inline bool operator==(const ResTable_config& a, const ResTable_config& b) {
   return a.compare(b) == 0;
-}
-
-static inline ::std::ostream& operator<<(::std::ostream& out, const String8& str) {
-  return out << str.string();
-}
-
-static inline ::std::ostream& operator<<(::std::ostream& out, const String16& str) {
-  return out << String8(str).string();
 }
 
 static inline ::std::ostream& operator<<(::std::ostream& out, const ResTable_config& c) {

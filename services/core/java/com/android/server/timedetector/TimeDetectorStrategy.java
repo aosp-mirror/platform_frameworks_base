@@ -19,15 +19,15 @@ package com.android.server.timedetector;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.PhoneTimeSuggestion;
-import android.content.Intent;
-import android.util.TimestampedValue;
+import android.app.timedetector.NetworkTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
+import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
 
 /**
- * The interface for classes that implement the time detection algorithm used by the
- * TimeDetectorService.
+ * The interface for the class that implements the time detection algorithm used by the
+ * {@link TimeDetectorService}.
  *
  * <p>Most calls will be handled by a single thread but that is not true for all calls. For example
  * {@link #dump(PrintWriter, String[])}) may be called on a different thread so implementations must
@@ -61,10 +61,10 @@ public interface TimeDetectorStrategy {
         /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
         void acquireWakeLock();
 
-        /** Returns the elapsedRealtimeMillis clock value. The WakeLock must be held. */
+        /** Returns the elapsedRealtimeMillis clock value. */
         long elapsedRealtimeMillis();
 
-        /** Returns the system clock value. The WakeLock must be held. */
+        /** Returns the system clock value. */
         long systemClockMillis();
 
         /** Sets the device system clock. The WakeLock must be held. */
@@ -72,19 +72,19 @@ public interface TimeDetectorStrategy {
 
         /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
         void releaseWakeLock();
-
-        /** Send the supplied intent as a stick broadcast. */
-        void sendStickyBroadcast(@NonNull Intent intent);
     }
 
     /** Initialize the strategy. */
     void initialize(@NonNull Callback callback);
 
     /** Process the suggested time from telephony sources. */
-    void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion);
+    void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
     /** Process the suggested manually entered time. */
     void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
+
+    /** Process the suggested time from network sources. */
+    void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);
 
     /** Handle the auto-time setting being toggled on or off. */
     void handleAutoTimeDetectionChanged();

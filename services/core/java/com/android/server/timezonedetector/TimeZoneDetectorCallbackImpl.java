@@ -20,13 +20,14 @@ import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.SystemProperties;
 import android.provider.Settings;
 
 /**
- * The real implementation of {@link TimeZoneDetectorStrategy.Callback}.
+ * The real implementation of {@link TimeZoneDetectorStrategyImpl.Callback}.
  */
-public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrategy.Callback {
+public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrategyImpl.Callback {
 
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
@@ -40,7 +41,20 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
 
     @Override
     public boolean isAutoTimeZoneDetectionEnabled() {
-        return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
+        if (isAutoTimeZoneDetectionSupported()) {
+            return Settings.Global.getInt(mCr, Settings.Global.AUTO_TIME_ZONE, 1 /* default */) > 0;
+        }
+        return false;
+    }
+
+    private boolean isAutoTimeZoneDetectionSupported() {
+        return deviceHasTelephonyNetwork();
+    }
+
+    private boolean deviceHasTelephonyNetwork() {
+        // TODO b/150583524 Avoid the use of a deprecated API.
+        return mContext.getSystemService(ConnectivityManager.class)
+                .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 
     @Override

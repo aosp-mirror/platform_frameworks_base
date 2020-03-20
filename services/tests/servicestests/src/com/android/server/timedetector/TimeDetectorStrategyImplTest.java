@@ -18,18 +18,17 @@ package com.android.server.timedetector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.PhoneTimeSuggestion;
-import android.content.Intent;
+import android.app.timedetector.NetworkTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
 import android.icu.util.Calendar;
 import android.icu.util.GregorianCalendar;
 import android.icu.util.TimeZone;
-import android.util.TimestampedValue;
+import android.os.TimestampedValue;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -45,13 +44,15 @@ public class TimeDetectorStrategyImplTest {
     private static final TimestampedValue<Long> ARBITRARY_CLOCK_INITIALIZATION_INFO =
             new TimestampedValue<>(
                     123456789L /* realtimeClockMillis */,
-                    createUtcTime(1977, 1, 1, 12, 0, 0));
+                    createUtcTime(2008, 5, 23, 12, 0, 0));
 
+    /**
+     * An arbitrary time, very different from the {@link #ARBITRARY_CLOCK_INITIALIZATION_INFO}
+     * time. Can be used as the basis for time suggestions.
+     */
     private static final long ARBITRARY_TEST_TIME_MILLIS = createUtcTime(2018, 1, 1, 12, 0, 0);
 
-    private static final int ARBITRARY_PHONE_ID = 123456;
-
-    private static final long ONE_DAY_MILLIS = Duration.ofDays(1).toMillis();
+    private static final int ARBITRARY_SLOT_INDEX = 123456;
 
     private Script mScript;
 
@@ -61,212 +62,203 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void testSuggestPhoneTime_autoTimeEnabled() {
+    public void testSuggestTelephonyTime_autoTimeEnabled() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true);
 
-        int phoneId = ARBITRARY_PHONE_ID;
+        int slotIndex = ARBITRARY_SLOT_INDEX;
         long testTimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-        PhoneTimeSuggestion timeSuggestion =
-                mScript.generatePhoneTimeSuggestion(phoneId, testTimeMillis);
-        int clockIncrement = 1000;
-        long expectedSystemClockMillis = testTimeMillis + clockIncrement;
 
-        mScript.simulateTimePassing(clockIncrement)
-                .simulatePhoneTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis, true /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion);
+        TelephonyTimeSuggestion timeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, testTimeMillis);
+        mScript.simulateTimePassing()
+                .simulateTelephonyTimeSuggestion(timeSuggestion);
+
+        long expectedSystemClockMillis =
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+        mScript.verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion);
     }
 
     @Test
-    public void testSuggestPhoneTime_emptySuggestionIgnored() {
+    public void testSuggestTelephonyTime_emptySuggestionIgnored() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true);
 
-        int phoneId = ARBITRARY_PHONE_ID;
-        PhoneTimeSuggestion timeSuggestion =
-                mScript.generatePhoneTimeSuggestion(phoneId, null);
-        mScript.simulatePhoneTimeSuggestion(timeSuggestion)
+        int slotIndex = ARBITRARY_SLOT_INDEX;
+        TelephonyTimeSuggestion timeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, null);
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion)
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, null);
+                .assertLatestTelephonySuggestion(slotIndex, null);
     }
 
     @Test
-    public void testSuggestPhoneTime_systemClockThreshold() {
-        int systemClockUpdateThresholdMillis = 1000;
+    public void testSuggestTelephonyTime_systemClockThreshold() {
+        final int systemClockUpdateThresholdMillis = 1000;
+        final int clockIncrementMillis = 100;
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeThresholds(systemClockUpdateThresholdMillis)
                 .pokeAutoTimeDetectionEnabled(true);
 
-        final int clockIncrement = 100;
-        int phoneId = ARBITRARY_PHONE_ID;
+        int slotIndex = ARBITRARY_SLOT_INDEX;
 
         // Send the first time signal. It should be used.
         {
-            long testTimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-            PhoneTimeSuggestion timeSuggestion1 =
-                    mScript.generatePhoneTimeSuggestion(phoneId, testTimeMillis);
-            TimestampedValue<Long> utcTime1 = timeSuggestion1.getUtcTime();
+            TelephonyTimeSuggestion timeSuggestion1 =
+                    mScript.generateTelephonyTimeSuggestion(slotIndex, ARBITRARY_TEST_TIME_MILLIS);
 
             // Increment the the device clocks to simulate the passage of time.
-            mScript.simulateTimePassing(clockIncrement);
+            mScript.simulateTimePassing(clockIncrementMillis);
 
             long expectedSystemClockMillis1 =
-                    TimeDetectorStrategy.getTimeAt(utcTime1, mScript.peekElapsedRealtimeMillis());
+                    mScript.calculateTimeInMillisForNow(timeSuggestion1.getUtcTime());
 
-            mScript.simulatePhoneTimeSuggestion(timeSuggestion1)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis1, true /* expectNetworkBroadcast */)
-                    .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
+            mScript.simulateTelephonyTimeSuggestion(timeSuggestion1)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
+                    .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
         }
 
         // Now send another time signal, but one that is too similar to the last one and should be
         // stored, but not used to set the system clock.
         {
             int underThresholdMillis = systemClockUpdateThresholdMillis - 1;
-            PhoneTimeSuggestion timeSuggestion2 = mScript.generatePhoneTimeSuggestion(
-                    phoneId, mScript.peekSystemClockMillis() + underThresholdMillis);
-            mScript.simulateTimePassing(clockIncrement)
-                    .simulatePhoneTimeSuggestion(timeSuggestion2)
+            TelephonyTimeSuggestion timeSuggestion2 = mScript.generateTelephonyTimeSuggestion(
+                    slotIndex, mScript.peekSystemClockMillis() + underThresholdMillis);
+            mScript.simulateTimePassing(clockIncrementMillis)
+                    .simulateTelephonyTimeSuggestion(timeSuggestion2)
                     .verifySystemClockWasNotSetAndResetCallTracking()
-                    .assertLatestPhoneSuggestion(phoneId, timeSuggestion2);
+                    .assertLatestTelephonySuggestion(slotIndex, timeSuggestion2);
         }
 
         // Now send another time signal, but one that is on the threshold and so should be used.
         {
-            PhoneTimeSuggestion timeSuggestion3 = mScript.generatePhoneTimeSuggestion(
-                    phoneId,
+            TelephonyTimeSuggestion timeSuggestion3 = mScript.generateTelephonyTimeSuggestion(
+                    slotIndex,
                     mScript.peekSystemClockMillis() + systemClockUpdateThresholdMillis);
-            mScript.simulateTimePassing(clockIncrement);
+            mScript.simulateTimePassing(clockIncrementMillis);
 
             long expectedSystemClockMillis3 =
-                    TimeDetectorStrategy.getTimeAt(timeSuggestion3.getUtcTime(),
-                            mScript.peekElapsedRealtimeMillis());
+                    mScript.calculateTimeInMillisForNow(timeSuggestion3.getUtcTime());
 
-            mScript.simulatePhoneTimeSuggestion(timeSuggestion3)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis3, true /* expectNetworkBroadcast */)
-                    .assertLatestPhoneSuggestion(phoneId, timeSuggestion3);
+            mScript.simulateTelephonyTimeSuggestion(timeSuggestion3)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis3)
+                    .assertLatestTelephonySuggestion(slotIndex, timeSuggestion3);
         }
     }
 
     @Test
-    public void testSuggestPhoneTime_multiplePhoneIdsAndBucketing() {
+    public void testSuggestTelephonyTime_multipleSlotIndexsAndBucketing() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true);
 
-        // There are 2 phones in this test. Phone 2 has a different idea of the current time.
-        // phone1Id < phone2Id (which is important because the strategy uses the lowest ID when
-        // multiple phone suggestions are available.
-        int phone1Id = ARBITRARY_PHONE_ID;
-        int phone2Id = ARBITRARY_PHONE_ID + 1;
-        long phone1TimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-        long phone2TimeMillis = phone1TimeMillis + 60000;
+        // There are 2 slotIndexes in this test. slotIndex1 and slotIndex2 have different opinions
+        // about the current time. slotIndex1 < slotIndex2 (which is important because the strategy
+        // uses the lowest slotIndex when multiple telephony suggestions are available.
+        int slotIndex1 = ARBITRARY_SLOT_INDEX;
+        int slotIndex2 = ARBITRARY_SLOT_INDEX + 1;
+        long slotIndex1TimeMillis = ARBITRARY_TEST_TIME_MILLIS;
+        long slotIndex2TimeMillis = ARBITRARY_TEST_TIME_MILLIS + Duration.ofDays(1).toMillis();
 
-        final int clockIncrement = 999;
-
-        // Make a suggestion with phone2Id.
+        // Make a suggestion with slotIndex2.
         {
-            PhoneTimeSuggestion phone2TimeSuggestion =
-                    mScript.generatePhoneTimeSuggestion(phone2Id, phone2TimeMillis);
-            mScript.simulateTimePassing(clockIncrement);
+            TelephonyTimeSuggestion slotIndex2TimeSuggestion =
+                    mScript.generateTelephonyTimeSuggestion(slotIndex2, slotIndex2TimeMillis);
+            mScript.simulateTimePassing();
 
-            long expectedSystemClockMillis = phone2TimeMillis + clockIncrement;
+            long expectedSystemClockMillis =
+                    mScript.calculateTimeInMillisForNow(slotIndex2TimeSuggestion.getUtcTime());
 
-            mScript.simulatePhoneTimeSuggestion(phone2TimeSuggestion)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis, true /* expectNetworkBroadcast */)
-                    .assertLatestPhoneSuggestion(phone1Id, null)
-                    .assertLatestPhoneSuggestion(phone2Id, phone2TimeSuggestion);
+            mScript.simulateTelephonyTimeSuggestion(slotIndex2TimeSuggestion)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
+                    .assertLatestTelephonySuggestion(slotIndex1, null)
+                    .assertLatestTelephonySuggestion(slotIndex2, slotIndex2TimeSuggestion);
         }
 
-        mScript.simulateTimePassing(clockIncrement);
+        mScript.simulateTimePassing();
 
-        // Now make a different suggestion with phone1Id.
+        // Now make a different suggestion with slotIndex1.
         {
-            PhoneTimeSuggestion phone1TimeSuggestion =
-                    mScript.generatePhoneTimeSuggestion(phone1Id, phone1TimeMillis);
-            mScript.simulateTimePassing(clockIncrement);
+            TelephonyTimeSuggestion slotIndex1TimeSuggestion =
+                    mScript.generateTelephonyTimeSuggestion(slotIndex1, slotIndex1TimeMillis);
+            mScript.simulateTimePassing();
 
-            long expectedSystemClockMillis = phone1TimeMillis + clockIncrement;
+            long expectedSystemClockMillis =
+                    mScript.calculateTimeInMillisForNow(slotIndex1TimeSuggestion.getUtcTime());
 
-            mScript.simulatePhoneTimeSuggestion(phone1TimeSuggestion)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis, true /* expectNetworkBroadcast */)
-                    .assertLatestPhoneSuggestion(phone1Id, phone1TimeSuggestion);
+            mScript.simulateTelephonyTimeSuggestion(slotIndex1TimeSuggestion)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
+                    .assertLatestTelephonySuggestion(slotIndex1, slotIndex1TimeSuggestion);
 
         }
 
-        mScript.simulateTimePassing(clockIncrement);
+        mScript.simulateTimePassing();
 
-        // Make another suggestion with phone2Id. It should be stored but not used because the
-        // phone1Id suggestion will still "win".
+        // Make another suggestion with slotIndex2. It should be stored but not used because the
+        // slotIndex1 suggestion will still "win".
         {
-            PhoneTimeSuggestion phone2TimeSuggestion =
-                    mScript.generatePhoneTimeSuggestion(phone2Id, phone2TimeMillis);
-            mScript.simulateTimePassing(clockIncrement);
+            TelephonyTimeSuggestion slotIndex2TimeSuggestion =
+                    mScript.generateTelephonyTimeSuggestion(slotIndex2, slotIndex2TimeMillis);
+            mScript.simulateTimePassing();
 
-            mScript.simulatePhoneTimeSuggestion(phone2TimeSuggestion)
+            mScript.simulateTelephonyTimeSuggestion(slotIndex2TimeSuggestion)
                     .verifySystemClockWasNotSetAndResetCallTracking()
-                    .assertLatestPhoneSuggestion(phone2Id, phone2TimeSuggestion);
+                    .assertLatestTelephonySuggestion(slotIndex2, slotIndex2TimeSuggestion);
         }
 
-        // Let enough time pass that phone1Id's suggestion should now be too old.
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.PHONE_BUCKET_SIZE_MILLIS);
+        // Let enough time pass that slotIndex1's suggestion should now be too old.
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.TELEPHONY_BUCKET_SIZE_MILLIS);
 
-        // Make another suggestion with phone2Id. It should be used because the phoneId1
+        // Make another suggestion with slotIndex2. It should be used because the slotIndex1
         // is in an older "bucket".
         {
-            PhoneTimeSuggestion phone2TimeSuggestion =
-                    mScript.generatePhoneTimeSuggestion(phone2Id, phone2TimeMillis);
-            mScript.simulateTimePassing(clockIncrement);
+            TelephonyTimeSuggestion slotIndex2TimeSuggestion =
+                    mScript.generateTelephonyTimeSuggestion(slotIndex2, slotIndex2TimeMillis);
+            mScript.simulateTimePassing();
 
-            long expectedSystemClockMillis = phone2TimeMillis + clockIncrement;
+            long expectedSystemClockMillis =
+                    mScript.calculateTimeInMillisForNow(slotIndex2TimeSuggestion.getUtcTime());
 
-            mScript.simulatePhoneTimeSuggestion(phone2TimeSuggestion)
-                    .verifySystemClockWasSetAndResetCallTracking(
-                            expectedSystemClockMillis, true /* expectNetworkBroadcast */)
-                    .assertLatestPhoneSuggestion(phone2Id, phone2TimeSuggestion);
+            mScript.simulateTelephonyTimeSuggestion(slotIndex2TimeSuggestion)
+                    .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis)
+                    .assertLatestTelephonySuggestion(slotIndex2, slotIndex2TimeSuggestion);
         }
     }
 
     @Test
-    public void testSuggestPhoneTime_autoTimeDisabled() {
+    public void testSuggestTelephonyTime_autoTimeDisabled() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(false);
 
-        int phoneId = ARBITRARY_PHONE_ID;
-        PhoneTimeSuggestion timeSuggestion =
-                mScript.generatePhoneTimeSuggestion(phoneId, ARBITRARY_TEST_TIME_MILLIS);
-        mScript.simulateTimePassing(1000)
-                .simulatePhoneTimeSuggestion(timeSuggestion)
+        int slotIndex = ARBITRARY_SLOT_INDEX;
+        TelephonyTimeSuggestion timeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, ARBITRARY_TEST_TIME_MILLIS);
+        mScript.simulateTimePassing()
+                .simulateTelephonyTimeSuggestion(timeSuggestion)
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion);
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion);
     }
 
     @Test
-    public void testSuggestPhoneTime_invalidNitzReferenceTimesIgnored() {
+    public void testSuggestTelephonyTime_invalidNitzReferenceTimesIgnored() {
         final int systemClockUpdateThreshold = 2000;
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeThresholds(systemClockUpdateThreshold)
                 .pokeAutoTimeDetectionEnabled(true);
 
         long testTimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-        int phoneId = ARBITRARY_PHONE_ID;
+        int slotIndex = ARBITRARY_SLOT_INDEX;
 
-        PhoneTimeSuggestion timeSuggestion1 =
-                mScript.generatePhoneTimeSuggestion(phoneId, testTimeMillis);
+        TelephonyTimeSuggestion timeSuggestion1 =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, testTimeMillis);
         TimestampedValue<Long> utcTime1 = timeSuggestion1.getUtcTime();
 
-        // Initialize the strategy / device with a time set from a phone suggestion.
-        mScript.simulateTimePassing(100);
-        long expectedSystemClockMillis1 =
-                TimeDetectorStrategy.getTimeAt(utcTime1, mScript.peekElapsedRealtimeMillis());
-        mScript.simulatePhoneTimeSuggestion(timeSuggestion1)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis1, true /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
+        // Initialize the strategy / device with a time set from a telephony suggestion.
+        mScript.simulateTimePassing();
+        long expectedSystemClockMillis1 = mScript.calculateTimeInMillisForNow(utcTime1);
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion1)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
         // The UTC time increment should be larger than the system clock update threshold so we
         // know it shouldn't be ignored for other reasons.
@@ -277,11 +269,11 @@ public class TimeDetectorStrategyImplTest {
         long referenceTimeBeforeLastSignalMillis = utcTime1.getReferenceTimeMillis() - 1;
         TimestampedValue<Long> utcTime2 = new TimestampedValue<>(
                 referenceTimeBeforeLastSignalMillis, validUtcTimeMillis);
-        PhoneTimeSuggestion timeSuggestion2 =
-                createPhoneTimeSuggestion(phoneId, utcTime2);
-        mScript.simulatePhoneTimeSuggestion(timeSuggestion2)
+        TelephonyTimeSuggestion timeSuggestion2 =
+                createTelephonyTimeSuggestion(slotIndex, utcTime2);
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion2)
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
         // Now supply a new signal that has an obviously bogus reference time : substantially in the
         // future.
@@ -289,38 +281,36 @@ public class TimeDetectorStrategyImplTest {
                 utcTime1.getReferenceTimeMillis() + Integer.MAX_VALUE + 1;
         TimestampedValue<Long> utcTime3 = new TimestampedValue<>(
                 referenceTimeInFutureMillis, validUtcTimeMillis);
-        PhoneTimeSuggestion timeSuggestion3 =
-                createPhoneTimeSuggestion(phoneId, utcTime3);
-        mScript.simulatePhoneTimeSuggestion(timeSuggestion3)
+        TelephonyTimeSuggestion timeSuggestion3 =
+                createTelephonyTimeSuggestion(slotIndex, utcTime3);
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion3)
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
         // Just to prove validUtcTimeMillis is valid.
         long validReferenceTimeMillis = utcTime1.getReferenceTimeMillis() + 100;
         TimestampedValue<Long> utcTime4 = new TimestampedValue<>(
                 validReferenceTimeMillis, validUtcTimeMillis);
-        long expectedSystemClockMillis4 =
-                TimeDetectorStrategy.getTimeAt(utcTime4, mScript.peekElapsedRealtimeMillis());
-        PhoneTimeSuggestion timeSuggestion4 =
-                createPhoneTimeSuggestion(phoneId, utcTime4);
-        mScript.simulatePhoneTimeSuggestion(timeSuggestion4)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis4, true /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion4);
+        long expectedSystemClockMillis4 = mScript.calculateTimeInMillisForNow(utcTime4);
+        TelephonyTimeSuggestion timeSuggestion4 =
+                createTelephonyTimeSuggestion(slotIndex, utcTime4);
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion4)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis4)
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion4);
     }
 
     @Test
-    public void testSuggestPhoneTime_timeDetectionToggled() {
+    public void testSuggestTelephonyTime_timeDetectionToggled() {
         final int clockIncrementMillis = 100;
         final int systemClockUpdateThreshold = 2000;
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeThresholds(systemClockUpdateThreshold)
                 .pokeAutoTimeDetectionEnabled(false);
 
-        int phoneId = ARBITRARY_PHONE_ID;
+        int slotIndex = ARBITRARY_SLOT_INDEX;
         long testTimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-        PhoneTimeSuggestion timeSuggestion1 =
-                mScript.generatePhoneTimeSuggestion(phoneId, testTimeMillis);
+        TelephonyTimeSuggestion timeSuggestion1 =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, testTimeMillis);
         TimestampedValue<Long> utcTime1 = timeSuggestion1.getUtcTime();
 
         // Simulate time passing.
@@ -328,78 +318,77 @@ public class TimeDetectorStrategyImplTest {
 
         // Simulate the time signal being received. It should not be used because auto time
         // detection is off but it should be recorded.
-        mScript.simulatePhoneTimeSuggestion(timeSuggestion1)
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion1)
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
         // Simulate more time passing.
         mScript.simulateTimePassing(clockIncrementMillis);
 
-        long expectedSystemClockMillis1 =
-                TimeDetectorStrategy.getTimeAt(utcTime1, mScript.peekElapsedRealtimeMillis());
+        long expectedSystemClockMillis1 = mScript.calculateTimeInMillisForNow(utcTime1);
 
         // Turn on auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis1, true /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis1)
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
         // Turn off auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion1);
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion1);
 
         // Receive another valid time signal.
         // It should be on the threshold and accounting for the clock increments.
-        PhoneTimeSuggestion timeSuggestion2 = mScript.generatePhoneTimeSuggestion(
-                phoneId, mScript.peekSystemClockMillis() + systemClockUpdateThreshold);
+        TelephonyTimeSuggestion timeSuggestion2 = mScript.generateTelephonyTimeSuggestion(
+                slotIndex, mScript.peekSystemClockMillis() + systemClockUpdateThreshold);
 
         // Simulate more time passing.
         mScript.simulateTimePassing(clockIncrementMillis);
 
-        long expectedSystemClockMillis2 = TimeDetectorStrategy.getTimeAt(
-                timeSuggestion2.getUtcTime(), mScript.peekElapsedRealtimeMillis());
+        long expectedSystemClockMillis2 =
+                mScript.calculateTimeInMillisForNow(timeSuggestion2.getUtcTime());
 
         // The new time, though valid, should not be set in the system clock because auto time is
         // disabled.
-        mScript.simulatePhoneTimeSuggestion(timeSuggestion2)
+        mScript.simulateTelephonyTimeSuggestion(timeSuggestion2)
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion2);
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion2);
 
         // Turn on auto time detection.
         mScript.simulateAutoTimeDetectionToggle()
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis2, true /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, timeSuggestion2);
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis2)
+                .assertLatestTelephonySuggestion(slotIndex, timeSuggestion2);
     }
 
     @Test
-    public void testSuggestPhoneTime_maxSuggestionAge() {
+    public void testSuggestTelephonyTime_maxSuggestionAge() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true);
 
-        int phoneId = ARBITRARY_PHONE_ID;
+        int slotIndex = ARBITRARY_SLOT_INDEX;
         long testTimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-        PhoneTimeSuggestion phoneSuggestion =
-                mScript.generatePhoneTimeSuggestion(phoneId, testTimeMillis);
-        int clockIncrementMillis = 1000;
+        TelephonyTimeSuggestion telephonySuggestion =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, testTimeMillis);
 
-        mScript.simulateTimePassing(clockIncrementMillis)
-                .simulatePhoneTimeSuggestion(phoneSuggestion)
+        mScript.simulateTimePassing();
+
+        long expectedSystemClockMillis =
+                mScript.calculateTimeInMillisForNow(telephonySuggestion.getUtcTime());
+        mScript.simulateTelephonyTimeSuggestion(telephonySuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(
-                        testTimeMillis + clockIncrementMillis, true /* expectedNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, phoneSuggestion);
+                        expectedSystemClockMillis  /* expectedNetworkBroadcast */)
+                .assertLatestTelephonySuggestion(slotIndex, telephonySuggestion);
 
-        // Look inside and check what the strategy considers the current best phone suggestion.
-        assertEquals(phoneSuggestion, mScript.peekBestPhoneSuggestion());
+        // Look inside and check what the strategy considers the current best telephony suggestion.
+        assertEquals(telephonySuggestion, mScript.peekBestTelephonySuggestion());
 
-        // Simulate time passing, long enough that phoneSuggestion is now too old.
-        mScript.simulateTimePassing(TimeDetectorStrategyImpl.PHONE_MAX_AGE_MILLIS);
+        // Simulate time passing, long enough that telephonySuggestion is now too old.
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS);
 
-        // Look inside and check what the strategy considers the current best phone suggestion. It
-        // should still be the, it's just no longer used.
-        assertNull(mScript.peekBestPhoneSuggestion());
-        mScript.assertLatestPhoneSuggestion(phoneId, phoneSuggestion);
+        // Look inside and check what the strategy considers the current best telephony suggestion.
+        // It should still be the, it's just no longer used.
+        assertNull(mScript.peekBestTelephonySuggestion());
+        mScript.assertLatestTelephonySuggestion(slotIndex, telephonySuggestion);
     }
 
     @Test
@@ -407,15 +396,15 @@ public class TimeDetectorStrategyImplTest {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(false);
 
-        long testTimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-        ManualTimeSuggestion timeSuggestion = mScript.generateManualTimeSuggestion(testTimeMillis);
-        final int clockIncrement = 1000;
-        long expectedSystemClockMillis = testTimeMillis + clockIncrement;
+        ManualTimeSuggestion timeSuggestion =
+                mScript.generateManualTimeSuggestion(ARBITRARY_TEST_TIME_MILLIS);
 
-        mScript.simulateTimePassing(clockIncrement)
-                .simulateManualTimeSuggestion(timeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedSystemClockMillis, false /* expectNetworkBroadcast */);
+        mScript.simulateTimePassing();
+
+        long expectedSystemClockMillis =
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+        mScript.simulateManualTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
     }
 
     @Test
@@ -424,62 +413,60 @@ public class TimeDetectorStrategyImplTest {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true);
 
-        int phoneId = ARBITRARY_PHONE_ID;
+        int slotIndex = ARBITRARY_SLOT_INDEX;
 
-        // Simulate a phone suggestion.
+        // Simulate a telephony suggestion.
         long testTimeMillis = ARBITRARY_TEST_TIME_MILLIS;
-        PhoneTimeSuggestion phoneTimeSuggestion =
-                mScript.generatePhoneTimeSuggestion(phoneId, testTimeMillis);
-        long expectedAutoClockMillis = phoneTimeSuggestion.getUtcTime().getValue();
-        final int clockIncrement = 1000;
+        TelephonyTimeSuggestion telephonyTimeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(slotIndex, testTimeMillis);
 
         // Simulate the passage of time.
-        mScript.simulateTimePassing(clockIncrement);
-        expectedAutoClockMillis += clockIncrement;
+        mScript.simulateTimePassing();
 
-        mScript.simulatePhoneTimeSuggestion(phoneTimeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedAutoClockMillis, true /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
+        long expectedAutoClockMillis =
+                mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUtcTime());
+        mScript.simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(expectedAutoClockMillis)
+                .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
 
         // Simulate the passage of time.
-        mScript.simulateTimePassing(clockIncrement);
-        expectedAutoClockMillis += clockIncrement;
+        mScript.simulateTimePassing();
 
         // Switch to manual.
         mScript.simulateAutoTimeDetectionToggle()
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
+                .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
 
         // Simulate the passage of time.
-        mScript.simulateTimePassing(clockIncrement);
-        expectedAutoClockMillis += clockIncrement;
+        mScript.simulateTimePassing();
 
         // Simulate a manual suggestion 1 day different from the auto suggestion.
-        long manualTimeMillis = testTimeMillis + ONE_DAY_MILLIS;
-        long expectedManualClockMillis = manualTimeMillis;
+        long manualTimeMillis = testTimeMillis + Duration.ofDays(1).toMillis();
         ManualTimeSuggestion manualTimeSuggestion =
                 mScript.generateManualTimeSuggestion(manualTimeMillis);
+        mScript.simulateTimePassing();
+
+        long expectedManualClockMillis =
+                mScript.calculateTimeInMillisForNow(manualTimeSuggestion.getUtcTime());
         mScript.simulateManualTimeSuggestion(manualTimeSuggestion)
-                .verifySystemClockWasSetAndResetCallTracking(
-                        expectedManualClockMillis, false /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
+                .verifySystemClockWasSetAndResetCallTracking(expectedManualClockMillis)
+                .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
 
         // Simulate the passage of time.
-        mScript.simulateTimePassing(clockIncrement);
-        expectedAutoClockMillis += clockIncrement;
+        mScript.simulateTimePassing();
 
         // Switch back to auto.
         mScript.simulateAutoTimeDetectionToggle();
 
-        mScript.verifySystemClockWasSetAndResetCallTracking(
-                        expectedAutoClockMillis, true /* expectNetworkBroadcast */)
-                .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
+        expectedAutoClockMillis =
+                mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUtcTime());
+        mScript.verifySystemClockWasSetAndResetCallTracking(expectedAutoClockMillis)
+                .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
 
         // Switch back to manual - nothing should happen to the clock.
         mScript.simulateAutoTimeDetectionToggle()
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestPhoneSuggestion(phoneId, phoneTimeSuggestion);
+                .assertLatestTelephonySuggestion(slotIndex, telephonyTimeSuggestion);
     }
 
     /**
@@ -492,11 +479,137 @@ public class TimeDetectorStrategyImplTest {
 
         ManualTimeSuggestion timeSuggestion =
                 mScript.generateManualTimeSuggestion(ARBITRARY_TEST_TIME_MILLIS);
-        final int clockIncrement = 1000;
 
-        mScript.simulateTimePassing(clockIncrement)
+        mScript.simulateTimePassing()
                 .simulateManualTimeSuggestion(timeSuggestion)
                 .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestNetworkTime_autoTimeEnabled() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true);
+
+        NetworkTimeSuggestion timeSuggestion =
+                mScript.generateNetworkTimeSuggestion(ARBITRARY_TEST_TIME_MILLIS);
+
+        mScript.simulateTimePassing();
+
+        long expectedSystemClockMillis =
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+        mScript.simulateNetworkTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
+    }
+
+    @Test
+    public void testSuggestNetworkTime_autoTimeDisabled() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(false);
+
+        NetworkTimeSuggestion timeSuggestion =
+                mScript.generateNetworkTimeSuggestion(ARBITRARY_TEST_TIME_MILLIS);
+
+        mScript.simulateTimePassing()
+                .simulateNetworkTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void testSuggestNetworkTime_telephonySuggestionsBeatNetworkSuggestions() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true);
+
+        // Three obviously different times that could not be mistaken for each other.
+        long networkTimeMillis1 = ARBITRARY_TEST_TIME_MILLIS;
+        long networkTimeMillis2 = ARBITRARY_TEST_TIME_MILLIS + Duration.ofDays(30).toMillis();
+        long telephonyTimeMillis = ARBITRARY_TEST_TIME_MILLIS + Duration.ofDays(60).toMillis();
+        // A small increment used to simulate the passage of time, but not enough to interfere with
+        // macro-level time changes associated with suggestion age.
+        final long smallTimeIncrementMillis = 101;
+
+        // A network suggestion is made. It should be used because there is no telephony suggestion.
+        NetworkTimeSuggestion networkTimeSuggestion1 =
+                mScript.generateNetworkTimeSuggestion(networkTimeMillis1);
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .simulateNetworkTimeSuggestion(networkTimeSuggestion1)
+                .verifySystemClockWasSetAndResetCallTracking(
+                        mScript.calculateTimeInMillisForNow(networkTimeSuggestion1.getUtcTime()));
+
+        // Check internal state.
+        mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, null)
+                .assertLatestNetworkSuggestion(networkTimeSuggestion1);
+        assertEquals(networkTimeSuggestion1, mScript.peekLatestValidNetworkSuggestion());
+        assertNull(mScript.peekBestTelephonySuggestion());
+
+        // Simulate a little time passing.
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Now a telephony suggestion is made. Telephony suggestions are prioritized over network
+        // suggestions so it should "win".
+        TelephonyTimeSuggestion telephonyTimeSuggestion =
+                mScript.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeMillis);
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(
+                        mScript.calculateTimeInMillisForNow(telephonyTimeSuggestion.getUtcTime()));
+
+        // Check internal state.
+        mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
+                .assertLatestNetworkSuggestion(networkTimeSuggestion1);
+        assertEquals(networkTimeSuggestion1, mScript.peekLatestValidNetworkSuggestion());
+        assertEquals(telephonyTimeSuggestion, mScript.peekBestTelephonySuggestion());
+
+        // Simulate some significant time passing: half the time allowed before a time signal
+        // becomes "too old to use".
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Now another network suggestion is made. Telephony suggestions are prioritized over
+        // network suggestions so the latest telephony suggestion should still "win".
+        NetworkTimeSuggestion networkTimeSuggestion2 =
+                mScript.generateNetworkTimeSuggestion(networkTimeMillis2);
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .simulateNetworkTimeSuggestion(networkTimeSuggestion2)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Check internal state.
+        mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
+                .assertLatestNetworkSuggestion(networkTimeSuggestion2);
+        assertEquals(networkTimeSuggestion2, mScript.peekLatestValidNetworkSuggestion());
+        assertEquals(telephonyTimeSuggestion, mScript.peekBestTelephonySuggestion());
+
+        // Simulate some significant time passing: half the time allowed before a time signal
+        // becomes "too old to use". This should mean that telephonyTimeSuggestion is now too old to
+        // be used but networkTimeSuggestion2 is not.
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2);
+
+        // NOTE: The TimeDetectorStrategyImpl doesn't set an alarm for the point when the last
+        // suggestion it used becomes too old: it requires a new suggestion or an auto-time toggle
+        // to re-run the detection logic. This may change in future but until then we rely on a
+        // steady stream of suggestions to re-evaluate.
+        mScript.verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Check internal state.
+        mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
+                .assertLatestNetworkSuggestion(networkTimeSuggestion2);
+        assertEquals(networkTimeSuggestion2, mScript.peekLatestValidNetworkSuggestion());
+        assertNull(mScript.peekBestTelephonySuggestion());
+
+        // Toggle auto-time off and on to force the detection logic to run.
+        mScript.simulateAutoTimeDetectionToggle()
+                .simulateTimePassing(smallTimeIncrementMillis)
+                .simulateAutoTimeDetectionToggle();
+
+        // Verify the latest network time now wins.
+        mScript.verifySystemClockWasSetAndResetCallTracking(
+                mScript.calculateTimeInMillisForNow(networkTimeSuggestion2.getUtcTime()));
+
+        // Check internal state.
+        mScript.assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
+                .assertLatestNetworkSuggestion(networkTimeSuggestion2);
+        assertEquals(networkTimeSuggestion2, mScript.peekLatestValidNetworkSuggestion());
+        assertNull(mScript.peekBestTelephonySuggestion());
     }
 
     /**
@@ -512,7 +625,6 @@ public class TimeDetectorStrategyImplTest {
 
         // Tracking operations.
         private boolean mSystemClockWasSet;
-        private Intent mBroadcastSent;
 
         @Override
         public int systemClockUpdateThresholdMillis() {
@@ -539,7 +651,6 @@ public class TimeDetectorStrategyImplTest {
 
         @Override
         public long systemClockMillis() {
-            assertWakeLockAcquired();
             return mSystemClockMillis;
         }
 
@@ -554,12 +665,6 @@ public class TimeDetectorStrategyImplTest {
         public void releaseWakeLock() {
             assertWakeLockAcquired();
             mWakeLockAcquired = false;
-        }
-
-        @Override
-        public void sendStickyBroadcast(Intent intent) {
-            assertNotNull(intent);
-            mBroadcastSent = intent;
         }
 
         // Methods below are for managing the fake's behavior.
@@ -606,17 +711,8 @@ public class TimeDetectorStrategyImplTest {
             assertEquals(expectedSystemClockMillis, mSystemClockMillis);
         }
 
-        void verifyIntentWasBroadcast() {
-            assertTrue(mBroadcastSent != null);
-        }
-
-        void verifyIntentWasNotBroadcast() {
-            assertNull(mBroadcastSent);
-        }
-
         void resetCallTracking() {
             mSystemClockWasSet = false;
-            mBroadcastSent = null;
         }
 
         private void assertWakeLockAcquired() {
@@ -664,13 +760,18 @@ public class TimeDetectorStrategyImplTest {
             return mFakeCallback.peekSystemClockMillis();
         }
 
-        Script simulatePhoneTimeSuggestion(PhoneTimeSuggestion timeSuggestion) {
-            mTimeDetectorStrategy.suggestPhoneTime(timeSuggestion);
+        Script simulateTelephonyTimeSuggestion(TelephonyTimeSuggestion timeSuggestion) {
+            mTimeDetectorStrategy.suggestTelephonyTime(timeSuggestion);
             return this;
         }
 
         Script simulateManualTimeSuggestion(ManualTimeSuggestion timeSuggestion) {
             mTimeDetectorStrategy.suggestManualTime(timeSuggestion);
+            return this;
+        }
+
+        Script simulateNetworkTimeSuggestion(NetworkTimeSuggestion timeSuggestion) {
+            mTimeDetectorStrategy.suggestNetworkTime(timeSuggestion);
             return this;
         }
 
@@ -685,37 +786,55 @@ public class TimeDetectorStrategyImplTest {
             return this;
         }
 
+        /**
+         * Simulates time passing by an arbitrary (but relatively small) amount.
+         */
+        Script simulateTimePassing() {
+            return simulateTimePassing(999);
+        }
+
         Script verifySystemClockWasNotSetAndResetCallTracking() {
             mFakeCallback.verifySystemClockNotSet();
-            mFakeCallback.verifyIntentWasNotBroadcast();
             mFakeCallback.resetCallTracking();
             return this;
         }
 
-        Script verifySystemClockWasSetAndResetCallTracking(
-                long expectedSystemClockMillis, boolean expectNetworkBroadcast) {
+        Script verifySystemClockWasSetAndResetCallTracking(long expectedSystemClockMillis) {
             mFakeCallback.verifySystemClockWasSet(expectedSystemClockMillis);
-            if (expectNetworkBroadcast) {
-                mFakeCallback.verifyIntentWasBroadcast();
-            }
             mFakeCallback.resetCallTracking();
             return this;
         }
 
         /**
-         * White box test info: Asserts the latest suggestion for the phone ID is as expected.
+         * White box test info: Asserts the latest suggestion for the slotIndex is as expected.
          */
-        Script assertLatestPhoneSuggestion(int phoneId, PhoneTimeSuggestion expected) {
-            assertEquals(expected, mTimeDetectorStrategy.getLatestPhoneSuggestion(phoneId));
+        Script assertLatestTelephonySuggestion(int slotIndex, TelephonyTimeSuggestion expected) {
+            assertEquals(expected, mTimeDetectorStrategy.getLatestTelephonySuggestion(slotIndex));
             return this;
         }
 
         /**
-         * White box test info: Returns the phone suggestion that would be used, if any, given the
-         * current elapsed real time clock.
+         * White box test info: Asserts the latest network suggestion is as expected.
          */
-        PhoneTimeSuggestion peekBestPhoneSuggestion() {
-            return mTimeDetectorStrategy.findBestPhoneSuggestionForTests();
+        Script assertLatestNetworkSuggestion(NetworkTimeSuggestion expected) {
+            assertEquals(expected, mTimeDetectorStrategy.getLatestNetworkSuggestion());
+            return this;
+        }
+
+        /**
+         * White box test info: Returns the telephony suggestion that would be used, if any, given
+         * the current elapsed real time clock and regardless of origin prioritization.
+         */
+        TelephonyTimeSuggestion peekBestTelephonySuggestion() {
+            return mTimeDetectorStrategy.findBestTelephonySuggestionForTests();
+        }
+
+        /**
+         * White box test info: Returns the network suggestion that would be used, if any, given the
+         * current elapsed real time clock and regardless of origin prioritization.
+         */
+        NetworkTimeSuggestion peekLatestValidNetworkSuggestion() {
+            return mTimeDetectorStrategy.findLatestValidNetworkSuggestionForTests();
         }
 
         /**
@@ -729,21 +848,39 @@ public class TimeDetectorStrategyImplTest {
         }
 
         /**
-         * Generates a PhoneTimeSuggestion using the current elapsed realtime clock for the
-         * reference time.
+         * Generates a {@link TelephonyTimeSuggestion} using the current elapsed realtime clock for
+         * the reference time.
          */
-        PhoneTimeSuggestion generatePhoneTimeSuggestion(int phoneId, Long timeMillis) {
+        TelephonyTimeSuggestion generateTelephonyTimeSuggestion(int slotIndex, Long timeMillis) {
             TimestampedValue<Long> time = null;
             if (timeMillis != null) {
                 time = new TimestampedValue<>(peekElapsedRealtimeMillis(), timeMillis);
             }
-            return createPhoneTimeSuggestion(phoneId, time);
+            return createTelephonyTimeSuggestion(slotIndex, time);
+        }
+
+        /**
+         * Generates a NetworkTimeSuggestion using the current elapsed realtime clock for the
+         * reference time.
+         */
+        NetworkTimeSuggestion generateNetworkTimeSuggestion(long timeMillis) {
+            TimestampedValue<Long> utcTime =
+                    new TimestampedValue<>(mFakeCallback.peekElapsedRealtimeMillis(), timeMillis);
+            return new NetworkTimeSuggestion(utcTime);
+        }
+
+        /**
+         * Calculates what the supplied time would be when adjusted for the movement of the fake
+         * elapsed realtime clock.
+         */
+        long calculateTimeInMillisForNow(TimestampedValue<Long> utcTime) {
+            return TimeDetectorStrategy.getTimeAt(utcTime, peekElapsedRealtimeMillis());
         }
     }
 
-    private static PhoneTimeSuggestion createPhoneTimeSuggestion(int phoneId,
+    private static TelephonyTimeSuggestion createTelephonyTimeSuggestion(int slotIndex,
             TimestampedValue<Long> utcTime) {
-        return new PhoneTimeSuggestion.Builder(phoneId)
+        return new TelephonyTimeSuggestion.Builder(slotIndex)
                 .setUtcTime(utcTime)
                 .build();
     }

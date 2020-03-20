@@ -17,10 +17,12 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.telephony.Rlog;
 
 import java.util.Objects;
 
@@ -78,6 +80,15 @@ public final class CellInfoLte extends CellInfo implements Parcelable {
         mCellIdentityLte = new CellIdentityLte(cil.base.cellIdentityLte);
         mCellSignalStrengthLte = new CellSignalStrengthLte(cil.base.signalStrengthLte);
         mCellConfig = new CellConfigLte(cil.cellConfig);
+    }
+
+    /** @hide */
+    public CellInfoLte(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_5.CellInfoLte cil = ci.ratSpecificInfo.lte();
+        mCellIdentityLte = new CellIdentityLte(cil.cellIdentityLte);
+        mCellSignalStrengthLte = new CellSignalStrengthLte(cil.signalStrengthLte);
+        mCellConfig = new CellConfigLte();
     }
 
     /**

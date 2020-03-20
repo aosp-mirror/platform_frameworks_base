@@ -91,6 +91,7 @@
     <uses-permission android:name="android.permission.TEST_MANAGE_ROLLBACKS" />
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.READ_FRAME_BUFFER" />
+    <uses-permission android:name="android.permission.REBOOT" />
     <uses-permission android:name="android.permission.DEVICE_POWER" />
     <uses-permission android:name="android.permission.POWER_SAVER" />
     <uses-permission android:name="android.permission.INSTALL_LOCATION_PROVIDER" />
@@ -186,6 +187,9 @@
 
     <uses-permission android:name="android.permission.MANAGE_APPOPS" />
 
+    <!-- Permission required for storage tests - FuseDaemonHostTest -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+
     <!-- Permission needed to run network tests in CTS -->
     <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
     <!-- Permission needed to test tcp keepalive offload. -->
@@ -207,6 +211,14 @@
     <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
     <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
 
+    <!-- permissions required for CTS test - PhoneStateListenerTest -->
+    <uses-permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH" />
+
+    <!-- Permissions required for ganting and logging -->
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
+
     <!-- Permission required for CTS test - UiModeManagerTest -->
     <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
 
@@ -215,6 +227,25 @@
 
     <!-- Permission required for CTS test - TetheringManagerTest -->
     <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
+
+    <!-- Permissions required to test ambient display. -->
+    <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_DREAM_STATE"/>
+
+    <!-- Permission needed to test mainline permission module rollback -->
+    <uses-permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS" />
+
+    <!-- Permission required for CTS test - CtsLightsManagerTest -->
+    <uses-permission android:name="android.permission.CONTROL_DEVICE_LIGHTS" />
+
+    <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
+    <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
+
+    <!-- Permission needed to use wifi usability API's for CtsNetTestCases -->
+    <uses-permission android:name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE" />
+
+    <!-- Permission required for testing system audio effect APIs. -->
+    <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
@@ -261,6 +292,22 @@
                   android:noHistory="true"
                   android:excludeFromRecents="true"
                   android:exported="false" />
+
+        <!--
+        The following is used as a no-op/null home activity when
+        no other MAIN/HOME activity is present (e.g., in CSI).
+        -->
+        <activity android:name=".NullHome"
+                  android:excludeFromRecents="true"
+                  android:label=""
+                  android:screenOrientation="nosensor">
+            <!-- The priority here is set to be lower than that for Settings -->
+            <intent-filter android:priority="-1100">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
 
         <receiver
             android:name=".BugreportReceiver"

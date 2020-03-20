@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "PowerStatsPuller.h"
+#include "statslog.h"
 #include "stats_log_util.h"
 
 using android::hardware::hidl_vec;

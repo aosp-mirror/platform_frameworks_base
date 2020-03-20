@@ -19,7 +19,7 @@ package com.android.internal.view;
 import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.inputmethodservice.AbstractInputMethodService;
 import android.os.Bundle;
 import android.os.Handler;

@@ -135,7 +135,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         synchronized (mProfileLock) {
             if (newProfileState == BluetoothProfile.STATE_CONNECTED) {
                 if (profile instanceof MapProfile) {
-                    profile.setPreferred(mDevice, true);
+                    profile.setEnabled(mDevice, true);
                 }
                 if (!mProfiles.contains(profile)) {
                     mRemovedProfiles.remove(profile);
@@ -148,7 +148,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 }
             } else if (profile instanceof MapProfile
                     && newProfileState == BluetoothProfile.STATE_DISCONNECTED) {
-                profile.setPreferred(mDevice, false);
+                profile.setEnabled(mDevice, false);
             } else if (mLocalNapRoleConnected && profile instanceof PanProfile
                     && ((PanProfile) profile).isLocalRoleNap(mDevice)
                     && newProfileState == BluetoothProfile.STATE_DISCONNECTED) {
@@ -172,25 +172,40 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         PbapServerProfile PbapProfile = mProfileManager.getPbapProfile();
         if (PbapProfile != null && isConnectedProfile(PbapProfile))
         {
-            PbapProfile.disconnect(mDevice);
+            PbapProfile.setEnabled(mDevice, false);
         }
     }
 
     public void disconnect(LocalBluetoothProfile profile) {
-        if (profile.disconnect(mDevice)) {
+        if (profile.setEnabled(mDevice, false)) {
             if (BluetoothUtils.D) {
                 Log.d(TAG, "Command sent successfully:DISCONNECT " + describe(profile));
             }
         }
     }
 
+    /**
+     * Connect this device.
+     *
+     * @param connectAllProfiles {@code true} to connect all profile, {@code false} otherwise.
+     *
+     * @deprecated use {@link #connect()} instead.
+     */
+    @Deprecated
     public void connect(boolean connectAllProfiles) {
+        connect();
+    }
+
+    /**
+     * Connect this device.
+     */
+    public void connect() {
         if (!ensurePaired()) {
             return;
         }
 
         mConnectAttempted = SystemClock.elapsedRealtime();
-        connectWithoutResettingTimer(connectAllProfiles);
+        connectAllEnabledProfiles();
     }
 
     public long getHiSyncId() {
@@ -211,10 +226,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     void onBondingDockConnect() {
         // Attempt to connect if UUIDs are available. Otherwise,
         // we will connect when the ACTION_UUID intent arrives.
-        connect(false);
+        connect();
     }
 
-    private void connectWithoutResettingTimer(boolean connectAllProfiles) {
+    private void connectAllEnabledProfiles() {
         synchronized (mProfileLock) {
             // Try to initialize the profiles if they were not.
             if (mProfiles.isEmpty()) {
@@ -229,36 +244,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                 return;
             }
 
-            int preferredProfiles = 0;
-            for (LocalBluetoothProfile profile : mProfiles) {
-                if (connectAllProfiles ? profile.accessProfileEnabled()
-                        : profile.isAutoConnectable()) {
-                    if (profile.isPreferred(mDevice)) {
-                        ++preferredProfiles;
-                        connectInt(profile);
-                    }
-                }
-            }
-            if (BluetoothUtils.D) Log.d(TAG, "Preferred profiles = " + preferredProfiles);
-
-            if (preferredProfiles == 0) {
-                connectAutoConnectableProfiles();
-            }
-        }
-    }
-
-    private void connectAutoConnectableProfiles() {
-        if (!ensurePaired()) {
-            return;
-        }
-
-        synchronized (mProfileLock) {
-            for (LocalBluetoothProfile profile : mProfiles) {
-                if (profile.isAutoConnectable()) {
-                    profile.setPreferred(mDevice, true);
-                    connectInt(profile);
-                }
-            }
+            mLocalAdapter.connectAllEnabledProfiles(mDevice);
         }
     }
 
@@ -278,7 +264,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         if (!ensurePaired()) {
             return;
         }
-        if (profile.connect(mDevice)) {
+        if (profile.setEnabled(mDevice, true)) {
             if (BluetoothUtils.D) {
                 Log.d(TAG, "Command sent successfully:CONNECT " + describe(profile));
             }
@@ -431,7 +417,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     /**
      * Get battery level from remote device
-     * @return battery level in percentage [0-100], or {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
+     * @return battery level in percentage [0-100],
+     * {@link BluetoothDevice#BATTERY_LEVEL_BLUETOOTH_OFF}, or
+     * {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
      */
     public int getBatteryLevel() {
         return mDevice.getBatteryLevel();
@@ -623,9 +611,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
          * If a connect was attempted earlier without any UUID, we will do the connect now.
          * Otherwise, allow the connect on UUID change.
          */
-        if (!mProfiles.isEmpty()
-                && ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime())) {
-            connectWithoutResettingTimer(false);
+        if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
+            Log.d(TAG, "onUuidChanged: triggering connectAllEnabledProfiles");
+            connectAllEnabledProfiles();
         }
 
         dispatchAttributesChanged();
@@ -644,7 +632,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         refresh();
 
         if (bondState == BluetoothDevice.BOND_BONDED && mDevice.isBondingInitiatedLocally()) {
-            connect(false);
+            connect();
         }
     }
 
@@ -876,12 +864,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         String batteryLevelPercentageString = null;
-        // Android framework should only set mBatteryLevel to valid range [0-100] or
-        // BluetoothDevice.BATTERY_LEVEL_UNKNOWN, any other value should be a framework bug.
-        // Thus assume here that if value is not BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must
-        // be valid
+        // Android framework should only set mBatteryLevel to valid range [0-100],
+        // BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN,
+        // any other value should be a framework bug. Thus assume here that if value is greater
+        // than BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
         final int batteryLevel = getBatteryLevel();
-        if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+        if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
             // TODO: name com.android.settingslib.bluetooth.Utils something different
             batteryLevelPercentageString =
                     com.android.settingslib.Utils.formatPercentage(batteryLevel);
@@ -984,12 +972,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         String batteryLevelPercentageString = null;
-        // Android framework should only set mBatteryLevel to valid range [0-100] or
-        // BluetoothDevice.BATTERY_LEVEL_UNKNOWN, any other value should be a framework bug.
-        // Thus assume here that if value is not BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must
-        // be valid
+        // Android framework should only set mBatteryLevel to valid range [0-100],
+        // BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN,
+        // any other value should be a framework bug. Thus assume here that if value is greater
+        // than BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
         final int batteryLevel = getBatteryLevel();
-        if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+        if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
             // TODO: name com.android.settingslib.bluetooth.Utils something different
             batteryLevelPercentageString =
                     com.android.settingslib.Utils.formatPercentage(batteryLevel);

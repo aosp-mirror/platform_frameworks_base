@@ -454,6 +454,10 @@ public final class BinderProxy implements IBinder {
         return null;
     }
 
+    /** @hide */
+    @Override
+    public native @Nullable IBinder getExtension() throws RemoteException;
+
     /**
      * Perform a binder transaction on a proxy.
      *

@@ -16,8 +16,8 @@
 
 package com.android.internal.content;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;

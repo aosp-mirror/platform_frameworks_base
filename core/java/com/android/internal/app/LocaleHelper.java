@@ -17,7 +17,7 @@
 package com.android.internal.app;
 
 import android.annotation.IntRange;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.icu.text.ListFormatter;
 import android.icu.util.ULocale;
 import android.os.LocaleList;

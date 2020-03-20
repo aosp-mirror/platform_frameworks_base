@@ -16,8 +16,9 @@
 
 package android.security.keymaster;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
+
 import java.util.Date;
 
 /**

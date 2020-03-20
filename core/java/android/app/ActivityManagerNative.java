@@ -15,7 +15,7 @@
  */
 
 package android.app;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.IBinder;
 

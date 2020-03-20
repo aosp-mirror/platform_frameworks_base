@@ -22,7 +22,6 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.telephony.ims.RcsContactUceCapability;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
@@ -33,7 +32,7 @@ import android.telephony.ims.stub.RcsPresenceExchangeImplBase;
 import android.telephony.ims.stub.RcsSipOptionsImplBase;
 import android.util.Log;
 
-import com.android.internal.util.FunctionalUtils;
+import com.android.internal.telephony.util.TelephonyUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -43,6 +42,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * Base implementation of the RcsFeature APIs. Any ImsService wishing to support RCS should extend
@@ -150,13 +150,13 @@ public class RcsFeature extends ImsFeature {
 
         // Call the methods with a clean calling identity on the executor and wait indefinitely for
         // the future to return.
-        private void executeMethodAsync(FunctionalUtils.ThrowingRunnable r, String errorLogName)
+        private void executeMethodAsync(Runnable r, String errorLogName)
                 throws RemoteException {
             // call with a clean calling identity on the executor and wait indefinitely for the
             // future to return.
             try {
                 CompletableFuture.runAsync(
-                        () -> Binder.withCleanCallingIdentity(r), mExecutor).join();
+                        () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor).join();
             } catch (CancellationException | CompletionException e) {
                 Log.w(LOG_TAG, "RcsFeatureBinder - " + errorLogName + " exception: "
                         + e.getMessage());
@@ -164,12 +164,12 @@ public class RcsFeature extends ImsFeature {
             }
         }
 
-        private <T> T executeMethodAsyncForResult(FunctionalUtils.ThrowingSupplier<T> r,
+        private <T> T executeMethodAsyncForResult(Supplier<T> r,
                 String errorLogName) throws RemoteException {
             // call with a clean calling identity on the executor and wait indefinitely for the
             // future to return.
             CompletableFuture<T> future = CompletableFuture.supplyAsync(
-                    () -> Binder.withCleanCallingIdentity(r), mExecutor);
+                    () -> TelephonyUtils.runWithCleanCallingIdentity(r), mExecutor);
             try {
                 return future.get();
             } catch (ExecutionException | InterruptedException e) {
@@ -193,6 +193,7 @@ public class RcsFeature extends ImsFeature {
      * of the capability and notify the capability status as true using
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)}. This will signal to the
      * framework that the capability is available for usage.
+     * @hide
      */
     public static class RcsImsCapabilities extends Capabilities {
         /** @hide*/
@@ -286,6 +287,7 @@ public class RcsFeature extends ImsFeature {
      * set, the {@link RcsFeature} has brought up the capability and is ready for framework
      * requests. To change the status of the capabilities
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)} should be called.
+     * @hide
      */
     @Override
     public @NonNull final RcsImsCapabilities queryCapabilityStatus() {
@@ -296,6 +298,7 @@ public class RcsFeature extends ImsFeature {
      * Notify the framework that the capabilities status has changed. If a capability is enabled,
      * this signals to the framework that the capability has been initialized and is ready.
      * Call {@link #queryCapabilityStatus()} to return the current capability status.
+     * @hide
      */
     public final void notifyCapabilitiesStatusChanged(@NonNull RcsImsCapabilities c) {
         if (c == null) {
@@ -310,6 +313,7 @@ public class RcsFeature extends ImsFeature {
      * {@link #changeEnabledCapabilities(CapabilityChangeRequest, CapabilityCallbackProxy)} to
      * enable or disable capability A, this method should return the correct configuration for
      * capability A afterwards (until it has changed).
+     * @hide
      */
     public boolean queryCapabilityConfiguration(
             @RcsImsCapabilities.RcsImsCapabilityFlag int capability,
@@ -331,6 +335,7 @@ public class RcsFeature extends ImsFeature {
      * If for some reason one or more of these capabilities can not be enabled/disabled,
      * {@link CapabilityCallbackProxy#onChangeCapabilityConfigurationError(int, int, int)} should
      * be called for each capability change that resulted in an error.
+     * @hide
      */
     @Override
     public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
@@ -351,7 +356,7 @@ public class RcsFeature extends ImsFeature {
      * it is supported by the device.
      * @hide
      */
-    public RcsSipOptionsImplBase getOptionsExchangeImpl() {
+    public @NonNull RcsSipOptionsImplBase getOptionsExchangeImpl() {
         // Base Implementation, override to implement functionality
         return new RcsSipOptionsImplBase();
     }
@@ -367,7 +372,7 @@ public class RcsFeature extends ImsFeature {
      * exchange if it is supported by the device.
      * @hide
      */
-    public RcsPresenceExchangeImplBase getPresenceExchangeImpl() {
+    public @NonNull RcsPresenceExchangeImplBase getPresenceExchangeImpl() {
         // Base Implementation, override to implement functionality.
         return new RcsPresenceExchangeImplBase();
     }

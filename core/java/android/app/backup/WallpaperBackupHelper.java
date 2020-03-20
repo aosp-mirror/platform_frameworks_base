@@ -85,6 +85,10 @@ public class WallpaperBackupHelper extends FileBackupHelperBase implements Backu
      */
     @Override
     public void restoreEntity(BackupDataInputStream data) {
+        if (mWpm == null) {
+            Slog.w(TAG, "restoreEntity(): no wallpaper service");
+            return;
+        }
         final String key = data.getKey();
         if (isKeyInList(key, mKeys)) {
             if (key.equals(WALLPAPER_IMAGE_KEY)) {

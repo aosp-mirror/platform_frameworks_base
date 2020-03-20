@@ -43,6 +43,7 @@ import android.util.Slog;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.SafeActivityOptions;
@@ -293,6 +294,8 @@ public class PendingIntentController {
                     PendingIntentController::handlePendingIntentCancelled, this, callbacks);
             mH.sendMessage(m);
         }
+        final AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
+        ami.remove(new PendingIntent(rec));
     }
 
     private void handlePendingIntentCancelled(RemoteCallbackList<IResultReceiver> callbacks) {

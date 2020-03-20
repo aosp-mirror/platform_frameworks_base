@@ -18,8 +18,9 @@ package com.android.tests.gating;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.compat.testing.PlatformCompatChangeRule;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.compat.testing.DummyApi;
 
@@ -81,14 +82,14 @@ public class PlatformCompatGatingTest {
     @Test
     @EnableCompatChanges({DummyApi.CHANGE_SYSTEM_SERVER})
     public void testDummyGatingPositiveSystemServer() {
-        assertThat(
-                DummyApi.dummySystemServer(InstrumentationRegistry.getTargetContext())).isTrue();
+        assertThat(DummyApi.dummySystemServer(
+                InstrumentationRegistry.getInstrumentation().getTargetContext())).isTrue();
     }
 
     @Test
     @DisableCompatChanges({DummyApi.CHANGE_SYSTEM_SERVER})
     public void testDummyGatingNegativeSystemServer() {
-        assertThat(
-                DummyApi.dummySystemServer(InstrumentationRegistry.getTargetContext())).isFalse();
+        assertThat(DummyApi.dummySystemServer(
+                InstrumentationRegistry.getInstrumentation().getTargetContext())).isFalse();
     }
 }

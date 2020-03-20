@@ -28,8 +28,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
 public class LicenseHtmlGeneratorFromXmlTest {
@@ -68,6 +71,7 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     private static final String HTML_BODY_STRING =
             "<li><a href=\"#id0\">/file0</a></li>\n"
+            + "<li><a href=\"#id1\">/file0</a></li>\n"
             + "<li><a href=\"#id0\">/file1</a></li>\n"
             + "</ul>\n"
             + "</div><!-- table of contents -->\n"
@@ -82,6 +86,15 @@ public class LicenseHtmlGeneratorFromXmlTest {
             + "license content #0\n"
             + "</pre><!-- license-text -->\n"
             + "</td></tr><!-- same-license -->\n"
+            + "<tr id=\"id1\"><td class=\"same-license\">\n"
+            + "<div class=\"label\">Notices for file(s):</div>\n"
+            + "<div class=\"file-list\">\n"
+            + "/file0 <br/>\n"
+            + "</div><!-- file-list -->\n"
+            + "<pre class=\"license-text\">\n"
+            + "license content #1\n"
+            + "</pre><!-- license-text -->\n"
+            + "</td></tr><!-- same-license -->\n"
             + "</table></body></html>\n";
 
     private static final String EXPECTED_HTML_STRING = HTML_HEAD_STRING + HTML_BODY_STRING;
@@ -91,22 +104,22 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     @Test
     public void testParseValidXmlStream() throws XmlPullParserException, IOException {
-        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, Set<String>> fileNameToContentIdMap = new HashMap<>();
         Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
         LicenseHtmlGeneratorFromXml.parse(
                 new InputStreamReader(new ByteArrayInputStream(VALILD_XML_STRING.getBytes())),
                 fileNameToContentIdMap, contentIdToFileContentMap);
         assertThat(fileNameToContentIdMap.size()).isEqualTo(2);
-        assertThat(fileNameToContentIdMap.get("/file0")).isEqualTo("0");
-        assertThat(fileNameToContentIdMap.get("/file1")).isEqualTo("0");
+        assertThat(fileNameToContentIdMap.get("/file0")).containsExactly("0");
+        assertThat(fileNameToContentIdMap.get("/file1")).containsExactly("0");
         assertThat(contentIdToFileContentMap.size()).isEqualTo(1);
         assertThat(contentIdToFileContentMap.get("0")).isEqualTo("license content #0");
     }
 
     @Test(expected = XmlPullParserException.class)
     public void testParseInvalidXmlStream() throws XmlPullParserException, IOException {
-        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, Set<String>> fileNameToContentIdMap = new HashMap<>();
         Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
         LicenseHtmlGeneratorFromXml.parse(
@@ -116,12 +129,13 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     @Test
     public void testGenerateHtml() {
-        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, Set<String>> fileNameToContentIdMap = new HashMap<>();
         Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
-        fileNameToContentIdMap.put("/file0", "0");
-        fileNameToContentIdMap.put("/file1", "0");
+        fileNameToContentIdMap.put("/file0", new HashSet<String>(Arrays.asList("0", "1")));
+        fileNameToContentIdMap.put("/file1", new HashSet<String>(Arrays.asList("0")));
         contentIdToFileContentMap.put("0", "license content #0");
+        contentIdToFileContentMap.put("1", "license content #1");
 
         StringWriter output = new StringWriter();
         LicenseHtmlGeneratorFromXml.generateHtml(
@@ -131,12 +145,13 @@ public class LicenseHtmlGeneratorFromXmlTest {
 
     @Test
     public void testGenerateHtmlWithCustomHeading() {
-        Map<String, String> fileNameToContentIdMap = new HashMap<>();
+        Map<String, Set<String>> fileNameToContentIdMap = new HashMap<>();
         Map<String, String> contentIdToFileContentMap = new HashMap<>();
 
-        fileNameToContentIdMap.put("/file0", "0");
-        fileNameToContentIdMap.put("/file1", "0");
+        fileNameToContentIdMap.put("/file0", new HashSet<String>(Arrays.asList("0", "1")));
+        fileNameToContentIdMap.put("/file1", new HashSet<String>(Arrays.asList("0")));
         contentIdToFileContentMap.put("0", "license content #0");
+        contentIdToFileContentMap.put("1", "license content #1");
 
         StringWriter output = new StringWriter();
         LicenseHtmlGeneratorFromXml.generateHtml(

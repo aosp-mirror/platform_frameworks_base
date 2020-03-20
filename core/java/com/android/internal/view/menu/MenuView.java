@@ -16,10 +16,7 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuItemImpl;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.drawable.Drawable;
 
 /**

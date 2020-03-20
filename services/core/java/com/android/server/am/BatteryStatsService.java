@@ -1133,7 +1133,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     @Override
     public void setBatteryState(final int status, final int health, final int plugType,
             final int level, final int temp, final int volt, final int chargeUAh,
-            final int chargeFullUAh) {
+            final int chargeFullUAh, final long chargeTimeToFullSeconds) {
         enforceCallingPermission();
 
         // BatteryService calls us here and we may update external state. It would be wrong
@@ -1145,7 +1145,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     // The battery state has not changed, so we don't need to sync external
                     // stats immediately.
                     mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt,
-                            chargeUAh, chargeFullUAh);
+                            chargeUAh, chargeFullUAh, chargeTimeToFullSeconds);
                     return;
                 }
             }
@@ -1158,7 +1158,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mWorker.scheduleRunnable(() -> {
                 synchronized (mStats) {
                     mStats.setBatteryStateLocked(status, health, plugType, level, temp, volt,
-                            chargeUAh, chargeFullUAh);
+                            chargeUAh, chargeFullUAh, chargeTimeToFullSeconds);
                 }
             });
         });

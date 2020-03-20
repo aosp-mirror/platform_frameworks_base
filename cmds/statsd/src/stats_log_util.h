@@ -19,9 +19,9 @@
 #include <android/util/ProtoOutputStream.h>
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
+#include "atoms_info.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
-#include "statslog.h"
 
 namespace android {
 namespace os {

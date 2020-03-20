@@ -19,9 +19,13 @@ package android.telephony;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.hardware.radio.V1_0.CellInfoType;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.telephony.Rlog;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -65,8 +69,8 @@ public abstract class CellIdentity implements Parcelable {
     protected String mAlphaShort;
 
     /** @hide */
-    protected CellIdentity(String tag, int type, String mcc, String mnc, String alphal,
-                           String alphas) {
+    protected CellIdentity(@Nullable String tag, int type, @Nullable String mcc,
+            @Nullable String mnc, @Nullable String alphal, @Nullable String alphas) {
         mTag = tag;
         mType = type;
 
@@ -181,7 +185,17 @@ public abstract class CellIdentity implements Parcelable {
      * @return a CellLocation object for this CellIdentity
      * @hide
      */
-    public abstract CellLocation asCellLocation();
+    @SystemApi
+    public abstract @NonNull CellLocation asCellLocation();
+
+    /**
+     * Create and a return a new instance of CellIdentity with location-identifying information
+     * removed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public abstract @NonNull CellIdentity sanitizeLocationInfo();
 
     @Override
     public boolean equals(Object other) {
@@ -310,4 +324,103 @@ public abstract class CellIdentity implements Parcelable {
         return true;
     }
 
+    /** @hide */
+    public static CellIdentity create(android.hardware.radio.V1_0.CellIdentity cellIdentity) {
+        if (cellIdentity == null)  return null;
+        switch(cellIdentity.cellInfoType) {
+            case CellInfoType.GSM: {
+                if (cellIdentity.cellIdentityGsm.size() == 1) {
+                    return new CellIdentityGsm(cellIdentity.cellIdentityGsm.get(0));
+                }
+                break;
+            }
+            case CellInfoType.WCDMA: {
+                if (cellIdentity.cellIdentityWcdma.size() == 1) {
+                    return new CellIdentityWcdma(cellIdentity.cellIdentityWcdma.get(0));
+                }
+                break;
+            }
+            case CellInfoType.TD_SCDMA: {
+                if (cellIdentity.cellIdentityTdscdma.size() == 1) {
+                    return new  CellIdentityTdscdma(cellIdentity.cellIdentityTdscdma.get(0));
+                }
+                break;
+            }
+            case CellInfoType.LTE: {
+                if (cellIdentity.cellIdentityLte.size() == 1) {
+                    return new CellIdentityLte(cellIdentity.cellIdentityLte.get(0));
+                }
+                break;
+            }
+            case CellInfoType.CDMA: {
+                if (cellIdentity.cellIdentityCdma.size() == 1) {
+                    return new CellIdentityCdma(cellIdentity.cellIdentityCdma.get(0));
+                }
+                break;
+            }
+            case CellInfoType.NONE: break;
+            default: break;
+        }
+        return null;
+    }
+
+    /** @hide */
+    public static CellIdentity create(android.hardware.radio.V1_2.CellIdentity cellIdentity) {
+        if (cellIdentity == null)  return null;
+        switch(cellIdentity.cellInfoType) {
+            case CellInfoType.GSM: {
+                if (cellIdentity.cellIdentityGsm.size() == 1) {
+                    return new CellIdentityGsm(cellIdentity.cellIdentityGsm.get(0));
+                }
+                break;
+            }
+            case CellInfoType.WCDMA: {
+                if (cellIdentity.cellIdentityWcdma.size() == 1) {
+                    return new CellIdentityWcdma(cellIdentity.cellIdentityWcdma.get(0));
+                }
+                break;
+            }
+            case CellInfoType.TD_SCDMA: {
+                if (cellIdentity.cellIdentityTdscdma.size() == 1) {
+                    return new  CellIdentityTdscdma(cellIdentity.cellIdentityTdscdma.get(0));
+                }
+                break;
+            }
+            case CellInfoType.LTE: {
+                if (cellIdentity.cellIdentityLte.size() == 1) {
+                    return new CellIdentityLte(cellIdentity.cellIdentityLte.get(0));
+                }
+                break;
+            }
+            case CellInfoType.CDMA: {
+                if (cellIdentity.cellIdentityCdma.size() == 1) {
+                    return new CellIdentityCdma(cellIdentity.cellIdentityCdma.get(0));
+                }
+                break;
+            }
+            case CellInfoType.NONE: break;
+            default: break;
+        }
+        return null;
+    }
+
+    /** @hide */
+    public static CellIdentity create(android.hardware.radio.V1_5.CellIdentity ci) {
+        if (ci == null) return null;
+        switch (ci.getDiscriminator()) {
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.gsm:
+                return new CellIdentityGsm(ci.gsm());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.cdma:
+                return new CellIdentityCdma(ci.cdma());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.lte:
+                return new CellIdentityLte(ci.lte());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.wcdma:
+                return new CellIdentityWcdma(ci.wcdma());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.tdscdma:
+                return new CellIdentityTdscdma(ci.tdscdma());
+            case android.hardware.radio.V1_5.CellIdentity.hidl_discriminator.nr:
+                return new CellIdentityNr(ci.nr());
+            default: return null;
+        }
+    }
 }

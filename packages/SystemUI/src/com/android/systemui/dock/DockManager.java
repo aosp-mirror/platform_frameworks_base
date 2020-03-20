@@ -17,12 +17,12 @@
 package com.android.systemui.dock;
 
 /**
- * Allows an app to handle dock events
+ * Allows an app to handle dock events.
  */
 public interface DockManager {
 
     /**
-     * Uninitialized / undocking dock states
+     * Uninitialized / undocking dock states.
      */
     int STATE_NONE = 0;
     /**
@@ -30,34 +30,81 @@ public interface DockManager {
      */
     int STATE_DOCKED = 1;
     /**
-     * The state for docking without showing UI
+     * The state for docking without showing UI.
      */
     int STATE_DOCKED_HIDE = 2;
 
     /**
-     * Add a dock event listener into manager
+     * Indicates there's no alignment info. This could happen when the device is unable to decide
+     * its alignment condition.
+     */
+    int ALIGN_STATE_UNKNOWN = -1;
+
+    /**
+     * Indicates there's no alignment issue.
+     */
+    int ALIGN_STATE_GOOD = 0;
+
+    /**
+     * Indicates it's slightly not aligned with dock. Normally combines with slow charging issue.
+     */
+    int ALIGN_STATE_POOR = 1;
+
+    /**
+     * Indicates it's not aligned with dock. Normally combines with not charging issue.
+     */
+    int ALIGN_STATE_TERRIBLE = 2;
+
+    /**
+     * Adds a dock event listener into manager.
      *
      * @param callback A {@link DockEventListener} which want to add
      */
     void addListener(DockEventListener callback);
 
     /**
-     * Remove the added listener from dock manager
+     * Removes the added listener from dock manager
      *
      * @param callback A {@link DockEventListener} which want to remove
      */
     void removeListener(DockEventListener callback);
 
     /**
+     * Adds a alignment listener into manager.
+     *
+     * @param listener A {@link AlignmentStateListener} which want to add
+     */
+    void addAlignmentStateListener(AlignmentStateListener listener);
+
+    /**
+     * Removes the added alignment listener from dock manager.
+     *
+     * @param listener A {@link AlignmentStateListener} which want to remove
+     */
+    void removeAlignmentStateListener(AlignmentStateListener listener);
+
+    /**
     * Returns true if the device is in docking state.
     */
     boolean isDocked();
 
-    /** Callback for receiving dock events */
+    /**
+     * Listens to dock events.
+     */
     interface DockEventListener {
         /**
-         * Override to handle dock events
+         * Override to handle dock events.
          */
         void onEvent(int event);
+    }
+
+    /**
+     * Listens to dock alignment state changed.
+     */
+    interface AlignmentStateListener {
+        /**
+         * Override to handle alignment state changes.
+         */
+        void onAlignmentStateChanged(int alignState);
     }
 }

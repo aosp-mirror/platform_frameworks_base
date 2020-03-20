@@ -27,9 +27,8 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
-
-import com.android.internal.telephony.TelephonyIntents;
 
 /**
  * Service to run {@link android.app.job.JobScheduler} job.
@@ -93,7 +92,7 @@ public class ProvisionObserver extends JobService {
         }
         int jobId;
         switch(intent.getAction()) {
-            case TelephonyIntents.ACTION_CARRIER_SIGNAL_REDIRECTED:
+            case TelephonyManager.ACTION_CARRIER_SIGNAL_REDIRECTED:
                 jobId = PROVISION_OBSERVER_REEVALUATION_JOB_ID;
                 break;
             default:

@@ -238,6 +238,7 @@ public class ActionsSuggestionsHelperTest {
         assertThat(conversationActions).isEmpty();
     }
 
+    @Test
     public void createLabeledIntentResult_null() {
         ActionsSuggestionsModel.ActionSuggestion nativeSuggestion =
                 new ActionsSuggestionsModel.ActionSuggestion(

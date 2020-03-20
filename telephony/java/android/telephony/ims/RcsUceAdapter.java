@@ -21,6 +21,8 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
@@ -29,6 +31,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.ims.aidl.IImsRcsController;
 import android.telephony.ims.aidl.IRcsUceControllerCallback;
+import android.telephony.ims.feature.RcsFeature;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -42,60 +45,74 @@ import java.util.concurrent.Executor;
  * @see ImsRcsManager#getUceAdapter() for information on creating an instance of this class.
  * @hide
  */
+@SystemApi
+@TestApi
 public class RcsUceAdapter {
     private static final String TAG = "RcsUceAdapter";
 
     /**
      * An unknown error has caused the request to fail.
+     * @hide
      */
     public static final int ERROR_GENERIC_FAILURE = 1;
     /**
      * The carrier network does not have UCE support enabled for this subscriber.
+     * @hide
      */
     public static final int ERROR_NOT_ENABLED = 2;
     /**
      * The data network that the device is connected to does not support UCE currently (e.g. it is
      * 1x only currently).
+     * @hide
      */
     public static final int ERROR_NOT_AVAILABLE = 3;
     /**
      * The network has responded with SIP 403 error and a reason "User not registered."
+     * @hide
      */
     public static final int ERROR_NOT_REGISTERED = 4;
     /**
      * The network has responded to this request with a SIP 403 error and reason "not authorized for
      * presence" for this subscriber.
+     * @hide
      */
     public static final int ERROR_NOT_AUTHORIZED = 5;
     /**
      * The network has responded to this request with a SIP 403 error and no reason.
+     * @hide
      */
     public static final int ERROR_FORBIDDEN = 6;
     /**
      * The contact URI requested is not provisioned for VoLTE or it is not known as an IMS
      * subscriber to the carrier network.
+     * @hide
      */
     public static final int ERROR_NOT_FOUND = 7;
     /**
      * The capabilities request contained too many URIs for the carrier network to handle. Retry
      * with a lower number of contact numbers. The number varies per carrier.
+     * @hide
      */
     // TODO: Try to integrate this into the API so that the service will split based on carrier.
     public static final int ERROR_REQUEST_TOO_LARGE = 8;
     /**
      * The network did not respond to the capabilities request before the request timed out.
+     * @hide
      */
     public static final int ERROR_REQUEST_TIMEOUT = 10;
     /**
      * The request failed due to the service having insufficient memory.
+     * @hide
      */
     public static final int ERROR_INSUFFICIENT_MEMORY = 11;
     /**
      * The network was lost while trying to complete the request.
+     * @hide
      */
     public static final int ERROR_LOST_NETWORK = 12;
     /**
      * The request has failed because the same request has already been added to the queue.
+     * @hide
      */
     public static final int ERROR_ALREADY_IN_QUEUE = 13;
 
@@ -120,28 +137,33 @@ public class RcsUceAdapter {
     /**
      * The last publish has resulted in a "200 OK" response or the device is using SIP OPTIONS for
      * UCE.
+     * @hide
      */
-    public static final int PUBLISH_STATE_200_OK = 1;
+    public static final int PUBLISH_STATE_OK = 1;
 
     /**
      * The hasn't published its capabilities since boot or hasn't gotten any publish response yet.
+     * @hide
      */
     public static final int PUBLISH_STATE_NOT_PUBLISHED = 2;
 
     /**
      * The device has tried to publish its capabilities, which has resulted in an error. This error
      * is related to the fact that the device is not VoLTE provisioned.
+     * @hide
      */
     public static final int PUBLISH_STATE_VOLTE_PROVISION_ERROR = 3;
 
     /**
      * The device has tried to publish its capabilities, which has resulted in an error. This error
      * is related to the fact that the device is not RCS or UCE provisioned.
+     * @hide
      */
     public static final int PUBLISH_STATE_RCS_PROVISION_ERROR = 4;
 
     /**
      * The last publish resulted in a "408 Request Timeout" response.
+     * @hide
      */
     public static final int PUBLISH_STATE_REQUEST_TIMEOUT = 5;
 
@@ -150,13 +172,14 @@ public class RcsUceAdapter {
      * or SIP 423 - "Interval too short".
      * <p>
      * Device shall retry with exponential back-off.
+     * @hide
      */
     public static final int PUBLISH_STATE_OTHER_ERROR = 6;
 
     /**@hide*/
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "PUBLISH_STATE_", value = {
-            PUBLISH_STATE_200_OK,
+            PUBLISH_STATE_OK,
             PUBLISH_STATE_NOT_PUBLISHED,
             PUBLISH_STATE_VOLTE_PROVISION_ERROR,
             PUBLISH_STATE_RCS_PROVISION_ERROR,
@@ -170,6 +193,7 @@ public class RcsUceAdapter {
      * Provides a one-time callback for the response to a UCE request. After this callback is called
      * by the framework, the reference to this callback will be discarded on the service side.
      * @see #requestCapabilities(Executor, List, CapabilitiesCallback)
+     * @hide
      */
     public static class CapabilitiesCallback {
 
@@ -197,6 +221,7 @@ public class RcsUceAdapter {
     /**
      * Not to be instantiated directly, use
      * {@link ImsRcsManager#getUceAdapter()} to instantiate this manager class.
+     * @hide
      */
     RcsUceAdapter(int subId) {
         mSubId = subId;
@@ -220,9 +245,10 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void requestCapabilities(@CallbackExecutor Executor executor,
+    public void requestCapabilities(@NonNull @CallbackExecutor Executor executor,
             @NonNull List<Uri> contactNumbers,
             @NonNull CapabilitiesCallback c) throws ImsException {
         if (c == null) {
@@ -245,15 +271,22 @@ public class RcsUceAdapter {
         IRcsUceControllerCallback internalCallback = new IRcsUceControllerCallback.Stub() {
             @Override
             public void onCapabilitiesReceived(List<RcsContactUceCapability> contactCapabilities) {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() ->
-                                c.onCapabilitiesReceived(contactCapabilities)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() ->
+                            c.onCapabilitiesReceived(contactCapabilities));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
             @Override
             public void onError(int errorCode) {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() ->
-                                c.onError(errorCode)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> c.onError(errorCode));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
         };
 
@@ -270,11 +303,12 @@ public class RcsUceAdapter {
      * Gets the last publish result from the UCE service if the device is using an RCS presence
      * server.
      * @return The last publish result from the UCE service. If the device is using SIP OPTIONS,
-     * this method will return {@link #PUBLISH_STATE_200_OK} as well.
+     * this method will return {@link #PUBLISH_STATE_OK} as well.
      * @throws ImsException if the subscription associated with this instance of
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public @PublishState int getUcePublishState() throws ImsException {
@@ -295,14 +329,13 @@ public class RcsUceAdapter {
     }
 
     /**
-     * The user’s setting for whether or not Presence and User Capability Exchange (UCE) is enabled
-     * for the associated subscription.
+     * The user’s setting for whether or not User Capability Exchange (UCE) is enabled for the
+     * associated subscription.
+     * <p>
+     * Note: This setting does not affect whether or not the device publishes its service
+     * capabilities if the subscription supports presence publication.
      *
-     * @return true if the user’s setting for UCE is enabled, false otherwise. If false,
-     * {@link ImsRcsManager#isCapable(int)} will return false for
-     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} and
-     * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE}
-     * @see #setUceSettingEnabled(boolean)
+     * @return true if the user’s setting for UCE is enabled, false otherwise.
      * @throws ImsException if the subscription associated with this instance of
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
@@ -328,12 +361,12 @@ public class RcsUceAdapter {
 
     /**
      * Change the user’s setting for whether or not UCE is enabled for the associated subscription.
-     * @param isEnabled the user's setting for whether or not they wish for Presence and User
-     *         Capability Exchange to be enabled. If false,
-     *         {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_OPTIONS_UCE} and
-     *         {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} capability will be
-     *         disabled, depending on which type of UCE the carrier supports.
-     * @see #isUceSettingEnabled()
+     * <p>
+     * Note: This setting does not affect whether or not the device publishes its service
+     * capabilities if the subscription supports presence publication.
+     *
+     * @param isEnabled the user's setting for whether or not they wish for User
+     *         Capability Exchange to be enabled.
      * @throws ImsException if the subscription associated with this instance of
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription

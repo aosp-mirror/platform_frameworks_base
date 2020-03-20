@@ -52,4 +52,18 @@ public class BinderTest extends TestCase {
         } catch (IllegalStateException expected) {
         }
     }
+
+    @SmallTest
+    public void testGetExtension() throws Exception {
+        Binder binder = new Binder();
+        assertNull(binder.getExtension());
+
+        IBinder extension = new Binder();
+        binder.setExtension(extension);
+        assertNotNull(binder.getExtension());
+        assertSame(binder.getExtension(), extension);
+
+        binder.setExtension(null);
+        assertNull(binder.getExtension());
+    }
 }

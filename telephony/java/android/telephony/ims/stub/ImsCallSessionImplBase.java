@@ -16,6 +16,7 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Message;
@@ -180,6 +181,18 @@ public class ImsCallSessionImplBase implements AutoCloseable {
         @Override
         public void reject(int reason) {
             ImsCallSessionImplBase.this.reject(reason);
+        }
+
+        @Override
+        public void transfer(@NonNull String number, boolean isConfirmationRequired) {
+            ImsCallSessionImplBase.this.transfer(number, isConfirmationRequired);
+        }
+
+        @Override
+        public void consultativeTransfer(@NonNull IImsCallSession transferToSession) {
+            ImsCallSessionImplBase otherSession = new ImsCallSessionImplBase();
+            otherSession.setServiceImpl(transferToSession);
+            ImsCallSessionImplBase.this.transfer(otherSession);
         }
 
         @Override
@@ -410,9 +423,36 @@ public class ImsCallSessionImplBase implements AutoCloseable {
      * Rejects an incoming call or session update.
      *
      * @param reason reason code to reject an incoming call, defined in {@link ImsReasonInfo}.
+     *               The {@link android.telecom.InCallService} (dialer app) can use the
+     *               {@link android.telecom.Call#reject(int)} API to reject a call while specifying
+     *               a user-indicated reason for rejecting the call.
+     *               Normal call declines ({@link android.telecom.Call#REJECT_REASON_DECLINED}) will
+     *               map to {@link ImsReasonInfo#CODE_USER_DECLINE}.
+     *               Unwanted calls ({@link android.telecom.Call#REJECT_REASON_UNWANTED}) will map
+     *               to {@link ImsReasonInfo#CODE_SIP_USER_MARKED_UNWANTED}.
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
     public void reject(int reason) {
+    }
+
+    /**
+     * Transfer an established call to given number
+     *
+     * @param number number to transfer the call
+     * @param isConfirmationRequired if {@code True}, indicates Assured transfer,
+     * if {@code False} it indicates Blind transfer.
+     * @hide
+     */
+    public void transfer(@NonNull String number, boolean isConfirmationRequired) {
+    }
+
+    /**
+     * Transfer an established call to another call session
+     *
+     * @param otherSession The other ImsCallSession to transfer the ongoing session to.
+     * @hide
+     */
+    public void transfer(@NonNull ImsCallSessionImplBase otherSession) {
     }
 
     /**

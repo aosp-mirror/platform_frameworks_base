@@ -528,14 +528,14 @@ public class LocalBluetoothProfileManager {
             (mMapProfile.getConnectionStatus(device) == BluetoothProfile.STATE_CONNECTED)) {
             profiles.add(mMapProfile);
             removedProfiles.remove(mMapProfile);
-            mMapProfile.setPreferred(device, true);
+            mMapProfile.setEnabled(device, true);
         }
 
         if ((mPbapProfile != null) &&
             (mPbapProfile.getConnectionStatus(device) == BluetoothProfile.STATE_CONNECTED)) {
             profiles.add(mPbapProfile);
             removedProfiles.remove(mPbapProfile);
-            mPbapProfile.setPreferred(device, true);
+            mPbapProfile.setEnabled(device, true);
         }
 
         if (mMapClientProfile != null) {

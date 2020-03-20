@@ -19,29 +19,33 @@ package com.android.server.connectivity.tethering;
 import android.annotation.Nullable;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
-import android.net.NetworkState;
 import android.net.RouteInfo;
 import android.net.util.InterfaceSet;
 
-import java.net.Inet4Address;
-import java.net.Inet6Address;
+import com.android.net.module.util.NetUtils;
+
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * @hide
  */
 public final class TetheringInterfaceUtils {
+    private static final InetAddress IN6ADDR_ANY = getByAddress(
+            new byte[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+    private static final InetAddress INADDR_ANY = getByAddress(new byte[] {0, 0, 0, 0});
+
     /**
      * Get upstream interfaces for tethering based on default routes for IPv4/IPv6.
      * @return null if there is no usable interface, or a set of at least one interface otherwise.
      */
-    public static @Nullable InterfaceSet getTetheringInterfaces(NetworkState ns) {
+    public static @Nullable InterfaceSet getTetheringInterfaces(UpstreamNetworkState ns) {
         if (ns == null) {
             return null;
         }
 
         final LinkProperties lp = ns.linkProperties;
-        final String if4 = getInterfaceForDestination(lp, Inet4Address.ANY);
+        final String if4 = getInterfaceForDestination(lp, INADDR_ANY);
         final String if6 = getIPv6Interface(ns);
 
         return (if4 == null && if6 == null) ? null : new InterfaceSet(if4, if6);
@@ -51,7 +55,7 @@ public final class TetheringInterfaceUtils {
      * Get the upstream interface for IPv6 tethering.
      * @return null if there is no usable interface, or the interface name otherwise.
      */
-    public static @Nullable String getIPv6Interface(NetworkState ns) {
+    public static @Nullable String getIPv6Interface(UpstreamNetworkState ns) {
         // Broadly speaking:
         //
         //     [1] does the upstream have an IPv6 default route?
@@ -77,14 +81,22 @@ public final class TetheringInterfaceUtils {
                 && ns.networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
 
         return canTether
-                ? getInterfaceForDestination(ns.linkProperties, Inet6Address.ANY)
+                ? getInterfaceForDestination(ns.linkProperties, IN6ADDR_ANY)
                 : null;
     }
 
     private static String getInterfaceForDestination(LinkProperties lp, InetAddress dst) {
         final RouteInfo ri = (lp != null)
-                ? RouteInfo.selectBestRoute(lp.getAllRoutes(), dst)
+                ? NetUtils.selectBestRoute(lp.getAllRoutes(), dst)
                 : null;
         return (ri != null) ? ri.getInterface() : null;
+    }
+
+    private static InetAddress getByAddress(final byte[] addr) {
+        try {
+            return InetAddress.getByAddress(null, addr);
+        } catch (UnknownHostException e) {
+            throw new AssertionError("illegal address length" + addr.length);
+        }
     }
 }

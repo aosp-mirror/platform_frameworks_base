@@ -18,8 +18,6 @@ package android.net.dhcp;
 
 import static android.net.InetAddresses.parseNumericAddress;
 
-import static com.google.android.collect.Sets.newHashSet;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -34,6 +32,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.net.Inet4Address;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -47,9 +47,10 @@ public class DhcpServingParamsParcelExtTest {
     private static final int TEST_LEASE_TIME_SECS = 120;
     private static final int TEST_MTU = 1000;
     private static final Set<Inet4Address> TEST_ADDRESS_SET =
-            newHashSet(inet4Addr("192.168.1.123"), inet4Addr("192.168.1.124"));
+            new HashSet<Inet4Address>(Arrays.asList(
+            new Inet4Address[] {inet4Addr("192.168.1.123"), inet4Addr("192.168.1.124")}));
     private static final Set<Integer> TEST_ADDRESS_SET_PARCELED =
-            newHashSet(0xc0a8017b, 0xc0a8017c);
+            new HashSet<Integer>(Arrays.asList(new Integer[] {0xc0a8017b, 0xc0a8017c}));
 
     private DhcpServingParamsParcelExt mParcel;
 

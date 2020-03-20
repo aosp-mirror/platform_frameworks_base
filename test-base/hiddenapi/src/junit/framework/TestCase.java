@@ -16,7 +16,7 @@
 
 package junit.framework;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Stub only

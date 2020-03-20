@@ -30,12 +30,23 @@ import org.junit.runner.RunWith;
  * Unit tests for bundle that requires accessing hidden APS.  Tests that can be written only with
  * public APIs should go in the CTS counterpart.
  *
- * Run with:
- * bit FrameworksCoreTests:android.os.BundleTest
+ * Run with: atest FrameworksCoreTests:android.os.BundleTest
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BundleTest {
+
+    /**
+     * Take a bundle, write it to a parcel and return the parcel.
+     */
+    private Parcel getParcelledBundle(Bundle bundle) {
+        final Parcel p = Parcel.obtain();
+        // Don't use p.writeParcelabe(), which would write the creator, which we don't need.
+        bundle.writeToParcel(p, 0);
+        p.setDataPosition(0);
+        return p;
+    }
+
     /**
      * Create a test bundle, parcel it and return the parcel.
      */
@@ -48,12 +59,7 @@ public class BundleTest {
             pipe[1].close();
             source.putParcelable("fd", pipe[0]);
         }
-        final Parcel p = Parcel.obtain();
-        // Don't use p.writeParcelabe(), which would write the creator, which we don't need.
-        source.writeToParcel(p, 0);
-        p.setDataPosition(0);
-
-        return p;
+        return getParcelledBundle(source);
     }
 
     /**
@@ -136,5 +142,79 @@ public class BundleTest {
         b.readFromParcel(p);
         checkBundle(b, withFd);
         p.recycle();
+    }
+
+    @Test
+    public void kindofEquals_bothUnparcelled_same() {
+        Bundle bundle1 = new Bundle();
+        bundle1.putString("StringKey", "S");
+        bundle1.putInt("IntKey", 2);
+
+        Bundle bundle2 = new Bundle();
+        bundle2.putString("StringKey", "S");
+        bundle2.putInt("IntKey", 2);
+
+        assertTrue(BaseBundle.kindofEquals(bundle1, bundle2));
+    }
+
+    @Test
+    public void kindofEquals_bothUnparcelled_different() {
+        Bundle bundle1 = new Bundle();
+        bundle1.putString("StringKey", "S");
+        bundle1.putInt("IntKey", 2);
+
+        Bundle bundle2 = new Bundle();
+        bundle2.putString("StringKey", "T");
+        bundle2.putLong("LongKey", 30L);
+
+        assertFalse(BaseBundle.kindofEquals(bundle1, bundle2));
+    }
+
+    @Test
+    public void kindofEquals_bothParcelled_same() {
+        Bundle bundle1 = new Bundle();
+        bundle1.putString("StringKey", "S");
+        bundle1.putInt("IntKey", 2);
+        bundle1.readFromParcel(getParcelledBundle(bundle1));
+
+        Bundle bundle2 = new Bundle();
+        bundle2.putString("StringKey", "S");
+        bundle2.putInt("IntKey", 2);
+        bundle2.readFromParcel(getParcelledBundle(bundle2));
+
+        assertTrue(bundle1.isParcelled());
+        assertTrue(bundle2.isParcelled());
+        assertTrue(BaseBundle.kindofEquals(bundle1, bundle2));
+    }
+
+    @Test
+    public void kindofEquals_bothParcelled_different() {
+        Bundle bundle1 = new Bundle();
+        bundle1.putString("StringKey", "S");
+        bundle1.putInt("IntKey", 2);
+        bundle1.readFromParcel(getParcelledBundle(bundle1));
+
+        Bundle bundle2 = new Bundle();
+        bundle2.putString("StringKey", "T");
+        bundle2.putLong("LongKey", 5);
+        bundle2.readFromParcel(getParcelledBundle(bundle2));
+
+        assertTrue(bundle1.isParcelled());
+        assertTrue(bundle2.isParcelled());
+        assertFalse(BaseBundle.kindofEquals(bundle1, bundle2));
+    }
+
+    @Test
+    public void kindofEquals_ParcelledUnparcelled_empty() {
+        Bundle bundle1 = new Bundle();
+        bundle1.readFromParcel(getParcelledBundle(bundle1));
+
+        Bundle bundle2 = new Bundle();
+
+        assertTrue(bundle1.isParcelled());
+        assertFalse(bundle2.isParcelled());
+        // Even though one is parcelled and the other is not, both are empty, so it should
+        // return true
+        assertTrue(BaseBundle.kindofEquals(bundle1, bundle2));
     }
 }

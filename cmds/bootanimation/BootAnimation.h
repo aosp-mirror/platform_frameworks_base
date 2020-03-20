@@ -17,6 +17,8 @@
 #ifndef ANDROID_BOOTANIMATION_H
 #define ANDROID_BOOTANIMATION_H
 
+#include <vector>
+
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -157,6 +159,7 @@ private:
     bool parseAnimationDesc(Animation&);
     bool preloadZip(Animation &animation);
     void findBootAnimationFile();
+    bool findBootAnimationFileInternal(const std::vector<std::string>& files);
     bool preloadAnimation();
 
     void checkExit();

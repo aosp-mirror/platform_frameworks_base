@@ -16,7 +16,7 @@
 
 package android.view;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.BaseRecordingCanvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;

@@ -18,14 +18,12 @@ android_test {
     name: "PlatformCompatGating",
     // Only compile source java files in this apk.
     srcs: ["src/**/*.java"],
-    certificate: "platform",
-    libs: [
-        "android.test.runner",
-        "android.test.base",
-    ],
+    test_suites: ["device-tests"],
     static_libs: [
         "junit",
-        "android-support-test",
+        "androidx.test.runner",
+        "androidx.test.core",
+        "androidx.test.ext.junit",
         "mockito-target-minus-junit4",
         "truth-prebuilt",
         "platform-compat-test-rules"

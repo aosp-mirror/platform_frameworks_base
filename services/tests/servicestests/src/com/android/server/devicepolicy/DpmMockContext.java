@@ -207,8 +207,6 @@ public class DpmMockContext extends MockContext {
         switch (name) {
             case Context.ALARM_SERVICE:
                 return mMockSystemServices.alarmManager;
-            case Context.TIME_DETECTOR_SERVICE:
-                return mMockSystemServices.timeDetector;
             case Context.USER_SERVICE:
                 return mMockSystemServices.userManager;
             case Context.POWER_SERVICE:
@@ -217,6 +215,8 @@ public class DpmMockContext extends MockContext {
                 return mMockSystemServices.wifiManager;
             case Context.ACCOUNT_SERVICE:
                 return mMockSystemServices.accountManager;
+            case Context.TELEPHONY_SERVICE:
+                return mMockSystemServices.telephonyManager;
         }
         throw new UnsupportedOperationException();
     }

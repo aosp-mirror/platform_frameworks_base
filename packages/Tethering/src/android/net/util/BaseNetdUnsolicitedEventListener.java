@@ -67,4 +67,9 @@ public class BaseNetdUnsolicitedEventListener extends INetdUnsolicitedEventListe
     public int getInterfaceVersion() {
         return INetdUnsolicitedEventListener.VERSION;
     }
+
+    @Override
+    public String getInterfaceHash() {
+        return INetdUnsolicitedEventListener.HASH;
+    }
 }

@@ -19,7 +19,7 @@ package android.net.wifi.p2p;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.MacAddress;
 import android.net.wifi.WpsInfo;
 import android.os.Parcel;
@@ -28,6 +28,7 @@ import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.PatternSyntaxException;
 
 /**
@@ -228,6 +229,10 @@ public class WifiP2pConfig implements Parcelable {
 
         private static final MacAddress MAC_ANY_ADDRESS =
                 MacAddress.fromString("02:00:00:00:00:00");
+        /**
+         * Maximum number of bytes allowed for a SSID.
+         */
+        private static final int MAX_SSID_BYTES = 32;
 
         private MacAddress mDeviceAddress = MAC_ANY_ADDRESS;
         private String mNetworkName = "";
@@ -278,6 +283,10 @@ public class WifiP2pConfig implements Parcelable {
             if (TextUtils.isEmpty(networkName)) {
                 throw new IllegalArgumentException(
                         "network name must be non-empty.");
+            }
+            if (networkName.getBytes(StandardCharsets.UTF_8).length > MAX_SSID_BYTES) {
+                throw new IllegalArgumentException(
+                        "network name exceeds " + MAX_SSID_BYTES + " bytes.");
             }
             try {
                 if (!networkName.matches("^DIRECT-[a-zA-Z0-9]{2}.*")) {

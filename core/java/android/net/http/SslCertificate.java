@@ -17,7 +17,7 @@
 package android.net.http;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.format.DateFormat;

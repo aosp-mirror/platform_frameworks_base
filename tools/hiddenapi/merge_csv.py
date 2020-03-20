@@ -14,27 +14,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
-Merge mutliple CSV files, possibly with different columns, writing to stdout.
+Merge multiple CSV files, possibly with different columns.
 """
 
+import argparse
 import csv
-import sys
+import io
 
-csv_readers = [
-    csv.DictReader(open(csv_file, 'rb'), delimiter=',', quotechar='|')
-    for csv_file in sys.argv[1:]
-]
+from zipfile import ZipFile
 
-# Build union of all columns from source files:
+args_parser = argparse.ArgumentParser(description='Merge given CSV files into a single one.')
+args_parser.add_argument('--header', help='Comma separated field names; '
+                                          'if missing determines the header from input files.')
+args_parser.add_argument('--zip_input', help='ZIP archive with all CSV files to merge.')
+args_parser.add_argument('--output', help='Output file for merged CSV.',
+                         default='-', type=argparse.FileType('w'))
+args_parser.add_argument('files', nargs=argparse.REMAINDER)
+args = args_parser.parse_args()
+
+
+def dict_reader(input):
+    return csv.DictReader(input, delimiter=',', quotechar='|')
+
+
+if args.zip_input and len(args.files) > 0:
+    raise ValueError('Expecting either a single ZIP with CSV files'
+                     ' or a list of CSV files as input; not both.')
+
+csv_readers = []
+if len(args.files) > 0:
+    for file in args.files:
+        csv_readers.append(dict_reader(open(file, 'r')))
+elif args.zip_input:
+    with ZipFile(args.zip_input) as zip:
+        for entry in zip.namelist():
+            if entry.endswith('.uau'):
+                csv_readers.append(dict_reader(io.TextIOWrapper(zip.open(entry, 'r'))))
+
 headers = set()
-for reader in csv_readers:
-  headers = headers.union(reader.fieldnames)
+if args.header:
+    fieldnames = args.header.split(',')
+else:
+    # Build union of all columns from source files:
+    for reader in csv_readers:
+        headers = headers.union(reader.fieldnames)
+    fieldnames = sorted(headers)
 
 # Concatenate all files to output:
-out = csv.DictWriter(sys.stdout, delimiter=',', quotechar='|', fieldnames = sorted(headers))
-out.writeheader()
+writer = csv.DictWriter(args.output, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL,
+                        dialect='unix', fieldnames=fieldnames)
+writer.writeheader()
 for reader in csv_readers:
-  for row in reader:
-    out.writerow(row)
-
-
+    for row in reader:
+        writer.writerow(row)

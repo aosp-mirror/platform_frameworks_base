@@ -23,8 +23,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
@@ -179,9 +180,10 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
      */
+    @SuppressLint("ActionValue")
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_ALIAS_CHANGED =
-            "android.bluetooth.action.ALIAS_CHANGED";
+            "android.bluetooth.device.action.ALIAS_CHANGED";
 
     /**
      * Broadcast Action: Indicates a change in the bond state of a remote
@@ -226,6 +228,13 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     public static final int BATTERY_LEVEL_UNKNOWN = -1;
+
+    /**
+     * Used as an error value for {@link #getBatteryLevel()} to represent bluetooth is off
+     *
+     * @hide
+     */
+    public static final int BATTERY_LEVEL_BLUETOOTH_OFF = -100;
 
     /**
      * Used as a Parcelable {@link BluetoothDevice} extra field in every intent
@@ -1023,7 +1032,11 @@ public final class BluetoothDevice implements Parcelable {
         try {
             String name = service.getRemoteName(this);
             if (name != null) {
-                return name.replaceAll("[\\t\\n\\r]+", " ");
+                // remove whitespace characters from the name
+                return name
+                        .replace('\t', ' ')
+                        .replace('\n', ' ')
+                        .replace('\r', ' ');
             }
             return null;
         } catch (RemoteException e) {
@@ -1091,7 +1104,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setAlias(@NonNull String alias) {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1107,20 +1120,38 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
+     * Get the Bluetooth alias of the remote device.
+     * If Alias is null, get the Bluetooth name instead.
+     *
+     * @return the Bluetooth alias, or null if no alias or there was a problem
+     * @hide
+     * @see #getAlias()
+     * @see #getName()
+     */
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link #getName()} instead.")
+    public String getAliasName() {
+        String name = getAlias();
+        if (name == null) {
+            name = getName();
+        }
+        return name;
+    }
+
+    /**
      * Get the most recent identified battery level of this Bluetooth device
      *
-     * @return Battery level in percents from 0 to 100, or {@link #BATTERY_LEVEL_UNKNOWN} if
-     * Bluetooth is disabled, or device is disconnected, or does not have any battery reporting
-     * service, or return value is invalid
+     * @return Battery level in percents from 0 to 100, {@link #BATTERY_LEVEL_BLUETOOTH_OFF} if
+     * Bluetooth is disabled or {@link #BATTERY_LEVEL_UNKNOWN} if device is disconnected, or does
+     * not have any battery reporting service, or return value is invalid
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public int getBatteryLevel() {
         final IBluetooth service = sService;
         if (service == null) {
             Log.e(TAG, "Bluetooth disabled. Cannot get remote device battery level");
-            return BATTERY_LEVEL_UNKNOWN;
+            return BATTERY_LEVEL_BLUETOOTH_OFF;
         }
         try {
             return service.getBatteryLevel(this);
@@ -1206,7 +1237,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean isBondingInitiatedLocally() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1244,13 +1275,12 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Cancel an in-progress bonding request started with {@link #createBond}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return true on success, false on error
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean cancelBondProcess() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1273,13 +1303,12 @@ public final class BluetoothDevice implements Parcelable {
      * <p>Delete the link key associated with the remote device, and
      * immediately terminate connections to that device that require
      * authentication and encryption.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}.
      *
      * @return true on success, false on error
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean removeBond() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1323,13 +1352,12 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Returns whether there is an open connection to this device.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return True if there is at least one open connection to this device.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isConnected() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1347,13 +1375,12 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Returns whether there is an open connection to this device
      * that has been encrypted.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}.
      *
      * @return True if there is at least one encrypted connection to this device.
      * @hide
      */
     @SystemApi
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isEncrypted() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1506,7 +1533,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setPin(@Nullable String pin) {
+    public boolean setPin(@NonNull String pin) {
         byte[] pinBytes = convertPinToBytes(pin);
         if (pinBytes == null) {
             return false;
@@ -1542,6 +1569,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean cancelPairing() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1573,8 +1601,8 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getPhonebookAccessPermission() {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public @AccessPermission int getPhonebookAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
             return ACCESS_UNKNOWN;
@@ -1653,7 +1681,6 @@ public final class BluetoothDevice implements Parcelable {
 
     /**
      * Sets whether the phonebook access is allowed to this device.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_PRIVILEGED}.
      *
      * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link
      * #ACCESS_REJECTED}.
@@ -1662,7 +1689,7 @@ public final class BluetoothDevice implements Parcelable {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setPhonebookAccessPermission(int value) {
+    public boolean setPhonebookAccessPermission(@AccessPermission int value) {
         final IBluetooth service = sService;
         if (service == null) {
             return false;
@@ -1682,7 +1709,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @AccessPermission int getMessageAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1699,7 +1726,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Sets whether the message access is allowed to this device.
      *
-     * @param value is the value we are setting the message access permission to
+     * @param value Can be {@link #ACCESS_UNKNOWN} if the device is unbonded,
+     * {@link #ACCESS_ALLOWED} if the permission is being granted, or {@link #ACCESS_REJECTED} if
+     * the permission is not being granted.
      * @return Whether the value has been successfully set.
      * @hide
      */
@@ -1729,7 +1758,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @AccessPermission int getSimAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1746,8 +1775,9 @@ public final class BluetoothDevice implements Parcelable {
     /**
      * Sets whether the Sim access is allowed to this device.
      *
-     * @param value Can be {@link #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link
-     * #ACCESS_REJECTED}.
+     * @param value Can be {@link #ACCESS_UNKNOWN} if the device is unbonded,
+     * {@link #ACCESS_ALLOWED} if the permission is being granted, or {@link #ACCESS_REJECTED} if
+     * the permission is not being granted.
      * @return Whether the value has been successfully set.
      * @hide
      */
@@ -2172,17 +2202,6 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, createL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothSocket createL2capCocSocket(int transport, int psm) throws IOException {
-        Log.e(TAG, "createL2capCocSocket: PLEASE USE THE OFFICIAL API, createL2capChannel");
-        return createL2capChannel(psm);
-    }
-
-    /**
      * Create a Bluetooth L2CAP Connection-oriented Channel (CoC) {@link BluetoothSocket} that can
      * be used to start a secure outgoing connection to the remote device with the same dynamic
      * protocol/service multiplexer (PSM) value. The supported Bluetooth transport is LE only.
@@ -2210,17 +2229,6 @@ public final class BluetoothDevice implements Parcelable {
         }
         return new BluetoothSocket(BluetoothSocket.TYPE_L2CAP_LE, -1, false, false, this, psm,
                 null);
-    }
-
-    /**
-     * TODO: Remove this hidden method once all the SL4A and other tests are updated to use the new
-     * API name, createInsecureL2capChannel.
-     * @hide
-     */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public BluetoothSocket createInsecureL2capCocSocket(int transport, int psm) throws IOException {
-        Log.e(TAG, "createL2capCocSocket: PLEASE USE THE OFFICIAL API, createInsecureL2capChannel");
-        return createInsecureL2capChannel(psm);
     }
 
     /**

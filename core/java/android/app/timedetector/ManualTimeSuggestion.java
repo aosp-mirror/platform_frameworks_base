@@ -20,7 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.TimestampedValue;
+import android.os.TimestampedValue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,10 +29,18 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A time signal from a manual (user provided) source. The value consists of the number of
- * milliseconds elapsed since 1/1/1970 00:00:00 UTC and the time according to the elapsed realtime
- * clock when that number was established. The elapsed realtime clock is considered accurate but
- * volatile, so time signals must not be persisted across device resets.
+ * A time signal from a manual (user provided) source.
+ *
+ * <p>{@code utcTime} is the suggested time. The {@code utcTime.value} is the number of milliseconds
+ * elapsed since 1/1/1970 00:00:00 UTC. The {@code utcTime.referenceTimeMillis} is the value of the
+ * elapsed realtime clock when the {@code utcTime.value} was established.
+ * Note that the elapsed realtime clock is considered accurate but it is volatile, so time
+ * suggestions cannot be persisted across device resets.
+ *
+ * <p>{@code debugInfo} contains debugging metadata associated with the suggestion. This is used to
+ * record why the suggestion exists and how it was entered. This information exists only to aid in
+ * debugging and therefore is used by {@link #toString()}, but it is not for use in detection
+ * logic and is not considered in {@link #hashCode()} or {@link #equals(Object)}.
  *
  * @hide
  */
@@ -49,10 +57,8 @@ public final class ManualTimeSuggestion implements Parcelable {
                 }
             };
 
-    @NonNull
-    private final TimestampedValue<Long> mUtcTime;
-    @Nullable
-    private ArrayList<String> mDebugInfo;
+    @NonNull private final TimestampedValue<Long> mUtcTime;
+    @Nullable private ArrayList<String> mDebugInfo;
 
     public ManualTimeSuggestion(@NonNull TimestampedValue<Long> utcTime) {
         mUtcTime = Objects.requireNonNull(utcTime);

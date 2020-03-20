@@ -16,11 +16,13 @@
 
 java_defaults {
     name: "TetheringAndroidLibraryDefaults",
-    platform_apis: true,
+    // TODO (b/146757305): change to module API once available
+    // TODO (b/148190005): change to module-libs-api-stubs-current once it is ready.
+    sdk_version: "core_platform",
     srcs: [
         "src/**/*.java",
         ":framework-tethering-shared-srcs",
-        ":net-module-utils-srcs",
+        ":tethering-module-utils-srcs",
         ":services-tethering-shared-srcs",
     ],
     static_libs: [
@@ -28,10 +30,22 @@ java_defaults {
         "netd_aidl_interface-unstable-java",
         "netlink-client",
         "networkstack-aidl-interfaces-unstable-java",
+        "android.hardware.tetheroffload.config-V1.0-java",
         "android.hardware.tetheroffload.control-V1.0-java",
-        "tethering-client",
+        "net-utils-framework-common",
     ],
-    libs: ["unsupportedappusage"],
+    libs: [
+        // Order matters: framework-tethering needs to be before the system stubs, otherwise
+        // hidden fields in the framework-tethering classes (which are also used to generate stubs)
+        // will not be found.
+        "framework-tethering",
+        "android_system_stubs_current",
+        "framework-res",
+        "unsupportedappusage",
+        "android_system_stubs_current",
+        "framework-res",
+    ],
+    plugins: ["java_api_finder"],
     manifest: "AndroidManifestBase.xml",
 }
 
@@ -43,26 +57,26 @@ android_library {
 
 // Due to b/143733063, APK can't access a jni lib that is in APEX (but not in the APK).
 cc_library {
-    name: "libtetheroffloadjni",
+    name: "libtetherutilsjni",
+    sdk_version: "current",
     srcs: [
-        "jni/com_android_server_connectivity_tethering_OffloadHardwareInterface.cpp",
+        "jni/android_net_util_TetheringUtils.cpp",
     ],
     shared_libs: [
-        "libcgrouprc",
-        "libnativehelper_compat_libc++",
-        "libvndksupport",
-    ],
-    static_libs: [
-        "android.hardware.tetheroffload.config@1.0",
         "liblog",
-        "libbase",
-        "libbinderthreadstate",
-        "libcutils",
-        "libhidlbase",
-        "libjsoncpp",
-        "libprocessgroup",
-        "libutils",
+        "libnativehelper_compat_libc++",
     ],
+
+    // We cannot use plain "libc++" here to link libc++ dynamically because it results in:
+    //   java.lang.UnsatisfiedLinkError: dlopen failed: library "libc++_shared.so" not found
+    // even if "libc++" is added into jni_libs below. Adding "libc++_shared" into jni_libs doesn't
+    // build because soong complains of:
+    //   module Tethering missing dependencies: libc++_shared
+    //
+    // So, link libc++ statically. This means that we also need to ensure that all the C++ libraries
+    // we depend on do not dynamically link libc++. This is currently the case, because liblog is
+    // C-only and libnativehelper_compat_libc also uses stl: "c++_static".
+    stl: "c++_static",
 
     cflags: [
         "-Wall",
@@ -77,19 +91,25 @@ cc_library {
 // Common defaults for compiling the actual APK.
 java_defaults {
     name: "TetheringAppDefaults",
-    platform_apis: true,
+    // TODO (b/146757305): change to module API once available
+    // TODO (b/148190005): change to module-libs-api-stubs-current once it is ready.
+    sdk_version: "core_platform",
     privileged: true,
-    // Build system doesn't track transitive dependeicies for jni_libs, list all the dependencies
-    // explicitly.
     jni_libs: [
-        "libcgrouprc",
-        "libnativehelper_compat_libc++",
-        "libvndksupport",
-        "libtetheroffloadjni",
+        "libtetherutilsjni",
     ],
     resource_dirs: [
         "res",
     ],
+    libs: [
+        // Order matters: framework-tethering needs to be before the system stubs, otherwise
+        // hidden fields in the framework-tethering classes (which are also used to generate stubs)
+        // will not be found.
+        "framework-tethering",
+        "android_system_stubs_current",
+        "framework-res",
+    ],
+    jarjar_rules: "jarjar-rules.txt",
     optimize: {
         proguard_flags_files: ["proguard.flags"],
     },
@@ -104,7 +124,6 @@ android_app {
     manifest: "AndroidManifest_InProcess.xml",
     // InProcessTethering is a replacement for Tethering
     overrides: ["Tethering"],
-    // TODO: use PlatformNetworkPermissionConfig.
 }
 
 // Updatable tethering packaged as an application
@@ -117,4 +136,5 @@ android_app {
     use_embedded_native_libs: true,
     // The permission configuration *must* be included to ensure security of the device
     required: ["NetworkPermissionConfig"],
+    apex_available: ["com.android.tethering"],
 }

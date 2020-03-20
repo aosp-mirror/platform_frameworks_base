@@ -98,7 +98,13 @@ public class Annotation {
             TelephonyManager.NETWORK_TYPE_GSM,
             TelephonyManager.NETWORK_TYPE_TD_SCDMA,
             TelephonyManager.NETWORK_TYPE_IWLAN,
-            TelephonyManager.NETWORK_TYPE_LTE_CA,
+
+            //TODO: In order for @SystemApi methods to use this class, there cannot be any
+            // public hidden members.  This network type is marked as hidden because it is not a
+            // true network type and we are looking to remove it completely from the available list
+            // of network types.
+            //TelephonyManager.NETWORK_TYPE_LTE_CA,
+
             TelephonyManager.NETWORK_TYPE_NR,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -485,30 +491,98 @@ public class Annotation {
             PreciseCallState.PRECISE_CALL_STATE_DISCONNECTING})
     public @interface PreciseCallStates {}
 
+    @IntDef(value = {
+            DisconnectCause.NOT_VALID,
+            DisconnectCause.NOT_DISCONNECTED,
+            DisconnectCause.INCOMING_MISSED,
+            DisconnectCause.NORMAL,
+            DisconnectCause.LOCAL,
+            DisconnectCause.BUSY,
+            DisconnectCause.CONGESTION,
+            DisconnectCause.MMI,
+            DisconnectCause.INVALID_NUMBER,
+            DisconnectCause.NUMBER_UNREACHABLE,
+            DisconnectCause.SERVER_UNREACHABLE,
+            DisconnectCause.INVALID_CREDENTIALS,
+            DisconnectCause.OUT_OF_NETWORK,
+            DisconnectCause.SERVER_ERROR,
+            DisconnectCause.TIMED_OUT,
+            DisconnectCause.LOST_SIGNAL,
+            DisconnectCause.LIMIT_EXCEEDED,
+            DisconnectCause.INCOMING_REJECTED,
+            DisconnectCause.POWER_OFF,
+            DisconnectCause.OUT_OF_SERVICE,
+            DisconnectCause.ICC_ERROR,
+            DisconnectCause.CALL_BARRED,
+            DisconnectCause.FDN_BLOCKED,
+            DisconnectCause.CS_RESTRICTED,
+            DisconnectCause.CS_RESTRICTED_NORMAL,
+            DisconnectCause.CS_RESTRICTED_EMERGENCY,
+            DisconnectCause.UNOBTAINABLE_NUMBER,
+            DisconnectCause.CDMA_LOCKED_UNTIL_POWER_CYCLE,
+            DisconnectCause.CDMA_DROP,
+            DisconnectCause.CDMA_INTERCEPT,
+            DisconnectCause.CDMA_REORDER,
+            DisconnectCause.CDMA_SO_REJECT,
+            DisconnectCause.CDMA_RETRY_ORDER,
+            DisconnectCause.CDMA_ACCESS_FAILURE,
+            DisconnectCause.CDMA_PREEMPTED,
+            DisconnectCause.CDMA_NOT_EMERGENCY,
+            DisconnectCause.CDMA_ACCESS_BLOCKED,
+            DisconnectCause.ERROR_UNSPECIFIED,
+    })
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = {"RIL_RADIO_TECHNOLOGY_" }, value = {
-            ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN,
-            ServiceState.RIL_RADIO_TECHNOLOGY_GPRS,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EDGE,
-            ServiceState.RIL_RADIO_TECHNOLOGY_UMTS,
-            ServiceState.RIL_RADIO_TECHNOLOGY_IS95A,
-            ServiceState.RIL_RADIO_TECHNOLOGY_IS95B,
-            ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSPA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B,
-            ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD,
-            ServiceState.RIL_RADIO_TECHNOLOGY_LTE,
-            ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP,
-            ServiceState.RIL_RADIO_TECHNOLOGY_GSM,
-            ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN,
-            ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA,
-            ServiceState.RIL_RADIO_TECHNOLOGY_NR})
-    public @interface RilRadioTechnology {}
+    public @interface DisconnectCauses {
+    }
+
+    @IntDef(value = {
+            PreciseDisconnectCause.NOT_VALID,
+            PreciseDisconnectCause.NO_DISCONNECT_CAUSE_AVAILABLE,
+            PreciseDisconnectCause.UNOBTAINABLE_NUMBER,
+            PreciseDisconnectCause.NORMAL,
+            PreciseDisconnectCause.BUSY,
+            PreciseDisconnectCause.NUMBER_CHANGED,
+            PreciseDisconnectCause.STATUS_ENQUIRY,
+            PreciseDisconnectCause.NORMAL_UNSPECIFIED,
+            PreciseDisconnectCause.NO_CIRCUIT_AVAIL,
+            PreciseDisconnectCause.TEMPORARY_FAILURE,
+            PreciseDisconnectCause.SWITCHING_CONGESTION,
+            PreciseDisconnectCause.CHANNEL_NOT_AVAIL,
+            PreciseDisconnectCause.QOS_NOT_AVAIL,
+            PreciseDisconnectCause.BEARER_NOT_AVAIL,
+            PreciseDisconnectCause.ACM_LIMIT_EXCEEDED,
+            PreciseDisconnectCause.CALL_BARRED,
+            PreciseDisconnectCause.FDN_BLOCKED,
+            PreciseDisconnectCause.IMSI_UNKNOWN_IN_VLR,
+            PreciseDisconnectCause.IMEI_NOT_ACCEPTED,
+            PreciseDisconnectCause.CDMA_LOCKED_UNTIL_POWER_CYCLE,
+            PreciseDisconnectCause.CDMA_DROP,
+            PreciseDisconnectCause.CDMA_INTERCEPT,
+            PreciseDisconnectCause.CDMA_REORDER,
+            PreciseDisconnectCause.CDMA_SO_REJECT,
+            PreciseDisconnectCause.CDMA_RETRY_ORDER,
+            PreciseDisconnectCause.CDMA_ACCESS_FAILURE,
+            PreciseDisconnectCause.CDMA_PREEMPTED,
+            PreciseDisconnectCause.CDMA_NOT_EMERGENCY,
+            PreciseDisconnectCause.CDMA_ACCESS_BLOCKED,
+            PreciseDisconnectCause.ERROR_UNSPECIFIED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PreciseDisconnectCauses {
+    }
+
+    /**
+     * Carrier Privilege Status.
+     */
+    @IntDef(prefix = { "CARRIER_PRIVILEGE_STATUS_" }, value = {
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS,
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_NO_ACCESS,
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED,
+        TelephonyManager.CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CarrierPrivilegeStatus {
+    }
 
     @IntDef({
             Connection.AUDIO_CODEC_NONE,
@@ -535,4 +609,71 @@ public class Annotation {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsAudioCodec {
     }
+
+    /**
+     * Call forwarding function status
+     */
+    @IntDef(prefix = { "STATUS_" }, value = {
+        CallForwardingInfo.STATUS_ACTIVE,
+        CallForwardingInfo.STATUS_INACTIVE,
+        CallForwardingInfo.STATUS_UNKNOWN_ERROR,
+        CallForwardingInfo.STATUS_NOT_SUPPORTED,
+        CallForwardingInfo.STATUS_FDN_CHECK_FAILURE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallForwardingStatus {
+    }
+
+    /**
+     * Call forwarding reason types
+     */
+    @IntDef(flag = true, prefix = { "REASON_" }, value = {
+        CallForwardingInfo.REASON_UNCONDITIONAL,
+        CallForwardingInfo.REASON_BUSY,
+        CallForwardingInfo.REASON_NO_REPLY,
+        CallForwardingInfo.REASON_NOT_REACHABLE,
+        CallForwardingInfo.REASON_ALL,
+        CallForwardingInfo.REASON_ALL_CONDITIONAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallForwardingReason {
+    }
+
+    /**
+     * Call waiting function status
+     */
+    @IntDef(prefix = { "CALL_WAITING_STATUS_" }, value = {
+        TelephonyManager.CALL_WAITING_STATUS_ACTIVE,
+        TelephonyManager.CALL_WAITING_STATUS_INACTIVE,
+        TelephonyManager.CALL_WAITING_STATUS_NOT_SUPPORTED,
+        TelephonyManager.CALL_WAITING_STATUS_UNKNOWN_ERROR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallWaitingStatus {
+    }
+
+    /**
+     * UICC SIM Application Types
+     */
+    @IntDef(prefix = { "APPTYPE_" }, value = {
+            TelephonyManager.APPTYPE_SIM,
+            TelephonyManager.APPTYPE_USIM,
+            TelephonyManager.APPTYPE_RUIM,
+            TelephonyManager.APPTYPE_CSIM,
+            TelephonyManager.APPTYPE_ISIM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UiccAppType{}
+
+    /**
+     * Override network type
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "OVERRIDE_NETWORK_TYPE_", value = {
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NONE,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_CA,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_LTE_ADVANCED_PRO,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA,
+            DisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE})
+    public @interface OverrideNetworkType {}
 }

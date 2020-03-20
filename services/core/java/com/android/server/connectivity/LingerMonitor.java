@@ -16,6 +16,10 @@
 
 package com.android.server.connectivity;
 
+import static android.net.ConnectivityManager.NETID_UNSET;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -27,18 +31,16 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.util.SparseBooleanArray;
-import java.util.Arrays;
-import java.util.HashMap;
+import android.util.SparseIntArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.MessageUtils;
-import com.android.server.connectivity.NetworkNotificationManager;
 import com.android.server.connectivity.NetworkNotificationManager.NotificationType;
 
-import static android.net.ConnectivityManager.NETID_UNSET;
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Class that monitors default network linger events and possibly notifies the user of network
@@ -198,21 +200,33 @@ public class LingerMonitor {
         }
 
         if (DBG) {
-            Log.d(TAG, "Notifying switch from=" + fromNai.name() + " to=" + toNai.name() +
-                    " type=" + sNotifyTypeNames.get(notifyType, "unknown(" + notifyType + ")"));
+            Log.d(TAG, "Notifying switch from=" + fromNai.toShortString()
+                    + " to=" + toNai.toShortString()
+                    + " type=" + sNotifyTypeNames.get(notifyType, "unknown(" + notifyType + ")"));
         }
 
         mNotifications.put(fromNai.network.netId, toNai.network.netId);
         mEverNotified.put(fromNai.network.netId, true);
     }
 
+    /**
+     * Put up or dismiss a notification or toast for of a change in the default network if needed.
+     *
+     * Putting up a notification when switching from no network to some network is not supported
+     * and as such this method can't be called with a null |fromNai|. It can be called with a
+     * null |toNai| if there isn't a default network any more.
+     *
+     * @param fromNai switching from this NAI
+     * @param toNai switching to this NAI
+     */
     // The default network changed from fromNai to toNai due to a change in score.
-    public void noteLingerDefaultNetwork(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
+    public void noteLingerDefaultNetwork(@NonNull final NetworkAgentInfo fromNai,
+            @Nullable final NetworkAgentInfo toNai) {
         if (VDBG) {
-            Log.d(TAG, "noteLingerDefaultNetwork from=" + fromNai.name() +
-                    " everValidated=" + fromNai.everValidated +
-                    " lastValidated=" + fromNai.lastValidated +
-                    " to=" + toNai.name());
+            Log.d(TAG, "noteLingerDefaultNetwork from=" + fromNai.toShortString()
+                    + " everValidated=" + fromNai.everValidated
+                    + " lastValidated=" + fromNai.lastValidated
+                    + " to=" + toNai.toShortString());
         }
 
         // If we are currently notifying the user because the device switched to fromNai, now that
@@ -220,6 +234,10 @@ public class LingerMonitor {
         // where we switch back to toNai because its score improved again (e.g., because it regained
         // Internet access).
         maybeStopNotifying(fromNai);
+
+        // If the network was simply lost (either because it disconnected or because it stopped
+        // being the default with no replacement), then don't show a notification.
+        if (null == toNai) return;
 
         // If this network never validated, don't notify. Otherwise, we could do things like:
         //
@@ -253,7 +271,8 @@ public class LingerMonitor {
         // TODO: should we do this?
         if (everNotified(fromNai)) {
             if (VDBG) {
-                Log.d(TAG, "Not notifying handover from " + fromNai.name() + ", already notified");
+                Log.d(TAG, "Not notifying handover from " + fromNai.toShortString()
+                        + ", already notified");
             }
             return;
         }

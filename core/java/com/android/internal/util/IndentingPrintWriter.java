@@ -16,7 +16,8 @@
 
 package com.android.internal.util;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Arrays;

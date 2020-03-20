@@ -19,7 +19,6 @@ import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.SocketKeepalive.InvalidPacketException;
 import android.net.util.IpUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -73,6 +72,19 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         tcpWndScale = tcpDetails.rcvWndScale;
         ipTos = tcpDetails.tos;
         ipTtl = tcpDetails.ttl;
+    }
+
+    private TcpKeepalivePacketData(final InetAddress srcAddress, int srcPort,
+            final InetAddress dstAddress, int dstPort, final byte[] data, int tcpSeq,
+            int tcpAck, int tcpWnd, int tcpWndScale, int ipTos, int ipTtl)
+            throws InvalidPacketException {
+        super(srcAddress, srcPort, dstAddress, dstPort, data);
+        this.tcpSeq = tcpSeq;
+        this.tcpAck = tcpAck;
+        this.tcpWnd = tcpWnd;
+        this.tcpWndScale = tcpWndScale;
+        this.ipTos = ipTos;
+        this.ipTtl = ipTtl;
     }
 
     /**
@@ -170,7 +182,11 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     /** Write to parcel. */
     public void writeToParcel(Parcel out, int flags) {
-        super.writeToParcel(out, flags);
+        out.writeString(srcAddress.getHostAddress());
+        out.writeString(dstAddress.getHostAddress());
+        out.writeInt(srcPort);
+        out.writeInt(dstPort);
+        out.writeByteArray(getPacket());
         out.writeInt(tcpSeq);
         out.writeInt(tcpAck);
         out.writeInt(tcpWnd);
@@ -179,21 +195,32 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
         out.writeInt(ipTtl);
     }
 
-    private TcpKeepalivePacketData(Parcel in) {
-        super(in);
-        tcpSeq = in.readInt();
-        tcpAck = in.readInt();
-        tcpWnd = in.readInt();
-        tcpWndScale = in.readInt();
-        ipTos = in.readInt();
-        ipTtl = in.readInt();
+    private static TcpKeepalivePacketData readFromParcel(Parcel in) throws InvalidPacketException {
+        InetAddress srcAddress = InetAddresses.parseNumericAddress(in.readString());
+        InetAddress dstAddress = InetAddresses.parseNumericAddress(in.readString());
+        int srcPort = in.readInt();
+        int dstPort = in.readInt();
+        byte[] packet = in.createByteArray();
+        int tcpSeq = in.readInt();
+        int tcpAck = in.readInt();
+        int tcpWnd = in.readInt();
+        int tcpWndScale = in.readInt();
+        int ipTos = in.readInt();
+        int ipTtl = in.readInt();
+        return new TcpKeepalivePacketData(srcAddress, srcPort, dstAddress, dstPort, packet, tcpSeq,
+                tcpAck, tcpWnd, tcpWndScale, ipTos, ipTtl);
     }
 
     /** Parcelable Creator. */
     public static final @NonNull Parcelable.Creator<TcpKeepalivePacketData> CREATOR =
             new Parcelable.Creator<TcpKeepalivePacketData>() {
                 public TcpKeepalivePacketData createFromParcel(Parcel in) {
-                    return new TcpKeepalivePacketData(in);
+                    try {
+                        return readFromParcel(in);
+                    } catch (InvalidPacketException e) {
+                        throw new IllegalArgumentException(
+                                "Invalid NAT-T keepalive data: " + e.error);
+                    }
                 }
 
                 public TcpKeepalivePacketData[] newArray(int size) {

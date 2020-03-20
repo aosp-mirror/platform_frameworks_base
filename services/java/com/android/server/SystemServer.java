@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
@@ -41,7 +42,6 @@ import android.database.sqlite.SQLiteGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.ConnectivityModuleConnector;
 import android.net.NetworkStackClient;
-import android.net.TetheringManager;
 import android.os.BaseBundle;
 import android.os.Binder;
 import android.os.Build;
@@ -189,12 +189,6 @@ public final class SystemServer {
     private static final String ENCRYPTING_STATE = "trigger_restart_min_framework";
     private static final String ENCRYPTED_STATE = "1";
 
-    private static final long SNAPSHOT_INTERVAL = 60 * 60 * 1000; // 1hr
-
-    // The earliest supported time.  We pick one day into 1970, to
-    // give any timezone code room without going into negative time.
-    private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
-
     private static final long SLOW_DISPATCH_THRESHOLD_MS = 100;
     private static final long SLOW_DELIVERY_THRESHOLD_MS = 200;
 
@@ -285,6 +279,8 @@ public final class SystemServer {
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
             "com.android.server.contentsuggestions.ContentSuggestionsManagerService";
 
+    private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
+
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
     private static final String UNCRYPT_PACKAGE_FILE = "/cache/recovery/uncrypt_file";
@@ -351,6 +347,12 @@ public final class SystemServer {
      * Mark this process' heap as profileable. Only for debug builds.
      */
     private static native void initZygoteChildHeapProfiling();
+
+
+    /**
+     * Spawn a thread that monitors for fd leaks.
+     */
+    private static native void spawnFdLeakCheckThread();
 
     /**
      * The main entry point from zygote.
@@ -481,6 +483,11 @@ public final class SystemServer {
             // Debug builds - allow heap profiling.
             if (Build.IS_DEBUGGABLE) {
                 initZygoteChildHeapProfiling();
+            }
+
+            // Debug builds - spawn a thread to monitor for fd leaks.
+            if (Build.IS_DEBUGGABLE) {
+                spawnFdLeakCheckThread();
             }
 
             // Check whether we failed to shut down last time we tried.
@@ -926,7 +933,6 @@ public final class SystemServer {
                 false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
                 false);
-        boolean disableSlices = SystemProperties.getBoolean("config.disable_slices", false);
         boolean enableLeftyService = SystemProperties.getBoolean("config.enable_lefty", false);
 
         boolean isEmulator = SystemProperties.get("ro.kernel.qemu").equals("1");
@@ -1512,6 +1518,8 @@ public final class SystemServer {
                 traceBeginAndSlog("StartWallpaperManagerService");
                 mSystemServiceManager.startService(WALLPAPER_SERVICE_CLASS);
                 traceEnd();
+            } else {
+                Slog.i(TAG, "Wallpaper service disabled by config");
             }
 
             traceBeginAndSlog("StartAudioService");
@@ -1694,7 +1702,7 @@ public final class SystemServer {
             if (!isWatch && !disableNetworkTime) {
                 traceBeginAndSlog("StartNetworkTimeUpdateService");
                 try {
-                    networkTimeUpdater = new NetworkTimeUpdateServiceImpl(context);
+                    networkTimeUpdater = new NetworkTimeUpdateService(context);
                     ServiceManager.addService("network_time_update_service", networkTimeUpdater);
                 } catch (Throwable e) {
                     reportWtf("starting NetworkTimeUpdate service", e);
@@ -1898,7 +1906,7 @@ public final class SystemServer {
             traceEnd();
         }
 
-        if (!disableSlices) {
+        if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_SLICES_DISABLED)) {
             traceBeginAndSlog("StartSliceManagerService");
             mSystemServiceManager.startService(SLICE_MANAGER_SERVICE_CLASS);
             traceEnd();
@@ -2212,8 +2220,14 @@ public final class SystemServer {
 
             traceBeginAndSlog("StartTethering");
             try {
-                // Tethering must start after ConnectivityService and NetworkStack.
-                TetheringManager.getInstance().start();
+                // TODO: hide implementation details, b/146312721.
+                ConnectivityModuleConnector.getInstance().startModuleService(
+                        TETHERING_CONNECTOR_CLASS,
+                        PERMISSION_MAINLINE_NETWORK_STACK, service -> {
+                            ServiceManager.addService(Context.TETHERING_SERVICE, service,
+                                    false /* allowIsolated */,
+                                    DUMP_FLAG_PRIORITY_HIGH | DUMP_FLAG_PRIORITY_NORMAL);
+                        });
             } catch (Throwable e) {
                 reportWtf("starting Tethering", e);
             }

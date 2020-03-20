@@ -17,6 +17,7 @@
 
 package com.google.android.mms.pdu;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -34,12 +35,11 @@ import android.provider.Telephony.MmsSms;
 import android.provider.Telephony.MmsSms.PendingMessages;
 import android.provider.Telephony.Threads;
 import android.telephony.PhoneNumberUtils;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import com.google.android.mms.ContentType;
 import com.google.android.mms.InvalidHeaderValueException;
@@ -1448,9 +1448,9 @@ public class PduPersister {
         final Set<String> myPhoneNumbers = new HashSet<String>();
         if (excludeMyNumber) {
             // Build a list of my phone numbers from the various sims.
-            for (int subid : subscriptionManager.getActiveSubscriptionIdList()) {
+            for (SubscriptionInfo subInfo : subscriptionManager.getActiveSubscriptionInfoList()) {
                 final String myNumber = mContext.getSystemService(TelephonyManager.class).
-                        createForSubscriptionId(subid).getLine1Number();
+                        createForSubscriptionId(subInfo.getSubscriptionId()).getLine1Number();
                 if (myNumber != null) {
                     myPhoneNumbers.add(myNumber);
                 }

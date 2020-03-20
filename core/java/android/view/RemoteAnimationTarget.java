@@ -30,8 +30,8 @@ import static android.view.RemoteAnimationTargetProto.TASK_ID;
 import static android.view.RemoteAnimationTargetProto.WINDOW_CONFIGURATION;
 
 import android.annotation.IntDef;
-import android.annotation.UnsupportedAppUsage;
 import android.app.WindowConfiguration;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcel;

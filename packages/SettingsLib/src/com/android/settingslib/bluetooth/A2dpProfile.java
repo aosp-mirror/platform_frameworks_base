@@ -16,6 +16,10 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_AUDIO;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -42,6 +46,7 @@ public class A2dpProfile implements LocalBluetoothProfile {
     private boolean mIsProfileReady;
 
     private final CachedBluetoothDeviceManager mDeviceManager;
+    private final BluetoothAdapter mBluetoothAdapter;
 
     static final ParcelUuid[] SINK_UUIDS = {
         BluetoothUuid.A2DP_SINK,
@@ -96,7 +101,8 @@ public class A2dpProfile implements LocalBluetoothProfile {
         mContext = context;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new A2dpServiceListener(),
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mBluetoothAdapter.getProfileProxy(context, new A2dpServiceListener(),
                 BluetoothProfile.A2DP);
     }
 
@@ -147,20 +153,6 @@ public class A2dpProfile implements LocalBluetoothProfile {
         return mService.getDevicesMatchingConnectionStates(states);
     }
 
-    public boolean connect(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.connect(device);
-    }
-
-    public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
-        // Downgrade priority as user is disconnecting the headset.
-        if (mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
-        }
-        return mService.disconnect(device);
-    }
-
     public int getConnectionStatus(BluetoothDevice device) {
         if (mService == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -169,8 +161,12 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public boolean setActiveDevice(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.setActiveDevice(device);
+        if (mBluetoothAdapter == null) {
+            return false;
+        }
+        return device == null
+                ? mBluetoothAdapter.removeActiveDevice(ACTIVE_DEVICE_AUDIO)
+                : mBluetoothAdapter.setActiveDevice(device, ACTIVE_DEVICE_AUDIO);
     }
 
     public BluetoothDevice getActiveDevice() {
@@ -178,31 +174,37 @@ public class A2dpProfile implements LocalBluetoothProfile {
         return mService.getActiveDevice();
     }
 
-    public boolean isPreferred(BluetoothDevice device) {
+    @Override
+    public boolean isEnabled(BluetoothDevice device) {
         if (mService == null) {
             return false;
         }
-        return mService.getConnectionPolicy(device) > BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+        return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
     }
 
-    public int getPreferred(BluetoothDevice device) {
+    @Override
+    public int getConnectionPolicy(BluetoothDevice device) {
         if (mService == null) {
-            return BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+            return CONNECTION_POLICY_FORBIDDEN;
         }
         return mService.getConnectionPolicy(device);
     }
 
-    public void setPreferred(BluetoothDevice device, boolean preferred) {
+    @Override
+    public boolean setEnabled(BluetoothDevice device, boolean enabled) {
+        boolean isEnabled = false;
         if (mService == null) {
-            return;
+            return false;
         }
-        if (preferred) {
-            if (mService.getConnectionPolicy(device) < BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
-                mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_ALLOWED);
+        if (enabled) {
+            if (mService.getConnectionPolicy(device) < CONNECTION_POLICY_ALLOWED) {
+                isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
             }
         } else {
-            mService.setConnectionPolicy(device, BluetoothProfile.CONNECTION_POLICY_FORBIDDEN);
+            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
+
+        return isEnabled;
     }
     boolean isA2dpPlaying() {
         if (mService == null) return false;
@@ -216,24 +218,32 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public boolean supportsHighQualityAudio(BluetoothDevice device) {
-        int support = mService.supportsOptionalCodecs(device);
+        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
+        if (bluetoothDevice == null) {
+            return false;
+        }
+        int support = mService.isOptionalCodecsSupported(bluetoothDevice);
         return support == BluetoothA2dp.OPTIONAL_CODECS_SUPPORTED;
     }
 
     public boolean isHighQualityAudioEnabled(BluetoothDevice device) {
-        int enabled = mService.getOptionalCodecsEnabled(device);
+        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
+        if (bluetoothDevice == null) {
+            return false;
+        }
+        int enabled = mService.isOptionalCodecsEnabled(bluetoothDevice);
         if (enabled != BluetoothA2dp.OPTIONAL_CODECS_PREF_UNKNOWN) {
             return enabled == BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED;
-        } else if (getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED &&
-                supportsHighQualityAudio(device)) {
+        } else if (getConnectionStatus(bluetoothDevice) != BluetoothProfile.STATE_CONNECTED
+                && supportsHighQualityAudio(bluetoothDevice)) {
             // Since we don't have a stored preference and the device isn't connected, just return
             // true since the default behavior when the device gets connected in the future would be
             // to have optional codecs enabled.
             return true;
         }
         BluetoothCodecConfig codecConfig = null;
-        if (mService.getCodecStatus(device) != null) {
-            codecConfig = mService.getCodecStatus(device).getCodecConfig();
+        if (mService.getCodecStatus(bluetoothDevice) != null) {
+            codecConfig = mService.getCodecStatus(bluetoothDevice).getCodecConfig();
         }
         if (codecConfig != null)  {
             return !codecConfig.isMandatoryCodec();
@@ -243,23 +253,28 @@ public class A2dpProfile implements LocalBluetoothProfile {
     }
 
     public void setHighQualityAudioEnabled(BluetoothDevice device, boolean enabled) {
+        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
+        if (bluetoothDevice == null) {
+            return;
+        }
         int prefValue = enabled
                 ? BluetoothA2dp.OPTIONAL_CODECS_PREF_ENABLED
                 : BluetoothA2dp.OPTIONAL_CODECS_PREF_DISABLED;
-        mService.setOptionalCodecsEnabled(device, prefValue);
-        if (getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED) {
+        mService.setOptionalCodecsEnabled(bluetoothDevice, prefValue);
+        if (getConnectionStatus(bluetoothDevice) != BluetoothProfile.STATE_CONNECTED) {
             return;
         }
         if (enabled) {
-            mService.enableOptionalCodecs(device);
+            mService.enableOptionalCodecs(bluetoothDevice);
         } else {
-            mService.disableOptionalCodecs(device);
+            mService.disableOptionalCodecs(bluetoothDevice);
         }
     }
 
     public String getHighQualityAudioOptionLabel(BluetoothDevice device) {
+        BluetoothDevice bluetoothDevice = (device != null) ? device : mService.getActiveDevice();
         int unknownCodecId = R.string.bluetooth_profile_a2dp_high_quality_unknown_codec;
-        if (!supportsHighQualityAudio(device)
+        if (bluetoothDevice == null || !supportsHighQualityAudio(device)
                 || getConnectionStatus(device) != BluetoothProfile.STATE_CONNECTED) {
             return mContext.getString(unknownCodecId);
         }

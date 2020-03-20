@@ -18,6 +18,7 @@
 package com.google.android.mms.util;
 
 import android.app.ActivityManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -26,8 +27,6 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 public final class SqliteWrapper {
     private static final String TAG = "SqliteWrapper";
@@ -61,8 +60,7 @@ public final class SqliteWrapper {
     @UnsupportedAppUsage
     public static void checkSQLiteException(Context context, SQLiteException e) {
         if (isLowMemory(e)) {
-            Toast.makeText(context, com.android.internal.R.string.low_memory,
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, android.R.string.low_memory, Toast.LENGTH_SHORT).show();
         } else {
             throw e;
         }

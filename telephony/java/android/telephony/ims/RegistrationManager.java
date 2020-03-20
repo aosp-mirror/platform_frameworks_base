@@ -22,8 +22,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Binder;
 import android.telephony.AccessNetworkConstants;
@@ -41,10 +39,7 @@ import java.util.function.Consumer;
 
 /**
  * Manages IMS Service registration state for associated {@link ImsFeature}s.
- * @hide
  */
-@SystemApi
-@TestApi
 public interface RegistrationManager {
 
     /**
@@ -110,42 +105,62 @@ public interface RegistrationManager {
             public void onRegistered(int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
-                        mLocalCallback.onRegistered(getAccessType(imsRadioTech))));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mLocalCallback.onRegistered(getAccessType(imsRadioTech)));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
             public void onRegistering(int imsRadioTech) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() -> mExecutor.execute(() ->
-                        mLocalCallback.onRegistering(getAccessType(imsRadioTech))));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() ->
+                            mLocalCallback.onRegistering(getAccessType(imsRadioTech)));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
             public void onDeregistered(ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onUnregistered(info)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onUnregistered(info));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             @Override
             public void onTechnologyChangeFailed(int imsRadioTech, ImsReasonInfo info) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
-                                getAccessType(imsRadioTech), info)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onTechnologyChangeFailed(
+                            getAccessType(imsRadioTech), info));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
-            @Override
             public void onSubscriberAssociatedUriChanged(Uri[] uris) {
                 if (mLocalCallback == null) return;
 
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() ->
-                                mLocalCallback.onSubscriberAssociatedUriChanged(uris)));
+                long callingIdentity = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> mLocalCallback.onSubscriberAssociatedUriChanged(uris));
+                } finally {
+                    restoreCallingIdentity(callingIdentity);
+                }
             }
 
             private void setExecutor(Executor executor) {
@@ -225,7 +240,11 @@ public interface RegistrationManager {
 
     /**
      * Registers a {@link RegistrationCallback} with the system. Use
-     * {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to Subscription changed
+     * @param executor The {@link Executor} that will be used to call the IMS registration state
+     *                 callback.
+     * @param c A callback called on the supplied {@link Executor} that will contain the
+     *                      registration state of the IMS service, which will be one of the
+     * {@see  SubscriptionManager.OnSubscriptionsChangedListener} to listen to Subscription changed
      * events and call {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up.
      *
      * When the callback is registered, it will initiate the callback c to be called with the
@@ -275,10 +294,10 @@ public interface RegistrationManager {
      * Gets the Transport Type associated with the current IMS registration.
      * @param executor The {@link Executor} that will be used to call the transportTypeCallback.
      * @param transportTypeCallback The transport type associated with the current IMS registration,
- *                              which will be one of following:
- *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN},
- *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, or
- *                              {@link AccessNetworkConstants#TRANSPORT_TYPE_INVALID}.
+     * which will be one of following:
+     * {@see AccessNetworkConstants#TRANSPORT_TYPE_WWAN},
+     * {@see AccessNetworkConstants#TRANSPORT_TYPE_WLAN}, or
+     * {@see AccessNetworkConstants#TRANSPORT_TYPE_INVALID}.
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     void getRegistrationTransportType(

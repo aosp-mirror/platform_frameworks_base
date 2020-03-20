@@ -16,10 +16,8 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.menu.MenuView.ItemView;
-
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +36,8 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.widget.LinearLayout;
+
+import com.android.internal.view.menu.MenuView.ItemView;
 
 /**
  * @hide

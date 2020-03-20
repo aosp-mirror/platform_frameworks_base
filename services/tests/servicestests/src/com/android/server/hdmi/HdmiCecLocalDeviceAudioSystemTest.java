@@ -530,6 +530,7 @@ public class HdmiCecLocalDeviceAudioSystemTest {
         assertThat(mNativeWrapper.getOnlyResultMessage()).isEqualTo(expectedMessage);
     }
 
+    @Test
     public void handleSystemAudioModeRequest_fromNonTV_tVNotSupport() {
         HdmiCecMessage message =
                 HdmiCecMessageBuilder.buildSystemAudioModeRequest(

@@ -16,8 +16,8 @@
 
 package android.telephony.ims.compat.feature;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.ims.ImsCallProfile;

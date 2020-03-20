@@ -16,10 +16,12 @@
 
 package android.telephony;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.radio.V1_4.CellInfo.Info;
+import android.hardware.radio.V1_5.CellInfo.CellInfoRatSpecificInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Immutable cell information from a point in time.
@@ -151,7 +154,7 @@ public abstract class CellInfo implements Parcelable {
     protected CellInfo() {
         this.mRegistered = false;
         this.mTimeStamp = Long.MAX_VALUE;
-        mCellConnectionStatus = CONNECTION_NONE;
+        this.mCellConnectionStatus = CONNECTION_NONE;
     }
 
     /** @hide */
@@ -177,8 +180,20 @@ public abstract class CellInfo implements Parcelable {
     /**
      * Approximate time this cell information was received from the modem.
      *
-     * @return a time stamp in nanos since boot.
+     * @return a time stamp in millis since boot.
      */
+    @ElapsedRealtimeLong
+    public long getTimestampMillis() {
+        return mTimeStamp / 1000000;
+    }
+
+    /**
+     * Approximate time this cell information was received from the modem.
+     *
+     * @return a time stamp in nanos since boot.
+     * @deprecated Use {@link #getTimestampMillis} instead.
+     */
+    @Deprecated
     public long getTimeStamp() {
         return mTimeStamp;
     }
@@ -227,27 +242,17 @@ public abstract class CellInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return ((mRegistered ? 0 : 1) * primeNum) + ((int)(mTimeStamp / 1000) * primeNum)
-                + (mCellConnectionStatus * primeNum);
+        return Objects.hash(mCellConnectionStatus, mRegistered, mTimeStamp);
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other == null) {
-            return false;
-        }
-        if (this == other) {
-            return true;
-        }
-        try {
-            CellInfo o = (CellInfo) other;
-            return mRegistered == o.mRegistered
-                    && mTimeStamp == o.mTimeStamp
-                    && mCellConnectionStatus == o.mCellConnectionStatus;
-        } catch (ClassCastException e) {
-            return false;
-        }
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CellInfo)) return false;
+        CellInfo cellInfo = (CellInfo) o;
+        return mCellConnectionStatus == cellInfo.mCellConnectionStatus
+                && mRegistered == cellInfo.mRegistered
+                && mTimeStamp == cellInfo.mTimeStamp;
     }
 
     @Override
@@ -340,6 +345,13 @@ public abstract class CellInfo implements Parcelable {
     }
 
     /** @hide */
+    protected CellInfo(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        this.mRegistered = ci.registered;
+        this.mTimeStamp = timeStamp;
+        this.mCellConnectionStatus = ci.connectionStatus;
+    }
+
+    /** @hide */
     public static CellInfo create(android.hardware.radio.V1_0.CellInfo ci) {
         if (ci == null) return null;
         switch(ci.cellInfoType) {
@@ -375,6 +387,26 @@ public abstract class CellInfo implements Parcelable {
             case Info.hidl_discriminator.wcdma: return new CellInfoWcdma(ci, timeStamp);
             case Info.hidl_discriminator.tdscdma: return new CellInfoTdscdma(ci, timeStamp);
             case Info.hidl_discriminator.nr: return new CellInfoNr(ci, timeStamp);
+            default: return null;
+        }
+    }
+
+    /** @hide */
+    public static CellInfo create(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        if (ci == null) return null;
+        switch (ci.ratSpecificInfo.getDiscriminator()) {
+            case CellInfoRatSpecificInfo.hidl_discriminator.gsm:
+                return new CellInfoGsm(ci, timeStamp);
+            case CellInfoRatSpecificInfo.hidl_discriminator.cdma:
+                return new CellInfoCdma(ci, timeStamp);
+            case CellInfoRatSpecificInfo.hidl_discriminator.lte:
+                return new CellInfoLte(ci, timeStamp);
+            case CellInfoRatSpecificInfo.hidl_discriminator.wcdma:
+                return new CellInfoWcdma(ci, timeStamp);
+            case CellInfoRatSpecificInfo.hidl_discriminator.tdscdma:
+                return new CellInfoTdscdma(ci, timeStamp);
+            case CellInfoRatSpecificInfo.hidl_discriminator.nr:
+                return new CellInfoNr(ci, timeStamp);
             default: return null;
         }
     }

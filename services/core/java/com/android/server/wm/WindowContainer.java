@@ -137,6 +137,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     private boolean mCommittedReparentToAnimationLeash;
 
+    private MagnificationSpec mLastMagnificationSpec;
+
     WindowContainer(WindowManagerService wms) {
         mWmService = wms;
         mPendingTransaction = wms.mTransactionFactory.make();
@@ -1186,10 +1188,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (shouldMagnify()) {
             t.setMatrix(mSurfaceControl, spec.scale, 0, 0, spec.scale)
                     .setPosition(mSurfaceControl, spec.offsetX, spec.offsetY);
+            mLastMagnificationSpec = spec;
         } else {
+            clearMagnificationSpec(t);
             for (int i = 0; i < mChildren.size(); i++) {
                 mChildren.get(i).applyMagnificationSpec(t, spec);
             }
+        }
+    }
+
+    void clearMagnificationSpec(Transaction t) {
+        if (mLastMagnificationSpec != null) {
+            t.setMatrix(mSurfaceControl, 1, 0, 0, 1)
+                .setPosition(mSurfaceControl, 0, 0);
+        }
+        mLastMagnificationSpec = null;
+        for (int i = 0; i < mChildren.size(); i++) {
+            mChildren.get(i).clearMagnificationSpec(t);
         }
     }
 

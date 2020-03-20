@@ -20,11 +20,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
-import android.app.timezonedetector.PhoneTimeZoneSuggestion;
+import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -67,19 +69,21 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     private static TimeZoneDetectorService create(@NonNull Context context) {
         final TimeZoneDetectorStrategy timeZoneDetectorStrategy =
-                TimeZoneDetectorStrategy.create(context);
+                TimeZoneDetectorStrategyImpl.create(context);
 
         Handler handler = FgThread.getHandler();
+        TimeZoneDetectorService service =
+                new TimeZoneDetectorService(context, handler, timeZoneDetectorStrategy);
+
         ContentResolver contentResolver = context.getContentResolver();
         contentResolver.registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.AUTO_TIME_ZONE), true,
                 new ContentObserver(handler) {
                     public void onChange(boolean selfChange) {
-                        timeZoneDetectorStrategy.handleAutoTimeZoneDetectionChange();
+                        service.handleAutoTimeZoneDetectionChanged();
                     }
                 });
-
-        return new TimeZoneDetectorService(context, handler, timeZoneDetectorStrategy);
+        return service;
     }
 
     @VisibleForTesting
@@ -99,11 +103,11 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     }
 
     @Override
-    public void suggestPhoneTimeZone(@NonNull PhoneTimeZoneSuggestion timeZoneSuggestion) {
-        enforceSuggestPhoneTimeZonePermission();
+    public void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion timeZoneSuggestion) {
+        enforceSuggestTelephonyTimeZonePermission();
         Objects.requireNonNull(timeZoneSuggestion);
 
-        mHandler.post(() -> mTimeZoneDetectorStrategy.suggestPhoneTimeZone(timeZoneSuggestion));
+        mHandler.post(() -> mTimeZoneDetectorStrategy.suggestTelephonyTimeZone(timeZoneSuggestion));
     }
 
     @Override
@@ -111,17 +115,33 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             @Nullable String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        mTimeZoneDetectorStrategy.dumpState(pw, args);
+        mTimeZoneDetectorStrategy.dump(pw, args);
     }
 
-    private void enforceSuggestPhoneTimeZonePermission() {
+    /** Internal method for handling the auto time zone setting being changed. */
+    @VisibleForTesting
+    public void handleAutoTimeZoneDetectionChanged() {
+        mHandler.post(mTimeZoneDetectorStrategy::handleAutoTimeZoneDetectionChanged);
+    }
+
+    private void enforceSuggestTelephonyTimeZonePermission() {
         mContext.enforceCallingPermission(
-                android.Manifest.permission.SET_TIME_ZONE, "set time zone");
+                android.Manifest.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE,
+                "suggest telephony time and time zone");
     }
 
     private void enforceSuggestManualTimeZonePermission() {
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.SET_TIME_ZONE, "set time zone");
+                android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE,
+                "suggest manual time and time zone");
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out,
+            FileDescriptor err, String[] args, ShellCallback callback,
+            ResultReceiver resultReceiver) {
+        (new TimeZoneDetectorShellCommand(this)).exec(
+                this, in, out, err, args, callback, resultReceiver);
     }
 }
 

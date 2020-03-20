@@ -27,8 +27,10 @@ java_library_static {
         "android.hardware.light-V2.0-java",
         "android.hardware.power-V1.0-java",
         "android.hardware.tv.cec-V1.0-java",
+        "android.hardware.vibrator-java",
+        "android.net.ipsec.ike.stubs.module_libs_api",
         "app-compat-annotations",
-        "vintf-vibrator-java",
+        "framework-tethering-stubs-module_libs_api",
     ],
 
     required: [
@@ -42,6 +44,8 @@ java_library_static {
         "android.hardware.broadcastradio-V2.0-java",
         "android.hardware.health-V1.0-java",
         "android.hardware.health-V2.0-java",
+        "android.hardware.health-V2.1-java",
+        "android.hardware.light-java",
         "android.hardware.weaver-V1.0-java",
         "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.1-java",
@@ -51,6 +55,10 @@ java_library_static {
         "android.hidl.manager-V1.2-java",
         "dnsresolver_aidl_interface-V2-java",
         "netd_event_listener_interface-java",
+    ],
+
+    plugins: [
+        "compat-changeid-annotation-processor",
     ],
 }
 

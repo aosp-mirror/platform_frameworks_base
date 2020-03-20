@@ -18,7 +18,6 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothAdapter;
@@ -62,18 +61,6 @@ public class MapClientProfileTest {
                 mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.MAP_CLIENT, mService);
-    }
-
-    @Test
-    public void connect_shouldConnectBluetoothMapClient() {
-        mProfile.connect(mBluetoothDevice);
-        verify(mService).connect(mBluetoothDevice);
-    }
-
-    @Test
-    public void disconnect_shouldDisconnectBluetoothMapClient() {
-        mProfile.disconnect(mBluetoothDevice);
-        verify(mService).disconnect(mBluetoothDevice);
     }
 
     @Test

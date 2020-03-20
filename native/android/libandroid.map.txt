@@ -40,6 +40,7 @@ LIBANDROID {
     AConfiguration_getOrientation;
     AConfiguration_getScreenHeightDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
     AConfiguration_getScreenLong;
+    AConfiguration_getScreenRound; # introduced=30
     AConfiguration_getScreenSize;
     AConfiguration_getScreenWidthDp; # introduced-arm=13 introduced-arm64=21 introduced-mips=13 introduced-mips64=21 introduced-x86=13 introduced-x86_64=21
     AConfiguration_getSdkVersion;

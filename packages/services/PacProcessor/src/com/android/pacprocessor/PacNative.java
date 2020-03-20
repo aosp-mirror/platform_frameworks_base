@@ -23,6 +23,8 @@ import android.util.Log;
 public class PacNative {
     private static final String TAG = "PacProxy";
 
+    private static final PacNative sInstance = new PacNative();
+
     private String mCurrentPac;
 
     private boolean mIsActive;
@@ -39,8 +41,12 @@ public class PacNative {
         System.loadLibrary("jni_pacprocessor");
     }
 
-    PacNative() {
+    private PacNative() {
 
+    }
+
+    public static PacNative getInstance() {
+        return sInstance;
     }
 
     public synchronized boolean startPacSupport() {

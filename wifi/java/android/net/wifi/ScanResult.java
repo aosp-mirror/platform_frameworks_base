@@ -16,13 +16,16 @@
 
 package android.net.wifi;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -433,58 +436,100 @@ public class ScanResult implements Parcelable {
     @UnsupportedAppUsage
     public List<String> anqpLines;
 
-    /** information elements from beacon
-     * @hide
+    /**
+     * information elements from beacon.
      */
     public static class InformationElement {
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_SSID = 0;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_SUPPORTED_RATES = 1;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_TIM = 5;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_BSS_LOAD = 11;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_ERP = 42;
+        /** @hide */
         public static final int EID_HT_CAPABILITIES = 45;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_RSN = 48;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_EXTENDED_SUPPORTED_RATES = 50;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_HT_OPERATION = 61;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_INTERWORKING = 107;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_ROAMING_CONSORTIUM = 111;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_EXTENDED_CAPS = 127;
+        /** @hide */
         public static final int EID_VHT_CAPABILITIES = 191;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_VHT_OPERATION = 192;
+        /** @hide */
         @UnsupportedAppUsage
         public static final int EID_VSA = 221;
 
+        /** @hide */
         @UnsupportedAppUsage
         public int id;
+        /** @hide */
         @UnsupportedAppUsage
         public byte[] bytes;
 
+        /** @hide */
         public InformationElement() {
         }
 
-        public InformationElement(InformationElement rhs) {
+        public InformationElement(@NonNull InformationElement rhs) {
             this.id = rhs.id;
             this.bytes = rhs.bytes.clone();
         }
+
+        /**
+         * The element ID of the information element. Defined in the IEEE 802.11-2016 spec
+         * Table 9-77.
+         */
+        public int getId() {
+            return id;
+        }
+
+        /**
+         * Get the specific content of the information element.
+         */
+        @NonNull
+        public ByteBuffer getBytes() {
+            return ByteBuffer.wrap(bytes).asReadOnlyBuffer();
+        }
     }
 
-    /** information elements found in the beacon
+    /**
+     * information elements found in the beacon.
      * @hide
      */
     @UnsupportedAppUsage
     public InformationElement[] informationElements;
+    /**
+     * Get all information elements found in the beacon.
+     */
+    @NonNull
+    public List<InformationElement> getInformationElements() {
+        return Collections.unmodifiableList(Arrays.asList(informationElements));
+    }
 
     /** ANQP response elements.
      * @hide
@@ -604,8 +649,8 @@ public class ScanResult implements Parcelable {
         this.wifiSsid = wifiSsid;
     }
 
-    /** copy constructor {@hide} */
-    public ScanResult(ScanResult source) {
+    /** copy constructor */
+    public ScanResult(@NonNull ScanResult source) {
         if (source != null) {
             wifiSsid = source.wifiSsid;
             SSID = source.SSID;
@@ -759,9 +804,8 @@ public class ScanResult implements Parcelable {
         }
     }
 
-    /** Implement the Parcelable interface {@hide} */
-    @UnsupportedAppUsage
-    public static final @android.annotation.NonNull Creator<ScanResult> CREATOR =
+    /** Implement the Parcelable interface */
+    public static final @NonNull Creator<ScanResult> CREATOR =
         new Creator<ScanResult>() {
             public ScanResult createFromParcel(Parcel in) {
                 WifiSsid wifiSsid = null;

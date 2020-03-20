@@ -72,6 +72,7 @@ java_library {
 
     libs: [
         "android.hidl.manager-V1.0-java",
+        "framework-tethering-stubs-module_libs_api",
     ],
 
     plugins: [
@@ -100,4 +101,44 @@ platform_compat_config {
 filegroup {
     name: "art-profile",
     srcs: ["art-profile"],
+}
+
+// API stub
+// =============================================================
+
+droidstubs {
+    name: "services-stubs.sources",
+    srcs: [":services-sources"],
+    installable: false,
+    args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
+        " --hide-annotation android.annotation.Hide" +
+        " --hide InternalClasses" + // com.android.* classes are okay in this interface
+        // TODO: remove the --hide options below
+        " --hide-package com.google.android.startop.iorap" +
+        " --hide ReferencesHidden" +
+        " --hide DeprecationMismatch" +
+        " --hide HiddenTypedefConstant",
+    visibility: ["//visibility:private"],
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+        last_released: {
+            api_file: ":last-released-system-server-api",
+            removed_api_file: "api/removed.txt",
+            baseline_file: ":system-server-api-incompatibilities-with-last-released"
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-system-server-api",
+            baseline_file: "api/lint-baseline.txt",
+        },
+    },
+}
+
+java_library {
+    name: "services-stubs",
+    srcs: [":services-stubs.sources"],
+    installable: false,
 }

@@ -18,13 +18,14 @@ package android.media;
 
 import static android.media.MediaPlayer.MEDIA_ERROR_UNSUPPORTED;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkUtils;
 import android.os.IBinder;
 import android.os.StrictMode;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;

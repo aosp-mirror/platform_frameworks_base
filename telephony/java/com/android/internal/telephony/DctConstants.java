@@ -15,9 +15,9 @@
  */
 package com.android.internal.telephony;
 
-import com.android.internal.util.Protocol;
+import android.compat.annotation.UnsupportedAppUsage;
 
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import com.android.internal.util.Protocol;
 
 /**
  * @hide
@@ -111,6 +111,10 @@ public class DctConstants {
     public static final int EVENT_DATA_SERVICE_BINDING_CHANGED = BASE + 49;
     public static final int EVENT_DEVICE_PROVISIONED_CHANGE = BASE + 50;
     public static final int EVENT_DATA_ENABLED_OVERRIDE_RULES_CHANGED = BASE + 51;
+    public static final int EVENT_SERVICE_STATE_CHANGED = BASE + 52;
+    public static final int EVENT_5G_TIMER_HYSTERESIS = BASE + 53;
+    public static final int EVENT_5G_TIMER_WATCHDOG = BASE + 54;
+    public static final int EVENT_UPDATE_CARRIER_CONFIGS = BASE + 55;
 
     /***** Constants *****/
 
@@ -120,4 +124,6 @@ public class DctConstants {
 
     public static final String APN_TYPE_KEY = "apnType";
     public static final String PROVISIONING_URL_KEY = "provisioningUrl";
+    public static final String BANDWIDTH_SOURCE_MODEM_KEY = "modem";
+    public static final String BANDWIDTH_SOURCE_CARRIER_CONFIG_KEY = "carrier_config";
 }

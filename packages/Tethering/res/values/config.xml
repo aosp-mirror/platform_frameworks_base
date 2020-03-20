@@ -1,7 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
 <resources>
     <!--
     OEMs that wish to change the below settings must do so via a runtime resource overlay package
     and *NOT* by changing this file. This file is part of the tethering mainline module.
+    TODO: define two resources for each config item: a default_* resource and a config_* resource,
+    config_* is empty by default but may be overridden by RROs.
     -->
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         USB interfaces.  If the device doesn't want to support tethering over USB this should
+         be empty.  An example would be "usb.*" -->
+    <string-array translatable="false" name="config_tether_usb_regexs">
+        <item>"usb\\d"</item>
+        <item>"rndis\\d"</item>
+    </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         NCM interfaces.  If the device doesn't want to support tethering over NCM this should
+         be empty. -->
+    <string-array translatable="false" name="config_tether_ncm_regexs">
+    </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         Wifi interfaces.  If the device doesn't want to support tethering over Wifi this
+         should be empty.  An example would be "softap.*" -->
+    <string-array translatable="false" name="config_tether_wifi_regexs">
+        <item>"wlan\\d"</item>
+        <item>"softap\\d"</item>
+    </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         Wifi P2P interfaces.  If the device doesn't want to support tethering over Wifi P2p this
+         should be empty.  An example would be "p2p-p2p.*" -->
+    <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
+    </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         bluetooth interfaces.  If the device doesn't want to support tethering over bluetooth this
+         should be empty. -->
+    <string-array translatable="false" name="config_tether_bluetooth_regexs">
+        <item>"bt-pan"</item>
+    </string-array>
+
+    <!-- Use the old dnsmasq DHCP server for tethering instead of the framework implementation. -->
+    <bool translatable="false" name="config_tether_enable_legacy_dhcp_server">false</bool>
+
+    <!-- Dhcp range (min, max) to use for tethering purposes -->
+    <string-array translatable="false" name="config_tether_dhcp_range">
+    </string-array>
+
+    <!-- Array of ConnectivityManager.TYPE_{BLUETOOTH, ETHERNET, MOBILE, MOBILE_DUN, MOBILE_HIPRI,
+         WIFI} values allowable for tethering.
+
+         Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
+         [1,7,0] for TYPE_WIFI, TYPE_BLUETOOTH, and TYPE_MOBILE.
+
+         This list is also modified by code within the framework, including:
+
+             - TYPE_ETHERNET (9) is prepended to this list, and
+
+             - the return value of TelephonyManager.isTetheringApnRequired()
+               determines how the array is further modified:
+
+                   * TRUE (DUN REQUIRED).
+                     TYPE_MOBILE is removed (if present).
+                     TYPE_MOBILE_HIPRI is removed (if present).
+                     TYPE_MOBILE_DUN is appended (if not already present).
+
+                   * FALSE (DUN NOT REQUIRED).
+                     TYPE_MOBILE_DUN is removed (if present).
+                     If both of TYPE_MOBILE{,_HIPRI} are not present:
+                        TYPE_MOBILE is appended.
+                        TYPE_MOBILE_HIPRI is appended.
+
+         For other changes applied to this list, now and in the future, see
+         com.android.server.connectivity.tethering.TetheringConfiguration.
+
+         Note also: the order of this is important. The first upstream type
+         for which a satisfying network exists is used.
+    -->
+    <integer-array translatable="false" name="config_tether_upstream_types">
+    </integer-array>
+
+    <!-- When true, the tethering upstream network follows the current default
+         Internet network (except when the current default network is mobile,
+         in which case a DUN network will be used if required).
+
+         When true, overrides the config_tether_upstream_types setting above.
+    -->
+    <bool translatable="false" name="config_tether_upstream_automatic">true</bool>
+
+
+    <!-- If the mobile hotspot feature requires provisioning, a package name and class name
+         can be provided to launch a supported application that provisions the devices.
+         EntitlementManager will send an intent to Settings with the specified package name and
+         class name in extras to launch provision app.
+         TODO: note what extras here.
+
+         See EntitlementManager#runUiTetherProvisioning and
+         packages/apps/Settings/src/com/android/settings/network/TetherProvisioningActivity.java
+         for more details.
+
+         For ui-less/periodic recheck support see config_mobile_hotspot_provision_app_no_ui
+        -->
+    <!-- The first element is the package name and the second element is the class name
+         of the provisioning app -->
+    <string-array translatable="false" name="config_mobile_hotspot_provision_app">
+    <!--
+        <item>com.example.provisioning</item>
+        <item>com.example.provisioning.Activity</item>
+    -->
+    </string-array>
+
+    <!-- If the mobile hotspot feature requires provisioning, an action can be provided
+         that will be broadcast in non-ui cases for checking the provisioning status.
+         EntitlementManager will pass the specified name to Settings and Settings would
+         launch provisioning app by sending an intent with the package name.
+
+         A second broadcast, action defined by config_mobile_hotspot_provision_response,
+         will be sent back to notify if provisioning succeeded or not.  The response will
+         match that of the activity in config_mobile_hotspot_provision_app, but instead
+         contained within the int extra "EntitlementResult".
+         TODO: provide the system api for "EntitlementResult" extra and note it here.
+
+         See EntitlementManager#runSilentTetherProvisioning and
+         packages/apps/Settings/src/com/android/settings/wifi/tether/TetherService.java for more
+         details.
+        -->
+    <string translatable="false" name="config_mobile_hotspot_provision_app_no_ui"></string>
+
+    <!-- Sent in response to a provisioning check. The caller must hold the
+         permission android.permission.TETHER_PRIVILEGED for Settings to
+         receive this response.
+
+         See config_mobile_hotspot_provision_response
+         -->
+    <string translatable="false" name="config_mobile_hotspot_provision_response"></string>
+
+    <!-- Number of hours between each background provisioning call -->
+    <integer translatable="false" name="config_mobile_hotspot_provision_check_period">24</integer>
+
+    <!-- ComponentName of the service used to run no ui tether provisioning. -->
+    <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.wifi.tether.TetherService</string>
+
+    <!-- Enable tethering notification -->
+    <!-- Icons for showing tether enable notification.
+         Each item should have two elements and be separated with ";".
+
+         The first element is downstream types which is one of tethering. This element has to be
+         made by WIFI, USB, BT, and OR'd with the others. Use "|" to combine multiple downstream
+         types and use "," to separate each combinations. Such as
+
+             USB|BT,WIFI|USB|BT
+
+         The second element is icon for the item. This element has to be composed by
+         <package name>:drawable/<resource name>. Such as
+
+             1. com.android.networkstack.tethering:drawable/stat_sys_tether_general
+             2. android:drawable/xxx
+
+         So the entire string of each item would be
+
+             USB|BT,WIFI|USB|BT;com.android.networkstack.tethering:drawable/stat_sys_tether_general
+
+         NOTE: One config can be separated into two or more for readability. Such as
+
+               WIFI|USB,WIFI|BT,USB|BT,WIFI|USB|BT;android:drawable/xxx
+
+               can be separated into
+
+               WIFI|USB;android:drawable/xxx
+               WIFI|BT;android:drawable/xxx
+               USB|BT;android:drawable/xxx
+               WIFI|USB|BT;android:drawable/xxx
+
+         Notification will not show if the downstream type isn't listed in array.
+         Empty array means disable notifications. -->
+    <!-- In AOSP, hotspot is configured to no notification by default. Because status bar has showed
+         an icon on the right side already -->
+    <string-array translatable="false" name="tethering_notification_icons">
+        <item>USB;com.android.networkstack.tethering:drawable/stat_sys_tether_usb</item>
+        <item>BT;com.android.networkstack.tethering:drawable/stat_sys_tether_bluetooth</item>
+        <item>WIFI|USB,WIFI|BT,USB|BT,WIFI|USB|BT;com.android.networkstack.tethering:drawable/stat_sys_tether_general</item>
+    </string-array>
+    <!-- String for tether enable notification title. -->
+    <string name="tethering_notification_title">@string/tethered_notification_title</string>
+    <!-- String for tether enable notification message. -->
+    <string name="tethering_notification_message">@string/tethered_notification_message</string>
 </resources>

@@ -50,6 +50,7 @@
 #include <memunreachable/memunreachable.h>
 #include <android-base/strings.h>
 #include "android_os_Debug.h"
+#include <vintf/VintfObject.h>
 
 namespace android
 {
@@ -192,7 +193,8 @@ static int read_memtrack_memory(struct memtrack_proc* p, int pid,
 {
     int err = memtrack_proc_get(p, pid);
     if (err != 0) {
-        ALOGW("failed to get memory consumption info: %d", err);
+        // The memtrack HAL may not be available, do not log to avoid flooding
+        // logcat.
         return err;
     }
 
@@ -260,6 +262,8 @@ static void load_maps(int pid, stats_t* stats, bool* foundSwapPss)
         } else if (base::StartsWith(name, "[anon:libc_malloc]")) {
             which_heap = HEAP_NATIVE;
         } else if (base::StartsWith(name, "[anon:scudo:")) {
+            which_heap = HEAP_NATIVE;
+        } else if (base::StartsWith(name, "[anon:GWP-ASan")) {
             which_heap = HEAP_NATIVE;
         } else if (base::StartsWith(name, "[stack")) {
             which_heap = HEAP_STACK;
@@ -826,11 +830,28 @@ static jlong android_os_Debug_getIonMappedSizeKb(JNIEnv* env, jobject clazz) {
         }
     }
 
-    for (dmabufinfo::DmaBuffer buf : dmabufs) {
+    for (const dmabufinfo::DmaBuffer& buf : dmabufs) {
         ionPss += buf.size() / 1024;
     }
 
     return ionPss;
+}
+
+static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
+{
+    static enum {
+        CONFIG_UNKNOWN,
+        CONFIG_SET,
+        CONFIG_UNSET,
+    } cfg_state = CONFIG_UNKNOWN;
+
+    if (cfg_state == CONFIG_UNKNOWN) {
+        const std::map<std::string, std::string> configs =
+            vintf::VintfObject::GetInstance()->getRuntimeInfo()->kernelConfigs();
+        std::map<std::string, std::string>::const_iterator it = configs.find("CONFIG_VMAP_STACK");
+        cfg_state = (it != configs.end() && it->second == "y") ? CONFIG_SET : CONFIG_UNSET;
+    }
+    return cfg_state == CONFIG_SET;
 }
 
 /*
@@ -882,6 +903,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getIonPoolsSizeKb },
     { "getIonMappedSizeKb", "()J",
             (void*)android_os_Debug_getIonMappedSizeKb },
+    { "isVmapStack", "()Z",
+            (void*)android_os_Debug_isVmapStack },
 };
 
 int register_android_os_Debug(JNIEnv *env)

@@ -20,11 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import android.os.SystemClock;
 import android.util.Range;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -64,16 +63,19 @@ public final class ModemActivityInfo implements Parcelable {
         mTimestamp = timestamp;
         mSleepTimeMs = sleepTimeMs;
         mIdleTimeMs = idleTimeMs;
-        if (txTimeMs != null) {
-            populateTransmitPowerRange(txTimeMs);
-        }
+        populateTransmitPowerRange(txTimeMs);
         mRxTimeMs = rxTimeMs;
     }
 
     /** helper API to populate tx power range for each bucket **/
     private void populateTransmitPowerRange(@NonNull int[] transmitPowerMs) {
-        for (int i = 0; i < Math.min(transmitPowerMs.length, TX_POWER_LEVELS); i++) {
+        int i = 0;
+        for ( ; i < Math.min(transmitPowerMs.length, TX_POWER_LEVELS); i++) {
             mTransmitPowerInfo.add(i, new TransmitPower(TX_POWER_RANGES[i], transmitPowerMs[i]));
+        }
+        // Make sure that mTransmitPowerInfo is fully initialized.
+        for ( ; i < TX_POWER_LEVELS; i++) {
+            mTransmitPowerInfo.add(i, new TransmitPower(TX_POWER_RANGES[i], 0));
         }
     }
 
@@ -199,10 +201,10 @@ public final class ModemActivityInfo implements Parcelable {
     }
 
     /**
+     * Indicates if the modem has reported valid {@link ModemActivityInfo}.
+     *
      * @return {@code true} if this {@link ModemActivityInfo} record is valid,
      * {@code false} otherwise.
-     *
-     * @hide
      */
     public boolean isValid() {
         for (TransmitPower powerInfo : getTransmitPowerInfo()) {

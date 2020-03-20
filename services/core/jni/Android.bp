@@ -21,6 +21,7 @@ cc_library_static {
         "BroadcastRadio/convert.cpp",
         "BroadcastRadio/regions.cpp",
         "com_android_server_AlarmManagerService.cpp",
+        "com_android_server_adb_AdbDebuggingManager.cpp",
         "com_android_server_am_BatteryStatsService.cpp",
         "com_android_server_connectivity_Vpn.cpp",
         "com_android_server_ConsumerIrService.cpp",
@@ -69,6 +70,8 @@ cc_library_static {
 cc_defaults {
     name: "libservices.core-libs",
     shared_libs: [
+        "libadb_pairing_server",
+        "libadb_pairing_connection",
         "libandroid_runtime",
         "libandroidfw",
         "libaudioclient",
@@ -93,7 +96,8 @@ cc_defaults {
         "libschedulerservicehidl",
         "libsensorservice",
         "libsensorservicehidl",
-        "libgui",
+        "libstatshidl",
+	"libgui",
         "libusbhost",
         "libtinyalsa",
         "libEGL",
@@ -124,6 +128,7 @@ cc_defaults {
         "android.hardware.thermal@1.0",
         "android.hardware.tv.cec@1.0",
         "android.hardware.tv.input@1.0",
+        "android.hardware.vibrator-cpp",
         "android.hardware.vibrator@1.0",
         "android.hardware.vibrator@1.1",
         "android.hardware.vibrator@1.2",
@@ -131,9 +136,9 @@ cc_defaults {
         "android.hardware.vr@1.0",
         "android.frameworks.schedulerservice@1.0",
         "android.frameworks.sensorservice@1.0",
-        "android.system.suspend@1.0",
+        "android.frameworks.stats@1.0",
+	"android.system.suspend@1.0",
         "suspend_control_aidl_interface-cpp",
-        "vintf-vibrator-cpp",
     ],
 
     static_libs: [

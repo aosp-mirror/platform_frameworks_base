@@ -1733,6 +1733,7 @@ easier.
         <item name="colorBackground">@color/background_device_default_light</item>
         <item name="colorBackgroundFloating">@color/background_device_default_light</item>
         <item name="layout_gravity">center</item>
+        <item name="windowAnimationStyle">@style/Animation.DeviceDefault.Dialog</item>
     </style>
 
     <style name="Theme.DeviceDefault.Notification" parent="@style/Theme.Material.Notification">

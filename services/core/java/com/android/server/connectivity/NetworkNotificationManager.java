@@ -28,7 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.NetworkSpecifier;
-import android.net.StringNetworkSpecifier;
+import android.net.TelephonyNetworkSpecifier;
 import android.net.wifi.WifiInfo;
 import android.os.UserHandle;
 import android.telephony.SubscriptionManager;
@@ -51,7 +51,6 @@ public class NetworkNotificationManager {
         LOST_INTERNET(SystemMessage.NOTE_NETWORK_LOST_INTERNET),
         NETWORK_SWITCH(SystemMessage.NOTE_NETWORK_SWITCH),
         NO_INTERNET(SystemMessage.NOTE_NETWORK_NO_INTERNET),
-        LOGGED_IN(SystemMessage.NOTE_NETWORK_LOGGED_IN),
         PARTIAL_CONNECTIVITY(SystemMessage.NOTE_NETWORK_PARTIAL_CONNECTIVITY),
         SIGN_IN(SystemMessage.NOTE_NETWORK_SIGN_IN),
         PRIVATE_DNS_BROKEN(SystemMessage.NOTE_NETWORK_PRIVATE_DNS_BROKEN);
@@ -114,14 +113,10 @@ public class NetworkNotificationManager {
         }
     }
 
-    private static int getIcon(int transportType, NotificationType notifyType) {
-        if (transportType != TRANSPORT_WIFI) {
-            return R.drawable.stat_notify_rssi_in_range;
-        }
-
-        return notifyType == NotificationType.LOGGED_IN
-            ? R.drawable.ic_wifi_signal_4
-            : R.drawable.stat_notify_wifi_in_range;  // TODO: Distinguish ! from ?.
+    private static int getIcon(int transportType) {
+        return (transportType == TRANSPORT_WIFI)
+                ? R.drawable.stat_notify_wifi_in_range :  // TODO: Distinguish ! from ?.
+                R.drawable.stat_notify_rssi_in_range;
     }
 
     /**
@@ -185,17 +180,17 @@ public class NetworkNotificationManager {
         Resources r = mContext.getResources();
         final CharSequence title;
         final CharSequence details;
-        int icon = getIcon(transportType, notifyType);
+        int icon = getIcon(transportType);
         if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.PRIVATE_DNS_BROKEN) {
             if (transportType == TRANSPORT_CELLULAR) {
                 title = r.getString(R.string.mobile_no_internet);
             } else if (transportType == TRANSPORT_WIFI) {
                 title = r.getString(R.string.wifi_no_internet,
-                        WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                        WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             } else {
                 title = r.getString(R.string.other_networks_no_internet);
             }
@@ -203,19 +198,19 @@ public class NetworkNotificationManager {
         } else if (notifyType == NotificationType.PARTIAL_CONNECTIVITY
                 && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.network_partial_connectivity,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.network_partial_connectivity_detailed);
         } else if (notifyType == NotificationType.LOST_INTERNET &&
                 transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
-                    WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.SIGN_IN) {
             switch (transportType) {
                 case TRANSPORT_WIFI:
                     title = r.getString(R.string.wifi_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
-                            WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID()));
+                            WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
                     break;
                 case TRANSPORT_CELLULAR:
                     title = r.getString(R.string.network_available_sign_in, 0);
@@ -223,14 +218,8 @@ public class NetworkNotificationManager {
                     // name has been added to it
                     NetworkSpecifier specifier = nai.networkCapabilities.getNetworkSpecifier();
                     int subId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-                    if (specifier instanceof StringNetworkSpecifier) {
-                        try {
-                            subId = Integer.parseInt(
-                                    ((StringNetworkSpecifier) specifier).specifier);
-                        } catch (NumberFormatException e) {
-                            Slog.e(TAG, "NumberFormatException on "
-                                    + ((StringNetworkSpecifier) specifier).specifier);
-                        }
+                    if (specifier instanceof TelephonyNetworkSpecifier) {
+                        subId = ((TelephonyNetworkSpecifier) specifier).getSubscriptionId();
                     }
 
                     details = mTelephonyManager.createForSubscriptionId(subId)
@@ -241,9 +230,6 @@ public class NetworkNotificationManager {
                     details = r.getString(R.string.network_available_sign_in_detailed, name);
                     break;
             }
-        } else if (notifyType == NotificationType.LOGGED_IN) {
-            title = WifiInfo.removeDoubleQuotes(nai.networkCapabilities.getSSID());
-            details = r.getString(R.string.captive_portal_logged_in_detailed);
         } else if (notifyType == NotificationType.NETWORK_SWITCH) {
             String fromTransport = getTransportName(transportType);
             String toTransport = getTransportName(approximateTransportType(switchToNai));
@@ -385,7 +371,6 @@ public class NetworkNotificationManager {
             case NETWORK_SWITCH:
                 return 2;
             case LOST_INTERNET:
-            case LOGGED_IN:
                 return 1;
             default:
                 return 0;

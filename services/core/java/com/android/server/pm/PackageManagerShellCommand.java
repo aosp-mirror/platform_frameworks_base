@@ -1159,7 +1159,7 @@ class PackageManagerShellCommand extends ShellCommand {
             }
             abandonSession = false;
 
-            if (!params.sessionParams.isStaged || !params.waitForStagedSessionReady) {
+            if (!params.sessionParams.isStaged || !params.mWaitForStagedSessionReady) {
                 pw.println("Success");
                 return 0;
             }
@@ -1197,7 +1197,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         + si.getStagedSessionErrorMessage() + "]");
                 return 1;
             }
-            pw.println("Success");
+            pw.println("Success. Reboot device to apply staged session");
             return 0;
         } finally {
             if (abandonSession) {
@@ -2376,6 +2376,7 @@ class PackageManagerShellCommand extends ShellCommand {
         int userId = -1;
         int flags = 0;
         String opt;
+        boolean preCreateOnly = false;
         while ((opt = getNextOption()) != null) {
             if ("--profileOf".equals(opt)) {
                 userId = UserHandle.parseUserArg(getNextArgRequired());
@@ -2389,16 +2390,22 @@ class PackageManagerShellCommand extends ShellCommand {
                 flags |= UserInfo.FLAG_GUEST;
             } else if ("--demo".equals(opt)) {
                 flags |= UserInfo.FLAG_DEMO;
+            } else if ("--pre-create-only".equals(opt)) {
+                preCreateOnly = true;
             } else {
                 getErrPrintWriter().println("Error: unknown option " + opt);
                 return 1;
             }
         }
         String arg = getNextArg();
-        if (arg == null) {
+        if (arg == null && !preCreateOnly) {
             getErrPrintWriter().println("Error: no user name specified.");
             return 1;
         }
+        if (arg != null && preCreateOnly) {
+            getErrPrintWriter().println("Warning: name is ignored for pre-created users");
+        }
+
         name = arg;
         UserInfo info;
         IUserManager um = IUserManager.Stub.asInterface(
@@ -2412,7 +2419,7 @@ class PackageManagerShellCommand extends ShellCommand {
             accm.addSharedAccountsFromParentUser(parentUserId, userId,
                     (Process.myUid() == Process.ROOT_UID) ? "root" : "com.android.shell");
         } else if (userId < 0) {
-            info = um.createUser(name, flags);
+            info = preCreateOnly ? um.preCreateUser(flags) : um.createUser(name, flags);
         } else {
             info = um.createProfileForUser(name, flags, userId, null);
         }
@@ -2487,7 +2494,7 @@ class PackageManagerShellCommand extends ShellCommand {
         SessionParams sessionParams;
         String installerPackageName;
         int userId = UserHandle.USER_ALL;
-        boolean waitForStagedSessionReady = false;
+        boolean mWaitForStagedSessionReady = true;
         long timeoutMs = DEFAULT_WAIT_MS;
     }
 
@@ -2601,6 +2608,8 @@ class PackageManagerShellCommand extends ShellCommand {
                 case "--staged":
                     sessionParams.setStaged();
                     break;
+                case "--force-queryable":
+                    break;
                 case "--enable-rollback":
                     if (params.installerPackageName == null) {
                         // com.android.shell has the TEST_MANAGE_ROLLBACKS
@@ -2615,12 +2624,15 @@ class PackageManagerShellCommand extends ShellCommand {
                     sessionParams.installFlags |= PackageManager.INSTALL_ENABLE_ROLLBACK;
                     break;
                 case "--wait":
-                    params.waitForStagedSessionReady = true;
+                    params.mWaitForStagedSessionReady = true;
                     try {
                         params.timeoutMs = Long.parseLong(peekNextArg());
                         getNextArg();
                     } catch (NumberFormatException ignore) {
                     }
+                    break;
+                case "--no-wait":
+                    params.mWaitForStagedSessionReady = false;
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown option " + opt);
@@ -3307,8 +3319,11 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  trim-caches DESIRED_FREE_SPACE [internal|UUID]");
         pw.println("    Trim cache files to reach the given free space.");
         pw.println("");
+        pw.println("  list users");
+        pw.println("    Lists the current users.");
+        pw.println("");
         pw.println("  create-user [--profileOf USER_ID] [--managed] [--restricted] [--ephemeral]");
-        pw.println("      [--guest] USER_NAME");
+        pw.println("      [--guest] [--pre-create-only] USER_NAME");
         pw.println("    Create a new user with the given USER_NAME, printing the new user identifier");
         pw.println("    of the user.");
         pw.println("");

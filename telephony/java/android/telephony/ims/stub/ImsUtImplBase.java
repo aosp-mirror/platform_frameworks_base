@@ -16,6 +16,9 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Bundle;
@@ -24,6 +27,9 @@ import android.telephony.ims.ImsUtListener;
 
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Base implementation of IMS UT interface, which implements stubs. Override these methods to
@@ -36,6 +42,70 @@ import com.android.ims.internal.IImsUtListener;
 @SystemApi
 @TestApi
 public class ImsUtImplBase {
+    /**
+     * Bar all incoming calls. (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_ALL_INCOMING = 1;
+
+    /**
+     * Bar all outgoing calls. (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_ALL_OUTGOING = 2;
+
+    /**
+     * Bar all outgoing international calls. (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_OUTGOING_INTL = 3;
+
+    /**
+     * Bar all outgoing international calls, excluding those to the home PLMN country
+     * (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_OUTGOING_INTL_EXCL_HOME = 4;
+
+    /**
+     * Bar all incoming calls when roaming (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BLOCKING_INCOMING_WHEN_ROAMING = 5;
+
+    /**
+     * Enable Anonymous Communication Rejection (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_ANONYMOUS_INCOMING = 6;
+
+    /**
+     * Bar all incoming and outgoing calls. (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_ALL = 7;
+
+    /**
+     * Bar all outgoing service requests, including calls. (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_OUTGOING_ALL_SERVICES = 8;
+
+    /**
+     * Bar all incoming service requests, including calls. (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_INCOMING_ALL_SERVICES = 9;
+
+    /**
+     * Bar specific incoming calls. (See 3GPP TS 24.611)
+     */
+    public static final int CALL_BARRING_SPECIFIC_INCOMING_CALLS = 10;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "CALL_BARRING_", value = {CALL_BARRING_ALL_INCOMING, CALL_BARRING_ALL_OUTGOING,
+            CALL_BARRING_OUTGOING_INTL, CALL_BARRING_OUTGOING_INTL_EXCL_HOME,
+            CALL_BLOCKING_INCOMING_WHEN_ROAMING, CALL_BARRING_ANONYMOUS_INCOMING,
+            CALL_BARRING_ALL, CALL_BARRING_OUTGOING_ALL_SERVICES,
+            CALL_BARRING_INCOMING_ALL_SERVICES, CALL_BARRING_SPECIFIC_INCOMING_CALLS})
+    public @interface CallBarringMode {}
+
+    /**
+     * Constant used to denote an invalid return value.
+     */
+    public static final int INVALID_RESULT = -1;
 
     private IImsUt.Stub mServiceImpl = new IImsUt.Stub() {
         @Override
@@ -137,6 +207,13 @@ public class ImsUtImplBase {
                 String[] barrList, int serviceClass) throws RemoteException {
             return ImsUtImplBase.this.updateCallBarringForServiceClass(
                     cbType, action, barrList, serviceClass);
+        }
+
+        @Override
+        public int updateCallBarringWithPassword(int cbType, int action, String[] barrList,
+                int serviceClass, String password) throws RemoteException {
+            return ImsUtImplBase.this.updateCallBarringWithPassword(
+                    cbType, action, barrList, serviceClass, password);
         }
     };
 
@@ -247,15 +324,23 @@ public class ImsUtImplBase {
     /**
      * Updates the configuration of the call barring.
      */
-    public int updateCallBarring(int cbType, int action, String[] barrList) {
+    public int updateCallBarring(@CallBarringMode int cbType, int action, String[] barrList) {
         return -1;
     }
 
     /**
      * Updates the configuration of the call barring for specified service class.
      */
-    public int updateCallBarringForServiceClass(int cbType, int action, String[] barrList,
-            int serviceClass) {
+    public int updateCallBarringForServiceClass(@CallBarringMode int cbType, int action,
+            String[] barrList, int serviceClass) {
+        return -1;
+    }
+
+    /**
+     * Updates the configuration of the call barring for specified service class with password.
+     */
+    public int updateCallBarringWithPassword(int cbType, int action, @Nullable String[] barrList,
+            int serviceClass, @NonNull String password) {
         return -1;
     }
 

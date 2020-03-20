@@ -15,7 +15,7 @@
  */
 package com.android.internal.logging;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.metrics.LogMaker;
 import android.os.Build;

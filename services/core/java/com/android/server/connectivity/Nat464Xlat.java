@@ -116,7 +116,8 @@ public class Nat464Xlat extends BaseNetworkObserver {
                 && !lp.hasIpv4Address();
 
         // If the network tells us it doesn't use clat, respect that.
-        final boolean skip464xlat = (nai.netMisc() != null) && nai.netMisc().skip464xlat;
+        final boolean skip464xlat = (nai.netAgentConfig() != null)
+                && nai.netAgentConfig().skip464xlat;
 
         return supported && connected && isIpv6OnlyNetwork && !skip464xlat;
     }
@@ -173,7 +174,7 @@ public class Nat464Xlat extends BaseNetworkObserver {
         try {
             mNMService.registerObserver(this);
         } catch (RemoteException e) {
-            Slog.e(TAG, "Can't register interface observer for clat on " + mNetwork.name());
+            Slog.e(TAG, "Can't register iface observer for clat on " + mNetwork.toShortString());
             return;
         }
 

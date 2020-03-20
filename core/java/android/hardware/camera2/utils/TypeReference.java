@@ -16,15 +16,16 @@
 
 package android.hardware.camera2.utils;
 
-import android.annotation.UnsupportedAppUsage;
+import static com.android.internal.util.Preconditions.checkNotNull;
+
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-
-import static com.android.internal.util.Preconditions.*;
 
 /**
  * Super type token; allows capturing generic types at runtime by forcing them to be reified.

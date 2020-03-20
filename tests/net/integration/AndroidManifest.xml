@@ -28,7 +28,9 @@
     <!-- Reading network status -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CONNECTIVITY_INTERNAL" />
+    <uses-permission android:name="android.permission.NETWORK_FACTORY" />
+    <uses-permission android:name="android.permission.NETWORK_STACK" />
+    <uses-permission android:name="android.permission.OBSERVE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.READ_PRIVILEGED_PHONE_STATE" />
     <!-- Reading DeviceConfig flags -->
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />

@@ -477,6 +477,7 @@ public class LockSettingsStorageTests {
         assertEquals(2, PersistentData.TYPE_SP_WEAVER);
     }
 
+    @Test
     public void testCredentialHash_serializeUnserialize() {
         byte[] serialized = CredentialHash.create(
                 PAYLOAD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD).toBytes();
@@ -488,6 +489,7 @@ public class LockSettingsStorageTests {
         assertFalse(deserialized.isBaseZeroPattern);
     }
 
+    @Test
     public void testCredentialHash_unserialize_versionGatekeeper() {
         // This test ensures that we can read serialized VERSION_GATEKEEPER CredentialHashes
         // even if we change the wire format in the future.

@@ -16,9 +16,9 @@
 
 package android.app;
 
-import android.annotation.UnsupportedAppUsage;
-import android.annotation.WorkerThread;
 import android.annotation.Nullable;
+import android.annotation.WorkerThread;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.HandlerThread;

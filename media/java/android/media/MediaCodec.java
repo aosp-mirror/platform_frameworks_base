@@ -19,7 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -362,7 +362,8 @@ import java.util.concurrent.locks.ReentrantLock;
    </tr>
    <tr>
     <td>FLAC</td>
-    <td>mandatory metadata block (called the STREAMINFO block),<br>
+    <td>"fLaC", the FLAC stream marker in ASCII,<br>
+        followed by the STREAMINFO block (the mandatory metadata block),<br>
         optionally followed by any number of other metadata blocks</td>
     <td class=NA>Not Used</td>
     <td class=NA>Not Used</td>

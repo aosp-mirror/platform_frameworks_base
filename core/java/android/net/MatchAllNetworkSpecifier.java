@@ -16,6 +16,8 @@
 
 package android.net;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,10 +29,12 @@ import android.os.Parcelable;
  *
  * @hide
  */
+@SystemApi
 public final class MatchAllNetworkSpecifier extends NetworkSpecifier implements Parcelable {
     /**
      * Utility method which verifies that the ns argument is not a MatchAllNetworkSpecifier and
      * throws an IllegalArgumentException if it is.
+     * @hide
      */
     public static void checkNotMatchAllNetworkSpecifier(NetworkSpecifier ns) {
         if (ns instanceof MatchAllNetworkSpecifier) {
@@ -38,6 +42,7 @@ public final class MatchAllNetworkSpecifier extends NetworkSpecifier implements 
         }
     }
 
+    /** @hide */
     public boolean satisfiedBy(NetworkSpecifier other) {
         /*
          * The method is called by a NetworkRequest to see if it is satisfied by a proposed
@@ -64,11 +69,11 @@ public final class MatchAllNetworkSpecifier extends NetworkSpecifier implements 
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         // Nothing to write.
     }
 
-    public static final @android.annotation.NonNull Parcelable.Creator<MatchAllNetworkSpecifier> CREATOR =
+    public static final @NonNull Parcelable.Creator<MatchAllNetworkSpecifier> CREATOR =
             new Parcelable.Creator<MatchAllNetworkSpecifier>() {
         public MatchAllNetworkSpecifier createFromParcel(Parcel in) {
             return new MatchAllNetworkSpecifier();

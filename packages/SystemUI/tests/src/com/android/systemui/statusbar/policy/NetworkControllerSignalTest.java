@@ -30,12 +30,12 @@ import android.telephony.CellSignalStrength;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.net.DataUsageController;
@@ -418,7 +418,7 @@ public class NetworkControllerSignalTest extends NetworkControllerBaseTest {
 
         intent.putExtra(TelephonyIntents.EXTRA_SHOW_PLMN, showPlmn);
         intent.putExtra(TelephonyIntents.EXTRA_PLMN, plmn);
-        intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, mSubId);
+        SubscriptionManager.putSubscriptionIdExtra(intent, mSubId);
 
         return intent;
     }

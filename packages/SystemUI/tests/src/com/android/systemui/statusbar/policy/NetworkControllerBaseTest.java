@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.telephony.AccessNetworkConstants.TRANSPORT_TYPE_WWAN;
+import static android.telephony.NetworkRegistrationInfo.DOMAIN_PS;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
@@ -39,6 +42,8 @@ import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.telephony.DisplayInfo;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
@@ -89,6 +94,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected PhoneStateListener mPhoneStateListener;
     protected SignalStrength mSignalStrength;
     protected ServiceState mServiceState;
+    protected DisplayInfo mDisplayInfo;
     protected ConnectivityManager mMockCm;
     protected WifiManager mMockWm;
     protected SubscriptionManager mMockSm;
@@ -139,6 +145,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
         mSignalStrength = mock(SignalStrength.class);
         mServiceState = mock(ServiceState.class);
+        mDisplayInfo = mock(DisplayInfo.class);
 
         mConfig = new Config();
         mConfig.hspaDataDistinguishable = true;
@@ -169,7 +176,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void setupNetworkController() {
         // For now just pretend to be the data sim, so we can test that too.
         mSubId = SubscriptionManager.DEFAULT_SUBSCRIPTION_ID;
-        when(mMockTm.isDataCapable()).thenReturn(true);
+        when(mMockTm.isDataConnectionAllowed()).thenReturn(true);
         setDefaultSubId(mSubId);
         setSubscriptions(mSubId);
         mMobileSignalController = mNetworkController.mMobileSignalControllers.get(mSubId);
@@ -228,33 +235,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
             NetworkCapabilities.TRANSPORT_CELLULAR, true, true);
     }
 
-    public void setupDefaultNr5GIconConfiguration() {
-        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("connected:5g", mConfig);
-    }
-
-    public void setupNr5GIconConfigurationForNotRestrictedRrcCon() {
-        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_con:5g", mConfig);
-    }
-
-    public void setupNr5GIconConfigurationForNotRestrictedRrcIdle() {
-        NetworkControllerImpl.Config.add5GIconMapping("connected_mmwave:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("connected:5g_plus", mConfig);
-        NetworkControllerImpl.Config.add5GIconMapping("not_restricted_rrc_idle:5g", mConfig);
-    }
-
-    public void setupDefaultNr5GIconDisplayGracePeriodTime_enableThirtySeconds() {
-        final int enableDisplayGraceTimeSec = 30;
-        NetworkControllerImpl.Config.setDisplayGraceTime(enableDisplayGraceTimeSec, mConfig);
-    }
-
-    public void setupDefaultNr5GIconDisplayGracePeriodTime_disabled() {
-        final int disableDisplayGraceTimeSec = 0;
-        NetworkControllerImpl.Config.setDisplayGraceTime(disableDisplayGraceTimeSec, mConfig);
-    }
-
     public void setConnectivityViaBroadcast(
         int networkType, boolean validated, boolean isConnected) {
         setConnectivityCommon(networkType, validated, isConnected);
@@ -298,12 +278,12 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void setVoiceRegState(int voiceRegState) {
-        when(mServiceState.getVoiceRegState()).thenReturn(voiceRegState);
+        when(mServiceState.getState()).thenReturn(voiceRegState);
         updateServiceState();
     }
 
     public void setDataRegState(int dataRegState) {
-        when(mServiceState.getDataRegState()).thenReturn(dataRegState);
+        when(mServiceState.getDataRegistrationState()).thenReturn(dataRegState);
         updateServiceState();
     }
 
@@ -339,6 +319,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     protected void updateServiceState() {
         Log.d(TAG, "Sending Service State: " + mServiceState);
         mPhoneStateListener.onServiceStateChanged(mServiceState);
+        mPhoneStateListener.onDisplayInfoChanged(mDisplayInfo);
     }
 
     public void updateCallState(int state) {
@@ -347,7 +328,14 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     }
 
     public void updateDataConnectionState(int dataState, int dataNetType) {
-        when(mServiceState.getDataNetworkType()).thenReturn(dataNetType);
+        NetworkRegistrationInfo fakeRegInfo = new NetworkRegistrationInfo.Builder()
+                .setTransportType(TRANSPORT_TYPE_WWAN)
+                .setDomain(DOMAIN_PS)
+                .setAccessNetworkTechnology(dataNetType)
+                .build();
+        when(mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN))
+                .thenReturn(fakeRegInfo);
+        when(mDisplayInfo.getNetworkType()).thenReturn(dataNetType);
         mPhoneStateListener.onDataConnectionStateChanged(dataState, dataNetType);
     }
 

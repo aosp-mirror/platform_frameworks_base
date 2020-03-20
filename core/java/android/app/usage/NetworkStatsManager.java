@@ -16,19 +16,23 @@
 
 package android.app.usage;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
-
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.usage.NetworkStats.Bucket;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsService;
 import android.net.NetworkIdentity;
+import android.net.NetworkStack;
 import android.net.NetworkTemplate;
+import android.net.netstats.provider.INetworkStatsProviderCallback;
+import android.net.netstats.provider.NetworkStatsProvider;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -41,6 +45,8 @@ import android.util.DataUnit;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Objects;
 
 /**
  * Provides access to network usage history and statistics. Usage data is collected in
@@ -418,7 +424,7 @@ public class NetworkStatsManager {
     /** @hide */
     public void registerUsageCallback(NetworkTemplate template, int networkType,
             long thresholdBytes, UsageCallback callback, @Nullable Handler handler) {
-        checkNotNull(callback, "UsageCallback cannot be null");
+        Objects.requireNonNull(callback, "UsageCallback cannot be null");
 
         final Looper looper;
         if (handler == null) {
@@ -517,6 +523,57 @@ public class NetworkStatsManager {
          * @hide used for internal bookkeeping
          */
         private DataUsageRequest request;
+    }
+
+    /**
+     * Registers a custom provider of {@link android.net.NetworkStats} to provide network statistics
+     * to the system. To unregister, invoke {@link #unregisterNetworkStatsProvider}.
+     * Note that no de-duplication of statistics between providers is performed, so each provider
+     * must only report network traffic that is not being reported by any other provider. Also note
+     * that the provider cannot be re-registered after unregistering.
+     *
+     * @param tag a human readable identifier of the custom network stats provider. This is only
+     *            used for debugging.
+     * @param provider the subclass of {@link NetworkStatsProvider} that needs to be
+     *                 registered to the system.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STATS_PROVIDER,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    @NonNull public void registerNetworkStatsProvider(
+            @NonNull String tag,
+            @NonNull NetworkStatsProvider provider) {
+        try {
+            if (provider.getProviderCallbackBinder() != null) {
+                throw new IllegalArgumentException("provider is already registered");
+            }
+            final INetworkStatsProviderCallback cbBinder =
+                    mService.registerNetworkStatsProvider(tag, provider.getProviderBinder());
+            provider.setProviderCallbackBinder(cbBinder);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Unregisters an instance of {@link NetworkStatsProvider}.
+     *
+     * @param provider the subclass of {@link NetworkStatsProvider} that needs to be
+     *                 unregistered to the system.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STATS_PROVIDER,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK})
+    @NonNull public void unregisterNetworkStatsProvider(@NonNull NetworkStatsProvider provider) {
+        try {
+            provider.getProviderCallbackBinderOrThrow().unregister();
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     private static NetworkTemplate createTemplate(int networkType, String subscriberId) {

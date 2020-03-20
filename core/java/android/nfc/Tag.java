@@ -16,7 +16,7 @@
 
 package android.nfc;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.nfc.tech.IsoDep;
 import android.nfc.tech.MifareClassic;
@@ -455,12 +455,12 @@ public final class Tag implements Parcelable {
      *
      * @hide
      */
-    public synchronized void setConnectedTechnology(int technology) {
-        if (mConnectedTechnology == -1) {
-            mConnectedTechnology = technology;
-        } else {
-            throw new IllegalStateException("Close other technology first!");
+    public synchronized boolean setConnectedTechnology(int technology) {
+        if (mConnectedTechnology != -1) {
+            return false;
         }
+        mConnectedTechnology = technology;
+        return true;
     }
 
     /**

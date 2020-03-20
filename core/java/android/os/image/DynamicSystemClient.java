@@ -96,9 +96,6 @@ public class DynamicSystemClient {
 
     private static final String TAG = "DynSystemClient";
 
-    private static final long DEFAULT_USERDATA_SIZE = (10L << 30);
-
-
     /** Listener for installation status updates. */
     public interface OnStatusChangedListener {
         /**
@@ -256,9 +253,13 @@ public class DynamicSystemClient {
                 mService.send(msg);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Unable to get status from installation service");
-                mExecutor.execute(() -> {
+                if (mExecutor != null) {
+                    mExecutor.execute(() -> {
+                        mListener.onStatusChanged(STATUS_UNKNOWN, CAUSE_ERROR_IPC, 0, e);
+                    });
+                } else {
                     mListener.onStatusChanged(STATUS_UNKNOWN, CAUSE_ERROR_IPC, 0, e);
-                });
+                }
             }
         }
 
@@ -382,7 +383,7 @@ public class DynamicSystemClient {
     @SystemApi
     @TestApi
     public void start(@NonNull Uri systemUrl, @BytesLong long systemSize) {
-        start(systemUrl, systemSize, DEFAULT_USERDATA_SIZE);
+        start(systemUrl, systemSize, 0 /* Use the default userdata size */);
     }
 
     /**

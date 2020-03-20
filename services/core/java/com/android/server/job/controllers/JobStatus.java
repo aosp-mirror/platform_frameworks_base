@@ -29,7 +29,7 @@ import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.text.format.Time;
+import android.text.format.TimeMigrationUtils;
 import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
@@ -1502,11 +1502,11 @@ public final class JobStatus {
                     pw.println();
                 }
             }
-            if (job.getExtras() != null && !job.getExtras().maybeIsEmpty()) {
+            if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
                 pw.print(prefix); pw.print("  Extras: ");
                 pw.println(job.getExtras().toShortString());
             }
-            if (job.getTransientExtras() != null && !job.getTransientExtras().maybeIsEmpty()) {
+            if (job.getTransientExtras() != null && !job.getTransientExtras().isDefinitelyEmpty()) {
                 pw.print(prefix); pw.print("  Transient extras: ");
                 pw.println(job.getTransientExtras().toShortString());
             }
@@ -1643,17 +1643,13 @@ public final class JobStatus {
         if (numFailures != 0) {
             pw.print(prefix); pw.print("Num failures: "); pw.println(numFailures);
         }
-        final Time t = new Time();
-        final String format = "%Y-%m-%d %H:%M:%S";
         if (mLastSuccessfulRunTime != 0) {
             pw.print(prefix); pw.print("Last successful run: ");
-            t.set(mLastSuccessfulRunTime);
-            pw.println(t.format(format));
+            pw.println(TimeMigrationUtils.formatMillisWithFixedFormat(mLastSuccessfulRunTime));
         }
         if (mLastFailedRunTime != 0) {
             pw.print(prefix); pw.print("Last failed run: ");
-            t.set(mLastFailedRunTime);
-            pw.println(t.format(format));
+            pw.println(TimeMigrationUtils.formatMillisWithFixedFormat(mLastFailedRunTime));
         }
     }
 
@@ -1706,10 +1702,10 @@ public final class JobStatus {
                             job.getTriggerContentMaxDelay());
                 }
             }
-            if (job.getExtras() != null && !job.getExtras().maybeIsEmpty()) {
+            if (job.getExtras() != null && !job.getExtras().isDefinitelyEmpty()) {
                 job.getExtras().writeToProto(proto, JobStatusDumpProto.JobInfo.EXTRAS);
             }
-            if (job.getTransientExtras() != null && !job.getTransientExtras().maybeIsEmpty()) {
+            if (job.getTransientExtras() != null && !job.getTransientExtras().isDefinitelyEmpty()) {
                 job.getTransientExtras().writeToProto(proto, JobStatusDumpProto.JobInfo.TRANSIENT_EXTRAS);
             }
             if (job.getClipData() != null) {

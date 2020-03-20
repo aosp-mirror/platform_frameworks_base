@@ -26,14 +26,69 @@ mainline_stubs_args =
     "--hide Typo " +
     "--hide UnavailableSymbol "
 
+// TODO: remove this server classes are cleaned up.
+mainline_stubs_args += "--hide-package com.android.server "
+
+priv_apps = " " +
+    "--show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+    "\\) "
+
+module_libs = " " +
+    " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+    "\\) "
+
 stubs_defaults {
     name: "framework-module-stubs-defaults-publicapi",
     args: mainline_stubs_args,
     installable: false,
+    sdk_version: "current",
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+    },
 }
 
 stubs_defaults {
     name: "framework-module-stubs-defaults-systemapi",
-    args: mainline_stubs_args + " --show-annotation android.annotation.SystemApi ",
+    args: mainline_stubs_args + priv_apps,
+    libs: ["framework-annotations-lib"],
     installable: false,
+    sdk_version: "system_current",
+    check_api: {
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+        },
+    },
+}
+
+// The defaults for module_libs comes in two parts - defaults for API checks
+// and defaults for stub generation. This is because we want the API txt
+// files to *only* include the module_libs_api, but the stubs to include
+// module_libs_api as well as priv_apps.
+
+stubs_defaults {
+    name: "framework-module-api-defaults-module_libs_api",
+    args: mainline_stubs_args + module_libs,
+    libs: ["framework-annotations-lib"],
+    installable: false,
+    sdk_version: "module_current",
+    check_api: {
+        current: {
+            api_file: "api/module-lib-current.txt",
+            removed_api_file: "api/module-lib-removed.txt",
+        },
+    },
+}
+
+stubs_defaults {
+    name: "framework-module-stubs-defaults-module_libs_api",
+    args: mainline_stubs_args + module_libs + priv_apps,
+    libs: ["framework-annotations-lib"],
+    installable: false,
+    sdk_version: "module_current",
 }

@@ -19,7 +19,7 @@ package android.os;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.Log;
 
 import java.io.File;
@@ -32,7 +32,7 @@ import java.util.List;
 
 /**
  * Monitors files (using <a href="http://en.wikipedia.org/wiki/Inotify">inotify</a>)
- * to fire an event after files are accessed or changed by by any process on
+ * to fire an event after files are accessed or changed by any process on
  * the device (including this one).  FileObserver is an abstract class;
  * subclasses must implement the event handler {@link #onEvent(int, String)}.
  *

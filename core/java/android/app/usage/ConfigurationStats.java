@@ -15,7 +15,7 @@
  */
 package android.app.usage;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Parcel;

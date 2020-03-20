@@ -18,7 +18,6 @@ package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothA2dpSink;
@@ -62,18 +61,6 @@ public class A2dpSinkProfileTest {
                 mDeviceManager, mProfileManager);
         mServiceListener = mShadowBluetoothAdapter.getServiceListener();
         mServiceListener.onServiceConnected(BluetoothProfile.A2DP_SINK, mService);
-    }
-
-    @Test
-    public void connect_shouldConnectBluetoothA2dpSink() {
-        mProfile.connect(mBluetoothDevice);
-        verify(mService).connect(mBluetoothDevice);
-    }
-
-    @Test
-    public void disconnect_shouldDisconnectBluetoothA2dpSink() {
-        mProfile.disconnect(mBluetoothDevice);
-        verify(mService).disconnect(mBluetoothDevice);
     }
 
     @Test

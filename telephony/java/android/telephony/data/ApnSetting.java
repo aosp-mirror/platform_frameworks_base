@@ -28,12 +28,13 @@ import android.provider.Telephony;
 import android.provider.Telephony.Carriers;
 import android.telephony.Annotation.ApnType;
 import android.telephony.Annotation.NetworkType;
-import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -122,6 +123,118 @@ public class ApnSetting implements Parcelable {
     public static final int AUTH_TYPE_CHAP = 2;
     /** Authentication type for PAP or CHAP. */
     public static final int AUTH_TYPE_PAP_OR_CHAP = 3;
+
+    /** @hide */
+    @IntDef({
+            Telephony.Carriers.SKIP_464XLAT_DEFAULT,
+            Telephony.Carriers.SKIP_464XLAT_DISABLE,
+            Telephony.Carriers.SKIP_464XLAT_ENABLE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Skip464XlatStatus {}
+
+    /**
+     * APN types for data connections.  These are usage categories for an APN
+     * entry.  One APN entry may support multiple APN types, eg, a single APN
+     * may service regular internet traffic ("default") as well as MMS-specific
+     * connections.<br/>
+     * APN_TYPE_ALL is a special type to indicate that this APN entry can
+     * service all data connections.
+     * <p>
+     * Note: The goal is to deprecate this.  Due to the Carrier Table being used
+     * directly, this isn't feasible right now.
+     *
+     * @hide
+     */
+    public static final String TYPE_ALL_STRING = "*";
+
+    /**
+     * APN type for default data traffic
+     *
+     * @hide
+     */
+    public static final String TYPE_DEFAULT_STRING = "default";
+
+
+    /**
+     * APN type for MMS traffic
+     *
+     * @hide
+     */
+    public static final String TYPE_MMS_STRING = "mms";
+
+
+    /**
+     * APN type for SUPL assisted GPS
+     *
+     * @hide
+     */
+    public static final String TYPE_SUPL_STRING = "supl";
+
+    /**
+     * APN type for DUN traffic
+     *
+     * @hide
+     */
+    public static final String TYPE_DUN_STRING = "dun";
+
+    /**
+     * APN type for HiPri traffic
+     *
+     * @hide
+     */
+    public static final String TYPE_HIPRI_STRING = "hipri";
+
+    /**
+     * APN type for FOTA
+     *
+     * @hide
+     */
+    public static final String TYPE_FOTA_STRING = "fota";
+
+    /**
+     * APN type for IMS
+     *
+     * @hide
+     */
+    public static final String TYPE_IMS_STRING = "ims";
+
+    /**
+     * APN type for CBS
+     *
+     * @hide
+     */
+    public static final String TYPE_CBS_STRING = "cbs";
+
+    /**
+     * APN type for IA Initial Attach APN
+     *
+     * @hide
+     */
+    public static final String TYPE_IA_STRING = "ia";
+
+    /**
+     * APN type for Emergency PDN. This is not an IA apn, but is used
+     * for access to carrier services in an emergency call situation.
+     *
+     * @hide
+     */
+    public static final String TYPE_EMERGENCY_STRING = "emergency";
+
+    /**
+     * APN type for Mission Critical Services
+     *
+     * @hide
+     */
+    public static final String TYPE_MCX_STRING = "mcx";
+
+    /**
+     * APN type for XCAP
+     *
+     * @hide
+     */
+    public static final String TYPE_XCAP_STRING = "xcap";
+
 
     /** @hide */
     @IntDef(prefix = { "AUTH_TYPE_" }, value = {
@@ -623,7 +736,7 @@ public class ApnSetting implements Parcelable {
      * @return SKIP_464XLAT_DEFAULT, SKIP_464XLAT_DISABLE or SKIP_464XLAT_ENABLE
      * @hide
      */
-    @Carriers.Skip464XlatStatus
+    @Skip464XlatStatus
     public int getSkip464Xlat() {
         return mSkip464Xlat;
     }
@@ -1056,6 +1169,11 @@ public class ApnSetting implements Parcelable {
     }
 
     /** @hide */
+    public boolean isEmergencyApn() {
+        return hasApnType(TYPE_EMERGENCY);
+    }
+
+    /** @hide */
     public boolean canHandleType(@ApnType int type) {
         if (!mCarrierEnabled) {
             return false;
@@ -1284,10 +1402,12 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
+     * Converts the integer value of an APN type to the string version.
      * @param apnTypeBitmask bitmask of APN types.
      * @return comma delimited list of APN types.
      * @hide
      */
+    @NonNull
     public static String getApnTypesStringFromBitmask(int apnTypeBitmask) {
         List<String> types = new ArrayList<>();
         for (Integer type : APN_TYPE_INT_MAP.keySet()) {
@@ -1935,7 +2055,7 @@ public class ApnSetting implements Parcelable {
          * @param skip464xlat skip464xlat for this APN
          * @hide
          */
-        public Builder setSkip464Xlat(@Carriers.Skip464XlatStatus int skip464xlat) {
+        public Builder setSkip464Xlat(@Skip464XlatStatus int skip464xlat) {
             this.mSkip464Xlat = skip464xlat;
             return this;
         }

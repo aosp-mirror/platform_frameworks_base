@@ -16,7 +16,9 @@
 
 package android.telecom;
 
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
@@ -290,6 +292,7 @@ public abstract class CallScreeningService extends Service {
              */
             @SystemApi
             @TestApi
+            @RequiresPermission(Manifest.permission.CAPTURE_AUDIO_OUTPUT)
             public @NonNull Builder setShouldScreenCallViaAudioProcessing(
                     boolean shouldScreenCallViaAudioProcessing) {
                 mShouldScreenCallViaAudioProcessing = shouldScreenCallViaAudioProcessing;

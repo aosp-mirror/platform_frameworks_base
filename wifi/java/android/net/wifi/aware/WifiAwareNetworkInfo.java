@@ -120,10 +120,12 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
             new Creator<WifiAwareNetworkInfo>() {
                 @Override
                 public WifiAwareNetworkInfo createFromParcel(Parcel in) {
+                    byte[] addr = in.createByteArray();
+                    String interfaceName = in.readString();
+                    int port = in.readInt();
+                    int transportProtocol = in.readInt();
                     Inet6Address ipv6Addr;
                     try {
-                        byte[] addr = in.createByteArray();
-                        String interfaceName = in.readString();
                         NetworkInterface ni = null;
                         if (interfaceName != null) {
                             try {
@@ -137,9 +139,6 @@ public final class WifiAwareNetworkInfo implements TransportInfo, Parcelable {
                         e.printStackTrace();
                         return null;
                     }
-                    int port = in.readInt();
-                    int transportProtocol = in.readInt();
-
                     return new WifiAwareNetworkInfo(ipv6Addr, port, transportProtocol);
                 }
 

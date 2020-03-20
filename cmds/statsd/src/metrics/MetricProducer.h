@@ -73,7 +73,7 @@ enum DumpLatency {
 // writing the report to dropbox. MetricProducers should respond to package changes as required in
 // PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
 // be a no-op.
-class MetricProducer : public virtual PackageInfoListener {
+class MetricProducer : public virtual android::RefBase {
 public:
     MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
                    const int conditionIndex, const sp<ConditionWizard>& wizard)
@@ -105,8 +105,8 @@ public:
      * the flush again when the end timestamp is forced to be now, and then after flushing, update
      * the start timestamp to be now.
      */
-    void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
-                          const int64_t version) override {
+    virtual void notifyAppUpgrade(const int64_t& eventTimeNs, const string& apk, const int uid,
+                          const int64_t version) {
         std::lock_guard<std::mutex> lock(mMutex);
 
         if (eventTimeNs > getCurrentBucketEndTimeNs()) {
@@ -119,14 +119,9 @@ public:
         // is a partial bucket and can merge it with the previous bucket.
     };
 
-    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) override{
+    void notifyAppRemoved(const int64_t& eventTimeNs, const string& apk, const int uid) {
         // Force buckets to split on removal also.
         notifyAppUpgrade(eventTimeNs, apk, uid, 0);
-    };
-
-    void onUidMapReceived(const int64_t& eventTimeNs) override{
-            // Purposefully don't flush partial buckets on a new snapshot.
-            // This occurs if a new user is added/removed or statsd crashes.
     };
 
     // Consume the parsed stats log entry that already matched the "what" of the metric.

@@ -27,7 +27,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -75,6 +75,7 @@ import com.android.internal.os.RoSystemProperties;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -2904,7 +2905,7 @@ public class ActivityManager {
         public static final int IMPORTANCE_CANT_SAVE_STATE_PRE_26 = 170;
 
         /**
-         * Constant for {@link #importance}: This process is contains services
+         * Constant for {@link #importance}: This process contains services
          * that should remain running.  These are background services apps have
          * started, not something the user is aware of, so they may be killed by
          * the system relatively freely (though it is generally desired that they
@@ -3870,6 +3871,30 @@ public class ActivityManager {
     }
 
     /**
+     * Updates mcc mnc configuration and applies changes to the entire system.
+     *
+     * @param mcc mcc configuration to update.
+     * @param mnc mnc configuration to update.
+     * @throws RemoteException; IllegalArgumentException if mcc or mnc is null;
+     * @return Returns {@code true} if the configuration was updated successfully;
+     *         {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION)
+    public boolean updateMccMncConfiguration(@NonNull String mcc, @NonNull String mnc) {
+        if (mcc == null || mnc == null) {
+            throw new IllegalArgumentException("mcc or mnc cannot be null.");
+        }
+        try {
+            return getService().updateMccMncConfiguration(mcc, mnc);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Logs out current current foreground user by switching to the system user and stopping the
      * user being switched from.
      * @hide
@@ -4328,6 +4353,37 @@ public class ActivityManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
+    }
+
+    /**
+     * Register with {@link HomeVisibilityObserver} with ActivityManager.
+     * @hide
+     */
+    @SystemApi
+    public void registerHomeVisibilityObserver(@NonNull HomeVisibilityObserver observer) {
+        Preconditions.checkNotNull(observer);
+        try {
+            observer.init(mContext, this);
+            getService().registerProcessObserver(observer.mObserver);
+            // Notify upon first registration.
+            observer.onHomeVisibilityChanged(observer.mIsHomeActivityVisible);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister with {@link HomeVisibilityObserver} with ActivityManager.
+     * @hide
+     */
+    @SystemApi
+    public void unregisterHomeVisibilityObserver(@NonNull HomeVisibilityObserver observer) {
+        Preconditions.checkNotNull(observer);
+        try {
+            getService().unregisterProcessObserver(observer.mObserver);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

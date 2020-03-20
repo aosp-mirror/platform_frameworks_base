@@ -16,18 +16,17 @@
 
 package com.android.server.connectivity.tethering;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.INetd;
-import android.net.INetworkPolicyManager;
-import android.net.INetworkStatsService;
 import android.net.NetworkRequest;
 import android.net.ip.IpServer;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.Looper;
-import android.os.ServiceManager;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.util.StateMachine;
 
@@ -39,7 +38,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
-public class TetheringDependencies {
+public abstract class TetheringDependencies {
     /**
      * Get a reference to the offload hardware interface to be used by tethering.
      */
@@ -66,9 +65,7 @@ public class TetheringDependencies {
     /**
      * Get dependencies to be used by IpServer.
      */
-    public IpServer.Dependencies getIpServerDependencies() {
-        return new IpServer.Dependencies();
-    }
+    public abstract IpServer.Dependencies getIpServerDependencies();
 
     /**
      * Indicates whether tethering is supported on the device.
@@ -80,9 +77,7 @@ public class TetheringDependencies {
     /**
      * Get the NetworkRequest that should be fulfilled by the default network.
      */
-    public NetworkRequest getDefaultNetworkRequest() {
-        return null;
-    }
+    public abstract NetworkRequest getDefaultNetworkRequest();
 
     /**
      * Get a reference to the EntitlementManager to be used by tethering.
@@ -101,33 +96,6 @@ public class TetheringDependencies {
     }
 
     /**
-     * Get a reference to INetworkManagementService to registerTetheringStatsProvider from
-     * OffloadController. Note: This should be removed soon by Usage refactor work in R
-     * development cycle.
-     */
-    public INetworkManagementService getINetworkManagementService() {
-        return INetworkManagementService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
-    }
-
-    /**
-     *  Get a reference to INetworkStatsService to force update tethering usage.
-     *  Note: This should be removed in R development cycle.
-     */
-    public INetworkStatsService getINetworkStatsService() {
-        return INetworkStatsService.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
-    }
-
-    /**
-     * Get a reference to INetworkPolicyManager to be used by tethering.
-     */
-    public INetworkPolicyManager getINetworkPolicyManager() {
-        return INetworkPolicyManager.Stub.asInterface(
-                ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
-    }
-
-    /**
      * Get a reference to INetd to be used by tethering.
      */
     public INetd getINetd(Context context) {
@@ -136,16 +104,24 @@ public class TetheringDependencies {
     }
 
     /**
+     * Get a reference to the TetheringNotificationUpdater to be used by tethering.
+     */
+    public TetheringNotificationUpdater getNotificationUpdater(@NonNull final Context ctx) {
+        return new TetheringNotificationUpdater(ctx);
+    }
+
+    /**
      * Get tethering thread looper.
      */
-    public Looper getTetheringLooper() {
-        return null;
-    }
+    public abstract Looper getTetheringLooper();
 
     /**
      *  Get Context of TetheringSerice.
      */
-    public Context getContext() {
-        return null;
-    }
+    public abstract Context getContext();
+
+    /**
+     * Get a reference to BluetoothAdapter to be used by tethering.
+     */
+    public abstract BluetoothAdapter getBluetoothAdapter();
 }

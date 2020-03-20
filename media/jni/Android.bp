@@ -124,8 +124,3 @@ cc_library_shared {
         "-Wunreachable-code",
     ],
 }
-
-subdirs = [
-    "audioeffect",
-    "soundpool",
-]

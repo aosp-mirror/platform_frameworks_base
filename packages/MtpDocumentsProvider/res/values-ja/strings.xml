@@ -20,6 +20,6 @@
     <string name="downloads_app_label" msgid="7120690641874849726">"ダウンロード"</string>
     <string name="root_name" msgid="5819495383921089536">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> <xliff:g id="STORAGE_NAME">%2$s</xliff:g>"</string>
     <string name="accessing_notification_title" msgid="3030133609230917944">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> からファイルにアクセスしています"</string>
-    <string name="error_busy_device" msgid="3997316850357386589">"接続先の端末は使用中のため、利用できるようになるまでファイルを転送できません。"</string>
-    <string name="error_locked_device" msgid="7557872102188356147">"ファイルが見つかりません。接続先の端末がロックされている可能性があります。その場合は、ロックを解除してからもう一度お試しください。"</string>
+    <string name="error_busy_device" msgid="3997316850357386589">"接続先のデバイスは使用中のため、利用できるようになるまでファイルを転送できません。"</string>
+    <string name="error_locked_device" msgid="7557872102188356147">"ファイルが見つかりません。接続先のデバイスがロックされている可能性があります。その場合は、ロックを解除してからもう一度お試しください。"</string>
 </resources>

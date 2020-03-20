@@ -17,7 +17,7 @@
 
 package android.filterfw.core;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * @hide

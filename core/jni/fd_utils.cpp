@@ -33,24 +33,24 @@
 
 // Static whitelist of open paths that the zygote is allowed to keep open.
 static const char* kPathWhitelist[] = {
-  "/apex/com.android.conscrypt/javalib/conscrypt.jar",
-  "/apex/com.android.ipsec/javalib/ike.jar",
-  "/apex/com.android.media/javalib/updatable-media.jar",
-  "/apex/com.android.sdkext/javalib/framework-sdkext.jar",
-  "/apex/com.android.telephony/javalib/telephony-common.jar",
-  "/apex/com.android.telephony/javalib/ims-common.jar",
-  "/dev/null",
-  "/dev/socket/zygote",
-  "/dev/socket/zygote_secondary",
-  "/dev/socket/usap_pool_primary",
-  "/dev/socket/usap_pool_secondary",
-  "/dev/socket/webview_zygote",
-  "/dev/socket/heapprofd",
-  "/sys/kernel/debug/tracing/trace_marker",
-  "/system/framework/framework-res.apk",
-  "/dev/urandom",
-  "/dev/ion",
-  "/dev/dri/renderD129", // Fixes b/31172436
+        "/apex/com.android.conscrypt/javalib/conscrypt.jar",
+        "/apex/com.android.ipsec/javalib/ike.jar",
+        "/apex/com.android.media/javalib/updatable-media.jar",
+        "/apex/com.android.sdkext/javalib/framework-sdkextensions.jar",
+        "/apex/com.android.tethering/javalib/framework-tethering.jar",
+        "/dev/null",
+        "/dev/socket/zygote",
+        "/dev/socket/zygote_secondary",
+        "/dev/socket/usap_pool_primary",
+        "/dev/socket/usap_pool_secondary",
+        "/dev/socket/webview_zygote",
+        "/dev/socket/heapprofd",
+        "/sys/kernel/debug/tracing/trace_marker",
+        "/sys/kernel/tracing/trace_marker",
+        "/system/framework/framework-res.apk",
+        "/dev/urandom",
+        "/dev/ion",
+        "/dev/dri/renderD129", // Fixes b/31172436
 };
 
 static const char kFdPath[] = "/proc/self/fd";

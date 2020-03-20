@@ -20,7 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ShellCommand;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,10 +30,14 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A time signal from a manual (user provided) source. The value consists of the number of
- * milliseconds elapsed since 1/1/1970 00:00:00 UTC and the time according to the elapsed realtime
- * clock when that number was established. The elapsed realtime clock is considered accurate but
- * volatile, so time signals must not be persisted across device resets.
+ * A time zone suggestion from a manual (user provided) source.
+ *
+ * <p>{@code zoneId} contains the suggested time zone ID, e.g. "America/Los_Angeles".
+ *
+ * <p>{@code debugInfo} contains debugging metadata associated with the suggestion. This is used to
+ * record why the suggestion exists and how it was entered. This information exists only to aid in
+ * debugging and therefore is used by {@link #toString()}, but it is not for use in detection logic
+ * and is not considered in {@link #hashCode()} or {@link #equals(Object)}.
  *
  * @hide
  */
@@ -48,10 +54,8 @@ public final class ManualTimeZoneSuggestion implements Parcelable {
                 }
             };
 
-    @NonNull
-    private final String mZoneId;
-    @Nullable
-    private ArrayList<String> mDebugInfo;
+    @NonNull private final String mZoneId;
+    @Nullable private ArrayList<String> mDebugInfo;
 
     public ManualTimeZoneSuggestion(@NonNull String zoneId) {
         mZoneId = Objects.requireNonNull(zoneId);
@@ -120,9 +124,37 @@ public final class ManualTimeZoneSuggestion implements Parcelable {
 
     @Override
     public String toString() {
-        return "ManualTimeSuggestion{"
+        return "ManualTimeZoneSuggestion{"
                 + "mZoneId=" + mZoneId
                 + ", mDebugInfo=" + mDebugInfo
                 + '}';
+    }
+
+    /** @hide */
+    public static ManualTimeZoneSuggestion parseCommandLineArg(@NonNull ShellCommand cmd) {
+        String zoneId = null;
+        String opt;
+        while ((opt = cmd.getNextArg()) != null) {
+            switch (opt) {
+                case "--zone_id": {
+                    zoneId = cmd.getNextArgRequired();
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException("Unknown option: " + opt);
+                }
+            }
+        }
+        ManualTimeZoneSuggestion suggestion = new ManualTimeZoneSuggestion(zoneId);
+        suggestion.addDebugInfo("Command line injection");
+        return suggestion;
+    }
+
+    /** @hide */
+    public static void printCommandLineOpts(@NonNull PrintWriter pw) {
+        pw.println("Manual suggestion options:");
+        pw.println("  --zone_id <Olson ID>");
+        pw.println();
+        pw.println("See " + ManualTimeZoneSuggestion.class.getName() + " for more information");
     }
 }

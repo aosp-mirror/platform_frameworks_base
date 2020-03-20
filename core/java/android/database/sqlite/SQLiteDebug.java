@@ -17,13 +17,12 @@
 package android.database.sqlite;
 
 import android.annotation.TestApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Printer;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import java.util.ArrayList;
 

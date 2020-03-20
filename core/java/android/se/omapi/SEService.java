@@ -22,14 +22,11 @@
 
 package android.se.omapi;
 
-import android.app.ActivityThread;
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.IPackageManager;
-import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -101,6 +98,8 @@ public final class SEService {
 
     private static final String TAG = "OMAPI.SEService";
 
+    private static final String UICC_TERMINAL = "SIM";
+
     private final Object mLock = new Object();
 
     /** The client context (e.g. activity). */
@@ -141,10 +140,6 @@ public final class SEService {
 
         if (context == null || listener == null || executor == null) {
             throw new NullPointerException("Arguments must not be null");
-        }
-
-        if (!hasOMAPIReaders()) {
-            throw new UnsupportedOperationException("Device does not support any OMAPI reader");
         }
 
         mContext = context;
@@ -197,32 +192,33 @@ public final class SEService {
      * is of length 0.
      */
     public @NonNull Reader[] getReaders() {
-        if (mSecureElementService == null) {
-            throw new IllegalStateException("service not connected to system");
-        }
-        String[] readerNames;
-        try {
-            readerNames = mSecureElementService.getReaders();
-        } catch (RemoteException e) {
-            throw new RuntimeException(e);
-        }
+        loadReaders();
 
-        Reader[] readers = new Reader[readerNames.length];
-        int i = 0;
-        for (String readerName : readerNames) {
-            if (mReaders.get(readerName) == null) {
-                try {
-                    mReaders.put(readerName, new Reader(this, readerName,
-                            getReader(readerName)));
-                    readers[i++] = mReaders.get(readerName);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error adding Reader: " + readerName, e);
-                }
-            } else {
-                readers[i++] = mReaders.get(readerName);
-            }
-        }
-        return readers;
+        return mReaders.values().toArray(new Reader[0]);
+    }
+
+    /**
+      * Obtain a UICC Reader instance with specific slot number from the SecureElementService
+      *
+      * @param slotNumber The index of the uicc slot. The index starts from 1.
+      * @throws IllegalArgumentException if the reader object corresponding to the uiccSlotNumber
+      *         is not exist.
+      * @return A Reader object for this uicc slot.
+      */
+     public @NonNull Reader getUiccReader(int slotNumber) {
+         if (slotNumber < 1) {
+             throw new IllegalArgumentException("slotNumber should be larger than 0");
+         }
+         loadReaders();
+
+         String readerName = UICC_TERMINAL + slotNumber;
+         Reader reader = mReaders.get(readerName);
+
+         if (reader == null) {
+            throw new IllegalArgumentException("Reader:" + readerName + " doesn't exist");
+         }
+
+         return reader;
     }
 
     /**
@@ -279,21 +275,28 @@ public final class SEService {
     }
 
     /**
-     * Helper to check if this device support any OMAPI readers
+     * Load available Secure Element Readers
      */
-    private static boolean hasOMAPIReaders() {
-        IPackageManager pm = ActivityThread.getPackageManager();
-        if (pm == null) {
-            Log.e(TAG, "Cannot get package manager, assuming OMAPI readers supported");
-            return true;
+    private void loadReaders() {
+        if (mSecureElementService == null) {
+            throw new IllegalStateException("service not connected to system");
         }
+        String[] readerNames;
         try {
-            return pm.hasSystemFeature(PackageManager.FEATURE_SE_OMAPI_UICC, 0)
-                || pm.hasSystemFeature(PackageManager.FEATURE_SE_OMAPI_ESE, 0)
-                || pm.hasSystemFeature(PackageManager.FEATURE_SE_OMAPI_SD, 0);
+            readerNames = mSecureElementService.getReaders();
         } catch (RemoteException e) {
-            Log.e(TAG, "Package manager query failed, assuming OMAPI readers supported", e);
-            return true;
+            throw e.rethrowAsRuntimeException();
+        }
+
+        for (String readerName : readerNames) {
+            if (mReaders.get(readerName) == null) {
+                try {
+                    mReaders.put(readerName, new Reader(this, readerName,
+                            getReader(readerName)));
+                } catch (Exception e) {
+                    Log.e(TAG, "Error adding Reader: " + readerName, e);
+                }
+            }
         }
     }
 }

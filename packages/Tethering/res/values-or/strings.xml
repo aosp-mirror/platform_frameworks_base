@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"ଟିଥରିଙ୍ଗ କିମ୍ୱା ହଟସ୍ପଟ୍‌ ସକ୍ରିୟ ଅଛି"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"ସେଟଅପ୍‍ କରିବାକୁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"ଟିଥରିଙ୍ଗ ଅକ୍ଷମ କରାଯାଇଛି"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"ବିବରଣୀ ପାଇଁ ନିଜ ଆଡମିନ୍‌ଙ୍କ ସହ ଯୋଗାଯୋଗ କରନ୍ତୁ"</string>
-</resources>

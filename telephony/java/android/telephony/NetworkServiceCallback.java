@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.NetworkService.NetworkServiceProvider;
 
+import com.android.telephony.Rlog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 

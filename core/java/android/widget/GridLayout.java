@@ -31,7 +31,7 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 import android.annotation.IntDef;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
