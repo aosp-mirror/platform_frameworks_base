@@ -2465,5 +2465,11 @@ public class InputManagerService extends IInputManager.Stub
                 }
             }
         }
+
+        @Override
+        public boolean transferTouchFocus(@NonNull IBinder fromChannelToken,
+                @NonNull IBinder toChannelToken) {
+            return InputManagerService.this.transferTouchFocus(fromChannelToken, toChannelToken);
+        }
     }
 }

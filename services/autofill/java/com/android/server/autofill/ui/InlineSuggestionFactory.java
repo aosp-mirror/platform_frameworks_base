@@ -44,7 +44,7 @@ import com.android.internal.view.inline.IInlineContentProvider;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
 import com.android.server.autofill.RemoteInlineSuggestionRenderService;
-import com.android.server.wm.WindowManagerInternal;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -312,10 +312,9 @@ public final class InlineSuggestionFactory {
             @Override
             public void onTransferTouchFocusToImeWindow(IBinder sourceInputToken, int displayId)
                     throws RemoteException {
-                //TODO(b/149574510): Move logic to IMMS
-                final WindowManagerInternal windowManagerInternal = LocalServices.getService(
-                        WindowManagerInternal.class);
-                if (!windowManagerInternal.transferTouchFocusToImeWindow(sourceInputToken,
+                final InputMethodManagerInternal inputMethodManagerInternal =
+                        LocalServices.getService(InputMethodManagerInternal.class);
+                if (!inputMethodManagerInternal.transferTouchFocusToImeWindow(sourceInputToken,
                         displayId)) {
                     Slog.e(TAG, "Cannot transfer touch focus from suggestion to IME");
                     onErrorCallback.run();
