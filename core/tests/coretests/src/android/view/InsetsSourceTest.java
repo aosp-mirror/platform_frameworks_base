@@ -127,6 +127,48 @@ public class InsetsSourceTest {
     }
 
     @Test
+    public void testCalculateInsets_noIntersection_vertical() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        Insets insets = mSource.calculateInsets(new Rect(0, 100, 500, 500), false);
+        assertEquals(Insets.NONE, insets);
+    }
+
+    @Test
+    public void testCalculateInsets_zeroWidthIntersection_vertical_start() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        Insets insets = mSource.calculateInsets(new Rect(0, 0, 0, 500), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_zeroWidthIntersection_vertical_end() {
+        mSource.setFrame(new Rect(0, 0, 500, 100));
+        Insets insets = mSource.calculateInsets(new Rect(500, 0, 500, 500), false);
+        assertEquals(Insets.of(0, 100, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_noIntersection_horizontal() {
+        mSource.setFrame(new Rect(0, 0, 100, 500));
+        Insets insets = mSource.calculateInsets(new Rect(100, 0, 500, 500), false);
+        assertEquals(Insets.NONE, insets);
+    }
+
+    @Test
+    public void testCalculateInsets_zeroWidthIntersection_horizontal_start() {
+        mSource.setFrame(new Rect(0, 0, 100, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, 0, 500, 0), false);
+        assertEquals(Insets.of(100, 0, 0, 0), insets);
+    }
+
+    @Test
+    public void testCalculateInsets_zeroWidthIntersection_horizontal_end() {
+        mSource.setFrame(new Rect(0, 0, 100, 500));
+        Insets insets = mSource.calculateInsets(new Rect(0, 500, 500, 500), false);
+        assertEquals(Insets.of(100, 0, 0, 0), insets);
+    }
+
+    @Test
     public void testCalculateVisibleInsets_override() {
         mSource.setFrame(new Rect(0, 0, 500, 100));
         mSource.setVisibleFrame(new Rect(0, 0, 500, 200));
