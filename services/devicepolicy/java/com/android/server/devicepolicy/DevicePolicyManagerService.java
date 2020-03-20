@@ -11440,9 +11440,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean isSecondaryLockscreenEnabled(int userId) {
+    public boolean isSecondaryLockscreenEnabled(@NonNull UserHandle userHandle) {
         synchronized (getLockObject()) {
-            return getUserData(userId).mSecondaryLockscreenEnabled;
+            return getUserData(userHandle.getIdentifier()).mSecondaryLockscreenEnabled;
         }
     }
 

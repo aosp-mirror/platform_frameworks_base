@@ -23,5 +23,5 @@ import android.app.admin.IKeyguardCallback;
  * @hide
  */
 interface IKeyguardClient {
-    oneway void onSurfaceReady(in IBinder hostInputToken, in IKeyguardCallback keyguardCallback);
+    oneway void onCreateKeyguardSurface(in IBinder hostInputToken, in IKeyguardCallback keyguardCallback);
 }

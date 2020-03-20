@@ -38,6 +38,7 @@ import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -567,7 +568,10 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         ResolveInfo resolveInfo = new ResolveInfo();
         resolveInfo.serviceInfo = serviceInfo;
         when(mPackageManager.resolveService(any(Intent.class), eq(0))).thenReturn(resolveInfo);
-        when(mDevicePolicyManager.isSecondaryLockscreenEnabled(eq(user))).thenReturn(true, false);
+        when(mDevicePolicyManager.isSecondaryLockscreenEnabled(eq(UserHandle.of(user))))
+                .thenReturn(true, false);
+        when(mDevicePolicyManager.getProfileOwnerAsUser(user))
+                .thenReturn(new ComponentName(packageName, cls));
 
         // Initially null.
         assertThat(mKeyguardUpdateMonitor.getSecondaryLockscreenRequirement(user)).isNull();
