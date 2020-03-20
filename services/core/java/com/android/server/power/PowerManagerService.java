@@ -781,6 +781,11 @@ public final class PowerManagerService extends SystemService
                     batterySaverPolicy, batterySavingStats);
         }
 
+        BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context,
+                BatterySaverController batterySaverController) {
+            return new BatterySaverStateMachine(lock, context, batterySaverController);
+        }
+
         NativeWrapper createNativeWrapper() {
             return new NativeWrapper();
         }
@@ -865,8 +870,8 @@ public final class PowerManagerService extends SystemService
                 mInjector.createBatterySaverPolicy(mLock, mContext, mBatterySavingStats);
         mBatterySaverController = mInjector.createBatterySaverController(mLock, mContext,
                 mBatterySaverPolicy, mBatterySavingStats);
-        mBatterySaverStateMachine = new BatterySaverStateMachine(
-                mLock, mContext, mBatterySaverController);
+        mBatterySaverStateMachine = mInjector.createBatterySaverStateMachine(mLock, mContext,
+                mBatterySaverController);
 
         mInattentiveSleepWarningOverlayController =
                 mInjector.createInattentiveSleepWarningController();
