@@ -145,7 +145,7 @@
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Desaktibatuta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Deitu wifi bidez"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Deitu sare mugikorraren bidez"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wi-Fi sarea soilik"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wifi-sarea soilik"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ez da desbideratu"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> zenbakira <xliff:g id="TIME_DELAY">{2}</xliff:g> segundotan"</string>
@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikazioak edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Onartu aplikazio edo zerbitzu bati sistemako kamerak atzitzea argazkiak eta bideoak ateratzeko"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Pribilegioa duen sistema-aplikazio honek edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko. Halaber, android.permission.CAMERA baimena izan behar du aplikazioak."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Eman baimena aplikazioari edo zerbitzuari jakinarazpenak jasotzeko kamerak ireki edo ixten direnean."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dardara-egoera atzitzeko baimena ematen dio aplikazioari."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Deiak sistemaren bidez bideratzea baimentzen die aplikazioei, deien zerbitzua ahal bezain ona izan dadin."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ikusi eta kontrolatu deiak sistemaren bidez."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Gailuan abian diren deiak eta deion informazioa ikusi eta kontrolatzeko baimena ematen dio aplikazioari; besteak beste, deien zenbakiak eta deien egoera."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"salbuetsi audioa grabatzeko murriztapenen aurrean"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Salbuetsi aplikazioa audioa grabatzeko murriztapenen aurrean."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"Jarraitu beste aplikazio batean hasitako deia"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Beste aplikazio batean hasitako dei bat jarraitzea baimentzen dio aplikazioari."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"irakurri telefono-zenbakiak"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Ezabatu"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Idazketa-metodoa"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Testu-ekintzak"</string>
-    <string name="email" msgid="2503484245190492693">"Bidali mezu bat"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Bidali mezu elektroniko bat hautatutako helbidera"</string>
-    <string name="dial" msgid="4954567785798679706">"Deitu"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Deitu hautatutako telefono-zenbakira"</string>
-    <string name="map" msgid="6865483125449986339">"Mapa"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Bilatu hautatutako helbidea"</string>
-    <string name="browse" msgid="8692753594669717779">"Ireki"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Ireki hautatutako URLa"</string>
-    <string name="sms" msgid="3976991545867187342">"Bidali SMS bat"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Bidali testu-mezu bat hautatutako telefono-zenbakira"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Gehitu"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Gehitu kontaktuetan"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Ikusi"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Ikusi hautatutako ordua egutegian"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Antolatu"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Antolatu gertaera bat hautatutako ordurako"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Egin jarraipena"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Egin hautatutako hegaldiaren jarraipena"</string>
-    <string name="translate" msgid="1416909787202727524">"Itzuli"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Itzuli hautatutako testua"</string>
-    <string name="define" msgid="5214255850068764195">"Definitu"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Definitu hautatutako testua"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Memoria betetzen ari da"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Sistemaren funtzio batzuek ez dute agian funtzionatuko"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Sisteman ez dago behar adina memoria. Ziurtatu gutxienez 250 MB erabilgarri dituzula eta, ondoren, berrabiarazi gailua."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Sare mugikorra ezin da konektatu Internetera"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Sarea ezin da konektatu Internetera"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Ezin da atzitu DNS zerbitzari pribatua"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Konektatuta"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> sareak konektagarritasun murriztua du"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Sakatu hala ere konektatzeko"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> erabiltzen ari zara orain"</string>
@@ -1476,7 +1458,7 @@
     <string name="sync_do_nothing" msgid="4528734662446469646">"Ez egin ezer, oraingoz"</string>
     <string name="choose_account_label" msgid="5557833752759831548">"Aukeratu kontu bat"</string>
     <string name="add_account_label" msgid="4067610644298737417">"Gehitu kontu bat"</string>
-    <string name="add_account_button_label" msgid="322390749416414097">"Gehitu kontua"</string>
+    <string name="add_account_button_label" msgid="322390749416414097">"Gehitu kontu bat"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Handitu"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Txikitu"</string>
     <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"Eduki sakatuta <xliff:g id="VALUE">%s</xliff:g>."</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Bolumena gomendatutako mailatik gora igo nahi duzu?\n\nMusika bolumen handian eta denbora luzez entzuteak entzumena kalte diezazuke."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erabilerraztasun-lasterbidea erabili nahi duzu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Lasterbidea aktibatuta dagoenean, bi bolumen-botoiak hiru segundoz sakatuta abiaraziko da erabilerraztasun-eginbidea."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Gailua guztiz kontrolatzeko baimena eman nahi diozu <xliff:g id="SERVICE">%1$s</xliff:g> zerbitzuari?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> aktibatzen baduzu, gailuak ez du pantailaren blokeoa erabiliko datuen enkriptatzea hobetzeko."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Erabilerraztasun-beharrak asetzen dituzten aplikazioetan da egokia kontrol osoa, baina ez aplikazio gehienetan."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ikusi eta kontrolatu pantaila"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Pantailako eduki guztia irakur dezake, eta beste aplikazioen gainean edukia bistaratu."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ikusi eta gauzatu ekintzak"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Aplikazioekin edo hardware-sentsoreekin dituzun interakzioen jarraipena egin dezake, eta zure izenean beste aplikazio batzuekin interakzioan jardun."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Baimendu"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Ukatu"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Eginbide bat erabiltzen hasteko, saka ezazu:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Aukeratu Erabilerraztasuna botoiarekin erabili nahi dituzun aplikazioak"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Aukeratu bolumen-teklaren lasterbidearekin erabili nahi dituzun aplikazioak"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Desaktibatu da <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editatu lasterbideak"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Utzi"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Eginda"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desaktibatu lasterbidea"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Erabili lasterbidea"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Koloreen alderantzikatzea"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Erabilerraztasun-menua"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko azpitituluen barra."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Murriztuen edukiontzian ezarri da <xliff:g id="PACKAGE_NAME">%1$s</xliff:g>"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Elkarrizketa"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Taldeko elkarrizketa"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pertsonala"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Lanekoa"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Ikuspegi pertsonala"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Laneko ikuspegia"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Ezin da partekatu laneko aplikazioekin"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Ezin da partekatu aplikazio pertsonalekin"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"IKT saileko administratzaileak blokeatu egin du edukia profil pertsonalen eta laneko profilen artean partekatzeko aukera"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Ezin dira atzitu laneko aplikazioak"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"IKT saileko administratzaileak ez dizu uzten eduki pertsonala laneko aplikazioetan ikusten"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Ezin dira atzitu aplikazio pertsonalak"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"IKT saileko administratzaileak ez dizu uzten laneko edukia aplikazio pertsonaletan ikusten"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Edukia partekatzeko, aktibatu laneko profila"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Edukia ikusteko, aktibatu laneko profila"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Ez dago aplikaziorik erabilgarri"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Aktibatu"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Grabatu edo erreproduzitu telefono-deietako audioa"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Aplikazio hau markagailu lehenetsia denean, telefono-deietako audioa grabatu edo erreproduzitzeko aukera ematen dio."</string>
 </resources>

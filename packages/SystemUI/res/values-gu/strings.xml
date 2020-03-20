@@ -86,6 +86,10 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ફરીથી સ્ક્રીનશૉટ લેવાનો પ્રયાસ કરો"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"મર્યાદિત સ્ટોરેજ સ્પેસને કારણે સ્ક્રીનશૉટ સાચવી શકાતો નથી"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશૉટ લેવાની મંજૂરી નથી"</string>
+    <!-- no translation found for screenshot_dismiss_ui_description (934736855340147968) -->
+    <skip />
+    <!-- no translation found for screenshot_preview_description (669177537416980449) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"સ્ક્રીન રેકૉર્ડર"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"સ્ક્રીન રેકોર્ડિંગ સત્ર માટે ચાલુ નોટિફિકેશન"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"રેકૉર્ડિંગ શરૂ કરીએ?"</string>
@@ -558,8 +562,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"તમારી કાર્યાલયની પ્રોફાઇલ <xliff:g id="ORGANIZATION">%1$s</xliff:g> દ્વારા સંચાલિત થાય છે. આ પ્રોફાઇલ <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> સાથે કનેક્ટ કરેલ છે, જે ઇમેઇલ, ઍપ્લિકેશનો અને વેબસાઇટો સહિતની તમારી નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે.\n\nતમે <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> સાથે પણ કનેક્ટ કરેલું છે, જે તમારી વ્યક્તિગત નેટવર્ક પ્રવૃત્તિનું નિયમન કરી શકે છે."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent દ્વારા અનલૉક રાખેલું"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"તમે ઉપકરણને મેન્યુઅલી અનલૉક કરશો નહીં ત્યાં સુધી તે લૉક રહેશે"</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked_plugged_in (2323452175329362855) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"વધુ ઝડપથી સૂચનાઓ મેળવો"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"તમે અનલૉક કરો તે પહેલાં તેમને જુઓ"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ના, આભાર"</string>
@@ -999,14 +1002,15 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"નિયંત્રણો"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ઝડપી ઍક્સેસ માટેનાં નિયંત્રણો પસંદ કરો"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"મનપસંદ"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"તમામ"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"બધા નિયંત્રણોની સૂચિ લોડ કરી શકાઈ નથી."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"અન્ય"</string>
-    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
-    <skip />
-    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
-    <skip />
-    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <string name="controls_dialog_title" msgid="8806193219278278442">"ઝડપી નિયંત્રણોમાં ઉમેરો"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"મનપસંદમાં ઉમેરો"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> એ આ નિયંત્રણને તમારા મનપસંદમાં ઉમેરવાનું સૂચવ્યું છે."</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"પિનમાં અક્ષરો અથવા પ્રતીકોનો સમાવેશ થાય છે"</string>
+    <string name="controls_pin_verify" msgid="414043854030774349">"ડિવાઇસનો PIN ચકાસો"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"પિન દાખલ કરો"</string>
+    <string name="controls_structure_tooltip" msgid="1392966215435667434">"અન્ય માળખા જોવા માટે સ્વાઇપ કરો"</string>
+    <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
     <skip />
 </resources>

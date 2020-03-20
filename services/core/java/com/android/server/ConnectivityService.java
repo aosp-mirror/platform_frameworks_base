@@ -110,6 +110,7 @@ import android.net.NetworkWatchlistManager;
 import android.net.PrivateDnsConfigParcel;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
+import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
 import android.net.TetheringManager;
 import android.net.UidRange;
@@ -120,6 +121,7 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
 import android.net.shared.PrivateDnsConfig;
+import android.net.util.LinkPropertiesUtils.CompareOrUpdateResult;
 import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
@@ -232,6 +234,7 @@ import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 /**
  * @hide
@@ -1710,7 +1713,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         if (checkSettingsPermission(callerPid, callerUid)) {
-            return lp.makeSensitiveFieldsParcelingCopy();
+            return new LinkProperties(lp, true /* parcelSensitiveFields */);
         }
 
         final LinkProperties newLp = new LinkProperties(lp);
@@ -2237,14 +2240,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                 final NetworkInfo ni = intent.getParcelableExtra(
                         ConnectivityManager.EXTRA_NETWORK_INFO);
-                if (ni.getType() == ConnectivityManager.TYPE_MOBILE_SUPL) {
-                    intent.setAction(ConnectivityManager.CONNECTIVITY_ACTION_SUPL);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-                } else {
-                    BroadcastOptions opts = BroadcastOptions.makeBasic();
-                    opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
-                    options = opts.toBundle();
-                }
+                final BroadcastOptions opts = BroadcastOptions.makeBasic();
+                opts.setMaxManifestReceiverApiLevel(Build.VERSION_CODES.M);
+                options = opts.toBundle();
                 final IBatteryStats bs = mDeps.getBatteryStatsService();
                 try {
                     bs.noteConnectivityChanged(intent.getIntExtra(
@@ -5402,6 +5400,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public NetworkRequest requestNetwork(NetworkCapabilities networkCapabilities,
             Messenger messenger, int timeoutMs, IBinder binder, int legacyType,
             @NonNull String callingPackageName) {
+        if (legacyType != TYPE_NONE && !checkNetworkStackPermission()) {
+            throw new SecurityException("Insufficient permissions to specify legacy type");
+        }
         final int callingUid = Binder.getCallingUid();
         final NetworkRequest.Type type = (networkCapabilities == null)
                 ? NetworkRequest.Type.TRACK_DEFAULT
@@ -5951,15 +5952,49 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
+    // TODO: move to frameworks/libs/net.
+    private RouteInfoParcel convertRouteInfo(RouteInfo route) {
+        final String nextHop;
+
+        switch (route.getType()) {
+            case RouteInfo.RTN_UNICAST:
+                if (route.hasGateway()) {
+                    nextHop = route.getGateway().getHostAddress();
+                } else {
+                    nextHop = INetd.NEXTHOP_NONE;
+                }
+                break;
+            case RouteInfo.RTN_UNREACHABLE:
+                nextHop = INetd.NEXTHOP_UNREACHABLE;
+                break;
+            case RouteInfo.RTN_THROW:
+                nextHop = INetd.NEXTHOP_THROW;
+                break;
+            default:
+                nextHop = INetd.NEXTHOP_NONE;
+                break;
+        }
+
+        final RouteInfoParcel rip = new RouteInfoParcel();
+        rip.ifName = route.getInterface();
+        rip.destination = route.getDestination().toString();
+        rip.nextHop = nextHop;
+        rip.mtu = route.getMtu();
+
+        return rip;
+    }
+
     /**
      * Have netd update routes from oldLp to newLp.
      * @return true if routes changed between oldLp and newLp
      */
     private boolean updateRoutes(LinkProperties newLp, LinkProperties oldLp, int netId) {
-        // Compare the route diff to determine which routes should be added and removed.
-        CompareResult<RouteInfo> routeDiff = new CompareResult<>(
+        Function<RouteInfo, IpPrefix> getDestination = (r) -> r.getDestination();
+        // compare the route diff to determine which routes have been updated
+        CompareOrUpdateResult<IpPrefix, RouteInfo> routeDiff = new CompareOrUpdateResult<>(
                 oldLp != null ? oldLp.getAllRoutes() : null,
-                newLp != null ? newLp.getAllRoutes() : null);
+                newLp != null ? newLp.getAllRoutes() : null,
+                getDestination);
 
         // add routes before removing old in case it helps with continuous connectivity
 
@@ -5968,10 +6003,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (route.hasGateway()) continue;
             if (VDBG || DDBG) log("Adding Route [" + route + "] to network " + netId);
             try {
-                mNMS.addRoute(netId, route);
+                mNetd.networkAddRouteParcel(netId, convertRouteInfo(route));
             } catch (Exception e) {
                 if ((route.getDestination().getAddress() instanceof Inet4Address) || VDBG) {
-                    loge("Exception in addRoute for non-gateway: " + e);
+                    loge("Exception in networkAddRouteParcel for non-gateway: " + e);
                 }
             }
         }
@@ -5979,10 +6014,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (!route.hasGateway()) continue;
             if (VDBG || DDBG) log("Adding Route [" + route + "] to network " + netId);
             try {
-                mNMS.addRoute(netId, route);
+                mNetd.networkAddRouteParcel(netId, convertRouteInfo(route));
             } catch (Exception e) {
                 if ((route.getGateway() instanceof Inet4Address) || VDBG) {
-                    loge("Exception in addRoute for gateway: " + e);
+                    loge("Exception in networkAddRouteParcel for gateway: " + e);
                 }
             }
         }
@@ -5990,12 +6025,22 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (RouteInfo route : routeDiff.removed) {
             if (VDBG || DDBG) log("Removing Route [" + route + "] from network " + netId);
             try {
-                mNMS.removeRoute(netId, route);
+                mNetd.networkRemoveRouteParcel(netId, convertRouteInfo(route));
             } catch (Exception e) {
-                loge("Exception in removeRoute: " + e);
+                loge("Exception in networkRemoveRouteParcel: " + e);
             }
         }
-        return !routeDiff.added.isEmpty() || !routeDiff.removed.isEmpty();
+
+        for (RouteInfo route : routeDiff.updated) {
+            if (VDBG || DDBG) log("Updating Route [" + route + "] from network " + netId);
+            try {
+                mNetd.networkUpdateRouteParcel(netId, convertRouteInfo(route));
+            } catch (Exception e) {
+                loge("Exception in networkUpdateRouteParcel: " + e);
+            }
+        }
+        return !routeDiff.added.isEmpty() || !routeDiff.removed.isEmpty()
+                || !routeDiff.updated.isEmpty();
     }
 
     private void updateDnses(LinkProperties newLp, LinkProperties oldLp, int netId) {

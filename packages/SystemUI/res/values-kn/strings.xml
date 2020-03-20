@@ -86,6 +86,10 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪುನಃ ತೆಗೆದುಕೊಳ್ಳಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="screenshot_failed_to_save_text" msgid="8344173457344027501">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <!-- no translation found for screenshot_dismiss_ui_description (934736855340147968) -->
+    <skip />
+    <!-- no translation found for screenshot_preview_description (669177537416980449) -->
+    <skip />
     <string name="screenrecord_name" msgid="2596401223859996572">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡರ್"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಅಧಿಸೂಚನೆ"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಬೇಕೆ?"</string>
@@ -558,8 +562,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಅನ್ನು <xliff:g id="ORGANIZATION">%1$s</xliff:g> ನಿರ್ವಹಿಸುತ್ತಿದೆ. <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> ಗೆ ಪ್ರೊಫೈಲ್ ಸಂಪರ್ಕಗೊಂಡಿರುವ ಕಾರಣ, ಅದು ನಿಮ್ಮ ಇಮೇಲ್‌ಗಳು, ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ವೆಬ್‌ಸೈಟ್‌ಗಳೂ ಸೇರಿದಂತೆ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು.\n\nನೀವು <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> ಗೆ ಕೂಡಾ ಸಂಪರ್ಕಗೊಂಡಿದ್ದೀರಿ, ಇದು ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ನೆಟ್‌ವರ್ಕ್ ಚಟುವಟಿಕೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಬಹುದು."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent ನಿಂದ ಅನ್‌ಲಾಕ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"ನೀವಾಗಿಯೇ ಅನ್‌ಲಾಕ್‌ ಮಾಡುವವರೆಗೆ ಸಾಧನವು ಲಾಕ್‌ ಆಗಿಯೇ ಇರುತ್ತದೆ"</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked_plugged_in (2323452175329362855) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"ವೇಗವಾಗಿ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆದುಕೊಳ್ಳಿ"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"ನೀವು ಅನ್‌ಲಾಕ್‌ ಮಾಡುವ ಮೊದಲೇ ಅವುಗಳನ್ನು ನೋಡಿ"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"ಧನ್ಯವಾದಗಳು"</string>
@@ -999,14 +1002,15 @@
     </plurals>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"ತ್ವರಿತ ಪ್ರವೇಶಕ್ಕಾಗಿ ನಿಯಂತ್ರಣಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="controls_favorite_header_favorites" msgid="3118600046217493471">"ಮೆಚ್ಚಿನವುಗಳು"</string>
-    <string name="controls_favorite_header_all" msgid="7507855973418969992">"ಎಲ್ಲಾ"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಆಗಲಿಲ್ಲ."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ಇತರ"</string>
-    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
-    <skip />
-    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
-    <skip />
-    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
+    <string name="controls_dialog_title" msgid="8806193219278278442">"ತ್ವರಿತ ನಿಯಂತ್ರಣಗಳಿಗೆ ಸೇರಿಸಿ"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಿ"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"ಈ ನಿಯಂತ್ರಣವನ್ನು ನಿಮ್ಮ ಮೆಚ್ಚಿನವುಗಳಿಗೆ ಸೇರಿಸಲು <xliff:g id="APP">%s</xliff:g> ಸೂಚಿಸಿದೆ."</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"ಪಿನ್ ಅಕ್ಷರಗಳು ಅಥವಾ ಸಂಕೇತಗಳನ್ನು ಒಳಗೊಂಡಿದೆ"</string>
+    <string name="controls_pin_verify" msgid="414043854030774349">"ಸಾಧನದ ಪಿನ್‌ ದೃಢೀಕರಿಸಿ"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"ಪಿನ್ ನಮೂದಿಸಿ"</string>
+    <string name="controls_structure_tooltip" msgid="1392966215435667434">"ಇತರ ರಚನೆಗಳನ್ನು ನೋಡಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
     <skip />
 </resources>

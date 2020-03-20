@@ -447,6 +447,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا في أي وقت."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"السماح لتطبيق أو خدمة بالوصول إلى كاميرات النظام لالتقاط صور وتسجيل فيديوهات"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"‏إذا حصل تطبيق النظام على هذا الإذن، سيمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام كاميرا النظام في أي وقت. ويجب أن يحصل التطبيق أيضًا على الإذن android.permission.CAMERA."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"يسمح الإذن لتطبيق أو خدمة بتلقّي استدعاءات عما إذا كانت أجهزة الكاميرات مفتوحة أو مغلقة."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"يسمح هذا الإذن للتطبيق بالوصول إلى حالة الهزّاز."</string>
@@ -460,6 +463,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"يسمح للتطبيق بتوجيه المكالمات من خلال النظام لتحسين تجربة الاتصال."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"رؤية المكالمات والتحكّم فيها من خلال النظام"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"يستطيع التطبيق رؤية المكالمات الجارية على الجهاز والتحكّم فيها. ويشمل ذلك معلومات مثل الأرقام وحالة المكالمات."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"الإعفاء من القيود على تسجيل الصوت"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"إعفاء التطبيق من القيود على تسجيل الصوت"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"مواصلة مكالمة من تطبيق آخر"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"السماح للتطبيق بمواصلة مكالمة بدأت في تطبيق آخر."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"قراءة أرقام الهواتف"</string>
@@ -1179,28 +1184,6 @@
     <string name="deleteText" msgid="4200807474529938112">"حذف"</string>
     <string name="inputMethod" msgid="1784759500516314751">"طريقة الإرسال"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"إجراءات النص"</string>
-    <string name="email" msgid="2503484245190492693">"إرسال بريد إلكتروني"</string>
-    <string name="email_desc" msgid="8291893932252173537">"مراسلة العنوان المختار عبر البريد الإلكتروني"</string>
-    <string name="dial" msgid="4954567785798679706">"اتصال"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"الاتصال برقم الهاتف المختار"</string>
-    <string name="map" msgid="6865483125449986339">"فتح تطبيق خرائط"</string>
-    <string name="map_desc" msgid="1068169741300922557">"تحديد موقع العنوان المختار"</string>
-    <string name="browse" msgid="8692753594669717779">"فتح"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"‏فتح عنوان URL المختار"</string>
-    <string name="sms" msgid="3976991545867187342">"إرسال رسائل قصيرة"</string>
-    <string name="sms_desc" msgid="997349906607675955">"مراسلة رقم الهاتف المختار"</string>
-    <string name="add_contact" msgid="7404694650594333573">"إضافة"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"إضافة إلى جهات الاتصال"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"عرض"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"عرض الوقت المختار في التقويم"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"تحديد موعد حدث"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"جدولة الحدث في الوقت المختار"</string>
-    <string name="view_flight" msgid="2042802613849690108">"تتبّع"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"تتبُّع الرحلة الجوية المختارة"</string>
-    <string name="translate" msgid="1416909787202727524">"ترجمة"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"ترجمة النص المُختار"</string>
-    <string name="define" msgid="5214255850068764195">"تعريف"</string>
-    <string name="define_desc" msgid="6916651934713282645">"تحديد النص المُختار"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"قد لا تعمل بعض وظائف النظام"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
@@ -1339,7 +1322,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"شبكة الجوّال هذه غير متصلة بالإنترنت"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"الشبكة غير متصلة بالإنترنت"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"لا يمكن الوصول إلى خادم أسماء نظام نطاقات خاص"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"تمّ الاتصال."</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"إمكانية اتصال <xliff:g id="NETWORK_SSID">%1$s</xliff:g> محدودة."</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"يمكنك النقر للاتصال على أي حال."</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"تم التبديل إلى <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1401,7 +1383,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"جارٍ شحن الجهاز المتصل. انقر لعرض خيارات أكثر."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"تم اكتشاف ملحق صوتي تناظري"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"الجهاز الذي تم توصيله بالهاتف غير متوافق معه. انقر للحصول على المزيد من المعلومات."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"‏تم توصيل تصحيح أخطاء الجهاز عبر USB"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"‏تم توصيل أداة تصحيح أخطاء الجهاز عبر USB"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"‏انقر لإيقاف تصحيح أخطاء الجهاز عبر USB."</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‏اختيار إيقاف تصحيح أخطاء USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"‏تم تفعيل ميزة \"تصحيح الأخطاء عبر شبكة Wi-Fi\""</string>
@@ -1719,14 +1701,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"عند تفعيل الاختصار، يؤدي الضغط على زرّي التحكّم في مستوى الصوت معًا لمدة 3 ثوانٍ إلى تفعيل إحدى ميزات إمكانية الوصول."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"هل تريد السماح لخدمة <xliff:g id="SERVICE">%1$s</xliff:g> بالتحكّم الكامل في جهازك؟"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"في حال تفعيل <xliff:g id="SERVICE">%1$s</xliff:g>، لن يستخدم جهازك ميزة قفل الشاشة لتحسين ترميز البيانات."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"إنّ التحكّم الكامل ليس ملائمًا لمعظم التطبيقات، باستثناء التطبيقات المعنية بسهولة الاستخدام."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"قراءة محتوى الشاشة والتحكم به"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"يمكنها قراءة كل المحتوى على الشاشة وعرض المحتوى عبر تطبيقات أخرى."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"عرض الإجراءات وتنفيذها"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"يمكنها تتبّع تعاملاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"سماح"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رفض"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"اختيار التطبيقات التي يتم استخدامها مع زر أدوات تمكين الوصول"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"اختيار التطبيقات التي يتم استخدامها مع اختصار مفتاح مستوى الصوت"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"تم إيقاف <xliff:g id="SERVICE_NAME">%s</xliff:g>."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"تعديل الاختصارات"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"إلغاء"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"تم"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"إيقاف الاختصار"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"استخدام الاختصار"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"عكس الألوان"</string>
@@ -2167,31 +2156,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"قائمة \"سهولة الاستخدام\""</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"شريط الشرح لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"تم وضع <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> في الحزمة \"محظورة\"."</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"محادثة"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"محادثة جماعية"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"شخصي"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"عمل"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"عرض المحتوى الشخصي"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"عرض محتوى العمل"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"تتعذّر المشاركة مع تطبيقات العمل"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"تتعذّر المشاركة مع التطبيقات الشخصية"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"حظر مشرف تكنولوجيا المعلومات إمكانية المشاركة بين التطبيقات الشخصية وتطبيقات العمل."</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"لا يمكن الوصول إلى تطبيقات العمل"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"لا يسمح لك مشرف تكنولوجيا المعلومات بالاطّلاع على المحتوى الشخصي في تطبيقات العمل."</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"لا يمكن الوصول إلى التطبيقات الشخصية"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"لا يسمح لك مشرف تكنولوجيا المعلومات بالاطّلاع على محتوى العمل في التطبيقات الشخصية."</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"عليك تفعيل الملف الشخصي للعمل لمشاركة المحتوى."</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"عليك تفعيل الملف الشخصي للعمل لعرض المحتوى."</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"ليس هناك تطبيقات متاحة"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"تفعيل"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"تسجيل الصوت أو تشغيله في المكالمات الهاتفية"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"يسمح الإذن لهذا التطبيق بتسجيل الصوت أو تشغيله في المكالمات الهاتفية عندما يتم تخصيصه كالتطبيق التلقائي لبرنامج الاتصال."</string>
 </resources>

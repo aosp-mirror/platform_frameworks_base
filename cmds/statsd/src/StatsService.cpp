@@ -53,6 +53,8 @@ namespace statsd {
 
 constexpr const char* kPermissionDump = "android.permission.DUMP";
 
+constexpr const char* kPermissionRegisterPullAtom = "android.permission.REGISTER_STATS_PULL_ATOM";
+
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
 
 // for StatsDataDumpProto
@@ -60,7 +62,7 @@ const int FIELD_ID_REPORTS_LIST = 1;
 
 static Status exception(int32_t code, const std::string& msg) {
     ALOGE("%s (%d)", msg.c_str(), code);
-    return ::ndk::ScopedAStatus(AStatus_fromExceptionCodeWithMessage(code, msg.c_str()));
+    return Status::fromExceptionCodeWithMessage(code, msg.c_str());
 }
 
 static bool checkPermission(const char* permission) {
@@ -1210,7 +1212,12 @@ Status StatsService::registerPullAtomCallback(int32_t uid, int32_t atomTag, int6
 Status StatsService::registerNativePullAtomCallback(int32_t atomTag, int64_t coolDownNs,
                                     int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
                                     const shared_ptr<IPullAtomCallback>& pullerCallback) {
-
+    if (!checkPermission(kPermissionRegisterPullAtom)) {
+        return exception(
+                EX_SECURITY,
+                StringPrintf("Uid %d does not have the %s permission when registering atom %d",
+                             AIBinder_getCallingUid(), kPermissionRegisterPullAtom, atomTag));
+    }
     VLOG("StatsService::registerNativePullAtomCallback called.");
     int32_t uid = AIBinder_getCallingUid();
     mPullerManager->RegisterPullAtomCallback(uid, atomTag, coolDownNs, timeoutNs, additiveFields,
@@ -1226,6 +1233,12 @@ Status StatsService::unregisterPullAtomCallback(int32_t uid, int32_t atomTag) {
 }
 
 Status StatsService::unregisterNativePullAtomCallback(int32_t atomTag) {
+    if (!checkPermission(kPermissionRegisterPullAtom)) {
+        return exception(
+                EX_SECURITY,
+                StringPrintf("Uid %d does not have the %s permission when unregistering atom %d",
+                             AIBinder_getCallingUid(), kPermissionRegisterPullAtom, atomTag));
+    }
     VLOG("StatsService::unregisterNativePullAtomCallback called.");
     int32_t uid = AIBinder_getCallingUid();
     mPullerManager->UnregisterPullAtomCallback(uid, atomTag);

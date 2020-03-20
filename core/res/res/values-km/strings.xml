@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​ថត​វីដេអូ​ ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ចូលប្រើកាមេរ៉ា​ប្រព័ន្ធ ដើម្បីថតរូប និង​ថតវីដេអូ"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"កម្មវិធីប្រព័ន្ធ​ដែលមានសិទ្ធិអនុញ្ញាត​នេះអាចថត​រូប និង​ថតវីដេអូ​ ដោយប្រើកាមេរ៉ា​ប្រព័ន្ធបាន​គ្រប់ពេល។ តម្រូវឱ្យមាន​ការអនុញ្ញាត android.permission.CAMERA ដើម្បីឱ្យ​កម្មវិធីអាចធ្វើ​សកម្មភាព​បានផងដែរ"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"អនុញ្ញាតឱ្យកម្មវិធី ឬសេវាកម្ម​ទទួលការហៅត្រឡប់វិញអំពី​កាមេរ៉ាដែលកំពុងបិទ ឬបើក។"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ពិនិត្យ​ការ​ញ័រ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"អនុញ្ញាតឱ្យ​កម្មវិធី​ចូលប្រើ​ស្ថានភាពកម្មវិធី​ញ័រ។"</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"អនុញ្ញាត​ឲ្យ​កម្មវិធី​នេះ​បញ្ជូន​ការ​ហៅ​ទូរសព្ទ​របស់វា​តាមរយៈ​ប្រព័ន្ធ ​ដើម្បី​ធ្វើ​ឲ្យ​ការ​ហៅ​ទូរសព្ទ​ប្រសើរ​ជាង​មុន។"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"មើល និង​គ្រប់គ្រង​ការហៅទូរសព្ទ​តាមរយៈប្រព័ន្ធ។"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"អនុញ្ញាត​ឱ្យកម្មវិធី​មើល និងគ្រប់គ្រង​ការហៅទូរសព្ទ​ដែល​កំពុង​ដំណើរការ​នៅលើ​ឧបករណ៍។ សកម្មភាព​នេះរួមមាន​ព័ត៌មាន​ដូចជា លេខទូរសព្ទ​សម្រាប់ការ​ហៅទូរសព្ទ និង​ស្ថានភាព​នៃការហៅទូរសព្ទជាដើម។"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"លើកលែងពី​ការដាក់កំហិត​ការថតសំឡេង"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"លើកលែង​កម្មវិធីពី​ការដាក់កំហិត​លើការថតសំឡេង។"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"បន្ត​ការ​ហៅ​ទូរសព្ទ​ពី​កម្មវិធី​ផ្សេង​"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"អនុញ្ញាត​ឱ្យ​កម្មវិធី​បន្ត​ការ​ហៅ​ទូរសព្ទ​ ដែល​បាន​ចាប់ផ្តើម​នៅក្នុង​កម្មវិធី​ផ្សេង​។"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"អាន​លេខ​ទូរសព្ទ"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"លុប"</string>
     <string name="inputMethod" msgid="1784759500516314751">"វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"សកម្មភាព​អត្ថបទ"</string>
-    <string name="email" msgid="2503484245190492693">"អ៊ីមែល"</string>
-    <string name="email_desc" msgid="8291893932252173537">"ផ្ញើ​អ៊ីមែល​ទៅ​អាសយដ្ឋាន​ដែល​បាន​ជ្រើសរើស"</string>
-    <string name="dial" msgid="4954567785798679706">"ហៅទូរសព្ទ"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"ហៅ​ទូរសព្ទ​ទៅ​លេខ​ដែល​បាន​ជ្រើសរើស"</string>
-    <string name="map" msgid="6865483125449986339">"ផែនទី"</string>
-    <string name="map_desc" msgid="1068169741300922557">"កំណត់​ទីតាំង​អាសយដ្ឋាន​ដែល​បាន​ជ្រើសរើស"</string>
-    <string name="browse" msgid="8692753594669717779">"បើក"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"បើក URL ដែល​បាន​ជ្រើសរើស"</string>
-    <string name="sms" msgid="3976991545867187342">"សារ"</string>
-    <string name="sms_desc" msgid="997349906607675955">"ផ្ញើសារ​ទៅ​លេខ​ទូរសព្ទ​ដែល​បាន​ជ្រើសរើស"</string>
-    <string name="add_contact" msgid="7404694650594333573">"បញ្ចូល"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"បញ្ចូល​ទៅ​ក្នុង​ទំនាក់ទំនង"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"មើល"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"មើល​ពេលវេលា​ដែល​បាន​ជ្រើសរើស​នៅក្នុង​ប្រតិទិន"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"កំណត់​កាលវិភាគ"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"កំណត់​កាលវិភាគ​ព្រឹត្តិការណ៍​សម្រាប់ពេល​វេលាដែល​បាន​ជ្រើសរើស"</string>
-    <string name="view_flight" msgid="2042802613849690108">"តាម​ដាន"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"តាមដាន​ជើង​ហោះហើរ​ដែល​បាន​ជ្រើសរើស"</string>
-    <string name="translate" msgid="1416909787202727524">"បកប្រែ"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"បកប្រែអត្ថបទដែលបានជ្រើសរើស"</string>
-    <string name="define" msgid="5214255850068764195">"កំណត់​អត្ថន័យ"</string>
-    <string name="define_desc" msgid="6916651934713282645">"កំណត់​អត្ថន័យ​ពាក្យដែល​បានជ្រើសរើស"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"អស់​ទំហំ​ផ្ទុក"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"មុខងារ​ប្រព័ន្ធ​មួយ​ចំនួន​អាច​មិន​ដំណើរការ​"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"មិន​មាន​ទំហំ​ផ្ទុក​​គ្រប់​គ្រាន់​សម្រាប់​ប្រព័ន្ធ​។ សូម​ប្រាកដ​ថា​អ្នក​មាន​ទំហំ​ទំនេរ​ 250MB ហើយ​ចាប់ផ្ដើម​ឡើង​វិញ។"</string>
@@ -1261,7 +1244,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"បណ្ដាញ​ទូរសព្ទ​ចល័ត​មិនមានការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"បណ្ដាញ​មិនមាន​ការតភ្ជាប់​អ៊ីនធឺណិតទេ"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"មិនអាច​ចូលប្រើ​ម៉ាស៊ីនមេ DNS ឯកជន​បានទេ"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"បានភ្ជាប់"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> មានការតភ្ជាប់​មានកម្រិត"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"មិន​អី​ទេ ចុច​​ភ្ជាប់​ចុះ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"បានប្តូរទៅ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1633,14 +1615,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"អនុញ្ញាតឱ្យ <xliff:g id="SERVICE">%1$s</xliff:g> មានសិទ្ធិគ្រប់គ្រងឧបករណ៍​របស់អ្នក​ទាំងស្រុងឬ?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"បើ​អ្នក​បើក <xliff:g id="SERVICE">%1$s</xliff:g> ឧបករណ៍របស់​អ្នកនឹង​មិន​ប្រើ​ការចាក់សោអេក្រង់របស់​អ្នក​ ដើម្បី​បង្កើន​ប្រសិទ្ធភាពការ​អ៊ីនគ្រីប​ទិន្នន័យ​ទេ។"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ការគ្រប់គ្រង​ទាំងស្រុងមានលក្ខណៈ​សមស្របសម្រាប់​កម្មវិធី ដែលជួយអ្នក​ទាក់ទងនឹងការប្រើមុខងារភាពងាយស្រួល ប៉ុន្តែមិនសមស្របសម្រាប់​កម្មវិធីភាគច្រើនទេ។"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ការគ្រប់គ្រងអេក្រង់​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"មើល និង​ធ្វើសកម្មភាព"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬឧបករណ៍ចាប់​សញ្ញាហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"បដិសេធ"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ចុចមុខងារណាមួយ ដើម្បចាប់ផ្ដើមប្រើ៖"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"ជ្រើសរើស​កម្មវិធី​ ដើម្បីប្រើ​ជាមួយប៊ូតុង​ភាពងាយស្រួល"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"ជ្រើសរើស​កម្មវិធី​ ដើម្បីប្រើ​ជាមួយផ្លូវកាត់គ្រាប់ចុច​កម្រិតសំឡេង"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"បានបិទ <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"កែ​ផ្លូវកាត់"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"បោះបង់"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"រួចរាល់"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"បញ្ច្រាស​ពណ៌"</string>
@@ -2033,31 +2022,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ម៉ឺនុយ​ភាពងាយស្រួល"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"របារពណ៌នា​អំពី <xliff:g id="APP_NAME">%1$s</xliff:g>។"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ត្រូវបានដាក់​ទៅក្នុងធុង​ដែលបានដាក់កំហិត"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>៖"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ការ​សន្ទនា"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ការសន្ទនា​ជាក្រុម"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ផ្ទាល់ខ្លួន"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ការងារ"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ទិដ្ឋភាពផ្ទាល់ខ្លួន"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ទិដ្ឋភាព​ការងារ"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"មិនអាច​ចែករំលែក​ជាមួយ​កម្មវិធី​ការងារ​បានទេ"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"មិនអាច​ចែករំលែក​ជាមួយ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​បានទប់ស្កាត់​ការចែករំលែក​រវាង​កម្រងព័ត៌មាន​ការងារ និង​ផ្ទាល់ខ្លួន"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"មិន​អាច​ចូល​ប្រើ​កម្មវិធី​ការងារបានទេ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិន​អនុញ្ញាតឱ្យអ្នកមើល​ខ្លឹមសារផ្ទាល់ខ្លួននៅក្នុងកម្មវិធីការងារទេ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"មិន​អាចចូលប្រើកម្មវិធី​ផ្ទាល់ខ្លួនបានទេ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិន​អនុញ្ញាតឱ្យអ្នកមើល​ខ្លឹមសារការងារនៅក្នុងកម្មវិធីផ្ទាល់ខ្លួនទេ"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"បើកកម្រងព័ត៌មាន​ការងារ ដើម្បីចែករំលែកខ្លឹមសារ"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"បើកកម្រងព័ត៌មាន​ការងារ ដើម្បីមើលខ្លឹមសារ"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"មិនមាន​កម្មវិធី​ដែល​អាចប្រើ​បានទេ"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"បើក"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ថត ឬចាក់សំឡេង​នៅក្នុង​ការហៅទូរសព្ទ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"នៅពេលកំណត់​ជាកម្មវិធីផ្ទាំងចុច​ហៅទូរសព្ទលំនាំដើម សូមអនុញ្ញាត​ឱ្យកម្មវិធីនេះថត ឬចាក់សំឡេង​នៅក្នុង​ការហៅទូរសព្ទ។"</string>
 </resources>

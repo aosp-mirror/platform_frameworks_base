@@ -3647,10 +3647,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void updateAppOpsLocked(Host host, boolean visible) {
-        // The launcher must be at TOP.
-        final int procState = mActivityManagerInternal.getUidProcessState(host.id.uid);
-        if (procState > ActivityManager.PROCESS_STATE_TOP) {
-            return;
+        if (visible) {
+            final int procState = mActivityManagerInternal.getUidProcessState(host.id.uid);
+            if (procState > ActivityManager.PROCESS_STATE_TOP) {
+                // The launcher must be at TOP.
+                return;
+            }
         }
 
         final List<ResolveInfo> allHomeCandidates = new ArrayList<>();

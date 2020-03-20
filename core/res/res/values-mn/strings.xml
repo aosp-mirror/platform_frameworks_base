@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Энэ апп ямар ч үед камер ашиглан зураг авж, видео хийх боломжтой."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Видео болон зураг авахын тулд апп эсвэл үйлчилгээнд хандахыг системийн камерт зөвшөөрөх"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Энэ хамгаалагдсан | системийн апп нь системийн камер ашиглан ямар ч үед зураг авж, видео бичих боломжтой. Аппыг ашиглахын тулд android.permission.CAMERA-н зөвшөөрөл мөн шаардлагатай"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Аппликэйшн эсвэл үйлчилгээнд камерын төхөөрөмжүүдийг нээж эсвэл хааж байгаа тухай залгасан дуудлага хүлээн авахыг зөвшөөрөх."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"чичиргээг удирдах"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Апп нь чичиргээг удирдах боломжтой."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Аппыг чичиргээний төлөвт хандахыг зөвшөөрдөг."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Дуудлагыг сайжруулахын тулд дуудлагаа системээр дамжуулах зөвшөөрлийг апп-д олгодог."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"систем дэх дуудлагыг харах болон хянах."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Аппад төхөөрөмж дээр хийж буй дуудлагыг харах болон хянахыг зөвшөөрдөг. Үүнд дуудлагын дугаар болон дуудлагын төлөв зэрэг мэдээллийг агуулдаг."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"аудио бичих хязгаарлалтаас гаргах"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Аудио бичихийн тулд аппыг хязгаарлалтаас гаргана уу."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"дуудлагыг өөр аппаас үргэлжлүүлэх"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Аппад өөр аппад эхлүүлсэн дуудлагыг үргэлжлүүлэхийг зөвшөөрдөг."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"утасны дугаарыг унших"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Устгах"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Оруулах арга"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Текст үйлдэл"</string>
-    <string name="email" msgid="2503484245190492693">"Имэйл бичих"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Сонгосон хаяг руу имэйл илгээх"</string>
-    <string name="dial" msgid="4954567785798679706">"Залгах"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Сонгосон утасны дугаар руу залгах"</string>
-    <string name="map" msgid="6865483125449986339">"Газрын зураг хийх"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Сонгосон хаягийг байршуулах"</string>
-    <string name="browse" msgid="8692753594669717779">"Нээх"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Сонгосон URL-г нээх"</string>
-    <string name="sms" msgid="3976991545867187342">"Зурвас бичих"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Сонгосон утасны дугаар руу мессеж илгээх"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Нэмэх"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Харилцагчид нэмэх"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Үзэх"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Календариас сонгосон огноог харах"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Хуваарь гаргах"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Aрга хэмжээг сонгосон цагт хуваарилах"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Хянах"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Сонгосон нислэгийг хянах"</string>
-    <string name="translate" msgid="1416909787202727524">"Орчуулах"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Сонгосон текстийг орчуулах"</string>
-    <string name="define" msgid="5214255850068764195">"Тодорхойлох"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Сонгосон текстийг тодорхойлох"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сангийн хэмжээ дутагдаж байна"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Зарим систем функц ажиллахгүй байна"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Системд хангалттай сан байхгүй байна. 250MБ чөлөөтэй зай байгаа эсэхийг шалгаад дахин эхлүүлнэ үү."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Мобайл сүлжээнд интернэт хандалт байхгүй байна"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Сүлжээнд интернэт хандалт байхгүй байна"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Хувийн DNS серверт хандах боломжгүй байна"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Холбогдсон"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> зарим үйлчилгээнд хандах боломжгүй байна"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Ямар ч тохиолдолд холбогдохын тулд товших"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> руу шилжүүлсэн"</string>
@@ -1631,11 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дууг санал болгосноос чанга болгож өсгөх үү?\n\nУрт хугацаанд чанга хөгжим сонсох нь таны сонсголыг муутгаж болно."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Хүртээмжийн товчлолыг ашиглах уу?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Товчлол асаалттай үед дууны түвшний хоёр товчлуурыг хамтад нь 3 секунд дарснаар хандалтын онцлогийг эхлүүлнэ."</string>
-    <string name="accessibility_select_shortcut_menu_title" msgid="7310194076629867377">"Ашиглахыг хүсэж буй хандалтын аппаа товших"</string>
-    <string name="accessibility_edit_shortcut_menu_button_title" msgid="6096484087245145325">"Хандалтын товчлуурын тусламжтай ашиглахыг хүсэж буй аппуудаа сонгох"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="4849108668454490699">"Дууны түвшин тохируулах түлхүүрийн товчлолын тусламжтай ашиглахыг хүсэж буй аппуудаа сонгох"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g>-д таны төхөөрөмжийг бүрэн хянахыг зөвшөөрөх үү?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Хэрэв та <xliff:g id="SERVICE">%1$s</xliff:g>-г асаавал таны төхөөрөмж өгөгдлийн шифрлэлтийг сайжруулахын тулд таны дэлгэцийн түгжээг ашиглахгүй."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Бүрэн хянах нь таны хандалтын үйлчилгээний шаардлагад тусалдаг аппуудад тохиромжтой боловч ихэнх аппад тохиромжгүй байдаг."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Харах болон хянах дэлгэц"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Энэ нь дэлгэц дээрх бүх контентыг унших болон контентыг бусад аппад харуулах боломжтой."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Үйлдлийг харах болон гүйцэтгэх"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Энэ нь таны апп болон техник хангамжийн мэдрэгчтэй хийх харилцан үйлдлийг хянах болон таны өмнөөс апптай харилцан үйлдэл хийх боломжтой."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Зөвшөөрөх"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Татгалзах"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Үүнийг ашиглаж эхлэхийн тулд онцлог дээр товшино уу:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Хандалтын товчлуурын тусламжтай ашиглах аппуудыг сонгоно уу"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Дууны түвшний түлхүүрийн товчлолын тусламжтай ашиглах аппуудыг сонгоно уу"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g>-г унтраалаа"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Товчлолуудыг засах"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Болих"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Болсон"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Товчлолыг унтраах"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Товчлол ашиглах"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Өнгө хувиргалт"</string>
@@ -2028,6 +2020,9 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Хандалтын цэс"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н гарчгийн талбар."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>-г ХЯЗГААРЛАСАН сагс руу орууллаа"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Харилцан яриа"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Бүлгийн харилцан яриа"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Хувийн"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Ажил"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Хувийн харагдах байдал"</string>

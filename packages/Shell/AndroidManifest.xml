@@ -272,11 +272,17 @@
     <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
 
+    <!-- Permission needed to use wifi usability API's for CtsNetTestCases -->
+    <uses-permission android:name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE" />
+
     <!-- Permission needed to test registering pull atom callbacks -->
     <uses-permission android:name="android.permission.REGISTER_STATS_PULL_ATOM" />
 
     <!-- Permission needed to modify settings overrideable by restore in CTS tests -->
     <uses-permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE" />
+
+    <!-- Permission required for testing system audio effect APIs. -->
+    <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

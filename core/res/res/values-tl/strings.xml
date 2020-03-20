@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Makakakuha ng mga larawan at makakapag-record ng mga video ang app na ito gamit ang camera anumang oras."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Bigyan ang isang application o serbisyo ng access sa mga camera ng system para kumuha ng mga larawan at video"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Ang privileged | system app na ito ay makakakuha ng mga larawan at makakapag-record ng mga video gamit ang isang camera ng system anumang oras. Nangangailangang may android.permission.CAMERA na pahintulot din ang app"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Payagan ang isang application o serbisyo na makatanggap ng mga callback tungkol sa pagbubukas o pagsasara ng mga camera device."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolin ang pag-vibrate"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pinapayagan ang app na kontrolin ang vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Pinapayagan ang app na ma-access ang naka-vibrate na status."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Pinapayagan ang app na iruta ang mga tawag nito sa pamamagitan ng system upang mapahusay ang karanasan sa pagtawag."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"tingnan at kontrolin ang mga tawag sa pamamagitan ng system."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Binibigyang-daan ang app na makita at makontrol ang mga kasalukuyang tawag sa device. Kabilang dito ang impormasyon gaya ng mga numero ng tawag para sa mga tawag at ang status ng mga tawag."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ibukod sa mga paghihigpit sa pag-record ng audio"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Huwag ilapat sa app ang mga paghihigpit sa pag-record ng audio."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ipagpatuloy ang isang tawag mula sa ibang app"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Pinapayagan ang app na ipagpatuloy ang isang tawag na sinimulan sa ibang app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"basahin ang mga numero ng telepono"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"I-delete"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Pamamaraan ng pag-input"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Pagkilos ng teksto"</string>
-    <string name="email" msgid="2503484245190492693">"Mag-email"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Mag-email sa mga piniling address"</string>
-    <string name="dial" msgid="4954567785798679706">"Tumawag"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Tawagan ang piniling numero ng telepono"</string>
-    <string name="map" msgid="6865483125449986339">"Mag-mapa"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Hanapin ang piniling address"</string>
-    <string name="browse" msgid="8692753594669717779">"Buksan"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Buksan ang piniling URL"</string>
-    <string name="sms" msgid="3976991545867187342">"Magmensahe"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Padalhan ng mensahe ang piniling numero ng telepono"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Magdagdag"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Idagdag sa mga contact"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Tingnan"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Tingnan ang piniling oras sa kalendaryo"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Mag-iskedyul"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Mag-iskedyul ng event para sa piniling oras"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Subaybayan"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"I-track ang piniling flight"</string>
-    <string name="translate" msgid="1416909787202727524">"I-translate"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"I-translate ang piniling text"</string>
-    <string name="define" msgid="5214255850068764195">"Ilarawan"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Ilarawan ang piniling text"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Nauubusan na ang puwang ng storage"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Maaaring hindi gumana nang tama ang ilang paggana ng system"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Walang sapat na storage para sa system. Tiyaking mayroon kang 250MB na libreng espasyo at i-restart."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Walang access sa internet ang mobile network"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Walang access sa internet ang network"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Hindi ma-access ang pribadong DNS server"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Nakakonekta"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"Limitado ang koneksyon ng <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"I-tap para kumonekta pa rin"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Lumipat sa <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lakasan ang volume nang lagpas sa inirerekomendang antas?\n\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gagamitin ang Shortcut sa Pagiging Accessible?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kapag naka-on ang shortcut, magsisimula ang isang feature ng pagiging naa-access kapag pinindot ang parehong button ng volume."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Bigyan ang <xliff:g id="SERVICE">%1$s</xliff:g> ng ganap na kontrol sa iyong device?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Kung io-on mo ang <xliff:g id="SERVICE">%1$s</xliff:g>, hindi gagamitin ng iyong device ang lock ng screen mo para pahusayin ang pag-encrypt ng data."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Naaangkop ang ganap na kontrol sa mga app na tumutulong sa mga pangangailangan mo sa accessibility, pero hindi sa karamihan ng mga app."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Tingnan at kontrolin ang screen"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Mababasa nito ang lahat ng content na nasa screen at makakapagpakita ito ng content sa iba pang app."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Tumingin at magsagawa ng mga pagkilos"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Masusubaybayan nito ang iyong mga pakikipag-ugayan sa isang app o hardware na sensor, at puwede itong makipag-ugnayan sa mga app para sa iyo."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Payagan"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tanggihan"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"I-tap ang isang feature para simulan itong gamitin:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Pumili ng mga app na paggagamian ng button ng accessibility"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Pumili ng mga app na paggagamitan ng shortcut ng volume key"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Na-off ang <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"I-edit ang mga shortcut"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Kanselahin"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Tapos na"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"I-off ang Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gamitin ang Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Pag-invert ng Kulay"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menu ng Accessibility"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Caption bar ng <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Inilagay ang <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> sa PINAGHIHIGPITANG bucket"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Pag-uusap"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Panggrupong Pag-uusap"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabaho"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personal na view"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"View ng trabaho"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Hindi puwedeng magbahagi sa mga app para sa trabaho"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Hindi puwedeng magbahagi sa mga personal na app"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Na-block ng iyong IT admin ang pagbabahagi sa pagitan ng mga personal na profile at profile sa trabaho"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Hindi ma-access ang mga app para sa trabaho"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Hindi ka pinapayagan ng iyong IT admin na tingnan ang personal na content sa mga app para sa trabaho"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Hindi ma-access ang mga personal na app"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Hindi ka pinapayagan ng iyong IT admin na tingnan ang content ng trabaho sa mga personal na app"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"I-on ang profile sa trabaho para makapagbahagi ng content"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"I-on ang profile sa trabaho para tumingin ng content"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Walang available na app"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"I-on"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Mag-record o mag-play ng audio sa mga tawag sa telephony"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Papayagan ang app na ito na mag-record o mag-play ng audio sa mga tawag sa telephony kapag naitalaga bilang default na dialer application."</string>
 </resources>
