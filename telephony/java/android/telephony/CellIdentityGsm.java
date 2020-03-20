@@ -22,11 +22,12 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
+import android.util.ArraySet;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * CellIdentity to represent a unique GSM cell
@@ -50,7 +51,7 @@ public final class CellIdentityGsm extends CellIdentity {
     private final int mBsic;
 
     // a list of additional PLMN-IDs reported for this cell
-    private final List<String> mAdditionalPlmns;
+    private final ArraySet<String> mAdditionalPlmns;
 
     /**
      * @hide
@@ -62,7 +63,7 @@ public final class CellIdentityGsm extends CellIdentity {
         mCid = CellInfo.UNAVAILABLE;
         mArfcn = CellInfo.UNAVAILABLE;
         mBsic = CellInfo.UNAVAILABLE;
-        mAdditionalPlmns = Collections.emptyList();
+        mAdditionalPlmns = new ArraySet<>();
     }
 
     /**
@@ -81,13 +82,13 @@ public final class CellIdentityGsm extends CellIdentity {
      */
     public CellIdentityGsm(int lac, int cid, int arfcn, int bsic, @Nullable String mccStr,
             @Nullable String mncStr, @Nullable String alphal, @Nullable String alphas,
-            @NonNull List<String> additionalPlmns) {
+            @NonNull Collection<String> additionalPlmns) {
         super(TAG, CellInfo.TYPE_GSM, mccStr, mncStr, alphal, alphas);
         mLac = inRangeOrUnavailable(lac, 0, MAX_LAC);
         mCid = inRangeOrUnavailable(cid, 0, MAX_CID);
         mArfcn = inRangeOrUnavailable(arfcn, 0, MAX_ARFCN);
         mBsic = inRangeOrUnavailable(bsic, 0, MAX_BSIC);
-        mAdditionalPlmns = new ArrayList<>(additionalPlmns.size());
+        mAdditionalPlmns = new ArraySet<>(additionalPlmns.size());
         for (String plmn : additionalPlmns) {
             if (isValidPlmn(plmn)) {
                 mAdditionalPlmns.add(plmn);
@@ -99,7 +100,7 @@ public final class CellIdentityGsm extends CellIdentity {
     public CellIdentityGsm(@NonNull android.hardware.radio.V1_0.CellIdentityGsm cid) {
         this(cid.lac, cid.cid, cid.arfcn,
                 cid.bsic == (byte) 0xFF ? CellInfo.UNAVAILABLE : cid.bsic,
-                cid.mcc, cid.mnc, "", "", Collections.emptyList());
+                cid.mcc, cid.mnc, "", "", new ArraySet<>());
     }
 
     /** @hide */
@@ -107,7 +108,7 @@ public final class CellIdentityGsm extends CellIdentity {
         this(cid.base.lac, cid.base.cid, cid.base.arfcn,
                 cid.base.bsic == (byte) 0xFF ? CellInfo.UNAVAILABLE : cid.base.bsic, cid.base.mcc,
                 cid.base.mnc, cid.operatorNames.alphaLong, cid.operatorNames.alphaShort,
-                Collections.emptyList());
+                new ArraySet<>());
     }
 
     /** @hide */
@@ -221,8 +222,8 @@ public final class CellIdentityGsm extends CellIdentity {
      * @return a list of additional PLMN IDs supported by this cell.
      */
     @NonNull
-    public List<String> getAdditionalPlmns() {
-        return mAdditionalPlmns;
+    public Set<String> getAdditionalPlmns() {
+        return Collections.unmodifiableSet(mAdditionalPlmns);
     }
 
     /**
@@ -296,7 +297,7 @@ public final class CellIdentityGsm extends CellIdentity {
         dest.writeInt(mCid);
         dest.writeInt(mArfcn);
         dest.writeInt(mBsic);
-        dest.writeList(mAdditionalPlmns);
+        dest.writeArraySet(mAdditionalPlmns);
     }
 
     /** Construct from Parcel, type has already been processed */
@@ -306,7 +307,7 @@ public final class CellIdentityGsm extends CellIdentity {
         mCid = in.readInt();
         mArfcn = in.readInt();
         mBsic = in.readInt();
-        mAdditionalPlmns = in.readArrayList(null);
+        mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
 
         if (DBG) log(toString());
     }
