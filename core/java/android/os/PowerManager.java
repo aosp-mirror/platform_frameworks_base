@@ -1984,20 +1984,20 @@ public final class PowerManager {
      * temperature sensor. This means that there is no benefit to calling this function more
      * frequently than about once per second, and attempts to call significantly more frequently may
      * result in the function returning {@code NaN}.
-     *
+     * <p>
      * In addition, in order to be able to provide an accurate forecast, the system does not attempt
      * to forecast until it has multiple temperature samples from which to extrapolate. This should
      * only take a few seconds from the time of the first call, but during this time, no forecasting
      * will occur, and the current headroom will be returned regardless of the value of
      * {@code forecastSeconds}.
-     *
+     * <p>
      * The value returned is a non-negative float that represents how much of the thermal envelope
      * is in use (or is forecasted to be in use). A value of 1.0 indicates that the device is (or
      * will be) throttled at {@link #THERMAL_STATUS_SEVERE}. Such throttling can affect the CPU,
      * GPU, and other subsystems. Values may exceed 1.0, but there is no implied mapping to specific
      * thermal status levels beyond that point. This means that values greater than 1.0 may
      * correspond to {@link #THERMAL_STATUS_SEVERE}, but may also represent heavier throttling.
-     *
+     * <p>
      * A value of 0.0 corresponds to a fixed distance from 1.0, but does not correspond to any
      * particular thermal status or temperature. Values on (0.0, 1.0] may be expected to scale
      * linearly with temperature, though temperature changes over time are typically not linear.
