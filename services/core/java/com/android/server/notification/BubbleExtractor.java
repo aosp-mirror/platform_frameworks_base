@@ -219,7 +219,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             String shortcutId = metadata.getShortcutId();
             boolean shortcutValid = shortcutId != null
                     && mShortcutHelper.hasValidShortcutInfo(shortcutId, pkg, r.getUser());
-            if (metadata.getBubbleIntent() == null && !shortcutValid) {
+            if (metadata.getIntent() == null && !shortcutValid) {
                 // Should have a shortcut if intent is null
                 logBubbleError(r.getKey(),
                         "couldn't find valid shortcut for bubble with shortcutId: " + shortcutId);
@@ -229,7 +229,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
                 return true;
             }
             // no log: canLaunch method has the failure log
-            return canLaunchInActivityView(mContext, metadata.getBubbleIntent(), pkg);
+            return canLaunchInActivityView(mContext, metadata.getIntent(), pkg);
         }
 
         /**
