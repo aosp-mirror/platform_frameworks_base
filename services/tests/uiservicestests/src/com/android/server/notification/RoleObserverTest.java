@@ -65,6 +65,7 @@ import com.android.server.lights.LightsManager;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
@@ -147,6 +148,7 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(SnoozeHelper.class), mock(NotificationUsageStats.class),
                     mock(AtomicFile.class), mock(ActivityManager.class),
                     mock(GroupHelper.class), mock(IActivityManager.class),
+                    mock(ActivityTaskManagerInternal.class),
                     mock(UsageStatsManagerInternal.class),
                     mock(DevicePolicyManagerInternal.class), mock(IUriGrantsManager.class),
                     mock(UriGrantsManagerInternal.class),
