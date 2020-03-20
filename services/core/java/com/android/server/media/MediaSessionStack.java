@@ -156,7 +156,11 @@ class MediaSessionStack {
         if (mMediaButtonSession != null && mMediaButtonSession.getUid() == record.getUid()) {
             MediaSessionRecordImpl newMediaButtonSession =
                     findMediaButtonSession(mMediaButtonSession.getUid());
-            if (newMediaButtonSession != mMediaButtonSession) {
+            if (newMediaButtonSession != mMediaButtonSession
+                    && (newMediaButtonSession.getSessionPolicies()
+                    & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) == 0) {
+                // Check if the policy states that this session should not be updated as a media
+                // button session.
                 updateMediaButtonSession(newMediaButtonSession);
             }
         }
@@ -187,14 +191,15 @@ class MediaSessionStack {
         for (int i = 0; i < audioPlaybackUids.size(); i++) {
             MediaSessionRecordImpl mediaButtonSession =
                     findMediaButtonSession(audioPlaybackUids.get(i));
-            if (mediaButtonSession != null
-                    && (mediaButtonSession.getSessionPolicies()
-                            & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) == 0) {
-                // Found the media button session.
-                mAudioPlayerStateMonitor.cleanUpAudioPlaybackUids(mediaButtonSession.getUid());
-                if (mMediaButtonSession != mediaButtonSession) {
-                    updateMediaButtonSession(mediaButtonSession);
-                }
+            if (mediaButtonSession == null) continue;
+            boolean ignoreButtonSession = (mediaButtonSession.getSessionPolicies()
+                    & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) != 0;
+            if (mediaButtonSession == mMediaButtonSession && ignoreButtonSession) {
+                updateMediaButtonSession(null);
+                return;
+            }
+            if (mediaButtonSession != mMediaButtonSession && !ignoreButtonSession) {
+                updateMediaButtonSession(mediaButtonSession);
                 return;
             }
         }
@@ -276,15 +281,6 @@ class MediaSessionStack {
     }
 
     private void updateMediaButtonSession(MediaSessionRecordImpl newMediaButtonSession) {
-        // Check if the policy states that this session should not be updated as a media button
-        // session.
-        if (newMediaButtonSession != null) {
-            int policies = newMediaButtonSession.getSessionPolicies();
-            if ((policies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_SESSION) != 0) {
-                return;
-            }
-        }
-
         MediaSessionRecordImpl oldMediaButtonSession = mMediaButtonSession;
         mMediaButtonSession = newMediaButtonSession;
         mOnMediaButtonSessionChangedListener.onMediaButtonSessionChanged(
