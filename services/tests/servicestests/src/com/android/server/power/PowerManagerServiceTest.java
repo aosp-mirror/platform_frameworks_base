@@ -158,6 +158,7 @@ public class PowerManagerServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        FakeSettingsProvider.clearSettingsProvider();
 
         mPowerSaveState = new PowerSaveState.Builder()
                 .setBatterySaverEnabled(BATTERY_SAVER_ENABLED)
@@ -263,6 +264,7 @@ public class PowerManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.removeServiceForTest(BatteryManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     /**
