@@ -1520,8 +1520,16 @@ public final class OomAdjuster {
                                         != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
                                         : TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
                     } else {
-                        capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                        // Remove fgsType check and assign PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                        // and MICROPHONE when finish debugging.
+                        capabilityFromFGS |=
+                                (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+                        capabilityFromFGS |=
+                                (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
+                                        : TEMP_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
                     }
                 }
             }
