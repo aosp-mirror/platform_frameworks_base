@@ -19,6 +19,7 @@
 
 
 #include <google/protobuf/descriptor.h>
+#include "frameworks/base/cmds/statsd/src/atom_field_options.pb.h"
 
 #include <set>
 #include <vector>
@@ -29,6 +30,7 @@ namespace stats_log_api_gen {
 
 using std::map;
 using std::set;
+using std::shared_ptr;
 using std::string;
 using std::vector;
 using google::protobuf::Descriptor;
@@ -37,6 +39,20 @@ using google::protobuf::FieldDescriptor;
 const int PULL_ATOM_START_ID = 10000;
 
 const int FIRST_UID_IN_CHAIN_ID = 0;
+
+const unsigned char ANNOTATION_ID_IS_UID = 1;
+const unsigned char ANNOTATION_ID_TRUNCATE_TIMESTAMP = 2;
+const unsigned char ANNOTATION_ID_STATE_OPTION = 3;
+const unsigned char ANNOTATION_ID_DEFAULT_STATE = 4;
+const unsigned char ANNOTATION_ID_RESET_STATE = 5;
+const unsigned char ANNOTATION_ID_STATE_NESTED = 6;
+
+const int STATE_OPTION_UNSET = os::statsd::StateField::STATE_FIELD_UNSET;
+const int STATE_OPTION_EXCLUSIVE = os::statsd::StateField::EXCLUSIVE_STATE;
+const int STATE_OPTION_PRIMARY_FIELD_FIRST_UID = os::statsd::StateField::PRIMARY_FIELD_FIRST_UID;
+const int STATE_OPTION_PRIMARY = os::statsd::StateField::PRIMARY_FIELD;
+
+const string DEFAULT_MODULE_NAME = "DEFAULT";
 
 /**
  * The types for atom parameters.
@@ -58,6 +74,38 @@ typedef enum {
   JAVA_TYPE_BYTE_ARRAY = -2,
 } java_type_t;
 
+enum AnnotationType {
+    ANNOTATION_TYPE_UNKNOWN = 0,
+    ANNOTATION_TYPE_INT = 1,
+    ANNOTATION_TYPE_BOOL = 2,
+};
+
+union AnnotationValue {
+    int intValue;
+    bool boolValue;
+
+    AnnotationValue(const int value): intValue(value) {}
+    AnnotationValue(const bool value): boolValue(value) {}
+};
+
+struct Annotation {
+    const unsigned char annotationId;
+    const int atomId;
+    AnnotationType type;
+    AnnotationValue value;
+
+    inline Annotation(unsigned char annotationId, int atomId, AnnotationType type,
+            AnnotationValue value):
+            annotationId(annotationId), atomId(atomId), type(type), value(value) {}
+    inline ~Annotation() {}
+
+    inline bool operator<(const Annotation& that) const {
+        return atomId == that.atomId ? annotationId < that.annotationId : atomId < that.atomId;
+    }
+};
+
+using FieldNumberToAnnotations =  map<int, set<shared_ptr<Annotation>>>;
+
 /**
  * The name and type for an atom field.
  */
@@ -72,6 +120,7 @@ struct AtomField {
     inline AtomField(const AtomField& that) :name(that.name),
                                              javaType(that.javaType),
                                              enumValues(that.enumValues) {}
+
     inline AtomField(string n, java_type_t jt) :name(n), javaType(jt) {}
     inline ~AtomField() {}
 };
@@ -86,6 +135,8 @@ struct AtomDecl {
     string message;
     vector<AtomField> fields;
 
+    FieldNumberToAnnotations fieldNumberToAnnotations;
+
     vector<int> primaryFields;
     int exclusiveField = 0;
     int defaultState = INT_MAX;
@@ -98,8 +149,6 @@ struct AtomDecl {
 
     vector<int> binaryFields;
 
-    set<string> moduleNames;
-
     AtomDecl();
     AtomDecl(const AtomDecl& that);
     AtomDecl(int code, const string& name, const string& message);
@@ -111,17 +160,17 @@ struct AtomDecl {
 };
 
 struct Atoms {
-    map<vector<java_type_t>, set<string>> signatures_to_modules;
+    map<vector<java_type_t>, FieldNumberToAnnotations> signatureInfoMap;
     set<AtomDecl> decls;
     set<AtomDecl> non_chained_decls;
-    map<vector<java_type_t>, set<string>> non_chained_signatures_to_modules;
+    map<vector<java_type_t>, FieldNumberToAnnotations> nonChainedSignatureInfoMap;
     int maxPushedAtomId;
 };
 
 /**
  * Gather the information about the atoms.  Returns the number of errors.
  */
-int collate_atoms(const Descriptor* descriptor, Atoms* atoms);
+int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms* atoms);
 int collate_atom(const Descriptor *atom, AtomDecl *atomDecl, vector<java_type_t> *signature);
 
 }  // namespace stats_log_api_gen

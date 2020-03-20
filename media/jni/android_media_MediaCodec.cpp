@@ -34,9 +34,13 @@
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 
+#include <C2AllocatorGralloc.h>
+#include <C2BlockInternal.h>
 #include <C2Buffer.h>
 
 #include <android/hardware/cas/native/1.0/IDescrambler.h>
+
+#include <android_runtime/android_hardware_HardwareBuffer.h>
 
 #include <binder/MemoryHeapBase.h>
 
@@ -57,6 +61,8 @@
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/PersistentSurface.h>
 #include <mediadrm/ICrypto.h>
+
+#include <private/android/AHardwareBufferHelpers.h>
 
 #include <system/window.h>
 
@@ -143,15 +149,6 @@ static struct {
     jfieldID lockId;
 } gLinearBlockInfo;
 
-static struct {
-    jclass clazz;
-    jmethodID ctorId;
-    jmethodID setInternalStateId;
-    jfieldID contextId;
-    jfieldID validId;
-    jfieldID lockId;
-} gGraphicBlockInfo;
-
 struct fields_t {
     jmethodID postEventFromNativeID;
     jmethodID lockAndGetContextID;
@@ -167,7 +164,7 @@ struct fields_t {
     jfieldID patternSkipBlocksID;
     jfieldID queueRequestIndexID;
     jfieldID outputFrameLinearBlockID;
-    jfieldID outputFrameGraphicBlockID;
+    jfieldID outputFrameHardwareBufferID;
     jfieldID outputFrameChangedKeysID;
     jfieldID outputFrameFormatID;
 };
@@ -175,16 +172,6 @@ struct fields_t {
 static fields_t gFields;
 static const void *sRefBaseOwner;
 
-
-struct JMediaCodecGraphicBlock {
-    std::shared_ptr<C2Buffer> mBuffer;
-    std::shared_ptr<const C2GraphicView> mReadonlyMapping;
-
-    std::shared_ptr<C2GraphicBlock> mBlock;
-    std::shared_ptr<C2GraphicView> mReadWriteMapping;
-
-    sp<MediaCodecBuffer> mLegacyBuffer;
-};
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -706,16 +693,22 @@ status_t JMediaCodec::getOutputFrame(
                     break;
                 }
                 case C2BufferData::GRAPHIC: {
-                    std::unique_ptr<JMediaCodecGraphicBlock> context{new JMediaCodecGraphicBlock};
-                    context->mBuffer = c2Buffer;
-                    ScopedLocalRef<jobject> graphicBlock{env, env->NewObject(
-                            gGraphicBlockInfo.clazz, gGraphicBlockInfo.ctorId)};
-                    env->CallVoidMethod(
-                            graphicBlock.get(),
-                            gGraphicBlockInfo.setInternalStateId,
-                            (jlong)context.release(),
-                            true);
-                    env->SetObjectField(frame, gFields.outputFrameGraphicBlockID, graphicBlock.get());
+                    const C2Handle *c2Handle = c2Buffer->data().graphicBlocks().front().handle();
+                    uint32_t width, height, format, stride, igbp_slot, generation;
+                    uint64_t usage, igbp_id;
+                    _UnwrapNativeCodec2GrallocMetadata(
+                            c2Handle, &width, &height, &format, &usage, &stride, &generation,
+                            &igbp_id, &igbp_slot);
+                    native_handle_t *grallocHandle = UnwrapNativeCodec2GrallocHandle(c2Handle);
+                    GraphicBuffer* graphicBuffer = new GraphicBuffer(
+                            grallocHandle, GraphicBuffer::CLONE_HANDLE,
+                            width, height, format, 1, usage, stride);
+                    ScopedLocalRef<jobject> hardwareBuffer{
+                        env,
+                        android_hardware_HardwareBuffer_createFromAHardwareBuffer(
+                                env, AHardwareBuffer_from_GraphicBuffer(graphicBuffer))};
+                    env->SetObjectField(
+                            frame, gFields.outputFrameHardwareBufferID, hardwareBuffer.get());
                     break;
                 }
                 case C2BufferData::LINEAR_CHUNKS:  [[fallthrough]];
@@ -737,16 +730,7 @@ status_t JMediaCodec::getOutputFrame(
                         true);
                 env->SetObjectField(frame, gFields.outputFrameLinearBlockID, linearBlock.get());
             } else {
-                std::unique_ptr<JMediaCodecGraphicBlock> context{new JMediaCodecGraphicBlock};
-                context->mLegacyBuffer = buffer;
-                ScopedLocalRef<jobject> graphicBlock{env, env->NewObject(
-                        gGraphicBlockInfo.clazz, gGraphicBlockInfo.ctorId)};
-                env->CallVoidMethod(
-                        graphicBlock.get(),
-                        gGraphicBlockInfo.setInternalStateId,
-                        (jlong)context.release(),
-                        true);
-                env->SetObjectField(frame, gFields.outputFrameGraphicBlockID, graphicBlock.get());
+                // No-op.
             }
         }
     }
@@ -1873,6 +1857,113 @@ static void android_media_MediaCodec_queueSecureInputBuffer(
             env, err, ACTION_CODE_FATAL, errorDetailMsg.empty() ? NULL : errorDetailMsg.c_str());
 }
 
+static jobject android_media_MediaCodec_mapHardwareBuffer(JNIEnv *env, jobject bufferObj) {
+    ALOGV("android_media_MediaCodec_mapHardwareBuffer");
+    AHardwareBuffer *hardwareBuffer = android_hardware_HardwareBuffer_getNativeHardwareBuffer(
+            env, bufferObj);
+    AHardwareBuffer_Desc desc;
+    AHardwareBuffer_describe(hardwareBuffer, &desc);
+    if (desc.format != AHARDWAREBUFFER_FORMAT_Y8Cb8Cr8_420) {
+        ALOGI("mapHardwareBuffer: unmappable format: %d", desc.format);
+        return nullptr;
+    }
+    if ((desc.usage & AHARDWAREBUFFER_USAGE_CPU_READ_MASK) == 0) {
+        ALOGI("mapHardwareBuffer: buffer not CPU readable");
+        return nullptr;
+    }
+    bool readOnly = ((desc.usage & AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK) == 0);
+
+    uint64_t cpuUsage = desc.usage;
+    cpuUsage = (cpuUsage & AHARDWAREBUFFER_USAGE_CPU_READ_MASK);
+    cpuUsage = (cpuUsage & AHARDWAREBUFFER_USAGE_CPU_WRITE_MASK);
+
+    AHardwareBuffer_Planes planes;
+    int err = AHardwareBuffer_lockPlanes(
+            hardwareBuffer, cpuUsage, -1 /* fence */, nullptr /* rect */, &planes);
+    if (err != 0) {
+        ALOGI("mapHardwareBuffer: Failed to lock planes (err=%d)", err);
+        return nullptr;
+    }
+
+    if (planes.planeCount != 3) {
+        ALOGI("mapHardwareBuffer: planeCount expected 3, actual %u", planes.planeCount);
+        return nullptr;
+    }
+
+    ScopedLocalRef<jclass> planeClazz(
+            env, env->FindClass("android/media/MediaCodec$MediaImage$MediaPlane"));
+    ScopedLocalRef<jobjectArray> planeArray{
+            env, env->NewObjectArray(3, planeClazz.get(), NULL)};
+    CHECK(planeClazz.get() != NULL);
+    jmethodID planeConstructID = env->GetMethodID(planeClazz.get(), "<init>",
+            "([Ljava/nio/ByteBuffer;IIIII)V");
+
+    // plane indices are Y-U-V.
+    for (uint32_t i = 0; i < 3; ++i) {
+        const AHardwareBuffer_Plane &plane = planes.planes[i];
+        ScopedLocalRef<jobject> byteBuffer{env, CreateByteBuffer(
+                env,
+                plane.data,
+                plane.rowStride * (desc.height - 1) + plane.pixelStride * (desc.width - 1) + 1,
+                0,
+                plane.rowStride * (desc.height - 1) + plane.pixelStride * (desc.width - 1) + 1,
+                readOnly,
+                true)};
+
+        ScopedLocalRef<jobject> planeObj{env, env->NewObject(
+                planeClazz.get(), planeConstructID,
+                byteBuffer.get(), plane.rowStride, plane.pixelStride)};
+
+        env->SetObjectArrayElement(planeArray.get(), i, planeObj.get());
+    }
+
+    ScopedLocalRef<jclass> imageClazz(
+            env, env->FindClass("android/media/MediaCodec$MediaImage"));
+    CHECK(imageClazz.get() != NULL);
+
+    jmethodID imageConstructID = env->GetMethodID(imageClazz.get(), "<init>",
+            "([Landroid/media/Image$Plane;IIIZJIILandroid/graphics/Rect;J)V");
+
+    jobject img = env->NewObject(imageClazz.get(), imageConstructID,
+            planeArray.get(),
+            desc.width,
+            desc.height,
+            desc.format, // ???
+            (jboolean)readOnly /* readOnly */,
+            (jlong)0 /* timestamp */,
+            (jint)0 /* xOffset */, (jint)0 /* yOffset */, nullptr /* cropRect */,
+            (jlong)hardwareBuffer);
+
+    // if MediaImage creation fails, return null
+    if (env->ExceptionCheck()) {
+        env->ExceptionDescribe();
+        env->ExceptionClear();
+        return nullptr;
+    }
+
+    AHardwareBuffer_acquire(hardwareBuffer);
+
+    return img;
+}
+
+static void android_media_MediaCodec_closeMediaImage(JNIEnv *, jlong context) {
+    if (context == 0) {
+        return;
+    }
+    AHardwareBuffer *hardwareBuffer = (AHardwareBuffer *)context;
+
+    int32_t fenceFd = -1;
+    int err = AHardwareBuffer_unlock(hardwareBuffer, &fenceFd);
+    if (err == 0) {
+        sp<Fence> fence{new Fence(fenceFd)};
+    } else {
+        ALOGI("closeMediaImage: failed to unlock (err=%d)", err);
+        // Continue to release the hardwareBuffer
+    }
+
+    AHardwareBuffer_release(hardwareBuffer);
+}
+
 static status_t ConvertKeyValueListsToAMessage(
         JNIEnv *env, jobject keys, jobject values, sp<AMessage> *msg) {
     static struct Fields {
@@ -2031,11 +2122,6 @@ static void android_media_MediaCodec_native_queueLinearBlock(
         }
 
         NativeCryptoInfo cryptoInfo{env, cryptoInfoObj};
-        size_t cryptoSize = 0;
-        for (int i = 0; i < cryptoInfo.mNumSubSamples; ++i) {
-            cryptoSize += cryptoInfo.mSubSamples[i].mNumBytesOfClearData;
-            cryptoSize += cryptoInfo.mSubSamples[i].mNumBytesOfEncryptedData;
-        }
         err = codec->queueEncryptedLinearBlock(
                 index,
                 memory,
@@ -2059,10 +2145,10 @@ static void android_media_MediaCodec_native_queueLinearBlock(
     throwExceptionAsNecessary(env, err, ACTION_CODE_FATAL, errorDetailMsg.c_str());
 }
 
-static void android_media_MediaCodec_native_queueGraphicBlock(
+static void android_media_MediaCodec_native_queueHardwareBuffer(
         JNIEnv *env, jobject thiz, jint index, jobject bufferObj,
         jlong presentationTimeUs, jint flags, jobject keys, jobject values) {
-    ALOGV("android_media_MediaCodec_native_queueGraphicBlock");
+    ALOGV("android_media_MediaCodec_native_queueHardwareBuffer");
 
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
 
@@ -2078,29 +2164,21 @@ static void android_media_MediaCodec_native_queueGraphicBlock(
         return;
     }
 
-    std::shared_ptr<C2Buffer> buffer;
-    std::shared_ptr<C2GraphicBlock> block;
-    ScopedLocalRef<jobject> lock{env, env->GetObjectField(bufferObj, gGraphicBlockInfo.lockId)};
-    if (env->MonitorEnter(lock.get()) == JNI_OK) {
-        if (env->GetBooleanField(bufferObj, gGraphicBlockInfo.validId)) {
-            JMediaCodecGraphicBlock *context = (JMediaCodecGraphicBlock *)env->GetLongField(
-                    bufferObj, gGraphicBlockInfo.contextId);
-            buffer = context->mBuffer;
-            block = context->mBlock;
-        }
-        env->MonitorExit(lock.get());
-    } else {
-        throwExceptionAsNecessary(env, INVALID_OPERATION);
-        return;
-    }
+    AHardwareBuffer *hardwareBuffer = android_hardware_HardwareBuffer_getNativeHardwareBuffer(
+            env, bufferObj);
+    sp<GraphicBuffer> graphicBuffer{AHardwareBuffer_to_GraphicBuffer(hardwareBuffer)};
+    C2Handle *handle = WrapNativeCodec2GrallocHandle(
+            graphicBuffer->handle, graphicBuffer->format,
+            graphicBuffer->width, graphicBuffer->height,
+            graphicBuffer->usage, graphicBuffer->stride);
+    std::shared_ptr<C2GraphicBlock> block = _C2BlockFactory::CreateGraphicBlock(handle);
 
-    if (!block && !buffer) {
+    if (!block) {
         throwExceptionAsNecessary(env, BAD_VALUE);
         return;
     }
-    if (!buffer) {
-        buffer = C2Buffer::CreateGraphicBuffer(block->share(block->crop(), C2Fence{}));
-    }
+    std::shared_ptr<C2Buffer> buffer = C2Buffer::CreateGraphicBuffer(block->share(
+            block->crop(), C2Fence{}));
     AString errorDetailMsg;
     err = codec->queueBuffer(index, buffer, presentationTimeUs, flags, tunings, &errorDetailMsg);
     throwExceptionAsNecessary(env, err, ACTION_CODE_FATAL, errorDetailMsg.c_str());
@@ -2534,9 +2612,9 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
         env->GetFieldID(clazz.get(), "mLinearBlock", "Landroid/media/MediaCodec$LinearBlock;");
     CHECK(gFields.outputFrameLinearBlockID != NULL);
 
-    gFields.outputFrameGraphicBlockID =
-        env->GetFieldID(clazz.get(), "mGraphicBlock", "Landroid/media/MediaCodec$GraphicBlock;");
-    CHECK(gFields.outputFrameGraphicBlockID != NULL);
+    gFields.outputFrameHardwareBufferID =
+        env->GetFieldID(clazz.get(), "mHardwareBuffer", "Landroid/hardware/HardwareBuffer;");
+    CHECK(gFields.outputFrameHardwareBufferID != NULL);
 
     gFields.outputFrameChangedKeysID =
         env->GetFieldID(clazz.get(), "mChangedKeys", "Ljava/util/ArrayList;");
@@ -2729,27 +2807,6 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
 
     gLinearBlockInfo.lockId = env->GetFieldID(clazz.get(), "mLock", "Ljava/lang/Object;");
     CHECK(gLinearBlockInfo.lockId != NULL);
-
-    clazz.reset(env->FindClass("android/media/MediaCodec$GraphicBlock"));
-    CHECK(clazz.get() != NULL);
-
-    gGraphicBlockInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
-
-    gGraphicBlockInfo.ctorId = env->GetMethodID(clazz.get(), "<init>", "()V");
-    CHECK(gGraphicBlockInfo.ctorId != NULL);
-
-    gGraphicBlockInfo.setInternalStateId = env->GetMethodID(
-            clazz.get(), "setInternalStateLocked", "(JZ)V");
-    CHECK(gGraphicBlockInfo.setInternalStateId != NULL);
-
-    gGraphicBlockInfo.contextId = env->GetFieldID(clazz.get(), "mNativeContext", "J");
-    CHECK(gGraphicBlockInfo.contextId != NULL);
-
-    gGraphicBlockInfo.validId = env->GetFieldID(clazz.get(), "mValid", "Z");
-    CHECK(gGraphicBlockInfo.validId != NULL);
-
-    gGraphicBlockInfo.lockId = env->GetFieldID(clazz.get(), "mLock", "Ljava/lang/Object;");
-    CHECK(gGraphicBlockInfo.lockId != NULL);
 }
 
 static void android_media_MediaCodec_native_setup(
@@ -2949,196 +3006,6 @@ static jboolean android_media_MediaCodec_LinearBlock_checkCompatible(
     return isCompatible;
 }
 
-// MediaCodec.GraphicBlock
-
-template <class T>
-static jobject CreateImage(JNIEnv *env, const std::shared_ptr<T> &view) {
-    bool readOnly = std::is_const<T>::value;
-    const C2PlanarLayout layout = view->layout();
-    jint format = HAL_PIXEL_FORMAT_YCBCR_420_888;
-    switch (layout.type) {
-        case C2PlanarLayout::TYPE_YUV: {
-            if (layout.numPlanes != 3) {
-                throwExceptionAsNecessary(env, INVALID_OPERATION);
-                return nullptr;
-            }
-            const C2PlaneInfo & yPlane = layout.planes[C2PlanarLayout::PLANE_Y];
-            const C2PlaneInfo & uPlane = layout.planes[C2PlanarLayout::PLANE_U];
-            const C2PlaneInfo & vPlane = layout.planes[C2PlanarLayout::PLANE_V];
-            if (yPlane.rowSampling != 1 || yPlane.colSampling != 1) {
-                throwExceptionAsNecessary(env, INVALID_OPERATION);
-                return nullptr;
-            }
-            if (uPlane.rowSampling != vPlane.rowSampling
-                    || uPlane.colSampling != vPlane.colSampling) {
-                throwExceptionAsNecessary(env, INVALID_OPERATION);
-                return nullptr;
-            }
-            if (uPlane.rowSampling == 2 && uPlane.colSampling == 2) {
-                format = HAL_PIXEL_FORMAT_YCBCR_420_888;
-                break;
-            } else if (uPlane.rowSampling == 1 && uPlane.colSampling == 2) {
-                format = HAL_PIXEL_FORMAT_YCBCR_422_888;
-                break;
-            } else if (uPlane.rowSampling == 1 && uPlane.colSampling == 1) {
-                format = HAL_PIXEL_FORMAT_YCBCR_444_888;
-                break;
-            }
-            throwExceptionAsNecessary(env, INVALID_OPERATION);
-            return nullptr;
-        }
-        case C2PlanarLayout::TYPE_RGB: {
-            if (layout.numPlanes != 3) {
-                throwExceptionAsNecessary(env, INVALID_OPERATION);
-                return nullptr;
-            }
-            format = HAL_PIXEL_FORMAT_FLEX_RGB_888;
-            break;
-        }
-        case C2PlanarLayout::TYPE_RGBA: {
-            if (layout.numPlanes != 4) {
-                throwExceptionAsNecessary(env, INVALID_OPERATION);
-                return nullptr;
-            }
-            format = HAL_PIXEL_FORMAT_FLEX_RGBA_8888;
-            break;
-        }
-        case C2PlanarLayout::TYPE_YUVA:
-            [[fallthrough]];
-        default:
-            throwExceptionAsNecessary(env, INVALID_OPERATION);
-            return nullptr;
-    }
-
-    ScopedLocalRef<jclass> planeClazz(
-            env, env->FindClass("android/media/MediaCodec$MediaImage$MediaPlane"));
-    ScopedLocalRef<jobjectArray> planeArray{
-            env, env->NewObjectArray(layout.numPlanes, planeClazz.get(), NULL)};
-    CHECK(planeClazz.get() != NULL);
-    jmethodID planeConstructID = env->GetMethodID(planeClazz.get(), "<init>",
-            "([Ljava/nio/ByteBuffer;IIIII)V");
-
-    // plane indices are happened to be Y-U-V and R-G-B(-A) order.
-    for (uint32_t i = 0; i < layout.numPlanes; ++i) {
-        const C2PlaneInfo &plane = layout.planes[i];
-        if (plane.rowInc < 0 || plane.colInc < 0) {
-            throwExceptionAsNecessary(env, INVALID_OPERATION);
-            return nullptr;
-        }
-        ssize_t minOffset = plane.minOffset(view->width(), view->height());
-        ssize_t maxOffset = plane.maxOffset(view->width(), view->height());
-        ScopedLocalRef<jobject> byteBuffer{env, CreateByteBuffer(
-                env,
-                view->data()[plane.rootIx] + plane.offset + minOffset,
-                maxOffset - minOffset + 1,
-                0,
-                maxOffset - minOffset + 1,
-                readOnly,
-                true)};
-
-        ScopedLocalRef<jobject> jPlane{env, env->NewObject(
-                planeClazz.get(), planeConstructID,
-                byteBuffer.get(), plane.rowInc, plane.colInc)};
-    }
-
-    ScopedLocalRef<jclass> imageClazz(
-            env, env->FindClass("android/media/MediaCodec$MediaImage"));
-    CHECK(imageClazz.get() != NULL);
-
-    jmethodID imageConstructID = env->GetMethodID(imageClazz.get(), "<init>",
-            "([Landroid/media/Image$Plane;IIIZJIILandroid/graphics/Rect;)V");
-
-    jobject img = env->NewObject(imageClazz.get(), imageConstructID,
-            planeArray.get(),
-            view->width(),
-            view->height(),
-            format,
-            (jboolean)readOnly /* readOnly */,
-            (jlong)0 /* timestamp */,
-            (jint)0 /* xOffset */, (jint)0 /* yOffset */, nullptr /* cropRect */);
-
-    // if MediaImage creation fails, return null
-    if (env->ExceptionCheck()) {
-        env->ExceptionDescribe();
-        env->ExceptionClear();
-        return nullptr;
-    }
-
-    return img;
-}
-
-static jobject android_media_MediaCodec_GraphicBlock_native_map(
-        JNIEnv *env, jobject thiz) {
-    JMediaCodecGraphicBlock *context =
-        (JMediaCodecGraphicBlock *)env->GetLongField(thiz, gGraphicBlockInfo.contextId);
-    if (context->mBuffer) {
-        std::shared_ptr<C2Buffer> buffer = context->mBuffer;
-        if (!context->mReadonlyMapping) {
-            const C2BufferData data = buffer->data();
-            if (data.type() != C2BufferData::GRAPHIC) {
-                throwExceptionAsNecessary(env, INVALID_OPERATION);
-                return nullptr;
-            }
-            if (data.graphicBlocks().size() != 1u) {
-                throwExceptionAsNecessary(env, INVALID_OPERATION);
-                return nullptr;
-            }
-            C2ConstGraphicBlock block = data.graphicBlocks().front();
-            context->mReadonlyMapping =
-                std::make_shared<const C2GraphicView>(block.map().get());
-        }
-        return CreateImage(env, context->mReadonlyMapping);
-    } else if (context->mBlock) {
-        std::shared_ptr<C2GraphicBlock> block = context->mBlock;
-        if (!context->mReadWriteMapping) {
-            context->mReadWriteMapping =
-                std::make_shared<C2GraphicView>(block->map().get());
-        }
-        return CreateImage(env, context->mReadWriteMapping);
-    } else if (context->mLegacyBuffer) {
-    }
-    throwExceptionAsNecessary(env, INVALID_OPERATION);
-    return nullptr;
-}
-
-static void android_media_MediaCodec_GraphicBlock_native_recycle(
-        JNIEnv *env, jobject thiz) {
-    JMediaCodecGraphicBlock *context =
-        (JMediaCodecGraphicBlock *)env->GetLongField(thiz, gGraphicBlockInfo.contextId);
-    env->CallVoidMethod(thiz, gGraphicBlockInfo.setInternalStateId, 0, false /* isMappable */);
-    delete context;
-}
-
-static void android_media_MediaCodec_GraphicBlock_native_obtain(
-        JNIEnv *env, jobject thiz,
-        jint width, jint height, jint format, jlong usage, jobjectArray codecNames) {
-    std::unique_ptr<JMediaCodecGraphicBlock> context{new JMediaCodecGraphicBlock};
-    std::vector<std::string> names;
-    PopulateNamesVector(env, codecNames, &names);
-    context->mBlock = MediaCodec::FetchGraphicBlock(width, height, format, usage, names);
-    if (!context->mBlock) {
-        jniThrowException(env, "java/io/IOException", nullptr);
-        return;
-    }
-    env->CallVoidMethod(
-            thiz,
-            gGraphicBlockInfo.setInternalStateId,
-            (jlong)context.release(),
-            true /*isMappable */);
-}
-
-static jboolean android_media_MediaCodec_GraphicBlock_checkCompatible(
-        JNIEnv *env, jobjectArray codecNames) {
-    std::vector<std::string> names;
-    PopulateNamesVector(env, codecNames, &names);
-    bool isCompatible = false;
-    status_t err = MediaCodec::CanFetchGraphicBlock(names, &isCompatible);
-    if (err != OK) {
-        throwExceptionAsNecessary(env, err);
-    }
-    return isCompatible;
-}
-
 static const JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaCodec_release },
 
@@ -3184,14 +3051,20 @@ static const JNINativeMethod gMethods[] = {
     { "native_queueSecureInputBuffer", "(IILandroid/media/MediaCodec$CryptoInfo;JI)V",
       (void *)android_media_MediaCodec_queueSecureInputBuffer },
 
+    { "native_mapHardwareBuffer",
+      "(Landroid/hardware/HardwareBuffer;)Landroid/media/Image;",
+      (void *)android_media_MediaCodec_mapHardwareBuffer },
+
+    { "native_closeMediaImage", "(J)V", (void *)android_media_MediaCodec_closeMediaImage },
+
     { "native_queueLinearBlock",
       "(ILandroid/media/MediaCodec$LinearBlock;IILandroid/media/MediaCodec$CryptoInfo;JI"
       "Ljava/util/ArrayList;Ljava/util/ArrayList;)V",
       (void *)android_media_MediaCodec_native_queueLinearBlock },
 
-    { "native_queueGraphicBlock",
-      "(ILandroid/media/MediaCodec$GraphicBlock;JILjava/util/ArrayList;Ljava/util/ArrayList;)V",
-      (void *)android_media_MediaCodec_native_queueGraphicBlock },
+    { "native_queueHardwareBuffer",
+      "(ILandroid/hardware/HardwareBuffer;JILjava/util/ArrayList;Ljava/util/ArrayList;)V",
+      (void *)android_media_MediaCodec_native_queueHardwareBuffer },
 
     { "native_getOutputFrame",
       "(Landroid/media/MediaCodec$OutputFrame;I)V",
@@ -3265,20 +3138,6 @@ static const JNINativeMethod gLinearBlockMethods[] = {
       (void *)android_media_MediaCodec_LinearBlock_checkCompatible },
 };
 
-static const JNINativeMethod gGraphicBlockMethods[] = {
-    { "native_map", "()Landroid/media/Image;",
-      (void *)android_media_MediaCodec_GraphicBlock_native_map },
-
-    { "native_recycle", "()V",
-      (void *)android_media_MediaCodec_GraphicBlock_native_recycle },
-
-    { "native_obtain", "(IIIJ[Ljava/lang/String;)V",
-      (void *)android_media_MediaCodec_GraphicBlock_native_obtain },
-
-    { "native_checkCompatible", "([Ljava/lang/String;)Z",
-      (void *)android_media_MediaCodec_GraphicBlock_checkCompatible },
-};
-
 int register_android_media_MediaCodec(JNIEnv *env) {
     int result = AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaCodec", gMethods, NELEM(gMethods));
@@ -3289,12 +3148,5 @@ int register_android_media_MediaCodec(JNIEnv *env) {
                 "android/media/MediaCodec$LinearBlock",
                 gLinearBlockMethods,
                 NELEM(gLinearBlockMethods));
-    if (result != JNI_OK) {
-        return result;
-    }
-    result = AndroidRuntime::registerNativeMethods(env,
-                "android/media/MediaCodec$GraphicBlock",
-                gGraphicBlockMethods,
-                NELEM(gGraphicBlockMethods));
     return result;
 }

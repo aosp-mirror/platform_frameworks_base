@@ -32,6 +32,7 @@ import static android.system.OsConstants.O_RDONLY;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_DESC_RES_NAME;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_STRING_DESC;
+import static com.android.server.blob.BlobStoreConfig.hasLeaseWaitTimeElapsed;
 import static com.android.server.blob.BlobStoreUtils.getDescriptionResourceId;
 import static com.android.server.blob.BlobStoreUtils.getPackageResources;
 
@@ -227,6 +228,35 @@ class BlobMetadata {
         return false;
     }
 
+    boolean isACommitter(@NonNull String packageName, int uid) {
+        synchronized (mMetadataLock) {
+            return isAnAccessor(mCommitters, packageName, uid);
+        }
+    }
+
+    boolean isALeasee(@Nullable String packageName, int uid) {
+        synchronized (mMetadataLock) {
+            return isAnAccessor(mLeasees, packageName, uid);
+        }
+    }
+
+    private static <T extends Accessor> boolean isAnAccessor(@NonNull ArraySet<T> accessors,
+            @Nullable String packageName, int uid) {
+        // Check if the package is an accessor of the data blob.
+        for (int i = 0, size = accessors.size(); i < size; ++i) {
+            final Accessor accessor = accessors.valueAt(i);
+            if (packageName != null && uid != INVALID_UID
+                    && accessor.equals(packageName, uid)) {
+                return true;
+            } else if (packageName != null && accessor.packageName.equals(packageName)) {
+                return true;
+            } else if (uid != INVALID_UID && accessor.uid == uid) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean isALeasee(@NonNull String packageName) {
         return isALeasee(packageName, INVALID_UID);
     }
@@ -241,24 +271,6 @@ class BlobMetadata {
 
     boolean hasOtherLeasees(int uid) {
         return hasOtherLeasees(null, uid);
-    }
-
-    boolean isALeasee(@Nullable String packageName, int uid) {
-        synchronized (mMetadataLock) {
-            // Check if the package is a leasee of the data blob.
-            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
-                final Leasee leasee = mLeasees.valueAt(i);
-                if (packageName != null && uid != INVALID_UID
-                        && leasee.equals(packageName, uid)) {
-                    return true;
-                } else if (packageName != null && leasee.packageName.equals(packageName)) {
-                    return true;
-                } else if (uid != INVALID_UID && leasee.uid == uid) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private boolean hasOtherLeasees(@Nullable String packageName, int uid) {
@@ -346,10 +358,29 @@ class BlobMetadata {
                         mRevocableFds.get(callingPackage);
                 if (revocableFdsForPkg != null) {
                     revocableFdsForPkg.remove(revocableFd);
+                    if (revocableFdsForPkg.isEmpty()) {
+                        mRevocableFds.remove(callingPackage);
+                    }
                 }
             }
         });
         return revocableFd.getRevocableFileDescriptor();
+    }
+
+    boolean shouldBeDeleted(boolean respectLeaseWaitTime) {
+        // Expired data blobs
+        if (getBlobHandle().isExpired()) {
+            return true;
+        }
+
+        // Blobs with no active leases
+        // TODO: Track commit time instead of using last modified time.
+        if ((!respectLeaseWaitTime || hasLeaseWaitTimeElapsed(getBlobFile().lastModified()))
+                && !hasLeases()) {
+            return true;
+        }
+
+        return false;
     }
 
     void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
@@ -360,27 +391,47 @@ class BlobMetadata {
 
         fout.println("Committers:");
         fout.increaseIndent();
-        for (int i = 0, count = mCommitters.size(); i < count; ++i) {
-            final Committer committer = mCommitters.valueAt(i);
-            fout.println("committer " + committer.toString());
-            fout.increaseIndent();
-            committer.dump(fout);
-            fout.decreaseIndent();
+        if (mCommitters.isEmpty()) {
+            fout.println("<empty>");
+        } else {
+            for (int i = 0, count = mCommitters.size(); i < count; ++i) {
+                final Committer committer = mCommitters.valueAt(i);
+                fout.println("committer " + committer.toString());
+                fout.increaseIndent();
+                committer.dump(fout);
+                fout.decreaseIndent();
+            }
         }
         fout.decreaseIndent();
 
         fout.println("Leasees:");
         fout.increaseIndent();
-        for (int i = 0, count = mLeasees.size(); i < count; ++i) {
-            final Leasee leasee = mLeasees.valueAt(i);
-            fout.println("leasee " + leasee.toString());
-            fout.increaseIndent();
-            leasee.dump(mContext, fout);
-            fout.decreaseIndent();
+        if (mLeasees.isEmpty()) {
+            fout.println("<empty>");
+        } else {
+            for (int i = 0, count = mLeasees.size(); i < count; ++i) {
+                final Leasee leasee = mLeasees.valueAt(i);
+                fout.println("leasee " + leasee.toString());
+                fout.increaseIndent();
+                leasee.dump(mContext, fout);
+                fout.decreaseIndent();
+            }
         }
         fout.decreaseIndent();
 
-        fout.println("Open fds: #" + mRevocableFds.size());
+        fout.println("Open fds:");
+        fout.increaseIndent();
+        if (mRevocableFds.isEmpty()) {
+            fout.println("<empty>");
+        } else {
+            for (int i = 0, count = mRevocableFds.size(); i < count; ++i) {
+                final String packageName = mRevocableFds.keyAt(i);
+                final ArraySet<RevocableFileDescriptor> packageFds =
+                        mRevocableFds.valueAt(i);
+                fout.println(packageName + "#" + packageFds.size());
+            }
+        }
+        fout.decreaseIndent();
     }
 
     void writeToXml(XmlSerializer out) throws IOException {

@@ -1299,6 +1299,38 @@ public class LauncherApps {
         }
     }
 
+    /**
+     * @hide
+     */
+    public Icon getShortcutIcon(@NonNull ShortcutInfo shortcut) {
+        if (shortcut.hasIconFile()) {
+            final ParcelFileDescriptor pfd = getShortcutIconFd(shortcut);
+            if (pfd == null) {
+                return null;
+            }
+            try {
+                final Bitmap bmp = BitmapFactory.decodeFileDescriptor(pfd.getFileDescriptor());
+                if (bmp != null) {
+                    if (shortcut.hasAdaptiveBitmap()) {
+                        return Icon.createWithAdaptiveBitmap(bmp);
+                    } else {
+                        return Icon.createWithBitmap(bmp);
+                    }
+                }
+                return null;
+            } finally {
+                try {
+                    pfd.close();
+                } catch (IOException ignore) {
+                }
+            }
+        } else if (shortcut.hasIconResource()) {
+            return Icon.createWithResource(shortcut.getPackage(), shortcut.getIconResourceId());
+        } else {
+            return shortcut.getIcon();
+        }
+    }
+
     private Drawable loadDrawableResourceFromPackage(String packageName, int resId,
             UserHandle user, int density) {
         try {

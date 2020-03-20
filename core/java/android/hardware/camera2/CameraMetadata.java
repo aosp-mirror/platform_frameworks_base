@@ -2756,6 +2756,7 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>No rotate and crop is applied. Processed outputs are in the sensor orientation.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_NONE = 0;
 
@@ -2763,6 +2764,7 @@ public abstract class CameraMetadata<TKey> {
      * <p>Processed images are rotated by 90 degrees clockwise, and then cropped
      * to the original aspect ratio.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_90 = 1;
 
@@ -2770,6 +2772,7 @@ public abstract class CameraMetadata<TKey> {
      * <p>Processed images are rotated by 180 degrees.  Since the aspect ratio does not
      * change, no cropping is performed.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_180 = 2;
 
@@ -2777,6 +2780,7 @@ public abstract class CameraMetadata<TKey> {
      * <p>Processed images are rotated by 270 degrees clockwise, and then cropped
      * to the original aspect ratio.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_270 = 3;
 
@@ -2796,6 +2800,7 @@ public abstract class CameraMetadata<TKey> {
      * coordinate system to make the operation transparent for applications.</p>
      * <p>No coordinate mapping will be done when the application selects a non-AUTO mode.</p>
      * @see CaptureRequest#SCALER_ROTATE_AND_CROP
+     * @hide
      */
     public static final int SCALER_ROTATE_AND_CROP_AUTO = 4;
 

@@ -195,6 +195,9 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.onControlsChanged(createSingletonControl(ITYPE_STATUS_BAR));
 
+            ArgumentCaptor<WindowInsetsAnimationController> animationController =
+                    ArgumentCaptor.forClass(WindowInsetsAnimationController.class);
+
             WindowInsetsAnimationControlListener mockListener =
                     mock(WindowInsetsAnimationControlListener.class);
             mController.controlWindowInsetsAnimation(statusBars(), 10 /* durationMs */,
@@ -202,9 +205,10 @@ public class InsetsControllerTest {
 
             // Ready gets deferred until next predraw
             mViewRoot.getView().getViewTreeObserver().dispatchOnPreDraw();
-            verify(mockListener).onReady(any(), anyInt());
+            verify(mockListener).onReady(animationController.capture(), anyInt());
             mController.onControlsChanged(new InsetsSourceControl[0]);
             verify(mockListener).onCancelled(notNull());
+            assertTrue(animationController.getValue().isCancelled());
         });
     }
 

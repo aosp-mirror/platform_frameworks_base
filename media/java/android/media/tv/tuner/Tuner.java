@@ -245,6 +245,9 @@ public class Tuner implements AutoCloseable  {
         mContext = context;
         mTunerResourceManager = (TunerResourceManager)
                 context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+        if (mHandler == null) {
+            mHandler = createEventHandler();
+        }
 
         int[] clientId = new int[1];
         ResourceClientProfile profile = new ResourceClientProfile(tvInputSessionId, useCase);
@@ -450,7 +453,6 @@ public class Tuner implements AutoCloseable  {
      * @see #setOnTuneEventListener(Executor, OnTuneEventListener)
      */
     public void clearOnTuneEventListener() {
-        TunerUtils.checkTunerPermission(mContext);
         mOnTuneEventListener = null;
         mOnTunerEventExecutor = null;
 
@@ -497,7 +499,6 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int cancelTuning() {
-        TunerUtils.checkTunerPermission(mContext);
         return nativeStopTune();
     }
 
@@ -706,67 +707,70 @@ public class Tuner implements AutoCloseable  {
 
     private void onFrequenciesReport(int[] frequency) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReport(frequency));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReported(frequency));
         }
     }
 
     private void onSymbolRates(int[] rate) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRates(rate));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRatesReported(rate));
         }
     }
 
     private void onHierarchy(int hierarchy) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchy(hierarchy));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchyReported(hierarchy));
         }
     }
 
     private void onSignalType(int signalType) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalType(signalType));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalTypeReported(signalType));
         }
     }
 
     private void onPlpIds(int[] plpIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIds(plpIds));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIdsReported(plpIds));
         }
     }
 
     private void onGroupIds(int[] groupIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIds(groupIds));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIdsReported(groupIds));
         }
     }
 
     private void onInputStreamIds(int[] inputStreamIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onInputStreamIds(inputStreamIds));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onInputStreamIdsReported(inputStreamIds));
         }
     }
 
     private void onDvbsStandard(int dvbsStandandard) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbsStandard(dvbsStandandard));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onDvbsStandardReported(dvbsStandandard));
         }
     }
 
     private void onDvbtStandard(int dvbtStandard) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandard(dvbtStandard));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandardReported(dvbtStandard));
         }
     }
 
     private void onAnalogSifStandard(int sif) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandard(sif));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandardReported(sif));
         }
     }
 
     private void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onAtsc3PlpInfos(atsc3PlpInfos));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onAtsc3PlpInfosReported(atsc3PlpInfos));
         }
     }
 

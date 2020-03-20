@@ -297,6 +297,8 @@ public class WifiNetworkSuggestionTest {
         assertTrue(suggestion.isAppInteractionRequired);
         assertEquals(suggestion.wifiConfiguration.meteredOverride,
                 WifiConfiguration.METERED_OVERRIDE_METERED);
+        assertEquals(suggestion.getPasspointConfig().getMeteredOverride(),
+                WifiConfiguration.METERED_OVERRIDE_METERED);
         assertTrue(suggestion.isUserAllowedToManuallyConnect);
     }
 

@@ -29,10 +29,10 @@ using std::set;
 using std::vector;
 
 /**
- * Return whether the set contains a vector of the elements provided.
+ * Return whether the map contains a vector of the elements provided.
  */
 static bool
-set_contains_vector(const map<vector<java_type_t>, set<string>>& s, int count, ...)
+map_contains_vector(const map<vector<java_type_t>, FieldNumberToAnnotations>& s, int count, ...)
 {
     va_list args;
     vector<java_type_t> v;
@@ -47,12 +47,12 @@ set_contains_vector(const map<vector<java_type_t>, set<string>>& s, int count, .
 }
 
 /**
- * Expect that the provided set contains the elements provided.
+ * Expect that the provided map contains the elements provided.
  */
-#define EXPECT_SET_CONTAINS_SIGNATURE(s, ...) \
+#define EXPECT_MAP_CONTAINS_SIGNATURE(s, ...) \
     do { \
         int count = sizeof((int[]){__VA_ARGS__})/sizeof(int); \
-        EXPECT_TRUE(set_contains_vector(s, count, __VA_ARGS__)); \
+        EXPECT_TRUE(map_contains_vector(s, count, __VA_ARGS__)); \
     } while(0)
 
 /** Expects that the provided atom has no enum values for any field. */
@@ -83,20 +83,20 @@ set_contains_vector(const map<vector<java_type_t>, set<string>>& s, int count, .
  */
 TEST(CollationTest, CollateStats) {
     Atoms atoms;
-    int errorCount = collate_atoms(Event::descriptor(), &atoms);
+    int errorCount = collate_atoms(Event::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(0, errorCount);
-    EXPECT_EQ(3ul, atoms.signatures_to_modules.size());
+    EXPECT_EQ(3ul, atoms.signatureInfoMap.size());
 
     // IntAtom, AnotherIntAtom
-    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_INT);
+    EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_INT);
 
     // OutOfOrderAtom
-    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_INT, JAVA_TYPE_INT);
+    EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_INT, JAVA_TYPE_INT);
 
     // AllTypesAtom
-    EXPECT_SET_CONTAINS_SIGNATURE(
-        atoms.signatures_to_modules,
+    EXPECT_MAP_CONTAINS_SIGNATURE(
+        atoms.signatureInfoMap,
         JAVA_TYPE_ATTRIBUTION_CHAIN, // AttributionChain
         JAVA_TYPE_FLOAT,             // float
         JAVA_TYPE_LONG,              // int64
@@ -150,7 +150,7 @@ TEST(CollationTest, CollateStats) {
  */
 TEST(CollationTest, NonMessageTypeFails) {
     Atoms atoms;
-    int errorCount = collate_atoms(IntAtom::descriptor(), &atoms);
+    int errorCount = collate_atoms(IntAtom::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(1, errorCount);
 }
@@ -160,7 +160,7 @@ TEST(CollationTest, NonMessageTypeFails) {
  */
 TEST(CollationTest, FailOnBadTypes) {
     Atoms atoms;
-    int errorCount = collate_atoms(BadTypesEvent::descriptor(), &atoms);
+    int errorCount = collate_atoms(BadTypesEvent::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(4, errorCount);
 }
@@ -170,7 +170,7 @@ TEST(CollationTest, FailOnBadTypes) {
  */
 TEST(CollationTest, FailOnSkippedFieldsSingle) {
     Atoms atoms;
-    int errorCount = collate_atoms(BadSkippedFieldSingle::descriptor(), &atoms);
+    int errorCount = collate_atoms(BadSkippedFieldSingle::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(1, errorCount);
 }
@@ -181,7 +181,7 @@ TEST(CollationTest, FailOnSkippedFieldsSingle) {
  */
 TEST(CollationTest, FailOnSkippedFieldsMultiple) {
     Atoms atoms;
-    int errorCount = collate_atoms(BadSkippedFieldMultiple::descriptor(), &atoms);
+    int errorCount = collate_atoms(BadSkippedFieldMultiple::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(2, errorCount);
 }
@@ -193,48 +193,48 @@ TEST(CollationTest, FailOnSkippedFieldsMultiple) {
 TEST(CollationTest, FailBadAttributionNodePosition) {
   Atoms atoms;
   int errorCount =
-      collate_atoms(BadAttributionNodePosition::descriptor(), &atoms);
+      collate_atoms(BadAttributionNodePosition::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
   EXPECT_EQ(1, errorCount);
 }
 
 TEST(CollationTest, FailOnBadStateAtomOptions) {
     Atoms atoms;
-    int errorCount = collate_atoms(BadStateAtoms::descriptor(), &atoms);
+    int errorCount = collate_atoms(BadStateAtoms::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(3, errorCount);
 }
 
 TEST(CollationTest, PassOnGoodStateAtomOptions) {
     Atoms atoms;
-    int errorCount = collate_atoms(GoodStateAtoms::descriptor(), &atoms);
+    int errorCount = collate_atoms(GoodStateAtoms::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     EXPECT_EQ(0, errorCount);
 }
 
 TEST(CollationTest, PassOnGoodBinaryFieldAtom) {
     Atoms atoms;
     int errorCount =
-            collate_atoms(GoodEventWithBinaryFieldAtom::descriptor(), &atoms);
+            collate_atoms(GoodEventWithBinaryFieldAtom::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     EXPECT_EQ(0, errorCount);
 }
 
 TEST(CollationTest, FailOnBadBinaryFieldAtom) {
     Atoms atoms;
     int errorCount =
-            collate_atoms(BadEventWithBinaryFieldAtom::descriptor(), &atoms);
+            collate_atoms(BadEventWithBinaryFieldAtom::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     EXPECT_TRUE(errorCount > 0);
 }
 
 TEST(CollationTest, PassOnWhitelistedAtom) {
     Atoms atoms;
-    int errorCount = collate_atoms(ListedAtoms::descriptor(), &atoms);
+    int errorCount = collate_atoms(ListedAtoms::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     EXPECT_EQ(errorCount, 0);
     EXPECT_EQ(atoms.decls.size(), 2ul);
 }
 
 TEST(CollationTest, RecogniseWhitelistedAtom) {
     Atoms atoms;
-    collate_atoms(ListedAtoms::descriptor(), &atoms);
+    collate_atoms(ListedAtoms::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     for (const auto& atomDecl : atoms.decls) {
         if (atomDecl.code == 1) {
             EXPECT_TRUE(atomDecl.whitelisted);
@@ -246,45 +246,80 @@ TEST(CollationTest, RecogniseWhitelistedAtom) {
 
 TEST(CollationTest, PassOnLogFromModuleAtom) {
     Atoms atoms;
-    int errorCount = collate_atoms(ModuleAtoms::descriptor(), &atoms);
+    int errorCount = collate_atoms(ModuleAtoms::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     EXPECT_EQ(errorCount, 0);
     EXPECT_EQ(atoms.decls.size(), 4ul);
 }
 
 TEST(CollationTest, RecognizeModuleAtom) {
     Atoms atoms;
-    int errorCount = collate_atoms(ModuleAtoms::descriptor(), &atoms);
+    int errorCount = collate_atoms(ModuleAtoms::descriptor(), DEFAULT_MODULE_NAME, &atoms);
     EXPECT_EQ(errorCount, 0);
     EXPECT_EQ(atoms.decls.size(), 4ul);
-    for (const auto& atomDecl: atoms.decls) {
-        if (atomDecl.code == 1) {
-            EXPECT_EQ(1ul, atomDecl.moduleNames.size());
-            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module1"));
-        } else if (atomDecl.code == 2) {
-            EXPECT_EQ(1ul, atomDecl.moduleNames.size());
-            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module2"));
-        } else if (atomDecl.code == 3) {
-            EXPECT_EQ(2ul, atomDecl.moduleNames.size());
-            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module1"));
-            EXPECT_NE(atomDecl.moduleNames.end(), atomDecl.moduleNames.find("module2"));
-        } else {
-            EXPECT_TRUE(atomDecl.moduleNames.empty());
+    EXPECT_EQ(atoms.signatureInfoMap.size(), 2u);
+    EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_INT);
+    EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_STRING);
+    for (auto signatureInfoMapIt : atoms.signatureInfoMap) {
+        vector<java_type_t> signature = signatureInfoMapIt.first;
+        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt.second;
+        if (signature[0] == JAVA_TYPE_STRING) {
+            EXPECT_EQ(0u, fieldNumberToAnnotations.size());
+        } else if (signature[0] == JAVA_TYPE_INT) {
+            EXPECT_EQ(1u, fieldNumberToAnnotations.size());
+            EXPECT_NE(fieldNumberToAnnotations.end(), fieldNumberToAnnotations.find(1));
+            const set<shared_ptr<Annotation>>& annotations = fieldNumberToAnnotations.at(1);
+            EXPECT_EQ(2u, annotations.size());
+            for (const shared_ptr<Annotation> annotation : annotations) {
+                EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID
+                        || annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
+                if (ANNOTATION_ID_IS_UID == annotation->annotationId) {
+                    EXPECT_EQ(1, annotation->atomId);
+                    EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
+                    EXPECT_TRUE(annotation->value.boolValue);
+                }
+
+                if (ANNOTATION_ID_STATE_OPTION == annotation->annotationId) {
+                    EXPECT_EQ(3, annotation->atomId);
+                    EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
+                    EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
+                }
+            }
         }
     }
+}
 
-    EXPECT_EQ(atoms.signatures_to_modules.size(), 2u);
-    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_INT);
-    EXPECT_SET_CONTAINS_SIGNATURE(atoms.signatures_to_modules, JAVA_TYPE_STRING);
-    for (auto signature_to_modules_it : atoms.signatures_to_modules) {
-        vector<java_type_t> signature = signature_to_modules_it.first;
-        if (signature[0] == JAVA_TYPE_STRING) {
-            EXPECT_EQ(signature_to_modules_it.second.size(), 0u);
-        } else if (signature[0] == JAVA_TYPE_INT) {
-            set<string> modules = signature_to_modules_it.second;
-            EXPECT_EQ(modules.size(), 2u);
-            // Assert that the set contains "module1" and "module2".
-            EXPECT_NE(modules.find("module1"), modules.end());
-            EXPECT_NE(modules.find("module2"), modules.end());
+TEST(CollationTest, RecognizeModule1Atom) {
+    Atoms atoms;
+    const string moduleName = "module1";
+    int errorCount = collate_atoms(ModuleAtoms::descriptor(), moduleName, &atoms);
+    EXPECT_EQ(errorCount, 0);
+    EXPECT_EQ(atoms.decls.size(), 2ul);
+    EXPECT_EQ(atoms.signatureInfoMap.size(), 1u);
+    EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_INT);
+    for (auto signatureInfoMapIt : atoms.signatureInfoMap) {
+        vector<java_type_t> signature = signatureInfoMapIt.first;
+        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt.second;
+        EXPECT_EQ(JAVA_TYPE_INT, signature[0]);
+        EXPECT_EQ(1u, fieldNumberToAnnotations.size());
+        int fieldNumber = 1;
+        EXPECT_NE(fieldNumberToAnnotations.end(), fieldNumberToAnnotations.find(fieldNumber));
+        const set<shared_ptr<Annotation>>& annotations =
+                fieldNumberToAnnotations.at(fieldNumber);
+        EXPECT_EQ(2u, annotations.size());
+        for (const shared_ptr<Annotation> annotation : annotations) {
+            EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID
+                    || annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
+            if (ANNOTATION_ID_IS_UID == annotation->annotationId) {
+                EXPECT_EQ(1, annotation->atomId);
+                EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
+                EXPECT_TRUE(annotation->value.boolValue);
+            }
+
+            if (ANNOTATION_ID_STATE_OPTION == annotation->annotationId) {
+                EXPECT_EQ(3, annotation->atomId);
+                EXPECT_EQ(ANNOTATION_TYPE_INT, annotation->type);
+                EXPECT_EQ(os::statsd::StateField::EXCLUSIVE_STATE, annotation->value.intValue);
+            }
         }
     }
 }

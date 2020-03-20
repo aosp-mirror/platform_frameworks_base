@@ -46,7 +46,7 @@ public class DummyBlobData {
     byte[] mFileDigest;
     long mExpiryTimeMs;
 
-    public DummyBlobData(Builder builder) {
+    private DummyBlobData(Builder builder) {
         mRandom = new Random(builder.getRandomSeed());
         mFile = new File(builder.getContext().getFilesDir(), builder.getFileName());
         mFileSize = builder.getFileSize();

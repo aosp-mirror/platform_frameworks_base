@@ -51,6 +51,7 @@ class AllModel(
                 ControlInfo.Builder().apply {
                     controlId = it.controlId
                     controlTitle = it.title
+                    controlSubtitle = it.subtitle
                     deviceType = it.deviceType
                 }
             }

@@ -25,7 +25,7 @@ import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHER_ERROR_ENTITLEMENT_UNKNOWN;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
-import static android.net.TetheringManager.TETHER_ERROR_PROVISION_FAILED;
+import static android.net.TetheringManager.TETHER_ERROR_PROVISIONING_FAILED;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -579,7 +579,7 @@ public class EntitlementManager {
         switch (value) {
             case TETHER_ERROR_ENTITLEMENT_UNKNOWN: return "TETHER_ERROR_ENTITLEMENT_UNKONWN";
             case TETHER_ERROR_NO_ERROR: return "TETHER_ERROR_NO_ERROR";
-            case TETHER_ERROR_PROVISION_FAILED: return "TETHER_ERROR_PROVISION_FAILED";
+            case TETHER_ERROR_PROVISIONING_FAILED: return "TETHER_ERROR_PROVISIONING_FAILED";
             default:
                 return String.format("UNKNOWN ERROR (%d)", value);
         }
@@ -592,7 +592,7 @@ public class EntitlementManager {
             protected void onReceiveResult(int resultCode, Bundle resultData) {
                 int updatedCacheValue = updateEntitlementCacheValue(type, resultCode);
                 addDownstreamMapping(type, updatedCacheValue);
-                if (updatedCacheValue == TETHER_ERROR_PROVISION_FAILED && notifyFail) {
+                if (updatedCacheValue == TETHER_ERROR_PROVISIONING_FAILED && notifyFail) {
                     mListener.onUiEntitlementFailed(type);
                 }
                 if (receiver != null) receiver.send(updatedCacheValue, null);
@@ -635,8 +635,8 @@ public class EntitlementManager {
             mEntitlementCacheValue.put(type, resultCode);
             return resultCode;
         } else {
-            mEntitlementCacheValue.put(type, TETHER_ERROR_PROVISION_FAILED);
-            return TETHER_ERROR_PROVISION_FAILED;
+            mEntitlementCacheValue.put(type, TETHER_ERROR_PROVISIONING_FAILED);
+            return TETHER_ERROR_PROVISIONING_FAILED;
         }
     }
 

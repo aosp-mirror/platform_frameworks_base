@@ -57,6 +57,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -2209,6 +2210,28 @@ public final class ContactsContract {
          */
         public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
             return openContactPhotoInputStream(cr, contactUri, false);
+        }
+
+        /**
+         * Creates and returns a corp lookup URI from the given enterprise lookup URI by removing
+         * {@link #ENTERPRISE_CONTACT_LOOKUP_PREFIX} from the key. Returns {@code null} if the given
+         * URI is not an enterprise lookup URI.
+         *
+         * @hide
+         */
+        @Nullable
+        public static Uri createCorpLookupUriFromEnterpriseLookupUri(
+                @NonNull Uri enterpriseLookupUri) {
+            final List<String> pathSegments = enterpriseLookupUri.getPathSegments();
+            if (pathSegments == null || pathSegments.size() <= 2) {
+                return null;
+            }
+            final String key = pathSegments.get(2);
+            if (TextUtils.isEmpty(key) || !key.startsWith(ENTERPRISE_CONTACT_LOOKUP_PREFIX)) {
+                return null;
+            }
+            final String actualKey = key.substring(ENTERPRISE_CONTACT_LOOKUP_PREFIX.length());
+            return Uri.withAppendedPath(Contacts.CONTENT_LOOKUP_URI, actualKey);
         }
     }
 

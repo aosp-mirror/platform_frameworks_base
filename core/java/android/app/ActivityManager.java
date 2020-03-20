@@ -4656,7 +4656,6 @@ public class ActivityManager {
      * @return Returns the boolean result.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS

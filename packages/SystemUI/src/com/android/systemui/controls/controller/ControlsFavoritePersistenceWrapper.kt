@@ -51,6 +51,7 @@ class ControlsFavoritePersistenceWrapper(
         private const val TAG_COMPONENT = "component"
         private const val TAG_ID = "id"
         private const val TAG_TITLE = "title"
+        private const val TAG_SUBTITLE = "subtitle"
         private const val TAG_TYPE = "type"
         private const val TAG_VERSION = "version"
 
@@ -102,6 +103,7 @@ class ControlsFavoritePersistenceWrapper(
                             startTag(null, TAG_CONTROL)
                             attribute(null, TAG_ID, c.controlId)
                             attribute(null, TAG_TITLE, c.controlTitle.toString())
+                            attribute(null, TAG_SUBTITLE, c.controlSubtitle.toString())
                             attribute(null, TAG_TYPE, c.deviceType.toString())
                             endTag(null, TAG_CONTROL)
                         }
@@ -168,9 +170,10 @@ class ControlsFavoritePersistenceWrapper(
             } else if (type == XmlPullParser.START_TAG && tagName == TAG_CONTROL) {
                 val id = parser.getAttributeValue(null, TAG_ID)
                 val title = parser.getAttributeValue(null, TAG_TITLE)
+                val subtitle = parser.getAttributeValue(null, TAG_SUBTITLE) ?: ""
                 val deviceType = parser.getAttributeValue(null, TAG_TYPE)?.toInt()
                 if (id != null && title != null && deviceType != null) {
-                    controls.add(ControlInfo(id, title, deviceType))
+                    controls.add(ControlInfo(id, title, subtitle, deviceType))
                 }
             } else if (type == XmlPullParser.END_TAG && tagName == TAG_STRUCTURE) {
                 infos.add(StructureInfo(lastComponent!!, lastStructure!!, controls.toList()))

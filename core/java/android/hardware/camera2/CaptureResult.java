@@ -3562,14 +3562,13 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      *   <li>{@link #SCALER_ROTATE_AND_CROP_AUTO AUTO}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
-     * {@link CameraCharacteristics#SCALER_AVAILABLE_ROTATE_AND_CROP_MODES android.scaler.availableRotateAndCropModes}</p>
+     * android.scaler.availableRotateAndCropModes</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_REGIONS
      * @see CaptureRequest#CONTROL_AF_REGIONS
      * @see CaptureRequest#CONTROL_AWB_REGIONS
      * @see CaptureRequest#CONTROL_ZOOM_RATIO
-     * @see CameraCharacteristics#SCALER_AVAILABLE_ROTATE_AND_CROP_MODES
      * @see CaptureRequest#SCALER_CROP_REGION
      * @see CaptureResult#STATISTICS_FACES
      * @see #SCALER_ROTATE_AND_CROP_NONE
@@ -3577,9 +3576,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see #SCALER_ROTATE_AND_CROP_180
      * @see #SCALER_ROTATE_AND_CROP_270
      * @see #SCALER_ROTATE_AND_CROP_AUTO
+     * @hide
      */
-    @PublicKey
-    @NonNull
     public static final Key<Integer> SCALER_ROTATE_AND_CROP =
             new Key<Integer>("android.scaler.rotateAndCrop", int.class);
 

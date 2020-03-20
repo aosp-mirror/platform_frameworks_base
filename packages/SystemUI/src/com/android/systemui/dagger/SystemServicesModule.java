@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
 import android.media.AudioManager;
@@ -139,6 +140,12 @@ public class SystemServicesModule {
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
     }
 
+    @Provides
+    @Singleton
+    static IPackageManager provideIPackageManager() {
+        return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+    }
+
     @Singleton
     @Provides
     static IStatusBarService provideIStatusBarService() {
@@ -157,13 +164,6 @@ public class SystemServicesModule {
     @Provides
     static IWindowManager provideIWindowManager() {
         return WindowManagerGlobal.getWindowManagerService();
-    }
-
-    /** */
-    @Singleton
-    @Provides
-    public IPackageManager provideIPackageManager() {
-        return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
     }
 
     @Singleton
@@ -228,6 +228,12 @@ public class SystemServicesModule {
     @Provides
     static SensorPrivacyManager provideSensorPrivacyManager(Context context) {
         return context.getSystemService(SensorPrivacyManager.class);
+    }
+
+    @Singleton
+    @Provides
+    static ShortcutManager provideShortcutManager(Context context) {
+        return context.getSystemService(ShortcutManager.class);
     }
 
     @Provides

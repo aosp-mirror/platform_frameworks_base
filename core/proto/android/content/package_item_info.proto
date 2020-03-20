@@ -109,7 +109,7 @@ message ApplicationInfoProto {
         }
         optional int32 network_security_config_res = 17;
         optional int32 category = 18;
-        optional bool enable_gwp_asan = 19;
+        optional int32 enable_gwp_asan = 19;
     }
     optional Detail detail = 17;
 }

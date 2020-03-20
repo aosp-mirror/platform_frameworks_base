@@ -219,7 +219,7 @@ class PackageInstalledNotificationUtils {
         channel.enableVibration(false);
         channel.setSound(null, null);
         channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
-        channel.setBlockableSystem(true);
+        channel.setBlockable(true);
 
         mNotificationManager.createNotificationChannel(channel);
     }

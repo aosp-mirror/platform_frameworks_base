@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.net.TetheringManager.TETHERING_WIFI;
+
 import android.app.ActivityManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.TetheringManager;
+import android.net.TetheringManager.TetheringRequest;
 import android.net.wifi.WifiClient;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
@@ -190,7 +193,7 @@ public class HotspotControllerImpl implements HotspotController, WifiManager.Sof
         if (enabled) {
             mWaitingForTerminalState = true;
             if (DEBUG) Log.d(TAG, "Starting tethering");
-            mTetheringManager.startTethering(ConnectivityManager.TETHERING_WIFI,
+            mTetheringManager.startTethering(new TetheringRequest.Builder(TETHERING_WIFI).build(),
                     ConcurrentUtils.DIRECT_EXECUTOR,
                     new TetheringManager.StartTetheringCallback() {
                         @Override

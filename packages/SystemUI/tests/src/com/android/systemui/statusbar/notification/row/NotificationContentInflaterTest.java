@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
@@ -51,6 +52,7 @@ import androidx.test.filters.Suppress;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback;
@@ -82,6 +84,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
     private ExpandableNotificationRow mRow;
 
     @Mock private NotifRemoteViewCache mCache;
+    @Mock private ConversationNotificationProcessor mConversationNotificationProcessor;
 
     @Before
     public void setUp() throws Exception {
@@ -101,7 +104,9 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
                 mCache,
                 mock(NotificationRemoteInputManager.class),
                 () -> smartReplyConstants,
-                () -> smartReplyController);
+                () -> smartReplyController,
+                mConversationNotificationProcessor,
+                mock(Executor.class));
     }
 
     @Test
@@ -188,6 +193,7 @@ public class NotificationContentInflaterTest extends SysuiTestCase {
         result.packageContext = mContext;
         CountDownLatch countDownLatch = new CountDownLatch(1);
         NotificationContentInflater.applyRemoteView(
+                AsyncTask.SERIAL_EXECUTOR,
                 false /* inflateSynchronously */,
                 result,
                 FLAG_CONTENT_VIEW_EXPANDED,

@@ -287,7 +287,7 @@ public final class CallQuality implements Parcelable {
      * Returns true if only silence rtp packets are received for a duration of 20 seconds starting
      * at call setup
      */
-    public boolean isIncomingSilenceDetected() {
+    public boolean isIncomingSilenceDetectedAtCallSetup() {
         return mRxSilenceDetected;
     }
 
@@ -295,7 +295,7 @@ public final class CallQuality implements Parcelable {
       * Returns true if only silence rtp packets are sent for a duration of 20 seconds starting at
       * call setup
       */
-    public boolean isOutgoingSilenceDetected() {
+    public boolean isOutgoingSilenceDetectedAtCallSetup() {
         return mTxSilenceDetected;
     }
 

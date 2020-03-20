@@ -7587,6 +7587,14 @@ public class WindowManagerService extends IWindowManager.Stub
 
             return mInputManager.transferTouchFocus(sourceInputToken, destinationInputToken);
         }
+
+        @Override
+        public String getWindowName(@NonNull IBinder binder) {
+            synchronized (mGlobalLock) {
+                final WindowState w = mWindowMap.get(binder);
+                return w != null ? w.getName() : null;
+            }
+        }
     }
 
     void registerAppFreezeListener(AppFreezeListener listener) {

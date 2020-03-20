@@ -19,6 +19,7 @@ package com.android.server.notification;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.Person;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
@@ -28,6 +29,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
 import android.provider.Settings;
@@ -37,6 +39,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import libcore.util.EmptyArray;
 
@@ -392,26 +396,57 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
         return searchContacts(context, numberUri);
     }
 
-    private LookupResult searchContacts(Context context, Uri lookupUri) {
+    @VisibleForTesting
+    LookupResult searchContacts(Context context, Uri lookupUri) {
         LookupResult lookupResult = new LookupResult();
-        Cursor c = null;
-        try {
-            c = context.getContentResolver().query(lookupUri, LOOKUP_PROJECTION, null, null, null);
+        final Uri corpLookupUri =
+                ContactsContract.Contacts.createCorpLookupUriFromEnterpriseLookupUri(lookupUri);
+        if (corpLookupUri == null) {
+            addContacts(lookupResult, context, lookupUri);
+        } else {
+            addWorkContacts(lookupResult, context, corpLookupUri);
+        }
+        return lookupResult;
+    }
+
+    private void addWorkContacts(LookupResult lookupResult, Context context, Uri corpLookupUri) {
+        final int workUserId = findWorkUserId(context);
+        if (workUserId == -1) {
+            Slog.w(TAG, "Work profile user ID not found for work contact: " + corpLookupUri);
+            return;
+        }
+        final Uri corpLookupUriWithUserId =
+                ContentProvider.maybeAddUserId(corpLookupUri, workUserId);
+        addContacts(lookupResult, context, corpLookupUriWithUserId);
+    }
+
+    /** Returns the user ID of the managed profile or -1 if none is found. */
+    private int findWorkUserId(Context context) {
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        final int[] profileIds =
+                userManager.getProfileIds(context.getUserId(), /* enabledOnly= */ true);
+        for (int profileId : profileIds) {
+            if (userManager.isManagedProfile(profileId)) {
+                return profileId;
+            }
+        }
+        return -1;
+    }
+
+    /** Modifies the given lookup result to add contacts found at the given URI. */
+    private void addContacts(LookupResult lookupResult, Context context, Uri uri) {
+        try (Cursor c = context.getContentResolver().query(
+                uri, LOOKUP_PROJECTION, null, null, null)) {
             if (c == null) {
                 Slog.w(TAG, "Null cursor from contacts query.");
-                return lookupResult;
+                return;
             }
             while (c.moveToNext()) {
                 lookupResult.mergeContact(c);
             }
         } catch (Throwable t) {
             Slog.w(TAG, "Problem getting content resolver or performing contacts query.", t);
-        } finally {
-            if (c != null) {
-                c.close();
-            }
         }
-        return lookupResult;
     }
 
     private static class LookupResult {

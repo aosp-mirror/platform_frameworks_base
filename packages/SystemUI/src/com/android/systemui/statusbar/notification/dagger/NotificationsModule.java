@@ -16,7 +16,10 @@
 
 package com.android.systemui.statusbar.notification.dagger;
 
+import android.app.INotificationManager;
 import android.content.Context;
+import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutManager;
 import android.os.Handler;
 import android.view.accessibility.AccessibilityManager;
 
@@ -103,14 +106,20 @@ public interface NotificationsModule {
             Lazy<StatusBar> statusBarLazy,
             @Main Handler mainHandler,
             AccessibilityManager accessibilityManager,
-            HighPriorityProvider highPriorityProvider) {
+            HighPriorityProvider highPriorityProvider,
+            INotificationManager notificationManager,
+            LauncherApps launcherApps,
+            ShortcutManager shortcutManager) {
         return new NotificationGutsManager(
                 context,
                 visualStabilityManager,
                 statusBarLazy,
                 mainHandler,
                 accessibilityManager,
-                highPriorityProvider);
+                highPriorityProvider,
+                notificationManager,
+                launcherApps,
+                shortcutManager);
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */

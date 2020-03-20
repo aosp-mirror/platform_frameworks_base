@@ -215,6 +215,7 @@ public final class DisplayManagerService extends SystemService {
     private final ArrayList<DisplayDevice> mDisplayDevices = new ArrayList<DisplayDevice>();
 
     // List of all logical displays indexed by logical display id.
+    // Any modification to mLogicalDisplays must invalidate the DisplayManagerGlobal cache.
     private final SparseArray<LogicalDisplay> mLogicalDisplays =
             new SparseArray<LogicalDisplay>();
     private int mNextNonDefaultDisplayId = Display.DEFAULT_DISPLAY + 1;
@@ -372,6 +373,10 @@ public final class DisplayManagerService extends SystemService {
             loadStableDisplayValuesLocked();
         }
         mHandler.sendEmptyMessage(MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS);
+
+        // If there was a runtime restart then we may have stale caches left around, so we need to
+        // make sure to invalidate them upon every start.
+        DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
 
         publishBinderService(Context.DISPLAY_SERVICE, new BinderService(),
                 true /*allowIsolated*/);
@@ -1005,7 +1010,15 @@ public final class DisplayManagerService extends SystemService {
         if (displayId == Display.DEFAULT_DISPLAY) {
             recordTopInsetLocked(display);
         }
+        // We don't bother invalidating the display info caches here because any changes to the
+        // display info will trigger a cache invalidation inside of LogicalDisplay before we hit
+        // this point.
         sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
+    }
+
+    private void handleLogicalDisplayRemoved(int displayId) {
+        DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
+        sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
     }
 
     private void applyGlobalDisplayStateLocked(List<Runnable> workQueue) {
@@ -1066,6 +1079,7 @@ public final class DisplayManagerService extends SystemService {
         }
 
         mLogicalDisplays.put(displayId, display);
+        DisplayManagerGlobal.invalidateLocalDisplayInfoCaches();
 
         // Wake up waitForDefaultDisplay.
         if (isDefault) {
@@ -1206,7 +1220,7 @@ public final class DisplayManagerService extends SystemService {
             display.updateLocked(mDisplayDevices);
             if (!display.isValidLocked()) {
                 mLogicalDisplays.removeAt(i);
-                sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_REMOVED);
+                handleLogicalDisplayRemoved(displayId);
                 changed = true;
             } else if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
                 handleLogicalDisplayChanged(displayId, display);

@@ -409,9 +409,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private boolean allowDontAutoRevokePermissions;
     private boolean preserveLegacyExternalStorage;
 
-    @Nullable
-    @DataClass.ParcelWith(ForBoolean.class)
-    protected Boolean enableGwpAsan = null;
+    protected int gwpAsanMode;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -911,7 +909,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.volumeUuid = volumeUuid;
         appInfo.zygotePreloadName = zygotePreloadName;
         appInfo.crossProfile = isCrossProfile();
-        appInfo.setGwpAsanEnabled(enableGwpAsan);
+        appInfo.setGwpAsanMode(gwpAsanMode);
         appInfo.setBaseCodePath(baseCodePath);
         appInfo.setBaseResourcePath(baseCodePath);
         appInfo.setCodePath(codePath);
@@ -1095,7 +1093,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBoolean(this.allowDontAutoRevokePermissions);
         dest.writeBoolean(this.preserveLegacyExternalStorage);
         dest.writeArraySet(this.mimeGroups);
-        sForBoolean.parcel(this.enableGwpAsan, dest, flags);
+        dest.writeInt(this.gwpAsanMode);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1255,7 +1253,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.allowDontAutoRevokePermissions = in.readBoolean();
         this.preserveLegacyExternalStorage = in.readBoolean();
         this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
-        this.enableGwpAsan = sForBoolean.unparcel(in);
+        this.gwpAsanMode = in.readInt();
     }
 
     public static final Parcelable.Creator<ParsingPackageImpl> CREATOR =
@@ -1978,9 +1976,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    @Nullable
-    public Boolean isGwpAsanEnabled() {
-        return enableGwpAsan;
+    public int getGwpAsanMode() {
+        return gwpAsanMode;
     }
 
     @Override
@@ -2449,8 +2446,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setGwpAsanEnabled(@Nullable Boolean value) {
-        enableGwpAsan = value;
+    public ParsingPackageImpl setGwpAsanMode(int value) {
+        gwpAsanMode = value;
         return this;
     }
 

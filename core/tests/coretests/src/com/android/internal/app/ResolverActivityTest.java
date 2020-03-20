@@ -624,7 +624,7 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_turn_on_work_apps_view))
+        onView(withText(R.string.resolver_turn_on_work_apps))
                 .check(matches(isDisplayed()));
     }
 
@@ -648,7 +648,7 @@ public class ResolverActivityTest {
         onView(withText(R.string.resolver_work_tab)).perform(click());
         waitForIdle();
 
-        onView(withText(R.string.resolver_no_apps_available))
+        onView(withText(R.string.resolver_no_work_apps_available_resolve))
                 .check(matches(isDisplayed()));
     }
 

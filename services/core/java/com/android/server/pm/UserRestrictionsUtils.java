@@ -395,22 +395,6 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * Merges a sparse array of restrictions bundles into one.
-     */
-    @Nullable
-    public static Bundle mergeAll(SparseArray<Bundle> restrictions) {
-        if (restrictions.size() == 0) {
-            return null;
-        } else {
-            final Bundle result = new Bundle();
-            for (int i = 0; i < restrictions.size(); i++) {
-                merge(result, restrictions.valueAt(i));
-            }
-            return result;
-        }
-    }
-
-    /**
      * @return true if a restriction is settable by device owner.
      */
     public static boolean canDeviceOwnerChange(String restriction) {
@@ -864,27 +848,15 @@ public class UserRestrictionsUtils {
     }
 
     /**
-     * Moves a particular restriction from one array of bundles to another, e.g. for all users.
+     * Moves a particular restriction from one array of restrictions sets to a restriction set,
+     * e.g. for all users.
      */
-    public static void moveRestriction(String restrictionKey, SparseArray<Bundle> srcRestrictions,
-            SparseArray<Bundle> destRestrictions) {
-        for (int i = 0; i < srcRestrictions.size(); i++) {
-            final int key = srcRestrictions.keyAt(i);
-            final Bundle from = srcRestrictions.valueAt(i);
-            if (contains(from, restrictionKey)) {
-                from.remove(restrictionKey);
-                Bundle to = destRestrictions.get(key);
-                if (to == null) {
-                    to = new Bundle();
-                    destRestrictions.append(key, to);
-                }
-                to.putBoolean(restrictionKey, true);
-                // Don't keep empty bundles.
-                if (from.isEmpty()) {
-                    srcRestrictions.removeAt(i);
-                    i--;
-                }
-            }
+    public static void moveRestriction(String restrictionKey,
+            SparseArray<RestrictionsSet> sourceRestrictionsSets,
+            RestrictionsSet destRestrictionSet) {
+        for (int i = 0; i < sourceRestrictionsSets.size(); i++) {
+            final RestrictionsSet sourceRestrictionsSet = sourceRestrictionsSets.valueAt(i);
+            sourceRestrictionsSet.moveRestriction(destRestrictionSet, restrictionKey);
         }
     }
 

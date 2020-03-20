@@ -725,8 +725,8 @@ public class PreferencesHelper implements RankingConfig {
                     existing.setDescription(channel.getDescription());
                     needsPolicyFileChange = true;
                 }
-                if (channel.isBlockableSystem() != existing.isBlockableSystem()) {
-                    existing.setBlockableSystem(channel.isBlockableSystem());
+                if (channel.isBlockable() != existing.isBlockable()) {
+                    existing.setBlockable(channel.isBlockable());
                     needsPolicyFileChange = true;
                 }
                 if (channel.getGroup() != null && existing.getGroup() == null) {

@@ -240,7 +240,7 @@ public interface ParsingPackage extends ParsingPackageRead {
 
     ParsingPackage setEnabled(boolean enabled);
 
-    ParsingPackage setGwpAsanEnabled(Boolean enableGwpAsan);
+    ParsingPackage setGwpAsanMode(int gwpAsanMode);
 
     ParsingPackage setCrossProfile(boolean crossProfile);
 

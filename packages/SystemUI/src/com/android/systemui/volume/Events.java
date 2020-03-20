@@ -238,7 +238,7 @@ public class Events {
         @UiEvent(doc = "The ringer mode was toggled to vibrate")
         RINGER_MODE_VIBRATE(155),
         @UiEvent(doc = "The ringer mode was toggled to normal")
-        RINGER_MODE_NORMAL(156),
+        RINGER_MODE_NORMAL(334),
         @UiEvent(doc = "USB Overheat alarm was raised")
         USB_OVERHEAT_ALARM(160),
         @UiEvent(doc = "USB Overheat alarm was dismissed")
@@ -293,7 +293,7 @@ public class Events {
     public enum ZenModeEvent implements UiEventLogger.UiEventEnum {
         INVALID(0),
         @UiEvent(doc = "Zen (do not disturb) mode was toggled to off")
-        ZEN_MODE_OFF(156),
+        ZEN_MODE_OFF(335),
         @UiEvent(doc = "Zen (do not disturb) mode was toggled to important interruptions only")
         ZEN_MODE_IMPORTANT_ONLY(157),
         @UiEvent(doc = "Zen (do not disturb) mode was toggled to alarms only")

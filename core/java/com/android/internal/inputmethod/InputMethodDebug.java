@@ -229,7 +229,7 @@ public final class InputMethodDebug {
 
     /**
      * Return a fixed size string of the object.
-     * TODO(b/141738570): Take & return with StringBuilder to make more memory efficient.
+     * TODO(b/151575861): Take & return with StringBuilder to make more memory efficient.
      */
     @NonNull
     @AnyThread

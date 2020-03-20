@@ -274,8 +274,13 @@ public class IntentFilter implements Parcelable {
      */
     public static final String SCHEME_HTTPS = "https";
 
-    /** The value to indicate a wildcard for incoming match arguments. */
-    private static final String WILDCARD = "*";
+    /**
+     * The value to indicate a wildcard for incoming match arguments.
+     * @hide
+     */
+    public static final String WILDCARD = "*";
+    /** @hide */
+    public static final String WILDCARD_PATH = "/" + WILDCARD;
 
     private int mPriority;
     @UnsupportedAppUsage
@@ -1439,7 +1444,7 @@ public class IntentFilter implements Parcelable {
         if (mDataPaths == null) {
             return false;
         }
-        if (wildcardSupported && WILDCARD.equals(data)) {
+        if (wildcardSupported && WILDCARD_PATH.equals(data)) {
             return true;
         }
         final int numDataPaths = mDataPaths.size();

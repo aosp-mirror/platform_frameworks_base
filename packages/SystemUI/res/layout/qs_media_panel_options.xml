@@ -19,23 +19,40 @@
     android:id="@+id/qs_media_controls_options"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     android:gravity="center"
-    android:layout_gravity="center"
-    android:padding="10dp"
-    >
-    <ImageButton
+    android:padding="16dp"
+    android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_weight="1"
+        android:minWidth="48dp"
+        android:layout_gravity="start|bottom"
+        android:gravity="bottom"
         android:id="@+id/remove"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:src="@android:drawable/ic_menu_delete"
-        android:padding="8dp"
-    />
-    <ImageButton
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:id="@+id/remove_icon"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_clear"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/remove_text"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:singleLine="true"
+            android:text="@string/controls_media_close_session" />
+    </LinearLayout>
+    <TextView
         android:id="@+id/cancel"
-        android:layout_width="48dp"
+        android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:src="@android:drawable/ic_menu_revert"
-        android:padding="8dp"
-    />
+        android:layout_weight="1"
+        android:minWidth="48dp"
+        android:layout_gravity="end|bottom"
+        android:gravity="bottom"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:text="@string/cancel" />
 </LinearLayout>

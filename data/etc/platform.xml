@@ -190,6 +190,8 @@
     <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
 
+    <assign-permission name="android.permission.REGISTER_STATS_PULL_ATOM" uid="gpu_service" />
+
     <split-permission name="android.permission.ACCESS_FINE_LOCATION">
         <new-permission name="android.permission.ACCESS_COARSE_LOCATION" />
     </split-permission>

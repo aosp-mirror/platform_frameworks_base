@@ -2909,28 +2909,6 @@ public class WifiManager {
     }
 
     /**
-     * Return TX packet counter, for CTS test of WiFi watchdog.
-     * @param listener is the interface to receive result
-     *
-     * @hide for CTS test only
-     */
-    // TODO(b/144036594): add @TestApi
-    public void getTxPacketCount(@NonNull TxPacketCountListener listener) {
-        if (listener == null) throw new IllegalArgumentException("listener cannot be null");
-        Binder binder = new Binder();
-        TxPacketCountListenerProxy listenerProxy =
-                new TxPacketCountListenerProxy(mLooper, listener);
-        try {
-            mService.getTxPacketCount(mContext.getOpPackageName(), binder, listenerProxy,
-                    listener.hashCode());
-        } catch (RemoteException e) {
-            listenerProxy.onFailure(ERROR);
-        } catch (SecurityException e) {
-            listenerProxy.onFailure(NOT_AUTHORIZED);
-        }
-    }
-
-    /**
      * Calculates the level of the signal. This should be used any time a signal
      * is being shown.
      *
@@ -3580,56 +3558,6 @@ public class WifiManager {
          * @deprecated This API is deprecated
          */
         public abstract void onFailed(int reason);
-    }
-
-    /** Interface for callback invocation on a TX packet count poll action {@hide} */
-    public interface TxPacketCountListener {
-        /**
-         * The operation succeeded
-         * @param count TX packet counter
-         */
-        public void onSuccess(int count);
-        /**
-         * The operation failed
-         * @param reason The reason for failure could be one of
-         * {@link #ERROR}, {@link #IN_PROGRESS} or {@link #BUSY}
-         */
-        public void onFailure(int reason);
-    }
-
-    /**
-     * Callback proxy for TxPacketCountListener objects.
-     *
-     * @hide
-     */
-    private class TxPacketCountListenerProxy extends ITxPacketCountListener.Stub {
-        private final Handler mHandler;
-        private final TxPacketCountListener mCallback;
-
-        TxPacketCountListenerProxy(Looper looper, TxPacketCountListener callback) {
-            mHandler = new Handler(looper);
-            mCallback = callback;
-        }
-
-        @Override
-        public void onSuccess(int count) {
-            if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "TxPacketCounterProxy: onSuccess: count=" + count);
-            }
-            mHandler.post(() -> {
-                mCallback.onSuccess(count);
-            });
-        }
-
-        @Override
-        public void onFailure(int reason) {
-            if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "TxPacketCounterProxy: onFailure: reason=" + reason);
-            }
-            mHandler.post(() -> {
-                mCallback.onFailure(reason);
-            });
-        }
     }
 
     /**

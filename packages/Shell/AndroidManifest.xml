@@ -272,6 +272,9 @@
     <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
 
+    <!-- Permission needed to use wifi usability API's for CtsNetTestCases -->
+    <uses-permission android:name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE" />
+
     <!-- Permission needed to test registering pull atom callbacks -->
     <uses-permission android:name="android.permission.REGISTER_STATS_PULL_ATOM" />
 

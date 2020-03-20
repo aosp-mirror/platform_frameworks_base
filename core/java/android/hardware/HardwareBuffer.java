@@ -46,7 +46,7 @@ import java.lang.annotation.RetentionPolicy;
 public final class HardwareBuffer implements Parcelable, AutoCloseable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = { "RGB", "BLOB", "D_", "DS_", "S_" }, value = {
+    @IntDef(prefix = { "RGB", "BLOB", "YCBCR_", "D_", "DS_", "S_" }, value = {
             RGBA_8888,
             RGBA_FP16,
             RGBA_1010102,
@@ -54,6 +54,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             RGB_888,
             RGB_565,
             BLOB,
+            YCBCR_420_888,
             D_16,
             D_24,
             DS_24UI8,
@@ -79,6 +80,8 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
     public static final int RGBA_1010102 = 0x2b;
     /** Format: opaque format used for raw data transfer; must have a height of 1 */
     public static final int BLOB         = 0x21;
+    /** Format: Planar YCbCr 420; must have an even width and height */
+    public static final int YCBCR_420_888 = 0x23;
     /** Format: 16 bits depth */
     public static final int D_16         = 0x30;
     /** Format: 24 bits depth */
@@ -396,6 +399,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
             case RGB_565:
             case RGB_888:
             case BLOB:
+            case YCBCR_420_888:
             case D_16:
             case D_24:
             case DS_24UI8:

@@ -27,7 +27,10 @@ using google::protobuf::EnumDescriptor;
 using google::protobuf::FieldDescriptor;
 using google::protobuf::FileDescriptor;
 using google::protobuf::SourceLocation;
+using std::make_shared;
 using std::map;
+
+const bool dbg = false;
 
 
 //
@@ -45,6 +48,7 @@ AtomDecl::AtomDecl(const AtomDecl &that)
         name(that.name),
         message(that.message),
         fields(that.fields),
+        fieldNumberToAnnotations(that.fieldNumberToAnnotations),
         primaryFields(that.primaryFields),
         exclusiveField(that.exclusiveField),
         defaultState(that.defaultState),
@@ -52,8 +56,7 @@ AtomDecl::AtomDecl(const AtomDecl &that)
         nested(that.nested),
         uidField(that.uidField),
         whitelisted(that.whitelisted),
-        binaryFields(that.binaryFields),
-        moduleNames(that.moduleNames) {}
+        binaryFields(that.binaryFields) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
     :code(c),
@@ -158,6 +161,17 @@ void collate_enums(const EnumDescriptor &enumDescriptor, AtomField *atomField) {
         atomField->enumValues[enumDescriptor.value(i)->number()] =
             enumDescriptor.value(i)->name().c_str();
     }
+}
+
+static void addAnnotationToAtomDecl(AtomDecl* atomDecl, const int fieldNumber,
+        const int annotationId, const AnnotationType annotationType,
+        const AnnotationValue annotationValue) {
+    if (dbg) {
+        printf("   Adding annotation to %s: [%d] = {id: %d, type: %d}\n",
+                atomDecl->name.c_str(), fieldNumber, annotationId, annotationType);
+    }
+    atomDecl->fieldNumberToAnnotations[fieldNumber].insert(make_shared<Annotation>(
+                annotationId, atomDecl->code, annotationType, annotationValue));
 }
 
 /**
@@ -279,7 +293,6 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
       if (javaType == JAVA_TYPE_ENUM) {
         // All enums are treated as ints when it comes to function signatures.
         signature->push_back(JAVA_TYPE_INT);
-        collate_enums(*field->enum_type(), &atField);
       } else if (javaType == JAVA_TYPE_OBJECT && isBinaryField) {
           signature->push_back(JAVA_TYPE_BYTE_ARRAY);
       } else {
@@ -292,64 +305,121 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     }
     atomDecl->fields.push_back(atField);
 
-    if (field->options().GetExtension(os::statsd::state_field_option).option() ==
-        os::statsd::StateField::PRIMARY_FIELD) {
-        if (javaType == JAVA_TYPE_UNKNOWN ||
-            javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
-            javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
-            errorCount++;
+    if (field->options().HasExtension(os::statsd::state_field_option)) {
+        const int option = field->options().GetExtension(os::statsd::state_field_option).option();
+        if (option != STATE_OPTION_UNSET) {
+            addAnnotationToAtomDecl(atomDecl, signature->size(), ANNOTATION_ID_STATE_OPTION,
+                    ANNOTATION_TYPE_INT, AnnotationValue(option));
         }
-        atomDecl->primaryFields.push_back(it->first);
+
+        if (option == STATE_OPTION_PRIMARY) {
+            if (javaType == JAVA_TYPE_UNKNOWN ||
+                    javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
+                    javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
+                print_error(
+                    field,
+                    "Invalid primary state field: '%s'\n",
+                    atom->name().c_str());
+                errorCount++;
+                continue;
+            }
+            atomDecl->primaryFields.push_back(it->first);
+
+        }
+
+        if (option == STATE_OPTION_PRIMARY_FIELD_FIRST_UID) {
+            if (javaType != JAVA_TYPE_ATTRIBUTION_CHAIN) {
+                print_error(
+                    field,
+                    "PRIMARY_FIELD_FIRST_UID annotation is only for AttributionChains: '%s'\n",
+                    atom->name().c_str());
+                errorCount++;
+                continue;
+            } else {
+                atomDecl->primaryFields.push_back(FIRST_UID_IN_CHAIN_ID);
+            }
+        }
+
+        if (option == STATE_OPTION_EXCLUSIVE) {
+            if (javaType == JAVA_TYPE_UNKNOWN ||
+                    javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
+                    javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
+                print_error(
+                    field,
+                    "Invalid exclusive state field: '%s'\n",
+                    atom->name().c_str());
+                errorCount++;
+                continue;
+            }
+
+            if (atomDecl->exclusiveField == 0) {
+                atomDecl->exclusiveField = it->first;
+            } else {
+                print_error(
+                    field,
+                    "Cannot have more than one exclusive state field in an atom: '%s'\n",
+                    atom->name().c_str());
+                errorCount++;
+                continue;
+            }
+
+            if (field->options()
+                        .GetExtension(os::statsd::state_field_option)
+                        .has_default_state_value()) {
+                const int defaultState =
+                        field->options().GetExtension(os::statsd::state_field_option)
+                        .default_state_value();
+                atomDecl->defaultState = defaultState;
+
+                addAnnotationToAtomDecl(atomDecl, signature->size(), ANNOTATION_ID_DEFAULT_STATE,
+                        ANNOTATION_TYPE_INT, AnnotationValue(defaultState));
+            }
+
+            if (field->options().GetExtension(os::statsd::state_field_option)
+                    .has_reset_state_value()) {
+                const int resetState = field->options()
+                        .GetExtension(os::statsd::state_field_option)
+                        .reset_state_value();
+
+                atomDecl->resetState = resetState;
+                addAnnotationToAtomDecl(atomDecl, signature->size(), ANNOTATION_ID_RESET_STATE,
+                        ANNOTATION_TYPE_INT, AnnotationValue(resetState));
+            }
+
+            if (field->options().GetExtension(os::statsd::state_field_option)
+                    .has_nested()) {
+                const bool nested =
+                        field->options().GetExtension(os::statsd::state_field_option).nested();
+                atomDecl->nested = nested;
+
+                addAnnotationToAtomDecl(atomDecl, signature->size(), ANNOTATION_ID_STATE_NESTED,
+                        ANNOTATION_TYPE_BOOL, AnnotationValue(nested));
+            }
+        }
+
     }
-
-    if (field->options().GetExtension(os::statsd::state_field_option).option() ==
-        os::statsd::StateField::PRIMARY_FIELD_FIRST_UID) {
-        if (javaType != JAVA_TYPE_ATTRIBUTION_CHAIN) {
-            errorCount++;
-        } else {
-            atomDecl->primaryFields.push_back(FIRST_UID_IN_CHAIN_ID);
-        }
-    }
-
-    if (field->options().GetExtension(os::statsd::state_field_option).option() ==
-        os::statsd::StateField::EXCLUSIVE_STATE) {
-        if (javaType == JAVA_TYPE_UNKNOWN ||
-            javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
-            javaType == JAVA_TYPE_OBJECT || javaType == JAVA_TYPE_BYTE_ARRAY) {
-            errorCount++;
-        }
-
-        if (atomDecl->exclusiveField == 0) {
-            atomDecl->exclusiveField = it->first;
-        } else {
-            errorCount++;
-        }
-
-        if (field->options()
-                    .GetExtension(os::statsd::state_field_option)
-                    .has_default_state_value()) {
-            atomDecl->defaultState = field->options()
-                                             .GetExtension(os::statsd::state_field_option)
-                                             .default_state_value();
-        }
-
-        if (field->options().GetExtension(os::statsd::state_field_option).has_reset_state_value()) {
-            atomDecl->resetState = field->options()
-                                           .GetExtension(os::statsd::state_field_option)
-                                           .reset_state_value();
-        }
-        atomDecl->nested = field->options().GetExtension(os::statsd::state_field_option).nested();
-    }
-
     if (field->options().GetExtension(os::statsd::is_uid) == true) {
         if (javaType != JAVA_TYPE_INT) {
+            print_error(
+                field,
+                "is_uid annotation can only be applied to int32 fields: '%s'\n",
+                atom->name().c_str());
             errorCount++;
+            continue;
         }
 
         if (atomDecl->uidField == 0) {
             atomDecl->uidField = it->first;
+
+            addAnnotationToAtomDecl(atomDecl, signature->size(), ANNOTATION_ID_IS_UID,
+                    ANNOTATION_TYPE_BOOL, AnnotationValue(true));
         } else {
+            print_error(
+                field,
+                "Cannot have more than one field in an atom with is_uid annotation: '%s'\n",
+                atom->name().c_str());
             errorCount++;
+            continue;
         }
     }
     // Binary field validity is already checked above.
@@ -408,16 +478,49 @@ bool get_non_chained_node(const Descriptor *atom, AtomDecl *atomDecl,
     return has_attribution_node;
 }
 
+static void populateFieldNumberToAnnotations(
+        const AtomDecl& atomDecl,
+        FieldNumberToAnnotations* fieldNumberToAnnotations) {
+    for (FieldNumberToAnnotations::const_iterator it = atomDecl.fieldNumberToAnnotations.begin();
+            it != atomDecl.fieldNumberToAnnotations.end(); it++) {
+        const int fieldNumber = it->first;
+        const set<shared_ptr<Annotation>>& insertAnnotationsSource = it->second;
+        set<shared_ptr<Annotation>>& insertAnnotationsTarget =
+                (*fieldNumberToAnnotations)[fieldNumber];
+        insertAnnotationsTarget.insert(
+                insertAnnotationsSource.begin(),
+                insertAnnotationsSource.end());
+    }
+}
+
 /**
  * Gather the info about the atoms.
  */
-int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
+int collate_atoms(const Descriptor *descriptor, const string& moduleName, Atoms *atoms) {
   int errorCount = 0;
-  const bool dbg = false;
 
   int maxPushedAtomId = 2;
   for (int i = 0; i < descriptor->field_count(); i++) {
     const FieldDescriptor *atomField = descriptor->field(i);
+
+    if (moduleName != DEFAULT_MODULE_NAME) {
+        const int moduleCount = atomField->options().ExtensionSize(os::statsd::module);
+        int j;
+        for (j = 0; j < moduleCount; ++j) {
+            const string atomModuleName = atomField->options().GetExtension(os::statsd::module, j);
+            if (atomModuleName == moduleName) {
+                break;
+            }
+        }
+
+        // This atom is not in the module we're interested in; skip it.
+        if (moduleCount == j) {
+            if (dbg) {
+              printf("   Skipping %s (%d)\n", atomField->name().c_str(), atomField->number());
+            }
+            continue;
+        }
+    }
 
     if (dbg) {
       printf("   %s (%d)\n", atomField->name().c_str(), atomField->number());
@@ -441,27 +544,27 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
         atomDecl.whitelisted = true;
     }
 
-    for (int j = 0; j < atomField->options().ExtensionSize(os::statsd::module); ++j) {
-        const string moduleName = atomField->options().GetExtension(os::statsd::module, j);
-        atomDecl.moduleNames.insert(moduleName);
-    }
-
     vector<java_type_t> signature;
     errorCount += collate_atom(atom, &atomDecl, &signature);
     if (atomDecl.primaryFields.size() != 0 && atomDecl.exclusiveField == 0) {
+        print_error(atomField,
+                  "Cannot have a primary field without an exclusive field: %s\n",
+                  atomField->name().c_str());
         errorCount++;
+        continue;
     }
 
-    atoms->signatures_to_modules[signature].insert(
-            atomDecl.moduleNames.begin(), atomDecl.moduleNames.end());
     atoms->decls.insert(atomDecl);
+    FieldNumberToAnnotations& fieldNumberToAnnotations = atoms->signatureInfoMap[signature];
+    populateFieldNumberToAnnotations(atomDecl, &fieldNumberToAnnotations);
 
     AtomDecl nonChainedAtomDecl(atomField->number(), atomField->name(), atom->name());
     vector<java_type_t> nonChainedSignature;
     if (get_non_chained_node(atom, &nonChainedAtomDecl, &nonChainedSignature)) {
-        atoms->non_chained_signatures_to_modules[nonChainedSignature].insert(
-            atomDecl.moduleNames.begin(), atomDecl.moduleNames.end());
         atoms->non_chained_decls.insert(nonChainedAtomDecl);
+        FieldNumberToAnnotations& fieldNumberToAnnotations =
+                atoms->nonChainedSignatureInfoMap[nonChainedSignature];
+        populateFieldNumberToAnnotations(atomDecl, &fieldNumberToAnnotations);
     }
 
     if (atomDecl.code < PULL_ATOM_START_ID && atomDecl.code > maxPushedAtomId) {
@@ -473,12 +576,12 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
 
   if (dbg) {
     printf("signatures = [\n");
-    for (map<vector<java_type_t>, set<string>>::const_iterator it =
-             atoms->signatures_to_modules.begin();
-         it != atoms->signatures_to_modules.end(); it++) {
+    for (map<vector<java_type_t>, FieldNumberToAnnotations>::const_iterator it =
+             atoms->signatureInfoMap.begin();
+         it != atoms->signatureInfoMap.end(); it++) {
       printf("   ");
       for (vector<java_type_t>::const_iterator jt = it->first.begin();
-           jt != it->first.end(); jt++) {
+           jt != it->first.end(); jt++){
         printf(" %d", (int)*jt);
       }
       printf("\n");

@@ -15,4 +15,4 @@
  */
 package android.telephony;
 
-parcelable DisplayInfo;
+parcelable TelephonyDisplayInfo;

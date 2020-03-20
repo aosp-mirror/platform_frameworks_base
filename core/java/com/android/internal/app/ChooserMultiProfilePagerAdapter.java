@@ -175,7 +175,7 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
             View.OnClickListener listener) {
         showEmptyState(activeListAdapter,
                 R.drawable.ic_work_apps_off,
-                R.string.resolver_turn_on_work_apps_share,
+                R.string.resolver_turn_on_work_apps,
                 /* subtitleRes */ 0,
                 listener);
     }
@@ -185,7 +185,7 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         showEmptyState(activeListAdapter,
                 R.drawable.ic_sharing_disabled,
                 R.string.resolver_cant_share_with_work_apps,
-                R.string.resolver_cant_share_cross_profile_explanation);
+                R.string.resolver_cant_share_with_work_apps_explanation);
     }
 
     @Override
@@ -193,7 +193,23 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
         showEmptyState(activeListAdapter,
                 R.drawable.ic_sharing_disabled,
                 R.string.resolver_cant_share_with_personal_apps,
-                R.string.resolver_cant_share_cross_profile_explanation);
+                R.string.resolver_cant_share_with_personal_apps_explanation);
+    }
+
+    @Override
+    protected void showNoPersonalAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
+        showEmptyState(listAdapter,
+                R.drawable.ic_no_apps,
+                R.string.resolver_no_personal_apps_available_share,
+                /* subtitleRes */ 0);
+    }
+
+    @Override
+    protected void showNoWorkAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
+        showEmptyState(listAdapter,
+                R.drawable.ic_no_apps,
+                R.string.resolver_no_work_apps_available_share,
+                /* subtitleRes */ 0);
     }
 
     class ChooserProfileDescriptor extends ProfileDescriptor {

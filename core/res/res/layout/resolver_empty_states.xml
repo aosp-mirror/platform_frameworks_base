@@ -18,7 +18,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/resolver_empty_state"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/resolver_empty_state_height"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:visibility="gone"
@@ -72,4 +72,12 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/resolver_empty_state_subtitle"
         android:indeterminateTint="?attr/colorAccent"/>
+    <TextView android:id="@+id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorBackgroundFloating"
+        android:text="@string/noApplications"
+        android:padding="@dimen/chooser_edge_margin_normal"
+        android:layout_marginBottom="56dp"
+        android:gravity="center"/>
 </RelativeLayout>

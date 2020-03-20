@@ -34,9 +34,8 @@ void write_java_q_logging_constants(FILE* out, const string& indent);
 
 int write_java_methods_q_schema(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
         const AtomDecl &attributionDecl,
-        const string& moduleName,
         const string& indent);
 
 void write_java_helpers_for_q_schema_methods(
@@ -46,7 +45,7 @@ void write_java_helpers_for_q_schema_methods(
         const string& indent);
 
 int write_stats_log_java_q_for_module(FILE* out, const Atoms& atoms,
-        const AtomDecl &attributionDecl, const string& moduleName, const string& javaClass,
+        const AtomDecl &attributionDecl, const string& javaClass,
         const string& javaPackage, const bool supportWorkSource);
 
 }  // namespace stats_log_api_gen

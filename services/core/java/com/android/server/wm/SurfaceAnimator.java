@@ -379,7 +379,8 @@ class SurfaceAnimator {
         if (DEBUG_ANIM) Slog.i(TAG, "Reparenting to leash");
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
-                .setName(surface + " - animation-leash");
+                .setName(surface + " - animation-leash")
+                .setColorLayer();
         final SurfaceControl leash = builder.build();
         if (!hidden) {
             // TODO(b/151665759) Defer reparent calls
@@ -390,6 +391,7 @@ class SurfaceAnimator {
             // seamless rotation.
             transactionFactory.get().unsetColor(leash).show(leash).apply();
         }
+        t.unsetColor(leash);
         t.setWindowCrop(leash, width, height);
         t.setPosition(leash, x, y);
         t.show(leash);

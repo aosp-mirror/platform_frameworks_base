@@ -577,6 +577,7 @@ public final class WifiNetworkSuggestion implements Parcelable {
                             : WifiConfiguration.METERED_OVERRIDE_NONE;
             wifiConfiguration.trusted = !mIsNetworkUntrusted;
             mPasspointConfiguration.setCarrierId(mCarrierId);
+            mPasspointConfiguration.setMeteredOverride(wifiConfiguration.meteredOverride);
             return wifiConfiguration;
         }
 

@@ -424,8 +424,9 @@ public class BlobStoreManagerService extends SystemService {
     private void releaseLeaseInternal(BlobHandle blobHandle, int callingUid,
             String callingPackage) {
         synchronized (mBlobsLock) {
-            final BlobMetadata blobMetadata = getUserBlobsLocked(UserHandle.getUserId(callingUid))
-                    .get(blobHandle);
+            final ArrayMap<BlobHandle, BlobMetadata> userBlobs =
+                    getUserBlobsLocked(UserHandle.getUserId(callingUid));
+            final BlobMetadata blobMetadata = userBlobs.get(blobHandle);
             if (blobMetadata == null || !blobMetadata.isAccessAllowedForCaller(
                     callingPackage, callingUid)) {
                 throw new SecurityException("Caller not allowed to access " + blobHandle
@@ -435,6 +436,10 @@ public class BlobStoreManagerService extends SystemService {
             if (LOGV) {
                 Slog.v(TAG, "Released lease on " + blobHandle
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
+            }
+            if (blobMetadata.shouldBeDeleted(true /* respectLeaseWaitTime */)) {
+                deleteBlobLocked(blobMetadata);
+                userBlobs.remove(blobHandle);
             }
             writeBlobsInfoAsync();
         }
@@ -863,12 +868,15 @@ public class BlobStoreManagerService extends SystemService {
                     getUserBlobsLocked(UserHandle.getUserId(uid));
             userBlobs.entrySet().removeIf(entry -> {
                 final BlobMetadata blobMetadata = entry.getValue();
-                blobMetadata.removeCommitter(packageName, uid);
+                final boolean isACommitter = blobMetadata.isACommitter(packageName, uid);
+                if (isACommitter) {
+                    blobMetadata.removeCommitter(packageName, uid);
+                }
                 blobMetadata.removeLeasee(packageName, uid);
-                // Delete the blob if it doesn't have any active leases.
-                if (!blobMetadata.hasLeases()) {
-                    blobMetadata.getBlobFile().delete();
-                    mActiveBlobIds.remove(blobMetadata.getBlobId());
+                // Regardless of when the blob is committed, we need to delete
+                // it if it was from the deleted package to ensure we delete all traces of it.
+                if (blobMetadata.shouldBeDeleted(isACommitter /* respectLeaseWaitTime */)) {
+                    deleteBlobLocked(blobMetadata);
                     return true;
                 }
                 return false;
@@ -899,8 +907,7 @@ public class BlobStoreManagerService extends SystemService {
             if (userBlobs != null) {
                 for (int i = 0, count = userBlobs.size(); i < count; ++i) {
                     final BlobMetadata blobMetadata = userBlobs.valueAt(i);
-                    blobMetadata.getBlobFile().delete();
-                    mActiveBlobIds.remove(blobMetadata.getBlobId());
+                    deleteBlobLocked(blobMetadata);
                 }
             }
             if (LOGV) {
@@ -938,27 +945,14 @@ public class BlobStoreManagerService extends SystemService {
         for (int i = 0, userCount = mBlobsMap.size(); i < userCount; ++i) {
             final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
             userBlobs.entrySet().removeIf(entry -> {
-                final BlobHandle blobHandle = entry.getKey();
                 final BlobMetadata blobMetadata = entry.getValue();
-                boolean shouldRemove = false;
 
-                // Cleanup expired data blobs.
-                if (blobHandle.isExpired()) {
-                    shouldRemove = true;
-                }
-
-                // Cleanup blobs with no active leases.
-                // TODO: Exclude blobs which were just committed.
-                if (!blobMetadata.hasLeases()) {
-                    shouldRemove = true;
-                }
-
-                if (shouldRemove) {
-                    blobMetadata.getBlobFile().delete();
-                    mActiveBlobIds.remove(blobMetadata.getBlobId());
+                if (blobMetadata.shouldBeDeleted(true /* respectLeaseWaitTime */)) {
+                    deleteBlobLocked(blobMetadata);
                     deletedBlobIds.add(blobMetadata.getBlobId());
+                    return true;
                 }
-                return shouldRemove;
+                return false;
             });
         }
         writeBlobsInfoAsync();
@@ -995,6 +989,12 @@ public class BlobStoreManagerService extends SystemService {
         writeBlobSessionsAsync();
     }
 
+    @GuardedBy("mBlobsLock")
+    private void deleteBlobLocked(BlobMetadata blobMetadata) {
+        blobMetadata.getBlobFile().delete();
+        mActiveBlobIds.remove(blobMetadata.getBlobId());
+    }
+
     void runClearAllSessions(@UserIdInt int userId) {
         synchronized (mBlobsLock) {
             if (userId == UserHandle.USER_ALL) {
@@ -1024,9 +1024,8 @@ public class BlobStoreManagerService extends SystemService {
             if (blobMetadata == null) {
                 return;
             }
-            blobMetadata.getBlobFile().delete();
+            deleteBlobLocked(blobMetadata);
             userBlobs.remove(blobHandle);
-            mActiveBlobIds.remove(blobMetadata.getBlobId());
             writeBlobsInfoAsync();
         }
     }

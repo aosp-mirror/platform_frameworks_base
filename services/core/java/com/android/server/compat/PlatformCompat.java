@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
+import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
@@ -44,6 +45,7 @@ import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * System server internal API for gating and reporting compatibility changes.
@@ -55,6 +57,9 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private final Context mContext;
     private final ChangeReporter mChangeReporter;
     private final CompatConfig mCompatConfig;
+
+    private static int sMinTargetSdk = Build.VERSION_CODES.P;
+    private static int sMaxTargetSdk = Build.VERSION_CODES.Q;
 
     public PlatformCompat(Context context) {
         mContext = context;
@@ -220,6 +225,12 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         return mCompatConfig.dumpChanges();
     }
 
+    @Override
+    public CompatibilityChangeInfo[] listUIChanges() {
+        return Arrays.stream(listAllChanges()).filter(
+                x -> isShownInUI(x)).toArray(CompatibilityChangeInfo[]::new);
+    }
+
     /**
      * Check whether the change is known to the compat config.
      *
@@ -338,5 +349,18 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private void checkCompatChangeReadAndLogPermission() throws SecurityException {
         checkCompatChangeReadPermission();
         checkCompatChangeLogPermission();
+    }
+
+    private boolean isShownInUI(CompatibilityChangeInfo change) {
+        if (change.getLoggingOnly()) {
+            return false;
+        }
+        if (change.getEnableAfterTargetSdk() > 0) {
+            if (change.getEnableAfterTargetSdk() < sMinTargetSdk
+                    || change.getEnableAfterTargetSdk() > sMaxTargetSdk) {
+                return false;
+            }
+        }
+        return true;
     }
 }

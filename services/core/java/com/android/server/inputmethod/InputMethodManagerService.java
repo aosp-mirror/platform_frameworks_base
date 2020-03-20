@@ -774,29 +774,35 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         private int mNextIndex = 0;
         private static final AtomicInteger sSequenceNumber = new AtomicInteger(0);
 
-        // TODO(b/141738570): add requestWindowToken to track who request show / hide softInput.
         private static final class Entry {
-            ClientState mClientState;
-            String mFocusedWindowString;
+            final ClientState mClientState;
             @SoftInputModeFlags
-            int mFocusedWindowSoftInputMode;
+            final int mFocusedWindowSoftInputMode;
             @SoftInputShowHideReason
-            int mReason;
-            boolean mRequestShowKeyboard;
+            final int mReason;
             // The timing of handling MSG_SHOW_SOFT_INPUT or MSG_HIDE_SOFT_INPUT.
-            long mTimestamp;
-            long mWallTime;
-            int mTargetDisplayId;
+            final long mTimestamp;
+            final long mWallTime;
+            final boolean mInFullscreenMode;
+            @NonNull
+            final String mFocusedWindowName;
+            @NonNull
+            final EditorInfo mEditorInfo;
+            @NonNull
+            final String mRequestWindowName;
 
-            Entry(ClientState client, String focusedWindow, @SoftInputModeFlags int softInputMode,
-                    @SoftInputShowHideReason int reason, boolean show) {
+            Entry(ClientState client, EditorInfo editorInfo, String focusedWindowName,
+                    @SoftInputModeFlags int softInputMode, @SoftInputShowHideReason int reason,
+                    boolean inFullscreenMode, String requestWindowName) {
                 mClientState = client;
-                mFocusedWindowString = focusedWindow;
+                mEditorInfo = editorInfo;
+                mFocusedWindowName = focusedWindowName;
                 mFocusedWindowSoftInputMode = softInputMode;
                 mReason = reason;
-                mRequestShowKeyboard = show;
                 mTimestamp = SystemClock.uptimeMillis();
                 mWallTime = System.currentTimeMillis();
+                mInFullscreenMode = inFullscreenMode;
+                mRequestWindowName = requestWindowName;
             }
         }
 
@@ -823,13 +829,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + " (timestamp=" + entry.mTimestamp + ")");
 
                 pw.print(prefix);
-                pw.print(" requestShowKeyboard=" + entry.mRequestShowKeyboard);
-                pw.print(" targetDisplayId=" + entry.mTargetDisplayId);
-                pw.println(" reason=" + entry.mReason);
+                pw.print(" reason=" + InputMethodDebug.softInputDisplayReasonToString(
+                        entry.mReason));
+                pw.println(" inFullscreenMode=" + entry.mInFullscreenMode);
 
                 pw.print(prefix);
-                pw.print(" requestClient=" + entry.mClientState);
-                pw.println(" focusedWindow=" + entry.mFocusedWindowString);
+                pw.println(" requestClient=" + entry.mClientState);
+
+                pw.print(prefix);
+                pw.println(" focusedWindowName=" + entry.mFocusedWindowName);
+
+                pw.print(prefix);
+                pw.println(" requestWindowName=" + entry.mRequestWindowName);
+
+                pw.print(prefix);
+                pw.print(" editorInfo: ");
+                pw.print(" inputType=" + entry.mEditorInfo.inputType);
+                pw.print(" privateImeOptions=" + entry.mEditorInfo.privateImeOptions);
+                pw.println(" fieldId (viewId)=" + entry.mEditorInfo.fieldId);
 
                 pw.print(prefix);
                 pw.println(" focusedWindowSoftInputMode=" + InputMethodDebug.softInputModeToString(
@@ -4012,10 +4029,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + InputMethodDebug.softInputDisplayReasonToString(reason));
                     ((IInputMethod) args.arg1).showSoftInput(
                             (IBinder) args.arg3, msg.arg1, (ResultReceiver) args.arg2);
-                    mSoftInputShowHideHistory.addEntry(
-                            new SoftInputShowHideHistory.Entry(mCurClient,
-                                    InputMethodDebug.objToString(mCurFocusedWindow),
-                                    mCurFocusedWindowSoftInputMode, reason, true /* show */));
+                    mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
+                            mCurClient, mCurAttribute,
+                            mWindowManagerInternal.getWindowName(mCurFocusedWindow),
+                            mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
+                            mWindowManagerInternal.getWindowName(
+                                    mShowRequestWindowMap.get(args.arg3))));
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4029,10 +4048,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             + InputMethodDebug.softInputDisplayReasonToString(reason));
                     ((IInputMethod)args.arg1).hideSoftInput(
                             (IBinder) args.arg3, 0, (ResultReceiver)args.arg2);
-                    mSoftInputShowHideHistory.addEntry(
-                            new SoftInputShowHideHistory.Entry(mCurClient,
-                                    InputMethodDebug.objToString(mCurFocusedWindow),
-                                    mCurFocusedWindowSoftInputMode, reason, false /* show */));
+                    mSoftInputShowHideHistory.addEntry(new SoftInputShowHideHistory.Entry(
+                            mCurClient, mCurAttribute,
+                            mWindowManagerInternal.getWindowName(mCurFocusedWindow),
+                            mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
+                            mWindowManagerInternal.getWindowName(
+                                    mHideRequestWindowMap.get(args.arg3))));
                 } catch (RemoteException e) {
                 }
                 args.recycle();

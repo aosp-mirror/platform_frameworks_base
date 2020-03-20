@@ -370,15 +370,18 @@ public final class NotificationChannel implements Parcelable {
 
     /**
      * Allows users to block notifications sent through this channel, if this channel belongs to
-     * a package that is signed with the system signature. If the channel does not belong to a
-     * package that is signed with the system signature, this method does nothing.
-     * @param blockableSystem if {@code true}, allows users to block notifications on this channel.
+     * a package that is signed with the system signature.
+     *
+     * If the channel does not belong to a package that is signed with the system signature, this
+     * method does nothing, since such channels are blockable by default and cannot be set to be
+     * unblockable.
+     * @param blockable if {@code true}, allows users to block notifications on this channel.
      * @hide
      */
     @SystemApi
     @TestApi
-    public void setBlockableSystem(boolean blockableSystem) {
-        mBlockableSystem = blockableSystem;
+    public void setBlockable(boolean blockable) {
+        mBlockableSystem = blockable;
     }
     // Modifiable by apps post channel creation
 
@@ -749,7 +752,7 @@ public final class NotificationChannel implements Parcelable {
      * @hide
      */
     @TestApi
-    public boolean isBlockableSystem() {
+    public boolean isBlockable() {
         return mBlockableSystem;
     }
 
@@ -873,7 +876,7 @@ public final class NotificationChannel implements Parcelable {
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
         setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
-        setBlockableSystem(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
+        setBlockable(safeBool(parser, ATT_BLOCKABLE_SYSTEM, false));
         setAllowBubbles(safeBool(parser, ATT_ALLOW_BUBBLE, DEFAULT_ALLOW_BUBBLE));
         setOriginalImportance(safeInt(parser, ATT_ORIG_IMP, DEFAULT_IMPORTANCE));
         setConversationId(parser.getAttributeValue(null, ATT_PARENT_CHANNEL),
@@ -995,8 +998,8 @@ public final class NotificationChannel implements Parcelable {
         if (getGroup() != null) {
             out.attribute(null, ATT_GROUP, getGroup());
         }
-        if (isBlockableSystem()) {
-            out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockableSystem()));
+        if (isBlockable()) {
+            out.attribute(null, ATT_BLOCKABLE_SYSTEM, Boolean.toString(isBlockable()));
         }
         if (canBubble() != DEFAULT_ALLOW_BUBBLE) {
             out.attribute(null, ATT_ALLOW_BUBBLE, Boolean.toString(canBubble()));
@@ -1060,7 +1063,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
         record.put(ATT_GROUP, getGroup());
-        record.put(ATT_BLOCKABLE_SYSTEM, isBlockableSystem());
+        record.put(ATT_BLOCKABLE_SYSTEM, isBlockable());
         record.put(ATT_ALLOW_BUBBLE, canBubble());
         // TODO: original importance
         return record;
@@ -1162,7 +1165,7 @@ public final class NotificationChannel implements Parcelable {
                 && mVibrationEnabled == that.mVibrationEnabled
                 && mShowBadge == that.mShowBadge
                 && isDeleted() == that.isDeleted()
-                && isBlockableSystem() == that.isBlockableSystem()
+                && isBlockable() == that.isBlockable()
                 && mAllowBubbles == that.mAllowBubbles
                 && Objects.equals(getId(), that.getId())
                 && Objects.equals(getName(), that.getName())
@@ -1186,7 +1189,7 @@ public final class NotificationChannel implements Parcelable {
                 getLockscreenVisibility(), getSound(), mLights, getLightColor(),
                 getUserLockedFields(),
                 isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
-                getAudioAttributes(), isBlockableSystem(), mAllowBubbles,
+                getAudioAttributes(), isBlockable(), mAllowBubbles,
                 mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance,
                 mParentId, mConversationId, mDemoted, mImportantConvo);
         result = 31 * result + Arrays.hashCode(mVibration);

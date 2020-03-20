@@ -18,6 +18,7 @@ package android.content.pm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -50,14 +51,13 @@ public class ProcessInfo implements Parcelable {
     /**
      * Indicates if the process has requested GWP-ASan to be enabled, disabled, or left unspecified.
      */
-    @Nullable
-    public Boolean enableGwpAsan;
+    public @ApplicationInfo.GwpAsanMode int gwpAsanMode;
 
     @Deprecated
     public ProcessInfo(@NonNull ProcessInfo orig) {
         this.name = orig.name;
         this.deniedPermissions = orig.deniedPermissions;
-        this.enableGwpAsan = orig.enableGwpAsan;
+        this.gwpAsanMode = orig.gwpAsanMode;
     }
 
 
@@ -82,19 +82,21 @@ public class ProcessInfo implements Parcelable {
      *   The name of the process, fully-qualified based on the app's package name.
      * @param deniedPermissions
      *   If non-null, these are permissions that are not allowed in this process.
-     * @param enableGwpAsan
+     * @param gwpAsanMode
      *   Indicates if the process has requested GWP-ASan to be enabled, disabled, or left unspecified.
      */
     @DataClass.Generated.Member
     public ProcessInfo(
             @NonNull String name,
             @Nullable ArraySet<String> deniedPermissions,
-            @Nullable Boolean enableGwpAsan) {
+            @ApplicationInfo.GwpAsanMode int gwpAsanMode) {
         this.name = name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
         this.deniedPermissions = deniedPermissions;
-        this.enableGwpAsan = enableGwpAsan;
+        this.gwpAsanMode = gwpAsanMode;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.GwpAsanMode.class, null, gwpAsanMode);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -118,11 +120,10 @@ public class ProcessInfo implements Parcelable {
 
         byte flg = 0;
         if (deniedPermissions != null) flg |= 0x2;
-        if (enableGwpAsan != null) flg |= 0x4;
         dest.writeByte(flg);
         dest.writeString(name);
         sParcellingForDeniedPermissions.parcel(deniedPermissions, dest, flags);
-        if (enableGwpAsan != null) dest.writeBoolean(enableGwpAsan);
+        dest.writeInt(gwpAsanMode);
     }
 
     @Override
@@ -139,13 +140,15 @@ public class ProcessInfo implements Parcelable {
         byte flg = in.readByte();
         String _name = in.readString();
         ArraySet<String> _deniedPermissions = sParcellingForDeniedPermissions.unparcel(in);
-        Boolean _enableGwpAsan = (flg & 0x4) == 0 ? null : (Boolean) in.readBoolean();
+        int _gwpAsanMode = in.readInt();
 
         this.name = _name;
         com.android.internal.util.AnnotationValidations.validate(
                 NonNull.class, null, name);
         this.deniedPermissions = _deniedPermissions;
-        this.enableGwpAsan = _enableGwpAsan;
+        this.gwpAsanMode = _gwpAsanMode;
+        com.android.internal.util.AnnotationValidations.validate(
+                ApplicationInfo.GwpAsanMode.class, null, gwpAsanMode);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -165,10 +168,10 @@ public class ProcessInfo implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1582840056156L,
+            time = 1584555730519L,
             codegenVersion = "1.0.15",
             sourceFile = "frameworks/base/core/java/android/content/pm/ProcessInfo.java",
-            inputSignatures = "public @android.annotation.NonNull java.lang.String name\npublic @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringArraySet.class) android.util.ArraySet<java.lang.String> deniedPermissions\npublic @android.annotation.Nullable java.lang.Boolean enableGwpAsan\nclass ProcessInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=false, genParcelable=true, genAidl=false, genBuilder=false)")
+            inputSignatures = "public @android.annotation.NonNull java.lang.String name\npublic @android.annotation.Nullable @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedStringArraySet.class) android.util.ArraySet<java.lang.String> deniedPermissions\npublic @android.content.pm.ApplicationInfo.GwpAsanMode int gwpAsanMode\nclass ProcessInfo extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=false, genParcelable=true, genAidl=false, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 

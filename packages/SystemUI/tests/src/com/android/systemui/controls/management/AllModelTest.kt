@@ -116,6 +116,7 @@ class AllModelTest : SysuiTestCase() {
     private fun sameControl(controlInfo: ControlInfo.Builder, control: Control): Boolean {
         return controlInfo.controlId == control.controlId &&
                 controlInfo.controlTitle == control.title &&
+                controlInfo.controlSubtitle == control.subtitle &&
                 controlInfo.deviceType == control.deviceType
     }
 

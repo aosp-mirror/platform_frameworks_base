@@ -194,7 +194,7 @@ run(int argc, char const*const* argv)
 
     // Collate the parameters
     Atoms atoms;
-    int errorCount = collate_atoms(Atom::descriptor(), &atoms);
+    int errorCount = collate_atoms(Atom::descriptor(), moduleName, &atoms);
     if (errorCount != 0) {
         return 1;
     }
@@ -246,7 +246,7 @@ run(int argc, char const*const* argv)
             return 1;
         }
         errorCount = android::stats_log_api_gen::write_stats_log_cpp(
-            out, atoms, attributionDecl, moduleName, cppNamespace, cppHeaderImport, supportQ);
+            out, atoms, attributionDecl, cppNamespace, cppHeaderImport, supportQ);
         fclose(out);
     }
 
@@ -262,7 +262,7 @@ run(int argc, char const*const* argv)
             fprintf(stderr, "Must supply --namespace if supplying a specific module\n");
         }
         errorCount = android::stats_log_api_gen::write_stats_log_header(
-            out, atoms, attributionDecl, moduleName, cppNamespace);
+            out, atoms, attributionDecl, cppNamespace);
         fclose(out);
     }
 
@@ -291,11 +291,11 @@ run(int argc, char const*const* argv)
 
         if (compileQ) {
             errorCount = android::stats_log_api_gen::write_stats_log_java_q_for_module(
-                    out, atoms, attributionDecl, moduleName, javaClass, javaPackage,
+                    out, atoms, attributionDecl, javaClass, javaPackage,
                     supportWorkSource);
         } else {
             errorCount = android::stats_log_api_gen::write_stats_log_java(
-                    out, atoms, attributionDecl, moduleName, javaClass, javaPackage, supportQ,
+                    out, atoms, attributionDecl, javaClass, javaPackage, supportQ,
                     supportWorkSource);
         }
 

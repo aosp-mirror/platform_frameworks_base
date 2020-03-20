@@ -30,7 +30,6 @@ import static android.net.wifi.WifiManager.OnWifiActivityEnergyInfoListener;
 import static android.net.wifi.WifiManager.SAP_START_FAILURE_GENERAL;
 import static android.net.wifi.WifiManager.STATUS_NETWORK_SUGGESTIONS_SUCCESS;
 import static android.net.wifi.WifiManager.STATUS_SUGGESTION_CONNECTION_FAILURE_AUTHENTICATION;
-import static android.net.wifi.WifiManager.TxPacketCountListener;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
@@ -2048,32 +2047,6 @@ public class WifiManagerTest {
 
         verify(mWifiService).connect(configuration, WifiConfiguration.INVALID_NETWORK_ID, null,
                 null, 0);
-    }
-
-    /**
-     * Test behavior of {@link WifiManager#getTxPacketCount(TxPacketCountListener)}
-     */
-    @Test
-    public void testGetTxPacketCount() throws Exception {
-        TxPacketCountListener externalListener =
-                mock(TxPacketCountListener.class);
-        mWifiManager.getTxPacketCount(externalListener);
-
-        ArgumentCaptor<ITxPacketCountListener> binderListenerCaptor =
-                ArgumentCaptor.forClass(ITxPacketCountListener.class);
-        verify(mWifiService).getTxPacketCount(anyString(), any(Binder.class),
-                binderListenerCaptor.capture(), anyInt());
-        assertNotNull(binderListenerCaptor.getValue());
-
-        // Trigger on success.
-        binderListenerCaptor.getValue().onSuccess(6);
-        mLooper.dispatchAll();
-        verify(externalListener).onSuccess(6);
-
-        // Trigger on failure.
-        binderListenerCaptor.getValue().onFailure(BUSY);
-        mLooper.dispatchAll();
-        verify(externalListener).onFailure(BUSY);
     }
 
     /**

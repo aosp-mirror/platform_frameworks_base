@@ -206,7 +206,7 @@ message ListedAtoms {
 }
 
 message ModuleOneAtom {
-    optional int32 field = 1;
+    optional int32 field = 1 [(android.os.statsd.is_uid) = true];
 }
 
 message ModuleTwoAtom {
@@ -214,7 +214,7 @@ message ModuleTwoAtom {
 }
 
 message ModuleOneAndTwoAtom {
-    optional int32 field = 1;
+    optional int32 field = 1 [(android.os.statsd.state_field_option).option = EXCLUSIVE_STATE];
 }
 
 message NoModuleAtom {

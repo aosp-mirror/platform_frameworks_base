@@ -31,9 +31,7 @@ oneway interface IDataLoaderStatusListener {
     const int DATA_LOADER_IMAGE_READY = 4;
     const int DATA_LOADER_IMAGE_NOT_READY = 5;
 
-    const int DATA_LOADER_SLOW_CONNECTION = 6;
-    const int DATA_LOADER_NO_CONNECTION = 7;
-    const int DATA_LOADER_CONNECTION_OK = 8;
+    const int DATA_LOADER_UNRECOVERABLE = 6;
 
     /** Data loader status callback */
     void onStatusChanged(in int dataLoaderId, in int status);

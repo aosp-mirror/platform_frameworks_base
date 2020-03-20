@@ -1170,6 +1170,10 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
             // If one lib file fails to be created, abort others as well
             break;
         }
+        // If it is a zero-byte file, skip data writing
+        if (uncompressedLen == 0) {
+            continue;
+        }
 
         // Write extracted data to new file
         std::vector<uint8_t> libData(uncompressedLen);
@@ -1248,14 +1252,6 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
     }
 
     switch (newStatus) {
-        case IDataLoaderStatusListener::DATA_LOADER_NO_CONNECTION: {
-            // TODO(b/150411019): handle data loader connection loss
-            break;
-        }
-        case IDataLoaderStatusListener::DATA_LOADER_CONNECTION_OK: {
-            // TODO(b/150411019): handle data loader connection loss
-            break;
-        }
         case IDataLoaderStatusListener::DATA_LOADER_CREATED: {
             if (startRequested) {
                 incrementalService.startDataLoader(mountId);
@@ -1275,6 +1271,10 @@ binder::Status IncrementalService::IncrementalDataLoaderListener::onStatusChange
             break;
         }
         case IDataLoaderStatusListener::DATA_LOADER_IMAGE_NOT_READY: {
+            break;
+        }
+        case IDataLoaderStatusListener::DATA_LOADER_UNRECOVERABLE: {
+            // Nothing for now. Rely on externalListener to handle this.
             break;
         }
         default: {

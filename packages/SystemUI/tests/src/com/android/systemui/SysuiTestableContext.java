@@ -14,12 +14,24 @@
 
 package com.android.systemui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.testing.LeakCheck;
 import android.testing.TestableContext;
+import android.util.ArraySet;
+import android.util.Log;
 import android.view.Display;
 
+import java.util.Set;
+
 public class SysuiTestableContext extends TestableContext {
+
+    private Set<BroadcastReceiver> mRegisteredReceivers = new ArraySet<>();
+
     public SysuiTestableContext(Context base) {
         super(base);
         setTheme(R.style.Theme_SystemUI);
@@ -39,5 +51,43 @@ public class SysuiTestableContext extends TestableContext {
         SysuiTestableContext context =
                 new SysuiTestableContext(getBaseContext().createDisplayContext(display));
         return context;
+    }
+
+    public void cleanUpReceivers(String testName) {
+        Set<BroadcastReceiver> copy = new ArraySet<>(mRegisteredReceivers);
+        for (BroadcastReceiver r : copy) {
+            try {
+                unregisterReceiver(r);
+                Log.w(testName, "Receiver not unregistered from Context: " + r);
+            } catch (IllegalArgumentException e) {
+                // Nothing to do here. Somehow it got unregistered.
+            }
+        }
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        mRegisteredReceivers.add(receiver);
+        return super.registerReceiver(receiver, filter);
+    }
+
+    @Override
+    public Intent registerReceiver(BroadcastReceiver receiver, IntentFilter filter,
+            String broadcastPermission, Handler scheduler) {
+        mRegisteredReceivers.add(receiver);
+        return super.registerReceiver(receiver, filter, broadcastPermission, scheduler);
+    }
+
+    @Override
+    public Intent registerReceiverAsUser(BroadcastReceiver receiver, UserHandle user,
+            IntentFilter filter, String broadcastPermission, Handler scheduler) {
+        mRegisteredReceivers.add(receiver);
+        return super.registerReceiverAsUser(receiver, user, filter, broadcastPermission, scheduler);
+    }
+
+    @Override
+    public void unregisterReceiver(BroadcastReceiver receiver) {
+        mRegisteredReceivers.remove(receiver);
+        super.unregisterReceiver(receiver);
     }
 }

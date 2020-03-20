@@ -169,8 +169,11 @@ class ControlsRequestDialog @Inject constructor(
 
     override fun onClick(dialog: DialogInterface?, which: Int) {
         if (which == Dialog.BUTTON_POSITIVE) {
-            controller.addFavorite(componentName, control.structure ?: "",
-                    ControlInfo(control.controlId, control.title, control.deviceType))
+            controller.addFavorite(
+                componentName,
+                control.structure ?: "",
+                ControlInfo(control.controlId, control.title, control.subtitle, control.deviceType)
+            )
         }
         finish()
     }

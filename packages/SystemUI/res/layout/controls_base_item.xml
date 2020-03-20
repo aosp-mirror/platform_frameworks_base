@@ -71,6 +71,8 @@
         android:paddingRight="@dimen/control_padding_adjustment"
         android:clickable="false"
         android:focusable="false"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintBottom_toTopOf="@+id/subtitle"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -84,6 +86,8 @@
         android:paddingBottom="@dimen/control_padding_adjustment"
         android:clickable="false"
         android:focusable="false"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 

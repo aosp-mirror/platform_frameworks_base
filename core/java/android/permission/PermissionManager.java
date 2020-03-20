@@ -177,7 +177,6 @@ public final class PermissionManager {
      * @param callback The callback provided by caller to be notified when grant completes
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
     public void grantDefaultPermissionsToLuiApp(
             @NonNull String packageName, @NonNull UserHandle user,
@@ -199,7 +198,6 @@ public final class PermissionManager {
      * @param callback The callback provided by caller to be notified when grant completes
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
     public void revokeDefaultPermissionsFromLuiApps(
             @NonNull String[] packageNames, @NonNull UserHandle user,
@@ -221,7 +219,6 @@ public final class PermissionManager {
      * @param callback The callback provided by caller to be notified when grant completes
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
     public void grantDefaultPermissionsToEnabledImsServices(
             @NonNull String[] packageNames, @NonNull UserHandle user,
@@ -243,7 +240,6 @@ public final class PermissionManager {
      * @param callback The callback provided by caller to be notified when grant completes
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
     public void grantDefaultPermissionsToEnabledTelephonyDataServices(
             @NonNull String[] packageNames, @NonNull UserHandle user,
@@ -265,7 +261,6 @@ public final class PermissionManager {
      * @param callback The callback provided by caller to be notified when revoke completes
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
     public void revokeDefaultPermissionsFromDisabledTelephonyDataServices(
             @NonNull String[] packageNames, @NonNull UserHandle user,
@@ -287,7 +282,6 @@ public final class PermissionManager {
      * @param callback The callback provided by caller to be notified when grant completes
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS)
     public void grantDefaultPermissionsToEnabledCarrierApps(@NonNull String[] packageNames,
             @NonNull UserHandle user, @NonNull @CallbackExecutor Executor executor,

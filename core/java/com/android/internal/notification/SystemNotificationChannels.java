@@ -65,7 +65,7 @@ public class SystemNotificationChannels {
                 VIRTUAL_KEYBOARD,
                 context.getString(R.string.notification_channel_virtual_keyboard),
                 NotificationManager.IMPORTANCE_LOW);
-        keyboard.setBlockableSystem(true);
+        keyboard.setBlockable(true);
         channelsList.add(keyboard);
 
         final NotificationChannel physicalKeyboardChannel = new NotificationChannel(
@@ -74,7 +74,7 @@ public class SystemNotificationChannels {
                 NotificationManager.IMPORTANCE_DEFAULT);
         physicalKeyboardChannel.setSound(Settings.System.DEFAULT_NOTIFICATION_URI,
                 Notification.AUDIO_ATTRIBUTES_DEFAULT);
-        physicalKeyboardChannel.setBlockableSystem(true);
+        physicalKeyboardChannel.setBlockable(true);
         channelsList.add(physicalKeyboardChannel);
 
         final NotificationChannel security = new NotificationChannel(
@@ -87,7 +87,7 @@ public class SystemNotificationChannels {
                 CAR_MODE,
                 context.getString(R.string.notification_channel_car_mode),
                 NotificationManager.IMPORTANCE_LOW);
-        car.setBlockableSystem(true);
+        car.setBlockable(true);
         channelsList.add(car);
 
         channelsList.add(newAccountChannel(context));
@@ -96,14 +96,14 @@ public class SystemNotificationChannels {
                 DEVELOPER,
                 context.getString(R.string.notification_channel_developer),
                 NotificationManager.IMPORTANCE_LOW);
-        developer.setBlockableSystem(true);
+        developer.setBlockable(true);
         channelsList.add(developer);
 
         final NotificationChannel developerImportant = new NotificationChannel(
                 DEVELOPER_IMPORTANT,
                 context.getString(R.string.notification_channel_developer_important),
                 NotificationManager.IMPORTANCE_HIGH);
-        developer.setBlockableSystem(true);
+        developer.setBlockable(true);
         channelsList.add(developerImportant);
 
         final NotificationChannel updates = new NotificationChannel(
@@ -116,21 +116,21 @@ public class SystemNotificationChannels {
                 NETWORK_STATUS,
                 context.getString(R.string.notification_channel_network_status),
                 NotificationManager.IMPORTANCE_LOW);
-        network.setBlockableSystem(true);
+        network.setBlockable(true);
         channelsList.add(network);
 
         final NotificationChannel networkAlertsChannel = new NotificationChannel(
                 NETWORK_ALERTS,
                 context.getString(R.string.notification_channel_network_alerts),
                 NotificationManager.IMPORTANCE_HIGH);
-        networkAlertsChannel.setBlockableSystem(true);
+        networkAlertsChannel.setBlockable(true);
         channelsList.add(networkAlertsChannel);
 
         final NotificationChannel networkAvailable = new NotificationChannel(
                 NETWORK_AVAILABLE,
                 context.getString(R.string.notification_channel_network_available),
                 NotificationManager.IMPORTANCE_LOW);
-        networkAvailable.setBlockableSystem(true);
+        networkAvailable.setBlockable(true);
         channelsList.add(networkAvailable);
 
         final NotificationChannel vpn = new NotificationChannel(
@@ -167,7 +167,7 @@ public class SystemNotificationChannels {
                 FOREGROUND_SERVICE,
                 context.getString(R.string.notification_channel_foreground_service),
                 NotificationManager.IMPORTANCE_LOW);
-        foregroundChannel.setBlockableSystem(true);
+        foregroundChannel.setBlockable(true);
         channelsList.add(foregroundChannel);
 
         NotificationChannel heavyWeightChannel = new NotificationChannel(

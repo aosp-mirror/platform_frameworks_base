@@ -29,6 +29,7 @@ import android.provider.DeviceConfig.Properties;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Slog;
+import android.util.TimeUtils;
 
 import com.android.internal.util.IndentingPrintWriter;
 
@@ -88,6 +89,17 @@ class BlobStoreConfig {
         public static float TOTAL_BYTES_PER_APP_LIMIT_FRACTION =
                 DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FRACTION;
 
+        /**
+         * Denotes the duration from the time a blob is committed that we wait for a lease to
+         * be acquired before deciding to delete the blob for having no leases.
+         */
+        public static final String KEY_LEASE_ACQUISITION_WAIT_DURATION_MS =
+                "lease_acquisition_wait_time_ms";
+        public static final long DEFAULT_LEASE_ACQUISITION_WAIT_DURATION_MS =
+                TimeUnit.HOURS.toMillis(6);
+        public static long LEASE_ACQUISITION_WAIT_DURATION_MS =
+                DEFAULT_LEASE_ACQUISITION_WAIT_DURATION_MS;
+
         static void refresh(Properties properties) {
             if (!NAMESPACE_BLOBSTORE.equals(properties.getNamespace())) {
                 return;
@@ -101,6 +113,10 @@ class BlobStoreConfig {
                     case KEY_TOTAL_BYTES_PER_APP_LIMIT_FRACTION:
                         TOTAL_BYTES_PER_APP_LIMIT_FRACTION = properties.getFloat(key,
                                 DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FRACTION);
+                        break;
+                    case KEY_LEASE_ACQUISITION_WAIT_DURATION_MS:
+                        LEASE_ACQUISITION_WAIT_DURATION_MS = properties.getLong(key,
+                                DEFAULT_LEASE_ACQUISITION_WAIT_DURATION_MS);
                         break;
                     default:
                         Slog.wtf(TAG, "Unknown key in device config properties: " + key);
@@ -117,6 +133,9 @@ class BlobStoreConfig {
             fout.println(String.format(dumpFormat, KEY_TOTAL_BYTES_PER_APP_LIMIT_FRACTION,
                     TOTAL_BYTES_PER_APP_LIMIT_FRACTION,
                     DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FRACTION));
+            fout.println(String.format(dumpFormat, KEY_LEASE_ACQUISITION_WAIT_DURATION_MS,
+                    TimeUtils.formatDuration(LEASE_ACQUISITION_WAIT_DURATION_MS),
+                    TimeUtils.formatDuration(DEFAULT_LEASE_ACQUISITION_WAIT_DURATION_MS)));
         }
     }
 
@@ -134,6 +153,14 @@ class BlobStoreConfig {
         final long totalBytesLimit = (long) (Environment.getDataSystemDirectory().getTotalSpace()
                 * DeviceConfigProperties.TOTAL_BYTES_PER_APP_LIMIT_FRACTION);
         return Math.max(DeviceConfigProperties.TOTAL_BYTES_PER_APP_LIMIT_FLOOR, totalBytesLimit);
+    }
+
+    /**
+     * Returns whether the wait time for lease acquisition for a blob has elapsed.
+     */
+    public static boolean hasLeaseWaitTimeElapsed(long commitTimeMs) {
+        return commitTimeMs + DeviceConfigProperties.LEASE_ACQUISITION_WAIT_DURATION_MS
+                < System.currentTimeMillis();
     }
 
     @Nullable

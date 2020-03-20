@@ -16,13 +16,14 @@
 
 package android.view;
 
-import static android.view.InsetsController.LAYOUT_INSETS_DURING_ANIMATION_SHOWN;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowInsets.Type.systemBars;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -135,6 +136,13 @@ public class InsetsAnimationControlImplTest {
     }
 
     @Test
+    public void testReady() {
+        assertTrue(mController.isReady());
+        assertFalse(mController.isFinished());
+        assertFalse(mController.isCancelled());
+    }
+
+    @Test
     public void testChangeInsets() {
         mController.setInsetsAndAlpha(Insets.of(0, 30, 40, 0), 1f /* alpha */,
                 0f /* fraction */);
@@ -178,6 +186,10 @@ public class InsetsAnimationControlImplTest {
         mController.applyChangeInsets(mInsetsState);
         assertEquals(Insets.of(0, 100, 100, 0), mController.getCurrentInsets());
         verify(mMockController).notifyFinished(eq(mController), eq(true /* shown */));
+        assertFalse(mController.isReady());
+        assertTrue(mController.isFinished());
+        assertFalse(mController.isCancelled());
+        verify(mMockListener).onFinished(mController);
     }
 
     @Test
@@ -188,6 +200,9 @@ public class InsetsAnimationControlImplTest {
             fail("Expected exception to be thrown");
         } catch (IllegalStateException ignored) {
         }
+        assertFalse(mController.isReady());
+        assertFalse(mController.isFinished());
+        assertTrue(mController.isCancelled());
         verify(mMockListener).onCancelled(mController);
         mController.finish(true /* shown */);
     }

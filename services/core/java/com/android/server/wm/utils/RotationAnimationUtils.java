@@ -16,16 +16,21 @@
 
 package com.android.server.wm.utils;
 
-import android.graphics.Bitmap;
+import static android.graphics.PixelFormat.RGBA_8888;
+
+import android.graphics.Color;
 import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.Image;
+import android.media.ImageReader;
 import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 
@@ -38,29 +43,57 @@ public class RotationAnimationUtils {
      * @return the average luminance of all the pixels at the borders of the bitmap
      */
     public static float getMedianBorderLuma(GraphicBuffer graphicBuffer, ColorSpace colorSpace) {
-        Bitmap hwBitmap = Bitmap.wrapHardwareBuffer(graphicBuffer, colorSpace);
-        if (hwBitmap == null) {
+        if (graphicBuffer == null || graphicBuffer.getFormat() != RGBA_8888) {
             return 0;
         }
 
-        Bitmap swaBitmap = hwBitmap.copy(Bitmap.Config.ARGB_8888, false);
-        int height = swaBitmap.getHeight();
-        int width = swaBitmap.getWidth();
+        ImageReader ir = ImageReader.newInstance(graphicBuffer.getWidth(),
+                graphicBuffer.getHeight(), graphicBuffer.getFormat(), 1);
+        ir.getSurface().attachAndQueueBufferWithColorSpace(graphicBuffer, colorSpace);
+        Image image = ir.acquireLatestImage();
+        if (image == null || image.getPlanes().length == 0) {
+            return 0;
+        }
+
+        Image.Plane plane = image.getPlanes()[0];
+        ByteBuffer buffer = plane.getBuffer();
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int pixelStride = plane.getPixelStride();
+        int rowStride = plane.getRowStride();
         float[] borderLumas = new float[2 * width + 2 * height];
-        int i;
-        int index = 0;
-        for (i = 0; i < width; i++, index += 2) {
-            borderLumas[index] = swaBitmap.getColor(i, 0).luminance();
-            borderLumas[index + 1] = swaBitmap.getColor(i, height - 1).luminance();
+
+        // Grab the top and bottom borders
+        int l = 0;
+        for (int x = 0; x < width; x++) {
+            borderLumas[l++] = getPixelLuminance(buffer, x, 0, pixelStride, rowStride);
+            borderLumas[l++] = getPixelLuminance(buffer, x, height - 1, pixelStride, rowStride);
         }
-        for (i = 0; i < height; i++, index += 2) {
-            borderLumas[index] = swaBitmap.getColor(0, i).luminance();
-            borderLumas[index + 1] = swaBitmap.getColor(width - 1, i).luminance();
+
+        // Grab the left and right borders
+        for (int y = 0; y < height; y++) {
+            borderLumas[l++] = getPixelLuminance(buffer, 0, y, pixelStride, rowStride);
+            borderLumas[l++] = getPixelLuminance(buffer, width - 1, y, pixelStride, rowStride);
         }
+
+        // Cleanup
+        ir.close();
+
         // Oh, is this too simple and inefficient for you?
         // How about implementing a O(n) solution? https://en.wikipedia.org/wiki/Median_of_medians
         Arrays.sort(borderLumas);
         return borderLumas[borderLumas.length / 2];
+    }
+
+    private static float getPixelLuminance(ByteBuffer buffer, int x, int y,
+            int pixelStride, int rowStride) {
+        int offset = y * rowStride + x * pixelStride;
+        int pixel = 0;
+        pixel |= (buffer.get(offset) & 0xff) << 16;     // R
+        pixel |= (buffer.get(offset + 1) & 0xff) << 8;  // G
+        pixel |= (buffer.get(offset + 2) & 0xff);       // B
+        pixel |= (buffer.get(offset + 3) & 0xff) << 24; // A
+        return Color.valueOf(pixel).luminance();
     }
 
     /**
