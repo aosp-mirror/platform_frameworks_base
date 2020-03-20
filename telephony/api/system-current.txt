@@ -717,11 +717,6 @@ package android.telephony {
     field @NonNull public static final android.net.Uri WFC_ROAMING_MODE_CONTENT_URI;
   }
 
-  public class TelephonyFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setTelephonyServiceManager(@NonNull android.os.TelephonyServiceManager);
-  }
-
   public final class TelephonyHistogram implements android.os.Parcelable {
     ctor public TelephonyHistogram(int, int, int);
     ctor public TelephonyHistogram(android.telephony.TelephonyHistogram);

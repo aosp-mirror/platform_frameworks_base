@@ -8546,31 +8546,6 @@ package android.os {
     field public static final int STATUS_WAITING_REBOOT = 5; // 0x5
   }
 
-  public class TelephonyServiceManager {
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getCarrierConfigServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccCardControllerServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getEuiccControllerService();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getIccPhoneBookServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getOpportunisticNetworkServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getPhoneSubServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSmsServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getSubscriptionServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyImsServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyRcsMessageServiceRegisterer();
-    method @NonNull public android.os.TelephonyServiceManager.ServiceRegisterer getTelephonyServiceRegisterer();
-  }
-
-  public static class TelephonyServiceManager.ServiceNotFoundException extends java.lang.Exception {
-    ctor public TelephonyServiceManager.ServiceNotFoundException(@NonNull String);
-  }
-
-  public static final class TelephonyServiceManager.ServiceRegisterer {
-    method @Nullable public android.os.IBinder get();
-    method @NonNull public android.os.IBinder getOrThrow() throws android.os.TelephonyServiceManager.ServiceNotFoundException;
-    method public void register(@NonNull android.os.IBinder);
-    method @Nullable public android.os.IBinder tryGet();
-  }
-
   public class UpdateEngine {
     ctor public UpdateEngine();
     method @NonNull @WorkerThread public android.os.UpdateEngine.AllocateSpaceResult allocateSpace(@NonNull String, @NonNull String[]);
@@ -11339,11 +11314,6 @@ package android.telephony {
     method @Deprecated public static android.telephony.SubscriptionPlan.Builder createRecurringDaily(java.time.ZonedDateTime);
     method @Deprecated public static android.telephony.SubscriptionPlan.Builder createRecurringMonthly(java.time.ZonedDateTime);
     method @Deprecated public static android.telephony.SubscriptionPlan.Builder createRecurringWeekly(java.time.ZonedDateTime);
-  }
-
-  public class TelephonyFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setTelephonyServiceManager(@NonNull android.os.TelephonyServiceManager);
   }
 
   public final class TelephonyHistogram implements android.os.Parcelable {
