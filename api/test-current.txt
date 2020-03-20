@@ -3020,6 +3020,7 @@ package android.provider {
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
+    field public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
