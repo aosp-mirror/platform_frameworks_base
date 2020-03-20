@@ -37,8 +37,21 @@ static struct overlayableinfo_offsets_t {
   jmethodID constructor;
 } gOverlayableInfoOffsets;
 
-static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, jstring java_path, jboolean system,
-                        jboolean force_shared_lib, jboolean overlay, jboolean for_loader) {
+// Keep in sync with f/b/android/content/res/ApkAssets.java
+using format_type_t = jint;
+enum : format_type_t {
+  // The path used to load the apk assets represents an APK file.
+  FORMAT_APK = 0,
+
+  // The path used to load the apk assets represents an idmap file.
+  FORMAT_IDMAP = 1,
+
+  // The path used to load the apk assets represents an resources.arsc file.
+  FORMAT_ARSC = 2,
+};
+
+static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
+                        jstring java_path, const jint property_flags) {
   ScopedUtfChars path(env, java_path);
   if (path.c_str() == nullptr) {
     return 0;
@@ -47,25 +60,33 @@ static jlong NativeLoad(JNIEnv* env, jclass /*clazz*/, jstring java_path, jboole
   ATRACE_NAME(base::StringPrintf("LoadApkAssets(%s)", path.c_str()).c_str());
 
   std::unique_ptr<const ApkAssets> apk_assets;
-  if (overlay) {
-    apk_assets = ApkAssets::LoadOverlay(path.c_str(), system);
-  } else if (force_shared_lib) {
-    apk_assets = ApkAssets::LoadAsSharedLibrary(path.c_str(), system);
-  } else {
-    apk_assets = ApkAssets::Load(path.c_str(), system, for_loader);
+  switch (format) {
+    case FORMAT_APK:
+      apk_assets = ApkAssets::Load(path.c_str(), property_flags);
+      break;
+    case FORMAT_IDMAP:
+      apk_assets = ApkAssets::LoadOverlay(path.c_str(), property_flags);
+      break;
+    case FORMAT_ARSC:
+      apk_assets = ApkAssets::LoadTable(path.c_str(), property_flags);
+      break;
+    default:
+      const std::string error_msg = base::StringPrintf("Unsupported format type %d", format);
+      jniThrowException(env, "java/lang/IllegalArgumentException", error_msg.c_str());
+      return 0;
   }
 
   if (apk_assets == nullptr) {
-    std::string error_msg = base::StringPrintf("Failed to load asset path %s", path.c_str());
+    const std::string error_msg = base::StringPrintf("Failed to load asset path %s", path.c_str());
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
   return reinterpret_cast<jlong>(apk_assets.release());
 }
 
-static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, jobject file_descriptor,
-                              jstring friendly_name, jboolean system, jboolean force_shared_lib,
-                              jboolean for_loader) {
+static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
+                              jobject file_descriptor, jstring friendly_name,
+                              const jint property_flags) {
   ScopedUtfChars friendly_name_utf8(env, friendly_name);
   if (friendly_name_utf8.c_str() == nullptr) {
     return 0;
@@ -85,49 +106,53 @@ static jlong NativeLoadFromFd(JNIEnv* env, jclass /*clazz*/, jobject file_descri
     return 0;
   }
 
-  auto dup_fd_id = dup_fd.get();
-  std::unique_ptr<const ApkAssets> apk_assets = ApkAssets::LoadFromFd(std::move(dup_fd),
-                                                                      friendly_name_utf8.c_str(),
-                                                                      system, force_shared_lib,
-                                                                      for_loader);
+  std::unique_ptr<const ApkAssets> apk_assets;
+  switch (format) {
+    case FORMAT_APK:
+      apk_assets = ApkAssets::LoadFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
+                                         property_flags);
+      break;
+    case FORMAT_ARSC:
+      apk_assets = ApkAssets::LoadTableFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
+                                              property_flags);
+      break;
+    default:
+      const std::string error_msg = base::StringPrintf("Unsupported format type %d", format);
+      jniThrowException(env, "java/lang/IllegalArgumentException", error_msg.c_str());
+      return 0;
+  }
 
   if (apk_assets == nullptr) {
     std::string error_msg = base::StringPrintf("Failed to load asset path %s from fd %d",
-                                               friendly_name_utf8.c_str(), dup_fd_id);
+                                               friendly_name_utf8.c_str(), fd);
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
   return reinterpret_cast<jlong>(apk_assets.release());
 }
 
-static jlong NativeLoadArsc(JNIEnv* env, jclass /*clazz*/, jstring java_path,
-                            jboolean for_loader) {
-  ScopedUtfChars path(env, java_path);
-  if (path.c_str() == nullptr) {
-    return 0;
-  }
-
-  ATRACE_NAME(base::StringPrintf("LoadApkAssetsArsc(%s)", path.c_str()).c_str());
-
-  std::unique_ptr<const ApkAssets> apk_assets = ApkAssets::LoadArsc(path.c_str(), for_loader);
-
-  if (apk_assets == nullptr) {
-    std::string error_msg = base::StringPrintf("Failed to load asset path %s", path.c_str());
-    jniThrowException(env, "java/io/IOException", error_msg.c_str());
-    return 0;
-  }
-  return reinterpret_cast<jlong>(apk_assets.release());
-}
-
-static jlong NativeLoadArscFromFd(JNIEnv* env, jclass /*clazz*/, jobject file_descriptor,
-                                  jstring friendly_name, jboolean for_loader) {
+static jlong NativeLoadFromFdOffset(JNIEnv* env, jclass /*clazz*/, const format_type_t format,
+                                    jobject file_descriptor, jstring friendly_name,
+                                    const jlong offset, const jlong length,
+                                    const jint property_flags) {
   ScopedUtfChars friendly_name_utf8(env, friendly_name);
   if (friendly_name_utf8.c_str() == nullptr) {
     return 0;
   }
 
+  if (offset < 0) {
+    jniThrowException(env, "java/lang/IllegalArgumentException",
+                     "offset cannot be negative");
+    return 0;
+  }
+
+  if (length < 0) {
+    jniThrowException(env, "java/lang/IllegalArgumentException",
+                     "length cannot be negative");
+    return 0;
+  }
+
   int fd = jniGetFDFromFileDescriptor(env, file_descriptor);
-  ATRACE_NAME(base::StringPrintf("LoadApkAssetsArscFd(%d)", fd).c_str());
   if (fd < 0) {
     jniThrowException(env, "java/lang/IllegalArgumentException", "Bad FileDescriptor");
     return 0;
@@ -139,18 +164,37 @@ static jlong NativeLoadArscFromFd(JNIEnv* env, jclass /*clazz*/, jobject file_de
     return 0;
   }
 
-  std::unique_ptr<const ApkAssets> apk_assets =
-      ApkAssets::LoadArsc(std::move(dup_fd), friendly_name_utf8.c_str(), for_loader);
+  ATRACE_NAME(base::StringPrintf("LoadApkAssetsFd(%s)", friendly_name_utf8.c_str()).c_str());
+
+  std::unique_ptr<const ApkAssets> apk_assets;
+  switch (format) {
+    case FORMAT_APK:
+      apk_assets = ApkAssets::LoadFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
+                                         property_flags, static_cast<off64_t>(offset),
+                                         static_cast<off64_t>(length));
+      break;
+    case FORMAT_ARSC:
+      apk_assets = ApkAssets::LoadTableFromFd(std::move(dup_fd), friendly_name_utf8.c_str(),
+                                              property_flags, static_cast<off64_t>(offset),
+                                              static_cast<off64_t>(length));
+      break;
+    default:
+      const std::string error_msg = base::StringPrintf("Unsupported format type %d", format);
+      jniThrowException(env, "java/lang/IllegalArgumentException", error_msg.c_str());
+      return 0;
+  }
+
   if (apk_assets == nullptr) {
-    std::string error_msg = base::StringPrintf("Failed to load asset path from fd %d", fd);
+    std::string error_msg = base::StringPrintf("Failed to load asset path %s from fd %d",
+                                               friendly_name_utf8.c_str(), fd);
     jniThrowException(env, "java/io/IOException", error_msg.c_str());
     return 0;
   }
   return reinterpret_cast<jlong>(apk_assets.release());
 }
 
-static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jboolean for_loader) {
-  std::unique_ptr<const ApkAssets> apk_assets = ApkAssets::LoadEmpty(for_loader);
+static jlong NativeLoadEmpty(JNIEnv* env, jclass /*clazz*/, jint flags) {
+  std::unique_ptr<const ApkAssets> apk_assets = ApkAssets::LoadEmpty(flags);
   return reinterpret_cast<jlong>(apk_assets.release());
 }
 
@@ -252,13 +296,11 @@ static jboolean NativeDefinesOverlayable(JNIEnv* env, jclass /*clazz*/, jlong pt
 
 // JNI registration.
 static const JNINativeMethod gApkAssetsMethods[] = {
-    {"nativeLoad", "(Ljava/lang/String;ZZZZ)J", (void*)NativeLoad},
-    {"nativeLoadFromFd", "(Ljava/io/FileDescriptor;Ljava/lang/String;ZZZ)J",
-        (void*)NativeLoadFromFd},
-    {"nativeLoadArsc", "(Ljava/lang/String;Z)J", (void*)NativeLoadArsc},
-    {"nativeLoadArscFromFd", "(Ljava/io/FileDescriptor;Ljava/lang/String;Z)J",
-        (void*)NativeLoadArscFromFd},
-    {"nativeLoadEmpty", "(Z)J", (void*)NativeLoadEmpty},
+    {"nativeLoad", "(ILjava/lang/String;I)J", (void*)NativeLoad},
+    {"nativeLoadEmpty", "(I)J", (void*)NativeLoadEmpty},
+    {"nativeLoadFd", "(ILjava/io/FileDescriptor;Ljava/lang/String;I)J", (void*)NativeLoadFromFd},
+     {"nativeLoadFdOffsets", "(ILjava/io/FileDescriptor;Ljava/lang/String;JJI)J",
+        (void*)NativeLoadFromFdOffset},
     {"nativeDestroy", "(J)V", (void*)NativeDestroy},
     {"nativeGetAssetPath", "(J)Ljava/lang/String;", (void*)NativeGetAssetPath},
     {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
