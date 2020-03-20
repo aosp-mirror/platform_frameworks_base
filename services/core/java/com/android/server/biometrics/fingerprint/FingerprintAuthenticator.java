@@ -38,7 +38,7 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
             String opPackageName, int cookie, int callingUid, int callingPid, int callingUserId)
             throws RemoteException {
         mFingerprintService.prepareForAuthentication(token, sessionId, userId, wrapperReceiver,
-                opPackageName, cookie, callingUid, callingPid, callingUserId, null /* windowId */);
+                opPackageName, cookie, callingUid, callingPid, callingUserId);
     }
 
     @Override
