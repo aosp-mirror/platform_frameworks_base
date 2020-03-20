@@ -27,9 +27,7 @@ import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration.NativeConfig;
-import android.content.res.loader.AssetsProvider;
 import android.content.res.loader.ResourcesLoader;
-import android.content.res.loader.ResourcesProvider;
 import android.os.ParcelFileDescriptor;
 import android.util.ArraySet;
 import android.util.Log;
@@ -44,7 +42,6 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -151,12 +148,9 @@ public final class AssetManager implements AutoCloseable {
                 final List<ApkAssets> currentLoaderApkAssets = mLoaders.get(i).getApkAssets();
                 for (int j = currentLoaderApkAssets.size() - 1; j >= 0; j--) {
                     final ApkAssets apkAssets = currentLoaderApkAssets.get(j);
-                    if (uniqueLoaderApkAssets.contains(apkAssets)) {
-                        continue;
+                    if (uniqueLoaderApkAssets.add(apkAssets)) {
+                        loaderApkAssets.add(0, apkAssets);
                     }
-
-                    uniqueLoaderApkAssets.add(apkAssets);
-                    loaderApkAssets.add(0, apkAssets);
                 }
             }
 
@@ -329,6 +323,42 @@ public final class AssetManager implements AutoCloseable {
                 invalidateCachesLocked(-1);
             }
         }
+    }
+
+    /**
+     * Changes the {@link ResourcesLoader ResourcesLoaders} used in this AssetManager.
+     * @hide
+     */
+    void setLoaders(@NonNull List<ResourcesLoader> newLoaders) {
+        Objects.requireNonNull(newLoaders, "newLoaders");
+
+        final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
+        for (int i = 0; i < mApkAssets.length; i++) {
+            // Filter out the previous loader apk assets.
+            if (!mApkAssets[i].isForLoader()) {
+                apkAssets.add(mApkAssets[i]);
+            }
+        }
+
+        if (!newLoaders.isEmpty()) {
+            // Filter so that assets provided by multiple loaders are only included once
+            // in the final assets list. The last appearance of the ApkAssets dictates its load
+            // order.
+            final int loaderStartIndex = apkAssets.size();
+            final ArraySet<ApkAssets> uniqueLoaderApkAssets = new ArraySet<>();
+            for (int i = newLoaders.size() - 1; i >= 0; i--) {
+                final List<ApkAssets> currentLoaderApkAssets = newLoaders.get(i).getApkAssets();
+                for (int j = currentLoaderApkAssets.size() - 1; j >= 0; j--) {
+                    final ApkAssets loaderApkAssets = currentLoaderApkAssets.get(j);
+                    if (uniqueLoaderApkAssets.add(loaderApkAssets)) {
+                        apkAssets.add(loaderStartIndex, loaderApkAssets);
+                    }
+                }
+            }
+        }
+
+        mLoaders = newLoaders.toArray(new ResourcesLoader[0]);
+        setApkAssets(apkAssets.toArray(new ApkAssets[0]), true /* invalidate_caches */);
     }
 
     /**
@@ -828,13 +858,6 @@ public final class AssetManager implements AutoCloseable {
         Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
-
-            String path = Paths.get("assets", fileName).toString();
-            InputStream inputStream = searchLoaders(0, path, accessMode);
-            if (inputStream != null) {
-                return inputStream;
-            }
-
             final long asset = nativeOpenAsset(mObject, fileName, accessMode);
             if (asset == 0) {
                 throw new FileNotFoundException("Asset file: " + fileName);
@@ -859,13 +882,6 @@ public final class AssetManager implements AutoCloseable {
         Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
-
-            String path = Paths.get("assets", fileName).toString();
-            AssetFileDescriptor fileDescriptor = searchLoadersFd(0, path);
-            if (fileDescriptor != null) {
-                return fileDescriptor;
-            }
-
             final ParcelFileDescriptor pfd = nativeOpenAssetFd(mObject, fileName, mOffsets);
             if (pfd == null) {
                 throw new FileNotFoundException("Asset file: " + fileName);
@@ -959,12 +975,6 @@ public final class AssetManager implements AutoCloseable {
         Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
-
-            InputStream inputStream = searchLoaders(cookie, fileName, accessMode);
-            if (inputStream != null) {
-                return inputStream;
-            }
-
             final long asset = nativeOpenNonAsset(mObject, cookie, fileName, accessMode);
             if (asset == 0) {
                 throw new FileNotFoundException("Asset absolute file: " + fileName);
@@ -1004,12 +1014,6 @@ public final class AssetManager implements AutoCloseable {
         Objects.requireNonNull(fileName, "fileName");
         synchronized (this) {
             ensureOpenLocked();
-
-            AssetFileDescriptor fileDescriptor = searchLoadersFd(cookie, fileName);
-            if (fileDescriptor != null) {
-                return fileDescriptor;
-            }
-
             final ParcelFileDescriptor pfd =
                     nativeOpenNonAssetFd(mObject, cookie, fileName, mOffsets);
             if (pfd == null) {
@@ -1072,15 +1076,7 @@ public final class AssetManager implements AutoCloseable {
         synchronized (this) {
             ensureOpenLocked();
 
-            final long xmlBlock;
-            AssetFileDescriptor fileDescriptor = searchLoadersFd(cookie, fileName);
-            if (fileDescriptor != null) {
-                xmlBlock = nativeOpenXmlAssetFd(mObject, cookie,
-                        fileDescriptor.getFileDescriptor());
-            } else {
-                xmlBlock = nativeOpenXmlAsset(mObject, cookie, fileName);
-            }
-
+            final long xmlBlock = nativeOpenXmlAsset(mObject, cookie, fileName);
             if (xmlBlock == 0) {
                 throw new FileNotFoundException("Asset XML file: " + fileName);
             }
@@ -1088,122 +1084,6 @@ public final class AssetManager implements AutoCloseable {
             incRefsLocked(block.hashCode());
             return block;
         }
-    }
-
-    private ResourcesProvider findResourcesProvider(int assetCookie) {
-        if (mLoaders == null) {
-            return null;
-        }
-
-        int apkAssetsIndex = assetCookie - 1;
-        if (apkAssetsIndex >= mApkAssets.length || apkAssetsIndex < 0) {
-            return null;
-        }
-
-        final ApkAssets apkAssets = mApkAssets[apkAssetsIndex];
-        if (!apkAssets.isForLoader()) {
-            return null;
-        }
-
-        for (int i = mLoaders.length - 1; i >= 0; i--) {
-            final ResourcesLoader loader = mLoaders[i];
-            for (int j = 0, n = loader.getProviders().size(); j < n; j++) {
-                final ResourcesProvider provider = loader.getProviders().get(j);
-                if (apkAssets == provider.getApkAssets()) {
-                    return provider;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    private InputStream searchLoaders(int cookie, @NonNull String fileName, int accessMode)
-            throws IOException {
-        if (mLoaders == null) {
-            return null;
-        }
-
-        if (cookie == 0) {
-            // A cookie of 0 means no specific ApkAssets, so search everything
-            for (int i = mLoaders.length - 1; i >= 0; i--) {
-                final ResourcesLoader loader = mLoaders[i];
-                final List<ResourcesProvider> providers = loader.getProviders();
-                for (int j = providers.size() - 1; j >= 0; j--) {
-                    final AssetsProvider assetsProvider = providers.get(j).getAssetsProvider();
-                    if (assetsProvider == null) {
-                        continue;
-                    }
-
-                    try {
-                        final InputStream inputStream = assetsProvider.loadAsset(
-                                fileName, accessMode);
-                        if (inputStream != null) {
-                            return inputStream;
-                        }
-                    } catch (IOException ignored) {
-                        // When searching, ignore read failures
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        final ResourcesProvider provider = findResourcesProvider(cookie);
-        if (provider != null && provider.getAssetsProvider() != null) {
-            return provider.getAssetsProvider().loadAsset(
-                    fileName, accessMode);
-        }
-
-        return null;
-    }
-
-    private AssetFileDescriptor searchLoadersFd(int cookie, @NonNull String fileName)
-            throws IOException {
-        if (mLoaders == null) {
-            return null;
-        }
-
-        if (cookie == 0) {
-            // A cookie of 0 means no specific ApkAssets, so search everything
-            for (int i = mLoaders.length - 1; i >= 0; i--) {
-                final ResourcesLoader loader = mLoaders[i];
-                final List<ResourcesProvider> providers = loader.getProviders();
-                for (int j = providers.size() - 1; j >= 0; j--) {
-                    final AssetsProvider assetsProvider = providers.get(j).getAssetsProvider();
-                    if (assetsProvider == null) {
-                        continue;
-                    }
-
-                    try {
-                        final ParcelFileDescriptor fileDescriptor = assetsProvider
-                                .loadAssetParcelFd(fileName);
-                        if (fileDescriptor != null) {
-                            return new AssetFileDescriptor(fileDescriptor, 0,
-                                    AssetFileDescriptor.UNKNOWN_LENGTH);
-                        }
-                    } catch (IOException ignored) {
-                        // When searching, ignore read failures
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        final ResourcesProvider provider = findResourcesProvider(cookie);
-        if (provider != null && provider.getAssetsProvider() != null) {
-            final ParcelFileDescriptor fileDescriptor = provider.getAssetsProvider()
-                    .loadAssetParcelFd(fileName);
-            if (fileDescriptor != null) {
-                return new AssetFileDescriptor(fileDescriptor, 0,
-                        AssetFileDescriptor.UNKNOWN_LENGTH);
-            }
-            return null;
-        }
-
-        return null;
     }
 
     void xmlBlockGone(int id) {

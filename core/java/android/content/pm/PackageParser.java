@@ -1443,7 +1443,7 @@ public class PackageParser {
         try {
             try {
                 apkAssets = fd != null
-                        ? ApkAssets.loadFromFd(fd, debugPathName, 0 /* flags */)
+                        ? ApkAssets.loadFromFd(fd, debugPathName, 0 /* flags */, null /* assets */)
                         : ApkAssets.loadFromPath(apkPath);
             } catch (IOException e) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
