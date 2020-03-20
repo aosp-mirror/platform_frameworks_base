@@ -132,11 +132,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         updateCropToPaddingForImageViews();
         Notification notification = row.getEntry().getSbn().getNotification();
         mIcon.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
-        if (mWorkProfileImage != null) {
-            // The work profile image is always the same lets just set the icon tag for it not to
-            // animate
-            mWorkProfileImage.setTag(ImageTransformState.ICON_TAG, notification.getSmallIcon());
-        }
 
         // We need to reset all views that are no longer transforming in case a view was previously
         // transformed, but now we decided to transform its container instead.
@@ -183,6 +178,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mTransformationHelper.reset();
         mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON,
                 mIcon);
+        mTransformationHelper.addViewTransformingToSimilar(mWorkProfileImage);
         if (mIsLowPriority && mHeaderText != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
                     mHeaderText);
