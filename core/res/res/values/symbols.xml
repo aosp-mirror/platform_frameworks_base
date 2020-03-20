@@ -3871,8 +3871,8 @@
   <java-symbol type="id" name="conversation_face_pile" />
   <java-symbol type="id" name="conversation_text" />
   <java-symbol type="id" name="message_icon_container" />
+  <java-symbol type="id" name="conversation_image_message_container" />
   <java-symbol type="dimen" name="conversation_expand_button_top_margin_expanded" />
-  <java-symbol type="dimen" name="conversation_expand_button_expanded_size" />
   <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
   <java-symbol type="dimen" name="conversation_badge_side_margin" />
   <java-symbol type="dimen" name="conversation_icon_size_badged" />

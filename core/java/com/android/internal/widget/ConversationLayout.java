@@ -16,6 +16,9 @@
 
 package com.android.internal.widget;
 
+import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_EXTERNAL;
+import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_INLINE;
+
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,6 +38,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -46,6 +50,7 @@ import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -109,13 +114,13 @@ public class ConversationLayout extends FrameLayout
     private View mExpandButtonContainer;
     private ViewGroup mExpandButtonAndContentContainer;
     private NotificationExpandButton mExpandButton;
+    private MessagingLinearLayout mImageMessageContainer;
     private int mExpandButtonExpandedTopMargin;
     private int mBadgedSideMargins;
     private int mIconSizeBadged;
     private int mIconSizeCentered;
     private CachingIconView mIcon;
     private int mExpandedGroupTopMargin;
-    private int mExpandButtonExpandedSize;
     private View mConversationFacePile;
     private int mNotificationBackgroundColor;
     private CharSequence mFallbackChatName;
@@ -126,6 +131,7 @@ public class ConversationLayout extends FrameLayout
     private View mContentContainer;
     private boolean mExpandable = true;
     private int mContentMarginEnd;
+    private Rect mMessagingClipRect;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -150,12 +156,13 @@ public class ConversationLayout extends FrameLayout
         super.onFinishInflate();
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
         mMessagingLinearLayout.setMessagingLayout(this);
+        mImageMessageContainer = findViewById(R.id.conversation_image_message_container);
         // We still want to clip, but only on the top, since views can temporarily out of bounds
         // during transitions.
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         int size = Math.max(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        Rect rect = new Rect(0, 0, size, size);
-        mMessagingLinearLayout.setClipBounds(rect);
+        mMessagingClipRect = new Rect(0, 0, size, size);
+        setMessagingClippingDisabled(false);
         mTitleView = findViewById(R.id.title);
         mAvatarSize = getResources().getDimensionPixelSize(R.dimen.messaging_avatar_size);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
@@ -176,8 +183,6 @@ public class ConversationLayout extends FrameLayout
         mExpandButton = findViewById(R.id.expand_button);
         mExpandButtonExpandedTopMargin = getResources().getDimensionPixelSize(
                 R.dimen.conversation_expand_button_top_margin_expanded);
-        mExpandButtonExpandedSize = getResources().getDimensionPixelSize(
-                R.dimen.conversation_expand_button_expanded_size);
         mNotificationHeaderExpandedPadding = getResources().getDimensionPixelSize(
                 R.dimen.conversation_header_expanded_padding_end);
         mContentMarginEnd = getResources().getDimensionPixelSize(
@@ -370,6 +375,41 @@ public class ConversationLayout extends FrameLayout
             messagingGroup.setCanHideSenderIfFirst(canHide);
         }
         updateIconPositionAndSize();
+        updateImageMessages();
+    }
+
+    private void updateImageMessages() {
+        boolean displayExternalImage = false;
+        ArraySet<View> newMessages = new ArraySet<>();
+        if (mIsCollapsed) {
+
+            // When collapsed, we're displaying all image messages in a dedicated container
+            // on the right of the layout instead of inline. Let's add all isolated images there
+            int imageIndex = 0;
+            for (int i = 0; i < mGroups.size(); i++) {
+                MessagingGroup messagingGroup = mGroups.get(i);
+                MessagingImageMessage isolatedMessage = messagingGroup.getIsolatedMessage();
+                if (isolatedMessage != null) {
+                    newMessages.add(isolatedMessage.getView());
+                    displayExternalImage = true;
+                    if (imageIndex
+                            != mImageMessageContainer.indexOfChild(isolatedMessage.getView())) {
+                        mImageMessageContainer.removeView(isolatedMessage.getView());
+                        mImageMessageContainer.addView(isolatedMessage.getView(), imageIndex);
+                    }
+                    imageIndex++;
+                }
+            }
+        }
+        // Remove all messages that don't belong into the image layout
+        for (int i = 0; i < mImageMessageContainer.getChildCount(); i++) {
+            View child = mImageMessageContainer.getChildAt(i);
+            if (!newMessages.contains(child)) {
+                mImageMessageContainer.removeView(child);
+                i--;
+            }
+        }
+        mImageMessageContainer.setVisibility(displayExternalImage ? VISIBLE : GONE);
     }
 
     private void bindFacePile() {
@@ -662,7 +702,9 @@ public class ConversationLayout extends FrameLayout
                 newGroup = MessagingGroup.createGroup(mMessagingLinearLayout);
                 mAddedGroups.add(newGroup);
             }
-            newGroup.setDisplayImagesAtEnd(mIsCollapsed);
+            newGroup.setImageDisplayLocation(mIsCollapsed
+                    ? IMAGE_DISPLAY_LOCATION_EXTERNAL
+                    : IMAGE_DISPLAY_LOCATION_INLINE);
             newGroup.setIsInConversation(true);
             newGroup.setLayoutColor(mLayoutColor);
             newGroup.setTextColors(mSenderTextColor, mMessageTextColor);
@@ -817,6 +859,10 @@ public class ConversationLayout extends FrameLayout
         return mMessagingLinearLayout;
     }
 
+    public @NonNull ViewGroup getImageMessageContainer() {
+        return mImageMessageContainer;
+    }
+
     public ArrayList<MessagingGroup> getMessagingGroups() {
         return mGroups;
     }
@@ -827,20 +873,17 @@ public class ConversationLayout extends FrameLayout
         int gravity;
         int topMargin = 0;
         ViewGroup newContainer;
-        int newContainerHeight;
         if (mIsCollapsed) {
             drawableId = R.drawable.ic_expand_notification;
             contentDescriptionId = R.string.expand_button_content_description_collapsed;
             gravity = Gravity.CENTER;
             newContainer = mExpandButtonAndContentContainer;
-            newContainerHeight = LayoutParams.MATCH_PARENT;
         } else {
             drawableId = R.drawable.ic_collapse_notification;
             contentDescriptionId = R.string.expand_button_content_description_expanded;
             gravity = Gravity.CENTER_HORIZONTAL | Gravity.TOP;
             topMargin = mExpandButtonExpandedTopMargin;
             newContainer = this;
-            newContainerHeight = mExpandButtonExpandedSize;
         }
         mExpandButton.setImageDrawable(getContext().getDrawable(drawableId));
         mExpandButton.setColorFilter(mExpandButton.getOriginalNotificationColor());
@@ -850,14 +893,11 @@ public class ConversationLayout extends FrameLayout
         if (newContainer != mExpandButtonContainer.getParent()) {
             ((ViewGroup) mExpandButtonContainer.getParent()).removeView(mExpandButtonContainer);
             newContainer.addView(mExpandButtonContainer);
-            MarginLayoutParams layoutParams =
-                    (MarginLayoutParams) mExpandButtonContainer.getLayoutParams();
-            layoutParams.height = newContainerHeight;
-            mExpandButtonContainer.setLayoutParams(layoutParams);
         }
 
         // update if the expand button is centered
-        FrameLayout.LayoutParams layoutParams = (LayoutParams) mExpandButton.getLayoutParams();
+        LinearLayout.LayoutParams layoutParams =
+                (LinearLayout.LayoutParams) mExpandButton.getLayoutParams();
         layoutParams.gravity = gravity;
         layoutParams.topMargin = topMargin;
         mExpandButton.setLayoutParams(layoutParams);
@@ -904,5 +944,10 @@ public class ConversationLayout extends FrameLayout
             mExpandButtonContainer.setVisibility(GONE);
         }
         updateContentPaddings();
+    }
+
+    @Override
+    public void setMessagingClippingDisabled(boolean clippingDisabled) {
+        mMessagingLinearLayout.setClipBounds(clippingDisabled ? null : mMessagingClipRect);
     }
 }
