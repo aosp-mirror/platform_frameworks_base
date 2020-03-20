@@ -346,10 +346,9 @@ public class ResourcesManager {
 
         // We must load this from disk.
         if (overlay) {
-            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(path),
-                    false /*system*/);
+            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(path), 0 /*flags*/);
         } else {
-            apkAssets = ApkAssets.loadFromPath(path, false /*system*/, sharedLib);
+            apkAssets = ApkAssets.loadFromPath(path, sharedLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
         }
 
         if (mLoadedApkAssets != null) {
