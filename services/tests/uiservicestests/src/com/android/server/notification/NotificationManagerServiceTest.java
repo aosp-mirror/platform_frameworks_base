@@ -678,9 +678,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     private Notification.BubbleMetadata.Builder getBubbleMetadataBuilder() {
         PendingIntent pi = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
-        return new Notification.BubbleMetadata.Builder()
-                .createIntentBubble(pi,
-                        Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon));
+        return new Notification.BubbleMetadata.Builder(pi,
+                Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon));
     }
 
     private Notification.Builder getMessageStyleNotifBuilder(boolean addBubbleMetadata,
@@ -6175,7 +6174,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Messaging notification with shortcut info
         Notification.BubbleMetadata metadata =
-                getBubbleMetadataBuilder().createShortcutBubble("someshortcutId").build();
+                new Notification.BubbleMetadata.Builder("someshortcutId").build();
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
                 null /* groupKey */, false /* isSummary */);
         nb.setBubbleMetadata(metadata);
@@ -6232,8 +6231,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 ArgumentCaptor.forClass(LauncherApps.Callback.class);
 
         // Messaging notification with shortcut info
-        Notification.BubbleMetadata metadata =
-                getBubbleMetadataBuilder().createShortcutBubble("someshortcutId").build();
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                "someshortcutId").build();
         Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
                 null /* groupKey */, false /* isSummary */);
         nb.setBubbleMetadata(metadata);
