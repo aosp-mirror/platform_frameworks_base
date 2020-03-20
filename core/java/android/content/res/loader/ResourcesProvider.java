@@ -50,8 +50,6 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
     @GuardedBy("mLock")
     private final ApkAssets mApkAssets;
 
-    private final AssetsProvider mAssetsProvider;
-
     /**
      * Creates an empty ResourcesProvider with no resource data. This is useful for loading
      * file-based assets not associated with resource identifiers.
@@ -60,8 +58,8 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
      */
     @NonNull
     public static ResourcesProvider empty(@NonNull AssetsProvider assetsProvider) {
-        return new ResourcesProvider(ApkAssets.loadEmptyForLoader(ApkAssets.PROPERTY_LOADER),
-                assetsProvider);
+        return new ResourcesProvider(ApkAssets.loadEmptyForLoader(ApkAssets.PROPERTY_LOADER,
+                assetsProvider));
     }
 
     /**
@@ -101,7 +99,7 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
             @Nullable AssetsProvider assetsProvider)
             throws IOException {
         return new ResourcesProvider(ApkAssets.loadFromFd(fileDescriptor.getFileDescriptor(),
-                fileDescriptor.toString(), ApkAssets.PROPERTY_LOADER), assetsProvider);
+                fileDescriptor.toString(), ApkAssets.PROPERTY_LOADER, assetsProvider));
     }
 
     /**
@@ -130,8 +128,8 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
             long offset, long length, @Nullable AssetsProvider assetsProvider)
             throws IOException {
         return new ResourcesProvider(ApkAssets.loadFromFd(fileDescriptor.getFileDescriptor(),
-                fileDescriptor.toString(), offset, length, ApkAssets.PROPERTY_LOADER),
-                assetsProvider);
+                fileDescriptor.toString(), offset, length, ApkAssets.PROPERTY_LOADER,
+                assetsProvider));
     }
 
     /**
@@ -156,7 +154,7 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
             throws IOException {
         return new ResourcesProvider(
                 ApkAssets.loadTableFromFd(fileDescriptor.getFileDescriptor(),
-                        fileDescriptor.toString(), ApkAssets.PROPERTY_LOADER), assetsProvider);
+                        fileDescriptor.toString(), ApkAssets.PROPERTY_LOADER, assetsProvider));
     }
 
     /**
@@ -187,8 +185,8 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
             throws IOException {
         return new ResourcesProvider(
                 ApkAssets.loadTableFromFd(fileDescriptor.getFileDescriptor(),
-                        fileDescriptor.toString(), offset, length, ApkAssets.PROPERTY_LOADER),
-                assetsProvider);
+                        fileDescriptor.toString(), offset, length, ApkAssets.PROPERTY_LOADER,
+                        assetsProvider));
     }
 
     /**
@@ -208,19 +206,28 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
         }
 
         String splitPath = appInfo.getSplitCodePaths()[splitIndex];
-        return new ResourcesProvider(ApkAssets.loadFromPath(splitPath, ApkAssets.PROPERTY_LOADER),
-                null);
+        return new ResourcesProvider(ApkAssets.loadFromPath(splitPath, ApkAssets.PROPERTY_LOADER,
+                null /* assetsProvider */));
     }
 
-    private ResourcesProvider(@NonNull ApkAssets apkAssets,
-            @Nullable AssetsProvider assetsProvider) {
+    /**
+     * Creates a ResourcesProvider from a directory path.
+     *
+     * File-based resources will be resolved within the directory as if the directory is an APK.
+     *
+     * @param path the path of the directory to treat as an APK
+     * @param assetsProvider the assets provider that overrides the loading of file-based resources
+     */
+    @NonNull
+    public static ResourcesProvider loadFromDirectory(@NonNull String path,
+            @Nullable AssetsProvider assetsProvider) throws IOException {
+        return new ResourcesProvider(ApkAssets.loadFromDir(path, ApkAssets.PROPERTY_LOADER,
+                assetsProvider));
+    }
+
+
+    private ResourcesProvider(@NonNull ApkAssets apkAssets) {
         this.mApkAssets = apkAssets;
-        this.mAssetsProvider = assetsProvider;
-    }
-
-    @Nullable
-    public AssetsProvider getAssetsProvider() {
-        return mAssetsProvider;
     }
 
     /** @hide */

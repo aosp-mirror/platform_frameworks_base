@@ -42,7 +42,7 @@ TEST(ApkAssetsTest, LoadApk) {
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
   ASSERT_THAT(loaded_arsc, NotNull());
   ASSERT_THAT(loaded_arsc->GetPackageById(0x7fu), NotNull());
-  ASSERT_THAT(loaded_apk->Open("res/layout/main.xml"), NotNull());
+  ASSERT_THAT(loaded_apk->GetAssetsProvider()->Open("res/layout/main.xml"), NotNull());
 }
 
 TEST(ApkAssetsTest, LoadApkFromFd) {
@@ -50,14 +50,13 @@ TEST(ApkAssetsTest, LoadApkFromFd) {
   unique_fd fd(::open(path.c_str(), O_RDONLY | O_BINARY));
   ASSERT_THAT(fd.get(), Ge(0));
 
-  std::unique_ptr<const ApkAssets> loaded_apk =
-      ApkAssets::LoadFromFd(std::move(fd), path, false /*system*/, false /*force_shared_lib*/);
+  std::unique_ptr<const ApkAssets> loaded_apk = ApkAssets::LoadFromFd(std::move(fd), path);
   ASSERT_THAT(loaded_apk, NotNull());
 
   const LoadedArsc* loaded_arsc = loaded_apk->GetLoadedArsc();
   ASSERT_THAT(loaded_arsc, NotNull());
   ASSERT_THAT(loaded_arsc->GetPackageById(0x7fu), NotNull());
-  ASSERT_THAT(loaded_apk->Open("res/layout/main.xml"), NotNull());
+  ASSERT_THAT(loaded_apk->GetAssetsProvider()->Open("res/layout/main.xml"), NotNull());
 }
 
 TEST(ApkAssetsTest, LoadApkAsSharedLibrary) {
@@ -84,9 +83,11 @@ TEST(ApkAssetsTest, CreateAndDestroyAssetKeepsApkAssetsOpen) {
       ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
   ASSERT_THAT(loaded_apk, NotNull());
 
-  { ASSERT_THAT(loaded_apk->Open("res/layout/main.xml", Asset::ACCESS_BUFFER), NotNull()); }
+  { ASSERT_THAT(loaded_apk->GetAssetsProvider()->Open("res/layout/main.xml",
+                                                      Asset::ACCESS_BUFFER), NotNull()); }
 
-  { ASSERT_THAT(loaded_apk->Open("res/layout/main.xml", Asset::ACCESS_BUFFER), NotNull()); }
+  { ASSERT_THAT(loaded_apk->GetAssetsProvider()->Open("res/layout/main.xml",
+                                                      Asset::ACCESS_BUFFER), NotNull()); }
 }
 
 TEST(ApkAssetsTest, OpenUncompressedAssetFd) {
@@ -94,7 +95,8 @@ TEST(ApkAssetsTest, OpenUncompressedAssetFd) {
       ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
   ASSERT_THAT(loaded_apk, NotNull());
 
-  auto asset = loaded_apk->Open("assets/uncompressed.txt", Asset::ACCESS_UNKNOWN);
+  auto asset = loaded_apk->GetAssetsProvider()->Open("assets/uncompressed.txt",
+                                                     Asset::ACCESS_UNKNOWN);
   ASSERT_THAT(asset, NotNull());
 
   off64_t start, length;
