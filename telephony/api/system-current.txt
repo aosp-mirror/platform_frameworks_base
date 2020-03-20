@@ -290,30 +290,6 @@ package android.telephony {
     field public static final String MBMS_STREAMING_SERVICE_ACTION = "android.telephony.action.EmbmsStreaming";
   }
 
-  public final class ModemActivityInfo implements android.os.Parcelable {
-    ctor public ModemActivityInfo(long, int, int, @NonNull int[], int);
-    method public int describeContents();
-    method public int getIdleTimeMillis();
-    method public int getReceiveTimeMillis();
-    method public int getSleepTimeMillis();
-    method public long getTimestamp();
-    method @NonNull public java.util.List<android.telephony.ModemActivityInfo.TransmitPower> getTransmitPowerInfo();
-    method public boolean isValid();
-    method public void writeToParcel(android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ModemActivityInfo> CREATOR;
-    field public static final int TX_POWER_LEVELS = 5; // 0x5
-    field public static final int TX_POWER_LEVEL_0 = 0; // 0x0
-    field public static final int TX_POWER_LEVEL_1 = 1; // 0x1
-    field public static final int TX_POWER_LEVEL_2 = 2; // 0x2
-    field public static final int TX_POWER_LEVEL_3 = 3; // 0x3
-    field public static final int TX_POWER_LEVEL_4 = 4; // 0x4
-  }
-
-  public class ModemActivityInfo.TransmitPower {
-    method @NonNull public android.util.Range<java.lang.Integer> getPowerRangeInDbm();
-    method public int getTimeInMillis();
-  }
-
   public final class NetworkRegistrationInfo implements android.os.Parcelable {
     method @Nullable public android.telephony.DataSpecificRegistrationInfo getDataSpecificInfo();
     method public int getRegistrationState();
@@ -521,19 +497,13 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
-    method public void fillInNotifierBundle(@NonNull android.os.Bundle);
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
-    method @NonNull public static android.telephony.ServiceState newFromBundle(@NonNull android.os.Bundle);
     field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2
     field public static final int ROAMING_TYPE_INTERNATIONAL = 3; // 0x3
     field public static final int ROAMING_TYPE_NOT_ROAMING = 0; // 0x0
     field public static final int ROAMING_TYPE_UNKNOWN = 1; // 0x1
-  }
-
-  public class SignalStrength implements android.os.Parcelable {
-    ctor public SignalStrength(@NonNull android.telephony.SignalStrength);
   }
 
   public final class SmsCbCmasInfo implements android.os.Parcelable {
@@ -807,7 +777,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isDataEnabledForApn(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isEmergencyAssistanceEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isIdle();
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isInEmergencySmsMode();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isLteCdmaEvdoGsmWcdmaEnabled();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isOpportunisticNetworkEnabled();
@@ -859,11 +828,6 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void updateOtaEmergencyNumberDbFilePath(@NonNull android.os.ParcelFileDescriptor);
     method public void updateServiceLocation();
     field @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public static final String ACTION_ANOMALY_REPORTED = "android.telephony.action.ANOMALY_REPORTED";
-    field public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE = "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
-    field public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE = "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";
-    field public static final String ACTION_CARRIER_SIGNAL_REDIRECTED = "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED";
-    field public static final String ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED = "com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED";
-    field public static final String ACTION_CARRIER_SIGNAL_RESET = "com.android.internal.telephony.CARRIER_SIGNAL_RESET";
     field public static final String ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED = "android.intent.action.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED = "android.intent.action.ACTION_DEFAULT_VOICE_SUBSCRIPTION_CHANGED";
     field public static final String ACTION_EMERGENCY_ASSISTANCE = "android.telephony.action.EMERGENCY_ASSISTANCE";
@@ -880,17 +844,8 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final String EXTRA_ANOMALY_DESCRIPTION = "android.telephony.extra.ANOMALY_DESCRIPTION";
     field public static final String EXTRA_ANOMALY_ID = "android.telephony.extra.ANOMALY_ID";
-    field @Deprecated public static final String EXTRA_APN_PROTOCOL = "apnProto";
-    field public static final String EXTRA_APN_PROTOCOL_INT = "apnProtoInt";
-    field @Deprecated public static final String EXTRA_APN_TYPE = "apnType";
-    field public static final String EXTRA_APN_TYPE_INT = "apnTypeInt";
-    field public static final String EXTRA_DEFAULT_NETWORK_AVAILABLE = "defaultNetworkAvailable";
-    field public static final String EXTRA_ERROR_CODE = "errorCode";
-    field public static final String EXTRA_PCO_ID = "pcoId";
-    field public static final String EXTRA_PCO_VALUE = "pcoValue";
     field public static final String EXTRA_PHONE_IN_ECM_STATE = "android.telephony.extra.PHONE_IN_ECM_STATE";
     field public static final String EXTRA_PHONE_IN_EMERGENCY_CALL = "android.telephony.extra.PHONE_IN_EMERGENCY_CALL";
-    field public static final String EXTRA_REDIRECTION_URL = "redirectionUrl";
     field public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";

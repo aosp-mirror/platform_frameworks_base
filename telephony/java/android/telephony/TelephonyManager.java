@@ -1579,7 +1579,6 @@ public class TelephonyManager {
      * <p class="note">This is a protected intent that can only be sent by the system.</p>
      * @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String ACTION_CARRIER_SIGNAL_REDIRECTED =
             "com.android.internal.telephony.CARRIER_SIGNAL_REDIRECTED";
@@ -1597,7 +1596,6 @@ public class TelephonyManager {
      * <p class="note">This is a protected intent that can only be sent by the system. </p>
      * @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String ACTION_CARRIER_SIGNAL_REQUEST_NETWORK_FAILED =
             "com.android.internal.telephony.CARRIER_SIGNAL_REQUEST_NETWORK_FAILED";
@@ -1620,7 +1618,6 @@ public class TelephonyManager {
      * <p class="note">This is a protected intent that can only be sent by the system. </p>
      * @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String ACTION_CARRIER_SIGNAL_PCO_VALUE =
             "com.android.internal.telephony.CARRIER_SIGNAL_PCO_VALUE";
@@ -1638,7 +1635,6 @@ public class TelephonyManager {
      * <p class="note">This is a protected intent that can only be sent by the system. </p>
      * @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE =
             "com.android.internal.telephony.CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE";
@@ -1653,7 +1649,6 @@ public class TelephonyManager {
      * <p class="note">This is a protected intent that can only be sent by the system.</p>
      * @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String ACTION_CARRIER_SIGNAL_RESET =
             "com.android.internal.telephony.CARRIER_SIGNAL_RESET";
@@ -1663,7 +1658,6 @@ public class TelephonyManager {
      *  An string extra of redirected url upon {@link #ACTION_CARRIER_SIGNAL_REDIRECTED}.
      *  @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String EXTRA_REDIRECTION_URL = "redirectionUrl";
 
@@ -1672,7 +1666,6 @@ public class TelephonyManager {
      *  Check {@link DataFailCause} for all possible values.
      *  @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String EXTRA_ERROR_CODE = "errorCode";
 
@@ -1686,7 +1679,6 @@ public class TelephonyManager {
      *
      *  @hide
      */
-    @SystemApi
     @Deprecated
     @SuppressLint("ActionValue")
     public static final String EXTRA_APN_TYPE = "apnType";
@@ -1699,7 +1691,6 @@ public class TelephonyManager {
      *  Check {@link ApnSetting} TYPE_* for its values.
      *  @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String EXTRA_APN_TYPE_INT = "apnTypeInt";
 
@@ -1711,7 +1702,6 @@ public class TelephonyManager {
      *
      *  @hide
      */
-    @SystemApi
     @Deprecated
     @SuppressLint("ActionValue")
     public static final String EXTRA_APN_PROTOCOL = "apnProto";
@@ -1722,7 +1712,6 @@ public class TelephonyManager {
      *  Check {@link ApnSetting} PROTOCOL_* for its values.
      *  @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String EXTRA_APN_PROTOCOL_INT = "apnProtoInt";
 
@@ -1731,7 +1720,6 @@ public class TelephonyManager {
      *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
      *  @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String EXTRA_PCO_ID = "pcoId";
 
@@ -1740,7 +1728,6 @@ public class TelephonyManager {
      *  {@link #ACTION_CARRIER_SIGNAL_PCO_VALUE} broadcasts.
      *  @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String EXTRA_PCO_VALUE = "pcoValue";
 
@@ -1749,7 +1736,6 @@ public class TelephonyManager {
      *  {@link #ACTION_CARRIER_SIGNAL_DEFAULT_NETWORK_AVAILABLE} broadcasts.
      *  @hide
      */
-    @SystemApi
     @SuppressLint("ActionValue")
     public static final String EXTRA_DEFAULT_NETWORK_AVAILABLE = "defaultNetworkAvailable";
 
@@ -2900,6 +2886,8 @@ public class TelephonyManager {
     /**
      * Return a collection of all network types
      * @return network types
+     *
+     * @hide
      */
     public static @NonNull @NetworkType int[] getAllNetworkTypes() {
         return NETWORK_TYPES;
@@ -8076,7 +8064,6 @@ public class TelephonyManager {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public boolean isInEmergencySmsMode() {
         try {
