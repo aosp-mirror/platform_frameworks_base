@@ -102,7 +102,7 @@ public final class ClosedSubscriberGroupInfo implements Parcelable {
         }
 
         ClosedSubscriberGroupInfo o = (ClosedSubscriberGroupInfo) other;
-        return mCsgIndicator == o.mCsgIndicator && mHomeNodebName == o.mHomeNodebName
+        return mCsgIndicator == o.mCsgIndicator && o.mHomeNodebName.equals(mHomeNodebName)
                 && mCsgIdentity == o.mCsgIdentity;
     }
 
