@@ -214,7 +214,7 @@ public class FrontendStatus {
     private Integer mFreqOffset;
     private Integer mHierarchy;
     private Boolean mIsRfLocked;
-    private Atsc3PlpInfo[] mPlpInfo;
+    private Atsc3PlpTuningInfo[] mPlpInfo;
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -419,7 +419,7 @@ public class FrontendStatus {
     /**
      * Gets lock status for RF.
      */
-    public boolean isRfLock() {
+    public boolean isRfLocked() {
         if (mIsRfLocked == null) {
             throw new IllegalStateException();
         }
@@ -429,7 +429,7 @@ public class FrontendStatus {
      * Gets an array of PLP status for tuned PLPs for ATSC3 frontend.
      */
     @NonNull
-    public Atsc3PlpInfo[] getAtsc3PlpInfo() {
+    public Atsc3PlpTuningInfo[] getAtsc3PlpTuningInfo() {
         if (mPlpInfo == null) {
             throw new IllegalStateException();
         }
@@ -439,14 +439,14 @@ public class FrontendStatus {
     /**
      * Status for each tuning Physical Layer Pipes.
      */
-    public static class Atsc3PlpInfo {
+    public static class Atsc3PlpTuningInfo {
         private final int mPlpId;
-        private final boolean mIsLock;
+        private final boolean mIsLocked;
         private final int mUec;
 
-        private Atsc3PlpInfo(int plpId, boolean isLock, int uec) {
+        private Atsc3PlpTuningInfo(int plpId, boolean isLocked, int uec) {
             mPlpId = plpId;
-            mIsLock = isLock;
+            mIsLocked = isLocked;
             mUec = uec;
         }
 
@@ -459,8 +459,8 @@ public class FrontendStatus {
         /**
          * Gets Demod Lock/Unlock status of this particular PLP.
          */
-        public boolean isLock() {
-            return mIsLock;
+        public boolean isLocked() {
+            return mIsLocked;
         }
         /**
          * Gets Uncorrectable Error Counts (UEC) of this particular PLP since last tune operation.
