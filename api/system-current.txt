@@ -5756,7 +5756,7 @@ package android.media.tv.tuner.frontend {
 
   public class FrontendStatus {
     method public int getAgc();
-    method @NonNull public android.media.tv.tuner.frontend.FrontendStatus.Atsc3PlpInfo[] getAtsc3PlpInfo();
+    method @NonNull public android.media.tv.tuner.frontend.FrontendStatus.Atsc3PlpTuningInfo[] getAtsc3PlpTuningInfo();
     method public int getBer();
     method public int getFreqOffset();
     method public int getHierarchy();
@@ -5776,7 +5776,7 @@ package android.media.tv.tuner.frontend {
     method public boolean isDemodLocked();
     method public boolean isEwbs();
     method public boolean isLnaOn();
-    method public boolean isRfLock();
+    method public boolean isRfLocked();
     field public static final int FRONTEND_STATUS_TYPE_AGC = 14; // 0xe
     field public static final int FRONTEND_STATUS_TYPE_ATSC3_PLP_INFO = 21; // 0x15
     field public static final int FRONTEND_STATUS_TYPE_BER = 2; // 0x2
@@ -5801,10 +5801,10 @@ package android.media.tv.tuner.frontend {
     field public static final int FRONTEND_STATUS_TYPE_SYMBOL_RATE = 7; // 0x7
   }
 
-  public static class FrontendStatus.Atsc3PlpInfo {
+  public static class FrontendStatus.Atsc3PlpTuningInfo {
     method public int getPlpId();
     method public int getUec();
-    method public boolean isLock();
+    method public boolean isLocked();
   }
 
   public class Isdbs3FrontendCapabilities extends android.media.tv.tuner.frontend.FrontendCapabilities {
