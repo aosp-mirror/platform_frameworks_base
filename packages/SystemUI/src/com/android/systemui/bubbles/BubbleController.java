@@ -1305,7 +1305,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      */
     static boolean canLaunchInActivityView(Context context, NotificationEntry entry) {
         PendingIntent intent = entry.getBubbleMetadata() != null
-                ? entry.getBubbleMetadata().getBubbleIntent()
+                ? entry.getBubbleMetadata().getIntent()
                 : null;
         if (entry.getBubbleMetadata() != null
                 && entry.getBubbleMetadata().getShortcutId() != null) {

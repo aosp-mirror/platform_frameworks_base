@@ -156,7 +156,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
 
         if (entry.getBubbleMetadata() == null
                 || (entry.getBubbleMetadata().getShortcutId() == null
-                    && entry.getBubbleMetadata().getBubbleIntent() == null)) {
+                    && entry.getBubbleMetadata().getIntent() == null)) {
             if (DEBUG) {
                 Log.d(TAG, "No bubble up: notification: " + sbn.getKey()
                         + " doesn't have valid metadata");

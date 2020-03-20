@@ -433,7 +433,7 @@ class Bubble implements BubbleViewProvider {
     PendingIntent getBubbleIntent() {
         Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
         if (data != null) {
-            return data.getBubbleIntent();
+            return data.getIntent();
         }
         return null;
     }
