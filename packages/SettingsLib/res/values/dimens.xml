@@ -92,4 +92,6 @@
     <!-- Size of nearby icon -->
     <dimen name="bt_nearby_icon_size">24dp</dimen>
 
+    <!-- Define minimal size of the tap area -->
+    <dimen name="min_tap_target_size">48dp</dimen>
 </resources>
