@@ -263,10 +263,6 @@ void sigpipe_handler(int signum) {
 }
 
 status_t WorkerThreadSection::Execute(ReportWriter* writer) const {
-    status_t err = NO_ERROR;
-    bool workerDone = false;
-    FdBuffer buffer;
-
     // Create shared data and pipe. Don't put data on the stack since this thread may exit early.
     sp<WorkerThreadData> data = new WorkerThreadData(this);
     if (!data->pipe.init()) {
@@ -289,6 +285,9 @@ status_t WorkerThreadSection::Execute(ReportWriter* writer) const {
     }).detach();
 
     // Loop reading until either the timeout or the worker side is done (i.e. eof).
+    status_t err = NO_ERROR;
+    bool workerDone = false;
+    FdBuffer buffer;
     err = buffer.read(data->pipe.readFd().get(), this->timeoutMs);
     if (err != NO_ERROR) {
         ALOGE("[%s] reader failed with error '%s'", this->name.string(), strerror(-err));
@@ -440,7 +439,7 @@ status_t DumpsysSection::BlockingCall(unique_fd& pipeWriteFd) const {
 
 // ================================================================================
 TextDumpsysSection::TextDumpsysSection(int id, const char* service, ...)
-    : WorkerThreadSection(id, REMOTE_CALL_TIMEOUT_MS), mService(service) {
+        :Section(id), mService(service) {
     name = "dumpsys ";
     name += service;
 
@@ -460,7 +459,7 @@ TextDumpsysSection::TextDumpsysSection(int id, const char* service, ...)
 
 TextDumpsysSection::~TextDumpsysSection() {}
 
-status_t TextDumpsysSection::BlockingCall(unique_fd& pipeWriteFd) const {
+status_t TextDumpsysSection::Execute(ReportWriter* writer) const {
     // checkService won't wait for the service to show up like getService will.
     sp<IBinder> service = defaultServiceManager()->checkService(mService);
     if (service == NULL) {
@@ -488,25 +487,36 @@ status_t TextDumpsysSection::BlockingCall(unique_fd& pipeWriteFd) const {
     });
 
     // Collect dump content
-    std::string content;
-    bool success = ReadFdToString(dumpPipe.readFd(), &content);
-    worker.join(); // Wait for worker to finish
-    dumpPipe.readFd().reset();
-    if (!success) {
-        ALOGW("[%s] failed to read data from pipe", this->name.string());
-        return -1;
-    }
-
+    FdBuffer buffer;
     ProtoOutputStream proto;
-    proto.write(util::TextDumpProto::COMMAND, std::string(name.string()));
-    proto.write(util::TextDumpProto::CONTENT, content);
-    proto.write(util::TextDumpProto::DUMP_DURATION_NS, int64_t(Nanotime() - start));
+    proto.write(TextDumpProto::COMMAND, std::string(name.string()));
+    proto.write(TextDumpProto::DUMP_DURATION_NS, int64_t(Nanotime() - start));
+    buffer.write(proto.data());
 
-    if (!proto.flush(pipeWriteFd.get()) && errno == EPIPE) {
-        ALOGE("[%s] wrote to a broken pipe\n", this->name.string());
-        return EPIPE;
+    sp<EncodedBuffer> internalBuffer = buffer.data();
+    internalBuffer->writeHeader((uint32_t)TextDumpProto::CONTENT, WIRE_TYPE_LENGTH_DELIMITED);
+    size_t editPos = internalBuffer->wp()->pos();
+    internalBuffer->wp()->move(8); // reserve 8 bytes for the varint of the data size
+    size_t dataBeginPos = internalBuffer->wp()->pos();
+
+    status_t readStatus = buffer.read(dumpPipe.readFd(), this->timeoutMs);
+    dumpPipe.readFd().reset();
+    writer->setSectionStats(buffer);
+    if (readStatus != OK || buffer.timedOut()) {
+        ALOGW("[%s] failed to read from dumpsys: %s, timedout: %s", this->name.string(),
+              strerror(-readStatus), buffer.timedOut() ? "true" : "false");
+        worker.detach();
+        return readStatus;
     }
-    return OK;
+    worker.join(); // wait for worker to finish
+
+    // Revisit the actual size from dumpsys and edit the internal buffer accordingly.
+    size_t dumpSize = buffer.size() - dataBeginPos;
+    internalBuffer->wp()->rewind()->move(editPos);
+    internalBuffer->writeRawVarint32(dumpSize);
+    internalBuffer->copy(dataBeginPos, dumpSize);
+
+    return writer->writeSection(buffer);
 }
 
 // ================================================================================
