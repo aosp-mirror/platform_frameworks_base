@@ -91,7 +91,7 @@ java_library_static {
     ],
 
     libs: [
-        "services-stubs",
+        "android_system_server_stubs_current",
         "services.net",
         "android.hardware.light-V2.0-java",
         "android.hardware.power-java",
