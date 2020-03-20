@@ -18,6 +18,7 @@ package android.service.storage;
 
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
+import android.os.storage.StorageVolume;
 
 /**
  * @hide
@@ -27,4 +28,6 @@ oneway interface IExternalStorageService
     void startSession(@utf8InCpp String sessionId, int type, in ParcelFileDescriptor deviceFd,
          @utf8InCpp String upperPath, @utf8InCpp String lowerPath, in RemoteCallback callback);
     void endSession(@utf8InCpp String sessionId, in RemoteCallback callback);
+    void notifyVolumeStateChanged(@utf8InCpp String sessionId, in StorageVolume vol,
+        in RemoteCallback callback);
 }
