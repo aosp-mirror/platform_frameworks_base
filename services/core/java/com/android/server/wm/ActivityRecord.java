@@ -4618,6 +4618,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending start: " + intent.getComponent(), e);
             }
+            // The activity may be waiting for stop, but that is no longer appropriate if we are
+            // starting the activity again
+            mStackSupervisor.mStoppingActivities.remove(this);
         }
         return false;
     }
@@ -4667,7 +4670,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * and {@link #shouldPauseActivity(ActivityRecord)}.
      */
     private boolean shouldStartActivity() {
-        return mVisibleRequested && isState(STOPPED);
+        return mVisibleRequested && (isState(STOPPED) || isState(STOPPING));
     }
 
     /**
