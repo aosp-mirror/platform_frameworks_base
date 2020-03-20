@@ -65,12 +65,13 @@ public class AvSettings extends Settings {
     /**
      * Builder for {@link AvSettings}.
      */
-    public static class Builder extends Settings.Builder<Builder> {
+    public static class Builder {
+        private final int mMainType;
         private final boolean mIsAudio;
         private boolean mIsPassthrough;
 
         private Builder(int mainType, boolean isAudio) {
-            super(mainType);
+            mMainType = mainType;
             mIsAudio = isAudio;
         }
 
@@ -89,11 +90,6 @@ public class AvSettings extends Settings {
         @NonNull
         public AvSettings build() {
             return new AvSettings(mMainType, mIsAudio, mIsPassthrough);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 }

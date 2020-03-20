@@ -88,9 +88,9 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
      * Builder for {@link SectionSettingsWithSectionBits}.
      */
     public static class Builder extends SectionSettings.Builder<Builder> {
-        private byte[] mFilter;
-        private byte[] mMask;
-        private byte[] mMode;
+        private byte[] mFilter = {};
+        private byte[] mMask = {};
+        private byte[] mMode = {};
 
         private Builder(int mainType) {
             super(mainType);
@@ -98,6 +98,8 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
 
         /**
          * Sets filter bytes.
+         *
+         * <p>Default value is an empty byte array.
          */
         @NonNull
         public Builder setFilter(@NonNull byte[] filter) {
@@ -106,6 +108,8 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
         }
         /**
          * Sets bit mask.
+         *
+         * <p>Default value is an empty byte array.
          */
         @NonNull
         public Builder setMask(@NonNull byte[] mask) {
@@ -114,6 +118,8 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
         }
         /**
          * Sets mode.
+         *
+         * <p>Default value is an empty byte array.
          */
         @NonNull
         public Builder setMode(@NonNull byte[] mode) {
