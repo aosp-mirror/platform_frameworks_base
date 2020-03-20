@@ -17,7 +17,6 @@
 package com.android.server.notification;
 
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
-import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.FLAG_AUTO_CANCEL;
@@ -165,6 +164,7 @@ import com.android.server.notification.NotificationManagerService.NotificationAs
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
@@ -252,6 +252,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     IBinder mPermOwner;
     @Mock
     IActivityManager mAm;
+    @Mock
+    ActivityTaskManagerInternal mAtm;
     @Mock
     IUriGrantsManager mUgm;
     @Mock
@@ -454,7 +456,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mRankingHandler, mPackageManager, mPackageManagerClient, mockLightsManager,
                 mListeners, mAssistants, mConditionProviders,
                 mCompanionMgr, mSnoozeHelper, mUsageStats, mPolicyFile, mActivityManager,
-                mGroupHelper, mAm, mAppUsageStats,
+                mGroupHelper, mAm, mAtm, mAppUsageStats,
                 mock(DevicePolicyManagerInternal.class), mUgm, mUgmInternal,
                 mAppOpsManager, mUm, mHistoryManager, mStatsManager);
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
@@ -4704,8 +4706,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getImportance(testPackage, mUid)).thenReturn(IMPORTANCE_NONE);
 
-        // this app is in the foreground
-        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_FOREGROUND);
+        setAppInForegroundForToasts(mUid, true);
 
         // enqueue toast -> toast should still enqueue
         ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
@@ -4723,8 +4724,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
                 .thenReturn(false);
 
-        // this app is NOT in the foreground
-        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_NONE);
+        setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> no toasts enqueued
         ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
@@ -4742,8 +4742,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
                 .thenReturn(false);
 
-        // this app is in the foreground
-        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_FOREGROUND);
+        setAppInForegroundForToasts(mUid, true);
 
         // enqueue toast -> toast should still enqueue
         ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
@@ -4761,8 +4760,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mPackageManager.isPackageSuspendedForUser(testPackage, UserHandle.getUserId(mUid)))
                 .thenReturn(false);
 
-        // this app is NOT in the foreground
-        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_NONE);
+        setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> toast should still enqueue
         ((INotificationManager) mService.mService).enqueueTextToast(testPackage, new Binder(),
@@ -4820,8 +4818,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getImportance(testPackage, mUid)).thenReturn(IMPORTANCE_NONE);
 
-        // this app is NOT in the foreground
-        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_GONE);
+        setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> no toasts enqueued
         ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
@@ -4843,13 +4840,18 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getImportance(testPackage, mUid)).thenReturn(IMPORTANCE_NONE);
 
-        // this app is NOT in the foreground
-        when(mActivityManager.getUidImportance(mUid)).thenReturn(IMPORTANCE_GONE);
+        setAppInForegroundForToasts(mUid, false);
 
         // enqueue toast -> system toast can still be enqueued
         ((INotificationManager) mService.mService).enqueueToast(testPackage, new Binder(),
                 new TestableToastCallback(), 2000, 0);
         assertEquals(1, mService.mToastQueue.size());
+    }
+
+    private void setAppInForegroundForToasts(int uid, boolean inForeground) {
+        int importance = (inForeground) ? IMPORTANCE_FOREGROUND : IMPORTANCE_NONE;
+        when(mActivityManager.getUidImportance(mUid)).thenReturn(importance);
+        when(mAtm.hasResumedActivity(uid)).thenReturn(inForeground);
     }
 
     @Test
