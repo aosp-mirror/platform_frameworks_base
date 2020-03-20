@@ -21,19 +21,21 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.ApkAssets;
+import android.content.res.AssetFileDescriptor;
 import android.os.ParcelFileDescriptor;
-import android.os.SharedMemory;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 
 /**
  * Provides methods to load resources data from APKs ({@code .apk}) and resources tables
- * {@code .arsc} for use with {@link ResourcesLoader ResourcesLoader(s)}.
+ * (eg. {@code resources.arsc}) for use with {@link ResourcesLoader ResourcesLoader(s)}.
  */
 public class ResourcesProvider implements AutoCloseable, Closeable {
     private static final String TAG = "ResourcesProvider";
@@ -48,73 +50,111 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
     @GuardedBy("mLock")
     private final ApkAssets mApkAssets;
 
-    private final AssetsProvider mAssetsProvider;
-
     /**
-     * Creates an empty ResourcesProvider with no resource data. This is useful for loading assets
-     * that are not associated with resource identifiers.
+     * Creates an empty ResourcesProvider with no resource data. This is useful for loading
+     * file-based assets not associated with resource identifiers.
      *
-     * @param assetsProvider the assets provider that overrides the loading of file-based resources
+     * @param assetsProvider the assets provider that implements the loading of file-based resources
      */
     @NonNull
     public static ResourcesProvider empty(@NonNull AssetsProvider assetsProvider) {
-        return new ResourcesProvider(ApkAssets.loadEmptyForLoader(), assetsProvider);
+        return new ResourcesProvider(ApkAssets.loadEmptyForLoader(ApkAssets.PROPERTY_LOADER,
+                assetsProvider));
     }
 
     /**
      * Creates a ResourcesProvider from an APK ({@code .apk}) file descriptor.
      *
-     * The file descriptor is duplicated and the original may be closed by the application at any
+     * <p>The file descriptor is duplicated and the original may be closed by the application at any
      * time without affecting the ResourcesProvider.
      *
      * @param fileDescriptor the file descriptor of the APK to load
+     *
+     * @see ParcelFileDescriptor#open(File, int)
+     * @see android.system.Os#memfd_create(String, int)
      */
     @NonNull
     public static ResourcesProvider loadFromApk(@NonNull ParcelFileDescriptor fileDescriptor)
             throws IOException {
-        return loadFromApk(fileDescriptor, null);
+        return loadFromApk(fileDescriptor, null /* assetsProvider */);
     }
 
     /**
      * Creates a ResourcesProvider from an APK ({@code .apk}) file descriptor.
      *
-     * The file descriptor is duplicated and the original may be closed by the application at any
+     * <p>The file descriptor is duplicated and the original may be closed by the application at any
      * time without affecting the ResourcesProvider.
+     *
+     * <p>The assets provider can override the loading of files within the APK and can provide
+     * entirely new files that do not exist in the APK.
      *
      * @param fileDescriptor the file descriptor of the APK to load
      * @param assetsProvider the assets provider that overrides the loading of file-based resources
+     *
+     * @see ParcelFileDescriptor#open(File, int)
+     * @see android.system.Os#memfd_create(String, int)
      */
     @NonNull
     public static ResourcesProvider loadFromApk(@NonNull ParcelFileDescriptor fileDescriptor,
             @Nullable AssetsProvider assetsProvider)
             throws IOException {
-        return new ResourcesProvider(
-                ApkAssets.loadApkForLoader(fileDescriptor.getFileDescriptor()), assetsProvider);
+        return new ResourcesProvider(ApkAssets.loadFromFd(fileDescriptor.getFileDescriptor(),
+                fileDescriptor.toString(), ApkAssets.PROPERTY_LOADER, assetsProvider));
     }
 
     /**
-     * Creates a ResourcesProvider from an {@code .apk} file representation in memory.
+     * Creates a ResourcesProvider from an APK ({@code .apk}) file descriptor.
      *
-     * @param sharedMemory the shared memory containing the data of the APK to load
+     * <p>The file descriptor is duplicated and the original may be closed by the application at any
+     * time without affecting the ResourcesProvider.
+     *
+     * <p>The assets provider can override the loading of files within the APK and can provide
+     * entirely new files that do not exist in the APK.
+     *
+     * @param fileDescriptor the file descriptor of the APK to load
+     * @param offset The location within the file that the apk starts. This must be 0 if length is
+     *               {@link AssetFileDescriptor#UNKNOWN_LENGTH}.
+     * @param length The number of bytes of the apk, or {@link AssetFileDescriptor#UNKNOWN_LENGTH}
+     *               if it extends to the end of the file.
+     * @param assetsProvider the assets provider that overrides the loading of file-based resources
+     *
+     * @see ParcelFileDescriptor#open(File, int)
+     * @see android.system.Os#memfd_create(String, int)
+     * @hide
      */
+    @VisibleForTesting
     @NonNull
-    public static ResourcesProvider loadFromApk(@NonNull SharedMemory sharedMemory)
+    public static ResourcesProvider loadFromApk(@NonNull ParcelFileDescriptor fileDescriptor,
+            long offset, long length, @Nullable AssetsProvider assetsProvider)
             throws IOException {
-        return loadFromApk(sharedMemory, null);
+        return new ResourcesProvider(ApkAssets.loadFromFd(fileDescriptor.getFileDescriptor(),
+                fileDescriptor.toString(), offset, length, ApkAssets.PROPERTY_LOADER,
+                assetsProvider));
     }
 
     /**
-     * Creates a ResourcesProvider from an {@code .apk} file representation in memory.
+     * Creates a ResourcesProvider from a resources table ({@code .arsc}) file descriptor.
      *
-     * @param sharedMemory the shared memory containing the data of the APK to load
+     * <p>The file descriptor is duplicated and the original may be closed by the application at any
+     * time without affecting the ResourcesProvider.
+     *
+     * <p>The resources table format is not an archive format and therefore cannot asset files
+     * within itself. The assets provider can instead provide files that are potentially referenced
+     * by path in the resources table.
+     *
+     * @param fileDescriptor the file descriptor of the resources table to load
      * @param assetsProvider the assets provider that implements the loading of file-based resources
+     *
+     * @see ParcelFileDescriptor#open(File, int)
+     * @see android.system.Os#memfd_create(String, int)
      */
     @NonNull
-    public static ResourcesProvider loadFromApk(@NonNull SharedMemory sharedMemory,
+    public static ResourcesProvider loadFromTable(@NonNull ParcelFileDescriptor fileDescriptor,
             @Nullable AssetsProvider assetsProvider)
             throws IOException {
         return new ResourcesProvider(
-                ApkAssets.loadApkForLoader(sharedMemory.getFileDescriptor()), assetsProvider);
+                ApkAssets.loadTableFromFd(fileDescriptor.getFileDescriptor(),
+                        fileDescriptor.toString(), ApkAssets.PROPERTY_LOADER, assetsProvider));
     }
 
     /**
@@ -123,30 +163,30 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
      * The file descriptor is duplicated and the original may be closed by the application at any
      * time without affecting the ResourcesProvider.
      *
+     * <p>The resources table format is not an archive format and therefore cannot asset files
+     * within itself. The assets provider can instead provide files that are potentially referenced
+     * by path in the resources table.
+     *
      * @param fileDescriptor the file descriptor of the resources table to load
-     * @param assetsProvider the assets provider that implements the loading of file-based resources
+     * @param offset The location within the file that the table starts. This must be 0 if length is
+     *               {@link AssetFileDescriptor#UNKNOWN_LENGTH}.
+     * @param length The number of bytes of the table, or {@link AssetFileDescriptor#UNKNOWN_LENGTH}
+     *               if it extends to the end of the file.
+     * @param assetsProvider the assets provider that overrides the loading of file-based resources
+     *
+     * @see ParcelFileDescriptor#open(File, int)
+     * @see android.system.Os#memfd_create(String, int)
+     * @hide
      */
+    @VisibleForTesting
     @NonNull
     public static ResourcesProvider loadFromTable(@NonNull ParcelFileDescriptor fileDescriptor,
-            @Nullable AssetsProvider assetsProvider)
+            long offset, long length, @Nullable AssetsProvider assetsProvider)
             throws IOException {
         return new ResourcesProvider(
-                ApkAssets.loadArscForLoader(fileDescriptor.getFileDescriptor()), assetsProvider);
-    }
-
-    /**
-     * Creates a ResourcesProvider from a resources table ({@code .arsc}) file representation in
-     * memory.
-     *
-     * @param sharedMemory the shared memory containing the data of the resources table to load
-     * @param assetsProvider the assets provider that overrides the loading of file-based resources
-     */
-    @NonNull
-    public static ResourcesProvider loadFromTable(@NonNull SharedMemory sharedMemory,
-            @Nullable AssetsProvider assetsProvider)
-            throws IOException {
-        return new ResourcesProvider(
-                ApkAssets.loadArscForLoader(sharedMemory.getFileDescriptor()), assetsProvider);
+                ApkAssets.loadTableFromFd(fileDescriptor.getFileDescriptor(),
+                        fileDescriptor.toString(), offset, length, ApkAssets.PROPERTY_LOADER,
+                        assetsProvider));
     }
 
     /**
@@ -166,18 +206,28 @@ public class ResourcesProvider implements AutoCloseable, Closeable {
         }
 
         String splitPath = appInfo.getSplitCodePaths()[splitIndex];
-        return new ResourcesProvider(ApkAssets.loadApkForLoader(splitPath), null);
+        return new ResourcesProvider(ApkAssets.loadFromPath(splitPath, ApkAssets.PROPERTY_LOADER,
+                null /* assetsProvider */));
     }
 
-    private ResourcesProvider(@NonNull ApkAssets apkAssets,
-            @Nullable AssetsProvider assetsProvider) {
+    /**
+     * Creates a ResourcesProvider from a directory path.
+     *
+     * File-based resources will be resolved within the directory as if the directory is an APK.
+     *
+     * @param path the path of the directory to treat as an APK
+     * @param assetsProvider the assets provider that overrides the loading of file-based resources
+     */
+    @NonNull
+    public static ResourcesProvider loadFromDirectory(@NonNull String path,
+            @Nullable AssetsProvider assetsProvider) throws IOException {
+        return new ResourcesProvider(ApkAssets.loadFromDir(path, ApkAssets.PROPERTY_LOADER,
+                assetsProvider));
+    }
+
+
+    private ResourcesProvider(@NonNull ApkAssets apkAssets) {
         this.mApkAssets = apkAssets;
-        this.mAssetsProvider = assetsProvider;
-    }
-
-    @Nullable
-    public AssetsProvider getAssetsProvider() {
-        return mAssetsProvider;
     }
 
     /** @hide */
