@@ -57,11 +57,11 @@
         android:text="@string/resolver_switch_on_work"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@null"
         android:fontFamily="@string/config_headlineFontFamilyMedium"
         android:textSize="14sp"
         android:textColor="?attr/colorAccent"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/resolver_turn_on_work_button_ripple_background"/>
     <ProgressBar
         android:id="@+id/resolver_empty_state_progress"
         style="@style/Widget.Material.Light.ProgressBar"
