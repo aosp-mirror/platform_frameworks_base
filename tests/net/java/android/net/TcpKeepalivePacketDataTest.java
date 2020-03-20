@@ -66,10 +66,10 @@ public final class TcpKeepalivePacketDataTest {
             fail("InvalidPacketException: " + e);
         }
 
-        assertEquals(InetAddress.getByAddress(testInfo.srcAddress), resultData.srcAddress);
-        assertEquals(InetAddress.getByAddress(testInfo.dstAddress), resultData.dstAddress);
-        assertEquals(testInfo.srcPort, resultData.srcPort);
-        assertEquals(testInfo.dstPort, resultData.dstPort);
+        assertEquals(InetAddress.getByAddress(testInfo.srcAddress), resultData.getSrcAddress());
+        assertEquals(InetAddress.getByAddress(testInfo.dstAddress), resultData.getDstAddress());
+        assertEquals(testInfo.srcPort, resultData.getSrcPort());
+        assertEquals(testInfo.dstPort, resultData.getDstPort());
         assertEquals(testInfo.seq, resultData.tcpSeq);
         assertEquals(testInfo.ack, resultData.tcpAck);
         assertEquals(testInfo.rcvWnd, resultData.tcpWnd);
