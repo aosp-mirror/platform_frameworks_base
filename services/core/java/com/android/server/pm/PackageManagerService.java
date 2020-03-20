@@ -24660,15 +24660,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void clearMimeGroup(String packageName, String mimeGroup) {
-        boolean changed = mSettings.mPackages.get(packageName).clearMimeGroup(mimeGroup);
-
-        if (changed) {
-            applyMimeGroupChanges(packageName, mimeGroup);
-        }
-    }
-
-    @Override
     public List<String> getMimeGroup(String packageName, String mimeGroup) {
         return mSettings.mPackages.get(packageName).getMimeGroup(mimeGroup);
     }
