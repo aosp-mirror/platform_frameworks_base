@@ -7238,8 +7238,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 resolveInfos.set(i, installerInfo);
                 continue;
             }
-            // caller is a full app
             if (ephemeralPkgName == null) {
+                // caller is a full app
                 SettingBase callingSetting =
                         mSettings.getSettingLPr(UserHandle.getAppId(filterCallingUid));
                 PackageSetting resolvedSetting =
@@ -7259,11 +7259,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     && intent.getComponent() == null) {
                 // ephemeral apps can launch other ephemeral apps indirectly
                 continue;
-            }
-            // allow activities that have been explicitly exposed to ephemeral apps
-            final boolean isEphemeralApp = info.activityInfo.applicationInfo.isInstantApp();
-            if (!isEphemeralApp
-                    && ((info.activityInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0)) {
+            } else if (((info.activityInfo.flags & ActivityInfo.FLAG_VISIBLE_TO_INSTANT_APP) != 0)
+                    && !info.activityInfo.applicationInfo.isInstantApp()) {
+                // allow activities that have been explicitly exposed to ephemeral apps
                 continue;
             }
             resolveInfos.remove(i);
