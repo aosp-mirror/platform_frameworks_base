@@ -177,6 +177,9 @@ public final class SmsCbMessage implements Parcelable {
     @Nullable
     private final String mLanguage;
 
+    /** The 8-bit data coding scheme defined in 3GPP TS 23.038 section 4. */
+    private final int mDataCodingScheme;
+
     /** Message body, as a String. */
     @Nullable
     private final String mBody;
@@ -220,7 +223,7 @@ public final class SmsCbMessage implements Parcelable {
             @Nullable SmsCbCmasInfo cmasWarningInfo, int slotIndex, int subId) {
 
         this(messageFormat, geographicalScope, serialNumber, location, serviceCategory, language,
-                body, priority, etwsWarningInfo, cmasWarningInfo, 0 /* maximumWaitingTime */,
+                0, body, priority, etwsWarningInfo, cmasWarningInfo, 0 /* maximumWaitingTime */,
                 null /* geometries */, System.currentTimeMillis(), slotIndex, subId);
     }
 
@@ -230,8 +233,8 @@ public final class SmsCbMessage implements Parcelable {
      */
     public SmsCbMessage(int messageFormat, int geographicalScope, int serialNumber,
                         @NonNull SmsCbLocation location, int serviceCategory,
-                        @Nullable String language, @Nullable String body, int priority,
-                        @Nullable SmsCbEtwsInfo etwsWarningInfo,
+                        @Nullable String language, int dataCodingScheme, @Nullable String body,
+                        int priority, @Nullable SmsCbEtwsInfo etwsWarningInfo,
                         @Nullable SmsCbCmasInfo cmasWarningInfo, int maximumWaitTimeSec,
                         @Nullable List<Geometry> geometries, long receivedTimeMillis, int slotIndex,
                         int subId) {
@@ -241,6 +244,7 @@ public final class SmsCbMessage implements Parcelable {
         mLocation = location;
         mServiceCategory = serviceCategory;
         mLanguage = language;
+        mDataCodingScheme = dataCodingScheme;
         mBody = body;
         mPriority = priority;
         mEtwsWarningInfo = etwsWarningInfo;
@@ -263,6 +267,7 @@ public final class SmsCbMessage implements Parcelable {
         mLocation = new SmsCbLocation(in);
         mServiceCategory = in.readInt();
         mLanguage = in.readString();
+        mDataCodingScheme = in.readInt();
         mBody = in.readString();
         mPriority = in.readInt();
         int type = in.readInt();
@@ -305,6 +310,7 @@ public final class SmsCbMessage implements Parcelable {
         mLocation.writeToParcel(dest, flags);
         dest.writeInt(mServiceCategory);
         dest.writeString(mLanguage);
+        dest.writeInt(mDataCodingScheme);
         dest.writeString(mBody);
         dest.writeInt(mPriority);
         if (mEtwsWarningInfo != null) {
@@ -395,6 +401,15 @@ public final class SmsCbMessage implements Parcelable {
     @Nullable
     public String getLanguageCode() {
         return mLanguage;
+    }
+
+    /**
+     * Get data coding scheme of the message
+     *
+     * @return The 8-bit data coding scheme defined in 3GPP TS 23.038 section 4.
+     */
+    public int getDataCodingScheme() {
+        return mDataCodingScheme;
     }
 
     /**
@@ -557,7 +572,7 @@ public final class SmsCbMessage implements Parcelable {
     public ContentValues getContentValues() {
         ContentValues cv = new ContentValues(16);
         cv.put(CellBroadcasts.SLOT_INDEX, mSlotIndex);
-        cv.put(CellBroadcasts.SUB_ID, mSubId);
+        cv.put(CellBroadcasts.SUBSCRIPTION_ID, mSubId);
         cv.put(CellBroadcasts.GEOGRAPHICAL_SCOPE, mGeographicalScope);
         if (mLocation.getPlmn() != null) {
             cv.put(CellBroadcasts.PLMN, mLocation.getPlmn());
@@ -571,6 +586,7 @@ public final class SmsCbMessage implements Parcelable {
         cv.put(CellBroadcasts.SERIAL_NUMBER, getSerialNumber());
         cv.put(CellBroadcasts.SERVICE_CATEGORY, getServiceCategory());
         cv.put(CellBroadcasts.LANGUAGE_CODE, getLanguageCode());
+        cv.put(CellBroadcasts.DATA_CODING_SCHEME, getDataCodingScheme());
         cv.put(CellBroadcasts.MESSAGE_BODY, getMessageBody());
         cv.put(CellBroadcasts.MESSAGE_FORMAT, getMessageFormat());
         cv.put(CellBroadcasts.MESSAGE_PRIORITY, getMessagePriority());
@@ -621,7 +637,7 @@ public final class SmsCbMessage implements Parcelable {
         int format = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_FORMAT));
         int priority = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.MESSAGE_PRIORITY));
         int slotIndex = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SLOT_INDEX));
-        int subId = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SUB_ID));
+        int subId = cursor.getInt(cursor.getColumnIndexOrThrow(CellBroadcasts.SUBSCRIPTION_ID));
 
         String plmn;
         int plmnColumn = cursor.getColumnIndex(CellBroadcasts.PLMN);
@@ -718,7 +734,7 @@ public final class SmsCbMessage implements Parcelable {
                 cursor.getColumnIndexOrThrow(CellBroadcasts.MAXIMUM_WAIT_TIME));
 
         return new SmsCbMessage(format, geoScope, serialNum, location, category,
-                language, body, priority, etwsInfo, cmasInfo, maximumWaitTimeSec, geometries,
+                language, 0, body, priority, etwsInfo, cmasInfo, maximumWaitTimeSec, geometries,
                 receivedTimeMillis, slotIndex, subId);
     }
 

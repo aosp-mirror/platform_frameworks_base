@@ -249,6 +249,7 @@ public class UsbService extends IUsbManager.Stub {
         if (mHostManager != null) {
             if (deviceName != null) {
                 int uid = Binder.getCallingUid();
+                int pid = Binder.getCallingPid();
                 int user = UserHandle.getUserId(uid);
 
                 long ident = clearCallingIdentity();
@@ -256,7 +257,7 @@ public class UsbService extends IUsbManager.Stub {
                     synchronized (mLock) {
                         if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {
                             fd = mHostManager.openDevice(deviceName, getSettingsForUser(user),
-                                    packageName, uid);
+                                    packageName, pid, uid);
                         } else {
                             Slog.w(TAG, "Cannot open " + deviceName + " for user " + user
                                     + " as user is not active.");
@@ -350,11 +351,12 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public boolean hasDevicePermission(UsbDevice device, String packageName) {
         final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserId(uid);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            return getSettingsForUser(userId).hasPermission(device, packageName, uid);
+            return getSettingsForUser(userId).hasPermission(device, packageName, pid, uid);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -376,11 +378,12 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public void requestDevicePermission(UsbDevice device, String packageName, PendingIntent pi) {
         final int uid = Binder.getCallingUid();
+        final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserId(uid);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            getSettingsForUser(userId).requestPermission(device, packageName, pi, uid);
+            getSettingsForUser(userId).requestPermission(device, packageName, pi, pid, uid);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

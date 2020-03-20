@@ -16,16 +16,15 @@
 
 package com.android.internal.telephony.uicc;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.telephony.Rlog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.GsmAlphabet;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import com.android.telephony.Rlog;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;

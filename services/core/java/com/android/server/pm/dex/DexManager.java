@@ -44,6 +44,8 @@ import com.android.server.pm.PackageDexOptimizer;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageManagerServiceUtils;
 
+import dalvik.system.VMRuntime;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -143,22 +145,15 @@ public class DexManager {
      * return as fast as possible.
      *
      * @param loadingAppInfo the package performing the load
-     * @param classLoadersNames the names of the class loaders present in the loading chain. The
-     *    list encodes the class loader chain in the natural order. The first class loader has
-     *    the second one as its parent and so on. The dex files present in the class path of the
-     *    first class loader will be recorded in the usage file.
-     * @param classPaths the class paths corresponding to the class loaders names from
-     *     {@param classLoadersNames}. The the first element corresponds to the first class loader
-     *     and so on. A classpath is represented as a list of dex files separated by
-     *     {@code File.pathSeparator}, or null if the class loader's classpath is not known.
-     *     The dex files found in the first class path will be recorded in the usage file.
+     * @param classLoaderContextMap a map from file paths to dex files that have been loaded to
+     *     the class loader context that was used to load them.
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
      */
-    public void notifyDexLoad(ApplicationInfo loadingAppInfo, List<String> classLoadersNames,
-            List<String> classPaths, String loaderIsa, int loaderUserId) {
+    public void notifyDexLoad(ApplicationInfo loadingAppInfo,
+            Map<String, String> classLoaderContextMap, String loaderIsa, int loaderUserId) {
         try {
-            notifyDexLoadInternal(loadingAppInfo, classLoadersNames, classPaths, loaderIsa,
+            notifyDexLoadInternal(loadingAppInfo, classLoaderContextMap, loaderIsa,
                     loaderUserId);
         } catch (Exception e) {
             Slog.w(TAG, "Exception while notifying dex load for package " +
@@ -168,46 +163,23 @@ public class DexManager {
 
     @VisibleForTesting
     /*package*/ void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
-            List<String> classLoaderNames, List<String> classPaths, String loaderIsa,
+            Map<String, String> classLoaderContextMap, String loaderIsa,
             int loaderUserId) {
-        if (classLoaderNames.size() != classPaths.size()) {
-            Slog.wtf(TAG, "Bad call to noitfyDexLoad: args have different size");
+        if (classLoaderContextMap == null) {
             return;
         }
-        if (classLoaderNames.isEmpty()) {
+        if (classLoaderContextMap.isEmpty()) {
             Slog.wtf(TAG, "Bad call to notifyDexLoad: class loaders list is empty");
             return;
         }
         if (!PackageManagerServiceUtils.checkISA(loaderIsa)) {
-            Slog.w(TAG, "Loading dex files " + classPaths + " in unsupported ISA: " +
-                    loaderIsa + "?");
+            Slog.w(TAG, "Loading dex files " + classLoaderContextMap.keySet()
+                    + " in unsupported ISA: " + loaderIsa + "?");
             return;
         }
 
-        // The first classpath should never be null because the first classloader
-        // should always be an instance of BaseDexClassLoader.
-        String firstClassPath = classPaths.get(0);
-        if (firstClassPath == null) {
-            return;
-        }
-        // The classpath is represented as a list of dex files separated by File.pathSeparator.
-        String[] dexPathsToRegister = firstClassPath.split(File.pathSeparator);
-
-        // Encode the class loader contexts for the dexPathsToRegister.
-        String[] classLoaderContexts = DexoptUtils.processContextForDexLoad(
-                classLoaderNames, classPaths);
-
-        // A null classLoaderContexts means that there are unsupported class loaders in the
-        // chain.
-        if (classLoaderContexts == null) {
-            if (DEBUG) {
-                Slog.i(TAG, loadingAppInfo.packageName +
-                        " uses unsupported class loader in " + classLoaderNames);
-            }
-        }
-
-        int dexPathIndex = 0;
-        for (String dexPath : dexPathsToRegister) {
+        for (Map.Entry<String, String> mapping : classLoaderContextMap.entrySet()) {
+            String dexPath = mapping.getKey();
             // Find the owning package name.
             DexSearchResult searchResult = getDexPackage(loadingAppInfo, dexPath, loaderUserId);
 
@@ -238,13 +210,13 @@ public class DexManager {
                             searchResult.mOwningPackageName, loadingAppInfo.packageName);
                 }
 
-                if (classLoaderContexts != null) {
-
+                String classLoaderContext = mapping.getValue();
+                if (classLoaderContext != null
+                        && VMRuntime.isValidClassLoaderContext(classLoaderContext)) {
                     // Record dex file usage. If the current usage is a new pattern (e.g. new
                     // secondary, or UsedByOtherApps), record will return true and we trigger an
                     // async write to disk to make sure we don't loose the data in case of a reboot.
 
-                    String classLoaderContext = classLoaderContexts[dexPathIndex];
                     if (mPackageDexUsage.record(searchResult.mOwningPackageName,
                             dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
                             loadingAppInfo.packageName, classLoaderContext)) {
@@ -258,7 +230,6 @@ public class DexManager {
                     Slog.i(TAG, "Could not find owning package for dex file: " + dexPath);
                 }
             }
-            dexPathIndex++;
         }
     }
 

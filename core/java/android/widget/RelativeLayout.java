@@ -19,7 +19,7 @@ package android.widget;
 import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.ResourceId;
 import android.content.res.TypedArray;
@@ -72,7 +72,7 @@ import java.util.TreeSet;
  *
  * <p>This behavior has been preserved for apps that set <code>android:targetSdkVersion="17"</code>
  * or older in their manifest's <code>uses-sdk</code> tag for compatibility. Apps targeting SDK
- * version 18 or newer will receive the correct behavior</p>
+ * version 18 or newer will receive the correct behavior.</p>
  *
  * <p>See the <a href="{@docRoot}guide/topics/ui/layout/relative.html">Relative
  * Layout</a> guide.</p>

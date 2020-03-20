@@ -17,19 +17,15 @@
 
 package android.filterfw.core;
 
-import android.annotation.UnsupportedAppUsage;
-import android.filterfw.core.FilterContext;
-import android.filterfw.core.FilterPort;
-import android.filterfw.core.KeyValueMap;
-import android.filterfw.io.TextGraphReader;
-import android.filterfw.io.GraphIOException;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.filterfw.format.ObjectFormat;
+import android.filterfw.io.GraphIOException;
+import android.filterfw.io.TextGraphReader;
 import android.util.Log;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.Thread;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;

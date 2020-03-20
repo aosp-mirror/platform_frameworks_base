@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST;
+import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
@@ -272,6 +273,7 @@ public final class ActiveServices {
 
         static final int MSG_BG_START_TIMEOUT = 1;
         static final int MSG_UPDATE_FOREGROUND_APPS = 2;
+        static final int MSG_ENSURE_NOT_START_BG = 3;
 
         ServiceMap(Looper looper, int userId) {
             super(looper);
@@ -289,6 +291,11 @@ public final class ActiveServices {
                 case MSG_UPDATE_FOREGROUND_APPS: {
                     updateForegroundApps(this);
                 } break;
+                case MSG_ENSURE_NOT_START_BG: {
+                    synchronized (mAm) {
+                        rescheduleDelayedStartsLocked();
+                    }
+                } break;
             }
         }
 
@@ -296,7 +303,9 @@ public final class ActiveServices {
             if (mStartingBackground.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
                         "No longer background starting: " + r);
-                rescheduleDelayedStartsLocked();
+                removeMessages(MSG_ENSURE_NOT_START_BG);
+                Message msg = obtainMessage(MSG_ENSURE_NOT_START_BG);
+                sendMessage(msg);
             }
             if (mDelayedStartList.remove(r)) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE, "No longer delaying start: " + r);
@@ -2608,8 +2617,10 @@ public final class ActiveServices {
         // Not running -- get it started, and enqueue this service record
         // to be executed when the app comes up.
         if (app == null && !permissionsReviewRequired) {
+            // TODO (chriswailes): Change the Zygote policy flags based on if the launch-for-service
+            //  was initiated from a notification tap or not.
             if ((app=mAm.startProcessLocked(procName, r.appInfo, true, intentFlags,
-                    hostingRecord, false, isolated, false)) == null) {
+                    hostingRecord, ZYGOTE_POLICY_FLAG_EMPTY, false, isolated, false)) == null) {
                 String msg = "Unable to launch app "
                         + r.appInfo.packageName + "/"
                         + r.appInfo.uid + " for service "
@@ -2935,7 +2946,9 @@ public final class ActiveServices {
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when unbinding service "
                                 + r.shortInstanceName, e);
+                        needOomAdj = false;
                         serviceProcessGoneLocked(r);
+                        break;
                     }
                 }
             }

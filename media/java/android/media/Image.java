@@ -16,13 +16,12 @@
 
 package android.media;
 
-import java.nio.ByteBuffer;
-import java.lang.AutoCloseable;
-
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
+
+import java.nio.ByteBuffer;
 
 /**
  * <p>A single complete image buffer to use with a media source such as a
@@ -395,7 +394,7 @@ public abstract class Image implements AutoCloseable {
          * <p>The row stride for this color plane, in bytes.</p>
          *
          * <p>This is the distance between the start of two consecutive rows of
-         * pixels in the image. Note that row stried is undefined for some formats
+         * pixels in the image. Note that row stride is undefined for some formats
          * such as
          * {@link android.graphics.ImageFormat#RAW_PRIVATE RAW_PRIVATE},
          * and calling getRowStride on images of these formats will

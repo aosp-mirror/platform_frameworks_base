@@ -24,16 +24,16 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.security.keymaster.KeyAttestationPackageInfo;
-import android.security.keymaster.KeyAttestationApplicationId;
 import android.security.keymaster.IKeyAttestationApplicationIdProvider;
+import android.security.keymaster.KeyAttestationApplicationId;
+import android.security.keymaster.KeyAttestationPackageInfo;
 
 /**
  * @hide
  * The KeyAttestationApplicationIdProviderService provides information describing the possible
  * applications identified by a UID. Due to UID sharing, this KeyAttestationApplicationId can
- * comprise information about multiple packages. The Information is used by keystore to describe
- * the initiating application of a key attestation procedure.
+ * comprise information about multiple packages. The Information is used by keystore and credstore
+ * to describe the initiating application of a key attestation procedure.
  */
 public class KeyAttestationApplicationIdProviderService
         extends IKeyAttestationApplicationIdProvider.Stub {
@@ -46,8 +46,10 @@ public class KeyAttestationApplicationIdProviderService
 
     public KeyAttestationApplicationId getKeyAttestationApplicationId(int uid)
             throws RemoteException {
-        if (Binder.getCallingUid() != android.os.Process.KEYSTORE_UID) {
-            throw new SecurityException("This service can only be used by Keystore");
+        int callingUid = Binder.getCallingUid();
+        if (callingUid != android.os.Process.KEYSTORE_UID
+                && callingUid != android.os.Process.CREDSTORE_UID) {
+            throw new SecurityException("This service can only be used by Keystore or Credstore");
         }
         KeyAttestationPackageInfo[] keyAttestationPackageInfos = null;
         final long token = Binder.clearCallingIdentity();

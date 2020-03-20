@@ -17,11 +17,12 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
+
+import com.android.telephony.Rlog;
 
 /**
  * A {@link CellInfo} representing a CDMA cell that provides identity and measurement info.
@@ -72,6 +73,15 @@ public final class CellInfoCdma extends CellInfo implements Parcelable {
     public CellInfoCdma(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
         super(ci, timeStamp);
         final android.hardware.radio.V1_2.CellInfoCdma cic = ci.info.cdma();
+        mCellIdentityCdma = new CellIdentityCdma(cic.cellIdentityCdma);
+        mCellSignalStrengthCdma =
+                new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);
+    }
+
+    /** @hide */
+    public CellInfoCdma(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_2.CellInfoCdma cic = ci.ratSpecificInfo.cdma();
         mCellIdentityCdma = new CellIdentityCdma(cic.cellIdentityCdma);
         mCellSignalStrengthCdma =
                 new CellSignalStrengthCdma(cic.signalStrengthCdma, cic.signalStrengthEvdo);

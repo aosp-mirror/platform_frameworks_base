@@ -17,7 +17,7 @@ package android.view;
 
 import android.animation.LayoutTransition;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Rect;

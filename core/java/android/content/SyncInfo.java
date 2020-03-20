@@ -17,7 +17,7 @@
 package android.content;
 
 import android.accounts.Account;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -157,6 +157,8 @@ public class WatchdogDiagnosticsTest {
             String expected =
                     "TestThread2 annotated stack trace:\n" +
                     "    at java.lang.Object.wait(Native Method)\n" +
+                    "    at java.lang.Object.wait(Object.java:442)\n" +
+                    "    at java.lang.Object.wait(Object.java:568)\n" +
                     "    at com.android.server.WatchdogDiagnosticsTest$TestThread2.y(" +
                             "WatchdogDiagnosticsTest.java:91)\n" +
                     "    - locked <HASH> (a java.lang.String)\n" +

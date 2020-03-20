@@ -20,16 +20,16 @@ import static android.car.VehicleAreaType.VEHICLE_AREA_TYPE_GLOBAL;
 import static android.car.VehiclePropertyIds.HVAC_TEMPERATURE_DISPLAY_UNITS;
 
 import android.car.Car;
+import android.car.Car.CarServiceLifecycleListener;
 import android.car.VehicleUnit;
 import android.car.hardware.CarPropertyValue;
 import android.car.hardware.hvac.CarHvacManager;
 import android.car.hardware.hvac.CarHvacManager.CarHvacEventCallback;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.ServiceConnection;
-import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
+
+import com.android.systemui.CarSystemUIFactory;
+import com.android.systemui.SystemUIFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,15 +43,12 @@ import java.util.Objects;
  * {@link TemperatureView}s
  */
 public class HvacController {
-
     public static final String TAG = "HvacController";
-    public static final int BIND_TO_HVAC_RETRY_DELAY = 5000;
 
     private Context mContext;
-    private Handler mHandler;
-    private Car mCar;
     private CarHvacManager mHvacManager;
     private HashMap<HvacKey, List<TemperatureView>> mTempComponents = new HashMap<>();
+
     /**
      * Callback for getting changes from {@link CarHvacManager} and setting the UI elements to
      * match.
@@ -83,39 +80,17 @@ public class HvacController {
                     + " zone: " + zone);
         }
     };
-    /**
-     * If the connection to car service goes away then restart it.
-     */
-    private final IBinder.DeathRecipient mRestart = new IBinder.DeathRecipient() {
-        @Override
-        public void binderDied() {
-            Log.d(TAG, "Death of HVAC triggering a restart");
-            if (mCar != null) {
-                mCar.disconnect();
-            }
-            destroyHvacManager();
-            mHandler.postDelayed(() -> mCar.connect(), BIND_TO_HVAC_RETRY_DELAY);
-        }
-    };
-    /**
-     * Registers callbacks and initializes components upon connection.
-     */
-    private ServiceConnection mServiceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            try {
-                service.linkToDeath(mRestart, 0);
-                mHvacManager = (CarHvacManager) mCar.getCarManager(Car.HVAC_SERVICE);
-                mHvacManager.registerCallback(mHardwareCallback);
-                initComponents();
-            } catch (Exception e) {
-                Log.e(TAG, "Failed to correctly connect to HVAC", e);
-            }
-        }
 
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            destroyHvacManager();
+    private final CarServiceLifecycleListener mCarServiceLifecycleListener = (car, ready) -> {
+        if (!ready) {
+            return;
+        }
+        try {
+            mHvacManager = (CarHvacManager) car.getCarManager(Car.HVAC_SERVICE);
+            mHvacManager.registerCallback(mHardwareCallback);
+            initComponents();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to correctly connect to HVAC", e);
         }
     };
 
@@ -128,19 +103,8 @@ public class HvacController {
      * ({@link CarHvacManager}) will happen on the same thread this method was called from.
      */
     public void connectToCarService() {
-        mHandler = new Handler();
-        mCar = Car.createCar(mContext, mServiceConnection, mHandler);
-        if (mCar != null) {
-            // note: this connect call handles the retries
-            mCar.connect();
-        }
-    }
-
-    private void destroyHvacManager() {
-        if (mHvacManager != null) {
-            mHvacManager.unregisterCallback(mHardwareCallback);
-            mHvacManager = null;
-        }
+        ((CarSystemUIFactory) SystemUIFactory.getInstance()).getCarServiceProvider(mContext)
+            .addListener(mCarServiceLifecycleListener);
     }
 
     /**

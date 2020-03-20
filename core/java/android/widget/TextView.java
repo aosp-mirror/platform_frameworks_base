@@ -36,11 +36,11 @@ import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.XmlRes;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.assist.AssistStructure;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.content.ClipboardManager;
@@ -6582,6 +6582,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mTransformation instanceof PasswordTransformationMethod;
     }
 
+    /**
+     * Returns true if the current inputType is any type of password.
+     *
+     * @hide
+     */
+    public boolean isAnyPasswordInputType() {
+        final int inputType = getInputType();
+        return isPasswordInputType(inputType) || isVisiblePasswordInputType(inputType);
+    }
+
     static boolean isPasswordInputType(int inputType) {
         final int variation =
                 inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
@@ -11283,6 +11293,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Nullable
+    final TextClassificationManager getTextClassificationManagerForUser() {
+        return getServiceManagerForUser(
+                getContext().getPackageName(), TextClassificationManager.class);
+    }
+
+    @Nullable
     final <T> T getServiceManagerForUser(String packageName, Class<T> managerClazz) {
         if (mTextOperationUser == null) {
             return getContext().getSystemService(managerClazz);
@@ -12383,8 +12399,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @NonNull
     public TextClassifier getTextClassifier() {
         if (mTextClassifier == null) {
-            final TextClassificationManager tcm =
-                    mContext.getSystemService(TextClassificationManager.class);
+            final TextClassificationManager tcm = getTextClassificationManagerForUser();
             if (tcm != null) {
                 return tcm.getTextClassifier();
             }
@@ -12400,8 +12415,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @NonNull
     TextClassifier getTextClassificationSession() {
         if (mTextClassificationSession == null || mTextClassificationSession.isDestroyed()) {
-            final TextClassificationManager tcm =
-                    mContext.getSystemService(TextClassificationManager.class);
+            final TextClassificationManager tcm = getTextClassificationManagerForUser();
             if (tcm != null) {
                 final String widgetType;
                 if (isTextEditable()) {

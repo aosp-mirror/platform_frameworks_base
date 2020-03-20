@@ -162,6 +162,24 @@
     <!-- Message of notification shown when trying to enable USB debugging but a secondary user is the current foreground user. -->
     <string name="usb_debugging_secondary_user_message">The user currently signed in to this device can\'t turn on USB debugging. To use this feature, switch to the primary user.</string>
 
+    <!-- Title of confirmation dialog for wireless debugging [CHAR LIMIT=NONE] -->
+    <string name="wifi_debugging_title">Allow wireless debugging on this network?</string>
+
+    <!-- Message of confirmation dialog for wireless debugging [CHAR LIMIT=NONE] -->
+    <string name="wifi_debugging_message">Network Name (SSID)\n<xliff:g id="ssid" example="My wifi">%1$s</xliff:g>\n\nWi\u2011Fi Address (BSSID)\n<xliff:g id="bssid" example="AB:CD:EF:12:34:56">%2$s</xliff:g></string>
+
+    <!-- Option to always allow wireless debugging on this network [CHAR LIMIT=NONE] -->
+    <string name="wifi_debugging_always">Always allow on this network</string>
+
+    <!-- Button label for confirming acceptance of enabling wireless debugging [CHAR LIMIT=15] -->
+    <string name="wifi_debugging_allow">Allow</string>
+
+    <!-- Title of notification shown when trying to enable wireless debugging but a secondary user is the current foreground user. [CHAR LIMIT=NONE] -->
+    <string name="wifi_debugging_secondary_user_title">Wireless debugging not allowed</string>
+
+    <!-- Message of notification shown when trying to enable wireless debugging but a secondary user is the current foreground user. [CHAR LIMIT=NONE] -->
+    <string name="wifi_debugging_secondary_user_message">The user currently signed in to this device can\u2019t turn on wireless debugging. To use this feature, switch to the primary user.</string>
+
     <!-- Title of USB contaminant presence dialog [CHAR LIMIT=NONE] -->
     <string name="usb_contaminant_title">USB port disabled</string>
 
@@ -892,8 +910,12 @@
     <string name="quick_settings_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
     <!-- QuickSettings: Label for the toggle to activate dark theme (A.K.A Dark Mode). [CHAR LIMIT=20] -->
     <string name="quick_settings_ui_mode_night_label">Dark theme</string>
-    <!-- QuickSettings: Label for the dark theme tile when enabled by battery saver. [CHAR LIMIT=40] -->
-    <string name="quick_settings_ui_mode_night_label_battery_saver">Dark theme\nBattery saver</string>
+    <!-- QuickSettings: Secondary text for the dark theme tile when enabled by battery saver. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_battery_saver">Battery Saver</string>
+    <!-- QuickSettings: Secondary text for when the Dark Mode will be enabled at sunset. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_on_at_sunset">On at sunset</string>
+    <!-- QuickSettings: Secondary text for when the Dark Mode will be on until sunrise. [CHAR LIMIT=20] -->
+    <string name="quick_settings_dark_mode_secondary_label_until_sunrise">Until sunrise</string>
 
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
@@ -963,6 +985,12 @@
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
+
+    <!-- Indication when device is slow charging due to misalignment on the dock. [CHAR LIMIT=60] -->
+    <string name="dock_alignment_slow_charging" product="default">Realign phone for faster charging</string>
+
+    <!-- Indication when device is not charging due to bad placement on the dock. [CHAR LIMIT=60] -->
+    <string name="dock_alignment_not_charging" product="default">Realign phone to charge wirelessly</string>
 
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device is managed by your organization</string>

@@ -3454,7 +3454,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     /**
-     * This is kept due to {@link android.annotation.UnsupportedAppUsage} in
+     * This is kept due to {@link android.compat.annotation.UnsupportedAppUsage} in
      * {@link InputMethodManager#getInputMethodWindowVisibleHeight()} and a dependency in
      * {@link InputMethodService#onCreate()}.
      *

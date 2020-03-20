@@ -160,6 +160,31 @@ public class DexManagerTests {
     }
 
     @Test
+    public void testNotifyPrimaryAndSecondary() {
+        List<String> dexFiles = mFooUser0.getBaseAndSplitDexPaths();
+        List<String> secondaries = mFooUser0.getSecondaryDexPaths();
+        int baseAndSplitCount = dexFiles.size();
+        dexFiles.addAll(secondaries);
+
+        notifyDexLoad(mFooUser0, dexFiles, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertIsUsedByOtherApps(mFooUser0, pui, false);
+        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
+
+        String[] allExpectedContexts = DexoptUtils.processContextForDexLoad(
+                Arrays.asList(mFooUser0.mClassLoader),
+                Arrays.asList(String.join(File.pathSeparator, dexFiles)));
+        String[] secondaryExpectedContexts = Arrays.copyOfRange(allExpectedContexts,
+                baseAndSplitCount, dexFiles.size());
+
+        assertSecondaryUse(mFooUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0,
+                secondaryExpectedContexts);
+
+        assertHasDclInfo(mFooUser0, mFooUser0, secondaries);
+    }
+
+    @Test
     public void testNotifySecondaryForeign() {
         // Foo loads bar secondary files.
         List<String> barSecondaries = mBarUser0.getSecondaryDexPaths();
@@ -507,6 +532,61 @@ public class DexManagerTests {
         assertHasDclInfo(mBarUser0, mBarUser0, secondaries);
     }
 
+    @Test
+    public void testPrimaryAndSecondaryDexLoad() {
+        // Foo loads both primary and secondary dexes
+        List<String> fooSecondaries = mFooUser0.getSecondaryDexPaths();
+        List<String> fooDexes = new ArrayList<>(mFooUser0.getBaseAndSplitDexPaths());
+        int primaryCount = fooDexes.size();
+        fooDexes.addAll(fooSecondaries);
+
+        notifyDexLoad(mFooUser0, fooDexes, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertIsUsedByOtherApps(mFooUser0, pui, false);
+        assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
+
+        // Below we want to verify that the secondary dex files within fooDexes have been correctly
+        // reported and their class loader contexts were correctly recorded.
+        //
+        // In order to achieve this we first use DexoptUtils.processContextForDexLoad to compute the
+        // class loader contexts for all the dex files.
+        String[] allClassLoaderContexts = DexoptUtils.processContextForDexLoad(
+                Arrays.asList(mFooUser0.mClassLoader),
+                Arrays.asList(String.join(File.pathSeparator, fooDexes)));
+        // Next we filter out the class loader contexts corresponding to non-secondary dex files.
+        String[] secondaryClassLoaderContexts = Arrays.copyOfRange(allClassLoaderContexts,
+                primaryCount, allClassLoaderContexts.length);
+        assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0,
+                secondaryClassLoaderContexts);
+
+        assertHasDclInfo(mFooUser0, mFooUser0, fooSecondaries);
+    }
+
+    @Test
+    public void testNotifySecondary_withSharedLibrary() {
+        // Foo loads its own secondary files.
+        List<String> fooSecondaries = mFooUser0.getSecondaryDexPaths();
+
+        String contextSuffix = "{PCL[/system/framework/org.apache.http.legacy.jar]}";
+        String[] expectedContexts = DexoptUtils.processContextForDexLoad(
+                Arrays.asList(mFooUser0.mClassLoader),
+                Arrays.asList(String.join(File.pathSeparator, fooSecondaries)));
+        for (int i = 0; i < expectedContexts.length; i++) {
+            expectedContexts[i] += contextSuffix;
+        }
+
+        notifyDexLoad(mFooUser0, fooSecondaries, expectedContexts, mUser0);
+
+        PackageUseInfo pui = getPackageUseInfo(mFooUser0);
+        assertIsUsedByOtherApps(mFooUser0, pui, false);
+        assertEquals(fooSecondaries.size(), pui.getDexUseInfoMap().size());
+        assertSecondaryUse(mFooUser0, pui, fooSecondaries, /*isUsedByOtherApps*/false, mUser0,
+                expectedContexts);
+
+        assertHasDclInfo(mFooUser0, mFooUser0, fooSecondaries);
+    }
+
     private void assertSecondaryUse(TestData testData, PackageUseInfo pui,
             List<String> secondaries, boolean isUsedByOtherApps, int ownerUserId,
             String[] expectedContexts) {
@@ -547,17 +627,43 @@ public class DexManagerTests {
         // By default, assume a single class loader in the chain.
         // This makes writing tests much easier.
         List<String> classLoaders = Arrays.asList(testData.mClassLoader);
-        List<String> classPaths = (dexPaths == null)
-                                  ? Arrays.asList((String) null)
-                                  : Arrays.asList(String.join(File.pathSeparator, dexPaths));
+        List<String> classPaths = dexPaths != null
+                ? Arrays.<String>asList(String.join(File.pathSeparator, dexPaths)) : null;
         notifyDexLoad(testData, classLoaders, classPaths, loaderUserId);
     }
 
     private void notifyDexLoad(TestData testData, List<String> classLoaders,
             List<String> classPaths, int loaderUserId) {
+        String[] classLoaderContexts = computeClassLoaderContexts(classLoaders, classPaths);
         // We call the internal function so any exceptions thrown cause test failures.
-        mDexManager.notifyDexLoadInternal(testData.mPackageInfo.applicationInfo, classLoaders,
-                classPaths, testData.mLoaderIsa, loaderUserId);
+        List<String> dexPaths = classPaths != null
+                ? Arrays.asList(classPaths.get(0).split(File.pathSeparator)) : Arrays.asList();
+        notifyDexLoad(testData, dexPaths, classLoaderContexts, loaderUserId);
+    }
+
+    private void notifyDexLoad(TestData testData, List<String> dexPaths,
+            String[] classLoaderContexts, int loaderUserId) {
+        assertTrue(dexPaths.size() == classLoaderContexts.length);
+        HashMap<String, String> dexPathMapping = new HashMap<>(dexPaths.size());
+        for (int i = 0; i < dexPaths.size(); i++) {
+            dexPathMapping.put(dexPaths.get(i), classLoaderContexts != null
+                    ? classLoaderContexts[i] : PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT);
+        }
+        mDexManager.notifyDexLoadInternal(testData.mPackageInfo.applicationInfo, dexPathMapping,
+                testData.mLoaderIsa, loaderUserId);
+    }
+
+    private String[] computeClassLoaderContexts(List<String> classLoaders,
+            List<String> classPaths) {
+        if (classPaths == null) {
+            return new String[0];
+        }
+        String[] results = DexoptUtils.processContextForDexLoad(classLoaders, classPaths);
+        if (results == null) {
+            results = new String[classPaths.get(0).split(File.pathSeparator).length];
+            Arrays.fill(results, PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT);
+        }
+        return results;
     }
 
     private PackageUseInfo getPackageUseInfo(TestData testData) {

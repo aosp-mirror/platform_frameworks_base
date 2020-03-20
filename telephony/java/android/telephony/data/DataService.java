@@ -31,10 +31,10 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.AccessNetworkConstants;
-import android.telephony.Rlog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -457,6 +457,9 @@ public abstract class DataService extends Service {
      * Create the instance of {@link DataServiceProvider}. Data service provider must override
      * this method to facilitate the creation of {@link DataServiceProvider} instances. The system
      * will call this method after binding the data service for each active SIM slot id.
+     *
+     * This methead is guaranteed to be invoked in {@link DataService}'s internal handler thread
+     * whose looper can be retrieved with {@link Looper.myLooper()} when override this method.
      *
      * @param slotIndex SIM slot id the data service associated with.
      * @return Data service object. Null if failed to create the provider (e.g. invalid slot index)

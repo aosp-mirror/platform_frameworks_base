@@ -16,9 +16,10 @@
 
 package android.app.backup;
 
-import android.annotation.UnsupportedAppUsage;
-import java.io.InputStream;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Provides an {@link java.io.InputStream}-like interface for accessing an

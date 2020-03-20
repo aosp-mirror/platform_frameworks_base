@@ -16,19 +16,22 @@
 
 package com.android.server.connectivity;
 
+import static android.net.NetworkCapabilities.transportNamesOf;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
+import android.net.CaptivePortalData;
 import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkMisc;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
-import android.net.NetworkScore;
 import android.net.NetworkState;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -127,7 +130,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // This should only be modified by ConnectivityService, via setNetworkCapabilities().
     // TODO: make this private with a getter.
     public NetworkCapabilities networkCapabilities;
-    public final NetworkMisc networkMisc;
+    public final NetworkAgentConfig networkAgentConfig;
     // Indicates if netd has been told to create this Network. From this point on the appropriate
     // routing rules are setup and routes are added so packets can begin flowing over the Network.
     // This is a sticky bit; once set it is never cleared.
@@ -157,12 +160,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Whether a captive portal was found during the last network validation attempt.
     public boolean lastCaptivePortalDetected;
 
-    // Indicates the captive portal app was opened to show a login UI to the user, but the network
-    // has not validated yet.
-    public volatile boolean captivePortalValidationPending;
-
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
+
+    // Captive portal info of the network, if any.
+    // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
+    public CaptivePortalData captivePortalData;
 
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
@@ -228,10 +231,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // validated).
     private boolean mLingering;
 
-    // This represents the characteristics of a network that affects how good the network is
-    // considered for a particular use.
-    @NonNull
-    private NetworkScore mNetworkScore;
+    // This represents the quality of the network with no clear scale.
+    private int mScore;
 
     // The list of NetworkRequests being satisfied by this Network.
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
@@ -260,8 +261,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private final Handler mHandler;
 
     public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
-            LinkProperties lp, NetworkCapabilities nc, @NonNull NetworkScore ns, Context context,
-            Handler handler, NetworkMisc misc, ConnectivityService connService, INetd netd,
+            LinkProperties lp, NetworkCapabilities nc, int score, Context context,
+            Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber) {
         this.messenger = messenger;
         asyncChannel = ac;
@@ -269,12 +270,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkInfo = info;
         linkProperties = lp;
         networkCapabilities = nc;
-        mNetworkScore = ns;
+        mScore = score;
         clatd = new Nat464Xlat(this, netd, dnsResolver, nms);
         mConnService = connService;
         mContext = context;
         mHandler = handler;
-        networkMisc = misc;
+        networkAgentConfig = config;
         this.factorySerialNumber = factorySerialNumber;
     }
 
@@ -309,8 +310,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return mConnService;
     }
 
-    public NetworkMisc netMisc() {
-        return networkMisc;
+    public NetworkAgentConfig netAgentConfig() {
+        return networkAgentConfig;
     }
 
     public Handler handler() {
@@ -372,7 +373,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             // Should only happen if the requestId wraps. If that happens lots of other things will
             // be broken as well.
             Log.wtf(TAG, String.format("Duplicate requestId for %s and %s on %s",
-                    networkRequest, existing, name()));
+                    networkRequest, existing, toShortString()));
             updateRequestCounts(REMOVE, existing);
         }
         mNetworkRequests.put(networkRequest.requestId, networkRequest);
@@ -451,15 +452,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 && !isLingering();
     }
 
-    /**
-     * Returns whether this network is currently suspended. A network is suspended if it is still
-     * connected but data temporarily fails to transfer. See {@link NetworkInfo.State#SUSPENDED}
-     * and {@link NetworkCapabilities#NET_CAPABILITY_NOT_SUSPENDED}.
-     */
-    public boolean isSuspended() {
-        return networkInfo.getState() == NetworkInfo.State.SUSPENDED;
-    }
-
     // Does this network satisfy request?
     public boolean satisfies(NetworkRequest request) {
         return created &&
@@ -487,11 +479,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // selected and we're trying to see what its score could be. This ensures that we don't tear
         // down an explicitly selected network before the user gets a chance to prefer it when
         // a higher-scoring network (e.g., Ethernet) is available.
-        if (networkMisc.explicitlySelected && (networkMisc.acceptUnvalidated || pretendValidated)) {
+        if (networkAgentConfig.explicitlySelected
+                && (networkAgentConfig.acceptUnvalidated || pretendValidated)) {
             return ConnectivityConstants.EXPLICITLY_SELECTED_NETWORK_SCORE;
         }
 
-        int score = mNetworkScore.getIntExtension(NetworkScore.LEGACY_SCORE);
+        int score = mScore;
         if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty() && !isVPN()) {
             score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
         }
@@ -520,20 +513,16 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         return getCurrentScore(true);
     }
 
-    public void setNetworkScore(@NonNull NetworkScore ns) {
-        mNetworkScore = ns;
-    }
-
-    @NonNull
-    public NetworkScore getNetworkScore() {
-        return mNetworkScore;
+    public void setScore(final int score) {
+        mScore = score;
     }
 
     public NetworkState getNetworkState() {
         synchronized (this) {
             // Network objects are outwardly immutable so there is no point in duplicating.
             // Duplicating also precludes sharing socket factories and connection pools.
-            final String subscriberId = (networkMisc != null) ? networkMisc.subscriberId : null;
+            final String subscriberId = (networkAgentConfig != null)
+                    ? networkAgentConfig.subscriberId : null;
             return new NetworkState(new NetworkInfo(networkInfo),
                     new LinkProperties(linkProperties),
                     new NetworkCapabilities(networkCapabilities), network, subscriberId, null);
@@ -549,11 +538,11 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             // Cannot happen. Once a request is lingering on a particular network, we cannot
             // re-linger it unless that network becomes the best for that request again, in which
             // case we should have unlingered it.
-            Log.wtf(TAG, this.name() + ": request " + request.requestId + " already lingered");
+            Log.wtf(TAG, toShortString() + ": request " + request.requestId + " already lingered");
         }
         final long expiryMs = now + duration;
         LingerTimer timer = new LingerTimer(request, expiryMs);
-        if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + this.name());
+        if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + toShortString());
         mLingerTimers.add(timer);
         mLingerTimerForRequest.put(request.requestId, timer);
     }
@@ -565,7 +554,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     public boolean unlingerRequest(NetworkRequest request) {
         LingerTimer timer = mLingerTimerForRequest.get(request.requestId);
         if (timer != null) {
-            if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + this.name());
+            if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + toShortString());
             mLingerTimers.remove(timer);
             mLingerTimerForRequest.remove(request.requestId);
             return true;
@@ -632,34 +621,49 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         for (LingerTimer timer : mLingerTimers) { pw.println(timer); }
     }
 
-    // TODO: Print shorter members first and only print the boolean variable which value is true
-    // to improve readability.
     public String toString() {
-        return "NetworkAgentInfo{ ni{" + networkInfo + "}  "
-                + "network{" + network + "}  nethandle{" + network.getNetworkHandle() + "}  "
-                + "lp{" + linkProperties + "}  "
-                + "nc{" + networkCapabilities + "}  Score{" + getCurrentScore() + "}  "
-                + "everValidated{" + everValidated + "}  lastValidated{" + lastValidated + "}  "
-                + "created{" + created + "} lingering{" + isLingering() + "} "
-                + "explicitlySelected{" + networkMisc.explicitlySelected + "} "
-                + "acceptUnvalidated{" + networkMisc.acceptUnvalidated + "} "
-                + "everCaptivePortalDetected{" + everCaptivePortalDetected + "} "
-                + "lastCaptivePortalDetected{" + lastCaptivePortalDetected + "} "
-                + "captivePortalValidationPending{" + captivePortalValidationPending + "} "
-                + "partialConnectivity{" + partialConnectivity + "} "
-                + "acceptPartialConnectivity{" + networkMisc.acceptPartialConnectivity + "} "
-                + "clat{" + clatd + "} "
+        return "NetworkAgentInfo{"
+                + "network{" + network + "}  handle{" + network.getNetworkHandle() + "}  ni{"
+                + networkInfo.toShortString() + "} "
+                + "  Score{" + getCurrentScore() + "} "
+                + (isLingering() ? " lingering" : "")
+                + (everValidated ? " everValidated" : "")
+                + (lastValidated ? " lastValidated" : "")
+                + (partialConnectivity ? " partialConnectivity" : "")
+                + (everCaptivePortalDetected ? " everCaptivePortal" : "")
+                + (lastCaptivePortalDetected ? " isCaptivePortal" : "")
+                + (networkAgentConfig.explicitlySelected ? " explicitlySelected" : "")
+                + (networkAgentConfig.acceptUnvalidated ? " acceptUnvalidated" : "")
+                + (networkAgentConfig.acceptPartialConnectivity ? " acceptPartialConnectivity" : "")
+                + (clatd.isStarted() ? " clat{" + clatd + "} " : "")
+                + "  lp{" + linkProperties + "}"
+                + "  nc{" + networkCapabilities + "}"
                 + "}";
     }
 
-    public String name() {
-        return "NetworkAgentInfo [" + networkInfo.getTypeName() + " (" +
-                networkInfo.getSubtypeName() + ") - " + Objects.toString(network) + "]";
+    /**
+     * Show a short string representing a Network.
+     *
+     * This is often not enough for debugging purposes for anything complex, but the full form
+     * is very long and hard to read, so this is useful when there isn't a lot of ambiguity.
+     * This represents the network with something like "[100 WIFI|VPN]" or "[108 MOBILE]".
+     */
+    public String toShortString() {
+        return "[" + network.netId + " "
+                + transportNamesOf(networkCapabilities.getTransportTypes()) + "]";
     }
 
     // Enables sorting in descending order of score.
     @Override
     public int compareTo(NetworkAgentInfo other) {
         return other.getCurrentScore() - getCurrentScore();
+    }
+
+    /**
+     * Null-guarding version of NetworkAgentInfo#toShortString()
+     */
+    @NonNull
+    public static String toShortString(@Nullable final NetworkAgentInfo nai) {
+        return null != nai ? nai.toShortString() : "[null]";
     }
 }

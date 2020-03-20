@@ -19,8 +19,8 @@ package android.bluetooth;
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Binder;
@@ -271,7 +271,8 @@ public final class BluetoothMapClient implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(BluetoothDevice device, int connectionPolicy) {
+    public boolean setConnectionPolicy(BluetoothDevice device,
+            @ConnectionPolicy int connectionPolicy) {
         if (DBG) Log.d(TAG, "setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothMapClient service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -319,7 +320,7 @@ public final class BluetoothMapClient implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionPolicy(BluetoothDevice device) {
+    public @ConnectionPolicy int getConnectionPolicy(BluetoothDevice device) {
         if (VDBG) Log.d(TAG, "getConnectionPolicy(" + device + ")");
         final IBluetoothMapClient service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {

@@ -17,10 +17,12 @@
 package android.telephony;
 
 import android.annotation.IntRange;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
+
+import com.android.telephony.Rlog;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -55,6 +57,25 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     private static final int MAX_LTE_RSRP = -44;
     private static final int MIN_LTE_RSRP = -140;
 
+    /**
+     * Indicates RSRP is considered for {@link #getLevel()} and reported from modem.
+     *
+     * @hide
+     */
+    public static final int USE_RSRP = 1 << 0;
+    /**
+     * Indicates RSRQ is considered for {@link #getLevel()} and reported from modem.
+     *
+     * @hide
+     */
+    public static final int USE_RSRQ = 1 << 1;
+    /**
+     * Indicates RSSNR is considered for {@link #getLevel()} and reported from modem.
+     *
+     * @hide
+     */
+    public static final int USE_RSSNR = 1 << 2;
+
     @UnsupportedAppUsage(maxTargetSdk = android.os.Build.VERSION_CODES.P)
     private int mSignalStrength; // To be removed
     private int mRssi;
@@ -70,6 +91,21 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     private int mTimingAdvance;
     private int mLevel;
 
+    /**
+     * Bit-field integer to determine whether to use Reference Signal Received Power (RSRP),
+     * Reference Signal Received Quality (RSRQ), and/or Reference Signal Signal to Noise Ratio
+     * (RSSNR) for the number of LTE signal bars. If multiple measures are set, the parameter
+     * whose signal level value is smallest is used to indicate the signal level.
+     *
+     *  RSRP = 1 << 0,
+     *  RSRQ = 1 << 1,
+     *  RSSNR = 1 << 2,
+     *
+     * For example, if both RSRP and RSRQ are used, the value of key is 3 (1 << 0 | 1 << 1).
+     * If the key is invalid or not configured, a default value (RSRP = 1 << 0) will apply.
+     */
+    private int mParametersUseForLevel;
+
     /** @hide */
     @UnsupportedAppUsage
     public CellSignalStrengthLte() {
@@ -81,7 +117,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
      *
      * @param rssi in dBm [-113,-51], UNKNOWN
      * @param rsrp in dBm [-140,-43], UNKNOWN
-     * @param rsrq in dB [-20,-3], UNKNOWN
+     * @param rsrq in dB [-34, 3], UNKNOWN
      * @param rssnr in 10*dB [-200, +300], UNKNOWN
      * @param cqi [0, 15], UNKNOWN
      * @param timingAdvance [0, 1282], UNKNOWN
@@ -94,7 +130,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mRssi = inRangeOrUnavailable(rssi, -113, -51);
         mSignalStrength = mRssi;
         mRsrp = inRangeOrUnavailable(rsrp, -140, -43);
-        mRsrq = inRangeOrUnavailable(rsrq, -20, -3);
+        mRsrq = inRangeOrUnavailable(rsrq, -34, 3);
         mRssnr = inRangeOrUnavailable(rssnr, -200, 300);
         mCqi = inRangeOrUnavailable(cqi, 0, 15);
         mTimingAdvance = inRangeOrUnavailable(timingAdvance, 0, 1282);
@@ -125,6 +161,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mCqi = s.mCqi;
         mTimingAdvance = s.mTimingAdvance;
         mLevel = s.mLevel;
+        mParametersUseForLevel = s.mParametersUseForLevel;
     }
 
     /** @hide */
@@ -144,6 +181,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         mCqi = CellInfo.UNAVAILABLE;
         mTimingAdvance = CellInfo.UNAVAILABLE;
         mLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        mParametersUseForLevel = USE_RSRP;
     }
 
     /** {@inheritDoc} */
@@ -154,102 +192,170 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     }
 
     // Lifted from Default carrier configs and max range of RSRP
-    private static final int[] sThresholds = new int[]{-115, -105, -95, -85};
+    private static final int[] sRsrpThresholds = new int[] {
+            -115, /* SIGNAL_STRENGTH_POOR */
+            -105, /* SIGNAL_STRENGTH_MODERATE */
+            -95,  /* SIGNAL_STRENGTH_GOOD */
+            -85   /* SIGNAL_STRENGTH_GREAT */
+    };
+
+    // Lifted from Default carrier configs and max range of RSRQ
+    private static final int[] sRsrqThresholds = new int[] {
+            -19, /* SIGNAL_STRENGTH_POOR */
+            -17, /* SIGNAL_STRENGTH_MODERATE */
+            -14, /* SIGNAL_STRENGTH_GOOD */
+            -12  /* SIGNAL_STRENGTH_GREAT */
+    };
+    // Lifted from Default carrier configs and max range of RSSNR
+    private static final int[] sRssnrThresholds = new int[] {
+            -30, /* SIGNAL_STRENGTH_POOR */
+            10,  /* SIGNAL_STRENGTH_MODERATE */
+            45,  /* SIGNAL_STRENGTH_GOOD */
+            130  /* SIGNAL_STRENGTH_GREAT */
+    };
     private static final int sRsrpBoost = 0;
+
+    /**
+     * Checks if the given parameter type is considered to use for {@link #getLevel()}.
+     *
+     * Note: if multiple parameter types are considered, the smaller level for one of the
+     * parameters would be returned by {@link #getLevel()}
+     *
+     * @param parameterType bitwise OR of {@link #USE_RSRP}, {@link #USE_RSRQ},
+     *         {@link #USE_RSSNR}
+     * @return {@code true} if the level is calculated based on the given parameter type;
+     *      {@code false} otherwise.
+     */
+    private boolean isLevelForParameter(int parameterType) {
+        return (parameterType & mParametersUseForLevel) == parameterType;
+    }
 
     /** @hide */
     @Override
     public void updateLevel(PersistableBundle cc, ServiceState ss) {
-        int[] thresholds;
+        int[] rsrpThresholds, rsrqThresholds, rssnrThresholds;
         boolean rsrpOnly;
         if (cc == null) {
-            thresholds = sThresholds;
+            mParametersUseForLevel = USE_RSRP;
+            rsrpThresholds = sRsrpThresholds;
+            rsrqThresholds = sRsrqThresholds;
+            rssnrThresholds = sRssnrThresholds;
             rsrpOnly = false;
         } else {
+            mParametersUseForLevel = cc.getInt(
+                    CarrierConfigManager.KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Using signal strength level: " + mParametersUseForLevel);
+            }
+            rsrpThresholds = cc.getIntArray(
+                    CarrierConfigManager.KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY);
+            if (rsrpThresholds == null) rsrpThresholds = sRsrpThresholds;
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Applying LTE RSRP Thresholds: "
+                        + Arrays.toString(rsrpThresholds));
+            }
+            rsrqThresholds = cc.getIntArray(
+                    CarrierConfigManager.KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY);
+            if (rsrqThresholds == null) rsrqThresholds = sRsrqThresholds;
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Applying LTE RSRQ Thresholds: "
+                        + Arrays.toString(rsrqThresholds));
+            }
+            rssnrThresholds = cc.getIntArray(
+                    CarrierConfigManager.KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY);
+            if (rssnrThresholds == null) rssnrThresholds = sRssnrThresholds;
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Applying LTE RSSNR Thresholds: "
+                        + Arrays.toString(rssnrThresholds));
+            }
             rsrpOnly = cc.getBoolean(
                     CarrierConfigManager.KEY_USE_ONLY_RSRP_FOR_LTE_SIGNAL_BAR_BOOL, false);
-            thresholds = cc.getIntArray(
-                    CarrierConfigManager.KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY);
-            if (thresholds == null) thresholds = sThresholds;
-            if (DBG) log("updateLevel() carrierconfig - rsrpOnly="
-                    + rsrpOnly + ", thresholds=" + Arrays.toString(thresholds));
         }
-
 
         int rsrpBoost = 0;
         if (ss != null) {
             rsrpBoost = ss.getLteEarfcnRsrpBoost();
         }
 
-        int rssiIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        int rsrpIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        int snrIconLevel = -1;
-
-        int rsrp = mRsrp + rsrpBoost;
-
-        if (rsrp < MIN_LTE_RSRP || rsrp > MAX_LTE_RSRP) {
-            rsrpIconLevel = -1;
-        } else {
-            rsrpIconLevel = thresholds.length;
-            while (rsrpIconLevel > 0 && rsrp < thresholds[rsrpIconLevel - 1]) rsrpIconLevel--;
-        }
+        int rsrp = inRangeOrUnavailable(mRsrp + rsrpBoost, MIN_LTE_RSRP, MAX_LTE_RSRP);
 
         if (rsrpOnly) {
-            if (DBG) log("updateLevel() - rsrp = " + rsrpIconLevel);
-            if (rsrpIconLevel != -1) {
-                mLevel = rsrpIconLevel;
+            int level = updateLevelWithMeasure(rsrp, rsrpThresholds);
+            if (DBG) log("updateLevel() - rsrp = " + level);
+            if (level != SignalStrength.INVALID) {
+                mLevel = level;
                 return;
             }
         }
 
-        /*
-         * Values are -200 dB to +300 (SNR*10dB) RS_SNR >= 13.0 dB =>4 bars 4.5
-         * dB <= RS_SNR < 13.0 dB => 3 bars 1.0 dB <= RS_SNR < 4.5 dB => 2 bars
-         * -3.0 dB <= RS_SNR < 1.0 dB 1 bar RS_SNR < -3.0 dB/No Service Antenna
-         * Icon Only
-         */
-        if (mRssnr > 300) snrIconLevel = -1;
-        else if (mRssnr >= 130) snrIconLevel = SIGNAL_STRENGTH_GREAT;
-        else if (mRssnr >= 45) snrIconLevel = SIGNAL_STRENGTH_GOOD;
-        else if (mRssnr >= 10) snrIconLevel = SIGNAL_STRENGTH_MODERATE;
-        else if (mRssnr >= -30) snrIconLevel = SIGNAL_STRENGTH_POOR;
-        else if (mRssnr >= -200)
-            snrIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        int rsrpLevel = SignalStrength.INVALID;
+        int rsrqLevel = SignalStrength.INVALID;
+        int rssnrLevel = SignalStrength.INVALID;
 
-        if (DBG) log("updateLevel() - rsrp:" + mRsrp + " snr:" + mRssnr + " rsrpIconLevel:"
-                + rsrpIconLevel + " snrIconLevel:" + snrIconLevel
-                + " lteRsrpBoost:" + sRsrpBoost);
-
-        /* Choose a measurement type to use for notification */
-        if (snrIconLevel != -1 && rsrpIconLevel != -1) {
-            /*
-             * The number of bars displayed shall be the smaller of the bars
-             * associated with LTE RSRP and the bars associated with the LTE
-             * RS_SNR
-             */
-            mLevel = (rsrpIconLevel < snrIconLevel ? rsrpIconLevel : snrIconLevel);
-            return;
+        if (isLevelForParameter(USE_RSRP)) {
+            rsrpLevel = updateLevelWithMeasure(rsrp, rsrpThresholds);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Updated 4G LTE RSRP Level: " + rsrpLevel);
+            }
         }
-
-        if (snrIconLevel != -1) {
-            mLevel = snrIconLevel;
-            return;
+        if (isLevelForParameter(USE_RSRQ)) {
+            rsrqLevel = updateLevelWithMeasure(mRsrq, rsrqThresholds);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Updated 4G LTE RSRQ Level: " + rsrqLevel);
+            }
         }
-
-        if (rsrpIconLevel != -1) {
-            mLevel = rsrpIconLevel;
-            return;
+        if (isLevelForParameter(USE_RSSNR)) {
+            rssnrLevel = updateLevelWithMeasure(mRssnr, rssnrThresholds);
+            if (DBG) {
+                Rlog.i(LOG_TAG, "Updated 4G LTE RSSNR Level: " + rssnrLevel);
+            }
         }
+        // Apply the smaller value among three levels of three measures.
+        mLevel = Math.min(Math.min(rsrpLevel, rsrqLevel), rssnrLevel);
 
-        if (mRssi > -51) rssiIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        else if (mRssi >= -89) rssiIconLevel = SIGNAL_STRENGTH_GREAT;
-        else if (mRssi >= -97) rssiIconLevel = SIGNAL_STRENGTH_GOOD;
-        else if (mRssi >= -103) rssiIconLevel = SIGNAL_STRENGTH_MODERATE;
-        else if (mRssi >= -113) rssiIconLevel = SIGNAL_STRENGTH_POOR;
-        else rssiIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-        if (DBG) log("getLteLevel - rssi:" + mRssi + " rssiIconLevel:"
-                + rssiIconLevel);
-        mLevel = rssiIconLevel;
+        if (mLevel == SignalStrength.INVALID) {
+            int rssiLevel;
+            if (mRssi > -51) {
+                rssiLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            } else if (mRssi >= -89) {
+                rssiLevel = SIGNAL_STRENGTH_GREAT;
+            } else if (mRssi >= -97) {
+                rssiLevel = SIGNAL_STRENGTH_GOOD;
+            } else if (mRssi >= -103) {
+                rssiLevel = SIGNAL_STRENGTH_MODERATE;
+            } else if (mRssi >= -113) {
+                rssiLevel = SIGNAL_STRENGTH_POOR;
+            } else {
+                rssiLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+            }
+            if (DBG) log("getLteLevel - rssi:" + mRssi + " rssiIconLevel:" + rssiLevel);
+            mLevel = rssiLevel;
+        }
+    }
+
+    /**
+     * Update level with corresponding measure and thresholds.
+     *
+     * @param measure corresponding signal measure
+     * @param thresholds corresponding signal thresholds
+     * @return level of the signal strength
+     */
+    private int updateLevelWithMeasure(int measure, int[] thresholds) {
+        int level;
+        if (measure == CellInfo.UNAVAILABLE) {
+            level = SignalStrength.INVALID;
+        } else if (measure >= thresholds[3]) {
+            level = SIGNAL_STRENGTH_GREAT;
+        } else if (measure >= thresholds[2]) {
+            level = SIGNAL_STRENGTH_GOOD;
+        } else if (measure >= thresholds[1]) {
+            level = SIGNAL_STRENGTH_MODERATE;
+        } else if (measure >= thresholds[0]) {
+            level = SIGNAL_STRENGTH_POOR;
+        } else {
+            level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        }
+        return level;
     }
 
     /**
@@ -386,7 +492,8 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
                 + " rssnr=" + mRssnr
                 + " cqi=" + mCqi
                 + " ta=" + mTimingAdvance
-                + " level=" + mLevel;
+                + " level=" + mLevel
+                + " parametersUseForLevel=" + mParametersUseForLevel;
     }
 
     /** Implement the Parcelable interface */

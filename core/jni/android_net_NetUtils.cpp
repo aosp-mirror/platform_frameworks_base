@@ -24,9 +24,7 @@
 #include <linux/tcp.h>
 #include <net/if.h>
 #include <netinet/ether.h>
-#include <netinet/icmp6.h>
 #include <netinet/ip.h>
-#include <netinet/ip6.h>
 #include <netinet/udp.h>
 
 #include <android_runtime/AndroidRuntime.h>
@@ -101,98 +99,6 @@ static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobjec
                 "setsockopt(SO_DETACH_FILTER): %s", strerror(errno));
     }
 
-}
-static void android_net_utils_setupRaSocket(JNIEnv *env, jobject clazz, jobject javaFd,
-        jint ifIndex)
-{
-    static const int kLinkLocalHopLimit = 255;
-
-    int fd = jniGetFDFromFileDescriptor(env, javaFd);
-
-    // Set an ICMPv6 filter that only passes Router Solicitations.
-    struct icmp6_filter rs_only;
-    ICMP6_FILTER_SETBLOCKALL(&rs_only);
-    ICMP6_FILTER_SETPASS(ND_ROUTER_SOLICIT, &rs_only);
-    socklen_t len = sizeof(rs_only);
-    if (setsockopt(fd, IPPROTO_ICMPV6, ICMP6_FILTER, &rs_only, len) != 0) {
-        jniThrowExceptionFmt(env, "java/net/SocketException",
-                "setsockopt(ICMP6_FILTER): %s", strerror(errno));
-        return;
-    }
-
-    // Most/all of the rest of these options can be set via Java code, but
-    // because we're here on account of setting an icmp6_filter go ahead
-    // and do it all natively for now.
-    //
-    // TODO: Consider moving these out to Java.
-
-    // Set the multicast hoplimit to 255 (link-local only).
-    int hops = kLinkLocalHopLimit;
-    len = sizeof(hops);
-    if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &hops, len) != 0) {
-        jniThrowExceptionFmt(env, "java/net/SocketException",
-                "setsockopt(IPV6_MULTICAST_HOPS): %s", strerror(errno));
-        return;
-    }
-
-    // Set the unicast hoplimit to 255 (link-local only).
-    hops = kLinkLocalHopLimit;
-    len = sizeof(hops);
-    if (setsockopt(fd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &hops, len) != 0) {
-        jniThrowExceptionFmt(env, "java/net/SocketException",
-                "setsockopt(IPV6_UNICAST_HOPS): %s", strerror(errno));
-        return;
-    }
-
-    // Explicitly disable multicast loopback.
-    int off = 0;
-    len = sizeof(off);
-    if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, &off, len) != 0) {
-        jniThrowExceptionFmt(env, "java/net/SocketException",
-                "setsockopt(IPV6_MULTICAST_LOOP): %s", strerror(errno));
-        return;
-    }
-
-    // Specify the IPv6 interface to use for outbound multicast.
-    len = sizeof(ifIndex);
-    if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &ifIndex, len) != 0) {
-        jniThrowExceptionFmt(env, "java/net/SocketException",
-                "setsockopt(IPV6_MULTICAST_IF): %s", strerror(errno));
-        return;
-    }
-
-    // Additional options to be considered:
-    //     - IPV6_TCLASS
-    //     - IPV6_RECVPKTINFO
-    //     - IPV6_RECVHOPLIMIT
-
-    // Bind to [::].
-    const struct sockaddr_in6 sin6 = {
-            .sin6_family = AF_INET6,
-            .sin6_port = 0,
-            .sin6_flowinfo = 0,
-            .sin6_addr = IN6ADDR_ANY_INIT,
-            .sin6_scope_id = 0,
-    };
-    auto sa = reinterpret_cast<const struct sockaddr *>(&sin6);
-    len = sizeof(sin6);
-    if (bind(fd, sa, len) != 0) {
-        jniThrowExceptionFmt(env, "java/net/SocketException",
-                "bind(IN6ADDR_ANY): %s", strerror(errno));
-        return;
-    }
-
-    // Join the all-routers multicast group, ff02::2%index.
-    struct ipv6_mreq all_rtrs = {
-        .ipv6mr_multiaddr = {{{0xff,2,0,0,0,0,0,0,0,0,0,0,0,0,0,2}}},
-        .ipv6mr_interface = ifIndex,
-    };
-    len = sizeof(all_rtrs);
-    if (setsockopt(fd, IPPROTO_IPV6, IPV6_JOIN_GROUP, &all_rtrs, len) != 0) {
-        jniThrowExceptionFmt(env, "java/net/SocketException",
-                "setsockopt(IPV6_JOIN_GROUP): %s", strerror(errno));
-        return;
-    }
 }
 
 static jboolean android_net_utils_bindProcessToNetwork(JNIEnv *env, jobject thiz, jint netId)
@@ -370,7 +276,6 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "attachDropAllBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDropAllBPFFilter },
     { "detachBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_detachBPFFilter },
     { "getTcpRepairWindow", "(Ljava/io/FileDescriptor;)Landroid/net/TcpRepairWindow;", (void*) android_net_utils_getTcpRepairWindow },
-    { "setupRaSocket", "(Ljava/io/FileDescriptor;I)V", (void*) android_net_utils_setupRaSocket },
     { "resNetworkSend", "(I[BII)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkSend },
     { "resNetworkQuery", "(ILjava/lang/String;III)Ljava/io/FileDescriptor;", (void*) android_net_utils_resNetworkQuery },
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },

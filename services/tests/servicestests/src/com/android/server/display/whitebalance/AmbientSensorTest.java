@@ -28,15 +28,14 @@ import static org.mockito.Mockito.when;
 import android.content.ContextWrapper;
 import android.content.res.Resources;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.server.display.TestUtils;
 import com.android.server.display.whitebalance.AmbientSensor.AmbientBrightnessSensor;
 import com.android.server.display.whitebalance.AmbientSensor.AmbientColorTemperatureSensor;
 
@@ -50,9 +49,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -73,8 +69,8 @@ public final class AmbientSensorTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mLightSensor = createSensor(Sensor.TYPE_LIGHT, null);
-        mAmbientColorSensor = createSensor(AMBIENT_COLOR_TYPE, AMBIENT_COLOR_TYPE_STR);
+        mLightSensor = TestUtils.createSensor(Sensor.TYPE_LIGHT, null);
+        mAmbientColorSensor = TestUtils.createSensor(AMBIENT_COLOR_TYPE, AMBIENT_COLOR_TYPE_STR);
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         mResourcesSpy = spy(mContextSpy.getResources());
         when(mContextSpy.getResources()).thenReturn(mResourcesSpy);
@@ -96,7 +92,7 @@ public final class AmbientSensorTest {
         // There should be no issues when we callback the listener, even if there is no callback
         // set.
         SensorEventListener listener = captor.getValue();
-        listener.onSensorChanged(createSensorEvent(mLightSensor, 100));
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, 100));
     }
 
     @Test
@@ -122,7 +118,7 @@ public final class AmbientSensorTest {
         verify(mSensorManagerMock).registerListener(captor.capture(), eq(mLightSensor),
                 anyInt(), eq(mHandler));
         SensorEventListener listener = captor.getValue();
-        listener.onSensorChanged(createSensorEvent(mLightSensor, luxValue));
+        listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, luxValue));
         assertTrue(changeSignal.await(5, TimeUnit.SECONDS));
         assertEquals(luxValue, luxReturned[0]);
     }
@@ -155,39 +151,8 @@ public final class AmbientSensorTest {
         verify(mSensorManagerMock).registerListener(captor.capture(), eq(mAmbientColorSensor),
                 anyInt(), eq(mHandler));
         SensorEventListener listener = captor.getValue();
-        listener.onSensorChanged(createSensorEvent(mAmbientColorSensor, colorTempValue));
+        listener.onSensorChanged(TestUtils.createSensorEvent(mAmbientColorSensor, colorTempValue));
         assertTrue(changeSignal.await(5, TimeUnit.SECONDS));
         assertEquals(colorTempValue, colorTempReturned[0]);
-    }
-
-    private SensorEvent createSensorEvent(Sensor sensor, int lux) throws Exception {
-        final Constructor<SensorEvent> constructor =
-                SensorEvent.class.getDeclaredConstructor(int.class);
-        constructor.setAccessible(true);
-        final SensorEvent event = constructor.newInstance(1);
-        event.sensor = sensor;
-        event.values[0] = lux;
-        event.timestamp = SystemClock.elapsedRealtimeNanos();
-        return event;
-    }
-
-
-    private void setSensorType(Sensor sensor, int type, String strType) throws Exception {
-        Method setter = Sensor.class.getDeclaredMethod("setType", Integer.TYPE);
-        setter.setAccessible(true);
-        setter.invoke(sensor, type);
-        if (strType != null) {
-            Field f = sensor.getClass().getDeclaredField("mStringType");
-            f.setAccessible(true);
-            f.set(sensor, strType);
-        }
-    }
-
-    private Sensor createSensor(int type, String strType) throws Exception {
-        Constructor<Sensor> constr = Sensor.class.getDeclaredConstructor();
-        constr.setAccessible(true);
-        Sensor sensor = constr.newInstance();
-        setSensorType(sensor, type, strType);
-        return sensor;
     }
 }

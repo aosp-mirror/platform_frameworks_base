@@ -23,47 +23,56 @@ import com.android.internal.telephony.ISetOpportunisticDataCallback;
 interface ISub {
     /**
      * @param callingPackage The package maing the call.
+     * @param callingFeatureId The feature in the package
      * @return a list of all subscriptions in the database, this includes
      * all subscriptions that have been seen.
      */
-    List<SubscriptionInfo> getAllSubInfoList(String callingPackage);
+    List<SubscriptionInfo> getAllSubInfoList(String callingPackage, String callingFeatureId);
 
     /**
      * @param callingPackage The package maing the call.
+     * @param callingFeatureId The feature in the package
      * @return the count of all subscriptions in the database, this includes
      * all subscriptions that have been seen.
      */
-    int getAllSubInfoCount(String callingPackage);
+    int getAllSubInfoCount(String callingPackage, String callingFeatureId);
 
     /**
      * Get the active SubscriptionInfo with the subId key
      * @param subId The unique SubscriptionInfo key in database
      * @param callingPackage The package maing the call.
+     * @param callingFeatureId The feature in the package
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfo(int subId, String callingPackage);
+    SubscriptionInfo getActiveSubscriptionInfo(int subId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Get the active SubscriptionInfo associated with the iccId
      * @param iccId the IccId of SIM card
      * @param callingPackage The package maing the call.
+     * @param callingFeatureId The feature in the package
      * @return SubscriptionInfo, maybe null if its not active
      */
-    SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId, String callingPackage);
+    SubscriptionInfo getActiveSubscriptionInfoForIccId(String iccId, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Get the active SubscriptionInfo associated with the slotIndex
      * @param slotIndex the slot which the subscription is inserted
      * @param callingPackage The package making the call.
+     * @param callingFeatureId The feature in the package
      * @return SubscriptionInfo, null for Remote-SIMs or non-active slotIndex.
      */
-    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIndex, String callingPackage);
+    SubscriptionInfo getActiveSubscriptionInfoForSimSlotIndex(int slotIndex, String callingPackage,
+            String callingFeatureId);
 
     /**
      * Get the SubscriptionInfo(s) of the active subscriptions. The records will be sorted
      * by {@link SubscriptionInfo#getSimSlotIndex} then by {@link SubscriptionInfo#getSubscriptionId}.
      *
      * @param callingPackage The package maing the call.
+     * @param callingFeatureId The feature in the package
      * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
      * <ul>
      * <li>
@@ -80,13 +89,15 @@ interface ISub {
      * </li>
      * </ul>
      */
-    List<SubscriptionInfo> getActiveSubscriptionInfoList(String callingPackage);
+    List<SubscriptionInfo> getActiveSubscriptionInfoList(String callingPackage,
+            String callingFeatureId);
 
     /**
      * @param callingPackage The package making the call.
+     * @param callingFeatureId The feature in the package.
      * @return the number of active subscriptions
      */
-    int getActiveSubInfoCount(String callingPackage);
+    int getActiveSubInfoCount(String callingPackage, String callingFeatureId);
 
     /**
      * @return the maximum number of subscriptions this device will support at any one time.
@@ -96,7 +107,8 @@ interface ISub {
     /**
      * @see android.telephony.SubscriptionManager#getAvailableSubscriptionInfoList
      */
-    List<SubscriptionInfo> getAvailableSubscriptionInfoList(String callingPackage);
+    List<SubscriptionInfo> getAvailableSubscriptionInfoList(String callingPackage,
+            String callingFeatureId);
 
     /**
      * @see android.telephony.SubscriptionManager#getAccessibleSubscriptionInfoList
@@ -225,7 +237,8 @@ interface ISub {
      * Return opportunistic subscriptions that can be visible to the caller.
      * @return the list of opportunistic subscription info. If none exists, an empty list.
      */
-    List<SubscriptionInfo> getOpportunisticSubscriptions(String callingPackage);
+    List<SubscriptionInfo> getOpportunisticSubscriptions(String callingPackage,
+            String callingFeatureId);
 
     void removeSubscriptionsFromGroup(in int[] subIdList, in ParcelUuid groupUuid,
         String callingPackage);
@@ -233,7 +246,8 @@ interface ISub {
     void addSubscriptionsIntoGroup(in int[] subIdList, in ParcelUuid groupUuid,
         String callingPackage);
 
-    List<SubscriptionInfo> getSubscriptionsInGroup(in ParcelUuid groupUuid, String callingPackage);
+    List<SubscriptionInfo> getSubscriptionsInGroup(in ParcelUuid groupUuid, String callingPackage,
+            String callingFeatureId);
 
     int getSlotIndex(int subId);
 
@@ -265,7 +279,8 @@ interface ISub {
 
     int setSubscriptionProperty(int subId, String propKey, String propValue);
 
-    String getSubscriptionProperty(int subId, String propKey, String callingPackage);
+    String getSubscriptionProperty(int subId, String propKey, String callingPackage,
+            String callingFeatureId);
 
     boolean setSubscriptionEnabled(boolean enable, int subId);
 
@@ -278,11 +293,11 @@ interface ISub {
      */
     int getSimStateForSlotIndex(int slotIndex);
 
-    boolean isActiveSubId(int subId, String callingPackage);
-
-    boolean setAlwaysAllowMmsData(int subId, boolean alwaysAllow);
+    boolean isActiveSubId(int subId, String callingPackage, String callingFeatureId);
 
     int getActiveDataSubscriptionId();
 
     boolean canDisablePhysicalSubscription();
+
+    int setUiccApplicationsEnabled(boolean enabled, int subscriptionId);
 }

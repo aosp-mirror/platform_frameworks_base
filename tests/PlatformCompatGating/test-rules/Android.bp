@@ -19,7 +19,7 @@ java_library {
     srcs: ["src/**/*.java"],
     static_libs: [
         "junit",
-        "android-support-test",
+        "androidx.test.core",
         "truth-prebuilt",
         "core-compat-test-rules"
     ],

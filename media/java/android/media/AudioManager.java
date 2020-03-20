@@ -27,12 +27,12 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothCodecConfig;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -908,6 +908,7 @@ public class AudioManager {
 
     /** @hide */
     @UnsupportedAppUsage
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public void setMasterMute(boolean mute, int flags) {
         final IAudioService service = getService();
         try {

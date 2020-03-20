@@ -25,6 +25,7 @@ import android.content.pm.ResolveInfo;
 import android.os.ParcelUuid;
 
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.telephony.Rlog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

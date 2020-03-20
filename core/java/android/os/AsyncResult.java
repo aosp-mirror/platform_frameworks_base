@@ -16,8 +16,7 @@
 
 package android.os;
 
-import android.annotation.UnsupportedAppUsage;
-import android.os.Message;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /** @hide */
 public class AsyncResult

@@ -17,7 +17,7 @@
 package android.graphics;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 import java.io.InputStream;
 import java.io.OutputStream;

@@ -16,8 +16,8 @@
 
 package android.provider;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.DownloadManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.NetworkPolicyManager;
 import android.net.Uri;

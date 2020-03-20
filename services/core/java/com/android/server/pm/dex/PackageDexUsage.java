@@ -83,8 +83,9 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             "=UnknownClassLoaderContext=";
 
     // The marker used for unsupported class loader contexts (no longer written, may occur in old
-    // files so discarded on read).
-    private static final String UNSUPPORTED_CLASS_LOADER_CONTEXT =
+    // files so discarded on read). Note: this matches
+    // ClassLoaderContext::kUnsupportedClassLoaderContextEncoding in the runtime.
+    /*package*/ static final String UNSUPPORTED_CLASS_LOADER_CONTEXT =
             "=UnsupportedClassLoaderContext=";
 
     /**
@@ -132,6 +133,9 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         }
         if (classLoaderContext == null) {
             throw new IllegalArgumentException("Null classLoaderContext");
+        }
+        if (classLoaderContext.equals(UNSUPPORTED_CLASS_LOADER_CONTEXT)) {
+            return false;
         }
 
         synchronized (mPackageUseInfoMap) {
@@ -843,10 +847,11 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             boolean updateLoadingPackages = mLoadingPackages.addAll(dexUseInfo.mLoadingPackages);
 
             String oldClassLoaderContext = mClassLoaderContext;
-            if (UNKNOWN_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext)) {
+            if (isUnknownOrUnsupportedContext(mClassLoaderContext)) {
                 // Can happen if we read a previous version.
                 mClassLoaderContext = dexUseInfo.mClassLoaderContext;
-            } else if (!Objects.equals(mClassLoaderContext, dexUseInfo.mClassLoaderContext)) {
+            } else if (!isUnknownOrUnsupportedContext(dexUseInfo.mClassLoaderContext)
+                        && !Objects.equals(mClassLoaderContext, dexUseInfo.mClassLoaderContext)) {
                 // We detected a context change.
                 mClassLoaderContext = VARIABLE_CLASS_LOADER_CONTEXT;
             }
@@ -855,6 +860,13 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                     (oldIsUsedByOtherApps != mIsUsedByOtherApps) ||
                     updateLoadingPackages
                     || !Objects.equals(oldClassLoaderContext, mClassLoaderContext);
+        }
+
+        private static boolean isUnknownOrUnsupportedContext(String context) {
+            // TODO: Merge UNKNOWN_CLASS_LOADER_CONTEXT & UNSUPPORTED_CLASS_LOADER_CONTEXT cases
+            // into UNSUPPORTED_CLASS_LOADER_CONTEXT.
+            return UNKNOWN_CLASS_LOADER_CONTEXT.equals(context)
+                    || UNSUPPORTED_CLASS_LOADER_CONTEXT.equals(context);
         }
 
         public boolean isUsedByOtherApps() {
@@ -878,7 +890,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         public boolean isUnknownClassLoaderContext() {
             // The class loader context may be unknown if we loaded the data from a previous version
             // which didn't save the context.
-            return UNKNOWN_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext);
+            return isUnknownOrUnsupportedContext(mClassLoaderContext);
         }
 
         public boolean isVariableClassLoaderContext() {

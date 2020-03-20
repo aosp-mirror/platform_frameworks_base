@@ -1,18 +1,18 @@
 /*
-** Copyright 2007, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License");
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+ * Copyright 2007, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package com.android.internal.telephony;
 
@@ -22,7 +22,7 @@ import android.os.Bundle;
 import com.android.internal.telephony.SmsRawData;
 
 /**
- * Interface for applications to access the ICC phone book.
+ * Service interface to handle SMS API requests
  *
  * See also SmsManager.java.
  */
@@ -91,34 +91,6 @@ interface ISms {
             in PendingIntent deliveryIntent);
 
     /**
-     * Send a data SMS. Only for use internally.
-     *
-     * @param smsc the SMSC to send the message through, or NULL for the
-     *  default SMSC
-     * @param data the body of the message to send
-     * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
-     *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:<br>
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
-     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
-     *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
-     *  the extra "errorCode" containing a radio technology specific value,
-     *  generally only useful for troubleshooting.<br>
-     *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applicaitons,
-     *  which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is delivered to the recipient.  The
-     *  raw pdu of the status report is in the extended data ("pdu").
-     * @param subId the subId id.
-     */
-    void sendDataForSubscriberWithSelfPermissions(int subId, String callingPkg, in String destAddr,
-            in String scAddr, in int destPort, in byte[] data, in PendingIntent sentIntent,
-            in PendingIntent deliveryIntent);
-
-    /**
      * Send an SMS.
      *
      * @param smsc the SMSC to send the message through, or NULL for the
@@ -149,34 +121,6 @@ interface ISms {
     void sendTextForSubscriber(in int subId, String callingPkg, in String destAddr,
             in String scAddr, in String text, in PendingIntent sentIntent,
             in PendingIntent deliveryIntent, in boolean persistMessageForNonDefaultSmsApp);
-
-    /**
-     * Send an SMS. Internal use only.
-     *
-     * @param smsc the SMSC to send the message through, or NULL for the
-     *  default SMSC
-     * @param text the body of the message to send
-     * @param sentIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is sucessfully sent, or failed.
-     *  The result code will be <code>Activity.RESULT_OK<code> for success,
-     *  or one of these errors:<br>
-     *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
-     *  <code>RESULT_ERROR_RADIO_OFF</code><br>
-     *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> the sentIntent may include
-     *  the extra "errorCode" containing a radio technology specific value,
-     *  generally only useful for troubleshooting.<br>
-     *  The per-application based SMS control checks sentIntent. If sentIntent
-     *  is NULL the caller will be checked against all unknown applications,
-     *  which cause smaller number of SMS to be sent in checking period.
-     * @param deliveryIntent if not NULL this <code>PendingIntent</code> is
-     *  broadcast when the message is delivered to the recipient.  The
-     *  raw pdu of the status report is in the extended data ("pdu").
-     * @param subId the subId on which the SMS has to be sent.
-     */
-    void sendTextForSubscriberWithSelfPermissions(in int subId, String callingPkg,
-            in String destAddr, in String scAddr, in String text, in PendingIntent sentIntent,
-            in PendingIntent deliveryIntent, in boolean persistMessage);
 
     /**
      * Send an SMS with options using Subscription Id.
@@ -224,10 +168,11 @@ interface ISms {
      *  Validity Period(Maximum) -> 635040 mins(i.e.63 weeks).
      *  Any Other values included Negative considered as Invalid Validity Period of the message.
      */
-    void sendTextForSubscriberWithOptions(in int subId, String callingPkg, in String destAddr,
-            in String scAddr, in String text, in PendingIntent sentIntent,
-            in PendingIntent deliveryIntent, in boolean persistMessageForNonDefaultSmsApp,
-            in int priority, in boolean expectMore, in int validityPeriod);
+    void sendTextForSubscriberWithOptions(in int subId, String callingPkg,
+            String callingAttributionTag, in String destAddr, in String scAddr, in String text,
+            in PendingIntent sentIntent, in PendingIntent deliveryIntent,
+            in boolean persistMessageForNonDefaultSmsApp, in int priority, in boolean expectMore,
+            in int validityPeriod);
 
     /**
      * Inject an SMS PDU into the android platform.
@@ -542,6 +487,13 @@ interface ISms {
                 in List<PendingIntent> deliveryIntents);
 
     /**
+     * Get carrier-dependent configuration values.
+     *
+     * @param subId the subscription Id
+     */
+    Bundle getCarrierConfigValuesForSubscriber(int subId);
+
+    /**
      * Create an app-only incoming SMS request for the calling package.
      *
      * If an incoming text contains the token returned by this method the provided
@@ -573,7 +525,8 @@ interface ISms {
      *
      * @param destAddress the destination address to test for possible short code
      */
-    int checkSmsShortCodeDestination(int subId, String callingApk, String destAddress, String countryIso);
+    int checkSmsShortCodeDestination(int subId, String callingApk, String callingFeatureId,
+            String destAddress, String countryIso);
 
     /**
      * Gets the SMSC address from (U)SIM.

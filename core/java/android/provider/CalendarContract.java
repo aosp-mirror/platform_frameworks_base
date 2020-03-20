@@ -20,11 +20,11 @@ import android.annotation.NonNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -40,7 +40,7 @@ import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
-import android.text.format.Time;
+import android.text.format.TimeMigrationUtils;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -1680,7 +1680,7 @@ public final class CalendarContract {
      * <h3>Writing to Events</h3> There are further restrictions on all Updates
      * and Inserts in the Events table:
      * <ul>
-     * <li>If allDay is set to 1 eventTimezone must be {@link Time#TIMEZONE_UTC}
+     * <li>If allDay is set to 1 eventTimezone must be "UTC"
      * and the time must correspond to a midnight boundary.</li>
      * <li>Exceptions are not allowed to recur. If rrule or rdate is not empty,
      * original_id and original_sync_id must be empty.</li>
@@ -2609,9 +2609,7 @@ public final class CalendarContract {
         @UnsupportedAppUsage
         public static void scheduleAlarm(Context context, AlarmManager manager, long alarmTime) {
             if (DEBUG) {
-                Time time = new Time();
-                time.set(alarmTime);
-                String schedTime = time.format(" %a, %b %d, %Y %I:%M%P");
+                String schedTime = TimeMigrationUtils.formatMillisWithFixedFormat(alarmTime);
                 Log.d(TAG, "Schedule alarm at " + alarmTime + " " + schedTime);
             }
 

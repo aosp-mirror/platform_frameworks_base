@@ -17,10 +17,7 @@
 
 package android.filterfw.core;
 
-import android.annotation.UnsupportedAppUsage;
-import android.filterfw.core.Frame;
-import android.filterfw.core.FrameFormat;
-import android.filterfw.core.MutableFrameFormat;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * @hide

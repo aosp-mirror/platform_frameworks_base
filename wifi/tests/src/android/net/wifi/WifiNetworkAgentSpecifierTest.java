@@ -71,16 +71,6 @@ public class WifiNetworkAgentSpecifierTest {
     }
 
     /**
-     * Validate that the NetworkAgentSpecifier cannot be used in a {@link NetworkRequest} by apps.
-     */
-    @Test(expected = IllegalStateException.class)
-    public void testWifiNetworkAgentSpecifierNotUsedInNetworkRequest() {
-        WifiNetworkAgentSpecifier specifier = createDefaultNetworkAgentSpecifier();
-
-        specifier.assertValidFromUid(TEST_UID);
-    }
-
-    /**
      * Validate NetworkAgentSpecifier equals with itself.
      * a) Create network agent specifier 1 for WPA_PSK network
      * b) Create network agent specifier 2 with the same params as specifier 1.

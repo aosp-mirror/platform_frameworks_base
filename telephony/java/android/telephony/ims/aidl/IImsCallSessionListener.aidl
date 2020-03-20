@@ -92,11 +92,11 @@ oneway interface IImsCallSessionListener {
     /**
      * Notifies of handover information for this call
      */
-    void callSessionHandover(int srcAccessTech, int targetAccessTech,
+    void callSessionHandover(int srcNetworkType, int targetNetworkType,
             in ImsReasonInfo reasonInfo);
-    void callSessionHandoverFailed(int srcAccessTech, int targetAccessTech,
+    void callSessionHandoverFailed(int srcNetworkType, int targetNetworkType,
             in ImsReasonInfo reasonInfo);
-    void callSessionMayHandover(int srcAccessTech, int targetAccessTech);
+    void callSessionMayHandover(int srcNetworkType, int targetNetworkType);
 
     /**
      * Notifies the TTY mode change by remote party.
@@ -146,6 +146,12 @@ oneway interface IImsCallSessionListener {
      * @param profile updated ImsStreamMediaProfile
      */
     void callSessionRttAudioIndicatorChanged(in ImsStreamMediaProfile profile);
+
+    /**
+     * Notifies the result of transfer request.
+     */
+    void callSessionTransferred();
+    void callSessionTransferFailed(in ImsReasonInfo reasonInfo);
 
     /**
      * Notifies of a change to the call quality.

@@ -29,7 +29,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.net.NetworkRequest;
@@ -625,10 +625,6 @@ public class JobInfo implements Parcelable {
         return hasLateConstraint;
     }
 
-    private static boolean kindofEqualsBundle(BaseBundle a, BaseBundle b) {
-        return (a == b) || (a != null && a.kindofEquals(b));
-    }
-
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof JobInfo)) {
@@ -639,11 +635,11 @@ public class JobInfo implements Parcelable {
             return false;
         }
         // XXX won't be correct if one is parcelled and the other not.
-        if (!kindofEqualsBundle(extras, j.extras)) {
+        if (!BaseBundle.kindofEquals(extras, j.extras)) {
             return false;
         }
         // XXX won't be correct if one is parcelled and the other not.
-        if (!kindofEqualsBundle(transientExtras, j.transientExtras)) {
+        if (!BaseBundle.kindofEquals(transientExtras, j.transientExtras)) {
             return false;
         }
         // XXX for now we consider two different clip data objects to be different,

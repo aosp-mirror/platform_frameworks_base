@@ -19,7 +19,7 @@ package com.android.internal.telephony;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.telephony.Rlog;
+import android.util.Log;
 
 import com.android.internal.telephony.HbpcdLookup.ArbitraryMccSidMatch;
 import com.android.internal.telephony.HbpcdLookup.MccIdd;
@@ -54,16 +54,16 @@ public final class HbpcdUtils {
         if (c2 != null) {
             int c2Counter = c2.getCount();
             if (DBG) {
-                Rlog.d(LOG_TAG, "Query unresolved arbitrary table, entries are " + c2Counter);
+                Log.d(LOG_TAG, "Query unresolved arbitrary table, entries are " + c2Counter);
             }
             if (c2Counter == 1) {
                 if (DBG) {
-                    Rlog.d(LOG_TAG, "Query Unresolved arbitrary returned the cursor " + c2);
+                    Log.d(LOG_TAG, "Query Unresolved arbitrary returned the cursor " + c2);
                 }
                 c2.moveToFirst();
                 tmpMcc = c2.getInt(0);
                 if (DBG) {
-                    Rlog.d(LOG_TAG, "MCC found in arbitrary_mcc_sid_match: " + tmpMcc);
+                    Log.d(LOG_TAG, "MCC found in arbitrary_mcc_sid_match: " + tmpMcc);
                 }
                 c2.close();
                 return tmpMcc;
@@ -85,18 +85,18 @@ public final class HbpcdUtils {
             int c3Counter = c3.getCount();
             if (c3Counter > 0) {
                 if (c3Counter > 1) {
-                    Rlog.w(LOG_TAG, "something wrong, get more results for 1 conflict SID: " + c3);
+                    Log.w(LOG_TAG, "something wrong, get more results for 1 conflict SID: " + c3);
                 }
-                if (DBG) Rlog.d(LOG_TAG, "Query conflict sid returned the cursor " + c3);
+                if (DBG) Log.d(LOG_TAG, "Query conflict sid returned the cursor " + c3);
                 c3.moveToFirst();
                 tmpMcc = c3.getInt(0);
                 if (DBG) {
-                    Rlog.d(LOG_TAG, "MCC found in mcc_lookup_table. Return tmpMcc = " + tmpMcc);
+                    Log.d(LOG_TAG, "MCC found in mcc_lookup_table. Return tmpMcc = " + tmpMcc);
                 }
                 if (!isNitzTimeZone) {
                     // time zone is not accurate, it may get wrong mcc, ignore it.
                     if (DBG) {
-                        Rlog.d(LOG_TAG, "time zone is not accurate, mcc may be " + tmpMcc);
+                        Log.d(LOG_TAG, "time zone is not accurate, mcc may be " + tmpMcc);
                     }
                     tmpMcc = 0;
                 }
@@ -115,18 +115,18 @@ public final class HbpcdUtils {
                 null, null);
         if (c5 != null) {
             if (c5.getCount() > 0) {
-                if (DBG) Rlog.d(LOG_TAG, "Query Range returned the cursor " + c5);
+                if (DBG) Log.d(LOG_TAG, "Query Range returned the cursor " + c5);
                 c5.moveToFirst();
                 tmpMcc = c5.getInt(0);
-                if (DBG) Rlog.d(LOG_TAG, "SID found in mcc_sid_range. Return tmpMcc = " + tmpMcc);
+                if (DBG) Log.d(LOG_TAG, "SID found in mcc_sid_range. Return tmpMcc = " + tmpMcc);
                 c5.close();
                 return tmpMcc;
             }
             c5.close();
         }
-        if (DBG) Rlog.d(LOG_TAG, "SID NOT found in mcc_sid_range.");
+        if (DBG) Log.d(LOG_TAG, "SID NOT found in mcc_sid_range.");
 
-        if (DBG) Rlog.d(LOG_TAG, "Exit getMccByOtherFactors. Return tmpMcc =  " + tmpMcc);
+        if (DBG) Log.d(LOG_TAG, "Exit getMccByOtherFactors. Return tmpMcc =  " + tmpMcc);
         // If unknown MCC still could not be resolved,
         return tmpMcc;
     }
@@ -135,7 +135,7 @@ public final class HbpcdUtils {
      *  Gets country information with given MCC.
     */
     public String getIddByMcc(int mcc) {
-        if (DBG) Rlog.d(LOG_TAG, "Enter getHbpcdInfoByMCC.");
+        if (DBG) Log.d(LOG_TAG, "Enter getHbpcdInfoByMCC.");
         String idd = "";
 
         Cursor c = null;
@@ -145,19 +145,19 @@ public final class HbpcdUtils {
                 MccIdd.MCC + "=" + mcc, null, null);
         if (cur != null) {
             if (cur.getCount() > 0) {
-                if (DBG) Rlog.d(LOG_TAG, "Query Idd returned the cursor " + cur);
+                if (DBG) Log.d(LOG_TAG, "Query Idd returned the cursor " + cur);
                 // TODO: for those country having more than 1 IDDs, need more information
                 // to decide which IDD would be used. currently just use the first 1.
                 cur.moveToFirst();
                 idd = cur.getString(0);
-                if (DBG) Rlog.d(LOG_TAG, "IDD = " + idd);
+                if (DBG) Log.d(LOG_TAG, "IDD = " + idd);
 
             }
             cur.close();
         }
         if (c != null) c.close();
 
-        if (DBG) Rlog.d(LOG_TAG, "Exit getHbpcdInfoByMCC.");
+        if (DBG) Log.d(LOG_TAG, "Exit getHbpcdInfoByMCC.");
         return idd;
     }
 }

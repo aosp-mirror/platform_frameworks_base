@@ -18,14 +18,11 @@ package com.android.internal.app;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
-import com.android.internal.R;
-
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.app.AlertDialog;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -33,7 +30,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Layout;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
 import android.text.method.MovementMethod;
 import android.util.AttributeSet;
 import android.util.TypedValue;
@@ -46,7 +42,6 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.view.ViewStub;
 import android.view.Window;
-import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -62,6 +57,8 @@ import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+
+import com.android.internal.R;
 
 import java.lang.ref.WeakReference;
 

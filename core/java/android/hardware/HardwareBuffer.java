@@ -20,7 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.GraphicBuffer;
 import android.os.Build;
 import android.os.Parcel;

@@ -16,7 +16,7 @@
 
 package android.webkit;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageInfo;
 import android.os.Parcel;
 import android.os.Parcelable;

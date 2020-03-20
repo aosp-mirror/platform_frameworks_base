@@ -16,7 +16,7 @@
 
 package android.view;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * An instance of this class represents a connection to the surface

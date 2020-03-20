@@ -400,6 +400,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * configurations
      * @return true if active
      */
+    @SystemApi
     public boolean isActive() {
         switch (mPlayerState) {
             case PLAYER_STATE_STARTED:
@@ -420,18 +421,7 @@ public final class AudioPlaybackConfiguration implements Parcelable {
      * @param pw
      */
     public void dump(PrintWriter pw) {
-        pw.println("  " + toLogFriendlyString(this));
-    }
-
-    /**
-     * @hide
-     */
-    public static String toLogFriendlyString(AudioPlaybackConfiguration apc) {
-        return new String("ID:" + apc.mPlayerIId
-                + " -- type:" + toLogFriendlyPlayerType(apc.mPlayerType)
-                + " -- u/pid:" + apc.mClientUid +"/" + apc.mClientPid
-                + " -- state:" + toLogFriendlyPlayerState(apc.mPlayerState)
-                + " -- attr:" + apc.mPlayerAttr);
+        pw.println("  " + this);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<AudioPlaybackConfiguration> CREATOR
@@ -496,6 +486,15 @@ public final class AudioPlaybackConfiguration implements Parcelable {
                 && (mPlayerType == that.mPlayerType)
                 && (mClientUid == that.mClientUid)
                 && (mClientPid == that.mClientPid));
+    }
+
+    @Override
+    public String toString() {
+        return "AudioPlaybackConfiguration piid:" + mPlayerIId
+                + " type:" + toLogFriendlyPlayerType(mPlayerType)
+                + " u/pid:" + mClientUid + "/" + mClientPid
+                + " state:" + toLogFriendlyPlayerState(mPlayerState)
+                + " attr:" + mPlayerAttr;
     }
 
     //=====================================================================

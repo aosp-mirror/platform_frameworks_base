@@ -215,6 +215,18 @@ public abstract class BaseLockSettingsServiceTests {
             }
         }).when(sm).addUserKeyAuth(anyInt(), anyInt(), any(), any());
 
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                mStorageManager.clearUserKeyAuth((int) args[0] /* userId */,
+                        (int) args[1] /* serialNumber */,
+                        (byte[]) args[2] /* token */,
+                        (byte[]) args[3] /* secret */);
+                return null;
+            }
+        }).when(sm).clearUserKeyAuth(anyInt(), anyInt(), any(), any());
+
         doAnswer(
                 new Answer<Void>() {
             @Override

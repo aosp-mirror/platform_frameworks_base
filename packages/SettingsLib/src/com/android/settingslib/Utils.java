@@ -421,7 +421,7 @@ public class Utils {
         // is not available. Note that we ignore the IWLAN service state
         // because that state indicates the use of VoWIFI and not cell service
         final int state = serviceState.getState();
-        final int dataState = serviceState.getDataRegState();
+        final int dataState = serviceState.getDataRegistrationState();
 
         if (state == ServiceState.STATE_OUT_OF_SERVICE
                 || state == ServiceState.STATE_EMERGENCY_ONLY) {

@@ -142,8 +142,8 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiServiceTestCase;
-import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.lights.LogicalLight;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
 import com.android.server.notification.NotificationManagerService.NotificationListeners;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -351,7 +351,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .thenReturn(applicationInfo);
         when(mPackageManagerClient.getPackageUidAsUser(any(), anyInt())).thenReturn(mUid);
         final LightsManager mockLightsManager = mock(LightsManager.class);
-        when(mockLightsManager.getLight(anyInt())).thenReturn(mock(Light.class));
+        when(mockLightsManager.getLight(anyInt())).thenReturn(mock(LogicalLight.class));
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
         when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
@@ -4193,6 +4193,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         assertEquals(0, mService.countLogSmartSuggestionsVisible);
     }
 
+    @Test
     public void testReportSeen_delegated() {
         Notification.Builder nb =
                 new Notification.Builder(mContext, mTestNotificationChannel.getId())

@@ -530,6 +530,46 @@ public class TimeControllerTest {
     }
 
     @Test
+    public void testJobDelayWakeupAlarmToggling() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+
+        JobStatus job = createJobStatus(
+                "testMaybeStartTrackingJobLocked_DeadlineReverseOrder",
+                createJob().setMinimumLatency(HOUR_IN_MILLIS));
+
+        doReturn(true).when(mTimeController)
+                .wouldBeReadyWithConstraintLocked(eq(job), anyInt());
+
+        // Starting off with using a wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
+        InOrder inOrder = inOrder(mAlarmManager);
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(),
+                        eq(TAG_DELAY), any(), any(), any());
+
+        // Use a non wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = true;
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(), eq(TAG_DELAY),
+                        any(), any(), any());
+
+        // Back off, use a wakeup alarm.
+        mConstants.USE_NON_WAKEUP_ALARM_FOR_DELAY = false;
+
+        mTimeController.maybeStartTrackingJobLocked(job, null);
+        inOrder.verify(mAlarmManager, times(1))
+                .set(eq(AlarmManager.ELAPSED_REALTIME_WAKEUP), eq(now + HOUR_IN_MILLIS), anyLong(),
+                        anyLong(),
+                        eq(TAG_DELAY), any(), any(), any());
+    }
+
+    @Test
     public void testCheckExpiredDelaysAndResetAlarm_WithSkipping_AllReady() {
         mConstants.SKIP_NOT_READY_JOBS = true;
         mTimeController.recheckAlarmsLocked();

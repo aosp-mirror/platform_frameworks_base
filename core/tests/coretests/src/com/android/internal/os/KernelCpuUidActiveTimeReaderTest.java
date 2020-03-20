@@ -21,11 +21,11 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.os.FileUtils;
+import android.util.SparseArray;
 import android.util.SparseLongArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 
@@ -33,11 +33,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -46,14 +50,16 @@ import java.util.Random;
  * $ atest FrameworksCoreTests:com.android.internal.os.KernelCpuUidActiveTimeReaderTest
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(Parameterized.class)
 public class KernelCpuUidActiveTimeReaderTest {
     private File mTestDir;
     private File mTestFile;
     private KernelCpuUidActiveTimeReader mReader;
+    private KernelCpuUidTestBpfMapReader mBpfMapReader;
     private VerifiableCallback mCallback;
 
     private Random mRand = new Random(12345);
+    protected boolean mUseBpf;
     private final int mCpus = 4;
     private final String mHeadline = "cpus: 4\n";
     private final int[] mUids = {0, 1, 22, 333, 4444, 55555};
@@ -62,12 +68,22 @@ public class KernelCpuUidActiveTimeReaderTest {
         return InstrumentationRegistry.getContext();
     }
 
+    @Parameters(name="useBpf={0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] { {true}, {false} });
+    }
+
+    public KernelCpuUidActiveTimeReaderTest(boolean useBpf) {
+        mUseBpf = useBpf;
+    }
+
     @Before
     public void setUp() {
         mTestDir = getContext().getDir("test", Context.MODE_PRIVATE);
         mTestFile = new File(mTestDir, "test.file");
+        mBpfMapReader = new KernelCpuUidTestBpfMapReader();
         mReader = new KernelCpuUidActiveTimeReader(
-                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), false);
+                new KernelCpuProcStringReader(mTestFile.getAbsolutePath()), mBpfMapReader, false);
         mCallback = new VerifiableCallback();
     }
 
@@ -80,7 +96,7 @@ public class KernelCpuUidActiveTimeReaderTest {
     @Test
     public void testReadDelta() throws Exception {
         final long[][] times = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times));
+        setCpusAndData(times);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], getActiveTime(times[i]));
@@ -90,7 +106,7 @@ public class KernelCpuUidActiveTimeReaderTest {
         // Verify that a second call will only return deltas.
         mCallback.clear();
         final long[][] newTimes1 = increaseTime(times);
-        writeToFile(mHeadline + uidLines(mUids, newTimes1));
+        setCpusAndData(newTimes1);
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], getActiveTime(newTimes1[i]) - getActiveTime(times[i]));
@@ -105,7 +121,7 @@ public class KernelCpuUidActiveTimeReaderTest {
         // Verify that calling with a null callback doesn't result in any crashes
         mCallback.clear();
         final long[][] newTimes2 = increaseTime(newTimes1);
-        writeToFile(mHeadline + uidLines(mUids, newTimes2));
+        setCpusAndData(newTimes2);
         mReader.readDelta(null);
         mCallback.verifyNoMoreInteractions();
 
@@ -113,19 +129,20 @@ public class KernelCpuUidActiveTimeReaderTest {
         // the previous call had null callback.
         mCallback.clear();
         final long[][] newTimes3 = increaseTime(newTimes2);
+        setCpusAndData(newTimes3);
         writeToFile(mHeadline + uidLines(mUids, newTimes3));
         mReader.readDelta(mCallback);
         for (int i = 0; i < mUids.length; ++i) {
             mCallback.verify(mUids[i], getActiveTime(newTimes3[i]) - getActiveTime(newTimes2[i]));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCpusAndData();
     }
 
     @Test
     public void testReadAbsolute() throws Exception {
         final long[][] times1 = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times1));
+        setCpusAndData(times1);
         mReader.readAbsolute(mCallback);
         for (int i = 0; i < mUids.length; i++) {
             mCallback.verify(mUids[i], getActiveTime(times1[i]));
@@ -135,19 +152,19 @@ public class KernelCpuUidActiveTimeReaderTest {
         // Verify that a second call should still return absolute values
         mCallback.clear();
         final long[][] times2 = increaseTime(times1);
-        writeToFile(mHeadline + uidLines(mUids, times2));
+        setCpusAndData(times2);
         mReader.readAbsolute(mCallback);
         for (int i = 0; i < mUids.length; i++) {
             mCallback.verify(mUids[i], getActiveTime(times2[i]));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCpusAndData();
     }
 
     @Test
     public void testReadDeltaDecreasedTime() throws Exception {
         final long[][] times1 = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times1));
+        setCpusAndData(times1);
         mReader.readDelta(mCallback);
 
         // Verify that there should not be a callback for a particular UID if its time decreases.
@@ -155,19 +172,19 @@ public class KernelCpuUidActiveTimeReaderTest {
         final long[][] times2 = increaseTime(times1);
         System.arraycopy(times1[0], 0, times2[0], 0, mCpus);
         times2[0][0] = 100;
-        writeToFile(mHeadline + uidLines(mUids, times2));
+        setCpusAndData(times2);
         mReader.readDelta(mCallback);
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], getActiveTime(times2[i]) - getActiveTime(times1[i]));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCpusAndData();
 
         // Verify that the internal state was not modified.
         mCallback.clear();
         final long[][] times3 = increaseTime(times2);
         times3[0] = increaseTime(times1)[0];
-        writeToFile(mHeadline + uidLines(mUids, times3));
+        setCpusAndData(times3);
         mReader.readDelta(mCallback);
         mCallback.verify(mUids[0], getActiveTime(times3[0]) - getActiveTime(times1[0]));
         for (int i = 1; i < mUids.length; i++) {
@@ -179,32 +196,54 @@ public class KernelCpuUidActiveTimeReaderTest {
     @Test
     public void testReadDeltaNegativeTime() throws Exception {
         final long[][] times1 = increaseTime(new long[mUids.length][mCpus]);
-        writeToFile(mHeadline + uidLines(mUids, times1));
+        setCpusAndData(times1);
         mReader.readDelta(mCallback);
 
         // Verify that there should not be a callback for a particular UID if its time is -ve.
         mCallback.clear();
         final long[][] times2 = increaseTime(times1);
         times2[0][0] *= -1;
-        writeToFile(mHeadline + uidLines(mUids, times2));
+        setCpusAndData(times2);
         mReader.readDelta(mCallback);
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], getActiveTime(times2[i]) - getActiveTime(times1[i]));
         }
         mCallback.verifyNoMoreInteractions();
-        assertTrue(mTestFile.delete());
+        clearCpusAndData();
 
         // Verify that the internal state was not modified.
         mCallback.clear();
         final long[][] times3 = increaseTime(times2);
         times3[0] = increaseTime(times1)[0];
-        writeToFile(mHeadline + uidLines(mUids, times3));
+        setCpusAndData(times3);
         mReader.readDelta(mCallback);
         mCallback.verify(mUids[0], getActiveTime(times3[0]) - getActiveTime(times1[0]));
         for (int i = 1; i < mUids.length; i++) {
             mCallback.verify(mUids[i], getActiveTime(times3[i]) - getActiveTime(times2[i]));
         }
         mCallback.verifyNoMoreInteractions();
+    }
+
+    private void setCpusAndData(long[][] times) throws IOException {
+        if (mUseBpf) {
+            mBpfMapReader.setCpus(new long[]{ mCpus });
+            SparseArray<long[]> data = new SparseArray<>();
+            for (int i = 0; i < mUids.length; i++) {
+                data.put(mUids[i], times[i]);
+            }
+            mBpfMapReader.setData(data);
+        } else {
+            writeToFile(mHeadline + uidLines(mUids, times));
+        }
+    }
+
+    private void clearCpusAndData() {
+        if (mUseBpf) {
+            mBpfMapReader.setCpus(null);
+            mBpfMapReader.setData(new SparseArray<>());
+        } else {
+            assertTrue(mTestFile.delete());
+        }
     }
 
     private String uidLines(int[] uids, long[][] times) {
@@ -259,6 +298,38 @@ public class KernelCpuUidActiveTimeReaderTest {
 
         public void verifyNoMoreInteractions() {
             assertEquals(0, mData.size());
+        }
+    }
+
+    private class KernelCpuUidTestBpfMapReader extends KernelCpuUidBpfMapReader {
+        private long[] mCpus;
+        private SparseArray<long[]> mNewData = new SparseArray<>();
+
+        public void setData(SparseArray<long[]> data) {
+            mNewData = data;
+        }
+
+        public void setCpus(long[] cpus) {
+            mCpus = cpus;
+        }
+
+        @Override
+        public final boolean startTrackingBpfTimes() {
+            return true;
+        }
+
+        @Override
+        protected final boolean readBpfData() {
+            if (!mUseBpf) {
+                return false;
+            }
+            mData = mNewData;
+            return true;
+        }
+
+        @Override
+        public final long[] getDataDimensions() {
+            return mCpus;
         }
     }
 }

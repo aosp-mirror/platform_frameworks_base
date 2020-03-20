@@ -18,8 +18,8 @@ package com.android.internal.widget;
 
 import android.annotation.AttrRes;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.StyleRes;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;

@@ -26,6 +26,10 @@ applications that come with the platform
         <permission name="android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE" />
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.angle">
+        <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.apps.tag">
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
@@ -33,11 +37,6 @@ applications that come with the platform
     <privapp-permissions package="com.android.backupconfirm">
         <permission name="android.permission.BACKUP"/>
         <permission name="android.permission.CRYPT_KEEPER"/>
-    </privapp-permissions>
-
-    <privapp-permissions package="com.android.captiveportallogin">
-        <permission name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS"/>
-        <permission name="android.permission.NETWORK_BYPASS_PRIVATE_DNS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.cellbroadcastreceiver">
@@ -67,7 +66,6 @@ applications that come with the platform
     <privapp-permissions package="com.android.managedprovisioning">
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.CRYPT_KEEPER"/>
         <permission name="android.permission.DELETE_PACKAGES"/>
         <permission name="android.permission.INSTALL_PACKAGES"/>
@@ -155,12 +153,12 @@ applications that come with the platform
         <permission name="android.permission.REGISTER_CALL_PROVIDER"/>
         <permission name="android.permission.REGISTER_SIM_SUBSCRIPTION"/>
         <permission name="android.permission.SEND_RESPOND_VIA_MESSAGE"/>
-        <permission name="android.permission.SET_TIME"/>
         <permission name="android.permission.SET_TIME_ZONE"/>
         <permission name="android.permission.SHUTDOWN"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
         <permission name="android.permission.STATUS_BAR"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
+        <permission name="android.permission.SUGGEST_TELEPHONY_TIME_AND_ZONE"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
         <permission name="android.permission.UPDATE_LOCK"/>
@@ -235,10 +233,13 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkstack.tethering">
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
+        <permission name="android.permission.TETHER_PRIVILEGED"/>
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
+        <permission name="android.permission.UPDATE_DEVICE_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.server.telecom">
@@ -305,6 +306,7 @@ applications that come with the platform
         <!-- Needed for test only -->
         <permission name="android.permission.READ_PRECISE_PHONE_STATE" />
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+        <permission name="android.permission.READ_WIFI_CREDENTIAL"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.REGISTER_CALL_PROVIDER"/>
@@ -326,6 +328,7 @@ applications that come with the platform
         <permission name="android.permission.SUSPEND_APPS" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.STATUS_BAR_SERVICE"/>
@@ -342,6 +345,18 @@ applications that come with the platform
         <permission name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
         <!-- Permission required for Tethering CTS tests. -->
         <permission name="android.permission.TETHER_PRIVILEGED"/>
+        <!-- Permissions required for ganting and logging -->
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG" />
+        <!-- Permissions required to test ambient display. -->
+        <permission name="android.permission.READ_DREAM_STATE" />
+        <permission name="android.permission.WRITE_DREAM_STATE" />
+        <!-- Permission required to test lights control APIs. -->
+        <permission name="android.permission.CONTROL_DEVICE_LIGHTS" />
+        <permission name="android.permission.REBOOT"/>
+        <!-- Permission required for testing system audio effect APIs. -->
+        <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -360,13 +375,16 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.vpndialogs">
-        <permission name="android.permission.CONNECTIVITY_INTERNAL"/>
         <permission name="android.permission.CONTROL_VPN"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.dynsystem">
         <permission name="android.permission.REBOOT"/>
         <permission name="android.permission.MANAGE_DYNAMIC_SYSTEM"/>
+        <permission name="android.permission.READ_OEM_UNLOCK_STATE"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.settings">
+        <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
+    </privapp-permissions>
 </permissions>

@@ -16,6 +16,9 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -83,22 +86,6 @@ public class PanProfile implements LocalBluetoothProfile {
         return false;
     }
 
-    public boolean connect(BluetoothDevice device) {
-        if (mService == null) return false;
-        List<BluetoothDevice> sinks = mService.getConnectedDevices();
-        if (sinks != null) {
-            for (BluetoothDevice sink : sinks) {
-                mService.disconnect(sink);
-            }
-        }
-        return mService.connect(device);
-    }
-
-    public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
-        return mService.disconnect(device);
-    }
-
     public int getConnectionStatus(BluetoothDevice device) {
         if (mService == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -106,16 +93,36 @@ public class PanProfile implements LocalBluetoothProfile {
         return mService.getConnectionState(device);
     }
 
-    public boolean isPreferred(BluetoothDevice device) {
+    @Override
+    public boolean isEnabled(BluetoothDevice device) {
         return true;
     }
 
-    public int getPreferred(BluetoothDevice device) {
+    @Override
+    public int getConnectionPolicy(BluetoothDevice device) {
         return -1;
     }
 
-    public void setPreferred(BluetoothDevice device, boolean preferred) {
-        // ignore: isPreferred is always true for PAN
+    @Override
+    public boolean setEnabled(BluetoothDevice device, boolean enabled) {
+        boolean isEnabled = false;
+        if (mService == null) {
+            return false;
+        }
+
+        if (enabled) {
+            final List<BluetoothDevice> sinks = mService.getConnectedDevices();
+            if (sinks != null) {
+                for (BluetoothDevice sink : sinks) {
+                    mService.setConnectionPolicy(sink, CONNECTION_POLICY_FORBIDDEN);
+                }
+            }
+            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_ALLOWED);
+        } else {
+            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
+        }
+
+        return isEnabled;
     }
 
     public String toString() {

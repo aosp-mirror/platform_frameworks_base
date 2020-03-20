@@ -25,11 +25,6 @@ cc_defaults {
         // GCC false-positives on this warning, and since we -Werror that's
         // a problem
         "-Wno-free-nonheap-object",
-
-        // Clang is producing non-determistic binary when the new pass manager is
-        // enabled. Disable the new PM as a temporary workaround.
-        // b/142372146
-        "-fno-experimental-new-pass-manager",
     ],
 
     include_dirs: [

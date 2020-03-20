@@ -19,5 +19,3 @@ java_sdk_library {
     srcs: ["src/**/*.java"],
     api_packages: ["com.android.future.usb"],
 }
-
-subdirs = ["tests/*"]

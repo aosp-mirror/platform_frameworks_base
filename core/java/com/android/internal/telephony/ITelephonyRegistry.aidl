@@ -19,11 +19,15 @@ package com.android.internal.telephony;
 import android.content.Intent;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
-import android.os.Bundle;
+import android.telephony.BarringInfo;
 import android.telephony.CallQuality;
+import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
+import android.telephony.DisplayInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.PhoneCapability;
+import android.telephony.PhysicalChannelConfig;
+import android.telephony.PreciseDataConnectionState;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
@@ -31,16 +35,22 @@ import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 
 interface ITelephonyRegistry {
-    void addOnSubscriptionsChangedListener(String pkg,
+    void addOnSubscriptionsChangedListener(String pkg, String featureId,
             IOnSubscriptionsChangedListener callback);
-    void addOnOpportunisticSubscriptionsChangedListener(String pkg,
+    void addOnOpportunisticSubscriptionsChangedListener(String pkg, String featureId,
             IOnSubscriptionsChangedListener callback);
     void removeOnSubscriptionsChangedListener(String pkg,
             IOnSubscriptionsChangedListener callback);
+    /**
+      * @deprecated Use {@link #listenWithFeature(String, String, IPhoneStateListener, int,
+      * boolean) instead
+      */
     @UnsupportedAppUsage
     void listen(String pkg, IPhoneStateListener callback, int events, boolean notifyNow);
-    void listenForSubscriber(in int subId, String pkg, IPhoneStateListener callback, int events,
+    void listenWithFeature(String pkg, String featureId, IPhoneStateListener callback, int events,
             boolean notifyNow);
+    void listenForSubscriber(in int subId, String pkg, String featureId,
+            IPhoneStateListener callback, int events, boolean notifyNow);
     @UnsupportedAppUsage
     void notifyCallStateForAllSubs(int state, String incomingNumber);
     void notifyCallState(in int phoneId, in int subId, int state, String incomingNumber);
@@ -54,19 +64,14 @@ interface ITelephonyRegistry {
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void notifyDataActivity(int state);
     void notifyDataActivityForSubscriber(in int subId, int state);
-    void notifyDataConnection(int state, boolean isDataConnectivityPossible,
-            String apn, String apnType, in LinkProperties linkProperties,
-            in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
-    void notifyDataConnectionForSubscriber(int phoneId, int subId, int state,
-            boolean isDataConnectivityPossible,
-            String apn, String apnType, in LinkProperties linkProperties,
-            in NetworkCapabilities networkCapabilities, int networkType, boolean roaming);
+    void notifyDataConnectionForSubscriber(
+            int phoneId, int subId, String apnType, in PreciseDataConnectionState preciseState);
     @UnsupportedAppUsage
     void notifyDataConnectionFailed(String apnType);
     void notifyDataConnectionFailedForSubscriber(int phoneId, int subId, String apnType);
-    @UnsupportedAppUsage(maxTargetSdk = 28)
-    void notifyCellLocation(in Bundle cellLocation);
-    void notifyCellLocationForSubscriber(in int subId, in Bundle cellLocation);
+    // Uses CellIdentity which is Parcelable here; will convert to CellLocation in client.
+    void notifyCellLocation(in CellIdentity cellLocation);
+    void notifyCellLocationForSubscriber(in int subId, in CellIdentity cellLocation);
     @UnsupportedAppUsage
     void notifyCellInfo(in List<CellInfo> cellInfo);
     void notifyPreciseCallState(int phoneId, int subId, int ringingCallState,
@@ -84,6 +89,7 @@ interface ITelephonyRegistry {
     void notifyOpportunisticSubscriptionInfoChanged();
     void notifyCarrierNetworkChange(in boolean active);
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
+    void notifyDisplayInfoChanged(int slotIndex, int subId, in DisplayInfo displayInfo);
     void notifyPhoneCapabilityChanged(in PhoneCapability capability);
     void notifyActiveDataSubIdChanged(int activeDataSubId);
     void notifyRadioPowerStateChanged(in int phoneId, in int subId, in int state);
@@ -95,4 +101,7 @@ interface ITelephonyRegistry {
     void notifyCallQualityChanged(in CallQuality callQuality, int phoneId, int subId,
             int callNetworkType);
     void notifyImsDisconnectCause(int subId, in ImsReasonInfo imsReasonInfo);
+    void notifyRegistrationFailed(int slotIndex, int subId, in CellIdentity cellIdentity,
+            String chosenPlmn, int domain, int causeCode, int additionalCauseCode);
+    void notifyBarringInfoChanged(int slotIndex, int subId, in BarringInfo barringInfo);
 }

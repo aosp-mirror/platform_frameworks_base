@@ -546,6 +546,60 @@
     <string name="enable_adb_summary">Debug mode when USB is connected</string>
     <!-- Setting title to revoke secure USB debugging authorizations -->
     <string name="clear_adb_keys">Revoke USB debugging authorizations</string>
+    <!-- [CHAR LIMIT=32] Setting title for ADB wireless switch -->
+    <string name="enable_adb_wireless">Wireless debugging</string>
+    <!-- [CHAR LIMIT=NONE] Setting checkbox summary for whether to enable Wireless debugging support on the phone -->
+    <string name="enable_adb_wireless_summary">Debug mode when Wi\u2011Fi is connected</string>
+    <!-- [CHAR LIMIT=32] Summary text when ADB wireless has error -->
+    <string name="adb_wireless_error">Error</string>
+    <!-- [CHAR LIMIT=32] Setting title for ADB wireless fragment -->
+    <string name="adb_wireless_settings">Wireless debugging</string>
+    <!-- [CHAR LIMIT=NONE] Wireless debugging settings. text displayed when wireless debugging is off and network list is empty. -->
+    <string name="adb_wireless_list_empty_off">To see and use available devices, turn on wireless debugging</string>
+    <!-- [CHAR LIMIT=50] Title for adb wireless pair by QR code preference -->
+    <string name="adb_pair_method_qrcode_title">Pair device with QR code</string>
+    <!-- [CHAR LIMIT=NONE] Summary for adb wireless pair by QR code preference -->
+    <string name="adb_pair_method_qrcode_summary">Pair new devices using QR code Scanner</string>
+    <!-- [CHAR LIMIT=50] Title for adb wireless pair by pairing code preference -->
+    <string name="adb_pair_method_code_title">Pair device with pairing code</string>
+    <!-- [CHAR LIMIT=NONE] Summary for adb wireless pair by pairing code preference -->
+    <string name="adb_pair_method_code_summary">Pair new devices using six digit code</string>
+    <!-- [CHAR LIMIT=50] Title for adb wireless paired devices category -->
+    <string name="adb_paired_devices_title">Paired devices</string>
+    <!-- [CHAR LIMIT=50] Summary for adb wireless paired device preference -->
+    <string name="adb_wireless_device_connected_summary">Currently connected</string>
+    <!-- [CHAR LIMIT=50] Title for the adb device details fragment -->
+    <string name="adb_wireless_device_details_title">Device details</string>
+    <!-- [CHAR LIMIT=16] Button label to forget an adb device -->
+    <string name="adb_device_forget">Forget</string>
+    <!-- [CHAR LIMIT=50] Title format for mac address preference in adb device details fragment -->
+    <string name="adb_device_fingerprint_title_format">Device fingerprint: <xliff:g id="fingerprint_param" example="a1:b2:c3:d4:e5:f6">%1$s</xliff:g></string>
+    <!-- [CHAR LIMIT=50] Title for adb wireless connection failed dialog -->
+    <string name="adb_wireless_connection_failed_title">Connection unsuccessful</string>
+    <!-- [CHAR LIMIT=NONE] Message for adb wireless connection failed dialog -->
+    <string name="adb_wireless_connection_failed_message">Make sure <xliff:g id="device_name" example="Bob's Macbook">%1$s</xliff:g> is connected to the correct network</string>
+    <!-- [CHAR LIMIT=32] Adb wireless pairing device dialog title -->
+    <string name="adb_pairing_device_dialog_title">Pair with device</string>
+    <!-- [CHAR LIMIT=32] Adb wireless pairing device dialog pairing code label -->
+    <string name="adb_pairing_device_dialog_pairing_code_label">Wi\u2011Fi pairing code</string>
+    <!-- [CHAR LIMIT=50] Adb Wireless pairing device failed dialog title -->
+    <string name="adb_pairing_device_dialog_failed_title">Pairing unsuccessful</string>
+    <!-- [CHAR LIMIT=NONE] Adb wireless pairing device failed dialog message -->
+    <string name="adb_pairing_device_dialog_failed_msg">Make sure the device is connected to the same network.</string>
+    <!-- [CHAR LIMIT=NONE] Adb wireless qr code scanner description -->
+    <string name="adb_wireless_qrcode_summary">Pair device over Wi\u2011Fi by scanning a QR code</string>
+    <!-- [CHAR LIMIT=NONE] Adb wireless QR code pairing in progress text -->
+    <string name="adb_wireless_verifying_qrcode_text">Pairing device\u2026</string>
+    <!-- [CHAR LIMIT=NONE] Adb wireless QR code failed message -->
+    <string name="adb_qrcode_pairing_device_failed_msg">Failed to pair the device. Either the QR code was incorrect, or the device is not connected to the same network.</string>
+    <!-- [CHAR LIMIT=50] Adb Wireless ip address and port title -->
+    <string name="adb_wireless_ip_addr_preference_title">IP address \u0026 Port</string>
+    <!-- [CHAR LIMIT=NONE] Adb Wireless QR code pairing scanner title -->
+    <string name="adb_wireless_qrcode_pairing_title">Scan QR code</string>
+    <!-- [CHAR LIMIT=NONE] Adb Wireless QR code pairing description -->
+    <string name="adb_wireless_qrcode_pairing_description">Pair device over Wi\u2011Fi by scanning a QR Code</string>
+    <!--Adb wireless search Keywords [CHAR LIMIT=NONE]-->
+    <string name="keywords_adb_wireless">adb, debug, dev</string>
     <!-- [CHAR LIMIT=NONE] Setting checkbox title for Whether to include bug report item in power menu. -->
     <string name="bugreport_in_power">Bug report shortcut</string>
     <!-- [CHAR LIMIT=NONE] Setting checkbox summary for Whether to include bug report item in power -->
@@ -596,6 +650,11 @@
     <string name="bluetooth_select_avrcp_version_string">Bluetooth AVRCP Version</string>
     <!-- UI debug setting: Select Bluetooth AVRCP Version -->
     <string name="bluetooth_select_avrcp_version_dialog_title">Select Bluetooth AVRCP Version</string>
+
+    <!-- UI debug setting: Select Bluetooth MAP Version [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_select_map_version_string">Bluetooth MAP Version</string>
+    <!-- UI debug setting: Select Bluetooth MAP Version [CHAR LIMIT=NONE] -->
+    <string name="bluetooth_select_map_version_dialog_title">Select Bluetooth MAP Version</string>
 
     <!-- UI debug setting: Trigger Bluetooth Audio Codec Selection -->
     <string name="bluetooth_select_a2dp_codec_type">Bluetooth Audio Codec</string>
@@ -672,6 +731,10 @@
     <string name="adb_warning_title">Allow USB debugging?</string>
     <!-- Warning text to user about the implications of enabling USB debugging -->
     <string name="adb_warning_message">USB debugging is intended for development purposes only. Use it to copy data between your computer and your device, install apps on your device without notification, and read log data.</string>
+    <!-- Title of warning dialog about the implications of enabling USB debugging [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_warning_title">Allow wireless debugging?</string>
+    <!-- Warning text to user about the implications of enabling USB debugging [CHAR LIMIT=NONE] -->
+    <string name="adbwifi_warning_message">Wireless debugging is intended for development purposes only. Use it to copy data between your computer and your device, install apps on your device without notification, and read log data.</string>
     <!-- Message of dialog confirming that user wants to revoke access to adb from all computers they have authorized -->
     <string name="adb_keys_warning_message">Revoke access to USB debugging from all computers you\u2019ve previously authorized?</string>
     <!-- Title of warning dialog about the implications of enabling developer settings -->

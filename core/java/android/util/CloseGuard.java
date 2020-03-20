@@ -26,7 +26,7 @@ import android.annotation.NonNull;
  * A simple example: <pre>   {@code
  *   class Foo {
  *
- *       private final CloseGuard guard = CloseGuard.get();
+ *       private final CloseGuard guard = new CloseGuard();
  *
  *       ...
  *
@@ -64,7 +64,7 @@ import android.annotation.NonNull;
  * be deferred. For example: <pre>   {@code
  *   class Bar {
  *
- *       private final CloseGuard guard = CloseGuard.get();
+ *       private final CloseGuard guard = new CloseGuard();
  *
  *       ...
  *

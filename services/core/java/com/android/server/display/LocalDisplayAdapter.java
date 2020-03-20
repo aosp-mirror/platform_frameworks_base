@@ -38,8 +38,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 
 import com.android.server.LocalServices;
-import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.lights.LogicalLight;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -160,7 +160,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private final class LocalDisplayDevice extends DisplayDevice {
         private final long mPhysicalDisplayId;
-        private final Light mBacklight;
+        private final LogicalLight mBacklight;
         private final SparseArray<DisplayModeRecord> mSupportedModes = new SparseArray<>();
         private final ArrayList<Integer> mSupportedColorModes = new ArrayList<>();
         private final boolean mIsInternal;

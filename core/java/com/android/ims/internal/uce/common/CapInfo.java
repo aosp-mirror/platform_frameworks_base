@@ -16,10 +16,9 @@
 
 package com.android.ims.internal.uce.common;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /** Class for capability discovery information.
  *  @hide */
@@ -65,6 +64,24 @@ public class CapInfo implements Parcelable {
     private boolean mRcsIpVideoCallSupported = false;
     /** RCS IP Video call support .  */
     private boolean mRcsIpVideoOnlyCallSupported = false;
+    /** IP Geo location Push using SMS. */
+    private boolean mGeoSmsSupported = false;
+    /** RCS call composer support. */
+    private boolean mCallComposerSupported = false;
+    /** RCS post-call support. */
+    private boolean mPostCallSupported = false;
+    /** Shared map support. */
+    private boolean mSharedMapSupported = false;
+    /** Shared Sketch supported. */
+    private boolean mSharedSketchSupported = false;
+    /** Chatbot communication support. */
+    private boolean mChatbotSupported = false;
+    /** Chatbot role support. */
+    private boolean mChatbotRoleSupported = false;
+    /** Standalone Chatbot communication support. */
+    private boolean mSmChatbotSupported = false;
+    /** MMtel based call composer support. */
+    private boolean mMmtelCallComposerSupported = false;
     /** List of supported extensions. */
     private String[] mExts = new String[10];
     /** Time used to compute when to query again. */
@@ -387,6 +404,132 @@ public class CapInfo implements Parcelable {
         this.mRcsIpVideoOnlyCallSupported = rcsIpVideoOnlyCallSupported;
     }
 
+    /**
+     * Checks whether Geo Push via SMS is supported.
+     */
+    public boolean isGeoSmsSupported() {
+        return mGeoSmsSupported;
+    }
+
+    /**
+     * Sets Geolocation Push via SMS as supported or not supported.
+     */
+    public void setGeoSmsSupported(boolean geoSmsSupported) {
+         this.mGeoSmsSupported = geoSmsSupported;
+    }
+
+    /**
+     * Checks whether RCS call composer is supported.
+     */
+    public boolean isCallComposerSupported() {
+        return mCallComposerSupported;
+    }
+
+    /**
+     * Sets call composer as supported or not supported.
+     */
+    public void setCallComposerSupported(boolean callComposerSupported) {
+        this.mCallComposerSupported = callComposerSupported;
+    }
+
+    /**
+     * Checks whether post call is supported.
+     */
+    public boolean isPostCallSupported(){
+        return mPostCallSupported;
+    }
+
+    /**
+     * Sets post call as supported or not supported.
+     */
+     public void setPostCallSupported(boolean postCallSupported) {
+         this.mPostCallSupported = postCallSupported;
+     }
+
+    /**
+     * Checks whether shared map is supported.
+     */
+    public boolean isSharedMapSupported() {
+        return mSharedMapSupported;
+    }
+
+    /**
+     * Sets shared map as supported or not supported.
+     */
+    public void setSharedMapSupported(boolean sharedMapSupported) {
+        this.mSharedMapSupported = sharedMapSupported;
+    }
+
+    /**
+     * Checks whether shared sketch is supported.
+     */
+    public boolean isSharedSketchSupported() {
+        return mSharedSketchSupported;
+    }
+
+    /**
+     * Sets shared sketch as supported or not supported.
+     */
+    public void setSharedSketchSupported(boolean sharedSketchSupported) {
+        this.mSharedSketchSupported = sharedSketchSupported;
+    }
+
+    /**
+     * Checks whether chatbot communication is supported.
+     */
+    public boolean isChatbotSupported() {
+        return mChatbotSupported;
+    }
+
+    /**
+     * Sets chatbot communication as supported or not supported.
+     */
+    public void setChatbotSupported(boolean chatbotSupported) {
+        this.mChatbotSupported = chatbotSupported;
+    }
+
+    /**
+     * Checks whether chatbot role is supported.
+     */
+    public boolean isChatbotRoleSupported() {
+        return mChatbotRoleSupported;
+    }
+
+    /**
+     * Sets chatbot role as supported or not supported.
+     */
+    public void setChatbotRoleSupported(boolean chatbotRoleSupported) {
+        this.mChatbotRoleSupported = chatbotRoleSupported;
+    }
+
+    /**
+     * Checks whether standalone chatbot communication is supported.
+     */
+    public boolean isSmChatbotSupported() {
+        return mSmChatbotSupported;
+    }
+
+    /**
+     * Sets standalone chatbot communication as supported or not supported.
+     */
+    public void setSmChatbotSupported(boolean smChatbotSupported) {
+        this.mSmChatbotSupported = smChatbotSupported;
+    }
+
+    /**
+     * Checks whether Mmtel based call composer is supported.
+     */
+    public boolean isMmtelCallComposerSupported() {
+        return mMmtelCallComposerSupported;
+    }
+
+    /**
+     * Sets Mmtel based call composer as supported or not supported.
+     */
+    public void setMmtelCallComposerSupported(boolean mmtelCallComposerSupported) {
+        this.mMmtelCallComposerSupported = mmtelCallComposerSupported;
+    }
+
     /** Gets the list of supported extensions. */
     public String[] getExts() {
         return mExts;
@@ -435,6 +578,15 @@ public class CapInfo implements Parcelable {
         dest.writeInt(mGeoPushSupported ? 1 : 0);
         dest.writeInt(mSmSupported ? 1 : 0);
         dest.writeInt(mFullSnFGroupChatSupported ? 1 : 0);
+        dest.writeInt(mGeoSmsSupported ? 1 : 0);
+        dest.writeInt(mCallComposerSupported ? 1 : 0);
+        dest.writeInt(mPostCallSupported ? 1 : 0);
+        dest.writeInt(mSharedMapSupported ? 1 : 0);
+        dest.writeInt(mSharedSketchSupported ? 1 : 0);
+        dest.writeInt(mChatbotSupported ? 1 : 0);
+        dest.writeInt(mChatbotRoleSupported ? 1 : 0);
+        dest.writeInt(mSmChatbotSupported ? 1 : 0);
+        dest.writeInt(mMmtelCallComposerSupported ? 1 : 0);
 
         dest.writeInt(mRcsIpVoiceCallSupported ? 1 : 0);
         dest.writeInt(mRcsIpVideoCallSupported ? 1 : 0);
@@ -477,6 +629,15 @@ public class CapInfo implements Parcelable {
         mGeoPushSupported = (source.readInt() == 0) ? false : true;
         mSmSupported = (source.readInt() == 0) ? false : true;
         mFullSnFGroupChatSupported = (source.readInt() == 0) ? false : true;
+        mGeoSmsSupported = (source.readInt() == 0) ? false : true;
+        mCallComposerSupported = (source.readInt() == 0) ? false : true;
+        mPostCallSupported = (source.readInt() == 0) ? false : true;
+        mSharedMapSupported = (source.readInt() == 0) ? false : true;
+        mSharedSketchSupported = (source.readInt() == 0) ? false : true;
+        mChatbotSupported = (source.readInt() == 0) ? false : true;
+        mChatbotRoleSupported = (source.readInt() == 0) ? false : true;
+        mSmChatbotSupported = (source.readInt() == 0) ? false : true;
+        mMmtelCallComposerSupported = (source.readInt() == 0) ? false : true;
 
         mRcsIpVoiceCallSupported = (source.readInt() == 0) ? false : true;
         mRcsIpVideoCallSupported = (source.readInt() == 0) ? false : true;

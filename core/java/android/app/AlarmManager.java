@@ -21,7 +21,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -35,7 +35,7 @@ import android.util.ArrayMap;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
-import libcore.timezone.ZoneInfoDB;
+import libcore.timezone.ZoneInfoDb;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -1000,7 +1000,7 @@ public class AlarmManager {
         if (mTargetSdkVersion >= Build.VERSION_CODES.M) {
             boolean hasTimeZone = false;
             try {
-                hasTimeZone = ZoneInfoDB.getInstance().hasTimeZone(timeZone);
+                hasTimeZone = ZoneInfoDb.getInstance().hasTimeZone(timeZone);
             } catch (IOException ignored) {
             }
 

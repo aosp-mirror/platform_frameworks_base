@@ -17,13 +17,14 @@
 package com.android.systemui.statusbar.policy;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_NONE;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
 import static android.telephony.PhoneStateListener.LISTEN_ACTIVE_DATA_SUBSCRIPTION_ID_CHANGE;
+import static android.telephony.TelephonyManager.MODEM_COUNT_DUAL_MODEM;
 
-import static com.android.internal.telephony.PhoneConstants.MAX_PHONE_COUNT_DUAL_SIM;
 import static com.android.systemui.Dependency.BG_LOOPER_NAME;
 
 import android.content.BroadcastReceiver;
@@ -51,14 +52,12 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.ConfigurationChangedReceiver;
@@ -67,7 +66,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
-import com.android.systemui.statusbar.policy.MobileSignalController.MobileIconGroup;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -75,10 +73,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -165,6 +161,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     ServiceState mLastServiceState;
     private boolean mUserSetup;
     private boolean mSimDetected;
+    private boolean mForceCellularValidated;
 
     /**
      * Construct this controller object and register for updates.
@@ -280,10 +277,39 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mPhoneStateListener = new PhoneStateListener(bgLooper) {
             @Override
             public void onActiveDataSubscriptionIdChanged(int subId) {
+                // For data switching from A to B, we assume B is validated for up to 2 seconds iff:
+                // 1) A and B are in the same subscription group e.g. CBRS data switch. And
+                // 2) A was validated before the switch.
+                // This is to provide smooth transition for UI without showing cross during data
+                // switch.
+                if (keepCellularValidationBitInSwitch(mActiveMobileDataSubscription, subId)) {
+                    if (DEBUG) Log.d(TAG, ": mForceCellularValidated to true.");
+                    mForceCellularValidated = true;
+                    mReceiverHandler.removeCallbacks(mClearForceValidated);
+                    mReceiverHandler.postDelayed(mClearForceValidated, 2000);
+                }
                 mActiveMobileDataSubscription = subId;
                 doUpdateMobileControllers();
             }
         };
+    }
+
+    private final Runnable mClearForceValidated = () -> {
+        if (DEBUG) Log.d(TAG, ": mClearForceValidated");
+        mForceCellularValidated = false;
+        updateConnectivity();
+    };
+
+    boolean isInGroupDataSwitch(int subId1, int subId2) {
+        SubscriptionInfo info1 = mSubscriptionManager.getActiveSubscriptionInfo(subId1);
+        SubscriptionInfo info2 = mSubscriptionManager.getActiveSubscriptionInfo(subId2);
+        return (info1 != null && info2 != null && info1.getGroupUuid() != null
+            && info1.getGroupUuid().equals(info2.getGroupUuid()));
+    }
+
+    boolean keepCellularValidationBitInSwitch(int sourceSubId, int destSubId) {
+        return mValidatedTransports.get(TRANSPORT_CELLULAR)
+                && isInGroupDataSwitch(sourceSubId, destSubId);
     }
 
     public DataSaverController getDataSaverController() {
@@ -517,7 +543,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 break;
             case TelephonyIntents.ACTION_SIM_STATE_CHANGED:
                 // Avoid rebroadcast because SysUI is direct boot aware.
-                if (intent.getBooleanExtra(TelephonyIntents.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
+                if (intent.getBooleanExtra(Intent.EXTRA_REBROADCAST_ON_UNLOCK, false)) {
                     break;
                 }
                 // Might have different subscriptions now.
@@ -536,7 +562,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 mReceiverHandler.post(this::handleConfigurationChanged);
                 break;
             default:
-                int subId = intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY,
+                int subId = intent.getIntExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX,
                         SubscriptionManager.INVALID_SUBSCRIPTION_ID);
                 if (SubscriptionManager.isValidSubscriptionId(subId)) {
                     if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
@@ -581,7 +607,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     }
 
     private void filterMobileSubscriptionInSameGroup(List<SubscriptionInfo> subscriptions) {
-        if (subscriptions.size() == MAX_PHONE_COUNT_DUAL_SIM) {
+        if (subscriptions.size() == MODEM_COUNT_DUAL_MODEM) {
             SubscriptionInfo info1 = subscriptions.get(0);
             SubscriptionInfo info2 = subscriptions.get(1);
             if (info1.getGroupUuid() != null && info1.getGroupUuid().equals(info2.getGroupUuid())) {
@@ -799,6 +825,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         }
 
+        if (mForceCellularValidated) mValidatedTransports.set(TRANSPORT_CELLULAR);
+
         if (CHATTY) {
             Log.d(TAG, "updateConnectivity: mConnectedTransports=" + mConnectedTransports);
             Log.d(TAG, "updateConnectivity: mValidatedTransports=" + mValidatedTransports);
@@ -848,12 +876,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.println(emergencyToString(mEmergencySource));
 
         pw.println("  - config ------");
-        pw.print("  patternOfCarrierSpecificDataIcon=");
-        pw.println(mConfig.patternOfCarrierSpecificDataIcon);
-        pw.print("  nr5GIconMap=");
-        pw.println(mConfig.nr5GIconMap.toString());
-        pw.print("  nrIconDisplayGracePeriodMs=");
-        pw.println(mConfig.nrIconDisplayGracePeriodMs);
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
             mobileSignalController.dump(pw);
@@ -1134,14 +1156,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     @VisibleForTesting
     static class Config {
-        static final int NR_CONNECTED_MMWAVE = 1;
-        static final int NR_CONNECTED = 2;
-        static final int NR_NOT_RESTRICTED_RRC_IDLE = 3;
-        static final int NR_NOT_RESTRICTED_RRC_CON = 4;
-        static final int NR_RESTRICTED = 5;
-
-        Map<Integer, MobileIconGroup> nr5GIconMap = new HashMap<>();
-
         boolean showAtLeast3G = false;
         boolean show4gFor3g = false;
         boolean alwaysShowCdmaRssi = false;
@@ -1150,22 +1164,6 @@ public class NetworkControllerImpl extends BroadcastReceiver
         boolean hspaDataDistinguishable;
         boolean inflateSignalStrengths = false;
         boolean alwaysShowDataRatIcon = false;
-        public String patternOfCarrierSpecificDataIcon = "";
-        public long nrIconDisplayGracePeriodMs;
-
-        /**
-         * Mapping from NR 5G status string to an integer. The NR 5G status string should match
-         * those in carrier config.
-         */
-        private static final Map<String, Integer> NR_STATUS_STRING_TO_INDEX;
-        static {
-            NR_STATUS_STRING_TO_INDEX = new HashMap<>(5);
-            NR_STATUS_STRING_TO_INDEX.put("connected_mmwave", NR_CONNECTED_MMWAVE);
-            NR_STATUS_STRING_TO_INDEX.put("connected", NR_CONNECTED);
-            NR_STATUS_STRING_TO_INDEX.put("not_restricted_rrc_idle", NR_NOT_RESTRICTED_RRC_IDLE);
-            NR_STATUS_STRING_TO_INDEX.put("not_restricted_rrc_con", NR_NOT_RESTRICTED_RRC_CON);
-            NR_STATUS_STRING_TO_INDEX.put("restricted", NR_RESTRICTED);
-        }
 
         static Config readConfig(Context context) {
             Config config = new Config();
@@ -1194,64 +1192,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
                         CarrierConfigManager.KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL);
                 config.hideLtePlus = b.getBoolean(
                         CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL);
-                config.patternOfCarrierSpecificDataIcon = b.getString(
-                        CarrierConfigManager.KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING);
-                String nr5GIconConfiguration =
-                        b.getString(CarrierConfigManager.KEY_5G_ICON_CONFIGURATION_STRING);
-                if (!TextUtils.isEmpty(nr5GIconConfiguration)) {
-                    String[] nr5GIconConfigPairs = nr5GIconConfiguration.trim().split(",");
-                    for (String pair : nr5GIconConfigPairs) {
-                        add5GIconMapping(pair, config);
-                    }
-                }
-                setDisplayGraceTime(
-                        b.getInt(CarrierConfigManager.KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT),
-                        config);
             }
 
             return config;
-        }
-
-        /**
-         * Add a mapping from NR 5G status to the 5G icon. All the icon resources come from
-         * {@link TelephonyIcons}.
-         *
-         * @param keyValuePair the NR 5G status and icon name separated by a colon.
-         * @param config container that used to store the parsed configs.
-         */
-        @VisibleForTesting
-        static void add5GIconMapping(String keyValuePair, Config config) {
-            String[] kv = (keyValuePair.trim().toLowerCase()).split(":");
-
-            if (kv.length != 2) {
-                if (DEBUG) Log.e(TAG, "Invalid 5G icon configuration, config = " + keyValuePair);
-                return;
-            }
-
-            String key = kv[0], value = kv[1];
-
-            // There is no icon config for the specific 5G status.
-            if (value.equals("none")) return;
-
-            if (NR_STATUS_STRING_TO_INDEX.containsKey(key)
-                    && TelephonyIcons.ICON_NAME_TO_ICON.containsKey(value)) {
-                config.nr5GIconMap.put(
-                        NR_STATUS_STRING_TO_INDEX.get(key),
-                        TelephonyIcons.ICON_NAME_TO_ICON.get(value));
-            }
-        }
-
-        /**
-         * Set display gracefully period time(MS) depend on carrierConfig KEY
-         * KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, and this function will convert to ms.
-         * {@link CarrierConfigManager}.
-         *
-         * @param time   showing 5G icon gracefully in the period of the time(SECOND)
-         * @param config container that used to store the parsed configs.
-         */
-        @VisibleForTesting
-        static void setDisplayGraceTime(int time, Config config) {
-            config.nrIconDisplayGracePeriodMs = time * DateUtils.SECOND_IN_MILLIS;
         }
     }
 }

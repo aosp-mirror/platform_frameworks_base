@@ -17,7 +17,8 @@
 package android.os;
 
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.util.ArrayList;
 
 /**

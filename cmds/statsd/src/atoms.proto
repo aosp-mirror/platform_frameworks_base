@@ -50,6 +50,7 @@ import "frameworks/base/core/proto/android/stats/intelligence/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/stats/location/location_enums.proto";
 import "frameworks/base/core/proto/android/stats/mediametrics/mediametrics.proto";
+import "frameworks/base/core/proto/android/stats/otaupdate/updateengine_enums.proto";
 import "frameworks/base/core/proto/android/stats/storage/storage_enums.proto";
 import "frameworks/base/core/proto/android/stats/style/style_enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
@@ -74,9 +75,9 @@ message Atom {
     // Pushed atoms start at 2.
     oneof pushed {
         // For StatsLog reasons, 1 is illegal and will not work. Must start at 2.
-        BleScanStateChanged ble_scan_state_changed = 2;
+        BleScanStateChanged ble_scan_state_changed = 2 [(log_from_module) = "bluetooth"];
         ProcessStateChanged process_state_changed = 3;
-        BleScanResultReceived ble_scan_result_received = 4;
+        BleScanResultReceived ble_scan_result_received = 4 [(log_from_module) = "bluetooth"];
         SensorStateChanged sensor_state_changed = 5;
         GpsScanStateChanged gps_scan_state_changed = 6;
         SyncStateChanged sync_state_changed = 7;
@@ -84,8 +85,8 @@ message Atom {
         ScreenBrightnessChanged screen_brightness_changed = 9;
         WakelockStateChanged wakelock_state_changed = 10;
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed = 11;
-        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12;
-        WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13;
+        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12 [(log_from_module) = "framework"];
+        WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13 [(log_from_module) = "framework"];
         ActivityManagerSleepStateChanged activity_manager_sleep_state_changed = 14;
         MemoryFactorStateChanged memory_factor_state_changed = 15;
         ExcessiveCpuUsageReported excessive_cpu_usage_reported = 16;
@@ -116,17 +117,17 @@ message Atom {
         SettingChanged setting_changed = 41;
         ActivityForegroundStateChanged activity_foreground_state_changed = 42;
         IsolatedUidChanged isolated_uid_changed = 43;
-        PacketWakeupOccurred packet_wakeup_occurred = 44;
+        PacketWakeupOccurred packet_wakeup_occurred = 44 [(log_from_module) = "framework"];
         WallClockTimeShifted wall_clock_time_shifted = 45;
         AnomalyDetected anomaly_detected = 46;
         AppBreadcrumbReported app_breadcrumb_reported = 47 [(allow_from_any_uid) = true];
         AppStartOccurred app_start_occurred = 48;
         AppStartCanceled app_start_canceled = 49;
         AppStartFullyDrawn app_start_fully_drawn = 50;
-        LmkKillOccurred lmk_kill_occurred = 51;
+        LmkKillOccurred lmk_kill_occurred = 51 [(log_from_module) = "lmkd"];
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
         WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
-        LmkStateChanged lmk_state_changed = 54;
+        LmkStateChanged lmk_state_changed = 54 [(log_from_module) = "lmkd"];
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         ShutdownSequenceReported shutdown_sequence_reported = 56;
         BootSequenceReported boot_sequence_reported = 57;
@@ -140,7 +141,8 @@ message Atom {
         AppDied app_died = 65;
         ResourceConfigurationChanged resource_configuration_changed = 66;
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
-        BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
+        BluetoothConnectionStateChanged bluetooth_connection_state_changed =
+                68 [(log_from_module) = "bluetooth"];
         GpsSignalQualityChanged gps_signal_quality_changed = 69;
         UsbConnectorStateChanged usb_connector_state_changed = 70;
         SpeakerImpedanceReported speaker_impedance_reported = 71;
@@ -215,9 +217,12 @@ message Atom {
         RescuePartyResetReported rescue_party_reset_reported = 122;
         SignedConfigReported signed_config_reported = 123;
         GnssNiEventReported gnss_ni_event_reported = 124;
-        BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event = 125;
-        BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed = 126;
-        BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed = 127;
+        BluetoothLinkLayerConnectionEvent bluetooth_link_layer_connection_event =
+                125 [(log_from_module) = "bluetooth"];
+        BluetoothAclConnectionStateChanged bluetooth_acl_connection_state_changed =
+                126 [(log_from_module) = "bluetooth"];
+        BluetoothScoConnectionStateChanged bluetooth_sco_connection_state_changed =
+                127 [(log_from_module) = "bluetooth"];
         AppDowngraded app_downgraded = 128;
         AppOptimizedAfterDowngraded app_optimized_after_downgraded = 129;
         LowStorageStateChanged low_storage_state_changed = 130;
@@ -241,23 +246,40 @@ message Atom {
         BiometricSystemHealthIssueDetected biometric_system_health_issue_detected = 148;
         BubbleUIChanged bubble_ui_changed = 149;
         ScheduledJobConstraintChanged scheduled_job_constraint_changed = 150;
-        BluetoothActiveDeviceChanged bluetooth_active_device_changed = 151;
-        BluetoothA2dpPlaybackStateChanged bluetooth_a2dp_playback_state_changed = 152;
-        BluetoothA2dpCodecConfigChanged bluetooth_a2dp_codec_config_changed = 153;
-        BluetoothA2dpCodecCapabilityChanged bluetooth_a2dp_codec_capability_changed = 154;
-        BluetoothA2dpAudioUnderrunReported bluetooth_a2dp_audio_underrun_reported = 155;
-        BluetoothA2dpAudioOverrunReported bluetooth_a2dp_audio_overrun_reported = 156;
-        BluetoothDeviceRssiReported bluetooth_device_rssi_reported = 157;
-        BluetoothDeviceFailedContactCounterReported bluetooth_device_failed_contact_counter_reported = 158;
-        BluetoothDeviceTxPowerLevelReported bluetooth_device_tx_power_level_reported = 159;
-        BluetoothHciTimeoutReported bluetooth_hci_timeout_reported = 160;
-        BluetoothQualityReportReported bluetooth_quality_report_reported = 161;
-        BluetoothDeviceInfoReported bluetooth_device_info_reported = 162;
-        BluetoothRemoteVersionInfoReported bluetooth_remote_version_info_reported = 163;
-        BluetoothSdpAttributeReported bluetooth_sdp_attribute_reported = 164;
-        BluetoothBondStateChanged bluetooth_bond_state_changed = 165;
-        BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported = 166;
-        BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported = 167;
+        BluetoothActiveDeviceChanged bluetooth_active_device_changed =
+                151 [(log_from_module) = "bluetooth"];
+        BluetoothA2dpPlaybackStateChanged bluetooth_a2dp_playback_state_changed =
+                152 [(log_from_module) = "bluetooth"];
+        BluetoothA2dpCodecConfigChanged bluetooth_a2dp_codec_config_changed =
+                153 [(log_from_module) = "bluetooth"];
+        BluetoothA2dpCodecCapabilityChanged bluetooth_a2dp_codec_capability_changed =
+                154 [(log_from_module) = "bluetooth"];
+        BluetoothA2dpAudioUnderrunReported bluetooth_a2dp_audio_underrun_reported =
+                155 [(log_from_module) = "bluetooth"];
+        BluetoothA2dpAudioOverrunReported bluetooth_a2dp_audio_overrun_reported =
+                156 [(log_from_module) = "bluetooth"];
+        BluetoothDeviceRssiReported bluetooth_device_rssi_reported =
+                157 [(log_from_module) = "bluetooth"];
+        BluetoothDeviceFailedContactCounterReported
+                bluetooth_device_failed_contact_counter_reported = 158 [(log_from_module) = "bluetooth"];
+        BluetoothDeviceTxPowerLevelReported bluetooth_device_tx_power_level_reported =
+                159 [(log_from_module) = "bluetooth"];
+        BluetoothHciTimeoutReported bluetooth_hci_timeout_reported =
+                160 [(log_from_module) = "bluetooth"];
+        BluetoothQualityReportReported bluetooth_quality_report_reported =
+                161 [(log_from_module) = "bluetooth"];
+        BluetoothDeviceInfoReported bluetooth_device_info_reported =
+                162 [(log_from_module) = "bluetooth"];
+        BluetoothRemoteVersionInfoReported bluetooth_remote_version_info_reported =
+                163 [(log_from_module) = "bluetooth"];
+        BluetoothSdpAttributeReported bluetooth_sdp_attribute_reported =
+                164 [(log_from_module) = "bluetooth"];
+        BluetoothBondStateChanged bluetooth_bond_state_changed =
+                165 [(log_from_module) = "bluetooth"];
+        BluetoothClassicPairingEventReported bluetooth_classic_pairing_event_reported =
+                166 [(log_from_module) = "bluetooth"];
+        BluetoothSmpPairingEventReported bluetooth_smp_pairing_event_reported =
+                167 [(log_from_module) = "bluetooth"];
         ScreenTimeoutExtensionReported screen_timeout_extension_reported = 168;
         ProcessStartTime process_start_time = 169;
         PermissionGrantRequestResultReported permission_grant_request_result_reported =
@@ -279,7 +301,8 @@ message Atom {
         BiometricEnrolled biometric_enrolled = 184;
         SystemServerWatchdogOccurred system_server_watchdog_occurred = 185;
         TombStoneOccurred tomb_stone_occurred = 186;
-        BluetoothClassOfDeviceReported bluetooth_class_of_device_reported = 187;
+        BluetoothClassOfDeviceReported bluetooth_class_of_device_reported =
+                187 [(log_from_module) = "bluetooth"];
         IntelligenceEventReported intelligence_event_reported =
             188 [(log_from_module) = "intelligence"];
         ThermalThrottlingSeverityStateChanged thermal_throttling_severity_state_changed = 189;
@@ -322,14 +345,23 @@ message Atom {
         ExclusionRectStateChanged exclusion_rect_state_changed = 223;
         BackGesture back_gesture_reported_reported = 224;
 
+        UpdateEngineUpdateAttemptReported update_engine_update_attempt_reported = 225;
+        UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
         AppCompatibilityChangeReported app_compatibility_change_reported =
             228 [(allow_from_any_uid) = true];
         PerfettoUploaded perfetto_uploaded =
             229 [(log_from_module) = "perfetto"];
+        VmsClientConnectionStateChanged vms_client_connection_state_changed = 230;
+        BootTimeEventDuration boot_time_event_duration_reported = 239;
+        BootTimeEventElapsedTime boot_time_event_elapsed_time_reported = 240;
+        BootTimeEventUtcTime boot_time_event_utc_time_reported = 241;
+        BootTimeEventErrorCode boot_time_event_error_code_reported = 242;
+        UserspaceRebootReported userspace_reboot_reported = 243 [(log_from_module) = "framework"];
+        SnapshotMergeReported snapshot_merge_reported = 255;
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10062
+    // Next: 10067
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -393,6 +425,8 @@ message Atom {
         CoolingDevice cooling_device = 10059;
         AppOps app_ops = 10060;
         ProcessSystemIonHeapSize process_system_ion_heap_size = 10061;
+        VmsClientStats vms_client_stats = 10065;
+        NotificationRemoteViews notification_remote_views = 10066;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -1689,6 +1723,19 @@ message WatchdogRollbackOccurred {
     optional string package_name = 2;
 
     optional int32 package_version_code = 3;
+
+    enum RollbackReasonType {
+        REASON_UNKNOWN = 0;
+        REASON_NATIVE_CRASH = 1;
+        REASON_EXPLICIT_HEALTH_CHECK = 2;
+        REASON_APP_CRASH = 3;
+        REASON_APP_NOT_RESPONDING = 4;
+    }
+    optional RollbackReasonType rollback_reason = 4;
+
+    // Set by RollbackPackageHealthObserver to be the package that is failing when a rollback
+    // is initiated. Empty if the package is unknown.
+    optional string failing_package_name = 5;
 }
 
 /**
@@ -3713,6 +3760,283 @@ message RoleRequestResultReported {
     optional Result result = 9;
 }
 
+/**
+ * Logs when a Vehicle Maps Service client's connection state has changed
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/stats/VmsClientLog.java
+ */
+message VmsClientConnectionStateChanged {
+    // The UID of the VMS client app
+    optional int32 uid = 1 [(is_uid) = true];
+
+    enum State {
+        UNKNOWN = 0;
+        // Attempting to connect to the client
+        CONNECTING = 1;
+        // Client connection established
+        CONNECTED = 2;
+        // Client connection closed unexpectedly
+        DISCONNECTED = 3;
+        // Client connection closed by VMS
+        TERMINATED = 4;
+        // Error establishing the client connection
+        CONNECTION_ERROR = 5;
+    }
+
+    optional State state  = 2;
+}
+
+/**
+ * Represents boot time event with duration in ms.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventDuration {
+    enum DurationEvent {
+        UNKNOWN = 0;
+        // Bootloader time excluding BOOTLOADER_UI_WAIT + boot complete time. Logged from bootstat.
+        ABSOLUTE_BOOT_TIME = 1;
+        // Bootloader's 1st stage execution time.
+        // Logged from bootstat.
+        BOOTLOADER_FIRST_STAGE_EXEC = 2;
+        // Bootloader's 1st stage loading time.
+        // Logged from bootstat.
+        BOOTLOADER_FIRST_STAGE_LOAD = 3;
+        // Bootloader's kernel loading time.
+        // Logged from bootstat.
+        BOOTLOADER_KERNEL_LOAD = 4;
+        // Bootloader's 2nd stage execution time.
+        // Logged from bootstat.
+        BOOTLOADER_SECOND_STAGE_EXEC = 5;
+        // Bootloader's 2nd stage loading time.
+        // Logged from bootstat.
+        BOOTLOADER_SECOND_STAGE_LOAD = 6;
+        // Duration for Bootloader to show unlocked device's warning UI. This should not happen
+        // for locked device.
+        // Logged from bootstat.
+        BOOTLOADER_UI_WAIT = 7;
+        // Total time spend in bootloader. This is the sum of all BOOTLOADER_* listed above.
+        // Logged from bootstat.
+        BOOTLOADER_TOTAL = 8;
+        // Shutdown duration inside init for the reboot before the current boot up.
+        // Logged from f/b/services/.../BootReceiver.java.
+        SHUTDOWN_DURATION = 9;
+        // Total time for mounting of disk devices during bootup.
+        // Logged from f/b/services/.../BootReceiver.java.
+        MOUNT_DEFAULT_DURATION = 10;
+        // Total time for early stage mounting of disk devices during bootup.
+        // Logged from f/b/services/.../BootReceiver.java.
+        MOUNT_EARLY_DURATION = 11;
+        // Total time for late stage mounting of disk devices during bootup.
+        // Logged from f/b/services/.../BootReceiver.java.
+        MOUNT_LATE_DURATION = 12;
+        // Average time to scan non-system app after OTA
+        // Logged from f/b/services/.../PackageManagerService.java
+        OTA_PACKAGE_MANAGER_INIT_TIME = 13;
+        // Time to initialize Package manager after OTA
+        // Logged from f/b/services/.../PackageManagerService.java
+        OTA_PACKAGE_MANAGER_DATA_APP_AVG_SCAN_TIME = 14;
+        // Time to scan all system app from Package manager after OTA
+        // Logged from f/b/services/.../PackageManagerService.java
+        OTA_PACKAGE_MANAGER_SYSTEM_APP_AVG_SCAN_TIME = 15;
+        // Init's total time for cold boot stage.
+        // Logged from bootstat.
+        COLDBOOT_WAIT = 16;
+        // Init's total time for initializing selinux.
+        // Logged from bootstat.
+        SELINUX_INIT = 17;
+        // Time since last factory reset.
+        // Logged from bootstat.
+        FACTORY_RESET_TIME_SINCE_RESET = 18;
+        // Init's total time spent for completing the 1st stage.
+        // Logged from bootstat.
+        ANDROID_INIT_STAGE_1 = 19;
+    }
+
+    // Type of the event.
+    optional DurationEvent event = 1;
+    // Duration of the event in ms.
+    optional int64 duration_millis = 2;
+}
+
+/**
+ * Represents the start of specific boot time event during bootup in ms. This is usually a time
+ * since boot-up.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventElapsedTime {
+    enum ElapsedTimeEvent {
+        UNKNOWN = 0;
+        // Time when init starts 1st stage. Logged from bootstat.
+        ANDROID_INIT_STAGE_1 = 1;
+        // Time when sys.boot_completed prop is set.
+        // Logged from bootstat.
+        BOOT_COMPLETE = 2;
+        // BOOT_COMPLETE for encrypted device.
+        BOOT_COMPLETE_ENCRYPTION = 3;
+        // BOOT_COMPLETE for device with no encryption.
+        BOOT_COMPLETE_NO_ENCRYPTION = 4;
+        // Adjusted BOOT_COMPLETE for encrypted device extracting decryption time.
+        BOOT_COMPLETE_POST_DECRYPT = 5;
+        // BOOT_COMPLETE after factory reset.
+        FACTORY_RESET_BOOT_COMPLETE = 6;
+        // BOOT_COMPLETE_NO_ENCRYPTION after factory reset.
+        FACTORY_RESET_BOOT_COMPLETE_NO_ENCRYPTION = 7;
+        // BOOT_COMPLETE_POST_DECRYPT after factory reset.
+        FACTORY_RESET_BOOT_COMPLETE_POST_DECRYPT = 8;
+        // BOOT_COMPLETE after OTA.
+        OTA_BOOT_COMPLETE = 9;
+        // BOOT_COMPLETE_NO_ENCRYPTION after OTA.
+        OTA_BOOT_COMPLETE_NO_ENCRYPTION = 10;
+        // BOOT_COMPLETE_POST_DECRYPT after OTA.
+        OTA_BOOT_COMPLETE_POST_DECRYPT = 11;
+        // Time when the system starts sending LOCKED_BOOT_COMPLETED broadcast.
+        // Logged from  f/b/services/.../UserController.java
+        FRAMEWORK_LOCKED_BOOT_COMPLETED = 12;
+        // Time when the system starts sending BOOT_COMPLETED broadcast.
+        // Logged from  f/b/services/.../UserController.java
+        FRAMEWORK_BOOT_COMPLETED = 13;
+        // Time when the package manager starts init.
+        // Logged from f/b/services/.../SystemServer.java
+        PACKAGE_MANAGER_INIT_START = 14;
+        // Time when package manager is ready
+        // Logged from f/b/services/.../SystemServer.java
+        PACKAGE_MANAGER_INIT_READY = 15;
+        // Represents the time when user has entered unlock credential for system with user pin.
+        // Logged from bootstat.
+        POST_DECRYPT = 16;
+        // Represents the start of zygote's init.
+        // Logged from zygote itself.
+        ZYGOTE_INIT_START = 17;
+        // Represents the start of secondary zygote's init.
+        // TODO: add logging to zygote
+        SECONDARY_ZYGOTE_INIT_START = 18;
+        // Represents the start of system server's init.
+        // Logged from f/b/services/.../SystemServer.java
+        SYSTEM_SERVER_INIT_START = 19;
+        // Represents the completion of system server's init.
+        // Logged from f/b/services/.../SystemServer.java
+        SYSTEM_SERVER_READY = 20;
+        // Represents the start of launcher during boot-up.
+        // TODO: add logging
+        LAUNCHER_START = 21;
+        // Represents the completion of launcher's initial rendering. User can use other apps from
+        // launcher from this point.
+        // TODO: add logging
+        LAUNCHER_SHOWN = 22;
+    }
+
+    // Type of the event.
+    optional ElapsedTimeEvent event = 1;
+    // Time since bootup for the event.
+    // It should be acquired from SystemClock elapsedRealtime() call or equivalent.
+    optional int64 time_millis = 2;
+}
+
+/**
+ * Boot time events with UTC time.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventUtcTime {
+    enum UtcTimeEvent {
+        UNKNOWN = 0;
+        // Time of the bootstat's marking of 1st boot after the last factory reset.
+        // Logged from bootstat.
+        FACTORY_RESET_RESET_TIME = 1;
+        // The time when bootstat records FACTORY_RESET_* events. This is close to
+        // BOOT_COMPLETE time for the current bootup.
+        // Logged from bootstat.
+        FACTORY_RESET_CURRENT_TIME = 2;
+        // DUplicate of FACTORY_RESET_RESET_TIME added for debugging purpose.
+        // Logged from bootstat.
+        FACTORY_RESET_RECORD_VALUE = 3;
+    }
+
+    // Type of the event.
+    optional UtcTimeEvent event = 1;
+    // UTC time for the event.
+    optional int64 utc_time_secs = 2;
+}
+
+/**
+ * Boot time events representing specific error code during bootup.
+ * Meaning of error code can be different per each event type.
+ *
+ * Logged from: bootstat and various system server components. Check each enums for details.
+ */
+message BootTimeEventErrorCode {
+    enum ErrorCodeEvent {
+        UNKNOWN = 0;
+        // Linux error code for time() call to get the current UTC time.
+        // Logged from bootstat.
+        FACTORY_RESET_CURRENT_TIME_FAILURE = 1;
+        // Represents UmountStat before the reboot for the current boot up. Error codes defined
+        // as UMOUNT_STAT_* from init/reboot.cpp.
+        // Logged from f/b/services/.../BootReceiver.java.
+        SHUTDOWN_UMOUNT_STAT = 2;
+        // Reprepsents fie system mounting error code of /data partition for the current boot.
+        // Error codes defined as combination of FsStatFlags from system/core/fs_mgr/fs_mgr.cpp.
+        // Logged from f/b/services/.../BootReceiver.java.
+        FS_MGR_FS_STAT_DATA_PARTITION = 3;
+    }
+
+    // Type of the event.
+    optional ErrorCodeEvent event = 1;
+    // error code defined per each event type.
+    // For example, this can have a value of FsStatFlags.FS_STAT_FULL_MOUNT_FAILED for the event of
+    // FS_MGR_FS_STAT.
+    optional int32 error_code = 2;
+}
+
+/**
+ * Collects Virtual A/B statistics related to the use of dm-snapshot performed
+ * after an OTA.
+ *
+ * Logged from:
+ *  - system/core/fs_mgr/libsnapshot/snapshot.cpp
+ *  - system/core/fs_mgr/libsnapshot/snapshotctl.cpp
+ */
+message SnapshotMergeReported {
+    // Keep in sync with
+    // system/core/fs_mgr/libsnapshot/android/snapshot/snapshot.proto
+    enum UpdateState {
+        // No update or merge is in progress.
+        NONE = 0;
+        // An update is applying; snapshots may already exist.
+        INITIATED = 1;
+        // An update is pending, but has not been successfully booted yet.
+        UNVERIFIED = 2;
+        // The kernel is merging in the background.
+        MERGING = 3;
+        // Post-merge cleanup steps could not be completed due to a transient
+        // error, but the next reboot will finish any pending operations.
+        MERGE_NEEDS_REBOOT = 4;
+        // Merging is complete, and needs to be acknowledged.
+        MERGE_COMPLETED = 5;
+        // Merging failed due to an unrecoverable error.
+        MERGE_FAILED = 6;
+        // The update was implicitly cancelled, either by a rollback or a flash
+        // operation via fastboot. This state can only be returned by WaitForMerge.
+        CANCELLED = 7;
+    };
+
+    // Status of the update after the merge attempts.
+    optional UpdateState final_state = 1;
+
+    // Time to complete a merge operation in milliseconds.
+    // A negative value corresponds to the case in which the merge operation
+    // was interrupted and resumed (e.g. in case of a system reboot during the
+    // merge).
+    optional int64 duration_millis = 2;
+
+    // Number of reboots that occurred after issuing and before completing the
+    // merge of all the snapshot devices.
+    optional int32 intermediate_reboots = 3;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
 //////////////////////////////////////////////////////////////////////
@@ -4725,6 +5049,24 @@ message ProcStats {
  */
 message ProcStatsPkgProc {
     optional ProcessStatsSectionProto proc_stats_section = 1;
+}
+
+// Next Tag: 2
+message PackageRemoteViewInfoProto {
+    optional string package_name = 1;
+    // add per-package additional info here (like channels)
+}
+
+// Next Tag: 2
+message NotificationRemoteViewsProto {
+    repeated PackageRemoteViewInfoProto package_remote_view_info = 1;
+}
+
+/**
+ * Pulled from NotificationManagerService.java
+ */
+message NotificationRemoteViews {
+    optional NotificationRemoteViewsProto notification_remote_views = 1;
 }
 
 message PowerProfileProto {
@@ -6234,7 +6576,8 @@ message DeviceIdentifierAccessDenied {
     optional bool is_preinstalled = 3;
 
     // True if the package is privileged.
-    optional bool is_priv_app = 4;
+    // Starting from Android 11, this boolean is not set and will always be false.
+    optional bool is_priv_app = 4 [deprecated = true];
 }
 
 /**
@@ -6858,7 +7201,6 @@ message AppCompatibilityChangeReported {
 
     // Where it was logged from.
     optional Source source = 4;
-
 }
 
 /**
@@ -6893,4 +7235,140 @@ message PerfettoUploaded {
     // UUID matching the one set inside the SystemInfo trace packet.
     optional int64 trace_uuid_lsb = 2;
     optional int64 trace_uuid_msb = 3;
+}
+
+/**
+ * Pulls client metrics on data transferred via Vehicle Maps Service.
+ * Metrics are keyed by uid + layer.
+ *
+ * Pulled from:
+ *   packages/services/Car/service/src/com/android/car/stats/CarStatsService.java
+ */
+message VmsClientStats {
+    // UID of the VMS client app
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // VMS layer definition
+    optional int32 layer_type = 2;
+    optional int32 layer_channel = 3;
+    optional int32 layer_version = 4;
+
+    // Bytes and packets sent by the client for the layer
+    optional int64 tx_bytes = 5;
+    optional int64 tx_packets = 6;
+
+    // Bytes and packets received by the client for the layer
+    optional int64 rx_bytes = 7;
+    optional int64 rx_packets = 8;
+
+    // Bytes and packets dropped due to client error
+    optional int64 dropped_bytes = 9;
+    optional int64 dropped_packets = 10;
+}
+
+/**
+ * Information about an OTA update attempt by update_engine.
+ * Logged from platform/system/update_engine/metrics_reporter_android.cc
+ */
+message UpdateEngineUpdateAttemptReported {
+    // The number of attempts for the update engine to apply a given payload.
+    optional int32 attempt_number = 1;
+
+    optional android.stats.otaupdate.PayloadType payload_type = 2;
+
+    // The total time in minutes for the update engine to apply a given payload.
+    // The time is calculated by calling clock_gettime() / CLOCK_BOOTTIME; and
+    // it's increased when the system is sleeping.
+    optional int32 duration_boottime_in_minutes = 3;
+
+    // The total time in minutes for the update engine to apply a given payload.
+    // The time is calculated by calling clock_gettime() / CLOCK_MONOTONIC_RAW;
+    // and it's not increased when the system is sleeping.
+    optional int32 duration_monotonic_in_minutes = 4;
+
+    // The size of the payload in MiBs.
+    optional int32 payload_size_mib = 5;
+
+    // The attempt result reported by the update engine for an OTA update.
+    optional android.stats.otaupdate.AttemptResult attempt_result = 6;
+
+    // The error code reported by the update engine after an OTA update attempt
+    // on A/B devices.
+    optional android.stats.otaupdate.ErrorCode error_code = 7;
+
+    // The build fingerprint of the source system. The value is read from a
+    // system property when the device takes the update. e.g.
+    // Android/aosp_sailfish/sailfish:10/QP1A.190425.004/5507117:userdebug/test-keys
+    optional string source_fingerprint = 8;
+}
+
+/**
+ * Information about all the attempts the device make before finishing the
+ * successful update.
+ * Logged from platform/system/update_engine/metrics_reporter_android.cc
+ */
+message UpdateEngineSuccessfulUpdateReported {
+    // The number of attempts for the update engine to apply the payload for a
+    // successful update.
+    optional int32 attempt_count = 1;
+
+    optional android.stats.otaupdate.PayloadType payload_type = 2;
+
+    optional int32 payload_size_mib = 3;
+
+    // The total number of bytes downloaded by update_engine since the last
+    // successful update.
+    optional int32 total_bytes_downloaded_mib = 4;
+
+    // The ratio in percentage of the over-downloaded bytes compared to the
+    // total bytes needed to successfully install the update. e.g. 200 if we
+    // download 200MiB in total for a 100MiB package.
+    optional int32 download_overhead_percentage = 5;
+
+    // The total time in minutes for the update engine to apply the payload for a
+    // successful update.
+    optional int32 total_duration_minutes = 6;
+
+    // The number of reboot of the device during a successful update.
+    optional int32 reboot_count = 7;
+}
+
+/*
+ * Logs userspace reboot outcome and duration.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/server/BootReceiver.java
+ */
+message UserspaceRebootReported {
+    // Possible outcomes of userspace reboot.
+    enum Outcome {
+        // Default value in case platform failed to determine the outcome.
+        OUTCOME_UNKNOWN = 0;
+        // Userspace reboot succeeded (i.e. boot completed without a fall back to hard reboot).
+        SUCCESS = 1;
+        // Userspace reboot shutdown sequence was aborted.
+        FAILED_SHUTDOWN_SEQUENCE_ABORTED = 2;
+        // Remounting userdata into checkpointing mode failed.
+        FAILED_USERDATA_REMOUNT = 3;
+        // Device didn't finish booting before timeout and userspace reboot watchdog issued a hard
+        // reboot.
+        FAILED_USERSPACE_REBOOT_WATCHDOG_TRIGGERED = 4;
+    }
+    // Outcome of userspace reboot. Always set.
+    optional Outcome outcome = 1;
+    // Duration of userspace reboot in case it has a successful outcome.
+    // Duration is measured as time between userspace reboot was initiated and until boot completed
+    // (e.g. sys.boot_completed=1).
+    optional int64 duration_millis = 2;
+    // State of primary user's (user0) credential encryption storage.
+    enum UserEncryptionState {
+        // Default value.
+        USER_ENCRYPTION_STATE_UNKNOWN = 0;
+        // Credential encrypted storage is unlocked.
+        UNLOCKED = 1;
+        // Credential encrypted storage is locked.
+        LOCKED = 2;
+    }
+    // State of primary user's encryption storage at the moment boot completed. Always set.
+    optional UserEncryptionState user_encryption_state = 3;
 }

@@ -17,9 +17,12 @@
 package android.net;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Annotation.NetworkType;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -150,10 +153,19 @@ public class NetworkInfo implements Parcelable {
     private boolean mIsRoaming;
 
     /**
-     * @hide
+     * Create a new instance of NetworkInfo.
+     *
+     * This may be useful for apps to write unit tests.
+     *
+     * @param type the legacy type of the network, as one of the ConnectivityManager.TYPE_*
+     *             constants.
+     * @param subtype the subtype if applicable, as one of the TelephonyManager.NETWORK_TYPE_*
+     *                constants.
+     * @param typeName a human-readable string for the network type, or an empty string or null.
+     * @param subtypeName a human-readable string for the subtype, or an empty string or null.
      */
-    @UnsupportedAppUsage
-    public NetworkInfo(int type, int subtype, String typeName, String subtypeName) {
+    public NetworkInfo(int type, @NetworkType int subtype,
+            @Nullable String typeName, @Nullable String subtypeName) {
         if (!ConnectivityManager.isNetworkTypeValid(type)
                 && type != ConnectivityManager.TYPE_NONE) {
             throw new IllegalArgumentException("Invalid network type: " + type);
@@ -462,17 +474,19 @@ public class NetworkInfo implements Parcelable {
 
     /**
      * Sets the fine-grained state of the network.
+     *
+     * This is only useful for testing.
+     *
      * @param detailedState the {@link DetailedState}.
      * @param reason a {@code String} indicating the reason for the state change,
      * if one was supplied. May be {@code null}.
      * @param extraInfo an optional {@code String} providing addditional network state
      * information passed up from the lower networking layers.
      * @deprecated Use {@link NetworkCapabilities} instead.
-     * @hide
      */
     @Deprecated
-    @UnsupportedAppUsage
-    public void setDetailedState(DetailedState detailedState, String reason, String extraInfo) {
+    public void setDetailedState(@NonNull DetailedState detailedState, @Nullable String reason,
+            @Nullable String extraInfo) {
         synchronized (this) {
             this.mDetailedState = detailedState;
             this.mState = stateMap.get(detailedState);
@@ -525,7 +539,7 @@ public class NetworkInfo implements Parcelable {
     @Override
     public String toString() {
         synchronized (this) {
-            StringBuilder builder = new StringBuilder("[");
+            final StringBuilder builder = new StringBuilder("[");
             builder.append("type: ").append(getTypeName()).append("[").append(getSubtypeName()).
             append("], state: ").append(mState).append("/").append(mDetailedState).
             append(", reason: ").append(mReason == null ? "(unspecified)" : mReason).
@@ -534,6 +548,32 @@ public class NetworkInfo implements Parcelable {
             append(", available: ").append(mIsAvailable).
             append(", roaming: ").append(mIsRoaming).
             append("]");
+            return builder.toString();
+        }
+    }
+
+    /**
+     * Returns a brief summary string suitable for debugging.
+     * @hide
+     */
+    public String toShortString() {
+        synchronized (this) {
+            final StringBuilder builder = new StringBuilder();
+            builder.append(getTypeName());
+
+            final String subtype = getSubtypeName();
+            if (!TextUtils.isEmpty(subtype)) {
+                builder.append("[").append(subtype).append("]");
+            }
+
+            builder.append(" ");
+            builder.append(mDetailedState);
+            if (mIsRoaming) {
+                builder.append(" ROAMING");
+            }
+            if (mExtraInfo != null) {
+                builder.append(" extra: ").append(mExtraInfo);
+            }
             return builder.toString();
         }
     }

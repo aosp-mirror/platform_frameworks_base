@@ -21,7 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,10 +30,11 @@ import android.os.Parcelable;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.AccessNetworkConstants.TransportType;
 import android.telephony.Annotation.NetworkType;
-import android.telephony.Annotation.RilRadioTechnology;
 import android.telephony.NetworkRegistrationInfo.Domain;
 import android.telephony.NetworkRegistrationInfo.NRState;
 import android.text.TextUtils;
+
+import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -65,6 +66,13 @@ public class ServiceState implements Parcelable {
     static final boolean DBG = false;
     static final boolean VDBG = false;  // STOPSHIP if true
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "STATE_",
+            value = {STATE_IN_SERVICE, STATE_OUT_OF_SERVICE, STATE_EMERGENCY_ONLY,
+                    STATE_POWER_OFF})
+    public @interface RegState {}
+
     /**
      * Normal operation condition, the phone is registered
      * with an operator either in home network or in roaming.
@@ -83,6 +91,7 @@ public class ServiceState implements Parcelable {
     /**
      * The phone is registered and locked.  Only emergency numbers are allowed. {@more}
      */
+    //TODO: This state is not used anymore. It should be deprecated in a future release.
     public static final int STATE_EMERGENCY_ONLY =
             TelephonyProtoEnums.SERVICE_STATE_EMERGENCY_ONLY;  // 2
 
@@ -221,6 +230,36 @@ public class ServiceState implements Parcelable {
     public static final int  RIL_RADIO_TECHNOLOGY_NR = 20;
 
     /**
+     * RIL Radio Annotation
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RIL_RADIO_TECHNOLOGY_" }, value = {
+        ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN,
+        ServiceState.RIL_RADIO_TECHNOLOGY_GPRS,
+        ServiceState.RIL_RADIO_TECHNOLOGY_EDGE,
+        ServiceState.RIL_RADIO_TECHNOLOGY_UMTS,
+        ServiceState.RIL_RADIO_TECHNOLOGY_IS95A,
+        ServiceState.RIL_RADIO_TECHNOLOGY_IS95B,
+        ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT,
+        ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0,
+        ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A,
+        ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA,
+        ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA,
+        ServiceState.RIL_RADIO_TECHNOLOGY_HSPA,
+        ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B,
+        ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD,
+        ServiceState.RIL_RADIO_TECHNOLOGY_LTE,
+        ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP,
+        ServiceState.RIL_RADIO_TECHNOLOGY_GSM,
+        ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA,
+        ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN,
+        ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA,
+        ServiceState.RIL_RADIO_TECHNOLOGY_NR})
+    public @interface RilRadioTechnology {}
+
+
+    /**
      * The number of the radio technologies.
      */
     private static final int NEXT_RIL_RADIO_TECHNOLOGY = 21;
@@ -278,6 +317,14 @@ public class ServiceState implements Parcelable {
      */
     public static final int UNKNOWN_ID = -1;
 
+    /**
+     * A parcelable extra used with {@link Intent#ACTION_SERVICE_STATE} representing the service
+     * state.
+     * @hide
+     */
+    private static final String EXTRA_SERVICE_STATE = "android.intent.extra.SERVICE_STATE";
+
+
     private String mOperatorAlphaLong;
     private String mOperatorAlphaShort;
     private String mOperatorNumeric;
@@ -314,6 +361,7 @@ public class ServiceState implements Parcelable {
 
     private String mOperatorAlphaLongRaw;
     private String mOperatorAlphaShortRaw;
+    private boolean mIsDataRoamingFromRegistration;
     private boolean mIsIwlanPreferred;
 
     /**
@@ -342,15 +390,15 @@ public class ServiceState implements Parcelable {
     /**
      * Create a new ServiceState from a intent notifier Bundle
      *
-     * This method is used by PhoneStateIntentReceiver, CellBroadcastReceiver, and maybe by
-     * external applications.
+     * This method is used to get ServiceState object from extras upon receiving
+     * {@link Intent#ACTION_SERVICE_STATE}.
      *
      * @param m Bundle from intent notifier
      * @return newly created ServiceState
      * @hide
      */
+    @SystemApi
     @NonNull
-    @UnsupportedAppUsage
     public static ServiceState newFromBundle(@NonNull Bundle m) {
         ServiceState ret;
         ret = new ServiceState();
@@ -399,6 +447,7 @@ public class ServiceState implements Parcelable {
         mNrFrequencyRange = s.mNrFrequencyRange;
         mOperatorAlphaLongRaw = s.mOperatorAlphaLongRaw;
         mOperatorAlphaShortRaw = s.mOperatorAlphaShortRaw;
+        mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
         mIsIwlanPreferred = s.mIsIwlanPreferred;
     }
 
@@ -433,6 +482,7 @@ public class ServiceState implements Parcelable {
         mNrFrequencyRange = in.readInt();
         mOperatorAlphaLongRaw = in.readString();
         mOperatorAlphaShortRaw = in.readString();
+        mIsDataRoamingFromRegistration = in.readBoolean();
         mIsIwlanPreferred = in.readBoolean();
     }
 
@@ -460,6 +510,7 @@ public class ServiceState implements Parcelable {
         out.writeInt(mNrFrequencyRange);
         out.writeString(mOperatorAlphaLongRaw);
         out.writeString(mOperatorAlphaShortRaw);
+        out.writeBoolean(mIsDataRoamingFromRegistration);
         out.writeBoolean(mIsIwlanPreferred);
     }
 
@@ -501,18 +552,36 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current data service state
+     * Get current data registration state.
      *
      * @see #STATE_IN_SERVICE
      * @see #STATE_OUT_OF_SERVICE
      * @see #STATE_EMERGENCY_ONLY
      * @see #STATE_POWER_OFF
      *
+     * @return current data registration state
+     *
      * @hide
      */
     @UnsupportedAppUsage
     public int getDataRegState() {
         return mDataRegState;
+    }
+
+    /**
+     * Get current data registration state.
+     *
+     * @see #STATE_IN_SERVICE
+     * @see #STATE_OUT_OF_SERVICE
+     * @see #STATE_EMERGENCY_ONLY
+     * @see #STATE_POWER_OFF
+     *
+     * @return current data registration state
+     *
+     * @hide
+     */
+    public @RegState int getDataRegistrationState() {
+        return getDataRegState();
     }
 
     /**
@@ -526,8 +595,8 @@ public class ServiceState implements Parcelable {
      */
     @DuplexMode
     public int getDuplexMode() {
-        // only support LTE duplex mode
-        if (!isLte(getRilDataRadioTechnology())) {
+        // support LTE/NR duplex mode
+        if (!isPsOnlyTech(getRilDataRadioTechnology())) {
             return DUPLEX_MODE_UNKNOWN;
         }
 
@@ -591,7 +660,9 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get current data network roaming type
+     * Get whether the current data network is roaming.
+     * This value may be overwritten by resource overlay or carrier configuration.
+     * @see #getDataRoamingFromRegistration() to get the value from the network registration.
      * @return roaming type
      * @hide
      */
@@ -601,18 +672,25 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get whether data network registration state is roaming
+     * Set whether the data network registration state is roaming.
+     * This should only be set to the roaming value received
+     * once the data registration phase has completed.
+     * @hide
+     */
+    public void setDataRoamingFromRegistration(boolean dataRoaming) {
+        mIsDataRoamingFromRegistration = dataRoaming;
+    }
+
+    /**
+     * Get whether data network registration state is roaming.
+     * This value is set directly from the modem and will not be overwritten
+     * by resource overlay or carrier configuration.
      * @return true if registration indicates roaming, false otherwise
      * @hide
      */
+    @SystemApi
     public boolean getDataRoamingFromRegistration() {
-        final NetworkRegistrationInfo regState = getNetworkRegistrationInfo(
-                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
-        if (regState != null) {
-            return regState.getRegistrationState()
-                    == NetworkRegistrationInfo.REGISTRATION_STATE_ROAMING;
-        }
-        return false;
+        return mIsDataRoamingFromRegistration;
     }
 
     /**
@@ -815,6 +893,7 @@ public class ServiceState implements Parcelable {
                     mNrFrequencyRange,
                     mOperatorAlphaLongRaw,
                     mOperatorAlphaShortRaw,
+                    mIsDataRoamingFromRegistration,
                     mIsIwlanPreferred);
         }
     }
@@ -845,6 +924,7 @@ public class ServiceState implements Parcelable {
                     && mNetworkRegistrationInfos.size() == s.mNetworkRegistrationInfos.size()
                     && mNetworkRegistrationInfos.containsAll(s.mNetworkRegistrationInfos)
                     && mNrFrequencyRange == s.mNrFrequencyRange
+                    && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration
                     && mIsIwlanPreferred == s.mIsIwlanPreferred;
         }
     }
@@ -1004,6 +1084,8 @@ public class ServiceState implements Parcelable {
                     .append(", mNrFrequencyRange=").append(mNrFrequencyRange)
                     .append(", mOperatorAlphaLongRaw=").append(mOperatorAlphaLongRaw)
                     .append(", mOperatorAlphaShortRaw=").append(mOperatorAlphaShortRaw)
+                    .append(", mIsDataRoamingFromRegistration=")
+                    .append(mIsDataRoamingFromRegistration)
                     .append(", mIsIwlanPreferred=").append(mIsIwlanPreferred)
                     .append("}").toString();
         }
@@ -1044,6 +1126,7 @@ public class ServiceState implements Parcelable {
         }
         mOperatorAlphaLongRaw = null;
         mOperatorAlphaShortRaw = null;
+        mIsDataRoamingFromRegistration = false;
         mIsIwlanPreferred = false;
     }
 
@@ -1216,7 +1299,7 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
-        ServiceState ssFromBundle = m.getParcelable(Intent.EXTRA_SERVICE_STATE);
+        ServiceState ssFromBundle = m.getParcelable(EXTRA_SERVICE_STATE);
         if (ssFromBundle != null) {
             copyFrom(ssFromBundle);
         }
@@ -1225,12 +1308,16 @@ public class ServiceState implements Parcelable {
     /**
      * Set intent notifier Bundle based on service state.
      *
+     * Put ServiceState object and its fields into bundle which is used by TelephonyRegistry
+     * to broadcast {@link Intent#ACTION_SERVICE_STATE}.
+     *
      * @param m intent notifier Bundle
      * @hide
+     *
      */
-    @UnsupportedAppUsage
-    public void fillInNotifierBundle(Bundle m) {
-        m.putParcelable(Intent.EXTRA_SERVICE_STATE, this);
+    @SystemApi
+    public void fillInNotifierBundle(@NonNull Bundle m) {
+        m.putParcelable(EXTRA_SERVICE_STATE, this);
         // serviceState already consists of below entries.
         // for backward compatibility, we continue fill in below entries.
         m.putInt("voiceRegState", mVoiceRegState);
@@ -1323,6 +1410,7 @@ public class ServiceState implements Parcelable {
             DataSpecificRegistrationInfo dsri = nri.getDataSpecificInfo();
             if (dsri != null) {
                 dsri.setIsUsingCarrierAggregation(ca);
+                addNetworkRegistrationInfo(nri);
             }
         }
     }
@@ -1408,7 +1496,15 @@ public class ServiceState implements Parcelable {
         return getRilDataRadioTechnology();
     }
 
-    /** @hide */
+    /**
+     * Transform RIL radio technology {@link RilRadioTechnology} value to Network
+     * type {@link NetworkType}.
+     *
+     * @param rat The RIL radio technology {@link RilRadioTechnology}.
+     * @return The network type {@link NetworkType}.
+     *
+     * @hide
+     */
     public static int rilRadioTechnologyToNetworkType(@RilRadioTechnology int rat) {
         switch(rat) {
             case RIL_RADIO_TECHNOLOGY_GPRS:
@@ -1490,7 +1586,15 @@ public class ServiceState implements Parcelable {
         }
     }
 
-    /** @hide */
+    /**
+     * Transform network type {@link NetworkType} value to RIL radio technology
+     * {@link RilRadioTechnology}.
+     *
+     * @param networkType The network type {@link NetworkType}.
+     * @return The RIL radio technology {@link RilRadioTechnology}.
+     *
+     * @hide
+     */
     public static int networkTypeToRilRadioTechnology(int networkType) {
         switch(networkType) {
             case TelephonyManager.NETWORK_TYPE_GPRS:
@@ -1546,7 +1650,8 @@ public class ServiceState implements Parcelable {
      * @return Current data network type
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @SystemApi
+    @TestApi
     public @NetworkType int getDataNetworkType() {
         final NetworkRegistrationInfo iwlanRegInfo = getNetworkRegistrationInfo(
                 NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
@@ -1639,9 +1744,10 @@ public class ServiceState implements Parcelable {
     }
 
     /** @hide */
-    public static boolean isLte(int radioTechnology) {
-        return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE ||
-                radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA;
+    public static boolean isPsOnlyTech(int radioTechnology) {
+        return radioTechnology == RIL_RADIO_TECHNOLOGY_LTE
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_LTE_CA
+                || radioTechnology == RIL_RADIO_TECHNOLOGY_NR;
     }
 
     /** @hide */
@@ -1691,7 +1797,14 @@ public class ServiceState implements Parcelable {
         return bearerBitmask;
     }
 
-    /** @hide */
+    /**
+     * Convert network type bitmask to bearer bitmask.
+     *
+     * @param networkTypeBitmask The network type bitmask value
+     * @return The bearer bitmask value.
+     *
+     * @hide
+     */
     public static int convertNetworkTypeBitmaskToBearerBitmask(int networkTypeBitmask) {
         if (networkTypeBitmask == 0) {
             return 0;
@@ -1705,7 +1818,14 @@ public class ServiceState implements Parcelable {
         return bearerBitmask;
     }
 
-    /** @hide */
+    /**
+     * Convert bearer bitmask to network type bitmask.
+     *
+     * @param bearerBitmask The bearer bitmask value.
+     * @return The network type bitmask value.
+     *
+     * @hide
+     */
     public static int convertBearerBitmaskToNetworkTypeBitmask(int bearerBitmask) {
         if (bearerBitmask == 0) {
             return 0;
@@ -1743,10 +1863,8 @@ public class ServiceState implements Parcelable {
      * Get all of the available network registration info.
      *
      * @return List of {@link NetworkRegistrationInfo}
-     * @hide
      */
     @NonNull
-    @SystemApi
     public List<NetworkRegistrationInfo> getNetworkRegistrationInfoList() {
         synchronized (mNetworkRegistrationInfos) {
             List<NetworkRegistrationInfo> newList = new ArrayList<>();
@@ -1796,7 +1914,7 @@ public class ServiceState implements Parcelable {
 
         synchronized (mNetworkRegistrationInfos) {
             for (NetworkRegistrationInfo networkRegistrationInfo : mNetworkRegistrationInfos) {
-                if (networkRegistrationInfo.getDomain() == domain) {
+                if ((networkRegistrationInfo.getDomain() & domain) != 0) {
                     list.add(new NetworkRegistrationInfo(networkRegistrationInfo));
                 }
             }
@@ -1807,12 +1925,13 @@ public class ServiceState implements Parcelable {
 
     /**
      * Get the network registration state for the transport type and network domain.
+     * If multiple domains are in the input bitmask, only the first one from
+     * networkRegistrationInfo.getDomain() will be returned.
      *
      * @param domain The network {@link NetworkRegistrationInfo.Domain domain}
      * @param transportType The transport type
      * @return The matching {@link NetworkRegistrationInfo}
      * @hide
-     *
      */
     @Nullable
     @SystemApi
@@ -1821,7 +1940,7 @@ public class ServiceState implements Parcelable {
         synchronized (mNetworkRegistrationInfos) {
             for (NetworkRegistrationInfo networkRegistrationInfo : mNetworkRegistrationInfos) {
                 if (networkRegistrationInfo.getTransportType() == transportType
-                        && networkRegistrationInfo.getDomain() == domain) {
+                        && (networkRegistrationInfo.getDomain() & domain) != 0) {
                     return new NetworkRegistrationInfo(networkRegistrationInfo);
                 }
             }
@@ -1864,9 +1983,17 @@ public class ServiceState implements Parcelable {
      * Returns a copy of self with location-identifying information removed.
      * Always clears the NetworkRegistrationInfo's CellIdentity fields, but if removeCoarseLocation
      * is true, clears other info as well.
+     *
+     * @param removeCoarseLocation Whether to also remove coarse location information.
+     *                             if false, it only clears fine location information such as
+     *                             NetworkRegistrationInfo's CellIdentity fields; If true, it will
+     *                             also remove other location information such as operator's MCC
+     *                             and MNC.
+     * @return the copied ServiceState with location info sanitized.
      * @hide
      */
-    public ServiceState sanitizeLocationInfo(boolean removeCoarseLocation) {
+    @NonNull
+    public ServiceState createLocationInfoSanitizedCopy(boolean removeCoarseLocation) {
         ServiceState state = new ServiceState(this);
         synchronized (state.mNetworkRegistrationInfos) {
             List<NetworkRegistrationInfo> networkRegistrationInfos =
@@ -1945,5 +2072,35 @@ public class ServiceState implements Parcelable {
      */
     public boolean isIwlanPreferred() {
         return mIsIwlanPreferred;
+    }
+
+    /**
+     * This indicates whether the device is searching for service.
+     *
+     * This API reports the modem searching status for
+     * {@link AccessNetworkConstants#TRANSPORT_TYPE_WWAN} (cellular) service in either
+     * {@link NetworkRegistrationInfo#DOMAIN_CS} or {@link NetworkRegistrationInfo#DOMAIN_PS}.
+     * This API will not report searching status for
+     * {@link AccessNetworkConstants#TRANSPORT_TYPE_WLAN}.
+     *
+     * @return {@code true} whenever the modem is searching for service.
+     */
+    public boolean isSearching() {
+        NetworkRegistrationInfo psRegState = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_PS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (psRegState != null && psRegState.getRegistrationState()
+                == NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING) {
+            return true;
+        }
+
+        NetworkRegistrationInfo csRegState = getNetworkRegistrationInfo(
+                NetworkRegistrationInfo.DOMAIN_CS, AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
+
+        if (csRegState != null && csRegState.getRegistrationState()
+                == NetworkRegistrationInfo.REGISTRATION_STATE_NOT_REGISTERED_SEARCHING) {
+            return true;
+        }
+        return false;
     }
 }

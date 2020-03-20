@@ -1,0 +1,373 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// How stubs are generated:
+//
+// raw source files --(metalava)--> stub source files --(javac)--> stub jar files
+//
+// The metalava conversion is done by droidstub modules *-api-stubs-docs.
+// The javac compilation is done by java_library modules android_*_stubs_current.
+// The metalava conversion is also responsible for creating API signature files
+// and comparing them against the last API signature in api/*-current.txt files
+// and also against the latest frozen API signature in prebuilts/sdk/*/*/api/android.txt
+// files.
+
+/////////////////////////////////////////////////////////////////////
+// Common metalava configs
+/////////////////////////////////////////////////////////////////////
+
+packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
+stubs_defaults {
+    name: "metalava-base-api-stubs-default",
+    srcs: [
+        ":framework-non-updatable-sources",
+        "core/java/**/*.logtags",
+        ":opt-telephony-srcs",
+        ":opt-net-voip-srcs",
+        ":core-current-stubs-source",
+        ":core_public_api_files",
+    ],
+    libs: ["framework-internal-utils"],
+    installable: false,
+    annotations_enabled: true,
+    previous_api: ":last-released-public-api",
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
+    api_levels_annotations_enabled: false,
+    filter_packages: packages_to_document,
+}
+
+stubs_defaults {
+    name: "metalava-full-api-stubs-default",
+    defaults: ["metalava-base-api-stubs-default"],
+    srcs: [":framework-updatable-sources"],
+    sdk_version: "core_platform",
+}
+
+stubs_defaults {
+    name: "metalava-non-updatable-api-stubs-default",
+    defaults: ["metalava-base-api-stubs-default"],
+    sdk_version: "core_platform",
+    libs: ["framework-all"],
+}
+
+/////////////////////////////////////////////////////////////////////
+// *-api-stubs-docs modules providing source files for the stub libraries
+/////////////////////////////////////////////////////////////////////
+
+// api-stubs-docs, system-api-stubs-docs, and test-api-stubs-docs have APIs
+// from the non-updatable part of the platform as well as from the updatable
+// modules
+droidstubs {
+    name: "api-stubs-docs",
+    defaults: ["metalava-full-api-stubs-default"],
+    api_filename: "public_api.txt",
+    private_api_filename: "private.txt",
+    removed_api_filename: "removed.txt",
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "api/current.txt",
+            removed_api_file: "api/removed.txt",
+        },
+        last_released: {
+            api_file: ":last-released-public-api",
+            removed_api_file: "api/removed.txt",
+            baseline_file: ":public-api-incompatibilities-with-last-released",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-public-api",
+            baseline_file: "api/lint-baseline.txt",
+        },
+    },
+    jdiff_enabled: true,
+}
+
+priv_apps = " " +
+    "--show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
+    "\\) "
+
+module_libs = " " +
+    " --show-annotation android.annotation.SystemApi\\(" +
+        "client=android.annotation.SystemApi.Client.MODULE_LIBRARIES" +
+    "\\) "
+
+droidstubs {
+    name: "system-api-stubs-docs",
+    defaults: ["metalava-full-api-stubs-default"],
+    api_tag_name: "SYSTEM",
+    api_filename: "system-api.txt",
+    private_api_filename: "system-private.txt",
+    removed_api_filename: "system-removed.txt",
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    args: metalava_framework_docs_args + priv_apps,
+    check_api: {
+        current: {
+            api_file: "api/system-current.txt",
+            removed_api_file: "api/system-removed.txt",
+        },
+        last_released: {
+            api_file: ":last-released-system-api",
+            removed_api_file: "api/system-removed.txt",
+            baseline_file: ":system-api-incompatibilities-with-last-released"
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-system-api",
+            baseline_file: "api/system-lint-baseline.txt",
+        },
+    },
+    jdiff_enabled: true,
+}
+
+droidstubs {
+    name: "test-api-stubs-docs",
+    defaults: ["metalava-full-api-stubs-default"],
+    api_tag_name: "TEST",
+    api_filename: "test-api.txt",
+    removed_api_filename: "test-removed.txt",
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    args: metalava_framework_docs_args + " --show-annotation android.annotation.TestApi",
+    check_api: {
+        current: {
+            api_file: "api/test-current.txt",
+            removed_api_file: "api/test-removed.txt",
+        },
+        api_lint: {
+            enabled: true,
+            baseline_file: "api/test-lint-baseline.txt",
+        },
+    },
+}
+
+/////////////////////////////////////////////////////////////////////
+// Following droidstubs modules are for extra APIs for modules.
+// The framework currently have two more API surfaces for modules:
+// @SystemApi(client=MODULE_APPS) and @SystemApi(client=MODULE_LIBRARIES)
+/////////////////////////////////////////////////////////////////////
+
+// TODO(b/146727827) remove the *-api module when we can teach metalava
+// about the relationship among the API surfaces. Currently, these modules are only to generate
+// the API signature files and ensure that the APIs evolve in a backwards compatible manner.
+// They however are NOT used for building the API stub.
+
+droidstubs {
+    name: "module-lib-api",
+    defaults: ["metalava-full-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + module_libs,
+    check_api: {
+        current: {
+            api_file: "api/module-lib-current.txt",
+            removed_api_file: "api/module-lib-removed.txt",
+        },
+        last_released: {
+            api_file: ":last-released-module-lib-api",
+            removed_api_file: "api/module-lib-removed.txt",
+            baseline_file: ":module-lib-api-incompatibilities-with-last-released"
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":last-released-module-lib-api",
+            baseline_file: "api/module-lib-lint-baseline.txt",
+        },
+    },
+}
+
+
+// The following droidstub module generates source files for the API stub library for
+// modules. Note that it not only includes its own APIs but also other APIs that have
+// narrower scope (all @SystemApis, not just the ones with 'client=MODULE_LIBRARIES').
+
+droidstubs {
+    name: "module-lib-api-stubs-docs",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + priv_apps + module_libs,
+}
+
+/////////////////////////////////////////////////////////////////////
+// android_*_stubs_current modules are the stubs libraries compiled
+// from *-api-stubs-docs
+/////////////////////////////////////////////////////////////////////
+
+java_defaults {
+    name: "framework-stubs-default",
+    libs: [ "stub-annotations" ],
+    static_libs: [ "private-stub-annotations-jar" ],
+    sdk_version: "core_current",
+    errorprone: {
+        javacflags: [
+            "-XepDisableAllChecks",
+        ],
+    },
+    java_resources: [
+        ":notices-for-framework-stubs",
+    ],
+    system_modules: "none",
+    java_version: "1.8",
+    compile_dex: true,
+}
+
+java_library_static {
+    name: "android_stubs_current",
+    srcs: [ ":api-stubs-docs" ],
+    defaults: ["framework-stubs-default"],
+}
+
+java_library_static {
+    name: "android_system_stubs_current",
+    srcs: [ ":system-api-stubs-docs" ],
+    defaults: ["framework-stubs-default"],
+}
+
+java_library_static {
+    name: "android_test_stubs_current",
+    srcs: [ ":test-api-stubs-docs" ],
+    defaults: ["framework-stubs-default"],
+}
+
+java_library_static {
+    name: "android_module_lib_stubs_current",
+    srcs: [ ":module-lib-api-stubs-docs" ],
+    defaults: ["framework-stubs-default"],
+    libs: ["android_system_stubs_current"],
+}
+
+/////////////////////////////////////////////////////////////////////
+// hwbinder.stubs provides APIs required for building HIDL Java
+// libraries.
+/////////////////////////////////////////////////////////////////////
+
+droidstubs {
+    name: "hwbinder-stubs-docs",
+    srcs: [
+        "core/java/android/os/HidlSupport.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/SystemApi.java",
+        "core/java/android/os/HidlMemory.java",
+        "core/java/android/os/HwBinder.java",
+        "core/java/android/os/HwBlob.java",
+        "core/java/android/os/HwParcel.java",
+        "core/java/android/os/IHwBinder.java",
+        "core/java/android/os/IHwInterface.java",
+        "core/java/android/os/DeadObjectException.java",
+        "core/java/android/os/DeadSystemException.java",
+        "core/java/android/os/NativeHandle.java",
+        "core/java/android/os/RemoteException.java",
+        "core/java/android/util/AndroidException.java",
+    ],
+    installable: false,
+    sdk_version: "core_platform",
+    annotations_enabled: true,
+    previous_api: ":last-released-public-api",
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
+    args: priv_apps,
+}
+
+java_library_static {
+    name: "hwbinder.stubs",
+    sdk_version: "core_current",
+    srcs: [
+        ":hwbinder-stubs-docs",
+    ],
+}
+
+/////////////////////////////////////////////////////////////////////
+// Stubs for hiddenapi processing.
+/////////////////////////////////////////////////////////////////////
+
+droidstubs {
+    name: "hiddenapi-lists-docs",
+    defaults: ["metalava-full-api-stubs-default"],
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    removed_dex_api_filename: "removed-dex.txt",
+    args: metalava_framework_docs_args +
+        " --show-unannotated " +
+        priv_apps +
+        " --show-annotation android.annotation.TestApi ",
+}
+
+droidstubs {
+    name: "hiddenapi-mappings",
+    defaults: ["metalava-full-api-stubs-default"],
+    srcs: [
+        ":opt-telephony-common-srcs",
+    ],
+
+    arg_files: [
+        "core/res/AndroidManifest.xml",
+    ],
+    dex_mapping_filename: "dex-mapping.txt",
+    args: metalava_framework_docs_args +
+        " --hide ReferencesHidden " +
+        " --hide UnhiddenSystemApi " +
+        " --show-unannotated " +
+        priv_apps +
+        " --show-annotation android.annotation.TestApi ",
+}
+
+/////////////////////////////////////////////////////////////////////
+// api/*-current.txt files for use by modules in other directories
+// like the CTS test
+/////////////////////////////////////////////////////////////////////
+
+filegroup {
+    name: "frameworks-base-api-current.txt",
+    srcs: [
+        "api/current.txt",
+    ],
+}
+
+filegroup {
+    name: "frameworks-base-api-system-current.txt",
+    srcs: [
+        "api/system-current.txt",
+    ],
+}
+
+filegroup {
+    name: "frameworks-base-api-system-removed.txt",
+    srcs: [
+        "api/system-removed.txt",
+    ],
+}

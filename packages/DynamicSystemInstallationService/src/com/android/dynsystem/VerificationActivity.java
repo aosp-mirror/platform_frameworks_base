@@ -16,9 +16,6 @@
 
 package com.android.dynsystem;
 
-import static android.os.image.DynamicSystemClient.KEY_SYSTEM_SIZE;
-import static android.os.image.DynamicSystemClient.KEY_USERDATA_SIZE;
-
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.content.Context;
@@ -31,11 +28,9 @@ import android.os.image.DynamicSystemClient;
 import android.util.FeatureFlagUtils;
 import android.util.Log;
 
-
 /**
- * This Activity starts KeyguardManager and ask the user to confirm
- * before any installation request. If the device is not protected by
- * a password, it approves the request by default.
+ * This Activity starts KeyguardManager and ask the user to confirm before any installation request.
+ * If the device is not protected by a password, it approves the request by default.
  */
 public class VerificationActivity extends Activity {
 
@@ -88,23 +83,19 @@ public class VerificationActivity extends Activity {
     private void startInstallationService() {
         // retrieve data from calling intent
         Intent callingIntent = getIntent();
-
         Uri url = callingIntent.getData();
-        long systemSize = callingIntent.getLongExtra(KEY_SYSTEM_SIZE, 0);
-        long userdataSize = callingIntent.getLongExtra(KEY_USERDATA_SIZE, 0);
-        boolean enableWhenCompleted = callingIntent.getBooleanExtra(
-                DynamicSystemInstallationService.KEY_ENABLE_WHEN_COMPLETED, false);
 
-        sVerifiedUrl = url.toString();
+        if (url != null) {
+            sVerifiedUrl = url.toString();
+        }
 
         // start service
         Intent intent = new Intent(this, DynamicSystemInstallationService.class);
-        intent.setData(url);
+        if (url != null) {
+            intent.setData(url);
+        }
         intent.setAction(DynamicSystemClient.ACTION_START_INSTALL);
-        intent.putExtra(KEY_SYSTEM_SIZE, systemSize);
-        intent.putExtra(KEY_USERDATA_SIZE, userdataSize);
-        intent.putExtra(
-                DynamicSystemInstallationService.KEY_ENABLE_WHEN_COMPLETED, enableWhenCompleted);
+        intent.putExtras(callingIntent);
 
         Log.d(TAG, "Starting Installation Service");
         startServiceAsUser(intent, UserHandle.SYSTEM);
@@ -116,6 +107,7 @@ public class VerificationActivity extends Activity {
     }
 
     static boolean isVerified(String url) {
+        if (url == null) return true;
         return sVerifiedUrl != null && sVerifiedUrl.equals(url);
     }
 }

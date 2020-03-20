@@ -126,5 +126,5 @@ prebuilt_etc {
     sub_dir: "permissions",
     src: "com.android.car.developeroptions.xml",
     filename_from_src: true,
-    product_specific: true,
+    system_ext_specific: true,
 }

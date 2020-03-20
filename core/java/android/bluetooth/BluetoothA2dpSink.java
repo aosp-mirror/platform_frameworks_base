@@ -21,7 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
@@ -66,7 +66,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      */
     @SystemApi
     @SuppressLint("ActionValue")
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.a2dp-sink.profile.action.CONNECTION_STATE_CHANGED";
 
@@ -296,8 +296,9 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    public boolean setConnectionPolicy(@Nullable BluetoothDevice device, int connectionPolicy) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setConnectionPolicy(@Nullable BluetoothDevice device,
+            @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothA2dpSink service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -344,8 +345,8 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionPolicy(@Nullable BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public @ConnectionPolicy int getConnectionPolicy(@Nullable BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothA2dpSink service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -369,7 +370,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean isAudioPlaying(@Nullable BluetoothDevice device) {
         final IBluetoothA2dpSink service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {

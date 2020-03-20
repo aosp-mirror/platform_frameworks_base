@@ -23,6 +23,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.display.AmbientDisplayConfiguration;
+import android.os.Build;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -39,6 +40,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import javax.inject.Inject;
@@ -52,7 +54,7 @@ public class NotificationInterruptionStateProvider {
 
     private static final String TAG = "InterruptionStateProvider";
     private static final boolean DEBUG = false;
-    private static final boolean DEBUG_HEADS_UP = true;
+    private static final boolean DEBUG_HEADS_UP = Build.IS_DEBUGGABLE;
     private static final boolean ENABLE_HEADS_UP = true;
     private static final String SETTING_HEADS_UP_TICKER = "ticker_gets_heads_up";
 
@@ -63,6 +65,7 @@ public class NotificationInterruptionStateProvider {
     private final Context mContext;
     private final PowerManager mPowerManager;
     private final IDreamManager mDreamManager;
+    private final BatteryController mBatteryController;
 
     private NotificationPresenter mPresenter;
     private HeadsUpManager mHeadsUpManager;
@@ -75,13 +78,14 @@ public class NotificationInterruptionStateProvider {
 
     @Inject
     public NotificationInterruptionStateProvider(Context context, NotificationFilter filter,
-            StatusBarStateController stateController) {
+            StatusBarStateController stateController, BatteryController batteryController) {
         this(context,
                 (PowerManager) context.getSystemService(Context.POWER_SERVICE),
                 IDreamManager.Stub.asInterface(
                         ServiceManager.checkService(DreamService.DREAM_SERVICE)),
                 new AmbientDisplayConfiguration(context),
                 filter,
+                batteryController,
                 stateController);
     }
 
@@ -92,10 +96,12 @@ public class NotificationInterruptionStateProvider {
             IDreamManager dreamManager,
             AmbientDisplayConfiguration ambientDisplayConfiguration,
             NotificationFilter notificationFilter,
+            BatteryController batteryController,
             StatusBarStateController statusBarStateController) {
         mContext = context;
         mPowerManager = powerManager;
         mDreamManager = dreamManager;
+        mBatteryController = batteryController;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
         mNotificationFilter = notificationFilter;
         mStatusBarStateController = statusBarStateController;
@@ -289,6 +295,13 @@ public class NotificationInterruptionStateProvider {
         if (!mAmbientDisplayConfiguration.pulseOnNotificationEnabled(UserHandle.USER_CURRENT)) {
             if (DEBUG_HEADS_UP) {
                 Log.d(TAG, "No pulsing: disabled by setting: " + sbn.getKey());
+            }
+            return false;
+        }
+
+        if (mBatteryController.isAodPowerSave()) {
+            if (DEBUG_HEADS_UP) {
+                Log.d(TAG, "No pulsing: disabled by battery saver: " + sbn.getKey());
             }
             return false;
         }

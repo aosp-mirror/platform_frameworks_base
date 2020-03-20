@@ -16,8 +16,12 @@
 
 package android.telephony;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemService;
 import android.app.ActivityThread;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -27,22 +31,18 @@ import com.android.internal.telephony.IMms;
 
 /**
  * Manages MMS operations such as sending multimedia messages.
- * Get this object by calling the static method {@link #getInstance()}.
- * @hide
+ * Get this object by calling Context#getSystemService(Context#MMS_SERVICE).
  */
+@SystemService(Context.MMS_SERVICE)
 public class MmsManager {
     private static final String TAG = "MmsManager";
-
-    /** Singleton object constructed during class initialization. */
-    private static final MmsManager sInstance = new MmsManager();
+    private final Context mContext;
 
     /**
-     * Get the MmsManager singleton instance.
-     *
-     * @return the {@link MmsManager} singleton instance.
+     * @hide
      */
-    public static MmsManager getInstance() {
-        return sInstance;
+    public MmsManager(@NonNull Context context) {
+        mContext = context;
     }
 
     /**
@@ -56,8 +56,9 @@ public class MmsManager {
      * @param sentIntent if not NULL this <code>PendingIntent</code> is broadcast when the message
      *                   is successfully sent, or failed
      */
-    public void sendMultimediaMessage(int subId, Uri contentUri, String locationUrl,
-            Bundle configOverrides, PendingIntent sentIntent) {
+    public void sendMultimediaMessage(int subId, @NonNull Uri contentUri,
+            @Nullable String locationUrl, @Nullable Bundle configOverrides,
+            @Nullable PendingIntent sentIntent) {
         try {
             final IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
             if (iMms == null) {
@@ -84,8 +85,9 @@ public class MmsManager {
      *  broadcast when the message is downloaded, or the download is failed
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
-    public void downloadMultimediaMessage(int subId, String locationUrl, Uri contentUri,
-            Bundle configOverrides, PendingIntent downloadedIntent) {
+    public void downloadMultimediaMessage(int subId, @NonNull String locationUrl,
+            @NonNull Uri contentUri, @Nullable Bundle configOverrides,
+            @Nullable PendingIntent downloadedIntent) {
         try {
             final IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
             if (iMms == null) {
@@ -96,23 +98,5 @@ public class MmsManager {
         } catch (RemoteException e) {
             // Ignore it
         }
-    }
-
-    /**
-     * Get carrier-dependent configuration values.
-     *
-     * @param subId the subscription id
-     * @return bundle key/values pairs of configuration values
-     */
-    public Bundle getCarrierConfigValues(int subId) {
-        try {
-            IMms iMms = IMms.Stub.asInterface(ServiceManager.getService("imms"));
-            if (iMms != null) {
-                return iMms.getCarrierConfigValues(subId);
-            }
-        } catch (RemoteException ex) {
-            // ignore it
-        }
-        return null;
     }
 }

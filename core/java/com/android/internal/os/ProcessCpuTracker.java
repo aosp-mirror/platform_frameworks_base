@@ -16,9 +16,14 @@
 
 package com.android.internal.os;
 
-import static android.os.Process.*;
+import static android.os.Process.PROC_COMBINE;
+import static android.os.Process.PROC_OUT_FLOAT;
+import static android.os.Process.PROC_OUT_LONG;
+import static android.os.Process.PROC_OUT_STRING;
+import static android.os.Process.PROC_PARENS;
+import static android.os.Process.PROC_SPACE_TERM;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -878,8 +883,11 @@ public class ProcessCpuTracker {
 
     private void getName(Stats st, String cmdlineFile) {
         String newName = st.name;
-        if (st.name == null || st.name.equals("app_process")
-                || st.name.equals("<pre-initialized>")) {
+        if (st.name == null
+                || st.name.equals("app_process")
+                || st.name.equals("<pre-initialized>")
+                || st.name.equals("usap32")
+                || st.name.equals("usap64")) {
             String cmdName = ProcStatsUtil.readTerminatedProcFile(cmdlineFile, (byte) '\0');
             if (cmdName != null && cmdName.length() > 1) {
                 newName = cmdName;

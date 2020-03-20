@@ -20,6 +20,6 @@
     <string name="downloads_app_label" msgid="7120690641874849726">"डाउनलोड"</string>
     <string name="root_name" msgid="5819495383921089536">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> <xliff:g id="STORAGE_NAME">%2$s</xliff:g>"</string>
     <string name="accessing_notification_title" msgid="3030133609230917944">"<xliff:g id="DEVICE_MODEL">%1$s</xliff:g> मधून फायलींंमध्ये प्रवेश करत आहे"</string>
-    <string name="error_busy_device" msgid="3997316850357386589">"दुसरे डिव्हाइस व्यस्त आहे. ते उपलब्‍ध होईपर्यंत तुम्ही फायली ट्रांसफर करू शकत नाही."</string>
+    <string name="error_busy_device" msgid="3997316850357386589">"दुसरे डिव्हाइस व्यस्त आहे. ते उपलब्‍ध होईपर्यंत तुम्ही फायली ट्रान्सफर करू शकत नाही."</string>
     <string name="error_locked_device" msgid="7557872102188356147">"कोणत्याही फायली आढळल्या नाहीत. दुसरे डिव्हाइस कदाचित बंद असू शकते. तसे असल्यास, ते अनलॉक करा आणि पुन्हा प्रयत्न करा."</string>
 </resources>

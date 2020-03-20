@@ -1,1 +1,9 @@
-#TBD
+# Keep class's integer static field for MessageUtils to parsing their name.
+-keep class com.android.server.connectivity.tethering.Tethering$TetherMasterSM {
+    static final int CMD_*;
+    static final int EVENT_*;
+}
+
+-keepclassmembers class android.net.ip.IpServer {
+    static final int CMD_*;
+}

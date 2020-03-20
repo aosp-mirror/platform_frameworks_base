@@ -238,20 +238,6 @@ public class NetworkNotificationManagerTest {
     }
 
     @Test
-    public void testSameLevelNotifications() {
-        final int id = 101;
-        final String tag = NetworkNotificationManager.tagFor(id);
-
-        mManager.showNotification(id, LOGGED_IN, mWifiNai, mCellNai, null, false);
-        verify(mNotificationManager, times(1))
-                .notifyAsUser(eq(tag), eq(LOGGED_IN.eventId), any(), any());
-
-        mManager.showNotification(id, LOST_INTERNET, mWifiNai, mCellNai, null, false);
-        verify(mNotificationManager, times(1))
-                .notifyAsUser(eq(tag), eq(LOST_INTERNET.eventId), any(), any());
-    }
-
-    @Test
     public void testClearNotificationByType() {
         final int id = 101;
         final String tag = NetworkNotificationManager.tagFor(id);
@@ -259,31 +245,25 @@ public class NetworkNotificationManagerTest {
         // clearNotification(int id, NotificationType notifyType) will check if given type is equal
         // to previous type or not. If they are equal then clear the notification; if they are not
         // equal then return.
-
-        mManager.showNotification(id, LOGGED_IN, mWifiNai, mCellNai, null, false);
+        mManager.showNotification(id, NO_INTERNET, mWifiNai, mCellNai, null, false);
         verify(mNotificationManager, times(1))
-                .notifyAsUser(eq(tag), eq(LOGGED_IN.eventId), any(), any());
+                .notifyAsUser(eq(tag), eq(NO_INTERNET.eventId), any(), any());
 
-        // Previous notification is LOGGED_IN and given type is LOGGED_IN too. The notification
+        // Previous notification is NO_INTERNET and given type is NO_INTERNET too. The notification
         // should be cleared.
-        mManager.clearNotification(id, LOGGED_IN);
+        mManager.clearNotification(id, NO_INTERNET);
         verify(mNotificationManager, times(1))
-                .cancelAsUser(eq(tag), eq(LOGGED_IN.eventId), any());
+                .cancelAsUser(eq(tag), eq(NO_INTERNET.eventId), any());
 
-        mManager.showNotification(id, LOGGED_IN, mWifiNai, mCellNai, null, false);
-        verify(mNotificationManager, times(2))
-                .notifyAsUser(eq(tag), eq(LOGGED_IN.eventId), any(), any());
-
-        // LOST_INTERNET notification popup after LOGGED_IN notification.
-        mManager.showNotification(id, LOST_INTERNET, mWifiNai, mCellNai, null, false);
+        // SIGN_IN is popped-up.
+        mManager.showNotification(id, SIGN_IN, mWifiNai, mCellNai, null, false);
         verify(mNotificationManager, times(1))
-                .notifyAsUser(eq(tag), eq(LOST_INTERNET.eventId), any(), any());
+                .notifyAsUser(eq(tag), eq(SIGN_IN.eventId), any(), any());
 
-        // Previous notification is LOST_INTERNET and given type is LOGGED_IN. The notification
-        // shouldn't be cleared.
-        mManager.clearNotification(id, LOGGED_IN);
-        // LOST_INTERNET shouldn't be cleared.
+        // The notification type is not matching previous one, PARTIAL_CONNECTIVITY won't be
+        // cleared.
+        mManager.clearNotification(id, PARTIAL_CONNECTIVITY);
         verify(mNotificationManager, never())
-                .cancelAsUser(eq(tag), eq(LOST_INTERNET.eventId), any());
+                .cancelAsUser(eq(tag), eq(PARTIAL_CONNECTIVITY.eventId), any());
     }
 }

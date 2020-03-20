@@ -16,8 +16,8 @@
 
 package com.android.internal.net;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -52,6 +52,7 @@ public class VpnConfig implements Parcelable {
 
     public static final String DIALOGS_PACKAGE = "com.android.vpndialogs";
 
+    // TODO: Rename this to something that encompasses Settings-based Platform VPNs as well.
     public static final String LEGACY_VPN = "[Legacy VPN]";
 
     public static Intent getIntentForConfirmation() {
@@ -231,7 +232,7 @@ public class VpnConfig implements Parcelable {
                 .append(", allowIPv4=").append(allowIPv4)
                 .append(", allowIPv6=").append(allowIPv6)
                 .append(", underlyingNetworks=").append(Arrays.toString(underlyingNetworks))
-                .append(", proxyInfo=").append(proxyInfo.toString())
+                .append(", proxyInfo=").append(proxyInfo)
                 .append("}")
                 .toString();
     }

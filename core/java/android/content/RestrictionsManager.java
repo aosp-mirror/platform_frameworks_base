@@ -17,9 +17,9 @@
 package android.content;
 
 import android.annotation.SystemService;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;

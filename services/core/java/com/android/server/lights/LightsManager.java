@@ -29,5 +29,8 @@ public abstract class LightsManager {
     public static final int LIGHT_ID_WIFI = Type.WIFI;
     public static final int LIGHT_ID_COUNT = Type.COUNT;
 
-    public abstract Light getLight(int id);
+    /**
+     * Returns the logical light with the given type.
+     */
+    public abstract LogicalLight getLight(int id);
 }

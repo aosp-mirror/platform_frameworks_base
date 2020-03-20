@@ -16,7 +16,7 @@
 
 package android.database.sqlite;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * An exception that indicates that garbage-collector is finalizing a database object

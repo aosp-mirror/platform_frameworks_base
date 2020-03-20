@@ -113,6 +113,51 @@ public class RcsPresenceExchangeImplBase extends RcsCapabilityExchange {
     })
     public @interface PresenceResponseCode {}
 
+
+    /** A capability update has been requested due to the Entity Tag (ETag) expiring. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 0;
+    /** A capability update has been requested due to moving to LTE with VoPS disabled. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED = 1;
+    /** A capability update has been requested due to moving to LTE with VoPS enabled. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED = 2;
+    /** A capability update has been requested due to moving to eHRPD. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD = 3;
+    /** A capability update has been requested due to moving to HSPA+. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_HSPAPLUS = 4;
+    /** A capability update has been requested due to moving to 3G. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G = 5;
+    /** A capability update has been requested due to moving to 2G. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G = 6;
+    /** A capability update has been requested due to moving to WLAN */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN = 7;
+    /** A capability update has been requested due to moving to IWLAN */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN = 8;
+    /** A capability update has been requested but the reason is unknown. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 9;
+    /** A capability update has been requested due to moving to 5G NR with VoPS disabled. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED = 10;
+    /** A capability update has been requested due to moving to 5G NR with VoPS enabled. */
+    public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11;
+
+    /** @hide*/
+    @IntDef(value = {
+            CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_DISABLED,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_LTE_VOPS_ENABLED,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_EHRPD,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_HSPAPLUS,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_IWLAN,
+            CAPABILITY_UPDATE_TRIGGER_UNKNOWN,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_DISABLED,
+            CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED
+    }, prefix = "CAPABILITY_UPDATE_TRIGGER_")
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface StackPublishTriggerType {
+    }
+
     /**
      * Provide the framework with a subsequent network response update to
      * {@link #updateCapabilities(RcsContactUceCapability, int)} and
@@ -164,15 +209,18 @@ public class RcsPresenceExchangeImplBase extends RcsCapabilityExchange {
      * This is typically used when trying to generate an initial PUBLISH for a new subscription to
      * the network. The device will cache all presence publications after boot until this method is
      * called once.
+     * @param publishTriggerType {@link StackPublishTriggerType} The reason for the capability
+     *         update request.
      * @throws ImsException If this {@link RcsPresenceExchangeImplBase} instance is not currently
      * connected to the framework. This can happen if the {@link RcsFeature} is not
      * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received the
      * {@link ImsFeature#onFeatureReady()} callback. This may also happen in rare cases when the
      * Telephony stack has crashed.
      */
-    public final void onNotifyUpdateCapabilites() throws ImsException {
+    public final void onNotifyUpdateCapabilites(@StackPublishTriggerType int publishTriggerType)
+            throws ImsException {
         try {
-            getListener().onNotifyUpdateCapabilities();
+            getListener().onNotifyUpdateCapabilities(publishTriggerType);
         } catch (RemoteException e) {
             throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }

@@ -66,6 +66,7 @@ public final class DisplayCutout {
     private static final String BOTTOM_MARKER = "@bottom";
     private static final String DP_MARKER = "@dp";
     private static final String RIGHT_MARKER = "@right";
+    private static final String LEFT_MARKER = "@left";
 
     /**
      * Category for overlays that allow emulating a display cutout on devices that don't have
@@ -637,11 +638,15 @@ public final class DisplayCutout {
                 return sCachedCutout;
             }
         }
-        spec = spec.trim();
+        final String specToCache = spec.trim();
+        spec = specToCache;
         final float offsetX;
         if (spec.endsWith(RIGHT_MARKER)) {
             offsetX = displayWidth;
             spec = spec.substring(0, spec.length() - RIGHT_MARKER.length()).trim();
+        } else if (spec.endsWith(LEFT_MARKER)) {
+            offsetX = 0;
+            spec = spec.substring(0, spec.length() - LEFT_MARKER.length()).trim();
         } else {
             offsetX = displayWidth / 2f;
         }
@@ -705,7 +710,7 @@ public final class DisplayCutout {
 
         final Pair<Path, DisplayCutout> result = new Pair<>(p, cutout);
         synchronized (CACHE_LOCK) {
-            sCachedSpec = spec;
+            sCachedSpec = specToCache;
             sCachedDisplayWidth = displayWidth;
             sCachedDisplayHeight = displayHeight;
             sCachedDensity = density;

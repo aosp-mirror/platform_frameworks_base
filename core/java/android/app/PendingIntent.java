@@ -19,7 +19,7 @@ package android.app;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -1257,7 +1257,12 @@ public final class PendingIntent implements Parcelable {
         return b != null ? new PendingIntent(b, in.getClassCookie(PendingIntent.class)) : null;
     }
 
-    /*package*/ PendingIntent(IIntentSender target) {
+    /**
+     * Creates a PendingIntent with the given target.
+     * @param target the backing IIntentSender
+     * @hide
+     */
+    public PendingIntent(IIntentSender target) {
         mTarget = target;
     }
 

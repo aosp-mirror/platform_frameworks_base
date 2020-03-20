@@ -445,6 +445,7 @@ bool ResourceParser::ParseResources(xml::XmlPullParser* parser) {
     ParsedResource parsed_resource;
     parsed_resource.config = config_;
     parsed_resource.source = source_.WithLine(parser->line_number());
+    // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
     parsed_resource.comment = std::move(comment);
     if (options_.visibility) {
       parsed_resource.visibility_level = options_.visibility.value();
@@ -977,6 +978,7 @@ bool ResourceParser::ParsePublicGroup(xml::XmlPullParser* parser, ParsedResource
       child_resource.name.type = *parsed_type;
       child_resource.name.entry = maybe_name.value().to_string();
       child_resource.id = next_id;
+      // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
       child_resource.comment = std::move(comment);
       child_resource.source = item_source;
       child_resource.visibility_level = Visibility::Level::kPublic;
@@ -1643,8 +1645,14 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
                                            ParsedResource* out_resource) {
   out_resource->name.type = ResourceType::kStyleable;
 
-  // Declare-styleable is kPrivate by default, because it technically only exists in R.java.
-  out_resource->visibility_level = Visibility::Level::kPublic;
+  if (!options_.preserve_visibility_of_styleables) {
+    // This was added in change Idd21b5de4d20be06c6f8c8eb5a22ccd68afc4927 to mimic aapt1, but no one
+    // knows exactly what for.
+    //
+    // FWIW, styleables only appear in generated R classes.  For custom views these should always be
+    // package-private (to be used only by the view class); themes are a different story.
+    out_resource->visibility_level = Visibility::Level::kPublic;
+  }
 
   // Declare-styleable only ends up in default config;
   if (out_resource->config != ConfigDescription::DefaultConfig()) {
@@ -1697,6 +1705,7 @@ bool ResourceParser::ParseDeclareStyleable(xml::XmlPullParser* parser,
       ParsedResource child_resource;
       child_resource.name = child_ref.name.value();
       child_resource.source = item_source;
+      // NOLINTNEXTLINE(bugprone-use-after-move) move+reset comment
       child_resource.comment = std::move(comment);
       if (options_.visibility) {
         child_resource.visibility_level = options_.visibility.value();

@@ -22,7 +22,7 @@ import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcel
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-import android.util.TimestampedValue;
+import android.os.TimestampedValue;
 
 import org.junit.Test;
 

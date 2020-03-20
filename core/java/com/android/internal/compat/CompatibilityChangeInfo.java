@@ -30,6 +30,7 @@ public class CompatibilityChangeInfo implements Parcelable {
     private final @Nullable String mName;
     private final int mEnableAfterTargetSdk;
     private final boolean mDisabled;
+    private final boolean mLoggingOnly;
     private final @Nullable String mDescription;
 
     public long getId() {
@@ -49,17 +50,22 @@ public class CompatibilityChangeInfo implements Parcelable {
         return mDisabled;
     }
 
+    public boolean getLoggingOnly() {
+        return mLoggingOnly;
+    }
+
     public String getDescription()  {
         return mDescription;
     }
 
     public CompatibilityChangeInfo(
             Long changeId, String name, int enableAfterTargetSdk, boolean disabled,
-            String description) {
+            boolean loggingOnly, String description) {
         this.mChangeId = changeId;
         this.mName = name;
         this.mEnableAfterTargetSdk = enableAfterTargetSdk;
         this.mDisabled = disabled;
+        this.mLoggingOnly = loggingOnly;
         this.mDescription = description;
     }
 
@@ -68,6 +74,7 @@ public class CompatibilityChangeInfo implements Parcelable {
         mName = in.readString();
         mEnableAfterTargetSdk = in.readInt();
         mDisabled = in.readBoolean();
+        mLoggingOnly = in.readBoolean();
         mDescription = in.readString();
     }
 
@@ -82,7 +89,45 @@ public class CompatibilityChangeInfo implements Parcelable {
         dest.writeString(mName);
         dest.writeInt(mEnableAfterTargetSdk);
         dest.writeBoolean(mDisabled);
+        dest.writeBoolean(mLoggingOnly);
         dest.writeString(mDescription);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("CompatibilityChangeInfo(")
+                .append(getId());
+        if (getName() != null) {
+            sb.append("; name=").append(getName());
+        }
+        if (getEnableAfterTargetSdk() != -1) {
+            sb.append("; enableAfterTargetSdk=").append(getEnableAfterTargetSdk());
+        }
+        if (getDisabled()) {
+            sb.append("; disabled");
+        }
+        if (getLoggingOnly()) {
+            sb.append("; loggingOnly");
+        }
+        return sb.append(")").toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof CompatibilityChangeInfo)) {
+            return false;
+        }
+        CompatibilityChangeInfo that = (CompatibilityChangeInfo) o;
+        return this.mChangeId == that.mChangeId
+                && this.mName.equals(that.mName)
+                && this.mEnableAfterTargetSdk == that.mEnableAfterTargetSdk
+                && this.mDisabled == that.mDisabled
+                && this.mLoggingOnly == that.mLoggingOnly
+                && this.mDescription.equals(that.mDescription);
+
     }
 
     public static final Parcelable.Creator<CompatibilityChangeInfo> CREATOR =

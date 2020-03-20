@@ -20,6 +20,7 @@ import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.WorkerThread;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
@@ -102,6 +103,17 @@ public abstract class CellBroadcastService extends Service {
             @NonNull String originatingAddress, @NonNull Consumer<Bundle> callback);
 
     /**
+     * Get broadcasted area information.
+     *
+     * @param slotIndex the index of the slot which received the area information.
+     *
+     * @return The area information string sent from the network. This is usually the human readable
+     * string shown in Setting app's SIM status page.
+     */
+    @WorkerThread
+    public abstract @NonNull CharSequence getCellBroadcastAreaInfo(int slotIndex);
+
+    /**
      * If overriding this method, call through to the super method for any unknown actions.
      * {@inheritDoc}
      */
@@ -162,6 +174,18 @@ public abstract class CellBroadcastService extends Service {
             };
             CellBroadcastService.this.onCdmaScpMessage(slotIndex, smsCbProgramData,
                     originatingAddress, consumer);
+        }
+
+        /**
+         * Get broadcasted area information
+         *
+         * @param slotIndex         the index of the slot which received the message
+         *
+         * @return The area information
+         */
+        @Override
+        public @NonNull CharSequence getCellBroadcastAreaInfo(int slotIndex) {
+            return CellBroadcastService.this.getCellBroadcastAreaInfo(slotIndex);
         }
     }
 }

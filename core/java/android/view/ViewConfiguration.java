@@ -18,8 +18,8 @@ package android.view;
 
 import android.annotation.FloatRange;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.app.AppGlobals;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;

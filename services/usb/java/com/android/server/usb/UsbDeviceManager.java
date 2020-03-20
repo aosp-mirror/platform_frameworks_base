@@ -41,6 +41,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.debug.AdbManagerInternal;
+import android.debug.AdbTransportType;
 import android.debug.IAdbTransport;
 import android.hardware.usb.ParcelableUsbPort;
 import android.hardware.usb.UsbAccessory;
@@ -774,8 +775,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             }
 
             @Override
-            public void onAdbEnabled(boolean enabled) {
-                mHandler.sendMessage(MSG_ENABLE_ADB, enabled);
+            public void onAdbEnabled(boolean enabled, byte transportType) {
+                if (transportType == AdbTransportType.USB) {
+                    mHandler.sendMessage(MSG_ENABLE_ADB, enabled);
+                }
             }
         }
 
@@ -1169,7 +1172,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         }
 
         protected boolean isAdbEnabled() {
-            return LocalServices.getService(AdbManagerInternal.class).isAdbEnabled();
+            return LocalServices.getService(AdbManagerInternal.class)
+                    .isAdbEnabled(AdbTransportType.USB);
         }
 
         protected void updateAdbNotification(boolean force) {
@@ -1714,21 +1718,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private static final int ENUMERATION_TIME_OUT_MS = 2000;
 
         /**
-         * Command to start native service.
-         */
-        protected static final String CTL_START = "ctl.start";
-
-        /**
-         * Command to start native service.
-         */
-        protected static final String CTL_STOP = "ctl.stop";
-
-        /**
-         * Adb native daemon.
-         */
-        protected static final String ADBD = "adbd";
-
-        /**
          * Gadget HAL fully qualified instance name for registering for ServiceNotification.
          */
         protected static final String GADGET_HAL_FQ_NAME =
@@ -1913,12 +1902,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                         /**
                          * Start adbd if ADB function is included in the configuration.
                          */
-                        setSystemProperty(CTL_START, ADBD);
+                        LocalServices.getService(AdbManagerInternal.class)
+                                .startAdbdForTransport(AdbTransportType.USB);
                     } else {
                         /**
-                         * Stop adbd otherwise.
+                         * Stop adbd otherwise
                          */
-                        setSystemProperty(CTL_STOP, ADBD);
+                        LocalServices.getService(AdbManagerInternal.class)
+                                .stopAdbdForTransport(AdbTransportType.USB);
                     }
                     UsbGadgetCallback usbGadgetCallback = new UsbGadgetCallback(mCurrentRequest,
                             config, chargingFunctions);

@@ -21,7 +21,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkState;
 import android.net.RouteInfo;
 import android.net.ip.IpServer;
 import android.net.util.NetworkConstants;
@@ -30,6 +29,7 @@ import android.util.Log;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -72,7 +72,7 @@ public class IPv6TetheringCoordinator {
     private final LinkedList<Downstream> mActiveDownstreams;
     private final byte[] mUniqueLocalPrefix;
     private short mNextSubnetId;
-    private NetworkState mUpstreamNetworkState;
+    private UpstreamNetworkState mUpstreamNetworkState;
 
     public IPv6TetheringCoordinator(ArrayList<IpServer> notifyList, SharedLog log) {
         mNotifyList = notifyList;
@@ -115,11 +115,11 @@ public class IPv6TetheringCoordinator {
     }
 
     /**
-     * Call when upstream NetworkState may be changed.
-     * If upstream has ipv6 for tethering, update this new NetworkState
+     * Call when UpstreamNetworkState may be changed.
+     * If upstream has ipv6 for tethering, update this new UpstreamNetworkState
      * to IpServer. Otherwise stop ipv6 tethering on downstream interfaces.
      */
-    public void updateUpstreamNetworkState(NetworkState ns) {
+    public void updateUpstreamNetworkState(UpstreamNetworkState ns) {
         if (VDBG) {
             Log.d(TAG, "updateUpstreamNetworkState: " + toDebugString(ns));
         }
@@ -144,18 +144,15 @@ public class IPv6TetheringCoordinator {
         }
     }
 
-    private void setUpstreamNetworkState(NetworkState ns) {
+    private void setUpstreamNetworkState(UpstreamNetworkState ns) {
         if (ns == null) {
             mUpstreamNetworkState = null;
         } else {
             // Make a deep copy of the parts we need.
-            mUpstreamNetworkState = new NetworkState(
-                    null,
+            mUpstreamNetworkState = new UpstreamNetworkState(
                     new LinkProperties(ns.linkProperties),
                     new NetworkCapabilities(ns.networkCapabilities),
-                    new Network(ns.network),
-                    null,
-                    null);
+                    new Network(ns.network));
         }
 
         mLog.log("setUpstreamNetworkState: " + toDebugString(mUpstreamNetworkState));
@@ -261,7 +258,7 @@ public class IPv6TetheringCoordinator {
         final LinkProperties lp = new LinkProperties();
 
         final IpPrefix local48 = makeUniqueLocalPrefix(ulp, (short) 0, 48);
-        lp.addRoute(new RouteInfo(local48, null, null));
+        lp.addRoute(new RouteInfo(local48, null, null, RouteInfo.RTN_UNICAST));
 
         final IpPrefix local64 = makeUniqueLocalPrefix(ulp, subnetId, 64);
         // Because this is a locally-generated ULA, we don't have an upstream
@@ -277,7 +274,13 @@ public class IPv6TetheringCoordinator {
         final byte[] bytes = Arrays.copyOf(in6addr, in6addr.length);
         bytes[7] = (byte) (subnetId >> 8);
         bytes[8] = (byte) subnetId;
-        return new IpPrefix(bytes, prefixlen);
+        final InetAddress addr;
+        try {
+            addr = InetAddress.getByAddress(bytes);
+        } catch (UnknownHostException e) {
+            throw new IllegalStateException("Invalid address length: " + bytes.length, e);
+        }
+        return new IpPrefix(addr, prefixlen);
     }
 
     // Generates a Unique Locally-assigned Prefix:
@@ -295,14 +298,11 @@ public class IPv6TetheringCoordinator {
         return in6addr;
     }
 
-    private static String toDebugString(NetworkState ns) {
+    private static String toDebugString(UpstreamNetworkState ns) {
         if (ns == null) {
-            return "NetworkState{null}";
+            return "UpstreamNetworkState{null}";
         }
-        return String.format("NetworkState{%s, %s, %s}",
-                ns.network,
-                ns.networkCapabilities,
-                ns.linkProperties);
+        return ns.toString();
     }
 
     private static void stopIPv6TetheringOn(IpServer ipServer) {

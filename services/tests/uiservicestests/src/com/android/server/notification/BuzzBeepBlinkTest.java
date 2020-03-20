@@ -72,7 +72,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.IntPair;
 import com.android.server.UiServiceTestCase;
-import com.android.server.lights.Light;
+import com.android.server.lights.LogicalLight;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -89,7 +89,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     @Mock AudioManager mAudioManager;
     @Mock Vibrator mVibrator;
     @Mock android.media.IRingtonePlayer mRingtonePlayer;
-    @Mock Light mLight;
+    @Mock LogicalLight mLight;
     @Mock
     NotificationManagerService.WorkerHandler mHandler;
     @Mock

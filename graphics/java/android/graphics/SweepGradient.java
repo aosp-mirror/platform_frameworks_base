@@ -20,7 +20,7 @@ import android.annotation.ColorInt;
 import android.annotation.ColorLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 public class SweepGradient extends Shader {
     @UnsupportedAppUsage

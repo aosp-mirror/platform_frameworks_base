@@ -16,11 +16,14 @@
 
 package android.bluetooth;
 
+import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,9 +38,6 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The Android Bluetooth API is not finalized, and *will* change. Use at your
- * own risk.
- *
  * Public API for controlling the Bluetooth Pbap Service. This includes
  * Bluetooth Phone book Access profile.
  * BluetoothPbap is a proxy object for controlling the Bluetooth Pbap
@@ -52,6 +52,11 @@ import java.util.List;
  * BluetoothPbap service. Use the ServiceListener interface to obtain a
  * notification when it is bound, this is especially important if you wish to
  * immediately call methods on BluetoothPbap after construction.
+ *
+ * To get an instance of the BluetoothPbap class, you can call
+ * {@link BluetoothAdapter#getProfileProxy(Context, ServiceListener, int)} with the final param
+ * being {@link BluetoothProfile#PBAP}. The ServiceListener should be able to get the instance of
+ * BluetoothPbap in {@link android.bluetooth.BluetoothProfile.ServiceListener#onServiceConnected}.
  *
  * Android only supports one connected Bluetooth Pce at a time.
  *
@@ -84,6 +89,7 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     @SuppressLint("ActionValue")
     @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_CONNECTION_STATE_CHANGED =
             "android.bluetooth.pbap.profile.action.CONNECTION_STATE_CHANGED";
@@ -232,7 +238,8 @@ public class BluetoothPbap implements BluetoothProfile {
      */
     @SystemApi
     @Override
-    public int getConnectionState(@Nullable BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public @BtProfileState int getConnectionState(@Nullable BluetoothDevice device) {
         log("getConnectionState: device=" + device);
         try {
             final IBluetoothPbap service = mService;
@@ -268,6 +275,45 @@ public class BluetoothPbap implements BluetoothProfile {
             Log.e(TAG, e.toString());
         }
         return new ArrayList<BluetoothDevice>();
+    }
+
+    /**
+     * Set connection policy of the profile and tries to disconnect it if connectionPolicy is
+     * {@link BluetoothProfile#CONNECTION_POLICY_FORBIDDEN}
+     *
+     * <p> The device should already be paired.
+     * Connection policy can be one of:
+     * {@link BluetoothProfile#CONNECTION_POLICY_ALLOWED},
+     * {@link BluetoothProfile#CONNECTION_POLICY_FORBIDDEN},
+     * {@link BluetoothProfile#CONNECTION_POLICY_UNKNOWN}
+     *
+     * @param device Paired bluetooth device
+     * @param connectionPolicy is the connection policy to set to for this profile
+     * @return true if connectionPolicy is set, false on error
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
+            @ConnectionPolicy int connectionPolicy) {
+        if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
+        try {
+            final IBluetoothPbap service = mService;
+            if (service != null && isEnabled()
+                    && isValidDevice(device)) {
+                if (connectionPolicy != BluetoothProfile.CONNECTION_POLICY_FORBIDDEN
+                        && connectionPolicy != BluetoothProfile.CONNECTION_POLICY_ALLOWED) {
+                    return false;
+                }
+                return service.setConnectionPolicy(device, connectionPolicy);
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
+            return false;
+        }
     }
 
     /**

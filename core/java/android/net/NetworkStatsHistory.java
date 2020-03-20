@@ -30,7 +30,7 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 
 import static com.android.internal.util.ArrayUtils.total;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.NetworkStatsHistoryBucketProto;
@@ -548,32 +548,32 @@ public class NetworkStatsHistory implements Parcelable {
         final int startIndex = getIndexAfter(end);
         for (int i = startIndex; i >= 0; i--) {
             final long curStart = bucketStart[i];
-            final long curEnd = curStart + bucketDuration;
+            long curEnd = curStart + bucketDuration;
 
             // bucket is older than request; we're finished
             if (curEnd <= start) break;
             // bucket is newer than request; keep looking
             if (curStart >= end) continue;
 
-            // include full value for active buckets, otherwise only fractional
-            final boolean activeBucket = curStart < now && curEnd > now;
-            final long overlap;
-            if (activeBucket) {
-                overlap = bucketDuration;
-            } else {
-                final long overlapEnd = curEnd < end ? curEnd : end;
-                final long overlapStart = curStart > start ? curStart : start;
-                overlap = overlapEnd - overlapStart;
-            }
+            // the active bucket is shorter then a normal completed bucket
+            if (curEnd > now) curEnd = now;
+            // usually this is simply bucketDuration
+            final long bucketSpan = curEnd - curStart;
+            // prevent division by zero
+            if (bucketSpan <= 0) continue;
+
+            final long overlapEnd = curEnd < end ? curEnd : end;
+            final long overlapStart = curStart > start ? curStart : start;
+            final long overlap = overlapEnd - overlapStart;
             if (overlap <= 0) continue;
 
             // integer math each time is faster than floating point
-            if (activeTime != null) entry.activeTime += activeTime[i] * overlap / bucketDuration;
-            if (rxBytes != null) entry.rxBytes += rxBytes[i] * overlap / bucketDuration;
-            if (rxPackets != null) entry.rxPackets += rxPackets[i] * overlap / bucketDuration;
-            if (txBytes != null) entry.txBytes += txBytes[i] * overlap / bucketDuration;
-            if (txPackets != null) entry.txPackets += txPackets[i] * overlap / bucketDuration;
-            if (operations != null) entry.operations += operations[i] * overlap / bucketDuration;
+            if (activeTime != null) entry.activeTime += activeTime[i] * overlap / bucketSpan;
+            if (rxBytes != null) entry.rxBytes += rxBytes[i] * overlap / bucketSpan;
+            if (rxPackets != null) entry.rxPackets += rxPackets[i] * overlap / bucketSpan;
+            if (txBytes != null) entry.txBytes += txBytes[i] * overlap / bucketSpan;
+            if (txPackets != null) entry.txPackets += txPackets[i] * overlap / bucketSpan;
+            if (operations != null) entry.operations += operations[i] * overlap / bucketSpan;
         }
         return entry;
     }

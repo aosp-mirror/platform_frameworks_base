@@ -16,12 +16,12 @@
 
 package android.renderscript;
 
-import java.io.File;
-import java.io.InputStream;
-
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+
+import java.io.File;
+import java.io.InputStream;
 
 /**
  * @hide

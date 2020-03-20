@@ -108,9 +108,9 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
 
             Log.d(TAG, "addConnectableA2dpDevices() device : " + cachedDevice.getName()
                     + ", is connected : " + cachedDevice.isConnected()
-                    + ", is preferred : " + a2dpProfile.isPreferred(device));
+                    + ", is enabled : " + a2dpProfile.isEnabled(device));
 
-            if (a2dpProfile.isPreferred(device)
+            if (a2dpProfile.isEnabled(device)
                     && BluetoothDevice.BOND_BONDED == cachedDevice.getBondState()) {
                 addMediaDevice(cachedDevice);
             }
@@ -140,13 +140,13 @@ public class BluetoothMediaManager extends MediaManager implements BluetoothCall
 
             Log.d(TAG, "addConnectableHearingAidDevices() device : " + cachedDevice.getName()
                     + ", is connected : " + cachedDevice.isConnected()
-                    + ", is preferred : " + hapProfile.isPreferred(device));
+                    + ", is enabled : " + hapProfile.isEnabled(device));
 
             final long hiSyncId = hapProfile.getHiSyncId(device);
 
             // device with same hiSyncId should not be shown in the UI.
             // So do not add it into connectedDevices.
-            if (!devicesHiSyncIds.contains(hiSyncId) && hapProfile.isPreferred(device)
+            if (!devicesHiSyncIds.contains(hiSyncId) && hapProfile.isEnabled(device)
                     && BluetoothDevice.BOND_BONDED == cachedDevice.getBondState()) {
                 devicesHiSyncIds.add(hiSyncId);
                 addMediaDevice(cachedDevice);

@@ -24,8 +24,8 @@
     <string name="installing_app" msgid="1165095864863849422">"جارٍ تثبيت <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
     <string name="install_done" msgid="5987363587661783896">"تم تثبيت التطبيق."</string>
     <string name="install_confirm_question" msgid="8176284075816604590">"هل تريد تثبيت هذا التطبيق؟"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"هل تريد تثبيت تحديث لهذا التطبيق الحالي؟ لن تفقد بياناتك الحالية."</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"هل تريد تثبيت تحديث لهذا التطبيق المضمَّن؟ لن تفقد بياناتك الحالية."</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"هل تريد تثبيت إعادة تحميل لهذا التطبيق الحالي؟ لن تفقد بياناتك الحالية."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"هل تريد تثبيت إعادة تحميل لهذا التطبيق المضمَّن؟ لن تفقد بياناتك الحالية."</string>
     <string name="install_failed" msgid="5777824004474125469">"التطبيق ليس مثبتًا."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"تم حظر تثبيت الحزمة."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"لم يتم تثبيت التطبيق لأن حزمة التثبيت تتعارض مع حزمة حالية."</string>

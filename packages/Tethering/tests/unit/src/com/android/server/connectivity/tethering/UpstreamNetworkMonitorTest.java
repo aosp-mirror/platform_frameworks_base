@@ -18,12 +18,13 @@ package com.android.server.connectivity.tethering;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE_DUN;
 import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
-import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+
+import static com.android.server.connectivity.tethering.UpstreamNetworkMonitor.TYPE_NONE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -50,7 +51,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.net.NetworkState;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.Message;
@@ -212,8 +212,8 @@ public class UpstreamNetworkMonitorTest {
         mUNM.updateMobileRequiresDun(true);
         mUNM.registerMobileNetworkRequest();
         verify(mCM, times(1)).requestNetwork(
-                any(NetworkRequest.class), any(NetworkCallback.class), anyInt(), anyInt(),
-                any(Handler.class));
+                any(NetworkRequest.class), anyInt(), anyInt(), any(Handler.class),
+                any(NetworkCallback.class));
 
         assertTrue(mUNM.mobileNetworkRequested());
         assertUpstreamTypeRequested(TYPE_MOBILE_DUN);
@@ -539,13 +539,15 @@ public class UpstreamNetworkMonitorTest {
                 mUNM.selectPreferredUpstreamType(preferredTypes));
         verify(mEntitleMgr, times(1)).maybeRunProvisioning();
     }
-    private void assertSatisfiesLegacyType(int legacyType, NetworkState ns) {
+
+    private void assertSatisfiesLegacyType(int legacyType, UpstreamNetworkState ns) {
         if (legacyType == TYPE_NONE) {
             assertTrue(ns == null);
             return;
         }
 
-        final NetworkCapabilities nc = ConnectivityManager.networkCapabilitiesForType(legacyType);
+        final NetworkCapabilities nc =
+                UpstreamNetworkMonitor.networkCapabilitiesForType(legacyType);
         assertTrue(nc.satisfiedByNetworkCapabilities(ns.networkCapabilities));
     }
 
@@ -647,8 +649,8 @@ public class UpstreamNetworkMonitorTest {
         }
 
         @Override
-        public void requestNetwork(NetworkRequest req, NetworkCallback cb,
-                int timeoutMs, int legacyType, Handler h) {
+        public void requestNetwork(NetworkRequest req,
+                int timeoutMs, int legacyType, Handler h, NetworkCallback cb) {
             assertFalse(allCallbacks.containsKey(cb));
             allCallbacks.put(cb, h);
             assertFalse(requested.containsKey(cb));

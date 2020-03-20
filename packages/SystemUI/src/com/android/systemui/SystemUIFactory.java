@@ -31,6 +31,7 @@ import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.ScrimView;
@@ -49,6 +50,7 @@ import com.android.systemui.statusbar.phone.UnlockMethodCache;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.volume.VolumeDialogComponent;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import dagger.Module;
@@ -108,6 +110,17 @@ public class SystemUIFactory {
     public StatusBarKeyguardViewManager createStatusBarKeyguardViewManager(Context context,
             ViewMediatorCallback viewMediatorCallback, LockPatternUtils lockPatternUtils) {
         return new StatusBarKeyguardViewManager(context, viewMediatorCallback, lockPatternUtils);
+    }
+
+    /**
+     * Creates an instance of ScreenshotNotificationSmartActionsProvider.
+     * This method is overridden in vendor specific implementation of Sys UI.
+     */
+    public ScreenshotNotificationSmartActionsProvider
+            createScreenshotNotificationSmartActionsProvider(Context context,
+            Executor executor,
+            Handler uiHandler) {
+        return new ScreenshotNotificationSmartActionsProvider();
     }
 
     public KeyguardBouncer createKeyguardBouncer(Context context, ViewMediatorCallback callback,

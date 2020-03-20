@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
@@ -35,10 +36,10 @@ import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
-import android.net.NetworkFactory;
 import android.net.NetworkInfo;
-import android.net.NetworkMisc;
+import android.net.NetworkProvider;
 import android.net.NetworkSpecifier;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
@@ -74,6 +75,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         final String typeName = ConnectivityManager.getNetworkTypeName(type);
         mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
         mNetworkCapabilities = new NetworkCapabilities();
+        mNetworkCapabilities.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
         mNetworkCapabilities.addTransportType(transport);
         switch (transport) {
             case TRANSPORT_ETHERNET:
@@ -114,7 +116,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
         public InstrumentedNetworkAgent(NetworkAgentWrapper wrapper, LinkProperties lp) {
             super(wrapper.mHandlerThread.getLooper(), wrapper.mContext, wrapper.mLogTag,
                     wrapper.mNetworkInfo, wrapper.mNetworkCapabilities, lp, wrapper.mScore,
-                    new NetworkMisc(), NetworkFactory.SerialNumber.NONE);
+                    new NetworkAgentConfig(), NetworkProvider.ID_NONE);
             mWrapper = wrapper;
         }
 
@@ -206,13 +208,11 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     }
 
     public void suspend() {
-        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.SUSPENDED, null, null);
-        mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+        removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
     }
 
     public void resume() {
-        mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
-        mNetworkAgent.sendNetworkInfo(mNetworkInfo);
+        addCapability(NET_CAPABILITY_NOT_SUSPENDED);
     }
 
     public void disconnect() {
@@ -222,7 +222,7 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
 
     @Override
     public Network getNetwork() {
-        return new Network(mNetworkAgent.netId);
+        return mNetworkAgent.getNetwork();
     }
 
     public void expectPreventReconnectReceived(long timeoutMs) {

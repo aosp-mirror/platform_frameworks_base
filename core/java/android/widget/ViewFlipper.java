@@ -17,7 +17,7 @@
 package android.widget;
 
 import android.annotation.IntRange;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

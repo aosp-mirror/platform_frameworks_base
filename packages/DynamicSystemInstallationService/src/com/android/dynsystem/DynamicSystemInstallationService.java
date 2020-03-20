@@ -46,6 +46,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.net.http.HttpResponseCache;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -56,9 +57,12 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.image.DynamicSystemClient;
 import android.os.image.DynamicSystemManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -74,6 +78,12 @@ public class DynamicSystemInstallationService extends Service
 
     // TODO (b/131866826): This is currently for test only. Will move this to System API.
     static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
+    static final String KEY_DSU_SLOT = "KEY_DSU_SLOT";
+    static final String DEFAULT_DSU_SLOT = "dsu";
+    static final String KEY_PUBKEY = "KEY_PUBKEY";
+
+    // Default userdata partition size is 2GiB.
+    private static final long DEFAULT_USERDATA_SIZE = 2L << 30;
 
     /*
      * Intent actions
@@ -129,6 +139,7 @@ public class DynamicSystemInstallationService extends Service
     private long mCurrentPartitionInstalledSize;
 
     private boolean mJustCancelledByUser;
+    private boolean mKeepNotification;
 
     // This is for testing only now
     private boolean mEnableWhenCompleted;
@@ -143,12 +154,31 @@ public class DynamicSystemInstallationService extends Service
         prepareNotification();
 
         mDynSystem = (DynamicSystemManager) getSystemService(Context.DYNAMIC_SYSTEM_SERVICE);
+
+        // Install an HttpResponseCache in the application cache directory so we can cache
+        // gsi key revocation list. The http(s) protocol handler uses this cache transparently.
+        // The cache size is chosen heuristically. Since we don't have too much traffic right now,
+        // a moderate size of 1MiB should be enough.
+        try {
+            File httpCacheDir = new File(getCacheDir(), "httpCache");
+            long httpCacheSize = 1 * 1024 * 1024; // 1 MiB
+            HttpResponseCache.install(httpCacheDir, httpCacheSize);
+        } catch (IOException e) {
+            Log.d(TAG, "HttpResponseCache.install() failed: " + e);
+        }
     }
 
     @Override
     public void onDestroy() {
-        // Cancel the persistent notification.
-        mNM.cancel(NOTIFICATION_ID);
+        HttpResponseCache cache = HttpResponseCache.getInstalled();
+        if (cache != null) {
+            cache.flush();
+        }
+
+        if (!mKeepNotification) {
+            // Cancel the persistent notification.
+            mNM.cancel(NOTIFICATION_ID);
+        }
     }
 
     @Override
@@ -201,9 +231,6 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
-        // if it's not successful, reset the task and stop self.
-        resetTaskAndStop();
-
         switch (result) {
             case RESULT_CANCELLED:
                 postStatus(STATUS_NOT_STARTED, CAUSE_INSTALL_CANCELLED, null);
@@ -222,6 +249,9 @@ public class DynamicSystemInstallationService extends Service
                 postStatus(STATUS_NOT_STARTED, CAUSE_ERROR_EXCEPTION, detail);
                 break;
         }
+
+        // if it's not successful, reset the task and stop self.
+        resetTaskAndStop();
     }
 
     private void executeInstallCommand(Intent intent) {
@@ -244,10 +274,20 @@ public class DynamicSystemInstallationService extends Service
         long systemSize = intent.getLongExtra(DynamicSystemClient.KEY_SYSTEM_SIZE, 0);
         long userdataSize = intent.getLongExtra(DynamicSystemClient.KEY_USERDATA_SIZE, 0);
         mEnableWhenCompleted = intent.getBooleanExtra(KEY_ENABLE_WHEN_COMPLETED, false);
+        String dsuSlot = intent.getStringExtra(KEY_DSU_SLOT);
+        String publicKey = intent.getStringExtra(KEY_PUBKEY);
 
+        if (userdataSize == 0) {
+            userdataSize = DEFAULT_USERDATA_SIZE;
+        }
+
+        if (TextUtils.isEmpty(dsuSlot)) {
+            dsuSlot = DEFAULT_DSU_SLOT;
+        }
         // TODO: better constructor or builder
-        mInstallTask = new InstallationAsyncTask(
-                url, systemSize, userdataSize, this, mDynSystem, this);
+        mInstallTask =
+                new InstallationAsyncTask(
+                        url, dsuSlot, publicKey, systemSize, userdataSize, this, mDynSystem, this);
 
         mInstallTask.execute();
 
@@ -262,10 +302,11 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
+        stopForeground(true);
         mJustCancelledByUser = true;
 
         if (mInstallTask.cancel(false)) {
-            // Will cleanup and post status in onResult()
+            // Will stopSelf() in onResult()
             Log.d(TAG, "Cancel request filed successfully");
         } else {
             Log.e(TAG, "Trying to cancel installation while it's already completed.");
@@ -355,10 +396,10 @@ public class DynamicSystemInstallationService extends Service
     private void resetTaskAndStop() {
         mInstallTask = null;
 
-        stopForeground(true);
-
-        // stop self, but this service is not destroyed yet if it's still bound
-        stopSelf();
+        new Handler().postDelayed(() -> {
+            stopForeground(STOP_FOREGROUND_DETACH);
+            stopSelf();
+        }, 50);
     }
 
     private void prepareNotification() {
@@ -380,6 +421,10 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private Notification buildNotification(int status, int cause) {
+        return buildNotification(status, cause, null);
+    }
+
+    private Notification buildNotification(int status, int cause, Throwable detail) {
         Notification.Builder builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_system_update_googblue_24dp)
                 .setProgress(0, 0, false);
@@ -408,7 +453,9 @@ public class DynamicSystemInstallationService extends Service
                 break;
 
             case STATUS_READY:
-                builder.setContentText(getString(R.string.notification_install_completed));
+                String msgCompleted = getString(R.string.notification_install_completed);
+                builder.setContentText(msgCompleted)
+                        .setStyle(new Notification.BigTextStyle().bigText(msgCompleted));
 
                 builder.addAction(new Notification.Action.Builder(
                         null, getString(R.string.notification_action_discard),
@@ -421,17 +468,24 @@ public class DynamicSystemInstallationService extends Service
                 break;
 
             case STATUS_IN_USE:
-                builder.setContentText(getString(R.string.notification_dynsystem_in_use));
+                String msgInUse = getString(R.string.notification_dynsystem_in_use);
+                builder.setContentText(msgInUse)
+                        .setStyle(new Notification.BigTextStyle().bigText(msgInUse));
 
                 builder.addAction(new Notification.Action.Builder(
-                        null, getString(R.string.notification_action_uninstall),
+                        null, getString(R.string.notification_action_reboot_to_origin),
                         createPendingIntent(ACTION_REBOOT_TO_NORMAL)).build());
 
                 break;
 
             case STATUS_NOT_STARTED:
                 if (cause != CAUSE_NOT_SPECIFIED && cause != CAUSE_INSTALL_CANCELLED) {
-                    builder.setContentText(getString(R.string.notification_install_failed));
+                    if (detail instanceof InstallationAsyncTask.ImageValidationException) {
+                        builder.setContentText(
+                                getString(R.string.notification_image_validation_failed));
+                    } else {
+                        builder.setContentText(getString(R.string.notification_install_failed));
+                    }
                 } else {
                     // no need to notify the user if the task is not started, or cancelled.
                 }
@@ -451,7 +505,53 @@ public class DynamicSystemInstallationService extends Service
     }
 
     private void postStatus(int status, int cause, Throwable detail) {
-        Log.d(TAG, "postStatus(): statusCode=" + status + ", causeCode=" + cause);
+        String statusString;
+        String causeString;
+        mKeepNotification = false;
+
+        switch (status) {
+            case STATUS_NOT_STARTED:
+                statusString = "NOT_STARTED";
+                break;
+            case STATUS_IN_PROGRESS:
+                statusString = "IN_PROGRESS";
+                break;
+            case STATUS_READY:
+                statusString = "READY";
+                break;
+            case STATUS_IN_USE:
+                statusString = "IN_USE";
+                break;
+            default:
+                statusString = "UNKNOWN";
+                break;
+        }
+
+        switch (cause) {
+            case CAUSE_INSTALL_COMPLETED:
+                causeString = "INSTALL_COMPLETED";
+                break;
+            case CAUSE_INSTALL_CANCELLED:
+                causeString = "INSTALL_CANCELLED";
+                break;
+            case CAUSE_ERROR_IO:
+                causeString = "ERROR_IO";
+                mKeepNotification = true;
+                break;
+            case CAUSE_ERROR_INVALID_URL:
+                causeString = "ERROR_INVALID_URL";
+                mKeepNotification = true;
+                break;
+            case CAUSE_ERROR_EXCEPTION:
+                causeString = "ERROR_EXCEPTION";
+                mKeepNotification = true;
+                break;
+            default:
+                causeString = "CAUSE_NOT_SPECIFIED";
+                break;
+        }
+
+        Log.d(TAG, "status=" + statusString + ", cause=" + causeString + ", detail=" + detail);
 
         boolean notifyOnNotificationBar = true;
 
@@ -464,7 +564,7 @@ public class DynamicSystemInstallationService extends Service
         }
 
         if (notifyOnNotificationBar) {
-            mNM.notify(NOTIFICATION_ID, buildNotification(status, cause));
+            mNM.notify(NOTIFICATION_ID, buildNotification(status, cause, detail));
         }
 
         for (int i = mClients.size() - 1; i >= 0; i--) {

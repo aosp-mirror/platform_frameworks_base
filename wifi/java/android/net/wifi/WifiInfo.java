@@ -19,7 +19,7 @@ package android.net.wifi;
 import android.annotation.IntRange;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
 import android.os.Build;
@@ -658,9 +658,21 @@ public class WifiInfo implements Parcelable {
         }
     }
 
-    /** {@hide} */
+    /**
+     * Remove double quotes (") surrounding a SSID string, if present. Otherwise, return the
+     * string unmodified. Return null if the input string was null.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public static String sanitizeSsid(@Nullable String string) {
+        return removeDoubleQuotes(string);
+    }
+
+    /** @hide */
     @UnsupportedAppUsage
-    public static String removeDoubleQuotes(String string) {
+    @Nullable
+    public static String removeDoubleQuotes(@Nullable String string) {
         if (string == null) return null;
         final int length = string.length();
         if ((length > 1) && (string.charAt(0) == '"') && (string.charAt(length - 1) == '"')) {

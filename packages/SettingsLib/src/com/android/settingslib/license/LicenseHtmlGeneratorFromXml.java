@@ -35,8 +35,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -84,7 +86,7 @@ class LicenseHtmlGeneratorFromXml {
      * "9645f39e9db895a4aa6e02cb57294595". Here "9645f39e9db895a4aa6e02cb57294595" is a MD5 sum
      * of the content of packages/services/Telephony/MODULE_LICENSE_APACHE2.
      */
-    private final Map<String, String> mFileNameToContentIdMap = new HashMap();
+    private final Map<String, Set<String>> mFileNameToContentIdMap = new HashMap();
 
     /*
      * A map from a content id (MD5 sum of file content) to a license file content.
@@ -186,10 +188,10 @@ class LicenseHtmlGeneratorFromXml {
      *     </licenses>
      */
     @VisibleForTesting
-    static void parse(InputStreamReader in, Map<String, String> outFileNameToContentIdMap,
+    static void parse(InputStreamReader in, Map<String, Set<String>> outFileNameToContentIdMap,
             Map<String, String> outContentIdToFileContentMap)
                     throws XmlPullParserException, IOException {
-        Map<String, String> fileNameToContentIdMap = new HashMap<String, String>();
+        Map<String, Set<String>> fileNameToContentIdMap = new HashMap<String, Set<String>>();
         Map<String, String> contentIdToFileContentMap = new HashMap<String, String>();
 
         XmlPullParser parser = Xml.newPullParser();
@@ -206,7 +208,10 @@ class LicenseHtmlGeneratorFromXml {
                     if (!TextUtils.isEmpty(contentId)) {
                         String fileName = readText(parser).trim();
                         if (!TextUtils.isEmpty(fileName)) {
-                            fileNameToContentIdMap.put(fileName, contentId);
+                            Set<String> contentIds =
+                                    fileNameToContentIdMap.computeIfAbsent(
+                                            fileName, k -> new HashSet<>());
+                            contentIds.add(contentId);
                         }
                     }
                 } else if (TAG_FILE_CONTENT.equals(parser.getName())) {
@@ -224,7 +229,13 @@ class LicenseHtmlGeneratorFromXml {
 
             state = parser.next();
         }
-        outFileNameToContentIdMap.putAll(fileNameToContentIdMap);
+        for (Map.Entry<String, Set<String>> entry : fileNameToContentIdMap.entrySet()) {
+            outFileNameToContentIdMap.merge(
+                    entry.getKey(), entry.getValue(), (s1, s2) -> {
+                        s1.addAll(s2);
+                        return s1;
+                    });
+        }
         outContentIdToFileContentMap.putAll(contentIdToFileContentMap);
     }
 
@@ -240,7 +251,7 @@ class LicenseHtmlGeneratorFromXml {
     }
 
     @VisibleForTesting
-    static void generateHtml(Map<String, String> fileNameToContentIdMap,
+    static void generateHtml(Map<String, Set<String>> fileNameToContentIdMap,
             Map<String, String> contentIdToFileContentMap, PrintWriter writer,
             String noticeHeader) {
         List<String> fileNameList = new ArrayList();
@@ -259,19 +270,20 @@ class LicenseHtmlGeneratorFromXml {
 
         // Prints all the file list with a link to its license file content.
         for (String fileName : fileNameList) {
-            String contentId = fileNameToContentIdMap.get(fileName);
-            // Assigns an id to a newly referred license file content.
-            if (!contentIdToOrderMap.containsKey(contentId)) {
-                contentIdToOrderMap.put(contentId, count);
+            for (String contentId : fileNameToContentIdMap.get(fileName)) {
+                // Assigns an id to a newly referred license file content.
+                if (!contentIdToOrderMap.containsKey(contentId)) {
+                    contentIdToOrderMap.put(contentId, count);
 
-                // An index in contentIdAndFileNamesList is the order of each element.
-                contentIdAndFileNamesList.add(new ContentIdAndFileNames(contentId));
-                count++;
+                    // An index in contentIdAndFileNamesList is the order of each element.
+                    contentIdAndFileNamesList.add(new ContentIdAndFileNames(contentId));
+                    count++;
+                }
+
+                int id = contentIdToOrderMap.get(contentId);
+                contentIdAndFileNamesList.get(id).mFileNameList.add(fileName);
+                writer.format("<li><a href=\"#id%d\">%s</a></li>\n", id, fileName);
             }
-
-            int id = contentIdToOrderMap.get(contentId);
-            contentIdAndFileNamesList.get(id).mFileNameList.add(fileName);
-            writer.format("<li><a href=\"#id%d\">%s</a></li>\n", id, fileName);
         }
 
         writer.println(HTML_MIDDLE_STRING);

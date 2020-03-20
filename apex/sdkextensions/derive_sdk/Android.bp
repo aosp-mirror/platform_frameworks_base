@@ -1,0 +1,55 @@
+// Copyright (C) 2019 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+cc_defaults {
+    name: "derive_sdk-defaults",
+    srcs: [
+        "derive_sdk.cpp",
+        "sdk.proto",
+    ],
+    proto: {
+        type: "lite",
+    },
+    sdk_version: "current",
+    stl: "c++_static",
+    shared_libs: [ "liblog" ],
+    static_libs: [
+        "libbase_ndk",
+        "libprotobuf-cpp-lite-ndk",
+    ],
+}
+
+cc_binary {
+    name: "derive_sdk",
+    defaults: [ "derive_sdk-defaults" ],
+    apex_available: [ "com.android.sdkext" ],
+    visibility: [ "//frameworks/base/apex/sdkextensions" ]
+}
+
+// Work around testing using a 64-bit test suite on 32-bit test device by
+// using a prefer32 version of derive_sdk in testing.
+cc_binary {
+    name: "derive_sdk_prefer32",
+    defaults: [ "derive_sdk-defaults" ],
+    compile_multilib: "prefer32",
+    stem: "derive_sdk",
+    apex_available: [ "test_com.android.sdkext" ],
+    visibility: [ "//frameworks/base/apex/sdkextensions/testing" ]
+}
+
+prebuilt_etc {
+    name: "derive_sdk.rc",
+    src: "derive_sdk.rc",
+    installable: false,
+}

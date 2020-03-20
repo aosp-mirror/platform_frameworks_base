@@ -19,7 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.system.Os;
 import android.system.OsConstants;
 import android.webkit.WebViewZygote;
@@ -97,6 +97,12 @@ public class Process {
      * @hide
      */
     public static final int KEYSTORE_UID = 1017;
+
+    /**
+     * Defines the UID/GID for credstore.
+     * @hide
+     */
+    public static final int CREDSTORE_UID = 1076;
 
     /**
      * Defines the UID/GID for the NFC service process.
@@ -481,6 +487,40 @@ public class Process {
     private static long sStartUptimeMillis;
 
     /**
+     * Value used to indicate that there is no special information about an application launch.  App
+     * launches with this policy will occur through the primary or secondary Zygote with no special
+     * treatment.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_EMPTY = 0;
+
+    /**
+     * Flag used to indicate that an application launch is user-visible and latency sensitive.  Any
+     * launch with this policy will use a Unspecialized App Process Pool if the target Zygote
+     * supports it.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE = 1 << 0;
+
+    /**
+     * Flag used to indicate that the launch is one in a series of app launches that will be
+     * performed in quick succession.  For future use.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_BATCH_LAUNCH = 1 << 1;
+
+    /**
+     * Flag used to indicate that the current launch event is for a system process.  All system
+     * processes are equally important, so none of them should be prioritized over the others.
+     *
+     * @hide
+     */
+    public static final int ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS = 1 << 2;
+
+    /**
      * State associated with the zygote process.
      * @hide
      */
@@ -519,6 +559,8 @@ public class Process {
      * @param appDataDir null-ok the data directory of the app.
      * @param invokeWith null-ok the command to invoke with.
      * @param packageName null-ok the name of the package this process belongs to.
+     * @param zygotePolicyFlags Flags used to determine how to launch the application
+     * @param isTopApp whether the process starts for high priority application.
      * @param disabledCompatChanges null-ok list of disabled compat changes for the process being
      *                             started.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
@@ -539,12 +581,14 @@ public class Process {
                                            @Nullable String appDataDir,
                                            @Nullable String invokeWith,
                                            @Nullable String packageName,
+                                           int zygotePolicyFlags,
+                                           boolean isTopApp,
                                            @Nullable long[] disabledCompatChanges,
                                            @Nullable String[] zygoteArgs) {
         return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ true, disabledCompatChanges, zygoteArgs);
+                    zygotePolicyFlags, isTopApp, disabledCompatChanges, zygoteArgs);
     }
 
     /** @hide */
@@ -565,7 +609,8 @@ public class Process {
         return WebViewZygote.getProcess().start(processClass, niceName, uid, gid, gids,
                     runtimeFlags, mountExternal, targetSdkVersion, seInfo,
                     abi, instructionSet, appDataDir, invokeWith, packageName,
-                    /*useUsapPool=*/ false, disabledCompatChanges, zygoteArgs);
+                    /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, /*isTopApp=*/ false,
+                    disabledCompatChanges, zygoteArgs);
     }
 
     /**
@@ -740,11 +785,12 @@ public class Process {
 
     /**
      * Set the priority of a thread, based on Linux priorities.
-     * 
-     * @param tid The identifier of the thread/process to change.
+     *
+     * @param tid The identifier of the thread/process to change. It should be
+     * the native thread id but not the managed id of {@link java.lang.Thread}.
      * @param priority A Linux priority level, from -20 for highest scheduling
      * priority to 19 for lowest scheduling priority.
-     * 
+     *
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      * @throws SecurityException Throws SecurityException if your process does

@@ -16,9 +16,9 @@
 
 package com.android.internal.app;
 
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.Dialog;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.KeyEvent;

@@ -17,6 +17,7 @@
 package android.nfc.cardemulation;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -652,6 +653,116 @@ public final class CardEmulation {
             } catch (RemoteException ee) {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 return false;
+            }
+        }
+    }
+
+    /**
+     * Retrieves the registered AIDs for the preferred payment service.
+     *
+     * @return The list of AIDs registered for this category, or null if it couldn't be found.
+     */
+    @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @Nullable
+    public List<String> getAidsForPreferredPaymentService() {
+        try {
+            ApduServiceInfo serviceInfo = sService.getPreferredPaymentService(mContext.getUserId());
+            return (serviceInfo != null ? serviceInfo.getAids() : null);
+        } catch (RemoteException e) {
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                throw e.rethrowFromSystemServer();
+            }
+            try {
+                ApduServiceInfo serviceInfo =
+                        sService.getPreferredPaymentService(mContext.getUserId());
+                return (serviceInfo != null ? serviceInfo.getAids() : null);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Retrieves the route destination for the preferred payment service.
+     *
+     * @return The route destination secure element name of the preferred payment service.
+     *         HCE payment: "Host"
+     *         OffHost payment: 1. String with prefix SIM or prefix eSE string.
+     *                             Ref: GSMA TS.26 - NFC Handset Requirements
+     *                             TS26_NFC_REQ_069: For UICC, Secure Element Name SHALL be
+     *                                               SIM[smartcard slot]
+     *                                               (e.g. SIM/SIM1, SIM2… SIMn).
+     *                             TS26_NFC_REQ_070: For embedded SE, Secure Element Name SHALL be
+     *                                               eSE[number]
+     *                                               (e.g. eSE/eSE1, eSE2, etc.).
+     *                          2. "OffHost" if the payment service does not specify secure element
+     *                             name.
+     */
+    @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @Nullable
+    public String getRouteDestinationForPreferredPaymentService() {
+        try {
+            ApduServiceInfo serviceInfo = sService.getPreferredPaymentService(mContext.getUserId());
+            if (serviceInfo != null) {
+                if (!serviceInfo.isOnHost()) {
+                    return serviceInfo.getOffHostSecureElement() == null ?
+                            "OffHost" : serviceInfo.getOffHostSecureElement();
+                }
+                return "Host";
+            }
+            return null;
+        } catch (RemoteException e) {
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                throw e.rethrowFromSystemServer();
+            }
+            try {
+                ApduServiceInfo serviceInfo =
+                        sService.getPreferredPaymentService(mContext.getUserId());
+                if (serviceInfo != null) {
+                    if (!serviceInfo.isOnHost()) {
+                        return serviceInfo.getOffHostSecureElement() == null ?
+                                "Offhost" : serviceInfo.getOffHostSecureElement();
+                    }
+                    return "Host";
+                }
+                return null;
+
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns a user-visible description of the preferred payment service.
+     *
+     * @return the preferred payment service description
+     */
+    @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO)
+    @Nullable
+    public CharSequence getDescriptionForPreferredPaymentService() {
+        try {
+            ApduServiceInfo serviceInfo = sService.getPreferredPaymentService(mContext.getUserId());
+            return (serviceInfo != null ? serviceInfo.getDescription() : null);
+        } catch (RemoteException e) {
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                throw e.rethrowFromSystemServer();
+            }
+            try {
+                ApduServiceInfo serviceInfo =
+                        sService.getPreferredPaymentService(mContext.getUserId());
+                return (serviceInfo != null ? serviceInfo.getDescription() : null);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                throw e.rethrowFromSystemServer();
             }
         }
     }

@@ -60,9 +60,10 @@ import com.android.internal.annotations.VisibleForTesting;
  * The telephony framework will then bind to the ImsService you have defined in your manifest
  * if you are either:
  * 1) Defined as the default ImsService for the device in the device overlay using
- *    "config_ims_package".
+ *    "config_ims_mmtel_package" or "config_ims_rcs_package".
  * 2) Defined as a Carrier Provided ImsService in the Carrier Configuration using
- *    {@link CarrierConfigManager#KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING}.
+ *    {@link CarrierConfigManager#KEY_CONFIG_IMS_MMTEL_PACKAGE_OVERRIDE_STRING} or
+ *    {@link CarrierConfigManager#KEY_CONFIG_IMS_RCS_PACKAGE_OVERRIDE_STRING}.
  *
  * There are two ways to define to the platform which {@link ImsFeature}s this {@link ImsService}
  * supports, dynamic or static definitions.

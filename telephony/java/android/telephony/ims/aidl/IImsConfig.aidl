@@ -40,4 +40,5 @@ interface IImsConfig {
     // Return result code defined in ImsConfig#OperationStatusConstants
     int setConfigString(int item, String value);
     void updateImsCarrierConfigs(in PersistableBundle bundle);
+    void notifyRcsAutoConfigurationReceived(in byte[] config, boolean isCompressed);
 }

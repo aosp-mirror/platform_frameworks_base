@@ -23,6 +23,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.IConnectivityManager;
+import android.net.VpnManager;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -43,9 +44,19 @@ public class ConfirmDialog extends AlertActivity
         implements DialogInterface.OnClickListener, ImageGetter {
     private static final String TAG = "VpnConfirm";
 
+    @VpnManager.VpnType private final int mVpnType;
+
     private String mPackage;
 
     private IConnectivityManager mService;
+
+    public ConfirmDialog() {
+        this(VpnManager.TYPE_VPN_SERVICE);
+    }
+
+    public ConfirmDialog(@VpnManager.VpnType int vpnType) {
+        mVpnType = vpnType;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,7 +149,7 @@ public class ConfirmDialog extends AlertActivity
             if (mService.prepareVpn(null, mPackage, UserHandle.myUserId())) {
                 // Authorize this app to initiate VPN connections in the future without user
                 // intervention.
-                mService.setVpnPackageAuthorization(mPackage, UserHandle.myUserId(), true);
+                mService.setVpnPackageAuthorization(mPackage, UserHandle.myUserId(), mVpnType);
                 setResult(RESULT_OK);
             }
         } catch (Exception e) {

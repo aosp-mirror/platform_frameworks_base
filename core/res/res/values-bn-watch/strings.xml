@@ -20,6 +20,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="android_upgrading_apk" msgid="1090732262010398759">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টির মধ্যে <xliff:g id="NUMBER_0">%1$d</xliff:g>টি অ্যাপ্লিকেশান"</string>
-    <string name="permgrouplab_sensors" msgid="202675452368612754">"সেন্সরগুলি"</string>
+    <string name="android_upgrading_apk" msgid="5356436701512342265">"<xliff:g id="NUMBER_1">%2$d</xliff:g>টির মধ্যে <xliff:g id="NUMBER_0">%1$d</xliff:g>টি অ্যাপ্লিকেশান"</string>
+    <string name="permgrouplab_sensors" msgid="2439544173324807471">"সেন্সরগুলি"</string>
 </resources>

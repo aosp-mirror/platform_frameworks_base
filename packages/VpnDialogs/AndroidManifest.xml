@@ -34,6 +34,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".PlatformVpnConfirmDialog"
+                  android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
+                  android:noHistory="true"
+                  android:excludeFromRecents="true"
+                  android:exported="true">
+        </activity>
+
         <activity android:name=".ManageDialog"
                   android:theme="@*android:style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:noHistory="true"

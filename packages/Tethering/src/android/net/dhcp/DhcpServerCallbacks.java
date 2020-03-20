@@ -28,4 +28,9 @@ public abstract class DhcpServerCallbacks extends IDhcpServerCallbacks.Stub {
     public int getInterfaceVersion() {
         return IDhcpServerCallbacks.VERSION;
     }
+
+    @Override
+    public String getInterfaceHash() {
+        return IDhcpServerCallbacks.HASH;
+    }
 }

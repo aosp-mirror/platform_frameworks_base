@@ -36,6 +36,7 @@ import android.app.IStopUserCallback;
 import android.app.IUidObserver;
 import android.app.KeyguardManager;
 import android.app.ProfilerInfo;
+import android.app.UserSwitchObserver;
 import android.app.WaitResult;
 import android.app.usage.AppStandbyInfo;
 import android.app.usage.ConfigurationStats;
@@ -1708,6 +1709,42 @@ final class ActivityManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private boolean switchUserAndWaitForComplete(int userId) throws RemoteException {
+        UserInfo currentUser = mInterface.getCurrentUser();
+        if (currentUser != null && userId == currentUser.id) {
+            // Already switched to the correct user, exit early.
+            return true;
+        }
+
+        // Register switch observer.
+        final CountDownLatch switchLatch = new CountDownLatch(1);
+        mInterface.registerUserSwitchObserver(
+                new UserSwitchObserver() {
+                    @Override
+                    public void onUserSwitchComplete(int newUserId) {
+                        if (userId == newUserId) {
+                            switchLatch.countDown();
+                        }
+                    }
+                }, ActivityManagerShellCommand.class.getName());
+
+        // Switch.
+        boolean switched = mInterface.switchUser(userId);
+        if (!switched) {
+            // Switching failed, don't wait for the user switch observer.
+            return false;
+        }
+
+        // Wait.
+        try {
+            switched = switchLatch.await(USER_OPERATION_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            getErrPrintWriter().println("Error: Thread interrupted unexpectedly.");
+        }
+
+        return switched;
+    }
+
     int runSwitchUser(PrintWriter pw) throws RemoteException {
         UserManager userManager = mInternal.mContext.getSystemService(UserManager.class);
         final int userSwitchable = userManager.getUserSwitchability();
@@ -1715,9 +1752,30 @@ final class ActivityManagerShellCommand extends ShellCommand {
             getErrPrintWriter().println("Error: " + userSwitchable);
             return -1;
         }
-        String user = getNextArgRequired();
-        mInterface.switchUser(Integer.parseInt(user));
-        return 0;
+        boolean wait = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if ("-w".equals(opt)) {
+                wait = true;
+            } else {
+                getErrPrintWriter().println("Error: unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        int userId = Integer.parseInt(getNextArgRequired());
+        boolean switched;
+        if (wait) {
+            switched = switchUserAndWaitForComplete(userId);
+        } else {
+            switched = mInterface.switchUser(userId);
+        }
+        if (switched) {
+            return 0;
+        } else {
+            pw.printf("Error: Failed to switch to user %d\n", userId);
+            return 1;
+        }
     }
 
     int runGetCurrentUser(PrintWriter pw) throws RemoteException {
@@ -2875,57 +2933,98 @@ final class ActivityManagerShellCommand extends ShellCommand {
         final PlatformCompat platformCompat = (PlatformCompat)
                 ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE);
         String toggleValue = getNextArgRequired();
-        if (toggleValue.equals("reset-all")) {
-            final String packageName = getNextArgRequired();
-            pw.println("Reset all changes for " + packageName + " to default value.");
-            platformCompat.clearOverrides(packageName);
-            return 0;
-        }
-        long changeId;
-        String changeIdString = getNextArgRequired();
-        try {
-            changeId = Long.parseLong(changeIdString);
-        } catch (NumberFormatException e) {
-            changeId = platformCompat.lookupChangeId(changeIdString);
-        }
-        if (changeId == -1) {
-            pw.println("Unknown or invalid change: '" + changeIdString + "'.");
-            return -1;
+        boolean toggleAll = false;
+        int targetSdkVersion = -1;
+        long changeId = -1;
+
+        if (toggleValue.endsWith("-all")) {
+            toggleValue = toggleValue.substring(0, toggleValue.lastIndexOf("-all"));
+            toggleAll = true;
+            if (!toggleValue.equals("reset")) {
+                try {
+                    targetSdkVersion = Integer.parseInt(getNextArgRequired());
+                } catch (NumberFormatException e) {
+                    pw.println("Invalid targetSdkVersion!");
+                    return -1;
+                }
+            }
+        } else {
+            String changeIdString = getNextArgRequired();
+            try {
+                changeId = Long.parseLong(changeIdString);
+            } catch (NumberFormatException e) {
+                changeId = platformCompat.lookupChangeId(changeIdString);
+            }
+            if (changeId == -1) {
+                pw.println("Unknown or invalid change: '" + changeIdString + "'.");
+                return -1;
+            }
         }
         String packageName = getNextArgRequired();
-        if (!platformCompat.isKnownChangeId(changeId)) {
+        if (!toggleAll && !platformCompat.isKnownChangeId(changeId)) {
             pw.println("Warning! Change " + changeId + " is not known yet. Enabling/disabling it"
                     + " could have no effect.");
         }
         ArraySet<Long> enabled = new ArraySet<>();
         ArraySet<Long> disabled = new ArraySet<>();
-        switch (toggleValue) {
-            case "enable":
-                enabled.add(changeId);
-                pw.println("Enabled change " + changeId + " for " + packageName + ".");
-                CompatibilityChangeConfig overrides =
-                        new CompatibilityChangeConfig(
-                                new Compatibility.ChangeConfig(enabled, disabled));
-                platformCompat.setOverrides(overrides, packageName);
-                return 0;
-            case "disable":
-                disabled.add(changeId);
-                pw.println("Disabled change " + changeId + " for " + packageName + ".");
-                overrides =
-                        new CompatibilityChangeConfig(
-                                new Compatibility.ChangeConfig(enabled, disabled));
-                platformCompat.setOverrides(overrides, packageName);
-                return 0;
-            case "reset":
-                if (platformCompat.clearOverride(changeId, packageName)) {
-                    pw.println("Reset change " + changeId + " for " + packageName
-                            + " to default value.");
-                } else {
-                    pw.println("No override exists for changeId " + changeId + ".");
-                }
-                return 0;
-            default:
-                pw.println("Invalid toggle value: '" + toggleValue + "'.");
+        try {
+            switch (toggleValue) {
+                case "enable":
+                    if (toggleAll) {
+                        int numChanges = platformCompat.enableTargetSdkChanges(packageName,
+                                                                               targetSdkVersion);
+                        if (numChanges == 0) {
+                            pw.println("No changes were enabled.");
+                            return -1;
+                        }
+                        pw.println("Enabled " + numChanges + " changes gated by targetSdkVersion "
+                                + targetSdkVersion + " for " + packageName + ".");
+                    } else {
+                        enabled.add(changeId);
+                        CompatibilityChangeConfig overrides =
+                                new CompatibilityChangeConfig(
+                                        new Compatibility.ChangeConfig(enabled, disabled));
+                        platformCompat.setOverrides(overrides, packageName);
+                        pw.println("Enabled change " + changeId + " for " + packageName + ".");
+                    }
+                    return 0;
+                case "disable":
+                    if (toggleAll) {
+                        int numChanges = platformCompat.disableTargetSdkChanges(packageName,
+                                                                                targetSdkVersion);
+                        if (numChanges == 0) {
+                            pw.println("No changes were disabled.");
+                            return -1;
+                        }
+                        pw.println("Disabled " + numChanges + " changes gated by targetSdkVersion "
+                                + targetSdkVersion + " for " + packageName + ".");
+                    } else {
+                        disabled.add(changeId);
+                        CompatibilityChangeConfig overrides =
+                                new CompatibilityChangeConfig(
+                                        new Compatibility.ChangeConfig(enabled, disabled));
+                        platformCompat.setOverrides(overrides, packageName);
+                        pw.println("Disabled change " + changeId + " for " + packageName + ".");
+                    }
+                    return 0;
+                case "reset":
+                    if (toggleAll) {
+                        platformCompat.clearOverrides(packageName);
+                        pw.println("Reset all changes for " + packageName + " to default value.");
+                        return 0;
+                    }
+                    if (platformCompat.clearOverride(changeId, packageName)) {
+                        pw.println("Reset change " + changeId + " for " + packageName
+                                + " to default value.");
+                    } else {
+                        pw.println("No override exists for changeId " + changeId + ".");
+                    }
+                    return 0;
+                default:
+                    pw.println("Invalid toggle value: '" + toggleValue + "'.");
+            }
+        } catch (SecurityException e) {
+            pw.println(e.getMessage());
         }
         return -1;
     }
@@ -3243,6 +3342,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("         enable|disable|reset <CHANGE_ID|CHANGE_NAME> <PACKAGE_NAME>");
             pw.println("            Toggles a change either by id or by name for <PACKAGE_NAME>.");
             pw.println("            It kills <PACKAGE_NAME> (to allow the toggle to take effect).");
+            pw.println("         enable-all|disable-all <targetSdkVersion> <PACKAGE_NAME");
+            pw.println("            Toggles all changes that are gated by <targetSdkVersion>.");
             pw.println("         reset-all <PACKAGE_NAME>");
             pw.println("            Removes all existing overrides for all changes for ");
             pw.println("            <PACKAGE_NAME> (back to default behaviour).");

@@ -17,7 +17,8 @@
 package android.app.timedetector;
 
 import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.PhoneTimeSuggestion;
+import android.app.timedetector.NetworkTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
 
 /**
  * System private API to communicate with time detector service.
@@ -33,6 +34,7 @@ import android.app.timedetector.PhoneTimeSuggestion;
  * {@hide}
  */
 interface ITimeDetectorService {
-  void suggestPhoneTime(in PhoneTimeSuggestion timeSuggestion);
   void suggestManualTime(in ManualTimeSuggestion timeSuggestion);
+  void suggestNetworkTime(in NetworkTimeSuggestion timeSuggestion);
+  void suggestTelephonyTime(in TelephonyTimeSuggestion timeSuggestion);
 }

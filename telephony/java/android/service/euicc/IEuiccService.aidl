@@ -29,6 +29,7 @@ import android.service.euicc.IOtaStatusChangedCallback;
 import android.service.euicc.IRetainSubscriptionsForFactoryResetCallback;
 import android.service.euicc.ISwitchToSubscriptionCallback;
 import android.service.euicc.IUpdateSubscriptionNicknameCallback;
+import android.service.euicc.IEuiccServiceDumpResultCallback;
 import android.telephony.euicc.DownloadableSubscription;
 import android.os.Bundle;
 
@@ -56,4 +57,5 @@ oneway interface IEuiccService {
             int slotIndex, int options, in IEraseSubscriptionsCallback callback);
     void retainSubscriptionsForFactoryReset(
             int slotId, in IRetainSubscriptionsForFactoryResetCallback callback);
+    void dump(in IEuiccServiceDumpResultCallback callback);
 }

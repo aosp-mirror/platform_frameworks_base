@@ -66,7 +66,7 @@ public class ChangeAppRotationTest extends FlickerTestBase {
     @Parameters(name = "{0}-{1}")
     public static Collection<Object[]> getParams() {
         int[] supportedRotations =
-                {Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_270};
+                {Surface.ROTATION_0, Surface.ROTATION_90};
         Collection<Object[]> params = new ArrayList<>();
         for (int begin : supportedRotations) {
             for (int end : supportedRotations) {
@@ -142,6 +142,19 @@ public class ChangeAppRotationTest extends FlickerTestBase {
                             .hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, endingPos).atTheEnd();
                 }
         );
+    }
+
+    @Test
+    public void checkVisibility_screenshotLayerBecomesInvisible() {
+        checkResults(result -> LayersTraceSubject.assertThat(result)
+                .showsLayer(mTestApp.getPackage())
+                .then()
+                .replaceVisibleLayer(mTestApp.getPackage(), "Screenshot")
+                .then()
+                .showsLayer(mTestApp.getPackage()).and().showsLayer("Screenshot")
+                .then()
+                .replaceVisibleLayer("Screenshot", mTestApp.getPackage())
+                .forAllEntries());
     }
 
     @FlakyTest(bugId = 140855415)

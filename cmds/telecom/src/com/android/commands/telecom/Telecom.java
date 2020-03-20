@@ -25,8 +25,8 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.sysprop.TelephonyProperties;
 import android.telecom.Log;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
@@ -35,7 +35,6 @@ import android.text.TextUtils;
 
 import com.android.internal.os.BaseCommand;
 import com.android.internal.telecom.ITelecomService;
-import com.android.internal.telephony.TelephonyProperties;
 
 import java.io.PrintStream;
 
@@ -363,16 +362,12 @@ public final class Telecom extends BaseCommand {
      * "" (empty string) for a phone in SS mode
      */
     private void runGetSimConfig() throws RemoteException {
-        System.out.println(SystemProperties.get(TelephonyProperties.PROPERTY_MULTI_SIM_CONFIG));
+        System.out.println(TelephonyProperties.multi_sim_config().orElse(""));
     }
 
     private void runGetMaxPhones() throws RemoteException {
-        // This assumes the max number of SIMs is 2, which it currently is
-        if (TelephonyManager.MULTISIM_ALLOWED == mTelephonyManager.isMultiSimSupported()) {
-            System.out.println("2");
-        } else {
-            System.out.println("1");
-        }
+        // how many logical modems can be potentially active simultaneously
+        System.out.println(mTelephonyManager.getSupportedModemCount());
     }
 
     private void runSetEmergencyPhoneAccountPackageFilter() throws RemoteException {

@@ -688,6 +688,16 @@ enum Action {
 
     // ACTION: Settings > Initialize Search bar > Verify Slice > Other exception
     ACTION_VERIFY_SLICE_OTHER_EXCEPTION = 1727;
+
+    // ACTION: Settings > Developer Options > Toggle on Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_ADB_WIRELESS_ON = 1734;
+
+    // ACTION: Settings > Developer Options > Toggle off Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    ACTION_ADB_WIRELESS_OFF = 1735;
 }
 
 /**
@@ -2407,8 +2417,36 @@ enum PageId {
     // OS: Q
     SETTINGS_AWARE_DISPLAY = 1750;
 
+    // OPEN: Settings > System > Input & Gesture > tap gesture
+    // CATEGORY: SETTINGS
+    // OS: Q
+    SETTINGS_GESTURE_TAP = 1751;
+
     // OPEN: Settings > Developer Options > Platform Compat
     // CATEGORY: SETTINGS
     // OS: R
-    SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;    
+    SETTINGS_PLATFORM_COMPAT_DASHBOARD = 1805;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    // CATEGORY: SETTINGS
+    // OS: R
+    SETTINGS_ADB_WIRELESS = 1831;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Pair device with pairing code > Pairing code dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_PAIRING_DIALOG = 1832;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Pair device with QR code > Scan QR code > Pairing device dialog
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_QR_PAIRING_DIALOG = 1833;
+
+    // OPEN: Settings > Developer Options > Wireless debugging
+    //   > Click on paired device
+    // CATEGORY: SETTINGS
+    // OS: R
+    ADB_WIRELESS_DEVICE_DETAILS = 1836;
 }

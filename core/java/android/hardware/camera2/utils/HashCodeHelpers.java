@@ -16,7 +16,7 @@
 
 package android.hardware.camera2.utils;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 
 /**
  * Provide hashing functions using the Modified Bernstein hash

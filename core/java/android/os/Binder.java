@@ -19,7 +19,7 @@ package android.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -260,6 +260,8 @@ public class Binder implements IBinder {
      * system services to determine its identity and check permissions.
      * If the current thread is not currently executing an incoming transaction,
      * then its own pid is returned.
+     *
+     * Warning: oneway transactions do not receive PID.
      */
     @CriticalNative
     public static final native int getCallingPid();
@@ -912,6 +914,18 @@ public class Binder implements IBinder {
         pw.flush();
         resultReceiver.send(0, null);
     }
+
+    /** @hide */
+    @Override
+    public final native @Nullable IBinder getExtension();
+
+    /**
+     * Set the binder extension.
+     * This should be called immediately when the object is created.
+     *
+     * @hide
+     */
+    public final native void setExtension(@Nullable IBinder extension);
 
     /**
      * Default implementation rewinds the parcels and calls onTransact.  On

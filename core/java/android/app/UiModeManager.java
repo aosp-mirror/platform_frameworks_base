@@ -23,7 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.RemoteException;
@@ -472,5 +472,19 @@ public class UiModeManager {
             }
         }
         return true;
+    }
+
+    /**
+     * @hide*
+     */
+    public boolean setNightModeActivated(boolean active) {
+        if (mService != null) {
+            try {
+                return mService.setNightModeActivated(active);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

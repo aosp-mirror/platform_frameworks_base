@@ -21,26 +21,26 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.timedetector.ManualTimeSuggestion;
-import android.app.timedetector.PhoneTimeSuggestion;
-import android.content.Intent;
-import android.telephony.TelephonyManager;
+import android.app.timedetector.NetworkTimeSuggestion;
+import android.app.timedetector.TelephonyTimeSuggestion;
+import android.os.TimestampedValue;
 import android.util.LocalLog;
 import android.util.Slog;
-import android.util.TimestampedValue;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.timezonedetector.ArrayMapWithHistory;
+import com.android.server.timezonedetector.ReferenceWithHistory;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * An implementation of TimeDetectorStrategy that passes phone and manual suggestions to
- * {@link AlarmManager}. When there are multiple phone sources, the one with the lowest ID is used
- * unless the data becomes too stale.
+ * An implementation of {@link TimeDetectorStrategy} that passes telephony and manual suggestions to
+ * {@link AlarmManager}. When there are multiple telephony sources, the one with the lowest ID is
+ * used unless the data becomes too stale.
  *
  * <p>Most public methods are marked synchronized to ensure thread safety around internal state.
  */
@@ -50,27 +50,34 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private static final String LOG_TAG = "SimpleTimeDetectorStrategy";
 
     /** A score value used to indicate "no score", either due to validation failure or age. */
-    private static final int PHONE_INVALID_SCORE = -1;
-    /** The number of buckets phone suggestions can be put in by age. */
-    private static final int PHONE_BUCKET_COUNT = 24;
+    private static final int TELEPHONY_INVALID_SCORE = -1;
+    /** The number of buckets telephony suggestions can be put in by age. */
+    private static final int TELEPHONY_BUCKET_COUNT = 24;
     /** Each bucket is this size. All buckets are equally sized. */
     @VisibleForTesting
-    static final int PHONE_BUCKET_SIZE_MILLIS = 60 * 60 * 1000;
-    /** Phone suggestions older than this value are considered too old. */
+    static final int TELEPHONY_BUCKET_SIZE_MILLIS = 60 * 60 * 1000;
+    /**
+     * Telephony and network suggestions older than this value are considered too old to be used.
+     */
     @VisibleForTesting
-    static final long PHONE_MAX_AGE_MILLIS = PHONE_BUCKET_COUNT * PHONE_BUCKET_SIZE_MILLIS;
+    static final long MAX_UTC_TIME_AGE_MILLIS =
+            TELEPHONY_BUCKET_COUNT * TELEPHONY_BUCKET_SIZE_MILLIS;
 
-    @IntDef({ ORIGIN_PHONE, ORIGIN_MANUAL })
+    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Origin {}
 
     /** Used when a time value originated from a telephony signal. */
     @Origin
-    private static final int ORIGIN_PHONE = 1;
+    private static final int ORIGIN_TELEPHONY = 1;
 
     /** Used when a time value originated from a user / manual settings. */
     @Origin
     private static final int ORIGIN_MANUAL = 2;
+
+    /** Used when a time value originated from a network signal. */
+    @Origin
+    private static final int ORIGIN_NETWORK = 3;
 
     /**
      * CLOCK_PARANOIA: The maximum difference allowed between the expected system clock time and the
@@ -79,10 +86,16 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     private static final long SYSTEM_CLOCK_PARANOIA_THRESHOLD_MILLIS = 2 * 1000;
 
-    /** The number of previous phone suggestions to keep for each ID (for use during debugging). */
-    private static final int KEEP_SUGGESTION_HISTORY_SIZE = 30;
+    /**
+     * The number of suggestions to keep. These are logged in bug reports to assist when debugging
+     * issues with detection.
+     */
+    private static final int KEEP_SUGGESTION_HISTORY_SIZE = 10;
 
-    // A log for changes made to the system clock and why.
+    /**
+     * A log that records the decisions / decision metadata that affected the device's system clock
+     * time. This is logged in bug reports to assist with debugging issues with detection.
+     */
     @NonNull
     private final LocalLog mTimeChangesLog = new LocalLog(30, false /* useLocalTimestamps */);
 
@@ -97,12 +110,17 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private TimestampedValue<Long> mLastAutoSystemClockTimeSet;
 
     /**
-     * A mapping from phoneId to a time suggestion. We typically expect one or two mappings: devices
-     * will have a small number of telephony devices and phoneIds are assumed to be stable.
+     * A mapping from slotIndex to a time suggestion. We typically expect one or two mappings:
+     * devices will have a small number of telephony devices and slotIndexs are assumed to be
+     * stable.
      */
     @GuardedBy("this")
-    private ArrayMapWithHistory<Integer, PhoneTimeSuggestion> mSuggestionByPhoneId =
+    private final ArrayMapWithHistory<Integer, TelephonyTimeSuggestion> mSuggestionBySlotIndex =
             new ArrayMapWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
+
+    @GuardedBy("this")
+    private final ReferenceWithHistory<NetworkTimeSuggestion> mLastNetworkSuggestion =
+            new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
     @Override
     public void initialize(@NonNull Callback callback) {
@@ -122,7 +140,31 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @Override
-    public synchronized void suggestPhoneTime(@NonNull PhoneTimeSuggestion timeSuggestion) {
+    public synchronized void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion) {
+        if (!validateSuggestionTime(timeSuggestion.getUtcTime(), timeSuggestion)) {
+            return;
+        }
+
+        // The caller submits suggestions with the best available information when there are network
+        // changes. The best available information may have been cached and if they were all stored
+        // this would lead to duplicates showing up in the suggestion history. The suggestions may
+        // be made for different reasons but there is not a significant benefit to storing the same
+        // suggestion information again. doAutoTimeDetection() should still be called: this ensures
+        // the suggestion and device state are always re-evaluated, which might produce a different
+        // detected time if, for example, the age of all suggestions are considered.
+        NetworkTimeSuggestion lastNetworkSuggestion = mLastNetworkSuggestion.get();
+        if (lastNetworkSuggestion == null || !lastNetworkSuggestion.equals(timeSuggestion)) {
+            mLastNetworkSuggestion.set(timeSuggestion);
+        }
+
+        // Now perform auto time detection. The new suggestion may be used to modify the system
+        // clock.
+        String reason = "New network time suggested. timeSuggestion=" + timeSuggestion;
+        doAutoTimeDetection(reason);
+    }
+
+    @Override
+    public synchronized void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion) {
         // Empty time suggestion means that telephony network connectivity has been lost.
         // The passage of time is relentless, and we don't expect our users to use a time machine,
         // so we can continue relying on previous suggestions when we lose connectivity. This is
@@ -134,14 +176,14 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // Perform validation / input filtering and record the validated suggestion against the
-        // phoneId.
-        if (!validateAndStorePhoneSuggestion(timeSuggestion)) {
+        // slotIndex.
+        if (!validateAndStoreTelephonySuggestion(timeSuggestion)) {
             return;
         }
 
         // Now perform auto time detection. The new suggestion may be used to modify the system
         // clock.
-        String reason = "New phone time suggested. timeSuggestion=" + timeSuggestion;
+        String reason = "New telephony time suggested. timeSuggestion=" + timeSuggestion;
         doAutoTimeDetection(reason);
     }
 
@@ -167,15 +209,26 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         ipw.increaseIndent(); // level 1
 
         ipw.println("mLastAutoSystemClockTimeSet=" + mLastAutoSystemClockTimeSet);
+        ipw.println("mCallback.isAutoTimeDetectionEnabled()="
+                + mCallback.isAutoTimeDetectionEnabled());
+        ipw.println("mCallback.elapsedRealtimeMillis()=" + mCallback.elapsedRealtimeMillis());
+        ipw.println("mCallback.systemClockMillis()=" + mCallback.systemClockMillis());
+        ipw.println("mCallback.systemClockUpdateThresholdMillis()="
+                + mCallback.systemClockUpdateThresholdMillis());
 
         ipw.println("Time change log:");
         ipw.increaseIndent(); // level 2
         mTimeChangesLog.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
-        ipw.println("Phone suggestion history:");
+        ipw.println("Telephony suggestion history:");
         ipw.increaseIndent(); // level 2
-        mSuggestionByPhoneId.dump(ipw);
+        mSuggestionBySlotIndex.dump(ipw);
+        ipw.decreaseIndent(); // level 2
+
+        ipw.println("Network suggestion history:");
+        ipw.increaseIndent(); // level 2
+        mLastNetworkSuggestion.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
         ipw.decreaseIndent(); // level 1
@@ -183,7 +236,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     @GuardedBy("this")
-    private boolean validateAndStorePhoneSuggestion(@NonNull PhoneTimeSuggestion suggestion) {
+    private boolean validateAndStoreTelephonySuggestion(
+            @NonNull TelephonyTimeSuggestion suggestion) {
         TimestampedValue<Long> newUtcTime = suggestion.getUtcTime();
         if (!validateSuggestionTime(newUtcTime, suggestion)) {
             // There's probably nothing useful we can do: elsewhere we assume that reference
@@ -191,8 +245,8 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return false;
         }
 
-        int phoneId = suggestion.getPhoneId();
-        PhoneTimeSuggestion previousSuggestion = mSuggestionByPhoneId.get(phoneId);
+        int slotIndex = suggestion.getSlotIndex();
+        TelephonyTimeSuggestion previousSuggestion = mSuggestionBySlotIndex.get(slotIndex);
         if (previousSuggestion != null) {
             // We can log / discard suggestions with obvious issues with the reference time clock.
             if (previousSuggestion.getUtcTime() == null
@@ -208,7 +262,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                     newUtcTime, previousSuggestion.getUtcTime());
             if (referenceTimeDifference < 0) {
                 // The reference time is before the previously received suggestion. Ignore it.
-                Slog.w(LOG_TAG, "Out of order phone suggestion received."
+                Slog.w(LOG_TAG, "Out of order telephony suggestion received."
                         + " referenceTimeDifference=" + referenceTimeDifference
                         + " previousSuggestion=" + previousSuggestion
                         + " suggestion=" + suggestion);
@@ -217,7 +271,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         }
 
         // Store the latest suggestion.
-        mSuggestionByPhoneId.put(phoneId, suggestion);
+        mSuggestionBySlotIndex.put(slotIndex, suggestion);
         return true;
     }
 
@@ -247,32 +301,43 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
             return;
         }
 
-        PhoneTimeSuggestion bestPhoneSuggestion = findBestPhoneSuggestion();
-
-        // Work out what to do with the best suggestion.
-        if (bestPhoneSuggestion == null) {
-            // There is no good phone suggestion.
-            if (DBG) {
-                Slog.d(LOG_TAG, "Could not determine time: No best phone suggestion."
-                        + " detectionReason=" + detectionReason);
-            }
+        // Android devices currently prioritize any telephony over network signals. There are
+        // carrier compliance tests that would need to be changed before we could ignore NITZ or
+        // prefer NTP generally. This check is cheap on devices without telephony hardware.
+        TelephonyTimeSuggestion bestTelephonySuggestion = findBestTelephonySuggestion();
+        if (bestTelephonySuggestion != null) {
+            final TimestampedValue<Long> newUtcTime = bestTelephonySuggestion.getUtcTime();
+            String cause = "Found good telephony suggestion."
+                    + ", bestTelephonySuggestion=" + bestTelephonySuggestion
+                    + ", detectionReason=" + detectionReason;
+            setSystemClockIfRequired(ORIGIN_TELEPHONY, newUtcTime, cause);
             return;
         }
 
-        final TimestampedValue<Long> newUtcTime = bestPhoneSuggestion.getUtcTime();
-        String cause = "Found good suggestion."
-                + ", bestPhoneSuggestion=" + bestPhoneSuggestion
-                + ", detectionReason=" + detectionReason;
-        setSystemClockIfRequired(ORIGIN_PHONE, newUtcTime, cause);
+        // There is no good telephony suggestion, try network.
+        NetworkTimeSuggestion networkSuggestion = findLatestValidNetworkSuggestion();
+        if (networkSuggestion != null) {
+            final TimestampedValue<Long> newUtcTime = networkSuggestion.getUtcTime();
+            String cause = "Found good network suggestion."
+                    + ", networkSuggestion=" + networkSuggestion
+                    + ", detectionReason=" + detectionReason;
+            setSystemClockIfRequired(ORIGIN_NETWORK, newUtcTime, cause);
+            return;
+        }
+
+        if (DBG) {
+            Slog.d(LOG_TAG, "Could not determine time: No best telephony or network suggestion."
+                    + " detectionReason=" + detectionReason);
+        }
     }
 
     @GuardedBy("this")
     @Nullable
-    private PhoneTimeSuggestion findBestPhoneSuggestion() {
+    private TelephonyTimeSuggestion findBestTelephonySuggestion() {
         long elapsedRealtimeMillis = mCallback.elapsedRealtimeMillis();
 
-        // Phone time suggestions are assumed to be derived from NITZ or NITZ-like signals. These
-        // have a number of limitations:
+        // Telephony time suggestions are assumed to be derived from NITZ or NITZ-like signals.
+        // These have a number of limitations:
         // 1) No guarantee of accuracy ("accuracy of the time information is in the order of
         // minutes") [1]
         // 2) No guarantee of regular signals ("dependent on the handset crossing radio network
@@ -280,36 +345,36 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         //
         // [1] https://en.wikipedia.org/wiki/NITZ
         //
-        // Generally, when there are suggestions from multiple phoneIds they should usually
+        // Generally, when there are suggestions from multiple slotIndexs they should usually
         // approximately agree. In cases where signals *are* inaccurate we don't want to vacillate
-        // between signals from two phoneIds. However, it is known for NITZ signals to be incorrect
-        // occasionally, which means we also don't want to stick forever with one phoneId. Without
-        // cross-referencing across sources (e.g. the current device time, NTP), or doing some kind
-        // of statistical analysis of consistency within and across phoneIds, we can't know which
-        // suggestions are more correct.
+        // between signals from two slotIndexs. However, it is known for NITZ signals to be
+        // incorrect occasionally, which means we also don't want to stick forever with one
+        // slotIndex. Without cross-referencing across sources (e.g. the current device time, NTP),
+        // or doing some kind of statistical analysis of consistency within and across slotIndexs,
+        // we can't know which suggestions are more correct.
         //
-        // For simplicity, we try to value recency, then consistency of phoneId.
+        // For simplicity, we try to value recency, then consistency of slotIndex.
         //
         // The heuristic works as follows:
-        // Recency: The most recent suggestion from each phone is scored. The score is based on a
-        // discrete age bucket, i.e. so signals received around the same time will be in the same
+        // Recency: The most recent suggestion from each slotIndex is scored. The score is based on
+        // a discrete age bucket, i.e. so signals received around the same time will be in the same
         // bucket, thus applying a loose reference time ordering. The suggestion with the highest
         // score is used.
         // Consistency: If there a multiple suggestions with the same score, the suggestion with the
-        // lowest phoneId is always taken.
+        // lowest slotIndex is always taken.
         //
         // In the trivial case with a single ID this will just mean that the latest received
         // suggestion is used.
 
-        PhoneTimeSuggestion bestSuggestion = null;
-        int bestScore = PHONE_INVALID_SCORE;
-        for (int i = 0; i < mSuggestionByPhoneId.size(); i++) {
-            Integer phoneId = mSuggestionByPhoneId.keyAt(i);
-            PhoneTimeSuggestion candidateSuggestion = mSuggestionByPhoneId.valueAt(i);
+        TelephonyTimeSuggestion bestSuggestion = null;
+        int bestScore = TELEPHONY_INVALID_SCORE;
+        for (int i = 0; i < mSuggestionBySlotIndex.size(); i++) {
+            Integer slotIndex = mSuggestionBySlotIndex.keyAt(i);
+            TelephonyTimeSuggestion candidateSuggestion = mSuggestionBySlotIndex.valueAt(i);
             if (candidateSuggestion == null) {
                 // Unexpected - null suggestions should never be stored.
-                Slog.w(LOG_TAG, "Latest suggestion unexpectedly null for phoneId."
-                        + " phoneId=" + phoneId);
+                Slog.w(LOG_TAG, "Latest suggestion unexpectedly null for slotIndex."
+                        + " slotIndex=" + slotIndex);
                 continue;
             } else if (candidateSuggestion.getUtcTime() == null) {
                 // Unexpected - we do not store empty suggestions.
@@ -318,8 +383,9 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                 continue;
             }
 
-            int candidateScore = scorePhoneSuggestion(elapsedRealtimeMillis, candidateSuggestion);
-            if (candidateScore == PHONE_INVALID_SCORE) {
+            int candidateScore =
+                    scoreTelephonySuggestion(elapsedRealtimeMillis, candidateSuggestion);
+            if (candidateScore == TELEPHONY_INVALID_SCORE) {
                 // Expected: This means the suggestion is obviously invalid or just too old.
                 continue;
             }
@@ -329,10 +395,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                 bestSuggestion = candidateSuggestion;
                 bestScore = candidateScore;
             } else if (bestScore == candidateScore) {
-                // Tie! Use the suggestion with the lowest phoneId.
-                int candidatePhoneId = candidateSuggestion.getPhoneId();
-                int bestPhoneId = bestSuggestion.getPhoneId();
-                if (candidatePhoneId < bestPhoneId) {
+                // Tie! Use the suggestion with the lowest slotIndex.
+                int candidateSlotIndex = candidateSuggestion.getSlotIndex();
+                int bestSlotIndex = bestSuggestion.getSlotIndex();
+                if (candidateSlotIndex < bestSlotIndex) {
                     bestSuggestion = candidateSuggestion;
                 }
             }
@@ -340,37 +406,50 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         return bestSuggestion;
     }
 
-    private static int scorePhoneSuggestion(
-            long elapsedRealtimeMillis, @NonNull PhoneTimeSuggestion timeSuggestion) {
-        // The score is based on the age since receipt. Suggestions are bucketed so two
-        // suggestions in the same bucket from different phoneIds are scored the same.
+    private static int scoreTelephonySuggestion(
+            long elapsedRealtimeMillis, @NonNull TelephonyTimeSuggestion timeSuggestion) {
+
+        // Validate first.
         TimestampedValue<Long> utcTime = timeSuggestion.getUtcTime();
-        long referenceTimeMillis = utcTime.getReferenceTimeMillis();
-        if (referenceTimeMillis > elapsedRealtimeMillis) {
-            // Future times are ignored. They imply the reference time was wrong, or the elapsed
-            // realtime clock has gone backwards, neither of which are supportable situations.
-            Slog.w(LOG_TAG, "Existing suggestion found to be in the future. "
+        if (!validateSuggestionUtcTime(elapsedRealtimeMillis, utcTime)) {
+            Slog.w(LOG_TAG, "Existing suggestion found to be invalid "
                     + " elapsedRealtimeMillis=" + elapsedRealtimeMillis
                     + ", timeSuggestion=" + timeSuggestion);
-            return PHONE_INVALID_SCORE;
+            return TELEPHONY_INVALID_SCORE;
         }
 
-        long ageMillis = elapsedRealtimeMillis - referenceTimeMillis;
+        // The score is based on the age since receipt. Suggestions are bucketed so two
+        // suggestions in the same bucket from different slotIndexs are scored the same.
+        long ageMillis = elapsedRealtimeMillis - utcTime.getReferenceTimeMillis();
 
-        // Any suggestion > MAX_AGE_MILLIS is treated as too old. Although time is relentless and
-        // predictable, the accuracy of the reference time clock may be poor over long periods which
-        // would lead to errors creeping in. Also, in edge cases where a bad suggestion has been
-        // made and never replaced, it could also mean that the time detection code remains
-        // opinionated using a bad invalid suggestion. This caps that edge case at MAX_AGE_MILLIS.
-        if (ageMillis > PHONE_MAX_AGE_MILLIS) {
-            return PHONE_INVALID_SCORE;
+        // Turn the age into a discrete value: 0 <= bucketIndex < TELEPHONY_BUCKET_COUNT.
+        int bucketIndex = (int) (ageMillis / TELEPHONY_BUCKET_SIZE_MILLIS);
+        if (bucketIndex >= TELEPHONY_BUCKET_COUNT) {
+            return TELEPHONY_INVALID_SCORE;
         }
-
-        // Turn the age into a discrete value: 0 <= bucketIndex < MAX_AGE_HOURS.
-        int bucketIndex = (int) (ageMillis / PHONE_BUCKET_SIZE_MILLIS);
 
         // We want the lowest bucket index to have the highest score. 0 > score >= BUCKET_COUNT.
-        return PHONE_BUCKET_COUNT - bucketIndex;
+        return TELEPHONY_BUCKET_COUNT - bucketIndex;
+    }
+
+    /** Returns the latest, valid, network suggestion. Returns {@code null} if there isn't one. */
+    @GuardedBy("this")
+    @Nullable
+    private NetworkTimeSuggestion findLatestValidNetworkSuggestion() {
+        NetworkTimeSuggestion networkSuggestion = mLastNetworkSuggestion.get();
+        if (networkSuggestion == null) {
+            // No network suggestions received. This is normal if there's no connectivity.
+            return null;
+        }
+
+        TimestampedValue<Long> utcTime = networkSuggestion.getUtcTime();
+        long elapsedRealTimeMillis = mCallback.elapsedRealtimeMillis();
+        if (!validateSuggestionUtcTime(elapsedRealTimeMillis, utcTime)) {
+            // The latest suggestion is not valid, usually due to its age.
+            return null;
+        }
+
+        return networkSuggestion;
     }
 
     @GuardedBy("this")
@@ -409,7 +488,7 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     private static boolean isOriginAutomatic(@Origin int origin) {
-        return origin == ORIGIN_PHONE;
+        return origin != ORIGIN_MANUAL;
     }
 
     @GuardedBy("this")
@@ -477,27 +556,26 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         } else {
             mLastAutoSystemClockTimeSet = null;
         }
-
-        // Historically, Android has sent a TelephonyManager.ACTION_NETWORK_SET_TIME broadcast only
-        // when setting the time using NITZ.
-        if (origin == ORIGIN_PHONE) {
-            // Send a broadcast that telephony code used to send after setting the clock.
-            // TODO Remove this broadcast as soon as there are no remaining listeners.
-            Intent intent = new Intent(TelephonyManager.ACTION_NETWORK_SET_TIME);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.putExtra("time", newSystemClockMillis);
-            mCallback.sendStickyBroadcast(intent);
-        }
     }
 
     /**
-     * Returns the current best phone suggestion. Not intended for general use: it is used during
+     * Returns the current best telephony suggestion. Not intended for general use: it is used
+     * during tests to check strategy behavior.
+     */
+    @VisibleForTesting
+    @Nullable
+    public synchronized TelephonyTimeSuggestion findBestTelephonySuggestionForTests() {
+        return findBestTelephonySuggestion();
+    }
+
+    /**
+     * Returns the latest valid network suggestion. Not intended for general use: it is used during
      * tests to check strategy behavior.
      */
     @VisibleForTesting
     @Nullable
-    public synchronized PhoneTimeSuggestion findBestPhoneSuggestionForTests() {
-        return findBestPhoneSuggestion();
+    public NetworkTimeSuggestion findLatestValidNetworkSuggestionForTests() {
+        return findLatestValidNetworkSuggestion();
     }
 
     /**
@@ -505,7 +583,35 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
      */
     @VisibleForTesting
     @Nullable
-    public synchronized PhoneTimeSuggestion getLatestPhoneSuggestion(int phoneId) {
-        return mSuggestionByPhoneId.get(phoneId);
+    public synchronized TelephonyTimeSuggestion getLatestTelephonySuggestion(int slotIndex) {
+        return mSuggestionBySlotIndex.get(slotIndex);
+    }
+
+    /**
+     * A method used to inspect state during tests. Not intended for general use.
+     */
+    @VisibleForTesting
+    @Nullable
+    public NetworkTimeSuggestion getLatestNetworkSuggestion() {
+        return mLastNetworkSuggestion.get();
+    }
+
+    private static boolean validateSuggestionUtcTime(
+            long elapsedRealtimeMillis, TimestampedValue<Long> utcTime) {
+        long referenceTimeMillis = utcTime.getReferenceTimeMillis();
+        if (referenceTimeMillis > elapsedRealtimeMillis) {
+            // Future reference times are ignored. They imply the reference time was wrong, or the
+            // elapsed realtime clock used to derive it has gone backwards, neither of which are
+            // supportable situations.
+            return false;
+        }
+
+        // Any suggestion > MAX_AGE_MILLIS is treated as too old. Although time is relentless and
+        // predictable, the accuracy of the reference time clock may be poor over long periods which
+        // would lead to errors creeping in. Also, in edge cases where a bad suggestion has been
+        // made and never replaced, it could also mean that the time detection code remains
+        // opinionated using a bad invalid suggestion. This caps that edge case at MAX_AGE_MILLIS.
+        long ageMillis = elapsedRealtimeMillis - referenceTimeMillis;
+        return ageMillis <= MAX_UTC_TIME_AGE_MILLIS;
     }
 }

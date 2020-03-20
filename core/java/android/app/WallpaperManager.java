@@ -26,7 +26,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -510,7 +510,9 @@ public class WallpaperManager {
 
     /*package*/ WallpaperManager(IWallpaperManager service, Context context, Handler handler) {
         mContext = context;
-        initGlobals(service, context.getMainLooper());
+        if (service != null) {
+            initGlobals(service, context.getMainLooper());
+        }
     }
 
     /**

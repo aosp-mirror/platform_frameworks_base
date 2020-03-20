@@ -19,6 +19,7 @@ package android.app;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.annotation.Nullable;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
@@ -39,8 +40,6 @@ import android.view.WindowAnimationFrameStats;
 import android.view.WindowContentFrameStats;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
 
 import libcore.io.IoUtils;
 

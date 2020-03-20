@@ -17,13 +17,17 @@
 package com.android.dynsystem;
 
 import android.content.Context;
+import android.gsi.AvbPublicKey;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.MemoryFile;
 import android.os.ParcelFileDescriptor;
 import android.os.image.DynamicSystemManager;
+import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Log;
 import android.webkit.URLUtil;
+
+import org.json.JSONException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -49,14 +53,42 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private static final List<String> UNSUPPORTED_PARTITIONS =
             Arrays.asList("vbmeta", "boot", "userdata", "dtbo", "super_empty", "system_other");
 
-    private class UnsupportedUrlException extends RuntimeException {
+    private class UnsupportedUrlException extends Exception {
         private UnsupportedUrlException(String message) {
             super(message);
         }
     }
 
-    private class UnsupportedFormatException extends RuntimeException {
+    private class UnsupportedFormatException extends Exception {
         private UnsupportedFormatException(String message) {
+            super(message);
+        }
+    }
+
+    static class ImageValidationException extends Exception {
+        ImageValidationException(String message) {
+            super(message);
+        }
+
+        ImageValidationException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    static class RevocationListFetchException extends ImageValidationException {
+        RevocationListFetchException(Throwable cause) {
+            super(cause);
+        }
+    }
+
+    static class KeyRevokedException extends ImageValidationException {
+        KeyRevokedException(String message) {
+            super(message);
+        }
+    }
+
+    static class PublicKeyException extends ImageValidationException {
+        PublicKeyException(String message) {
             super(message);
         }
     }
@@ -89,16 +121,22 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
     interface ProgressListener {
         void onProgressUpdate(Progress progress);
+
         void onResult(int resultCode, Throwable detail);
     }
 
     private final String mUrl;
+    private final String mDsuSlot;
+    private final String mPublicKey;
     private final long mSystemSize;
     private final long mUserdataSize;
     private final Context mContext;
     private final DynamicSystemManager mDynSystem;
     private final ProgressListener mListener;
+    private final boolean mIsNetworkUrl;
+    private final boolean mIsDeviceBootloaderUnlocked;
     private DynamicSystemManager.Session mInstallationSession;
+    private KeyRevocationList mKeyRevocationList;
 
     private boolean mIsZip;
     private boolean mIsCompleted;
@@ -106,14 +144,31 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     private InputStream mStream;
     private ZipFile mZipFile;
 
-    InstallationAsyncTask(String url, long systemSize, long userdataSize, Context context,
-            DynamicSystemManager dynSystem, ProgressListener listener) {
+    InstallationAsyncTask(
+            String url,
+            String dsuSlot,
+            String publicKey,
+            long systemSize,
+            long userdataSize,
+            Context context,
+            DynamicSystemManager dynSystem,
+            ProgressListener listener) {
         mUrl = url;
+        mDsuSlot = dsuSlot;
+        mPublicKey = publicKey;
         mSystemSize = systemSize;
         mUserdataSize = userdataSize;
         mContext = context;
         mDynSystem = dynSystem;
         mListener = listener;
+        mIsNetworkUrl = URLUtil.isNetworkUrl(mUrl);
+        PersistentDataBlockManager pdbManager =
+                (PersistentDataBlockManager)
+                        mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+        mIsDeviceBootloaderUnlocked =
+                (pdbManager != null)
+                        && (pdbManager.getFlashLockState()
+                                == PersistentDataBlockManager.FLASH_LOCK_UNLOCKED);
     }
 
     @Override
@@ -126,14 +181,17 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
             verifyAndPrepare();
 
-            mDynSystem.startInstallation();
+            mDynSystem.startInstallation(mDsuSlot);
 
             installUserdata();
             if (isCancelled()) {
                 mDynSystem.remove();
                 return null;
             }
-
+            if (mUrl == null) {
+                mDynSystem.finishInstallation();
+                return null;
+            }
             installImages();
             if (isCancelled()) {
                 mDynSystem.remove();
@@ -142,7 +200,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
 
             mDynSystem.finishInstallation();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(TAG, e.toString(), e);
             mDynSystem.remove();
             return e;
         } finally {
@@ -194,6 +252,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
     }
 
     private void verifyAndPrepare() throws Exception {
+        if (mUrl == null) {
+            return;
+        }
         String extension = mUrl.substring(mUrl.lastIndexOf('.') + 1);
 
         if ("gz".equals(extension) || "gzip".equals(extension)) {
@@ -205,7 +266,7 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 String.format(Locale.US, "Unsupported file format: %s", mUrl));
         }
 
-        if (URLUtil.isNetworkUrl(mUrl)) {
+        if (mIsNetworkUrl) {
             mStream = new URL(mUrl).openStream();
         } else if (URLUtil.isFileUrl(mUrl)) {
             if (mIsZip) {
@@ -218,6 +279,28 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         } else {
             throw new UnsupportedUrlException(
                     String.format(Locale.US, "Unsupported URL: %s", mUrl));
+        }
+
+        try {
+            String listUrl = mContext.getString(R.string.key_revocation_list_url);
+            mKeyRevocationList = KeyRevocationList.fromUrl(new URL(listUrl));
+        } catch (IOException | JSONException e) {
+            mKeyRevocationList = new KeyRevocationList();
+            imageValidationThrowOrWarning(new RevocationListFetchException(e));
+        }
+        if (mKeyRevocationList.isRevoked(mPublicKey)) {
+            imageValidationThrowOrWarning(new KeyRevokedException(mPublicKey));
+        }
+    }
+
+    private void imageValidationThrowOrWarning(ImageValidationException e)
+            throws ImageValidationException {
+        if (mIsDeviceBootloaderUnlocked || !mIsNetworkUrl) {
+            // If device is OEM unlocked or DSU is being installed from a local file URI,
+            // then be permissive.
+            Log.w(TAG, e.toString());
+        } else {
+            throw e;
         }
     }
 
@@ -253,7 +336,8 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installImages() throws IOException, InterruptedException {
+    private void installImages()
+            throws IOException, InterruptedException, ImageValidationException {
         if (mStream != null) {
             if (mIsZip) {
                 installStreamingZipUpdate();
@@ -265,12 +349,14 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installStreamingGzUpdate() throws IOException, InterruptedException {
+    private void installStreamingGzUpdate()
+            throws IOException, InterruptedException, ImageValidationException {
         Log.d(TAG, "To install a streaming GZ update");
         installImage("system", mSystemSize, new GZIPInputStream(mStream), 1);
     }
 
-    private void installStreamingZipUpdate() throws IOException, InterruptedException {
+    private void installStreamingZipUpdate()
+            throws IOException, InterruptedException, ImageValidationException {
         Log.d(TAG, "To install a streaming ZIP update");
 
         ZipInputStream zis = new ZipInputStream(mStream);
@@ -289,7 +375,8 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private void installLocalZipUpdate() throws IOException, InterruptedException {
+    private void installLocalZipUpdate()
+            throws IOException, InterruptedException, ImageValidationException {
         Log.d(TAG, "To install a local ZIP update");
 
         Enumeration<? extends ZipEntry> entries = mZipFile.entries();
@@ -308,8 +395,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         }
     }
 
-    private boolean installImageFromAnEntry(ZipEntry entry, InputStream is,
-            int numInstalledPartitions) throws IOException, InterruptedException {
+    private boolean installImageFromAnEntry(
+            ZipEntry entry, InputStream is, int numInstalledPartitions)
+            throws IOException, InterruptedException, ImageValidationException {
         String name = entry.getName();
 
         Log.d(TAG, "ZipEntry: " + name);
@@ -332,8 +420,9 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
         return true;
     }
 
-    private void installImage(String partitionName, long uncompressedSize, InputStream is,
-            int numInstalledPartitions) throws IOException, InterruptedException {
+    private void installImage(
+            String partitionName, long uncompressedSize, InputStream is, int numInstalledPartitions)
+            throws IOException, InterruptedException, ImageValidationException {
 
         SparseInputStream sis = new SparseInputStream(new BufferedInputStream(is));
 
@@ -404,6 +493,24 @@ class InstallationAsyncTask extends AsyncTask<String, InstallationAsyncTask.Prog
                 publishProgress(progress);
             }
         }
+
+        AvbPublicKey avbPublicKey = new AvbPublicKey();
+        if (!mInstallationSession.getAvbPublicKey(avbPublicKey)) {
+            imageValidationThrowOrWarning(new PublicKeyException("getAvbPublicKey() failed"));
+        } else {
+            String publicKey = toHexString(avbPublicKey.sha1);
+            if (mKeyRevocationList.isRevoked(publicKey)) {
+                imageValidationThrowOrWarning(new KeyRevokedException(publicKey));
+            }
+        }
+    }
+
+    private static String toHexString(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
     }
 
     private void close() {

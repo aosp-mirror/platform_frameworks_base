@@ -20,12 +20,13 @@ import android.Manifest.permission;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.service.dreams.Sandman;
 import android.util.ArrayMap;
@@ -44,70 +45,10 @@ import java.util.concurrent.Executor;
  * <p>
  * <b>Device battery life will be significantly affected by the use of this API.</b>
  * Do not acquire {@link WakeLock}s unless you really need them, use the minimum levels
- * possible, and be sure to release them as soon as possible.
- * </p><p>
- * The primary API you'll use is {@link #newWakeLock(int, String) newWakeLock()}.
- * This will create a {@link PowerManager.WakeLock} object.  You can then use methods
- * on the wake lock object to control the power state of the device.
- * </p><p>
- * In practice it's quite simple:
- * {@samplecode
- * PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
- * PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "My Tag");
- * wl.acquire();
- *   ..screen will stay on during this section..
- * wl.release();
- * }
- * </p><p>
- * The following wake lock levels are defined, with varying effects on system power.
- * <i>These levels are mutually exclusive - you may only specify one of them.</i>
+ * possible, and be sure to release them as soon as possible. In most cases,
+ * you'll want to use
+ * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead.
  *
- * <table>
- *     <tr><th>Flag Value</th>
- *     <th>CPU</th> <th>Screen</th> <th>Keyboard</th></tr>
- *
- *     <tr><td>{@link #PARTIAL_WAKE_LOCK}</td>
- *         <td>On*</td> <td>Off</td> <td>Off</td>
- *     </tr>
- *
- *     <tr><td>{@link #SCREEN_DIM_WAKE_LOCK}</td>
- *         <td>On</td> <td>Dim</td> <td>Off</td>
- *     </tr>
- *
- *     <tr><td>{@link #SCREEN_BRIGHT_WAKE_LOCK}</td>
- *         <td>On</td> <td>Bright</td> <td>Off</td>
- *     </tr>
- *
- *     <tr><td>{@link #FULL_WAKE_LOCK}</td>
- *         <td>On</td> <td>Bright</td> <td>Bright</td>
- *     </tr>
- * </table>
- * </p><p>
- * *<i>If you hold a partial wake lock, the CPU will continue to run, regardless of any
- * display timeouts or the state of the screen and even after the user presses the power button.
- * In all other wake locks, the CPU will run, but the user can still put the device to sleep
- * using the power button.</i>
- * </p><p>
- * In addition, you can add two more flags, which affect behavior of the screen only.
- * <i>These flags have no effect when combined with a {@link #PARTIAL_WAKE_LOCK}.</i></p>
- *
- * <table>
- *     <tr><th>Flag Value</th> <th>Description</th></tr>
- *
- *     <tr><td>{@link #ACQUIRE_CAUSES_WAKEUP}</td>
- *         <td>Normal wake locks don't actually turn on the illumination.  Instead, they cause
- *         the illumination to remain on once it turns on (e.g. from user activity).  This flag
- *         will force the screen and/or keyboard to turn on immediately, when the WakeLock is
- *         acquired.  A typical use would be for notifications which are important for the user to
- *         see immediately.</td>
- *     </tr>
- *
- *     <tr><td>{@link #ON_AFTER_RELEASE}</td>
- *         <td>If this flag is set, the user activity timer will be reset when the WakeLock is
- *         released, causing the illumination to remain on a bit longer.  This can be used to
- *         reduce flicker if you are cycling between wake lock conditions.</td>
- *     </tr>
- * </table>
  * <p>
  * Any application using a WakeLock must request the {@code android.permission.WAKE_LOCK}
  * permission in an {@code <uses-permission>} element of the application's manifest.
@@ -605,6 +546,13 @@ public final class PowerManager {
     public static final String REBOOT_SAFE_MODE = "safemode";
 
     /**
+     * The 'reason' value used for rebooting userspace.
+     * @hide
+     */
+    @SystemApi
+    public static final String REBOOT_USERSPACE = "userspace";
+
+    /**
      * The 'reason' value used when rebooting the device without turning on the screen.
      * @hide
      */
@@ -915,7 +863,8 @@ public final class PowerManager {
      * {@link #FULL_WAKE_LOCK}, {@link #SCREEN_DIM_WAKE_LOCK}
      * and {@link #SCREEN_BRIGHT_WAKE_LOCK}.  Exactly one wake lock level must be
      * specified as part of the {@code levelAndFlags} parameter.
-     * </p><p>
+     * </p>
+     * <p>
      * The wake lock flags are: {@link #ACQUIRE_CAUSES_WAKEUP}
      * and {@link #ON_AFTER_RELEASE}.  Multiple flags can be combined as part of the
      * {@code levelAndFlags} parameters.
@@ -1383,6 +1332,14 @@ public final class PowerManager {
     }
 
     /**
+     * Returns {@code true} if this device supports rebooting userspace.
+     */
+    // TODO(b/138605180): add link to documentation once it's ready.
+    public boolean isRebootingUserspaceSupported() {
+        return SystemProperties.getBoolean("ro.init.userspace_reboot.is_supported", false);
+    }
+
+    /**
      * Reboot the device.  Will not return if the reboot is successful.
      * <p>
      * Requires the {@link android.Manifest.permission#REBOOT} permission.
@@ -1390,8 +1347,15 @@ public final class PowerManager {
      *
      * @param reason code to pass to the kernel (e.g., "recovery") to
      *               request special boot modes, or null.
+     * @throws UnsupportedOperationException if userspace reboot was requested on a device that
+     *                                       doesn't support it.
      */
-    public void reboot(String reason) {
+    @RequiresPermission(permission.REBOOT)
+    public void reboot(@Nullable String reason) {
+        if (REBOOT_USERSPACE.equals(reason) && !isRebootingUserspaceSupported()) {
+            throw new UnsupportedOperationException(
+                    "Attempted userspace reboot on a device that doesn't support it");
+        }
         try {
             mService.reboot(false, reason, true);
         } catch (RemoteException e) {
@@ -1406,6 +1370,7 @@ public final class PowerManager {
      * </p>
      * @hide
      */
+    @RequiresPermission(permission.REBOOT)
     public void rebootSafeMode() {
         try {
             mService.rebootSafeMode(false, true);

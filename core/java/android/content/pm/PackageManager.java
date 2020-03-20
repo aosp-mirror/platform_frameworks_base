@@ -29,7 +29,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.StringRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.annotation.XmlRes;
 import android.app.ActivityManager;
@@ -38,6 +37,7 @@ import android.app.PackageDeleteObserver;
 import android.app.PackageInstallObserver;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -545,9 +545,10 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * Internal flag used to indicate that a package is a hidden system app.
+     * Internal {@link PackageInfo} flag used to indicate that a package is a hidden system app.
      * @hide
      */
+    @SystemApi
     public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS =  0x20000000;
 
     /**
@@ -2146,6 +2147,23 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the feature version
+     * specifies a date such that the device is known to pass the Vulkan dEQP test suite associated
+     * with that date.  The date is encoded as follows:
+     * <ul>
+     * <li>Year in bits 31-16</li>
+     * <li>Month in bits 15-8</li>
+     * <li>Day in bits 7-0</li>
+     * </ul>
+     * <p>
+     * Example: 2019-03-01 is encoded as 0x07E30301, and would indicate that the device passes the
+     * Vulkan dEQP test suite version that was current on 2019-03-01.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_VULKAN_DEQP_LEVEL = "android.software.vulkan.deqp.level";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device includes broadcast radio tuner.
      * @hide
      */
@@ -2865,6 +2883,13 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device does not have a slices implementation.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SLICES_DISABLED = "android.software.slices_disabled";
     /**
      * Extra field name for the URI to a verification file. Passed to a package
      * verifier.

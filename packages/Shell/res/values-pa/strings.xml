@@ -35,7 +35,7 @@
     <string name="bugreport_add_details_to_zip_failed" msgid="1302931926486712371">"ਬੱਗ ਰਿਪੋਰਟ ਵੇਰਵਿਆਂ ਨੂੰ ਜ਼ਿਪ ਫ਼ਾਈਲ ਵਿੱਚ ਸ਼ਾਮਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="bugreport_unnamed" msgid="2800582406842092709">"ਬਿਨਾਂ-ਨਾਮ"</string>
     <string name="bugreport_info_action" msgid="2158204228510576227">"ਵੇਰਵੇ"</string>
-    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
+    <string name="bugreport_screenshot_action" msgid="8677781721940614995">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਲਵੋ"</string>
     <string name="bugreport_screenshot_taken" msgid="5684211273096253120">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸਫਲਤਾਪੂਰਵਕ ਲਿਆ ਗਿਆ।"</string>
     <string name="bugreport_screenshot_failed" msgid="5853049140806834601">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਨਹੀਂ ਲਿਆ ਜਾ ਸਕਿਆ।"</string>
     <string name="bugreport_info_dialog_title" msgid="1355948594292983332">"ਬੱਗ ਰਿਪੋਰਟ <xliff:g id="ID">#%d</xliff:g> ਵੇਰਵੇ"</string>

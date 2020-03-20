@@ -22,6 +22,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 
+import com.android.telephony.Rlog;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
@@ -38,33 +40,35 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      */
     public static final int UNKNOWN_ASU_LEVEL = 99;
 
+    private static final boolean VDBG = false;
+
     private static final String TAG = "CellSignalStrengthNr";
 
     // Lifted from Default carrier configs and max range of SSRSRP
     // Boundaries: [-140 dB, -44 dB]
     private int[] mSsRsrpThresholds = new int[] {
-            -125, /* SIGNAL_STRENGTH_POOR */
-            -115, /* SIGNAL_STRENGTH_MODERATE */
-            -105, /* SIGNAL_STRENGTH_GOOD */
-            -95,  /* SIGNAL_STRENGTH_GREAT */
+            -110, /* SIGNAL_STRENGTH_POOR */
+            -90, /* SIGNAL_STRENGTH_MODERATE */
+            -80, /* SIGNAL_STRENGTH_GOOD */
+            -65,  /* SIGNAL_STRENGTH_GREAT */
     };
 
     // Lifted from Default carrier configs and max range of SSRSRQ
     // Boundaries: [-20 dB, -3 dB]
     private int[] mSsRsrqThresholds = new int[] {
-            -14, /* SIGNAL_STRENGTH_POOR */
-            -12, /* SIGNAL_STRENGTH_MODERATE */
-            -10, /* SIGNAL_STRENGTH_GOOD */
-            -8  /* SIGNAL_STRENGTH_GREAT */
+            -16, /* SIGNAL_STRENGTH_POOR */
+            -11, /* SIGNAL_STRENGTH_MODERATE */
+            -9, /* SIGNAL_STRENGTH_GOOD */
+            -7  /* SIGNAL_STRENGTH_GREAT */
     };
 
     // Lifted from Default carrier configs and max range of SSSINR
     // Boundaries: [-23 dB, 40 dB]
     private int[] mSsSinrThresholds = new int[] {
-            -8, /* SIGNAL_STRENGTH_POOR */
-            0, /* SIGNAL_STRENGTH_MODERATE */
-            8, /* SIGNAL_STRENGTH_GOOD */
-            16  /* SIGNAL_STRENGTH_GREAT */
+            -5, /* SIGNAL_STRENGTH_POOR */
+            5, /* SIGNAL_STRENGTH_MODERATE */
+            15, /* SIGNAL_STRENGTH_GOOD */
+            30  /* SIGNAL_STRENGTH_GREAT */
     };
 
     /**
@@ -155,7 +159,17 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
      * @param ss signal strength from modem.
      */
     public CellSignalStrengthNr(android.hardware.radio.V1_4.NrSignalStrength ss) {
-        this(ss.csiRsrp, ss.csiRsrq, ss.csiSinr, ss.ssRsrp, ss.ssRsrq, ss.ssSinr);
+        this(flip(ss.csiRsrp), flip(ss.csiRsrq), ss.csiSinr, flip(ss.ssRsrp), flip(ss.ssRsrq),
+                ss.ssSinr);
+    }
+
+    /**
+     * Flip sign cell strength value when taking in the value from hal
+     * @param val cell strength value
+     * @return flipped value
+     */
+    private static int flip(int val) {
+        return val != CellInfo.UNAVAILABLE ? -val : val;
     }
 
     /**
@@ -289,31 +303,45 @@ public final class CellSignalStrengthNr extends CellSignalStrength implements Pa
         } else {
             mParametersUseForLevel = cc.getInt(
                     CarrierConfigManager.KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT, USE_SSRSRP);
-            Rlog.i(TAG, "Using SSRSRP for Level.");
             mSsRsrpThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_5G_NR_SSRSRP_THRESHOLDS_INT_ARRAY);
-            Rlog.i(TAG, "Applying 5G NR SSRSRP Thresholds: " + Arrays.toString(mSsRsrpThresholds));
+            if (VDBG) {
+                Rlog.i(TAG, "Applying 5G NR SSRSRP Thresholds: "
+                        + Arrays.toString(mSsRsrpThresholds));
+            }
             mSsRsrqThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_5G_NR_SSRSRQ_THRESHOLDS_INT_ARRAY);
-            Rlog.i(TAG, "Applying 5G NR SSRSRQ Thresholds: " + Arrays.toString(mSsRsrqThresholds));
+            if (VDBG) {
+                Rlog.i(TAG, "Applying 5G NR SSRSRQ Thresholds: "
+                        + Arrays.toString(mSsRsrqThresholds));
+            }
             mSsSinrThresholds = cc.getIntArray(
                     CarrierConfigManager.KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY);
-            Rlog.i(TAG, "Applying 5G NR SSSINR Thresholds: " + Arrays.toString(mSsSinrThresholds));
+            if (VDBG) {
+                Rlog.i(TAG, "Applying 5G NR SSSINR Thresholds: "
+                        + Arrays.toString(mSsSinrThresholds));
+            }
         }
         int ssRsrpLevel = SignalStrength.INVALID;
         int ssRsrqLevel = SignalStrength.INVALID;
         int ssSinrLevel = SignalStrength.INVALID;
         if (isLevelForParameter(USE_SSRSRP)) {
             ssRsrpLevel = updateLevelWithMeasure(mSsRsrp, mSsRsrpThresholds);
-            Rlog.i(TAG, "Updated 5G NR SSRSRP Level: " + ssRsrpLevel);
+            if (VDBG) {
+                Rlog.i(TAG, "Updated 5G NR SSRSRP Level: " + ssRsrpLevel);
+            }
         }
         if (isLevelForParameter(USE_SSRSRQ)) {
             ssRsrqLevel = updateLevelWithMeasure(mSsRsrq, mSsRsrqThresholds);
-            Rlog.i(TAG, "Updated 5G NR SSRSRQ Level: " + ssRsrqLevel);
+            if (VDBG) {
+                Rlog.i(TAG, "Updated 5G NR SSRSRQ Level: " + ssRsrqLevel);
+            }
         }
         if (isLevelForParameter(USE_SSSINR)) {
             ssSinrLevel = updateLevelWithMeasure(mSsSinr, mSsSinrThresholds);
-            Rlog.i(TAG, "Updated 5G NR SSSINR Level: " + ssSinrLevel);
+            if (VDBG) {
+                Rlog.i(TAG, "Updated 5G NR SSSINR Level: " + ssSinrLevel);
+            }
         }
         // Apply the smaller value among three levels of three measures.
         mLevel = Math.min(Math.min(ssRsrpLevel, ssRsrqLevel), ssSinrLevel);

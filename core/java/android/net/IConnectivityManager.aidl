@@ -18,12 +18,12 @@ package android.net;
 
 import android.app.PendingIntent;
 import android.net.ConnectionInfo;
+import android.net.IConnectivityDiagnosticsCallback;
 import android.net.LinkProperties;
-import android.net.ITetheringEventCallback;
 import android.net.Network;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkMisc;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
@@ -59,7 +59,8 @@ interface IConnectivityManager
     NetworkInfo[] getAllNetworkInfo();
     Network getNetworkForType(int networkType);
     Network[] getAllNetworks();
-    NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(int userId);
+    NetworkCapabilities[] getDefaultNetworkCapabilitiesForUser(
+            int userId, String callingPackageName);
 
     boolean isNetworkSupported(int networkType);
 
@@ -68,7 +69,7 @@ interface IConnectivityManager
     LinkProperties getLinkPropertiesForType(int networkType);
     LinkProperties getLinkProperties(in Network network);
 
-    NetworkCapabilities getNetworkCapabilities(in Network network);
+    NetworkCapabilities getNetworkCapabilities(in Network network, String callingPackageName);
 
     @UnsupportedAppUsage
     NetworkState[] getAllNetworkState();
@@ -78,40 +79,30 @@ interface IConnectivityManager
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
-    int tether(String iface, String callerPkg);
-
-    int untether(String iface, String callerPkg);
-
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getLastTetherError} as alternative")
     int getLastTetherError(String iface);
 
-    boolean isTetheringSupported(String callerPkg);
-
-    void startTethering(int type, in ResultReceiver receiver, boolean showProvisioningUi,
-            String callerPkg);
-
-    void stopTethering(int type, String callerPkg);
-
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetherableIfaces} as alternative")
     String[] getTetherableIfaces();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetheredIfaces} as alternative")
     String[] getTetheredIfaces();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetheringErroredIfaces} "
+            + "as Alternative")
     String[] getTetheringErroredIfaces();
 
-    String[] getTetheredDhcpRanges();
-
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetherableUsbRegexs} as alternative")
     String[] getTetherableUsbRegexs();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 29,
+            publicAlternatives = "Use {@code TetheringManager#getTetherableWifiRegexs} as alternative")
     String[] getTetherableWifiRegexs();
-
-    String[] getTetherableBluetoothRegexs();
-
-    int setUsbTethering(boolean enable, String callerPkg);
 
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void reportInetCondition(int networkType, int percentage);
@@ -126,9 +117,17 @@ interface IConnectivityManager
 
     boolean prepareVpn(String oldPackage, String newPackage, int userId);
 
-    void setVpnPackageAuthorization(String packageName, int userId, boolean authorized);
+    void setVpnPackageAuthorization(String packageName, int userId, int vpnType);
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);
+
+    boolean provisionVpnProfile(in VpnProfile profile, String packageName);
+
+    void deleteVpnProfile(String packageName);
+
+    void startVpnProfile(String packageName);
+
+    void stopVpnProfile(String packageName);
 
     VpnConfig getVpnConfig(int userId);
 
@@ -153,28 +152,34 @@ interface IConnectivityManager
 
     void setAirplaneMode(boolean enable);
 
-    int registerNetworkFactory(in Messenger messenger, in String name);
-
     boolean requestBandwidthUpdate(in Network network);
 
+    int registerNetworkFactory(in Messenger messenger, in String name);
     void unregisterNetworkFactory(in Messenger messenger);
 
-    int registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
-            in NetworkCapabilities nc, int score, in NetworkMisc misc, in int factorySerialNumber);
+    int registerNetworkProvider(in Messenger messenger, in String name);
+    void unregisterNetworkProvider(in Messenger messenger);
+
+    void declareNetworkRequestUnfulfillable(in NetworkRequest request);
+
+    Network registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
+            in NetworkCapabilities nc, int score, in NetworkAgentConfig config,
+            in int factorySerialNumber);
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
-            in Messenger messenger, int timeoutSec, in IBinder binder, int legacy);
+            in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
+            String callingPackageName);
 
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
-            in PendingIntent operation);
+            in PendingIntent operation, String callingPackageName);
 
     void releasePendingNetworkRequest(in PendingIntent operation);
 
     NetworkRequest listenForNetwork(in NetworkCapabilities networkCapabilities,
-            in Messenger messenger, in IBinder binder);
+            in Messenger messenger, in IBinder binder, String callingPackageName);
 
     void pendingListenForNetwork(in NetworkCapabilities networkCapabilities,
-            in PendingIntent operation);
+            in PendingIntent operation, String callingPackageName);
 
     void releaseNetworkRequest(in NetworkRequest networkRequest);
 
@@ -217,11 +222,9 @@ interface IConnectivityManager
     boolean isCallerCurrentAlwaysOnVpnApp();
     boolean isCallerCurrentAlwaysOnVpnLockdownApp();
 
-    void getLatestTetheringEntitlementResult(int type, in ResultReceiver receiver,
-            boolean showEntitlementUi, String callerPkg);
-
-    void registerTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
-    void unregisterTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
+    void registerConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback,
+            in NetworkRequest request, String callingPackageName);
+    void unregisterConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback);
 
     IBinder startOrGetTestNetworkService();
 }

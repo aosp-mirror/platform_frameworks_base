@@ -19,8 +19,13 @@ android_test {
     certificate: "platform",
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
     ],
-    test_suites: ["device-tests"],
+    test_suites: [
+        "device-tests",
+        "mts",
+    ],
+    compile_multilib: "both",
     static_libs: [
         "androidx.test.rules",
         "frameworks-base-testutils",
@@ -29,14 +34,22 @@ android_test {
         "TetheringApiCurrentLib",
         "testables",
     ],
+    // TODO(b/147200698) change sdk_version to module-current and
+    // remove framework-minus-apex, ext, and framework-res
+    sdk_version: "core_platform",
     libs: [
+        "framework-minus-apex",
+        "ext",
+        "framework-res",
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
+        "framework-tethering",
     ],
     jni_libs: [
         // For mockito extended
         "libdexmakerjvmtiagent",
         "libstaticjvmtiagent",
     ],
+    jarjar_rules: "jarjar-rules.txt",
 }

@@ -20,7 +20,7 @@ import android.annotation.AnyRes;
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.annotation.StyleableRes;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
 import android.graphics.Typeface;
@@ -360,8 +360,9 @@ public class TypedArray {
     /**
      * Retrieve the boolean value for the attribute at <var>index</var>.
      * <p>
-     * If the attribute is an integer value, this method will return whether
-     * it is equal to zero. If the attribute is not a boolean or integer value,
+     * If the attribute is an integer value, this method returns false if the
+     * attribute is equal to zero, and true otherwise.
+     * If the attribute is not a boolean or integer value,
      * this method will attempt to coerce it to an integer using
      * {@link Integer#decode(String)} and return whether it is equal to zero.
      *

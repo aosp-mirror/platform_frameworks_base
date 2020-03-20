@@ -16,6 +16,8 @@
 
 package com.android.settingslib.bluetooth;
 
+import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -102,20 +104,6 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
     }
 
     @Override
-    public boolean connect(BluetoothDevice device) {
-        // Don't invoke method in service because settings is not allowed to connect this profile.
-        return false;
-    }
-
-    @Override
-    public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) {
-            return false;
-        }
-        return mService.disconnect(device);
-    }
-
-    @Override
     public int getConnectionStatus(BluetoothDevice device) {
         if (mService == null) {
             return BluetoothProfile.STATE_DISCONNECTED;
@@ -124,21 +112,24 @@ public class HidDeviceProfile implements LocalBluetoothProfile {
     }
 
     @Override
-    public boolean isPreferred(BluetoothDevice device) {
+    public boolean isEnabled(BluetoothDevice device) {
         return getConnectionStatus(device) != BluetoothProfile.STATE_DISCONNECTED;
     }
 
     @Override
-    public int getPreferred(BluetoothDevice device) {
+    public int getConnectionPolicy(BluetoothDevice device) {
         return PREFERRED_VALUE;
     }
 
     @Override
-    public void setPreferred(BluetoothDevice device, boolean preferred) {
+    public boolean setEnabled(BluetoothDevice device, boolean enabled) {
+        boolean isEnabled = false;
         // if set preferred to false, then disconnect to the current device
-        if (!preferred) {
-            mService.disconnect(device);
+        if (!enabled) {
+            isEnabled = mService.setConnectionPolicy(device, CONNECTION_POLICY_FORBIDDEN);
         }
+
+        return isEnabled;
     }
 
     @Override

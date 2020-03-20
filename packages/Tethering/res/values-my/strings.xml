@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2020 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="tethered_notification_title" msgid="3146694234398202601">"တဆင့်ပြန်လည်လွှင့်ခြင်း သို့မဟုတ် ဟော့စပေါ့ ဖွင့်ထားသည်"</string>
-    <string name="tethered_notification_message" msgid="2113628520792055377">"စနစ်ထည့်သွင်းရန် တို့ပါ။"</string>
-    <string name="disable_tether_notification_title" msgid="7526977944111313195">"မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးခြင်းအား ပိတ်ထားသည်"</string>
-    <string name="disable_tether_notification_message" msgid="2913366428516852495">"အသေးစိတ်အချက်အလက်များအတွက် သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ"</string>
+    <string name="tethered_notification_title" msgid="6426563586025792944">"မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း သို့မဟုတ် ဟော့စပေါ့ ဖွင့်ထားသည်"</string>
+    <string name="tethered_notification_message" msgid="64800879503420696">"စနစ်ထည့်သွင်းရန် တို့ပါ။"</string>
+    <string name="disable_tether_notification_title" msgid="3004509127903564191">"မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်းကို ပိတ်ထားသည်"</string>
+    <string name="disable_tether_notification_message" msgid="6717523799293901476">"အသေးစိတ်အတွက် သင့်စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ"</string>
+    <string name="notification_channel_tethering_status" msgid="2663463891530932727">"ဟော့စပေါ့နှင့် မိုဘိုင်းဖုန်းသုံး ချိတ်ဆက်မျှဝေခြင်း အခြေအနေ"</string>
 </resources>

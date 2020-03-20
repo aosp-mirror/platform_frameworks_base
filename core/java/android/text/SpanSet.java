@@ -16,7 +16,8 @@
 
 package android.text;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 

@@ -17,9 +17,8 @@
 package android.text.format;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;

@@ -30,8 +30,10 @@ import android.app.role.RoleControllerManager;
 import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
+import android.app.timedetector.TimeDetectorImpl;
 import android.app.timezone.RulesManager;
 import android.app.timezonedetector.TimeZoneDetector;
+import android.app.timezonedetector.TimeZoneDetectorImpl;
 import android.app.trust.TrustManager;
 import android.app.usage.IStorageStatsManager;
 import android.app.usage.IUsageStatsManager;
@@ -81,6 +83,7 @@ import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
 import android.hardware.iris.IIrisService;
 import android.hardware.iris.IrisManager;
+import android.hardware.lights.LightsManager;
 import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
@@ -98,6 +101,7 @@ import android.media.session.MediaSessionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityThread;
 import android.net.EthernetManager;
@@ -111,6 +115,8 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
 import android.net.NetworkWatchlistManager;
 import android.net.TestNetworkManager;
+import android.net.TetheringManager;
+import android.net.VpnManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
@@ -158,7 +164,6 @@ import android.os.health.SystemHealthManager;
 import android.os.image.DynamicSystemManager;
 import android.os.image.IDynamicSystemService;
 import android.os.storage.StorageManager;
-import android.telephony.TelephonyRegistryManager;
 import android.permission.PermissionControllerManager;
 import android.permission.PermissionManager;
 import android.print.IPrintManager;
@@ -170,8 +175,10 @@ import android.service.persistentdata.PersistentDataBlockManager;
 import android.service.vr.IVrManager;
 import android.telecom.TelecomManager;
 import android.telephony.CarrierConfigManager;
+import android.telephony.MmsManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.telephony.TelephonyRegistryManager;
 import android.telephony.euicc.EuiccCardManager;
 import android.telephony.euicc.EuiccManager;
 import android.util.ArrayMap;
@@ -340,6 +347,23 @@ final class SystemServiceRegistry {
             }
         });
 
+        registerService(Context.NETWORK_STACK_SERVICE, IBinder.class,
+                new StaticServiceFetcher<IBinder>() {
+                    @Override
+                    public IBinder createService() {
+                        return ServiceManager.getService(Context.NETWORK_STACK_SERVICE);
+                    }
+                });
+
+        registerService(Context.TETHERING_SERVICE, TetheringManager.class,
+                new CachedServiceFetcher<TetheringManager>() {
+            @Override
+            public TetheringManager createService(ContextImpl ctx) {
+                return new TetheringManager(
+                        ctx, () -> ServiceManager.getService(Context.TETHERING_SERVICE));
+            }});
+
+
         registerService(Context.IPSEC_SERVICE, IpSecManager.class,
                 new CachedServiceFetcher<IpSecManager>() {
             @Override
@@ -347,6 +371,27 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.IPSEC_SERVICE);
                 IIpSecService service = IIpSecService.Stub.asInterface(b);
                 return new IpSecManager(ctx, service);
+            }});
+
+        registerService(Context.VPN_MANAGEMENT_SERVICE, VpnManager.class,
+                new CachedServiceFetcher<VpnManager>() {
+            @Override
+            public VpnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+                return new VpnManager(ctx, service);
+            }});
+
+        registerService(Context.CONNECTIVITY_DIAGNOSTICS_SERVICE,
+                ConnectivityDiagnosticsManager.class,
+                new CachedServiceFetcher<ConnectivityDiagnosticsManager>() {
+            @Override
+            public ConnectivityDiagnosticsManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                // ConnectivityDiagnosticsManager is backed by ConnectivityService
+                IBinder b = ServiceManager.getServiceOrThrow(Context.CONNECTIVITY_SERVICE);
+                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+                return new ConnectivityDiagnosticsManager(ctx, service);
             }});
 
         registerService(
@@ -650,6 +695,13 @@ final class SystemServiceRegistry {
                         return new EuiccCardManager(ctx.getOuterContext());
                     }});
 
+        registerService(Context.MMS_SERVICE, MmsManager.class,
+                new CachedServiceFetcher<MmsManager>() {
+                    @Override
+                    public MmsManager createService(ContextImpl ctx) {
+                        return new MmsManager(ctx.getOuterContext());
+                    }});
+
         registerService(Context.UI_MODE_SERVICE, UiModeManager.class,
                 new CachedServiceFetcher<UiModeManager>() {
             @Override
@@ -694,11 +746,22 @@ final class SystemServiceRegistry {
             @Override
             public WallpaperManager createService(ContextImpl ctx)
                     throws ServiceNotFoundException {
-                final IBinder b;
-                if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
-                    b = ServiceManager.getServiceOrThrow(Context.WALLPAPER_SERVICE);
-                } else {
-                    b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
+                final IBinder b = ServiceManager.getService(Context.WALLPAPER_SERVICE);
+                if (b == null) {
+                    // There are 2 reason service can be null:
+                    // 1.Device doesn't support it - that's fine
+                    // 2.App is running on instant mode - should fail
+                    final boolean enabled = Resources.getSystem()
+                            .getBoolean(com.android.internal.R.bool.config_enableWallpaperService);
+                    if (!enabled) {
+                        // Life moves on...
+                        return DisabledWallpaperManager.getInstance();
+                    }
+                    if (ctx.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.P) {
+                        // Instant app
+                        throw new ServiceNotFoundException(Context.WALLPAPER_SERVICE);
+                    }
+                    // Bad state - WallpaperManager methods will throw exception
                 }
                 IWallpaperManager service = IWallpaperManager.Stub.asInterface(b);
                 return new WallpaperManager(service, ctx.getOuterContext(),
@@ -1234,7 +1297,7 @@ final class SystemServiceRegistry {
                     @Override
                     public TimeDetector createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        return new TimeDetector();
+                        return new TimeDetectorImpl();
                     }});
 
         registerService(Context.TIME_ZONE_DETECTOR_SERVICE, TimeZoneDetector.class,
@@ -1242,7 +1305,7 @@ final class SystemServiceRegistry {
                     @Override
                     public TimeZoneDetector createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        return new TimeZoneDetector();
+                        return new TimeZoneDetectorImpl();
                     }});
 
         registerService(Context.TELEPHONY_IMS_SERVICE, android.telephony.ims.ImsManager.class,
@@ -1305,6 +1368,13 @@ final class SystemServiceRegistry {
                         return new DynamicSystemManager(
                                 IDynamicSystemService.Stub.asInterface(b));
                     }});
+        registerService(Context.LIGHTS_SERVICE, LightsManager.class,
+            new CachedServiceFetcher<LightsManager>() {
+                @Override
+                public LightsManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    return new LightsManager(ctx);
+                }});
         //CHECKSTYLE:ON IndentationCheck
     }
 

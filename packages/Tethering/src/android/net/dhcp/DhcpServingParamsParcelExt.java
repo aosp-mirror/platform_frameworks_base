@@ -20,11 +20,11 @@ import static android.net.shared.Inet4AddressUtils.inet4AddressToIntHTH;
 
 import android.annotation.NonNull;
 import android.net.LinkAddress;
-
-import com.google.android.collect.Sets;
+import android.util.ArraySet;
 
 import java.net.Inet4Address;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 /**
@@ -68,7 +68,7 @@ public class DhcpServingParamsParcelExt extends DhcpServingParamsParcel {
      * but it must always be set explicitly.
      */
     public DhcpServingParamsParcelExt setDefaultRouters(@NonNull Inet4Address... defaultRouters) {
-        return setDefaultRouters(Sets.newArraySet(defaultRouters));
+        return setDefaultRouters(newArraySet(defaultRouters));
     }
 
     /**
@@ -96,7 +96,7 @@ public class DhcpServingParamsParcelExt extends DhcpServingParamsParcel {
      * <p>This may be an empty list of servers, but it must always be set explicitly.
      */
     public DhcpServingParamsParcelExt setDnsServers(@NonNull Inet4Address... dnsServers) {
-        return setDnsServers(Sets.newArraySet(dnsServers));
+        return setDnsServers(newArraySet(dnsServers));
     }
 
     /**
@@ -126,7 +126,7 @@ public class DhcpServingParamsParcelExt extends DhcpServingParamsParcel {
      * and do not need to be set here.
      */
     public DhcpServingParamsParcelExt setExcludedAddrs(@NonNull Inet4Address... excludedAddrs) {
-        return setExcludedAddrs(Sets.newArraySet(excludedAddrs));
+        return setExcludedAddrs(newArraySet(excludedAddrs));
     }
 
     /**
@@ -168,5 +168,11 @@ public class DhcpServingParamsParcelExt extends DhcpServingParamsParcel {
             i++;
         }
         return res;
+    }
+
+    private static ArraySet<Inet4Address> newArraySet(Inet4Address... addrs) {
+        ArraySet<Inet4Address> addrSet = new ArraySet<>(addrs.length);
+        Collections.addAll(addrSet, addrs);
+        return addrSet;
     }
 }

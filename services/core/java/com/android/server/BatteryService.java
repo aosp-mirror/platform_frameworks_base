@@ -26,8 +26,10 @@ import android.content.Intent;
 import android.database.ContentObserver;
 import android.hardware.health.V1_0.HealthInfo;
 import android.hardware.health.V2_0.IHealth;
-import android.hardware.health.V2_0.IHealthInfoCallback;
 import android.hardware.health.V2_0.Result;
+import android.hardware.health.V2_1.BatteryCapacityLevel;
+import android.hardware.health.V2_1.Constants;
+import android.hardware.health.V2_1.IHealthInfoCallback;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.metrics.LogMaker;
@@ -66,8 +68,8 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
 import com.android.server.am.BatteryStatsService;
-import com.android.server.lights.Light;
 import com.android.server.lights.LightsManager;
+import com.android.server.lights.LogicalLight;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -144,6 +146,7 @@ public final class BatteryService extends SystemService {
 
     private HealthInfo mHealthInfo;
     private final HealthInfo mLastHealthInfo = new HealthInfo();
+    private android.hardware.health.V2_1.HealthInfo mHealthInfo2p1;
     private boolean mBatteryLevelCritical;
     private int mLastBatteryStatus;
     private int mLastBatteryHealth;
@@ -162,6 +165,7 @@ public final class BatteryService extends SystemService {
     private int mLastInvalidCharger;
 
     private int mLowBatteryWarningLevel;
+    private int mLastLowBatteryWarningLevel;
     private int mLowBatteryCloseWarningLevel;
     private int mShutdownBatteryTemperature;
 
@@ -310,6 +314,7 @@ public final class BatteryService extends SystemService {
         final ContentResolver resolver = mContext.getContentResolver();
         int defWarnLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
+        mLastLowBatteryWarningLevel = mLowBatteryWarningLevel;
         mLowBatteryWarningLevel = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel);
         if (mLowBatteryWarningLevel == 0) {
@@ -354,10 +359,14 @@ public final class BatteryService extends SystemService {
         return !plugged
                 && mHealthInfo.batteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                 && mHealthInfo.batteryLevel <= mLowBatteryWarningLevel
-                && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel);
+                && (oldPlugged || mLastBatteryLevel > mLowBatteryWarningLevel
+                    || mHealthInfo.batteryLevel > mLastLowBatteryWarningLevel);
     }
 
     private boolean shouldShutdownLocked() {
+        if (mHealthInfo2p1.batteryCapacityLevel != BatteryCapacityLevel.UNSUPPORTED) {
+            return (mHealthInfo2p1.batteryCapacityLevel == BatteryCapacityLevel.CRITICAL);
+        }
         if (mHealthInfo.batteryLevel > 0) {
             return false;
         }
@@ -415,22 +424,23 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    private void update(android.hardware.health.V2_0.HealthInfo info) {
+    private void update(android.hardware.health.V2_1.HealthInfo info) {
         traceBegin("HealthInfoUpdate");
 
         Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryChargeCounter",
-                info.legacy.batteryChargeCounter);
+                info.legacy.legacy.batteryChargeCounter);
         Trace.traceCounter(Trace.TRACE_TAG_POWER, "BatteryCurrent",
-                info.legacy.batteryCurrent);
+                info.legacy.legacy.batteryCurrent);
 
         synchronized (mLock) {
             if (!mUpdatesStopped) {
-                mHealthInfo = info.legacy;
+                mHealthInfo = info.legacy.legacy;
+                mHealthInfo2p1 = info;
                 // Process the new values.
                 processValuesLocked(false);
                 mLock.notifyAll(); // for any waiters on new info
             } else {
-                copy(mLastHealthInfo, info.legacy);
+                copy(mLastHealthInfo, info.legacy.legacy);
             }
         }
         traceEnd();
@@ -484,7 +494,8 @@ public final class BatteryService extends SystemService {
             mBatteryStats.setBatteryState(mHealthInfo.batteryStatus, mHealthInfo.batteryHealth,
                     mPlugType, mHealthInfo.batteryLevel, mHealthInfo.batteryTemperature,
                     mHealthInfo.batteryVoltage, mHealthInfo.batteryChargeCounter,
-                    mHealthInfo.batteryFullCharge);
+                    mHealthInfo.batteryFullCharge,
+                    mHealthInfo2p1.batteryChargeTimeToFullNowSeconds);
         } catch (RemoteException e) {
             // Should never happen.
         }
@@ -1063,7 +1074,7 @@ public final class BatteryService extends SystemService {
     }
 
     private final class Led {
-        private final Light mBatteryLight;
+        private final LogicalLight mBatteryLight;
 
         private final int mBatteryLowARGB;
         private final int mBatteryMediumARGB;
@@ -1098,7 +1109,7 @@ public final class BatteryService extends SystemService {
                     mBatteryLight.setColor(mBatteryLowARGB);
                 } else {
                     // Flash red when battery is low and not charging
-                    mBatteryLight.setFlashing(mBatteryLowARGB, Light.LIGHT_FLASH_TIMED,
+                    mBatteryLight.setFlashing(mBatteryLowARGB, LogicalLight.LIGHT_FLASH_TIMED,
                             mBatteryLedOn, mBatteryLedOff);
                 }
             } else if (status == BatteryManager.BATTERY_STATUS_CHARGING
@@ -1120,8 +1131,21 @@ public final class BatteryService extends SystemService {
     private final class HealthHalCallback extends IHealthInfoCallback.Stub
             implements HealthServiceWrapper.Callback {
         @Override public void healthInfoChanged(android.hardware.health.V2_0.HealthInfo props) {
+            android.hardware.health.V2_1.HealthInfo propsLatest =
+                    new android.hardware.health.V2_1.HealthInfo();
+            propsLatest.legacy = props;
+
+            propsLatest.batteryCapacityLevel = BatteryCapacityLevel.UNSUPPORTED;
+            propsLatest.batteryChargeTimeToFullNowSeconds =
+                Constants.BATTERY_CHARGE_TIME_TO_FULL_NOW_SECONDS_UNSUPPORTED;
+
+            BatteryService.this.update(propsLatest);
+        }
+
+        @Override public void healthInfoChanged_2_1(android.hardware.health.V2_1.HealthInfo props) {
             BatteryService.this.update(props);
         }
+
         // on new service registered
         @Override public void onRegistration(IHealth oldService, IHealth newService,
                 String instance) {

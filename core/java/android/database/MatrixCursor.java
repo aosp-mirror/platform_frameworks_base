@@ -16,7 +16,7 @@
 
 package android.database;
 
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
 import java.util.ArrayList;

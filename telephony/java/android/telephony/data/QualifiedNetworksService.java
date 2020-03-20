@@ -28,10 +28,10 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.telephony.Annotation.ApnType;
-import android.telephony.Rlog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.telephony.Rlog;
 
 import java.util.List;
 

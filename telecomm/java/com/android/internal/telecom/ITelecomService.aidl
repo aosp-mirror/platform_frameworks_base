@@ -242,9 +242,20 @@ interface ITelecomService {
     void addNewIncomingCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
 
     /**
+     * @see TelecomServiceImpl#addNewIncomingConference
+     */
+    void addNewIncomingConference(in PhoneAccountHandle phoneAccount, in Bundle extras);
+
+    /**
      * @see TelecomServiceImpl#addNewUnknownCall
      */
     void addNewUnknownCall(in PhoneAccountHandle phoneAccount, in Bundle extras);
+
+    /**
+     * @see TelecomServiceImpl#startConference
+     */
+    void startConference(in List<Uri> participants, in Bundle extras,
+            String callingPackage);
 
     /**
      * @see TelecomServiceImpl#placeCall

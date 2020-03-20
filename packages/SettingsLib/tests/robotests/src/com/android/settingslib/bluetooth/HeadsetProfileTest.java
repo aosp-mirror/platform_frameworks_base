@@ -75,4 +75,10 @@ public class HeadsetProfileTest {
         assertThat(mProfile.getAudioState(mBluetoothDevice)).
                 isEqualTo(BluetoothHeadset.STATE_AUDIO_CONNECTED);
     }
+
+    @Test
+    public void setActiveDevice_returnTrue() {
+        assertThat(mProfile.setActiveDevice(null)).isTrue();
+        assertThat(mProfile.setActiveDevice(mBluetoothDevice)).isTrue();
+    }
 }

@@ -18,7 +18,8 @@ package android.telephony;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
+
+import com.android.telephony.Rlog;
 
 import java.util.Objects;
 
@@ -67,6 +68,14 @@ public final class CellInfoWcdma extends CellInfo implements Parcelable {
     public CellInfoWcdma(android.hardware.radio.V1_4.CellInfo ci, long timeStamp) {
         super(ci, timeStamp);
         final android.hardware.radio.V1_2.CellInfoWcdma ciw = ci.info.wcdma();
+        mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
+        mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
+    }
+
+    /** @hide */
+    public CellInfoWcdma(android.hardware.radio.V1_5.CellInfo ci, long timeStamp) {
+        super(ci, timeStamp);
+        final android.hardware.radio.V1_5.CellInfoWcdma ciw = ci.ratSpecificInfo.wcdma();
         mCellIdentityWcdma = new CellIdentityWcdma(ciw.cellIdentityWcdma);
         mCellSignalStrengthWcdma = new CellSignalStrengthWcdma(ciw.signalStrengthWcdma);
     }

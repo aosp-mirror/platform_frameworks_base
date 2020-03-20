@@ -53,6 +53,7 @@ filegroup {
         "core/java/android/view/DisplayAdjustments.java",
     ],
     path: "core/java",
+    visibility: ["//frameworks/base/test-mock"],
 }
 
 filegroup {
@@ -70,6 +71,14 @@ filegroup {
         "graphics/java/**/*.aidl",
     ],
     path: "graphics/java",
+}
+
+filegroup {
+    name: "framework-identity-sources",
+    srcs: [
+        "identity/java/**/*.java",
+    ],
+    path: "identity/java",
 }
 
 filegroup {
@@ -209,6 +218,14 @@ filegroup {
 }
 
 filegroup {
+    name: "framework-wifi-updatable-exported-aidl-sources",
+    srcs: [
+        "wifi/aidl-export/**/*.aidl",
+    ],
+    path: "wifi/aidl-export",
+}
+
+filegroup {
     name: "framework-non-updatable-sources",
     srcs: [
         // Java/AIDL sources under frameworks/base
@@ -216,6 +233,7 @@ filegroup {
         ":framework-drm-sources",
         ":framework-graphics-sources",
         ":framework-keystore-sources",
+        ":framework-identity-sources",
         ":framework-location-sources",
         ":framework-lowpan-sources",
         ":framework-media-sources",
@@ -232,11 +250,13 @@ filegroup {
         ":framework-wifi-sources",
         ":PacProcessor-aidl-sources",
         ":ProxyHandler-aidl-sources",
+        ":net-utils-framework-common-srcs",
 
         // AIDL from frameworks/base/native/
         ":platform-compat-native-aidl",
 
         // AIDL sources from external directories
+        ":credstore_aidl",
         ":dumpstate_aidl",
         ":framework_native_aidl",
         ":gatekeeper_aidl",
@@ -258,16 +278,31 @@ filegroup {
 
         // etc.
         ":framework-javastream-protos",
-        ":framework-statslog-gen",
+        ":framework-statslog-gen", // StatsLogInternal.java
+        ":statslog-framework-java-gen", // FrameworkStatsLog.java
     ],
 }
 
 filegroup {
     name: "framework-updatable-sources",
     srcs: [
-        ":framework-sdkext-sources",
+        ":framework-sdkextensions-sources",
+        ":framework-tethering-srcs",
+        ":framework-wifi-updatable-exported-aidl-sources",
         ":updatable-media-srcs",
+        ":ike-srcs",
     ]
+}
+
+java_library {
+    name: "framework-updatable-stubs-module_libs_api",
+    static_libs: [
+        "framework-sdkextensions-stubs-module_libs_api",
+        "framework-tethering-stubs-module_libs_api",
+        "updatable_media_stubs",
+    ],
+    sdk_version: "module_current",
+    visibility: [":__pkg__"],
 }
 
 filegroup {
@@ -286,6 +321,7 @@ java_defaults {
             "core/java",
             "drm/java",
             "graphics/java",
+            "identity/java",
             "keystore/java",
             "location/java",
             "lowpan/java",
@@ -299,8 +335,11 @@ java_defaults {
             "rs/java",
             "sax/java",
             "telecomm/java",
-            "telephony/java",
             "wifi/java",
+            "wifi/aidl-export",
+
+            // TODO(b/147699819): remove this
+            "telephony/java",
         ],
     },
 }
@@ -342,6 +381,7 @@ java_library {
         "devicepolicyprotosnano",
 
         "com.android.sysprop.apex",
+        "com.android.sysprop.init",
         "PlatformProperties",
     ],
     sdk_version: "core_platform",
@@ -369,7 +409,6 @@ java_defaults {
         "app-compat-annotations",
         "ext",
         "unsupportedappusage",
-        "updatable_media_stubs",
     ],
 
     jarjar_rules: ":framework-jarjar-rules",
@@ -435,6 +474,7 @@ java_library {
         "libcore-platform-compat-config",
         "services-platform-compat-config",
     ],
+    libs: ["framework-updatable-stubs-module_libs_api"],
     static_libs: [
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
@@ -443,6 +483,10 @@ java_library {
     // For backwards compatibility.
     stem: "framework",
     apex_available: ["//apex_available:platform"],
+    visibility: [
+        // TODO(b/147128803) remove the below lines
+        "//frameworks/base/packages/Tethering/tests/unit",
+    ],
 }
 
 // This "framework" module is NOT installed to the device. It's
@@ -460,9 +504,7 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "framework-minus-apex",
-        "updatable_media_stubs",
-        "framework-sdkext-stubs-systemapi",
-        // TODO(jiyong): add more stubs for APEXes here
+        "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
     apex_available: ["//apex_available:platform"],
@@ -474,6 +516,12 @@ java_library {
     srcs: [":framework-all-sources"],
     installable: false,
     apex_available: ["//apex_available:platform"],
+    visibility: [
+        // DO NOT ADD ANY MORE ENTRIES TO THIS LIST
+        "//external/robolectric-shadows:__subpackages__",
+        "//frameworks/base",
+        "//frameworks/layoutlib:__subpackages__",
+    ],
 }
 
 java_library {
@@ -486,7 +534,6 @@ java_library {
     ],
     installable: false,
     plugins: [
-        "unsupportedappusage-annotation-processor",
         "compat-changeid-annotation-processor",
     ],
 }
@@ -507,7 +554,6 @@ java_library {
     host_supported: true,
     srcs: [
         "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
     ],
     static_libs: [
         "art.module.api.annotations",
@@ -533,8 +579,16 @@ java_library {
 genrule {
     name: "framework-statslog-gen",
     tools: ["stats-log-api-gen"],
-    cmd: "$(location stats-log-api-gen) --java $(out)",
+    cmd: "$(location stats-log-api-gen) --java $(out) --worksource",
     out: ["android/util/StatsLogInternal.java"],
+}
+
+genrule {
+    name: "statslog-framework-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module framework" +
+         " --javaPackage com.android.internal.util --javaClass FrameworkStatsLog --worksource",
+    out: ["com/android/internal/util/FrameworkStatsLog.java"],
 }
 
 gensrcs {
@@ -567,12 +621,14 @@ gensrcs {
 filegroup {
     name: "framework-annotations",
     srcs: [
+        "core/java/android/annotation/Hide.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/RequiresPermission.java",
         "core/java/android/annotation/SystemApi.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
+        "core/java/android/annotation/TestApi.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
     ],
@@ -582,6 +638,19 @@ java_library {
     name: "framework-annotations-lib",
     srcs: [ ":framework-annotations" ],
     sdk_version: "current",
+}
+
+filegroup {
+    name: "framework-ike-shared-srcs",
+    visibility: ["//frameworks/opt/net/ike"],
+    srcs: [
+        "core/java/android/annotation/StringDef.java",
+        "core/java/android/net/annotations/PolicyDirection.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "telephony/java/android/telephony/Annotation.java",
+    ],
 }
 
 filegroup {
@@ -601,16 +670,39 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
+        "core/java/com/android/internal/util/TokenBucket.java",
         "core/java/android/net/shared/*.java",
     ],
 }
 
 filegroup {
+    name: "framework-services-net-module-wifi-shared-srcs",
+    srcs: [
+        "core/java/android/net/DhcpResults.java",
+        "core/java/android/net/shared/Inet4AddressUtils.java",
+        "core/java/android/net/shared/InetAddressUtils.java",
+        "core/java/android/net/util/IpUtils.java",
+        "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+    ],
+}
+
+// keep these files in sync with the package/Tethering/jarjar-rules.txt for the tethering module.
+filegroup {
     name: "framework-tethering-shared-srcs",
     srcs: [
         "core/java/android/util/LocalLog.java",
+        "core/java/com/android/internal/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/IState.java",
+        "core/java/com/android/internal/util/MessageUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/util/State.java",
+        "core/java/com/android/internal/util/StateMachine.java",
+        "core/java/com/android/internal/util/TrafficStatsConstants.java",
+        "core/java/android/net/shared/Inet4AddressUtils.java",
     ],
 }
+
 // Build ext.jar
 // ============================================================
 java_library {
@@ -844,22 +936,6 @@ gensrcs {
     output_extension: "proto.h",
 }
 
-
-subdirs = [
-    "cmds/*",
-    "core/*",
-    "libs/*",
-    "media/*",
-    "proto",
-    "tools/*",
-    "native/android",
-    "native/graphics/jni",
-]
-
-optional_subdirs = [
-    "core/tests/utiltests/jni",
-]
-
 // TODO(b/77285514): remove this once the last few hidl interfaces have been
 // updated to use hwbinder.stubs.
 java_library {
@@ -874,7 +950,6 @@ java_library {
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/android/os/HidlMemory.java",
         "core/java/android/os/HwBinder.java",
         "core/java/android/os/HwBlob.java",
@@ -887,6 +962,7 @@ java_library {
         "core/java/android/os/RemoteException.java",
         "core/java/android/util/AndroidException.java",
     ],
+    libs: [ "unsupportedappusage" ],
 
     dxflags: ["--core-library"],
     installable: false,
@@ -896,12 +972,12 @@ python_defaults {
     name: "base_default",
     version: {
         py2: {
-            enabled: true,
-            embedded_launcher: true,
-        },
-        py3: {
             enabled: false,
             embedded_launcher: false,
+        },
+        py3: {
+            enabled: true,
+            embedded_launcher: true,
         },
     },
 }
@@ -915,660 +991,6 @@ python_binary_host {
     ],
     libs: [
         "fontTools",
-    ],
-}
-
-// Make the api/current.txt file available for use by modules in other
-// directories.
-filegroup {
-    name: "frameworks-base-api-current.txt",
-    srcs: [
-        "api/current.txt",
-    ],
-}
-
-// Make the api/system-current.txt file available for use by modules in other
-// directories.
-filegroup {
-    name: "frameworks-base-api-system-current.txt",
-    srcs: [
-        "api/system-current.txt",
-    ],
-}
-
-// Make the api/system-removed.txt file available for use by modules in other
-// directories.
-filegroup {
-    name: "frameworks-base-api-system-removed.txt",
-    srcs: [
-        "api/system-removed.txt",
-    ],
-}
-
-framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
-    "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
-    "-overview $(location core/java/overview.html) " +
-    // Federate Support Library references against local API file.
-    "-federate SupportLib https://developer.android.com " +
-    "-federationapi SupportLib $(location :current-support-api) " +
-    // Federate Support Library references against local API file.
-    "-federate AndroidX https://developer.android.com " +
-    "-federationapi AndroidX $(location :current-androidx-api) "
-
-framework_docs_only_libs = [
-    "voip-common",
-    "android.test.mock",
-    "android-support-annotations",
-    "android-support-compat",
-    "android-support-core-ui",
-    "android-support-core-utils",
-    "android-support-customtabs",
-    "android-support-design",
-    "android-support-dynamic-animation",
-    "android-support-exifinterface",
-    "android-support-fragment",
-    "android-support-media-compat",
-    "android-support-percent",
-    "android-support-recommendation",
-    "android-support-transition",
-    "android-support-tv-provider",
-    "android-support-v7-cardview",
-    "android-support-v7-gridlayout",
-    "android-support-v7-mediarouter",
-    "android-support-v7-palette",
-    "android-support-v7-preference",
-    "android-support-v13",
-    "android-support-v14-preference",
-    "android-support-v17-leanback",
-    "android-support-v17-preference-leanback",
-    "android-support-wear",
-    "android-support-vectordrawable",
-    "android-support-animatedvectordrawable",
-    "android-support-v7-appcompat",
-    "android-support-v7-recyclerview",
-    "android-support-emoji",
-    "android-support-emoji-appcompat",
-    "android-support-emoji-bundled",
-    "android-support-v8-renderscript",
-    "android-support-multidex",
-    "android-support-multidex-instrumentation",
-]
-
-metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--ignore-classes-on-classpath " +
-    "--hide-package com.android.server " +
-    "--error UnhiddenSystemApi " +
-    "--hide RequiresPermission " +
-    "--hide CallbackInterface " +
-    "--hide MissingPermission --hide BroadcastBehavior " +
-    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
-    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
-    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*"
-
-packages_to_document = [
-    "android",
-    "dalvik",
-    "java",
-    "javax",
-    "junit",
-    "org.apache.http",
-    "org.json",
-    "org.w3c.dom",
-    "org.xml.sax",
-    "org.xmlpull",
-]
-
-stubs_defaults {
-    name: "framework-doc-stubs-default",
-    srcs: [
-        ":framework-mime-sources",
-        ":framework-non-updatable-sources",
-        ":framework-updatable-sources",
-        "core/java/**/*.logtags",
-        "test-base/src/**/*.java",
-        ":opt-telephony-srcs",
-        ":opt-net-voip-srcs",
-        ":core-current-stubs-source",
-        ":core_public_api_files",
-        "test-mock/src/**/*.java",
-        "test-runner/src/**/*.java",
-    ],
-    libs: framework_docs_only_libs,
-    create_doc_stubs: true,
-    annotations_enabled: true,
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
-    previous_api: ":last-released-public-api",
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-}
-
-doc_defaults {
-    name: "framework-docs-default",
-    libs: framework_docs_only_libs +
-        ["stub-annotations"],
-    html_dirs: [
-        "docs/html",
-    ],
-    knowntags: [
-        "docs/knowntags.txt",
-        ":known-oj-tags",
-    ],
-    custom_template: "droiddoc-templates-sdk",
-    resourcesdir: "docs/html/reference/images/",
-    resourcesoutdir: "reference/android/images/",
-    hdf: [
-        "dac true",
-        "sdk.codename O",
-        "sdk.preview.version 1",
-        "sdk.version 7.0",
-        "sdk.rel.id 1",
-        "sdk.preview 0",
-    ],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-        "core/java/overview.html",
-        ":current-support-api",
-        ":current-androidx-api",
-    ],
-    create_stubs: false,
-}
-
-doc_defaults {
-    name: "framework-dokka-docs-default",
-    create_stubs: false,
-}
-
-stubs_defaults {
-    name: "metalava-api-stubs-default",
-    srcs: [
-        ":framework-non-updatable-sources",
-        ":framework-updatable-sources",
-        "core/java/**/*.logtags",
-        ":opt-telephony-srcs",
-        ":opt-net-voip-srcs",
-        ":core-current-stubs-source",
-        ":core_public_api_files",
-        ":ike-api-srcs",
-    ],
-    libs: ["framework-internal-utils"],
-    installable: false,
-    annotations_enabled: true,
-    previous_api: ":last-released-public-api",
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-    api_levels_annotations_enabled: true,
-    api_levels_annotations_dirs: [
-        "sdk-dir",
-        "api-versions-jars-dir",
-    ],
-    sdk_version: "core_platform",
-    filter_packages: packages_to_document,
-}
-
-droidstubs {
-    name: "framework-doc-stubs",
-    defaults: ["framework-doc-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    args: metalava_framework_docs_args,
-    write_sdk_values: true,
-}
-
-droidstubs {
-    name: "framework-doc-system-stubs",
-    defaults: ["framework-doc-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi ",
-    write_sdk_values: true,
-}
-
-droiddoc {
-    name: "doc-comment-check-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    args: framework_docs_only_args + " -referenceonly -parsecomments",
-    installable: false,
-}
-
-droiddoc {
-    name: "offline-sdk-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc offline",
-    ],
-    proofread_file: "offline-sdk-docs-proofrerad.txt",
-    args: framework_docs_only_args + " -offlinemode -title \"Android SDK\"",
-    static_doc_index_redirect: "docs/docs-preview-index.html",
-}
-
-droiddoc {
-    // Please sync with android-api-council@ before making any changes for the name property below.
-    // Since there's cron jobs that fetch offline-sdk-referenceonly-docs-docs.zip periodically.
-    // See b/116221385 for reference.
-    name: "offline-sdk-referenceonly-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc offline",
-    ],
-    proofread_file: "offline-sdk-referenceonly-docs-proofrerad.txt",
-    args: framework_docs_only_args + " -offlinemode -title \"Android SDK\" -referenceonly",
-    static_doc_index_redirect: "docs/docs-documentation-redirect.html",
-    static_doc_properties: "docs/source.properties",
-}
-
-droiddoc {
-    // Please sync with android-api-council@ before making any changes for the name property below.
-    // Since there's cron jobs that fetch offline-system-sdk-referenceonly-docs-docs.zip periodically.
-    // See b/116221385 for reference.
-    name: "offline-system-sdk-referenceonly-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-system-stubs",
-    ],
-    hdf: [
-        "android.whichdoc offline",
-    ],
-    proofread_file: "offline-system-sdk-referenceonly-docs-proofrerad.txt",
-    args: framework_docs_only_args + " -hide 101 -hide 104 -hide 108" +
-    " -offlinemode -title \"Android System SDK\" -referenceonly",
-    static_doc_index_redirect: "docs/docs-documentation-redirect.html",
-    static_doc_properties: "docs/source.properties",
-}
-
-droiddoc {
-    name: "online-sdk-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-sdk-docs-proofrerad.txt",
-    args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-}
-
-droiddoc {
-    name: "online-system-api-sdk-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-system-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-system-api-sdk-docs-proofrerad.txt",
-    args: framework_docs_only_args +
-        " -referenceonly " +
-        " -title \"Android SDK - Including system APIs.\" " +
-        " -hide 101 " +
-        " -hide 104 " +
-        " -hide 108 " +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-    installable: false,
-}
-
-droiddoc {
-    name: "ds-docs-java",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "ds-docs-proofrerad.txt",
-    args: framework_docs_only_args +
-        " -toroot / -yamlV2 -metalavaApiSince -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -devsite -samplesdir development/samples/browseable ",
-}
-
-droiddoc {
-    name: "ds-docs-kt",
-    defaults: ["framework-dokka-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    args: "-noJdkLink -links https://kotlinlang.org/api/latest/jvm/stdlib/^external/dokka/package-list " +
-    "-noStdlibLink",
-    proofread_file: "ds-dokka-proofread.txt",
-    dokka_enabled: true,
-}
-
-java_genrule {
-    name: "ds-docs",
-    tools: [
-        "zip2zip",
-        "merge_zips",
-    ],
-    srcs: [
-        ":ds-docs-java{.docs.zip}",
-        ":ds-docs-kt{.docs.zip}",
-    ],
-    out: ["ds-docs.zip"],
-    dist: {
-        targets: ["docs"],
-    },
-    cmd: "$(location zip2zip) -i $(location :ds-docs-kt{.docs.zip}) -o $(genDir)/ds-docs-kt-moved.zip **/*:en/reference/kotlin && " +
-         "$(location merge_zips) $(out) $(location :ds-docs-java{.docs.zip}) $(genDir)/ds-docs-kt-moved.zip",
-}
-
-java_genrule {
-    name: "ds-docs-switched",
-    tools: [
-        "switcher4",
-        "soong_zip",
-    ],
-    srcs: [
-        ":ds-docs-java{.docs.zip}",
-        ":ds-docs-kt{.docs.zip}",
-    ],
-    out: ["ds-docs-switched.zip"],
-    dist: {
-        targets: ["docs"],
-    },
-    cmd: "unzip $(location :ds-docs-java{.docs.zip}) -d $(genDir) && " +
-         "unzip $(location :ds-docs-kt{.docs.zip}) -d $(genDir)/en/reference/kotlin && " +
-         "SWITCHER=$$(cd $$(dirname $(location switcher4)) && pwd)/$$(basename $(location switcher4)) && " +
-         "(cd $(genDir)/en/reference && $$SWITCHER --work platform) && " +
-         "$(location soong_zip) -o $(out) -C $(genDir) -D $(genDir)",
-}
-
-
-droiddoc {
-    name: "ds-static-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-    ],
-    proofread_file: "ds-static-docs-proofrerad.txt",
-    args: framework_docs_only_args +
-        " -staticonly " +
-        " -toroot / " +
-        " -devsite " +
-        " -ignoreJdLinks ",
-}
-
-droiddoc {
-    name: "ds-ref-navtree-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-    ],
-    proofread_file: "ds-ref-navtree-docs-proofrerad.txt",
-    args: framework_docs_only_args +
-        " -toroot / " +
-        " -atLinksNavtree " +
-        " -navtreeonly ",
-}
-
-droiddoc {
-    name: "online-sdk-dev-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    hdf: [
-        "android.whichdoc online",
-        "android.hasSamples true",
-    ],
-    proofread_file: "online-sdk-dev-docs-proofrerad.txt",
-    args: framework_docs_only_args +
-        " -toroot / -samplegroup Admin " +
-        " -samplegroup Background " +
-        " -samplegroup Connectivity " +
-        " -samplegroup Content " +
-        " -samplegroup Input " +
-        " -samplegroup Media " +
-        " -samplegroup Notification " +
-        " -samplegroup RenderScript " +
-        " -samplegroup Security " +
-        " -samplegroup Sensors " +
-        " -samplegroup System " +
-        " -samplegroup Testing " +
-        " -samplegroup UI " +
-        " -samplegroup Views " +
-        " -samplegroup Wearable -samplesdir development/samples/browseable ",
-}
-
-droiddoc {
-    name: "hidden-docs",
-    defaults: ["framework-docs-default"],
-    srcs: [
-        ":framework-doc-stubs",
-    ],
-    proofread_file: "hidden-docs-proofrerad.txt",
-    args: framework_docs_only_args +
-        " -referenceonly " +
-        " -title \"Android SDK - Including hidden APIs.\"",
-}
-
-droidstubs {
-    name: "hwbinder-stubs-docs",
-    srcs: [
-        "core/java/android/os/HidlSupport.java",
-        "core/java/android/annotation/IntDef.java",
-        "core/java/android/annotation/IntRange.java",
-        "core/java/android/annotation/NonNull.java",
-        "core/java/android/annotation/SystemApi.java",
-        "core/java/android/os/HidlMemory.java",
-        "core/java/android/os/HwBinder.java",
-        "core/java/android/os/HwBlob.java",
-        "core/java/android/os/HwParcel.java",
-        "core/java/android/os/IHwBinder.java",
-        "core/java/android/os/IHwInterface.java",
-        "core/java/android/os/DeadObjectException.java",
-        "core/java/android/os/DeadSystemException.java",
-        "core/java/android/os/NativeHandle.java",
-        "core/java/android/os/RemoteException.java",
-        "core/java/android/util/AndroidException.java",
-    ],
-    installable: false,
-    sdk_version: "core_platform",
-    annotations_enabled: true,
-    previous_api: ":last-released-public-api",
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-    args: " --show-annotation android.annotation.SystemApi",
-}
-
-java_library_static {
-    name: "hwbinder.stubs",
-    sdk_version: "core_current",
-    srcs: [
-        ":hwbinder-stubs-docs",
-    ],
-}
-
-droidstubs {
-    name: "hiddenapi-lists-docs",
-    defaults: ["metalava-api-stubs-default"],
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    dex_api_filename: "public-dex.txt",
-    private_dex_api_filename: "private-dex.txt",
-    removed_dex_api_filename: "removed-dex.txt",
-    args: metalava_framework_docs_args +
-        " --show-unannotated " +
-        " --show-annotation android.annotation.SystemApi " +
-        " --show-annotation android.annotation.TestApi ",
-}
-
-droidstubs {
-    name: "hiddenapi-mappings",
-    defaults: ["metalava-api-stubs-default"],
-    srcs: [
-        ":opt-telephony-common-srcs",
-    ],
-
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    dex_mapping_filename: "dex-mapping.txt",
-    args: metalava_framework_docs_args +
-        " --hide ReferencesHidden " +
-        " --hide UnhiddenSystemApi " +
-        " --show-unannotated " +
-        " --show-annotation android.annotation.SystemApi " +
-        " --show-annotation android.annotation.TestApi ",
-}
-
-droidstubs {
-    name: "api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
-    api_filename: "public_api.txt",
-    private_api_filename: "private.txt",
-    removed_api_filename: "removed.txt",
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    args: metalava_framework_docs_args,
-    check_api: {
-        current: {
-            api_file: "api/current.txt",
-            removed_api_file: "api/removed.txt",
-        },
-        last_released: {
-            api_file: ":last-released-public-api",
-            removed_api_file: "api/removed.txt",
-            baseline_file: ":public-api-incompatibilities-with-last-released",
-        },
-        api_lint: {
-            enabled: true,
-            new_since: ":last-released-public-api",
-            baseline_file: "api/lint-baseline.txt",
-        },
-    },
-    jdiff_enabled: true,
-}
-
-droidstubs {
-    name: "system-api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
-    api_tag_name: "SYSTEM",
-    api_filename: "system-api.txt",
-    private_api_filename: "system-private.txt",
-    private_dex_api_filename: "system-private-dex.txt",
-    removed_api_filename: "system-removed.txt",
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.SystemApi",
-    check_api: {
-        current: {
-            api_file: "api/system-current.txt",
-            removed_api_file: "api/system-removed.txt",
-        },
-        last_released: {
-            api_file: ":last-released-system-api",
-            removed_api_file: "api/system-removed.txt",
-            baseline_file: ":system-api-incompatibilities-with-last-released"
-        },
-        api_lint: {
-            enabled: true,
-            new_since: ":last-released-system-api",
-            baseline_file: "api/system-lint-baseline.txt",
-        },
-    },
-    jdiff_enabled: true,
-}
-
-droidstubs {
-    name: "test-api-stubs-docs",
-    defaults: ["metalava-api-stubs-default"],
-    api_tag_name: "TEST",
-    api_filename: "test-api.txt",
-    removed_api_filename: "test-removed.txt",
-    arg_files: [
-        "core/res/AndroidManifest.xml",
-    ],
-    args: metalava_framework_docs_args + " --show-annotation android.annotation.TestApi",
-    check_api: {
-        current: {
-            api_file: "api/test-current.txt",
-            removed_api_file: "api/test-removed.txt",
-        },
-        api_lint: {
-            enabled: true,
-            baseline_file: "api/test-lint-baseline.txt",
-        },
-    },
-}
-
-filegroup {
-    name: "framework-annotation-nonnull-srcs",
-    srcs: [
-        "core/java/android/annotation/NonNull.java",
     ],
 }
 
@@ -1587,7 +1009,6 @@ filegroup {
         "core/java/android/annotation/StringDef.java",
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/TestApi.java",
-        "core/java/android/annotation/UnsupportedAppUsage.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
     ],
 }
@@ -1634,6 +1055,7 @@ filegroup {
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
         "core/java/com/android/internal/util/AsyncChannel.java",
+        "core/java/com/android/internal/util/AsyncService.java",
         "core/java/com/android/internal/util/BitwiseInputStream.java",
         "core/java/com/android/internal/util/FastXmlSerializer.java",
         "core/java/com/android/internal/util/HexDump.java",
@@ -1645,3 +1067,24 @@ filegroup {
         "core/java/com/android/internal/util/UserIcons.java",
     ],
 }
+
+// TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
+metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
+    "--ignore-classes-on-classpath " +
+    "--hide-package com.android.server " +
+    "--error UnhiddenSystemApi " +
+    "--hide RequiresPermission " +
+    "--hide CallbackInterface " +
+    "--hide MissingPermission --hide BroadcastBehavior " +
+    "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
+    "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
+    "--api-lint-ignore-prefix android.icu. " +
+    "--api-lint-ignore-prefix java. " +
+    "--api-lint-ignore-prefix junit. " +
+    "--api-lint-ignore-prefix org. "
+
+build = [
+    "StubLibraries.bp",
+    "ApiDocs.bp",
+]

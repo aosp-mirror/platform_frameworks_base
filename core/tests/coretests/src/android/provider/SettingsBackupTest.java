@@ -104,6 +104,7 @@ public class SettingsBackupTest {
                     Settings.Global.ADAPTIVE_BATTERY_MANAGEMENT_ENABLED,
                     Settings.Global.ADB_ALLOWED_CONNECTION_TIME,
                     Settings.Global.ADB_ENABLED,
+                    Settings.Global.ADB_WIFI_ENABLED,
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
@@ -264,6 +265,7 @@ public class SettingsBackupTest {
                     Settings.Global.ERROR_LOGCAT_PREFIX,
                     Settings.Global.EUICC_PROVISIONED,
                     Settings.Global.EUICC_SUPPORTED_COUNTRIES,
+                    Settings.Global.EUICC_UNSUPPORTED_COUNTRIES,
                     Settings.Global.EUICC_FACTORY_RESET_TIMEOUT_MILLIS,
                     Settings.Global.EUICC_REMOVING_INVISIBLE_PROFILES_TIMEOUT_MILLIS,
                     Settings.Global.FANCY_IME_ANIMATIONS,
@@ -344,6 +346,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETSTATS_POLL_INTERVAL,
                     Settings.Global.NETSTATS_SAMPLE_ENABLED,
                     Settings.Global.NETSTATS_AUGMENT_ENABLED,
+                    Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED,
                     Settings.Global.NETSTATS_TIME_CACHE_MAX_AGE,
                     Settings.Global.NETSTATS_UID_BUCKET_DURATION,
                     Settings.Global.NETSTATS_UID_DELETE_AGE,
@@ -595,7 +598,10 @@ public class SettingsBackupTest {
                  Settings.Secure.ANR_SHOW_BACKGROUND,
                  Settings.Secure.ASSISTANT,
                  Settings.Secure.ASSIST_DISCLOSURE_ENABLED,
+                 Settings.Secure.ASSIST_GESTURE_ENABLED,
                  Settings.Secure.ASSIST_GESTURE_SENSITIVITY,
+                 Settings.Secure.ASSIST_GESTURE_WAKE_ENABLED,
+                 Settings.Secure.ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
                  Settings.Secure.ASSIST_GESTURE_SETUP_COMPLETE,
                  Settings.Secure.ASSIST_SCREENSHOT_ENABLED,
                  Settings.Secure.ASSIST_STRUCTURE_ENABLED,
@@ -723,6 +729,13 @@ public class SettingsBackupTest {
                  Settings.Secure.BIOMETRIC_DEBUG_ENABLED,
                  Settings.Secure.FACE_UNLOCK_ATTENTION_REQUIRED,
                  Settings.Secure.FACE_UNLOCK_DIVERSITY_REQUIRED,
+                 Settings.Secure.AWARE_ENABLED,
+                 Settings.Secure.SKIP_GESTURE,
+                 Settings.Secure.SILENCE_GESTURE,
+                 Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
+                 Settings.Secure.DOZE_WAKE_DISPLAY_GESTURE,
+                 Settings.Secure.TAP_GESTURE,
+                 Settings.Secure.NEARBY_SHARING_COMPONENT, // not user configurable
                  Settings.Secure.FACE_UNLOCK_RE_ENROLL);
 
     @Test

@@ -20,7 +20,7 @@ import static android.util.Patterns.GOOD_IRI_CHAR;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 
 import java.util.Locale;

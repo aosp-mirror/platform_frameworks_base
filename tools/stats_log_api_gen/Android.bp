@@ -21,9 +21,16 @@ cc_binary_host {
     name: "stats-log-api-gen",
     srcs: [
         "Collation.cpp",
+        "atoms_info_writer.cpp",
+        "java_writer.cpp",
+        "java_writer_q.cpp",
         "main.cpp",
+        "native_writer.cpp",
+        "native_writer_q.cpp",
+        "utils.cpp",
     ],
     cflags: [
+        "-DSTATS_SCHEMA_LEGACY",
         "-Wall",
         "-Werror",
     ],
@@ -98,28 +105,23 @@ genrule {
 cc_library {
     name: "libstatslog",
     host_supported: true,
-    generated_sources: ["statslog.cpp"],
-    generated_headers: ["statslog.h"],
+    generated_sources: [
+        "statslog.cpp",
+    ],
+    generated_headers: [
+        "statslog.h"
+    ],
     cflags: [
         "-Wall",
         "-Werror",
     ],
-    export_generated_headers: ["statslog.h"],
+    export_generated_headers: [
+        "statslog.h"
+    ],
     shared_libs: [
         "liblog",
         "libcutils",
     ],
     static_libs: ["libstatssocket"],
-    target: {
-        android: {
-            shared_libs: [
-                "libutils",
-            ],
-        },
-        host: {
-            static_libs: [
-                "libutils",
-            ],
-        },
-    },
 }
+

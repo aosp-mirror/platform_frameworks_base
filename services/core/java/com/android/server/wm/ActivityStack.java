@@ -2743,7 +2743,7 @@ class ActivityStack extends ConfigurationContainer {
         final boolean resumeWhilePausing = (next.info.flags & FLAG_RESUME_WHILE_PAUSING) != 0
                 && !lastResumedCanPip;
 
-        boolean pausing = getDisplay().pauseBackStacks(userLeaving, next, false);
+        boolean pausing = display.pauseBackStacks(userLeaving, next, false);
         if (mResumedActivity != null) {
             if (DEBUG_STATES) Slog.d(TAG_STATES,
                     "resumeTopActivityLocked: Pausing " + mResumedActivity);
@@ -2759,6 +2759,13 @@ class ActivityStack extends ConfigurationContainer {
             if (next.attachedToProcess()) {
                 next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
                         true /* activityChange */, false /* updateOomAdj */);
+            } else if (!next.isProcessRunning()) {
+                // Since the start-process is asynchronous, if we already know the process of next
+                // activity isn't running, we can start the process earlier to save the time to wait
+                // for the current activity to be paused.
+                final boolean isTop = this == display.getFocusedStack();
+                mService.startProcessAsync(next, false /* knownToBeDead */, isTop,
+                        isTop ? "pre-top-activity" : "pre-activity");
             }
             if (lastResumed != null) {
                 lastResumed.setWillCloseOrEnterPip(true);
@@ -2827,7 +2834,7 @@ class ActivityStack extends ConfigurationContainer {
         // that the previous one will be hidden soon.  This way it can know
         // to ignore it when computing the desired screen orientation.
         boolean anim = true;
-        final DisplayContent dc = getDisplay().mDisplayContent;
+        final DisplayContent dc = display.mDisplayContent;
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
@@ -2984,7 +2991,7 @@ class ActivityStack extends ConfigurationContainer {
                 next.clearOptionsLocked();
                 transaction.setLifecycleStateRequest(
                         ResumeActivityItem.obtain(next.app.getReportedProcState(),
-                                getDisplay().mDisplayContent.isNextTransitionForward()));
+                                dc.isNextTransitionForward()));
                 mService.getLifecycleManager().scheduleTransaction(transaction);
 
                 if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "

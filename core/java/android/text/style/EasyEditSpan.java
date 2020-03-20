@@ -17,8 +17,8 @@
 package android.text.style;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;

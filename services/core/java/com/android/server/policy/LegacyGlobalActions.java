@@ -16,24 +16,6 @@
 
 package com.android.server.policy;
 
-import com.android.internal.app.AlertController;
-import com.android.internal.globalactions.Action;
-import com.android.internal.globalactions.ActionsAdapter;
-import com.android.internal.globalactions.ActionsDialog;
-import com.android.internal.globalactions.LongPressAction;
-import com.android.internal.globalactions.SinglePressAction;
-import com.android.internal.globalactions.ToggleAction;
-import com.android.internal.logging.MetricsLogger;
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.R;
-import com.android.internal.telephony.TelephonyIntents;
-import com.android.internal.telephony.TelephonyProperties;
-import com.android.internal.util.EmergencyAffordanceManager;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.server.policy.PowerAction;
-import com.android.server.policy.RestartAction;
-import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
-
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -57,6 +39,7 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
+import android.sysprop.TelephonyProperties;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
@@ -68,6 +51,21 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.widget.AdapterView;
+
+import com.android.internal.R;
+import com.android.internal.app.AlertController;
+import com.android.internal.globalactions.Action;
+import com.android.internal.globalactions.ActionsAdapter;
+import com.android.internal.globalactions.ActionsDialog;
+import com.android.internal.globalactions.LongPressAction;
+import com.android.internal.globalactions.SinglePressAction;
+import com.android.internal.globalactions.ToggleAction;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.telephony.TelephonyIntents;
+import com.android.internal.util.EmergencyAffordanceManager;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -229,8 +227,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
 
             @Override
             public void onToggle(boolean on) {
-                if (mHasTelephony && Boolean.parseBoolean(
-                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE))) {
+                if (mHasTelephony && TelephonyProperties.in_ecm_mode().orElse(false)) {
                     mIsWaitingForEcmExit = true;
                     // Launch ECM exit dialog
                     Intent ecmDialogIntent =
@@ -247,8 +244,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
                 if (!mHasTelephony) return;
 
                 // In ECM mode airplane state cannot be changed
-                if (!(Boolean.parseBoolean(
-                        SystemProperties.get(TelephonyProperties.PROPERTY_INECM_MODE)))) {
+                if (!TelephonyProperties.in_ecm_mode().orElse(false)) {
                     mState = buttonOn ? State.TurningOn : State.TurningOff;
                     mAirplaneState = mState;
                 }
@@ -750,8 +746,8 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
             } else if (TelephonyIntents.ACTION_EMERGENCY_CALLBACK_MODE_CHANGED.equals(action)) {
                 // Airplane mode can be changed after ECM exits if airplane toggle button
                 // is pressed during ECM mode
-                if (!(intent.getBooleanExtra("PHONE_IN_ECM_STATE", false)) &&
-                        mIsWaitingForEcmExit) {
+                if (!(intent.getBooleanExtra(TelephonyManager.EXTRA_PHONE_IN_ECM_STATE, false))
+                        && mIsWaitingForEcmExit) {
                     mIsWaitingForEcmExit = false;
                     changeAirplaneModeSystemSetting(true);
                 }

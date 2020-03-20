@@ -9764,8 +9764,8 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @Override
-    public void notifyDexLoad(String loadingPackageName, List<String> classLoaderNames,
-            List<String> classPaths, String loaderIsa) {
+    public void notifyDexLoad(String loadingPackageName, Map<String, String> classLoaderContextMap,
+            String loaderIsa) {
         int userId = UserHandle.getCallingUserId();
         ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
         if (ai == null) {
@@ -9773,7 +9773,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 + loadingPackageName + ", user=" + userId);
             return;
         }
-        mDexManager.notifyDexLoad(ai, classLoaderNames, classPaths, loaderIsa, userId);
+        mDexManager.notifyDexLoad(ai, classLoaderContextMap, loaderIsa, userId);
     }
 
     @Override
@@ -21009,7 +21009,7 @@ public class PackageManagerService extends IPackageManager.Stub
         // Disable any carrier apps. We do this very early in boot to prevent the apps from being
         // disabled after already being started.
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(mContext.getOpPackageName(), this,
-                mContext.getContentResolver(), UserHandle.USER_SYSTEM);
+                UserHandle.USER_SYSTEM, mContext);
 
         disableSkuSpecificApps();
 
@@ -23119,6 +23119,13 @@ public class PackageManagerService extends IPackageManager.Stub
             mPermissionManager.updateAllPermissions(
                     StorageManager.UUID_PRIVATE_INTERNAL, true, mPackages.values(),
                     mPermissionCallback);
+        }
+    }
+
+    boolean readPermissionStateForUser(@UserIdInt int userId) {
+        synchronized (mPackages) {
+            mSettings.readPermissionStateForUserSyncLPr(userId);
+            return mSettings.areDefaultRuntimePermissionsGrantedLPr(userId);
         }
     }
 

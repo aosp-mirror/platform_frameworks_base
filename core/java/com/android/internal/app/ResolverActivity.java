@@ -21,7 +21,6 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
-import android.annotation.UnsupportedAppUsage;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -29,6 +28,7 @@ import android.app.ActivityThread;
 import android.app.VoiceInteractor.PickOptionRequest;
 import android.app.VoiceInteractor.PickOptionRequest.Option;
 import android.app.VoiceInteractor.Prompt;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -386,29 +386,46 @@ public class ResolverActivity extends Activity {
         finish();
     }
 
+    /**
+     * Numerous layouts are supported, each with optional ViewGroups.
+     * Make sure the inset gets added to the correct View, using
+     * a footer for Lists so it can properly scroll under the navbar.
+     */
+    protected boolean shouldAddFooterView() {
+        if (useLayoutWithDefault()) return true;
+
+        View buttonBar = findViewById(R.id.button_bar);
+        if (buttonBar == null || buttonBar.getVisibility() == View.GONE) return true;
+
+        return false;
+    }
+
     protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
         mSystemWindowInsets = insets.getSystemWindowInsets();
 
         mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
                 mSystemWindowInsets.right, 0);
 
+        resetButtonBar();
+
+        // Need extra padding so the list can fully scroll up
+        if (shouldAddFooterView()) {
+            if (mFooterSpacer == null) {
+                mFooterSpacer = new Space(getApplicationContext());
+            } else {
+                ((ListView) mAdapterView).removeFooterView(mFooterSpacer);
+            }
+            mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
+                                                                       mSystemWindowInsets.bottom));
+            ((ListView) mAdapterView).addFooterView(mFooterSpacer);
+        }
+
         View emptyView = findViewById(R.id.empty);
         if (emptyView != null) {
             emptyView.setPadding(0, 0, 0, mSystemWindowInsets.bottom
-                    + getResources().getDimensionPixelSize(
-                            R.dimen.chooser_edge_margin_normal) * 2);
+                                 + getResources().getDimensionPixelSize(
+                                         R.dimen.chooser_edge_margin_normal) * 2);
         }
-
-        if (mFooterSpacer == null) {
-            mFooterSpacer = new Space(getApplicationContext());
-        } else {
-            ((ListView) mAdapterView).removeFooterView(mFooterSpacer);
-        }
-        mFooterSpacer.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
-                mSystemWindowInsets.bottom));
-        ((ListView) mAdapterView).addFooterView(mFooterSpacer);
-
-        resetButtonBar();
 
         return insets.consumeSystemWindowInsets();
     }
@@ -565,7 +582,7 @@ public class ResolverActivity extends Activity {
                         intent.getData().getHost(),
                         mAdapter.getFilteredItem().getDisplayLabel());
             } else if (mAdapter.areAllTargetsBrowsers()) {
-                dialogTitle =  getString(ActionTitle.BROWSABLE_TITLE_RES);
+                dialogTitle = getString(ActionTitle.BROWSABLE_TITLE_RES);
             } else {
                 dialogTitle = getString(ActionTitle.BROWSABLE_HOST_TITLE_RES,
                         intent.getData().getHost());
@@ -1308,6 +1325,7 @@ public class ResolverActivity extends Activity {
         // In case this method is called again (due to activity recreation), avoid adding a new
         // header if one is already present.
         if (useHeader && listView != null && listView.getHeaderViewsCount() == 0) {
+            listView.setHeaderDividersEnabled(true);
             listView.addHeaderView(LayoutInflater.from(this).inflate(
                     R.layout.resolver_different_item_header, listView, false));
         }
@@ -1350,11 +1368,13 @@ public class ResolverActivity extends Activity {
         final ViewGroup buttonLayout = findViewById(R.id.button_bar);
         if (buttonLayout != null) {
             buttonLayout.setVisibility(View.VISIBLE);
-            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
-            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
-                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
-                        R.dimen.resolver_button_bar_spacing) + inset);
 
+            if (!useLayoutWithDefault()) {
+                int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
+                buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
+                        buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
+                                R.dimen.resolver_button_bar_spacing) + inset);
+            }
             mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
             mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
 
@@ -1411,6 +1431,7 @@ public class ResolverActivity extends Activity {
         private final Intent mResolvedIntent;
         private final List<Intent> mSourceIntents = new ArrayList<>();
         private boolean mIsSuspended;
+        private boolean mPinned = false;
 
         public DisplayResolveInfo(Intent originalIntent, ResolveInfo pri, CharSequence pLabel,
                 CharSequence pInfo, Intent pOrigIntent) {
@@ -1514,6 +1535,15 @@ public class ResolverActivity extends Activity {
         public boolean isSuspended() {
             return mIsSuspended;
         }
+
+        @Override
+        public boolean isPinned() {
+            return mPinned;
+        }
+
+        public void setPinned(boolean pinned) {
+            mPinned = pinned;
+        }
     }
 
     List<DisplayResolveInfo> getDisplayList() {
@@ -1614,6 +1644,11 @@ public class ResolverActivity extends Activity {
           * @return true if this target can be selected by the user
           */
         boolean isSuspended();
+
+        /**
+         * @return true if this target should be pinned to the front by the request of the user
+         */
+        boolean isPinned();
     }
 
     public class ResolveListAdapter extends BaseAdapter {
@@ -1920,6 +1955,10 @@ public class ResolverActivity extends Activity {
             final Intent replaceIntent = getReplacementIntent(add.activityInfo, intent);
             final DisplayResolveInfo dri = new DisplayResolveInfo(intent, add, roLabel,
                     extraInfo, replaceIntent);
+            dri.setPinned(rci.isPinned());
+            if (rci.isPinned()) {
+                Log.i(TAG, "Pinned item: " + rci.name);
+            }
             addResolveInfo(dri);
             if (replaceIntent == intent) {
                 // Only add alternates if we didn't get a specific replacement from
@@ -2061,7 +2100,9 @@ public class ResolverActivity extends Activity {
             CharSequence subLabel = info.getExtendedInfo();
             if (TextUtils.equals(label, subLabel)) subLabel = null;
 
-            if (!TextUtils.equals(holder.text2.getText(), subLabel)) {
+            if (!TextUtils.equals(holder.text2.getText(), subLabel)
+                    && !TextUtils.isEmpty(subLabel)) {
+                holder.text2.setVisibility(View.VISIBLE);
                 holder.text2.setText(subLabel);
             }
 
@@ -2086,6 +2127,7 @@ public class ResolverActivity extends Activity {
         public final ComponentName name;
         private final List<Intent> mIntents = new ArrayList<>();
         private final List<ResolveInfo> mResolveInfos = new ArrayList<>();
+        private boolean mPinned;
 
         public ResolvedComponentInfo(ComponentName name, Intent intent, ResolveInfo info) {
             this.name = name;
@@ -2126,6 +2168,15 @@ public class ResolverActivity extends Activity {
             }
             return -1;
         }
+
+        public boolean isPinned() {
+            return mPinned;
+        }
+
+        public void setPinned(boolean pinned) {
+            mPinned = pinned;
+        }
+
     }
 
     static class ViewHolder {

@@ -20,17 +20,21 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.Binder;
-import android.os.Build;
 import android.os.PersistableBundle;
+import android.os.SystemProperties;
 import android.telephony.CarrierConfigManager;
 import android.telephony.PhoneNumberUtils;
-import android.telephony.Rlog;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Base64;
+import android.util.Log;
 
 import com.android.internal.telephony.HbpcdLookup.MccIdd;
 import com.android.internal.telephony.HbpcdLookup.MccLookup;
+import com.android.internal.telephony.util.TelephonyUtils;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -43,7 +47,7 @@ import java.util.HashMap;
  */
 public class SmsNumberUtils {
     private static final String TAG = "SmsNumberUtils";
-    private static final boolean DBG = Build.IS_DEBUGGABLE;
+    private static final boolean DBG = SystemProperties.getInt("ro.debuggable", 0) == 1;
 
     private static final String PLUS_SIGN = "+";
 
@@ -143,7 +147,7 @@ public class SmsNumberUtils {
 
         // First check whether the number is a NANP number.
         int nanpState = checkNANP(numberEntry, allIDDs);
-        if (DBG) Rlog.d(TAG, "NANP type: " + getNumberPlanType(nanpState));
+        if (DBG) Log.d(TAG, "NANP type: " + getNumberPlanType(nanpState));
 
         if ((nanpState == NP_NANP_LOCAL)
             || (nanpState == NP_NANP_AREA_LOCAL)
@@ -173,7 +177,7 @@ public class SmsNumberUtils {
 
         int internationalState = checkInternationalNumberPlan(context, numberEntry, allIDDs,
                 NANP_IDD);
-        if (DBG) Rlog.d(TAG, "International type: " + getNumberPlanType(internationalState));
+        if (DBG) Log.d(TAG, "International type: " + getNumberPlanType(internationalState));
         String returnNumber = null;
 
         switch (internationalState) {
@@ -272,7 +276,7 @@ public class SmsNumberUtils {
                 }
             }
         } catch (SQLException e) {
-            Rlog.e(TAG, "Can't access HbpcdLookup database", e);
+            Log.e(TAG, "Can't access HbpcdLookup database", e);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -281,7 +285,7 @@ public class SmsNumberUtils {
 
         IDDS_MAPS.put(mcc, allIDDs);
 
-        if (DBG) Rlog.d(TAG, "MCC = " + mcc + ", all IDDs = " + allIDDs);
+        if (DBG) Log.d(TAG, "MCC = " + mcc + ", all IDDs = " + allIDDs);
         return allIDDs;
     }
 
@@ -472,7 +476,7 @@ public class SmsNumberUtils {
                 int tempCC = allCCs[i];
                 for (int j = 0; j < MAX_COUNTRY_CODES_LENGTH; j ++) {
                     if (tempCC == ccArray[j]) {
-                        if (DBG) Rlog.d(TAG, "Country code = " + tempCC);
+                        if (DBG) Log.d(TAG, "Country code = " + tempCC);
                         return tempCC;
                     }
                 }
@@ -509,7 +513,7 @@ public class SmsNumberUtils {
                 }
             }
         } catch (SQLException e) {
-            Rlog.e(TAG, "Can't access HbpcdLookup database", e);
+            Log.e(TAG, "Can't access HbpcdLookup database", e);
         } finally {
             if (cursor != null) {
                 cursor.close();
@@ -561,10 +565,10 @@ public class SmsNumberUtils {
      * Filter the destination number if using VZW sim card.
      */
     public static String filterDestAddr(Context context, int subId, String destAddr) {
-        if (DBG) Rlog.d(TAG, "enter filterDestAddr. destAddr=\"" + Rlog.pii(TAG, destAddr) + "\"" );
+        if (DBG) Log.d(TAG, "enter filterDestAddr. destAddr=\"" + pii(TAG, destAddr) + "\"" );
 
         if (destAddr == null || !PhoneNumberUtils.isGlobalPhoneNumber(destAddr)) {
-            Rlog.w(TAG, "destAddr" + Rlog.pii(TAG, destAddr) +
+            Log.w(TAG, "destAddr" + pii(TAG, destAddr) +
                     " is not a global phone number! Nothing changed.");
             return destAddr;
         }
@@ -585,9 +589,9 @@ public class SmsNumberUtils {
         }
 
         if (DBG) {
-            Rlog.d(TAG, "destAddr is " + ((result != null)?"formatted.":"not formatted."));
-            Rlog.d(TAG, "leave filterDestAddr, new destAddr=\"" + (result != null ? Rlog.pii(TAG,
-                    result) : Rlog.pii(TAG, destAddr)) + "\"");
+            Log.d(TAG, "destAddr is " + ((result != null)?"formatted.":"not formatted."));
+            Log.d(TAG, "leave filterDestAddr, new destAddr=\"" + (result != null ? pii(TAG,
+                    result) : pii(TAG, destAddr)) + "\"");
         }
         return result != null ? result : destAddr;
     }
@@ -608,7 +612,7 @@ public class SmsNumberUtils {
                 networkType = CDMA_HOME_NETWORK;
             }
         } else {
-            if (DBG) Rlog.w(TAG, "warning! unknown mPhoneType value=" + phoneType);
+            if (DBG) Log.w(TAG, "warning! unknown mPhoneType value=" + phoneType);
         }
 
         return networkType;
@@ -649,5 +653,45 @@ public class SmsNumberUtils {
         }
         // by default this value is false
         return false;
+    }
+
+    /**
+     * Redact personally identifiable information for production users.
+     * @param tag used to identify the source of a log message
+     * @param pii the personally identifiable information we want to apply secure hash on.
+     * @return If tag is loggable in verbose mode or pii is null, return the original input.
+     * otherwise return a secure Hash of input pii
+     */
+    private static String pii(String tag, Object pii) {
+        String val = String.valueOf(pii);
+        if (pii == null || TextUtils.isEmpty(val) || Log.isLoggable(tag, Log.VERBOSE)) {
+            return val;
+        }
+        return "[" + secureHash(val.getBytes()) + "]";
+    }
+
+    /**
+     * Returns a secure hash (using the SHA1 algorithm) of the provided input.
+     *
+     * @return "****" if the build type is user, otherwise the hash
+     * @param input the bytes for which the secure hash should be computed.
+     */
+    private static String secureHash(byte[] input) {
+        // Refrain from logging user personal information in user build.
+        if (TelephonyUtils.IS_USER) {
+            return "****";
+        }
+
+        MessageDigest messageDigest;
+
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            return "####";
+        }
+
+        byte[] result = messageDigest.digest(input);
+        return Base64.encodeToString(
+                result, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
     }
 }

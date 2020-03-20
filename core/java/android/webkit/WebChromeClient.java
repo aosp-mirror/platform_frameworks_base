@@ -71,11 +71,24 @@ public class WebChromeClient {
     }
 
     /**
-     * Notify the host application that the current page has entered full
-     * screen mode. The host application must show the custom View which
-     * contains the web contents &mdash; video or other HTML content &mdash;
-     * in full screen mode. Also see "Full screen support" documentation on
-     * {@link WebView}.
+     * Notify the host application that the current page has entered full screen mode. After this
+     * call, web content will no longer be rendered in the WebView, but will instead be rendered
+     * in {@code view}. The host application should add this View to a Window which is configured
+     * with {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN} flag in order to
+     * actually display this web content full screen.
+     *
+     * <p>The application may explicitly exit fullscreen mode by invoking {@code callback} (ex. when
+     * the user presses the back button). However, this is generally not necessary as the web page
+     * will often show its own UI to close out of fullscreen. Regardless of how the WebView exits
+     * fullscreen mode, WebView will invoke {@link #onHideCustomView()}, signaling for the
+     * application to remove the custom View.
+     *
+     * <p>If this method is not overridden, WebView will report to the web page it does not support
+     * fullscreen mode and will not honor the web page's request to run in fullscreen mode.
+     *
+     * <p class="note"><b>Note:</b> if overriding this method, the application must also override
+     * {@link #onHideCustomView()}.
+     *
      * @param view is the View object to be shown.
      * @param callback invoke this callback to request the page to exit
      * full screen mode.
@@ -98,10 +111,13 @@ public class WebChromeClient {
             CustomViewCallback callback) {};
 
     /**
-     * Notify the host application that the current page has exited full
-     * screen mode. The host application must hide the custom View, ie. the
-     * View passed to {@link #onShowCustomView} when the content entered fullscreen.
-     * Also see "Full screen support" documentation on {@link WebView}.
+     * Notify the host application that the current page has exited full screen mode. The host
+     * application must hide the custom View (the View which was previously passed to {@link
+     * #onShowCustomView(View, CustomViewCallback) onShowCustomView()}). After this call, web
+     * content will render in the original WebView again.
+     *
+     * <p class="note"><b>Note:</b> if overriding this method, the application must also override
+     * {@link #onShowCustomView(View, CustomViewCallback) onShowCustomView()}.
      */
     public void onHideCustomView() {}
 

@@ -37,6 +37,7 @@ import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
+import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
@@ -111,7 +112,7 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
-import android.net.StringNetworkSpecifier;
+import android.net.TelephonyNetworkSpecifier;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -1005,7 +1006,7 @@ public class NetworkPolicyManagerServiceTest {
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 256L, 2L, 256L, 2L);
+                .insertEntry(TEST_IFACE, 256L, 2L, 256L, 2L);
         when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START, CYCLE_END))
                 .thenReturn(stats.getTotalBytes());
 
@@ -1197,11 +1198,11 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_C, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
@@ -1225,9 +1226,9 @@ public class NetworkPolicyManagerServiceTest {
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
             stats.clear();
-            stats.addValues(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_A, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(960), 0, 0, 0, 0);
-            stats.addValues(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
+            stats.insertEntry(IFACE_ALL, UID_B, SET_ALL, TAG_ALL,
                     DataUnit.MEGABYTES.toBytes(480), 0, 0, 0, 0);
 
             reset(mNotifManager);
@@ -1259,7 +1260,7 @@ public class NetworkPolicyManagerServiceTest {
         // bring up wifi network with metered policy
         state = new NetworkState[] { buildWifi() };
         stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
+                .insertEntry(TEST_IFACE, 0L, 0L, 0L, 0L);
 
         {
             when(mConnManager.getAllNetworkState()).thenReturn(state);
@@ -1683,6 +1684,59 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     /**
+     * Test that when StatsProvider triggers limit reached, new limit will be calculated and
+     * re-armed.
+     */
+    @Test
+    public void testStatsProviderLimitReached() throws Exception {
+        final int CYCLE_DAY = 15;
+
+        final NetworkStats stats = new NetworkStats(0L, 1);
+        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+                2999, 1, 2000, 1, 0);
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats.getTotalBytes());
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats);
+
+        // Get active mobile network in place
+        expectMobileDefaults();
+        mService.updateNetworks();
+        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, Long.MAX_VALUE);
+
+        // Set limit to 10KB.
+        setNetworkPolicies(new NetworkPolicy(
+                sTemplateMobileAll, CYCLE_DAY, TIMEZONE_UTC, WARNING_DISABLED, 10000L,
+                true));
+        postMsgAndWaitForCompletion();
+
+        // Verifies that remaining quota is set to providers.
+        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L);
+
+        reset(mStatsService);
+
+        // Increase the usage.
+        stats.insertEntry(TEST_IFACE, UID_A, SET_ALL, TAG_NONE,
+                1000, 1, 999, 1, 0);
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats.getTotalBytes());
+        when(mStatsService.getNetworkUidBytes(any(), anyLong(), anyLong()))
+                .thenReturn(stats);
+
+        // Simulates that limit reached fires earlier by provider, but actually the quota is not
+        // yet reached.
+        final NetworkPolicyManagerInternal npmi = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+        npmi.onStatsProviderLimitReached("TEST");
+
+        // Verifies that the limit reached leads to a force update and new limit should be set.
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).forceUpdate();
+        postMsgAndWaitForCompletion();
+        verify(mStatsService).setStatsProviderLimitAsync(TEST_IFACE, 10000L - 4999L - 1999L);
+    }
+
+    /**
      * Exhaustively test isUidNetworkingBlocked to output the expected results based on external
      * conditions.
      */
@@ -1784,7 +1838,8 @@ public class NetworkPolicyManagerServiceTest {
         if (!roaming) {
             nc.addCapability(NET_CAPABILITY_NOT_ROAMING);
         }
-        nc.setNetworkSpecifier(new StringNetworkSpecifier(String.valueOf(subId)));
+        nc.setNetworkSpecifier(new TelephonyNetworkSpecifier.Builder()
+                .setSubscriptionId(subId).build());
         return nc;
     }
 

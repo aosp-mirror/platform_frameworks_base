@@ -16,8 +16,8 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7123375275748530234">"ບ່ອນຈັດເກັບຂໍ້ມູນພາຍນອກ"</string>
-    <string name="storage_description" msgid="8541974407321172792">"ບ່ອນຈັດເກັບຂໍ້ມູນໃນເຄື່ອງ"</string>
-    <string name="root_internal_storage" msgid="827844243068584127">"ບ່ອນຈັດເກັບຂໍ້ມູນພາຍໃນ"</string>
-    <string name="root_documents" msgid="4051252304075469250">"ເອ​ກະ​ສານ"</string>
+    <string name="app_label" msgid="748293919008814871">"ບ່ອນຈັດເກັບຂໍ້ມູນພາຍນອກ"</string>
+    <string name="storage_description" msgid="9176081505553938524">"ບ່ອນຈັດເກັບຂໍ້ມູນໃນເຄື່ອງ"</string>
+    <string name="root_internal_storage" msgid="4980477711224234931">"ບ່ອນຈັດເກັບຂໍ້ມູນພາຍໃນ"</string>
+    <string name="root_documents" msgid="5695037589229175941">"ເອ​ກະ​ສານ"</string>
 </resources>

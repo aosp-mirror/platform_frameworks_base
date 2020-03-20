@@ -100,6 +100,19 @@ final class ConnectionServiceAdapter implements DeathRecipient {
         }
     }
 
+    void handleCreateConferenceComplete(
+            String id,
+            ConnectionRequest request,
+            ParcelableConference conference) {
+        for (IConnectionServiceAdapter adapter : mAdapters) {
+            try {
+                adapter.handleCreateConferenceComplete(id, request, conference,
+                        Log.getExternalSession());
+            } catch (RemoteException e) {
+            }
+        }
+    }
+
     /**
      * Sets a call's state to active (e.g., an ongoing call where two parties can actively
      * communicate).

@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 

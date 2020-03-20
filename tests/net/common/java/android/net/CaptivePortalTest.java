@@ -18,19 +18,26 @@ package android.net;
 
 import static org.junit.Assert.assertEquals;
 
+import android.os.Build;
 import android.os.RemoteException;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.testutils.DevSdkIgnoreRule;
+import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class CaptivePortalTest {
+    @Rule
+    public final DevSdkIgnoreRule ignoreRule = new DevSdkIgnoreRule();
+
     private static final int DEFAULT_TIMEOUT_MS = 5000;
     private static final String TEST_PACKAGE_NAME = "com.google.android.test";
 
@@ -41,6 +48,11 @@ public class CaptivePortalTest {
         @Override
         public void appResponse(final int response) throws RemoteException {
             mCode = response;
+        }
+
+        @Override
+        public void appRequest(final int request) throws RemoteException {
+            mCode = request;
         }
 
         @Override
@@ -77,6 +89,13 @@ public class CaptivePortalTest {
     public void testUseNetwork() {
         final MyCaptivePortalImpl result = runCaptivePortalTest(c -> c.useNetwork());
         assertEquals(result.mCode, CaptivePortal.APP_RETURN_WANTED_AS_IS);
+    }
+
+    @IgnoreUpTo(Build.VERSION_CODES.Q)
+    @Test
+    public void testReevaluateNetwork() {
+        final MyCaptivePortalImpl result = runCaptivePortalTest(c -> c.reevaluateNetwork());
+        assertEquals(result.mCode, CaptivePortal.APP_REQUEST_REEVALUATION_REQUIRED);
     }
 
     @Test

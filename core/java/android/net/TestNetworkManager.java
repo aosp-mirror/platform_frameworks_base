@@ -16,6 +16,7 @@
 package android.net;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -29,6 +30,18 @@ import com.android.internal.util.Preconditions;
  */
 @TestApi
 public class TestNetworkManager {
+    /**
+     * Prefix for tun interfaces created by this class.
+     * @hide
+     */
+    public static final String TEST_TUN_PREFIX = "testtun";
+
+    /**
+     * Prefix for tap interfaces created by this class.
+     * @hide
+     */
+    public static final String TEST_TAP_PREFIX = "testtap";
+
     @NonNull private static final String TAG = TestNetworkManager.class.getSimpleName();
 
     @NonNull private final ITestNetworkManager mService;
@@ -53,6 +66,19 @@ public class TestNetworkManager {
         }
     }
 
+    private void setupTestNetwork(
+            @NonNull String iface,
+            @Nullable LinkProperties lp,
+            boolean isMetered,
+            @NonNull int[] administratorUids,
+            @NonNull IBinder binder) {
+        try {
+            mService.setupTestNetwork(iface, lp, isMetered, administratorUids, binder);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Sets up a capability-limited, testing-only network for a given interface
      *
@@ -66,11 +92,7 @@ public class TestNetworkManager {
     public void setupTestNetwork(
             @NonNull LinkProperties lp, boolean isMetered, @NonNull IBinder binder) {
         Preconditions.checkNotNull(lp, "Invalid LinkProperties");
-        try {
-            mService.setupTestNetwork(lp.getInterfaceName(), lp, isMetered, binder);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setupTestNetwork(lp.getInterfaceName(), lp, isMetered, new int[0], binder);
     }
 
     /**
@@ -82,11 +104,21 @@ public class TestNetworkManager {
      */
     @TestApi
     public void setupTestNetwork(@NonNull String iface, @NonNull IBinder binder) {
-        try {
-            mService.setupTestNetwork(iface, null, true, binder);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        setupTestNetwork(iface, null, true, new int[0], binder);
+    }
+
+    /**
+     * Sets up a capability-limited, testing-only network for a given interface with the given
+     * administrator UIDs.
+     *
+     * @param iface the name of the interface to be used for the Network LinkProperties.
+     * @param administratorUids The administrator UIDs to be used for the test-only network
+     * @param binder A binder object guarding the lifecycle of this test network.
+     * @hide
+     */
+    public void setupTestNetwork(
+            @NonNull String iface, @NonNull int[] administratorUids, @NonNull IBinder binder) {
+        setupTestNetwork(iface, null, true, administratorUids, binder);
     }
 
     /**

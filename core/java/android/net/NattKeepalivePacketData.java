@@ -16,10 +16,12 @@
 
 package android.net;
 
-import static android.net.SocketKeepalive.ERROR_INVALID_IP_ADDRESS;
-import static android.net.SocketKeepalive.ERROR_INVALID_PORT;
+import static android.net.InvalidPacketException.ERROR_INVALID_IP_ADDRESS;
+import static android.net.InvalidPacketException.ERROR_INVALID_PORT;
 
-import android.net.SocketKeepalive.InvalidPacketException;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.util.IpUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,19 +31,25 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Objects;
 
 /** @hide */
+@SystemApi
 public final class NattKeepalivePacketData extends KeepalivePacketData implements Parcelable {
+    private static final int IPV4_HEADER_LENGTH = 20;
+    private static final int UDP_HEADER_LENGTH = 8;
+
     // This should only be constructed via static factory methods, such as
     // nattKeepalivePacket
-    private NattKeepalivePacketData(InetAddress srcAddress, int srcPort,
-            InetAddress dstAddress, int dstPort, byte[] data) throws
+    public NattKeepalivePacketData(@NonNull InetAddress srcAddress, int srcPort,
+            @NonNull InetAddress dstAddress, int dstPort, @NonNull byte[] data) throws
             InvalidPacketException {
         super(srcAddress, srcPort, dstAddress, dstPort, data);
     }
 
     /**
      * Factory method to create Nat-T keepalive packet structure.
+     * @hide
      */
     public static NattKeepalivePacketData nattKeepalivePacket(
             InetAddress srcAddress, int srcPort, InetAddress dstAddress, int dstPort)
@@ -85,7 +93,7 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
     }
 
     /** Write to parcel */
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeString(srcAddress.getHostAddress());
         out.writeString(dstAddress.getHostAddress());
         out.writeInt(srcPort);
@@ -93,7 +101,7 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
     }
 
     /** Parcelable Creator */
-    public static final Parcelable.Creator<NattKeepalivePacketData> CREATOR =
+    public static final @NonNull Parcelable.Creator<NattKeepalivePacketData> CREATOR =
             new Parcelable.Creator<NattKeepalivePacketData>() {
                 public NattKeepalivePacketData createFromParcel(Parcel in) {
                     final InetAddress srcAddress =
@@ -115,4 +123,19 @@ public final class NattKeepalivePacketData extends KeepalivePacketData implement
                     return new NattKeepalivePacketData[size];
                 }
             };
+
+    @Override
+    public boolean equals(@Nullable final Object o) {
+        if (!(o instanceof NattKeepalivePacketData)) return false;
+        final NattKeepalivePacketData other = (NattKeepalivePacketData) o;
+        return this.srcAddress.equals(other.srcAddress)
+            && this.dstAddress.equals(other.dstAddress)
+            && this.srcPort == other.srcPort
+            && this.dstPort == other.dstPort;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(srcAddress, dstAddress, srcPort, dstPort);
+    }
 }

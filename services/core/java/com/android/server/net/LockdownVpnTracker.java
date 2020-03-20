@@ -45,12 +45,12 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.util.Preconditions;
 import com.android.server.ConnectivityService;
 import com.android.server.EventLogTags;
 import com.android.server.connectivity.Vpn;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * State tracker for lockdown mode. Watches for normal {@link NetworkInfo} to be
@@ -90,11 +90,11 @@ public class LockdownVpnTracker {
             @NonNull Handler handler,
             @NonNull Vpn vpn,
             @NonNull VpnProfile profile) {
-        mContext = Preconditions.checkNotNull(context);
-        mConnService = Preconditions.checkNotNull(connService);
-        mHandler = Preconditions.checkNotNull(handler);
-        mVpn = Preconditions.checkNotNull(vpn);
-        mProfile = Preconditions.checkNotNull(profile);
+        mContext = Objects.requireNonNull(context);
+        mConnService = Objects.requireNonNull(connService);
+        mHandler = Objects.requireNonNull(handler);
+        mVpn = Objects.requireNonNull(vpn);
+        mProfile = Objects.requireNonNull(profile);
 
         final Intent configIntent = new Intent(ACTION_VPN_SETTINGS);
         mConfigIntent = PendingIntent.getActivity(mContext, 0, configIntent, 0);
@@ -138,7 +138,7 @@ public class LockdownVpnTracker {
 
         if (egressDisconnected || egressChanged) {
             mAcceptedEgressIface = null;
-            mVpn.stopLegacyVpnPrivileged();
+            mVpn.stopVpnRunnerPrivileged();
         }
         if (egressDisconnected) {
             hideNotification();
@@ -218,7 +218,7 @@ public class LockdownVpnTracker {
         mAcceptedEgressIface = null;
         mErrorCount = 0;
 
-        mVpn.stopLegacyVpnPrivileged();
+        mVpn.stopVpnRunnerPrivileged();
         mVpn.setLockdown(false);
         hideNotification();
 

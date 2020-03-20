@@ -18,7 +18,7 @@ package android.app;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -46,7 +46,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.sysprop.ProductProperties;
+import android.sysprop.VndkProperties;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
@@ -785,13 +785,12 @@ public final class LoadedApk {
         // Similar to vendor apks, we should add /product/lib for apks from product partition
         // when product apps are marked as unbundled. We cannot use the same way from vendor
         // to check if lib path exists because there is possibility that /product/lib would not
-        // exist from legacy device while product apks are bundled. To make this clear, new
-        // property ("ro.product.apps.unbundled") is defined which should be true only when
-        // product apks are unbundled.
+        // exist from legacy device while product apks are bundled. To make this clear, we use
+        // "ro.product.vndk.version" property. If the property is defined, we regard all product
+        // apks as unbundled.
         if (mApplicationInfo.getCodePath() != null
-                && mApplicationInfo.isProduct() && ProductProperties.unbundled_apps().orElse(false)
-                // TODO(b/128557860): Change target SDK version when version code R is available.
-                && getTargetSdkVersion() == Build.VERSION_CODES.CUR_DEVELOPMENT) {
+                && mApplicationInfo.isProduct()
+                && VndkProperties.product_vndk_version().isPresent()) {
             isBundledApp = false;
         }
 

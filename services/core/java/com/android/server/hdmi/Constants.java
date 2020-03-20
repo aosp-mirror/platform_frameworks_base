@@ -306,10 +306,6 @@ final class Constants {
     static final String PROPERTY_PREFERRED_ADDRESS_PLAYBACK = "persist.sys.hdmi.addr.playback";
     static final String PROPERTY_PREFERRED_ADDRESS_TV = "persist.sys.hdmi.addr.tv";
 
-    // Property name for the local device configurations.
-    // TODO(OEM): OEM should provide this property, and the value is the comma separated integer
-    //     values which denotes the device type in HDMI Spec 1.4.
-    static final String PROPERTY_DEVICE_TYPE = "ro.hdmi.device_type";
 
     // TODO(OEM): Set this to false to keep the playback device in sleep upon hotplug event.
     //            True by default.

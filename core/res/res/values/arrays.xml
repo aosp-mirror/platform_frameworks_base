@@ -165,7 +165,7 @@
         <item>中文 (繁體)</item>
     </string-array>
 
-    <array name="sim_colors">
+    <array name="simColors">
         <item>@color/Teal_700</item>
         <item>@color/Blue_700</item>
         <item>@color/Indigo_700</item>
@@ -175,7 +175,15 @@
     </array>
 
     <!-- Used in ResolverTargetActionsDialogFragment -->
-    <string-array name="resolver_target_actions">
+    
+    <!-- Used in ResolverTargetActionsDialogFragment -->
+    <string-array name="resolver_target_actions_pin">
+        <item>@string/pin_target</item>
+        <item>@string/app_info</item>
+    </string-array>
+
+    <string-array name="resolver_target_actions_unpin">
+        <item>@string/unpin_target</item>
         <item>@string/app_info</item>
     </string-array>
 

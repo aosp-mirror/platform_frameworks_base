@@ -16,12 +16,12 @@
 
 package com.android.ims;
 
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Message;
 import android.telephony.ims.ImsCallForwardInfo;
 import android.telephony.ims.ImsSsInfo;
-
-import dalvik.annotation.compat.UnsupportedAppUsage;
+import android.telephony.ims.stub.ImsUtImplBase;
 
 /**
  * Provides APIs for the supplementary service settings using IMS (Ut interface).
@@ -59,47 +59,48 @@ public interface ImsUtInterface {
      * CDIV (Communication Diversion, 3GPP TS 24.604)
      *     actions: target, no reply timer
      */
-    public static final int CDIV_CF_UNCONDITIONAL = 0;
-    public static final int CDIV_CF_BUSY = 1;
-    public static final int CDIV_CF_NO_REPLY = 2;
-    public static final int CDIV_CF_NOT_REACHABLE = 3;
+    public static final int CDIV_CF_UNCONDITIONAL = ImsCallForwardInfo.CDIV_CF_REASON_UNCONDITIONAL;
+    public static final int CDIV_CF_BUSY = ImsCallForwardInfo.CDIV_CF_REASON_BUSY;
+    public static final int CDIV_CF_NO_REPLY = ImsCallForwardInfo.CDIV_CF_REASON_NO_REPLY;
+    public static final int CDIV_CF_NOT_REACHABLE = ImsCallForwardInfo.CDIV_CF_REASON_NOT_REACHABLE;
     // For CS service code: 002
-    public static final int CDIV_CF_ALL = 4;
+    public static final int CDIV_CF_ALL = ImsCallForwardInfo.CDIV_CF_REASON_ALL;
     // For CS service code: 004
-    public static final int CDIV_CF_ALL_CONDITIONAL = 5;
+    public static final int CDIV_CF_ALL_CONDITIONAL =
+            ImsCallForwardInfo.CDIV_CF_REASON_ALL_CONDITIONAL;
     // It's only supported in the IMS service (CS does not define it).
     // IR.92 recommends that an UE activates both the CFNRc and the CFNL
     // (CDIV using condition not-registered) to the same target.
-    public static final int CDIV_CF_NOT_LOGGED_IN = 6;
+    public static final int CDIV_CF_NOT_LOGGED_IN = ImsCallForwardInfo.CDIV_CF_REASON_NOT_LOGGED_IN;
 
     /**
      * CB (Communication Barring, 3GPP TS 24.611)
      */
     // Barring of All Incoming Calls
-    public static final int CB_BAIC = 1;
+    public static final int CB_BAIC = ImsUtImplBase.CALL_BARRING_ALL_INCOMING;
     // Barring of All Outgoing Calls
-    public static final int CB_BAOC = 2;
+    public static final int CB_BAOC = ImsUtImplBase.CALL_BARRING_ALL_OUTGOING;
     // Barring of Outgoing International Calls
-    public static final int CB_BOIC = 3;
+    public static final int CB_BOIC = ImsUtImplBase.CALL_BARRING_OUTGOING_INTL;
     // Barring of Outgoing International Calls - excluding Home Country
-    public static final int CB_BOIC_EXHC = 4;
+    public static final int CB_BOIC_EXHC = ImsUtImplBase.CALL_BARRING_OUTGOING_INTL_EXCL_HOME;
     // Barring of Incoming Calls - when roaming
-    public static final int CB_BIC_WR = 5;
+    public static final int CB_BIC_WR = ImsUtImplBase.CALL_BLOCKING_INCOMING_WHEN_ROAMING;
     // Barring of Anonymous Communication Rejection (ACR) - a particular case of ICB service
-    public static final int CB_BIC_ACR = 6;
+    public static final int CB_BIC_ACR = ImsUtImplBase.CALL_BARRING_ANONYMOUS_INCOMING;
     // Barring of All Calls
-    public static final int CB_BA_ALL = 7;
+    public static final int CB_BA_ALL = ImsUtImplBase.CALL_BARRING_ALL;
     // Barring of Outgoing Services (Service Code 333 - 3GPP TS 22.030 Table B-1)
-    public static final int CB_BA_MO = 8;
+    public static final int CB_BA_MO = ImsUtImplBase.CALL_BARRING_OUTGOING_ALL_SERVICES;
     // Barring of Incoming Services (Service Code 353 - 3GPP TS 22.030 Table B-1)
-    public static final int CB_BA_MT = 9;
+    public static final int CB_BA_MT = ImsUtImplBase.CALL_BARRING_INCOMING_ALL_SERVICES;
     // Barring of Specific Incoming calls
-    public static final int CB_BS_MT = 10;
+    public static final int CB_BS_MT = ImsUtImplBase.CALL_BARRING_SPECIFIC_INCOMING_CALLS;
 
     /**
      * Invalid result value.
      */
-    public static final int INVALID = (-1);
+    public static final int INVALID = ImsUtImplBase.INVALID_RESULT;
 
 
 
@@ -163,6 +164,12 @@ public interface ImsUtInterface {
      */
     public void updateCallBarring(int cbType, int action, Message result,
             String[] barrList, int serviceClass);
+
+    /**
+     * Modifies the configuration of the call barring for specified service class with password.
+     */
+    public void updateCallBarring(int cbType, int action, Message result,
+            String[] barrList, int serviceClass, String password);
 
     /**
      * Modifies the configuration of the call forward.

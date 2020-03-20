@@ -17,9 +17,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.frameworks.mockingservicestests">
 
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
     <uses-permission android:name="android.permission.HARDWARE_TEST"/>
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
 
     <application android:testOnly="true"
                  android:debuggable="true">

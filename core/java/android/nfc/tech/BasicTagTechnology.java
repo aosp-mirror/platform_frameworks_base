@@ -75,7 +75,10 @@ abstract class BasicTagTechnology implements TagTechnology {
 
             if (errorCode == ErrorCodes.SUCCESS) {
                 // Store this in the tag object
-                mTag.setConnectedTechnology(mSelectedTechnology);
+                if (!mTag.setConnectedTechnology(mSelectedTechnology)) {
+                    Log.e(TAG, "Close other technology first!");
+                    throw new IOException("Only one TagTechnology can be connected at a time.");
+                }
                 mIsConnected = true;
             } else if (errorCode == ErrorCodes.ERROR_NOT_SUPPORTED) {
                 throw new UnsupportedOperationException("Connecting to " +

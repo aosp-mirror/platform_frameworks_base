@@ -23,6 +23,8 @@
 package android.se.omapi;
 
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
@@ -148,6 +150,27 @@ public final class Reader {
             try {
                 mReader.closeSessions();
             } catch (RemoteException ignore) { }
+        }
+    }
+
+    /**
+     * Close all the sessions opened on this reader and reset the reader.
+     * All the channels opened by all these sessions will be closed.
+     * @return <code>true</code> if reset success, <code>false</code> otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SECURE_ELEMENT_PRIVILEGED_OPERATION)
+    public boolean reset() {
+        if (!mService.isConnected()) {
+            Log.e(TAG, "service is not connected");
+            return false;
+        }
+        synchronized (mLock) {
+            try {
+                closeSessions();
+                return mReader.reset();
+            } catch (RemoteException ignore) {return false;}
         }
     }
 }

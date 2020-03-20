@@ -48,9 +48,11 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.os.Build;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
 
+import androidx.core.os.BuildCompat;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
@@ -63,6 +65,13 @@ import java.util.Set;
 public class NetworkCapabilitiesTest {
     private static final String TEST_SSID = "TEST_SSID";
     private static final String DIFFERENT_TEST_SSID = "DIFFERENT_TEST_SSID";
+
+    private boolean isAtLeastR() {
+        // BuildCompat.isAtLeastR() is used to check the Android version before releasing Android R.
+        // Build.VERSION.SDK_INT > Build.VERSION_CODES.Q is used to check the Android version after
+        // releasing Android R.
+        return BuildCompat.isAtLeastR() || Build.VERSION.SDK_INT > Build.VERSION_CODES.Q;
+    }
 
     @Test
     public void testMaybeMarkCapabilitiesRestricted() {
@@ -269,9 +278,35 @@ public class NetworkCapabilitiesTest {
             .setUids(uids)
             .addCapability(NET_CAPABILITY_EIMS)
             .addCapability(NET_CAPABILITY_NOT_METERED);
+        if (isAtLeastR()) {
+            netCap.setOwnerUid(123);
+        }
         assertParcelingIsLossless(netCap);
         netCap.setSSID(TEST_SSID);
-        assertParcelSane(netCap, 12);
+        testParcelSane(netCap);
+    }
+
+    @Test
+    public void testParcelNetworkCapabilitiesWithRequestorUidAndPackageName() {
+        final NetworkCapabilities netCap = new NetworkCapabilities()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .addCapability(NET_CAPABILITY_EIMS)
+                .addCapability(NET_CAPABILITY_NOT_METERED);
+        if (isAtLeastR()) {
+            netCap.setRequestorPackageName("com.android.test");
+            netCap.setRequestorUid(9304);
+        }
+        assertParcelingIsLossless(netCap);
+        netCap.setSSID(TEST_SSID);
+        testParcelSane(netCap);
+    }
+
+    private void testParcelSane(NetworkCapabilities cap) {
+        if (isAtLeastR()) {
+            assertParcelSane(cap, 15);
+        } else {
+            assertParcelSane(cap, 11);
+        }
     }
 
     @Test

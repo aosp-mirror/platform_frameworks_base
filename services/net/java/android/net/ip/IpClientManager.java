@@ -16,6 +16,7 @@
 
 package android.net.ip;
 
+import android.annotation.Hide;
 import android.annotation.NonNull;
 import android.net.NattKeepalivePacketData;
 import android.net.ProxyInfo;
@@ -38,6 +39,7 @@ import android.util.Log;
  * wrapper methods in this class return a boolean that callers can use to determine whether
  * RemoteException was thrown.
  */
+@Hide
 public class IpClientManager {
     @NonNull private final IIpClient mIpClient;
     @NonNull private final String mTag;

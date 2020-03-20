@@ -240,7 +240,7 @@ public class KeyguardClockPositionAlgorithm {
      * @return Alpha from 0 to 1.
      */
     private float getClockAlpha(int y) {
-        float alphaKeyguard = Math.max(0, y / Math.max(1f, getExpandedPreferredClockY()));
+        float alphaKeyguard = Math.max(0, y / Math.max(1f, getClockY(1f)));
         alphaKeyguard = Interpolators.ACCELERATE.getInterpolation(alphaKeyguard);
         return MathUtils.lerp(alphaKeyguard, 1f, mDarkAmount);
     }

@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,6 +80,22 @@ public class PackageWatchdog {
             "watchdog_trigger_failure_count";
     static final String PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED =
             "watchdog_explicit_health_check_enabled";
+
+    public static final int FAILURE_REASON_UNKNOWN = 0;
+    public static final int FAILURE_REASON_NATIVE_CRASH = 1;
+    public static final int FAILURE_REASON_EXPLICIT_HEALTH_CHECK = 2;
+    public static final int FAILURE_REASON_APP_CRASH = 3;
+    public static final int FAILURE_REASON_APP_NOT_RESPONDING = 4;
+
+    @IntDef(prefix = { "FAILURE_REASON_" }, value = {
+            FAILURE_REASON_UNKNOWN,
+            FAILURE_REASON_NATIVE_CRASH,
+            FAILURE_REASON_EXPLICIT_HEALTH_CHECK,
+            FAILURE_REASON_APP_CRASH,
+            FAILURE_REASON_APP_NOT_RESPONDING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface FailureReasons {}
 
     // Duration to count package failures before it resets to 0
     private static final int DEFAULT_TRIGGER_FAILURE_DURATION_MS =
@@ -295,14 +312,15 @@ public class PackageWatchdog {
     }
 
     /**
-     * Called when a process fails either due to a crash or ANR.
+     * Called when a process fails due to a crash, ANR or explicit health check.
      *
      * <p>For each package contained in the process, one registered observer with the least user
      * impact will be notified for mitigation.
      *
      * <p>This method could be called frequently if there is a severe problem on the device.
      */
-    public void onPackageFailure(List<VersionedPackage> packages) {
+    public void onPackageFailure(List<VersionedPackage> packages,
+            @FailureReasons int failureReason) {
         mLongTaskHandler.post(() -> {
             synchronized (mLock) {
                 if (mAllObservers.isEmpty()) {
@@ -333,7 +351,7 @@ public class PackageWatchdog {
 
                     // Execute action with least user impact
                     if (currentObserverToNotify != null) {
-                        currentObserverToNotify.execute(versionedPackage);
+                        currentObserverToNotify.execute(versionedPackage, failureReason);
                     }
                 }
             }
@@ -404,7 +422,7 @@ public class PackageWatchdog {
          *
          * @return {@code true} if action was executed successfully, {@code false} otherwise
          */
-        boolean execute(VersionedPackage versionedPackage);
+        boolean execute(VersionedPackage versionedPackage, @FailureReasons int failureReason);
 
         // TODO(b/120598832): Ensure uniqueness?
         /**
@@ -648,7 +666,8 @@ public class PackageWatchdog {
                             // the tests don't install any packages
                             versionedPkg = new VersionedPackage(failedPackage, 0L);
                         }
-                        registeredObserver.execute(versionedPkg);
+                        registeredObserver.execute(versionedPkg,
+                                PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
                     }
                 }
             }
@@ -759,7 +778,7 @@ public class PackageWatchdog {
                     final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
                     final long failureCount = getTriggerFailureCount();
                     for (int i = 0; i < failureCount; i++) {
-                        onPackageFailure(pkgList);
+                        onPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
                     }
                 });
     }

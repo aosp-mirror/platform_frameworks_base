@@ -1,0 +1,3 @@
+rule com.android.internal.telephony.SmsApplication* com.android.internal.telephony.tests.SmsApplication@1
+rule android.telephony.PackageChangeReceiver* com.android.internal.telephony.tests.PackageChangeReceiver@1
+rule com.android.internal.os.BackgroundThread* com.android.internal.telephony.tests.BackgroundThread@1

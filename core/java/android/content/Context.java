@@ -30,14 +30,15 @@ import android.annotation.StringDef;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
@@ -2469,12 +2470,13 @@ public abstract class Context {
      *
      * @see #sendOrderedBroadcast(Intent, String, BroadcastReceiver, Handler, int, String, Bundle)
      * @see android.app.BroadcastOptions
+     * @hide
      */
-    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent,
+    public void sendOrderedBroadcast(@RequiresPermission @NonNull Intent intent, int initialCode,
             @Nullable String receiverPermission, @Nullable String receiverAppOp,
-            @Nullable Bundle options, @Nullable BroadcastReceiver resultReceiver,
-            @Nullable Handler scheduler, int initialCode, @Nullable String initialData,
-            @Nullable Bundle initialExtras) {
+            @Nullable BroadcastReceiver resultReceiver, @Nullable Handler scheduler,
+            @Nullable String initialData, @Nullable Bundle initialExtras,
+            @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -3295,6 +3297,7 @@ public abstract class Context {
             CONNECTIVITY_SERVICE,
             //@hide: IP_MEMORY_STORE_SERVICE,
             IPSEC_SERVICE,
+            VPN_MANAGEMENT_SERVICE,
             TEST_NETWORK_SERVICE,
             //@hide: UPDATE_LOCK_SERVICE,
             //@hide: NETWORKMANAGEMENT_SERVICE,
@@ -3318,6 +3321,7 @@ public abstract class Context {
             TELEPHONY_SUBSCRIPTION_SERVICE,
             CARRIER_CONFIG_SERVICE,
             EUICC_SERVICE,
+            MMS_SERVICE,
             TELECOM_SERVICE,
             CLIPBOARD_SERVICE,
             INPUT_METHOD_SERVICE,
@@ -3354,6 +3358,7 @@ public abstract class Context {
             CONSUMER_IR_SERVICE,
             //@hide: TRUST_SERVICE,
             TV_INPUT_SERVICE,
+            //@hide: TV_TUNER_RESOURCE_MGR_SERVICE,
             //@hide: NETWORK_SCORE_SERVICE,
             USAGE_STATS_SERVICE,
             MEDIA_SESSION_SERVICE,
@@ -3378,6 +3383,7 @@ public abstract class Context {
             //@hide: TIME_DETECTOR_SERVICE,
             //@hide: TIME_ZONE_DETECTOR_SERVICE,
             PERMISSION_SERVICE,
+            LIGHTS_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3513,6 +3519,8 @@ public abstract class Context {
      * @see android.telephony.CarrierConfigManager
      * @see #EUICC_SERVICE
      * @see android.telephony.euicc.EuiccManager
+     * @see #MMS_SERVICE
+     * @see android.telephony.MmsManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager
      * @see #UI_MODE_SERVICE
@@ -3827,6 +3835,7 @@ public abstract class Context {
      */
     @SystemApi
     @TestApi
+    @SuppressLint("ServiceName")
     public static final String STATUS_BAR_SERVICE = "statusbar";
 
     /**
@@ -3851,11 +3860,22 @@ public abstract class Context {
 
     /**
      * Use with {@link android.os.ServiceManager.getService()} to retrieve a
-     * {@link NetworkStackClient} IBinder for communicating with the network stack
+     * {@link INetworkStackConnector} IBinder for communicating with the network stack
      * @hide
      * @see NetworkStackClient
      */
+    @SystemApi
+    @TestApi
     public static final String NETWORK_STACK_SERVICE = "network_stack";
+
+    /**
+     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
+     * {@link ITetheringConnector} IBinder for communicating with the tethering service
+     * @hide
+     * @see TetheringClient
+     */
+    @SystemApi
+    public static final String TETHERING_SERVICE = "tethering";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -3865,6 +3885,24 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     public static final String IPSEC_SERVICE = "ipsec";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.VpnManager} to
+     * manage profiles for the platform built-in VPN.
+     *
+     * @see #getSystemService(String)
+     */
+    public static final String VPN_MANAGEMENT_SERVICE = "vpn_management";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.ConnectivityDiagnosticsManager} for performing network connectivity diagnostics
+     * as well as receiving network connectivity information from the system.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.ConnectivityDiagnosticsManager
+     */
+    public static final String CONNECTIVITY_DIAGNOSTICS_SERVICE = "connectivity_diagnostics";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
@@ -3909,6 +3947,8 @@ public abstract class Context {
      */
     public static final String NETWORK_STATS_SERVICE = "netstats";
     /** {@hide} */
+    @SystemApi
+    @SuppressLint("ServiceName")
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";
     /** {@hide} */
     public static final String NETWORK_WATCHLIST_SERVICE = "network_watchlist";
@@ -3988,16 +4028,16 @@ public abstract class Context {
     public static final String LOWPAN_SERVICE = "lowpan";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve a {@link
-     * android.net.EthernetManager} for handling management of
-     * Ethernet access.
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.EthernetManager}
+     * for handling management of Ethernet access.
      *
      * @see #getSystemService(String)
      * @see android.net.EthernetManager
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @TestApi
     public static final String ETHERNET_SERVICE = "ethernet";
 
     /**
@@ -4142,6 +4182,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.telephony.MmsManager} to send/receive MMS messages.
+     *
+     * @see #getSystemService(String)
+     * @see android.telephony.MmsManager
+     */
+    public static final String MMS_SERVICE = "mms";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.ClipboardManager} for accessing and modifying
      * the contents of the global clipboard.
      *
@@ -4218,6 +4267,7 @@ public abstract class Context {
      * @see #getSystemService(String)
      */
     @TestApi
+    @SuppressLint("ServiceName")  // TODO: This should be renamed to CONTENT_CAPTURE_SERVICE
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
@@ -4550,6 +4600,17 @@ public abstract class Context {
     public static final String TV_INPUT_SERVICE = "tv_input";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.tunerresourcemanager.TunerResourceManager} for interacting with TV
+     * tuner resources on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.TunerResourceManager
+     * @hide
+     */
+    public static final String TV_TUNER_RESOURCE_MGR_SERVICE = "tv_tuner_resource_mgr";
+
+    /**
      * {@link android.net.NetworkScoreManager} for managing network scoring.
      * @see #getSystemService(String)
      * @see android.net.NetworkScoreManager
@@ -4819,10 +4880,7 @@ public abstract class Context {
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.telephony.ims.ImsManager}.
-     * @hide
      */
-    @SystemApi
-    @TestApi
     public static final String TELEPHONY_IMS_SERVICE = "telephony_ims";
 
     /**
@@ -4846,6 +4904,15 @@ public abstract class Context {
      */
     @SystemApi
     public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.lights.LightsManager} for controlling device lights.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String LIGHTS_SERVICE = "lights";
 
     /**
      * Determine whether the given permission is allowed for a particular

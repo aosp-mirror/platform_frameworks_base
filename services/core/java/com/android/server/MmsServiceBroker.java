@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.telephony.SubscriptionManager.INVALID_SIM_SLOT_INDEX;
+
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -37,6 +39,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.carrier.CarrierMessagingService;
 import android.telephony.SmsManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
@@ -134,11 +137,6 @@ public class MmsServiceBroker extends SystemService {
                 Uri contentUri, Bundle configOverrides, PendingIntent downloadedIntent)
                 throws RemoteException {
             returnPendingIntentWithError(downloadedIntent);
-        }
-
-        @Override
-        public Bundle getCarrierConfigValues(int subId) throws RemoteException {
-            return null;
         }
 
         @Override
@@ -370,12 +368,6 @@ public class MmsServiceBroker extends SystemService {
         }
 
         @Override
-        public Bundle getCarrierConfigValues(int subId) throws RemoteException {
-            Slog.d(TAG, "getCarrierConfigValues() by " + getCallingPackageName());
-            return getServiceGuarded().getCarrierConfigValues(subId);
-        }
-
-        @Override
         public Uri importTextMessage(String callingPkg, String address, int type, String text,
                 long timestampMillis, boolean seen, boolean read) throws RemoteException {
             if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SMS, Binder.getCallingUid(),
@@ -523,11 +515,11 @@ public class MmsServiceBroker extends SystemService {
 
                 // Grant permission for the carrier app.
                 Intent intent = new Intent(action);
-                TelephonyManager telephonyManager =
-                        (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
-                List<String> carrierPackages =
-                        telephonyManager.getCarrierPackageNamesForIntentAndPhone(
-                                intent, SubscriptionManager.getPhoneId(subId));
+                TelephonyManager telephonyManager = (TelephonyManager)
+                        mContext.getSystemService(Context.TELEPHONY_SERVICE);
+                List<String> carrierPackages = telephonyManager
+                        .getCarrierPackageNamesForIntentAndPhone(
+                                intent, getPhoneIdFromSubId(subId));
                 if (carrierPackages != null && carrierPackages.size() == 1) {
                     LocalServices.getService(UriGrantsManagerInternal.class)
                             .grantUriPermissionFromIntent(callingUid, carrierPackages.get(0),
@@ -538,5 +530,14 @@ public class MmsServiceBroker extends SystemService {
             }
             return contentUri;
         }
+    }
+
+    private int getPhoneIdFromSubId(int subId) {
+        SubscriptionManager subManager = (SubscriptionManager)
+                mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        if (subManager == null) return INVALID_SIM_SLOT_INDEX;
+        SubscriptionInfo info = subManager.getActiveSubscriptionInfo(subId);
+        if (info == null) return INVALID_SIM_SLOT_INDEX;
+        return info.getSimSlotIndex();
     }
 }

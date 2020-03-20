@@ -17,7 +17,7 @@
 package android.hardware.usb;
 
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.util.Log;
 

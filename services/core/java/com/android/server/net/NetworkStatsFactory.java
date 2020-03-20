@@ -229,7 +229,7 @@ public class NetworkStatsFactory {
                     entry.txPackets += reader.nextLong();
                 }
 
-                stats.addValues(entry);
+                stats.insertEntry(entry);
                 reader.finishLine();
             }
         } catch (NullPointerException|NumberFormatException e) {
@@ -279,7 +279,7 @@ public class NetworkStatsFactory {
                 entry.txBytes = reader.nextLong();
                 entry.txPackets = reader.nextLong();
 
-                stats.addValues(entry);
+                stats.insertEntry(entry);
                 reader.finishLine();
             }
         } catch (NullPointerException|NumberFormatException e) {
@@ -439,7 +439,7 @@ public class NetworkStatsFactory {
                 if ((limitIfaces == null || ArrayUtils.contains(limitIfaces, entry.iface))
                         && (limitUid == UID_ALL || limitUid == entry.uid)
                         && (limitTag == TAG_ALL || limitTag == entry.tag)) {
-                    stats.addValues(entry);
+                    stats.insertEntry(entry);
                 }
 
                 reader.finishLine();

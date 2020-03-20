@@ -17,7 +17,7 @@
 package android.security.keystore;
 
 import android.annotation.NonNull;
-import android.annotation.UnsupportedAppUsage;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
