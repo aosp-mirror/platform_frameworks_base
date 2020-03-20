@@ -20,7 +20,6 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL;
-import static com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -132,15 +131,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.setSensitive(true, true);
         row.setHideSensitive(true, false, 0, 0);
         verify(row).updateShelfIconColor();
-    }
-
-    @Test
-    public void testFreeContentViewWhenSafe() throws Exception {
-        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
-
-        row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
-
-        assertNull(row.getPrivateLayout().getHeadsUpChild());
     }
 
     @Test
