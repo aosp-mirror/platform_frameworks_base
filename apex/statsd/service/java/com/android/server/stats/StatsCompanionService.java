@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -46,8 +47,6 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-
-import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -226,7 +225,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     Log.d(TAG, "Sent data for " + numRecords + " apps");
                 }
             } finally {
-                IoUtils.closeQuietly(fout);
+                FileUtils.closeQuietly(fout);
                 backgroundThread.quit();
                 backgroundThread.interrupt();
             }
