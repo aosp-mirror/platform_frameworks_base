@@ -1279,4 +1279,7 @@
 
     <!-- Name of the 3.5mm audio device. [CHAR LIMIT=40] -->
     <string name="media_transfer_wired_device_name">Wired audio device</string>
+
+    <!-- Help button label [CHAR LIMIT=40] -->
+    <string name="help_label">Help &amp; feedback</string>
 </resources>
