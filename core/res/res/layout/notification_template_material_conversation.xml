@@ -31,6 +31,7 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:paddingTop="12dp"
+        android:paddingBottom="12dp"
     >
 
         <FrameLayout
@@ -186,13 +187,29 @@
     </com.android.internal.widget.RemeasuringLinearLayout>
 
     <!--This is dynamically placed between here and at the end of the layout-->
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/expand_button_container"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/conversation_expand_button_expanded_size"
+        android:layout_height="@dimen/conversation_expand_button_size"
         android:layout_gravity="end|top"
         android:paddingStart="16dp"
-        android:paddingEnd="@dimen/notification_content_margin_end">
+        android:orientation="horizontal"
+        android:paddingEnd="@dimen/notification_content_margin_end"
+        android:clipToPadding="false"
+        android:clipChildren="false"
+        >
+        <!-- Images -->
+        <com.android.internal.widget.MessagingLinearLayout
+            android:id="@+id/conversation_image_message_container"
+            android:forceHasOverlappingRendering="false"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="11dp"
+            android:spacing="0dp"
+            android:layout_gravity="center"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            />
         <com.android.internal.widget.NotificationExpandButton
             android:id="@+id/expand_button"
             android:layout_width="@dimen/notification_header_expand_icon_size"
@@ -202,5 +219,5 @@
             android:clickable="false"
             android:importantForAccessibility="no"
             />
-    </FrameLayout>
+    </LinearLayout>
 </com.android.internal.widget.ConversationLayout>
