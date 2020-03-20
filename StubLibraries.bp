@@ -71,7 +71,8 @@ stubs_defaults {
 stubs_defaults {
     name: "metalava-non-updatable-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
-    sdk_version: "system_current",
+    sdk_version: "core_platform",
+    libs: ["framework-all"],
 }
 
 /////////////////////////////////////////////////////////////////////
