@@ -17,10 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.content.Context;
-import android.media.tv.tuner.TunerUtils;
 
 /**
  * Table information for Section Filter.
@@ -55,13 +52,10 @@ public class SectionSettingsWithTableInfo extends SectionSettings {
     /**
      * Creates a builder for {@link SectionSettingsWithTableInfo}.
      *
-     * @param context the context of the caller.
      * @param mainType the filter main type.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context, @Filter.Type int mainType) {
-        TunerUtils.checkTunerPermission(context);
+    public static Builder builder(@Filter.Type int mainType) {
         return new Builder(mainType);
     }
 
