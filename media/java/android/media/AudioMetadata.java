@@ -41,43 +41,47 @@ public final class AudioMetadata {
     private static final String TAG = "AudioMetadata";
 
     /**
-     * Key interface for the map.
+     * Key interface for the {@code AudioMetadata} map.
      *
-     * The presence of this {@code Key} interface on an object allows
-     * it to be used to reference metadata in the Audio Framework.
+     * <p>The presence of this {@code Key} interface on an object allows
+     * it to reference metadata in the Audio Framework.</p>
+     *
+     * <p>Vendors are allowed to implement this {@code Key} interface for their debugging or
+     * private application use. To avoid name conflicts, vendor key names should be qualified by
+     * the vendor company name followed by a dot; for example, "vendorCompany.someVolume".</p>
      *
      * @param <T> type of value associated with {@code Key}.
      */
-    // Conceivably metadata keys exposing multiple interfaces
-    // could be eligible to work in multiple framework domains.
+    /*
+     * Internal details:
+     * Conceivably metadata keys exposing multiple interfaces
+     * could be eligible to work in multiple framework domains.
+     */
     public interface Key<T> {
         /**
-         * Returns the internal name of the key.
+         * Returns the internal name of the key.  The name should be unique in the
+         * {@code AudioMetadata} namespace.  Vendors should prefix their keys with
+         * the company name followed by a dot.
          */
         @NonNull
         String getName();
 
         /**
-         * Returns the class type of the associated value.
+         * Returns the class type {@code T} of the associated value.  Valid class types for
+         * {@link android.os.Build.VERSION_CODES#R} are
+         * {@code Integer.class}, {@code Long.class}, {@code Float.class}, {@code Double.class},
+         * {@code String.class}.
          */
         @NonNull
         Class<T> getValueClass();
 
         // TODO: consider adding bool isValid(@NonNull T value)
-
-        /**
-         * Do not allow non-framework apps to create their own keys
-         * by implementing this interface; keep a method hidden.
-         *
-         * @hide
-         */
-        boolean isFromFramework();
     }
 
     /**
      * A read only {@code Map} interface of {@link Key} value pairs.
      *
-     * Using a {@link Key} interface, look up the corresponding value.
+     * <p>Using a {@link Key} interface, the map looks up the corresponding value.</p>
      */
     public interface ReadMap {
         /**
@@ -299,12 +303,6 @@ public final class AudioMetadata {
             @NonNull
             public Class<T> getValueClass() {
                 return mType;
-            }
-
-            // hidden interface method to prevent user class implements the of Key interface.
-            @Override
-            public boolean isFromFramework() {
-                return true;
             }
 
             /**

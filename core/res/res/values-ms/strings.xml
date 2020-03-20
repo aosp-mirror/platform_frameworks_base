@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Apl ini boleh mengambil gambar dan merakam video menggunakan kamera pada bila-bila masa."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Benarkan aplikasi atau perkhidmatan mengakses kamera sistem untuk mengambil gambar dan video"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Apl sistem | terlindung ini boleh mengambil gambar dan merakam video menggunakan kamera sistem pada bila-bila masa. Apl juga perlu mempunyai kebenaran android.permission.CAMERA"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Benarkan aplikasi atau perkhidmatan menerima panggilan balik tentang peranti kamera yang dibuka atau ditutup."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kawal getaran"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Membenarkan apl mengawal penggetar."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Membenarkan apl mengakses keadaan penggetar."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Membenarkan apl menghalakan panggilan menerusi sistem untuk meningkatkan pengalaman panggilan."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"lihat dan kawal panggilan melalui sistem."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Membenarkan apl melihat dan mengawal panggilan yang sedang berlangsung pada peranti. Ini termasuklah maklumat seperti nombor panggilan untuk panggilan dan keadaan panggilan tersebut."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"kecualikan daripada sekatan rakaman audio"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Kecualikan apl daripada sekatan untuk merakam audio."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"teruskan panggilan daripada apl lain"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Membenarkan apl meneruskan panggilan yang dimulakan dalam apl lain."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"baca nombor telefon"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Padam"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Kaedah input"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Tindakan teks"</string>
-    <string name="email" msgid="2503484245190492693">"E-mel"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Hantar e-mel ke alamat yang dipilih"</string>
-    <string name="dial" msgid="4954567785798679706">"Panggil"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Panggil nombor telefon yang dipilih"</string>
-    <string name="map" msgid="6865483125449986339">"Peta"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Cari alamat yang dipilih"</string>
-    <string name="browse" msgid="8692753594669717779">"Buka"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Buka URL yang dipilih"</string>
-    <string name="sms" msgid="3976991545867187342">"Mesej"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Hantar mesej kepada nombor telefon yang dipilih"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Tambah"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Tambah pada kenalan"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Lihat"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Lihat masa yang dipilih dalam kalendar"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Jadual"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Jadualkan acara untuk masa yang dipilih"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Pantau"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Jejak penerbangan yang dipilih"</string>
-    <string name="translate" msgid="1416909787202727524">"Terjemah"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Terjemahkan teks yang dipilih"</string>
-    <string name="define" msgid="5214255850068764195">"Takrifkan"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Takrifkan teks yang dipilih"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Ruang storan semakin berkurangan"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Beberapa fungsi sistem mungkin tidak berfungsi"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tidak cukup storan untuk sistem. Pastikan anda mempunyai 250MB ruang kosong dan mulakan semula."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Rangkaian mudah alih tiada akses Internet"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Rangkaian tiada akses Internet"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Pelayan DNS peribadi tidak boleh diakses"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Disambungkan"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> mempunyai kesambungan terhad"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Ketik untuk menyambung juga"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Beralih kepada <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Naikkan kelantangan melebihi paras yang disyokorkan?\n\nMendengar pada kelantangan yang tinggi untuk tempoh yang lama boleh merosakkan pendengaran anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Kebolehaksesan?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Apabila pintasan dihidupkan, tindakan menekan kedua-dua butang kelantangan selama 3 saat akan memulakan ciri kebolehaksesan."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Benarkan <xliff:g id="SERVICE">%1$s</xliff:g> mempunyai kawalan penuh atas peranti anda?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Jika anda menghidupkan <xliff:g id="SERVICE">%1$s</xliff:g>, peranti anda tidak akan menggunakan kunci skrin anda untuk meningkatkan penyulitan data."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Kawalan penuh sesuai untuk apl yang membantu anda dengan keperluan kebolehaksesan tetapi bukan untuk kebanyakan apl."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Melihat dan mengawal skrin"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ciri ini boleh membaca semua kandungan pada skrin dan memaparkan kandungan di atas apl lain."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Lihat dan laksanakan tindakan"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Tindakan ini boleh menjejak interaksi anda dengan apl atau penderia perkakasan dan berinteraksi dengan apl bagi pihak anda."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Benarkan"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Tolak"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ketik ciri untuk mula menggunakan ciri itu:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Pilih apl untuk digunakan dengan butang kebolehaksesan"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Pilih apl untuk digunakan dengan pintasan kekunci kelantangan"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> telah dimatikan"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Edit pintasan"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Batal"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Selesai"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Matikan pintasan"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Penyongsangan Warna"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menu Kebolehaksesan"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Bar kapsyen <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> telah diletakkan dalam baldi TERHAD"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Perbualan"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Perbualan Kumpulan"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Peribadi"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kerja"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Paparan peribadi"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Paparan kerja"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Tidak dapat berkongsi dengan apl kerja"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Tidak dapat berkongsi dengan apl peribadi"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Pentadbir IT anda menyekat perkongsian antara profil peribadi dan kerja"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Tidak dapat mengakses apl kerja"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"Pentadbir IT anda tidak membenarkan anda melihat kandungan peribadi dalam apl kerja"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Tidak dapat mengakses apl peribadi"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"Pentadbir IT anda tidak membenarkan anda melihat kandungan dalam apl peribadi"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Hidupkan profil kerja untuk berkongsi kandungan"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Hidupkan profil kerja untuk melihat kandungan"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Tiada rangkaian yang tersedia"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Hidupkan"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Rakam atau mainkan audio dalam panggilan telefoni"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Apabila ditetapkan sebagai apl pendail lalai, membenarkan apl ini merakam atau memainkan audio dalam panggilan telefoni."</string>
 </resources>

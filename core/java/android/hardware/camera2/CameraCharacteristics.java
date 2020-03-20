@@ -2860,36 +2860,20 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
 
     /**
-     * <p>List of rotate-and-crop modes for {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop} that are supported by this camera device.</p>
-     * <p>This entry lists the valid modes for {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop} for this camera device.</p>
-     * <p>Starting with API level 30, all devices will list at least <code>ROTATE_AND_CROP_NONE</code>.
-     * Devices with support for rotate-and-crop will additionally list at least
-     * <code>ROTATE_AND_CROP_AUTO</code> and <code>ROTATE_AND_CROP_90</code>.</p>
-     * <p><b>Range of valid values:</b><br>
-     * Any value listed in {@link CaptureRequest#SCALER_ROTATE_AND_CROP android.scaler.rotateAndCrop}</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
-     *
-     * @see CaptureRequest#SCALER_ROTATE_AND_CROP
-     */
-    @PublicKey
-    @NonNull
-    public static final Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES =
-            new Key<int[]>("android.scaler.availableRotateAndCropModes", int[].class);
-    /**
      * <p>An array of mandatory concurrent stream combinations.
      * This is an app-readable conversion of the concurrent mandatory stream combination
      * {@link android.hardware.camera2.CameraDevice#createCaptureSession tables}.</p>
      * <p>The array of
      * {@link android.hardware.camera2.params.MandatoryStreamCombination combinations} is
      * generated according to the documented
-     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each device
-     * which has its Id present in the set returned by
-     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds}.
+     * {@link android.hardware.camera2.CameraDevice#createCaptureSession guideline} for each
+     * device which has its Id present in the set returned by
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds }.
      * Clients can use the array as a quick reference to find an appropriate camera stream
      * combination.
-     * The mandatory stream combination array will be {@code null} in case the device is not a part
-     * of at least one set of combinations returned by
-     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds}.</p>
+     * The mandatory stream combination array will be {@code null} in case the device is not a
+     * part of at least one set of combinations returned by
+     * {@link android.hardware.camera2.CameraManager#getConcurrentCameraIds }.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      */
     @PublicKey
@@ -2897,6 +2881,21 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @SyntheticKey
     public static final Key<android.hardware.camera2.params.MandatoryStreamCombination[]> SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS =
             new Key<android.hardware.camera2.params.MandatoryStreamCombination[]>("android.scaler.mandatoryConcurrentStreamCombinations", android.hardware.camera2.params.MandatoryStreamCombination[].class);
+
+    /**
+     * <p>List of rotate-and-crop modes for android.scaler.rotateAndCrop that are supported by this camera device.</p>
+     * <p>This entry lists the valid modes for android.scaler.rotateAndCrop for this camera device.</p>
+     * <p>Starting at some future API level, all devices will list at least <code>ROTATE_AND_CROP_NONE</code>.
+     * Devices with support for rotate-and-crop will additionally list at least
+     * <code>ROTATE_AND_CROP_AUTO</code> and <code>ROTATE_AND_CROP_90</code>.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in android.scaler.rotateAndCrop</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<int[]> SCALER_AVAILABLE_ROTATE_AND_CROP_MODES =
+            new Key<int[]>("android.scaler.availableRotateAndCropModes", int[].class);
+
     /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
      * distortion correction has been applied.</p>

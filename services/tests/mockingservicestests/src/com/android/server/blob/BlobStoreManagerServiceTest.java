@@ -15,6 +15,7 @@
  */
 package com.android.server.blob;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -22,6 +23,8 @@ import static com.android.server.blob.BlobStoreConfig.SESSION_EXPIRY_TIMEOUT_MIL
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -89,6 +92,7 @@ public class BlobStoreManagerServiceTest {
         doReturn(mBlobsDir).when(() -> BlobStoreConfig.getBlobsDir());
         doReturn(true).when(mBlobsDir).exists();
         doReturn(new File[0]).when(mBlobsDir).listFiles();
+        doReturn(true).when(() -> BlobStoreConfig.hasLeaseWaitTimeElapsed(anyLong()));
 
         mContext = InstrumentationRegistry.getTargetContext();
         mHandler = new TestHandler(Looper.getMainLooper());
@@ -138,19 +142,32 @@ public class BlobStoreManagerServiceTest {
         final long blobId1 = 978;
         final File blobFile1 = mock(File.class);
         final BlobHandle blobHandle1 = BlobHandle.createWithSha256("digest1".getBytes(),
-                "label1", System.currentTimeMillis(), "tag1");
-        final BlobMetadata blobMetadata1 = createBlobMetadataMock(blobId1, blobFile1, true);
+                "label1", System.currentTimeMillis() + 10000, "tag1");
+        final BlobMetadata blobMetadata1 = createBlobMetadataMock(blobId1, blobFile1,
+                blobHandle1, true /* hasLeases */);
+        doReturn(true).when(blobMetadata1).isACommitter(TEST_PKG1, TEST_UID1);
         mUserBlobs.put(blobHandle1, blobMetadata1);
 
         final long blobId2 = 347;
         final File blobFile2 = mock(File.class);
         final BlobHandle blobHandle2 = BlobHandle.createWithSha256("digest2".getBytes(),
-                "label2", System.currentTimeMillis(), "tag2");
-        final BlobMetadata blobMetadata2 = createBlobMetadataMock(blobId2, blobFile2, false);
+                "label2", System.currentTimeMillis() + 20000, "tag2");
+        final BlobMetadata blobMetadata2 = createBlobMetadataMock(blobId2, blobFile2,
+                blobHandle2, false /* hasLeases */);
+        doReturn(false).when(blobMetadata2).isACommitter(TEST_PKG1, TEST_UID1);
         mUserBlobs.put(blobHandle2, blobMetadata2);
 
+        final long blobId3 = 49875;
+        final File blobFile3 = mock(File.class);
+        final BlobHandle blobHandle3 = BlobHandle.createWithSha256("digest3".getBytes(),
+                "label3", System.currentTimeMillis() - 1000, "tag3");
+        final BlobMetadata blobMetadata3 = createBlobMetadataMock(blobId3, blobFile3,
+                blobHandle3, true /* hasLeases */);
+        doReturn(true).when(blobMetadata3).isACommitter(TEST_PKG1, TEST_UID1);
+        mUserBlobs.put(blobHandle3, blobMetadata3);
+
         mService.addActiveIdsForTest(sessionId1, sessionId2, sessionId3, sessionId4,
-                blobId1, blobId2);
+                blobId1, blobId2, blobId3);
 
         // Invoke test method
         mService.handlePackageRemoved(TEST_PKG1, TEST_UID1);
@@ -170,20 +187,24 @@ public class BlobStoreManagerServiceTest {
         // Verify blobs are removed
         verify(blobMetadata1).removeCommitter(TEST_PKG1, TEST_UID1);
         verify(blobMetadata1).removeLeasee(TEST_PKG1, TEST_UID1);
-        verify(blobMetadata2).removeCommitter(TEST_PKG1, TEST_UID1);
+        verify(blobMetadata2, never()).removeCommitter(TEST_PKG1, TEST_UID1);
         verify(blobMetadata2).removeLeasee(TEST_PKG1, TEST_UID1);
+        verify(blobMetadata3).removeCommitter(TEST_PKG1, TEST_UID1);
+        verify(blobMetadata3).removeLeasee(TEST_PKG1, TEST_UID1);
 
         verify(blobFile1, never()).delete();
         verify(blobFile2).delete();
+        verify(blobFile3).delete();
 
         assertThat(mUserBlobs.size()).isEqualTo(1);
         assertThat(mUserBlobs.get(blobHandle1)).isNotNull();
         assertThat(mUserBlobs.get(blobHandle2)).isNull();
+        assertThat(mUserBlobs.get(blobHandle3)).isNull();
 
         assertThat(mService.getActiveIdsForTest()).containsExactly(
                 sessionId2, sessionId3, blobId1);
         assertThat(mService.getKnownIdsForTest()).containsExactly(
-                sessionId1, sessionId2, sessionId3, sessionId4, blobId1, blobId2);
+                sessionId1, sessionId2, sessionId3, sessionId4, blobId1, blobId2, blobId3);
     }
 
     @Test
@@ -269,21 +290,24 @@ public class BlobStoreManagerServiceTest {
         final File blobFile1 = mock(File.class);
         final BlobHandle blobHandle1 = BlobHandle.createWithSha256("digest1".getBytes(),
                 "label1", System.currentTimeMillis() - 2000, "tag1");
-        final BlobMetadata blobMetadata1 = createBlobMetadataMock(blobId1, blobFile1, true);
+        final BlobMetadata blobMetadata1 = createBlobMetadataMock(blobId1, blobFile1, blobHandle1,
+                true /* hasLeases */);
         mUserBlobs.put(blobHandle1, blobMetadata1);
 
         final long blobId2 = 78974;
         final File blobFile2 = mock(File.class);
         final BlobHandle blobHandle2 = BlobHandle.createWithSha256("digest2".getBytes(),
                 "label2", System.currentTimeMillis() + 30000, "tag2");
-        final BlobMetadata blobMetadata2 = createBlobMetadataMock(blobId2, blobFile2, true);
+        final BlobMetadata blobMetadata2 = createBlobMetadataMock(blobId2, blobFile2, blobHandle2,
+                true /* hasLeases */);
         mUserBlobs.put(blobHandle2, blobMetadata2);
 
         final long blobId3 = 97;
         final File blobFile3 = mock(File.class);
         final BlobHandle blobHandle3 = BlobHandle.createWithSha256("digest3".getBytes(),
                 "label3", System.currentTimeMillis() + 4400000, "tag3");
-        final BlobMetadata blobMetadata3 = createBlobMetadataMock(blobId3, blobFile3, false);
+        final BlobMetadata blobMetadata3 = createBlobMetadataMock(blobId3, blobFile3, blobHandle3,
+                false /* hasLeases */);
         mUserBlobs.put(blobHandle3, blobMetadata3);
 
         mService.addActiveIdsForTest(blobId1, blobId2, blobId3);
@@ -350,11 +374,14 @@ public class BlobStoreManagerServiceTest {
         return session;
     }
 
-    private BlobMetadata createBlobMetadataMock(long blobId, File blobFile, boolean hasLeases) {
+    private BlobMetadata createBlobMetadataMock(long blobId, File blobFile,
+            BlobHandle blobHandle, boolean hasLeases) {
         final BlobMetadata blobMetadata = mock(BlobMetadata.class);
         doReturn(blobId).when(blobMetadata).getBlobId();
         doReturn(blobFile).when(blobMetadata).getBlobFile();
         doReturn(hasLeases).when(blobMetadata).hasLeases();
+        doReturn(blobHandle).when(blobMetadata).getBlobHandle();
+        doCallRealMethod().when(blobMetadata).shouldBeDeleted(anyBoolean());
         return blobMetadata;
     }
 

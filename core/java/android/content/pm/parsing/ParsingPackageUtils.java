@@ -40,7 +40,6 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
@@ -1390,7 +1389,7 @@ public class ParsingPackageUtils {
 
                 Uri data = null;
                 String dataType = null;
-                String host = "";
+                String host = IntentFilter.WILDCARD;
                 final int numActions = intentInfo.countActions();
                 final int numSchemes = intentInfo.countDataSchemes();
                 final int numTypes = intentInfo.countDataTypes();
@@ -1421,10 +1420,23 @@ public class ParsingPackageUtils {
                     data = new Uri.Builder()
                             .scheme(intentInfo.getDataScheme(0))
                             .authority(host)
+                            .path(IntentFilter.WILDCARD_PATH)
                             .build();
                 }
                 if (numTypes == 1) {
                     dataType = intentInfo.getDataType(0);
+                    // The dataType may have had the '/' removed for the dynamic mimeType feature.
+                    // If we detect that case, we add the * back.
+                    if (!dataType.contains("/")) {
+                        dataType = dataType + "/*";
+                    }
+                    if (data == null) {
+                        data = new Uri.Builder()
+                                .scheme("content")
+                                .authority(IntentFilter.WILDCARD)
+                                .path(IntentFilter.WILDCARD_PATH)
+                                .build();
+                    }
                 }
                 intent.setDataAndType(data, dataType);
                 if (numActions == 1) {
@@ -1665,10 +1677,7 @@ public class ParsingPackageUtils {
                 return input.error("Invalid class loader name: " + classLoaderName);
             }
 
-            if (sa.hasValue(R.styleable.AndroidManifestApplication_enableGwpAsan)) {
-                pkg.setGwpAsanEnabled(
-                        sa.getBoolean(R.styleable.AndroidManifestApplication_enableGwpAsan, false));
-            }
+            pkg.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestApplication_gwpAsanMode, -1));
         } finally {
             sa.recycle();
         }

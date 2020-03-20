@@ -20,7 +20,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.ShellCommand;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -126,5 +128,33 @@ public final class ManualTimeZoneSuggestion implements Parcelable {
                 + "mZoneId=" + mZoneId
                 + ", mDebugInfo=" + mDebugInfo
                 + '}';
+    }
+
+    /** @hide */
+    public static ManualTimeZoneSuggestion parseCommandLineArg(@NonNull ShellCommand cmd) {
+        String zoneId = null;
+        String opt;
+        while ((opt = cmd.getNextArg()) != null) {
+            switch (opt) {
+                case "--zone_id": {
+                    zoneId = cmd.getNextArgRequired();
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException("Unknown option: " + opt);
+                }
+            }
+        }
+        ManualTimeZoneSuggestion suggestion = new ManualTimeZoneSuggestion(zoneId);
+        suggestion.addDebugInfo("Command line injection");
+        return suggestion;
+    }
+
+    /** @hide */
+    public static void printCommandLineOpts(@NonNull PrintWriter pw) {
+        pw.println("Manual suggestion options:");
+        pw.println("  --zone_id <Olson ID>");
+        pw.println();
+        pw.println("See " + ManualTimeZoneSuggestion.class.getName() + " for more information");
     }
 }

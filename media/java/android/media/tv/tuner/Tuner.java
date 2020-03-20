@@ -281,7 +281,9 @@ public class Tuner implements AutoCloseable  {
      * @param tuner the Tuner instance to share frontend resource with.
      */
     public void shareFrontendFromTuner(@NonNull Tuner tuner) {
-        // TODO: implementation.
+        mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
+        mFrontendHandle = tuner.mFrontendHandle;
+        nativeOpenFrontendByHandle(mFrontendHandle);
     }
 
     /**
@@ -296,7 +298,7 @@ public class Tuner implements AutoCloseable  {
      * @param niceValue the nice value.
      */
     public void updateResourcePriority(int priority, int niceValue) {
-        // TODO: implementation.
+        mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
     }
 
     private long mNativeContext; // used by native jMediaTuner
@@ -306,7 +308,14 @@ public class Tuner implements AutoCloseable  {
      */
     @Override
     public void close() {
-        // TODO: implementation.
+        if (mFrontendHandle != null) {
+            mTunerResourceManager.releaseFrontend(mFrontendHandle);
+            mFrontendHandle = null;
+        }
+        if (mLnb != null) {
+            mTunerResourceManager.releaseLnb(mLnbHandle);
+            mLnb = null;
+        }
     }
 
     /**
@@ -697,67 +706,70 @@ public class Tuner implements AutoCloseable  {
 
     private void onFrequenciesReport(int[] frequency) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReport(frequency));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReported(frequency));
         }
     }
 
     private void onSymbolRates(int[] rate) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRates(rate));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRatesReported(rate));
         }
     }
 
     private void onHierarchy(int hierarchy) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchy(hierarchy));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchyReported(hierarchy));
         }
     }
 
     private void onSignalType(int signalType) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalType(signalType));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalTypeReported(signalType));
         }
     }
 
     private void onPlpIds(int[] plpIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIds(plpIds));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIdsReported(plpIds));
         }
     }
 
     private void onGroupIds(int[] groupIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIds(groupIds));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIdsReported(groupIds));
         }
     }
 
     private void onInputStreamIds(int[] inputStreamIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onInputStreamIds(inputStreamIds));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onInputStreamIdsReported(inputStreamIds));
         }
     }
 
     private void onDvbsStandard(int dvbsStandandard) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbsStandard(dvbsStandandard));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onDvbsStandardReported(dvbsStandandard));
         }
     }
 
     private void onDvbtStandard(int dvbtStandard) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandard(dvbtStandard));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandardReported(dvbtStandard));
         }
     }
 
     private void onAnalogSifStandard(int sif) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandard(sif));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandardReported(sif));
         }
     }
 
     private void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onAtsc3PlpInfos(atsc3PlpInfos));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onAtsc3PlpInfosReported(atsc3PlpInfos));
         }
     }
 
@@ -806,7 +818,6 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
-        // TODO: update JNI code for LNB handle,
         return nativeOpenLnbByHandle(mLnbHandle);
     }
 

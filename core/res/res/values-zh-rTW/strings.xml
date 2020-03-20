@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"這個應用程式隨時可使用相機拍照及錄影。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"如要拍照或錄影，請允許應用程式或服務存取系統攝影機"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"取得存取權後，這個系統應用程式就隨時可以使用系統攝影機拍照及錄影。此外，你也必須將 android.permission.CAMERA 權限授予這個應用程式"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"允許應用程式或服務接收相機裝置開啟或關閉的相關回呼。"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"控制震動"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允許應用程式存取震動功能狀態。"</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"允許應用程式透過系統接通來電，以改善通話品質。"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"查看及控管透過系統撥打的電話。"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"允許應用程式查看及控管在裝置上撥出的電話，包括撥打的電話號碼和通話狀態等資訊。"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"移除錄音限制"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"移除應用程式的錄音限制。"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"繼續進行來自其他應用程式的通話"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"允許應用程式繼續進行在其他應用程式中發起的通話。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"讀取電話號碼"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"刪除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"輸入法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"文字動作"</string>
-    <string name="email" msgid="2503484245190492693">"發送電子郵件"</string>
-    <string name="email_desc" msgid="8291893932252173537">"將電子郵件寄到選取的地址"</string>
-    <string name="dial" msgid="4954567785798679706">"撥號通話"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"撥打選取的電話號碼"</string>
-    <string name="map" msgid="6865483125449986339">"查看地圖"</string>
-    <string name="map_desc" msgid="1068169741300922557">"尋找選取的地址"</string>
-    <string name="browse" msgid="8692753594669717779">"開啟"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"開啟選取的網址"</string>
-    <string name="sms" msgid="3976991545867187342">"發送訊息"</string>
-    <string name="sms_desc" msgid="997349906607675955">"將訊息傳送到選取的電話號碼"</string>
-    <string name="add_contact" msgid="7404694650594333573">"新增"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"新增至聯絡人"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"查看"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"在日曆中查看選取的時間"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"加入日曆"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"將活動安排在選取的時間"</string>
-    <string name="view_flight" msgid="2042802613849690108">"追蹤"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"追蹤選取的航班"</string>
-    <string name="translate" msgid="1416909787202727524">"翻譯"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"翻譯選取的文字"</string>
-    <string name="define" msgid="5214255850068764195">"查看定義"</string>
-    <string name="define_desc" msgid="6916651934713282645">"定義選取的文字"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"這個行動網路沒有網際網路連線"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"這個網路沒有網際網路連線"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"無法存取私人 DNS 伺服器"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"已連線"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> 的連線能力受限"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"輕觸即可繼續連線"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"已切換至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙捷徑嗎？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量按鈕 3 秒，就能啟動無障礙功能。"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"如果你開啟「<xliff:g id="SERVICE">%1$s</xliff:g>」，裝置將無法使用螢幕鎖定功能強化資料加密。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，可以將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"可追蹤你與應用程式或硬體感應器的互動，並代表你與應用程式進行互動。"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"允許"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"拒絕"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"輕觸即可開始使用所需功能："</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"選擇要搭配無障礙工具按鈕使用的應用程式"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"選擇要搭配音量快速鍵功能使用的應用程式"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"「<xliff:g id="SERVICE_NAME">%s</xliff:g>」已關閉"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"編輯捷徑"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"取消"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"停用捷徑"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用捷徑"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色彩反轉"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"無障礙選單"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」的說明文字列。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"已將「<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>」移入受限制的值區"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>："</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"對話"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"群組對話"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"個人"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"工作"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人檢視模式"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"工作檢視模式"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"無法與工作應用程式分享"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"無法與個人應用程式分享"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"你的 IT 管理員已封鎖個人和工作資料夾之間的分享功能"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"無法存取工作應用程式"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"你的 IT 管理員不允許你使用工作應用程式查看個人內容"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"無法存取個人應用程式"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"你的 IT 管理員不允許你使用個人應用程式查看工作內容"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"你必須開啟工作資料夾才能分享內容"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"你必須開啟工作資料夾才能查看內容"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"沒有可用的應用程式"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"開啟"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"在通話期間錄製或播放音訊"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"將這個應用程式指派為預設撥號應用程式時，允許應用程式在通話期間錄製或播放音訊。"</string>
 </resources>

@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Bu ilova xohlagan vaqtda kamera orqali suratga olishi va video yozib olishi mumkin."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Ilova yoki xizmatga tizim kamerasi orqali surat va videolar olishga ruxsat berish"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Bu imtiyozli | tizim ilovasi istalgan vaqtda tizim kamerasi orqali surat va videolar olishi mumkin. Ilovada android.permission.CAMERA ruxsati ham yoqilgan boʻlishi talab qilinadi"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Ilova yoki xizmatga kamera qurilmalari ochilayotgani yoki yopilayotgani haqida qayta chaqiruvlar qabul qilishi uchun ruxsat berish."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"tebranishni boshqarish"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ilovaga tebranish holatini aniqlash ruxsatini beradi."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Ilova aloqa sifatini yaxshilash maqsadida chaqiruvlarni tizim orqali yo‘naltirishi mumkin."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"tizim orqali chaqiruvlarni tekshirish va boshqarish."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Ilovaga qurilmadagi amaldagi chaqiruvlarni tekshirish va boshqarish imkonini beradi. Shuningdek, chaqiruvlar holati va kiruvchi-chiquvchi chaqiruv raqamlari axborotiga ham ruxsat beradi."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"audio yozish cheklovlaridan ozod qilish"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Audio yozib olish cheklovlaridan ilovani ozod qilish"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"chaqiruvni boshqa ilovada davom ettirish"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Ilovaga boshqa ilovada boshlangan chaqiruvni davom ettirish imkon beradi"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"telefon raqamlarini o‘qish"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"O‘chirish"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Kiritish uslubi"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Matn yozish"</string>
-    <string name="email" msgid="2503484245190492693">"Email"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Belgilangan e-pochta manziliga xat yuborish"</string>
-    <string name="dial" msgid="4954567785798679706">"Chaqiruv"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Belgilangan raqamga telefon qilish"</string>
-    <string name="map" msgid="6865483125449986339">"Xarita"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Belgilangan manzilni xaritadan topish"</string>
-    <string name="browse" msgid="8692753594669717779">"Ochish"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Belgilangan URL manzilini ochish"</string>
-    <string name="sms" msgid="3976991545867187342">"SMS yozish"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Belgilangan telefon raqamiga SMS yuborish"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Saqlab olish"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Kontaktlarga saqlash"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Ochish"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Belgilangan vaqtni taqvimda ochish"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Rejalashtirish"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Belgilangan vaqt uchun tadbir rejalashtirish"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Kuzatish"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Belgilangan parvozni kuzatish"</string>
-    <string name="translate" msgid="1416909787202727524">"Tarjima qilish"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Belgilangan matnni tarjima qilish"</string>
-    <string name="define" msgid="5214255850068764195">"Izohini olish"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Belgilangan matnning izohini aniqlash"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Xotirada bo‘sh joy tugamoqda"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"Mobil tarmoq internetga ulanmagan"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"Tarmoq internetga ulanmagan"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"Xususiy DNS server ishlamayapti"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Ulandi"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> nomli tarmoqda aloqa cheklangan"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Baribir ulash uchun bosing"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> tarmog‘iga ulanildi"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Tovush balandligi tavsiya etilgan darajadan ham yuqori qilinsinmi?\n\nUzoq vaqt davomida baland ovozda tinglash eshitish qobiliyatingizga salbiy ta’sir ko‘rsatishi mumkin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Tezkor ishga tushirishdan foydalanilsinmi?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala tovush tugmasini 3 soniya bosib turing."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> xizmatiga qurilmangizni boshqarish uchun toʻliq ruxsat berilsinmi?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Agar <xliff:g id="SERVICE">%1$s</xliff:g> xizmatini yoqsangiz, qurilmangiz maʼlumotlarni shifrlashni kuchaytirish uchun ekran qulfidan foydalanmaydi."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Toʻliq nazorat maxsus imkoniyatlar bilan ishlovchi ilovalar uchun mos, lekin barcha ilovalar uchun emas."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ekranni ochish va boshqarish"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Ekrandagi barcha kontentni oʻqishi va kontentni boshqa ilovalar ustida ochishi mumkin."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Harakatlarni koʻrish va bajarish"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ilova yoki qurilma sensori bilan munosabatlaringizni kuzatishi hamda sizning nomingizdan ilovalar bilan ishlashi mumkin."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ruxsat"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rad etish"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Funksiyadan foydalanish uchun ustiga bosing:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Maxsus imkoniyatlar tugmasi bilan foydalanish uchun ilovalarni tanlang"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Tovush balandligi tugmasi bilan foydalanish uchun ilovalarni tanlang"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> faolsizlantirildi"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Bekor qilish"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Tezkor ishga tushirishni o‘chirib qo‘yish"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Tezkor ishga tushirishdan foydalanish"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Ranglarni akslantirish"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Maxsus imkoniyatlar menyusi"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> taglavhalar paneli."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> cheklangan turkumga joylandi"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Suhbat"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Guruh suhbati"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Shaxsiy"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Ish"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Shaxsiy rejim"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ishchi rejim"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"Ishga oid ilovalarga ulashilmaydi"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"Shaxsiy ilovalarga ulashilmaydi"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Shaxsiy va ishga oid profillararo axborot ulashish AT administratori tomonidan taqiqlangan"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"Ishga oid ilovalardan foydalanish imkonsiz"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"AT administratori ishga oid ilovalarda shaxsiy maʼlumotlarni ochishni taqiqlagan"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"Shaxsiy ilovalardan foydalanish imkonsiz"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"AT administratori shaxsiy ilovalarda ishga oid kontentni ochishni taqiqlagan"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Kontentni ulashish uchun ishchi profilni yoqing"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Kontentni ochish uchun ishchi profilni yoqing"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"Mos ilova topilmadi"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Yoqish"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Telefondagi suhbatlarni yozib olish va ularni ijro qilish"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Bu ilova chaqiruvlar uchun asosiy ilova sifatida tayinlanganda u telefon chaqiruvlarida suhbatlarni yozib olish va shu audiolarni ijro etish imkonini beradi."</string>
 </resources>

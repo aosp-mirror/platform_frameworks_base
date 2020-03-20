@@ -3885,9 +3885,7 @@
 
   <!-- Intent resolver and share sheet -->
   <java-symbol type="string" name="resolver_personal_tab" />
-  <java-symbol type="string" name="resolver_personal_tab_accessibility" />
   <java-symbol type="string" name="resolver_work_tab" />
-  <java-symbol type="string" name="resolver_work_tab_accessibility" />
   <java-symbol type="id" name="stub" />
   <java-symbol type="id" name="resolver_empty_state" />
   <java-symbol type="id" name="resolver_empty_state_icon" />
@@ -3897,15 +3895,18 @@
   <java-symbol type="id" name="resolver_empty_state_progress" />
   <java-symbol type="id" name="resolver_tab_divider" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
+  <java-symbol type="string" name="resolver_cant_share_with_work_apps_explanation" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />
-  <java-symbol type="string" name="resolver_cant_share_cross_profile_explanation" />
+  <java-symbol type="string" name="resolver_cant_share_with_personal_apps_explanation" />
   <java-symbol type="string" name="resolver_cant_access_work_apps" />
   <java-symbol type="string" name="resolver_cant_access_work_apps_explanation" />
   <java-symbol type="string" name="resolver_cant_access_personal_apps" />
   <java-symbol type="string" name="resolver_cant_access_personal_apps_explanation" />
-  <java-symbol type="string" name="resolver_turn_on_work_apps_view" />
-  <java-symbol type="string" name="resolver_turn_on_work_apps_share" />
-  <java-symbol type="string" name="resolver_no_apps_available" />
+  <java-symbol type="string" name="resolver_turn_on_work_apps" />
+  <java-symbol type="string" name="resolver_no_work_apps_available_share" />
+  <java-symbol type="string" name="resolver_no_work_apps_available_resolve" />
+  <java-symbol type="string" name="resolver_no_personal_apps_available_share" />
+  <java-symbol type="string" name="resolver_no_personal_apps_available_resolve" />
   <java-symbol type="string" name="resolver_switch_on_work" />
   <java-symbol type="drawable" name="ic_work_apps_off" />
   <java-symbol type="drawable" name="ic_sharing_disabled" />

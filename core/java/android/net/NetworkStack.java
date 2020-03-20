@@ -19,15 +19,17 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.os.IBinder;
+import android.os.ServiceManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 /**
- *
- * Constants for client code communicating with the network stack service.
+ * Constants and utilities for client code communicating with the network stack service.
  * @hide
  */
 @SystemApi
@@ -42,6 +44,34 @@ public class NetworkStack {
     @TestApi
     public static final String PERMISSION_MAINLINE_NETWORK_STACK =
             "android.permission.MAINLINE_NETWORK_STACK";
+
+    @Nullable
+    private static volatile IBinder sMockService;
+
+    /**
+     * Get an {@link IBinder} representing the NetworkStack stable AIDL Interface, if registered.
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    @TestApi
+    public static IBinder getService() {
+        final IBinder mockService = sMockService;
+        if (mockService != null) return mockService;
+        return ServiceManager.getService(Context.NETWORK_STACK_SERVICE);
+    }
+
+    /**
+     * Set a mock service for testing, to be returned by future calls to {@link #getService()}.
+     *
+     * <p>Passing a {@code null} {@code mockService} resets {@link #getService()} to normal
+     * behavior.
+     * @hide
+     */
+    @TestApi
+    public static void setServiceForTest(@Nullable IBinder mockService) {
+        sMockService = mockService;
+    }
 
     private NetworkStack() {}
 

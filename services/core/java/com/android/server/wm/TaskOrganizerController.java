@@ -231,7 +231,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub
         }
     }
 
-    void unregisterTaskOrganizer(ITaskOrganizer organizer) {
+    @Override
+    public void unregisterTaskOrganizer(ITaskOrganizer organizer) {
         final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
         state.unlinkDeath();
         if (mTaskOrganizersForWindowingMode.get(state.mWindowingMode) == state) {

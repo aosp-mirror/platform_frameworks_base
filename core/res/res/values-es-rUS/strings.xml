@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta app puede tomar fotos y grabar videos con la cámara en cualquier momento."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Permitir que una aplicación o un servicio accedan a las cámaras del sistema para tomar fotos y grabar videos"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"Esta privilegiada | app del sistema puede tomar fotos y grabar videos con una cámara del sistema en cualquier momento. También se requiere que la app posea el permiso android.permission.CAMERA."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permite que una aplicación o un servicio reciba devoluciones de llamada cuando se abren o cierran dispositivos de cámara."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la app acceda al estado del modo de vibración."</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Permite que la app transmita las llamadas a través del sistema para mejorar la experiencia de llamadas."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"Mirar y controlar las llamadas con el sistema"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Permite que la app vea y controle las llamadas entrantes del dispositivo. Incluye información como los números emisores y el estado de las llamadas."</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"eximida de restricciones para grabar audio"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"Exime a la app de las restricciones para grabar audio."</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"continuar llamada de otra app"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Permite que la app continúe con una llamada que se inició en otra app."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"leer números de teléfono"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"Eliminar"</string>
     <string name="inputMethod" msgid="1784759500516314751">"Método de entrada"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"Acciones de texto"</string>
-    <string name="email" msgid="2503484245190492693">"Correo electrónico"</string>
-    <string name="email_desc" msgid="8291893932252173537">"Enviar un correo electrónico a la dirección seleccionada"</string>
-    <string name="dial" msgid="4954567785798679706">"Llamar"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"Llamar al número de teléfono seleccionado"</string>
-    <string name="map" msgid="6865483125449986339">"Mapa"</string>
-    <string name="map_desc" msgid="1068169741300922557">"Buscar la dirección seleccionada"</string>
-    <string name="browse" msgid="8692753594669717779">"Abrir"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"Abrir URL seleccionada"</string>
-    <string name="sms" msgid="3976991545867187342">"Mensaje"</string>
-    <string name="sms_desc" msgid="997349906607675955">"Enviar un mensaje al número de teléfono seleccionado"</string>
-    <string name="add_contact" msgid="7404694650594333573">"Agregar"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"Agregar a contactos"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"Ver"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"Ver la hora seleccionada en el calendario"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"Programar"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"Programar un evento para la hora seleccionada"</string>
-    <string name="view_flight" msgid="2042802613849690108">"Realizar seguimiento"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"Seguir el vuelo seleccionado"</string>
-    <string name="translate" msgid="1416909787202727524">"Traducir"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"Traducir texto seleccionado"</string>
-    <string name="define" msgid="5214255850068764195">"Definir"</string>
-    <string name="define_desc" msgid="6916651934713282645">"Definir texto seleccionado"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Queda poco espacio de almacenamiento"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Es posible que algunas funciones del sistema no estén disponibles."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"No hay espacio suficiente para el sistema. Asegúrate de que haya 250 MB libres y reinicia el dispositivo."</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"La red móvil no tiene acceso a Internet"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"La red no tiene acceso a Internet"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"No se puede acceder al servidor DNS privado"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"Se estableció conexión"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> tiene conectividad limitada"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"Presiona para conectarte de todas formas"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"Se cambió a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar a un alto volumen durante largos períodos puede dañar tu audición."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Usar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Cuando la combinación de teclas está activada, puedes presionar los botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"¿Deseas permitir que <xliff:g id="SERVICE">%1$s</xliff:g> tenga el control total del dispositivo?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"Si activas <xliff:g id="SERVICE">%1$s</xliff:g>, el dispositivo no utilizará el bloqueo de pantalla para mejorar la encriptación de datos."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"El control total es apropiado para las apps que te ayudan con las necesidades de accesibilidad, pero no para la mayoría de las apps."</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Ver y controlar la pantalla"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Puede leer todo el contenido en la pantalla y mostrarlo sobre otras apps."</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Ver y realizar acciones"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Puede realizar el seguimiento de tus interacciones con una app o un sensor de hardware, así como interactuar con las apps por ti."</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Permitir"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rechazar"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Presiona una función para comenzar a usarla:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"Selecciona apps para usar con el botón de accesibilidad"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"Selecciona apps para usar con la combinación de teclas de volumen"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Se desactivó <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar accesos directos"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"Cancelar"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Listo"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desactivar acceso directo"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Usar acceso directo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de color"</string>
@@ -2031,31 +2020,24 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"Menú de accesibilidad"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"Barra de subtítulos de <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"Se colocó <xliff:g id="PACKAGE_NAME">%1$s</xliff:g> en el depósito RESTRICTED"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversación"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversación en grupo"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Personal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabajo"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
-    <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
-    <skip />
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Vista personal"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Vista de trabajo"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"No se puede compartir con apps de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"No se puede compartir con apps personales"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
-    <skip />
+    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"Tu administrador de TI bloqueó el uso compartido entre los perfiles personales y los de trabajo"</string>
+    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"No se puede acceder a las apps de trabajo"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"No tienes permiso del administrador de TI para ver el contenido personal en apps de trabajo"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"No se puede acceder a las apps personales"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"No tienes permiso del administrador de TI para ver el contenido de trabajo en apps personales"</string>
+    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"Activa el perfil de trabajo para compartir contenido"</string>
+    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"Activa el perfil de trabajo para ver contenido"</string>
     <string name="resolver_no_apps_available" msgid="7710339903040989654">"No hay apps disponibles"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
-    <skip />
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"Activar"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Graba o reproduce audio en llamadas de telefonía"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Permite que esta app grabe o reproduzca audio en llamadas de telefonía cuando se la asigna como aplicación de teléfono predeterminada."</string>
 </resources>

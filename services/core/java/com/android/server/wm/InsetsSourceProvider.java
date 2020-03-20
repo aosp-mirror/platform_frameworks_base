@@ -215,11 +215,7 @@ class InsetsSourceProvider {
             final Rect frame = mWin.getWindowFrames().mFrame;
             if (mControl.setSurfacePosition(frame.left, frame.top) && mControlTarget != null) {
                 // The leash has been stale, we need to create a new one for the client.
-                if (mControlTarget != mDisplayContent.mRemoteInsetsControlTarget) {
-                    // Hacky: recreating leash for RemoteInsetsControlTarget might cause IME
-                    // flicker, so we just report the new surface position to it.
-                    updateControlForTarget(mControlTarget, true /* force */);
-                }
+                updateControlForTarget(mControlTarget, true /* force */);
                 mStateController.notifyControlChanged(mControlTarget);
             }
         }
