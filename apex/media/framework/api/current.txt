@@ -52,6 +52,20 @@ package android.media {
     field public static final String PARAMETER_TS_IGNORE_AVC_STREAM = "android.media.mediaparser.ts.ignoreAvcStream";
     field public static final String PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM = "android.media.mediaparser.ts.ignoreSpliceInfoStream";
     field public static final String PARAMETER_TS_MODE = "android.media.mediaparser.ts.mode";
+    field public static final String PARSER_NAME_AC3 = "android.media.mediaparser.Ac3Parser";
+    field public static final String PARSER_NAME_AC4 = "android.media.mediaparser.Ac4Parser";
+    field public static final String PARSER_NAME_ADTS = "android.media.mediaparser.AdtsParser";
+    field public static final String PARSER_NAME_AMR = "android.media.mediaparser.AmrParser";
+    field public static final String PARSER_NAME_FLAC = "android.media.mediaparser.FlacParser";
+    field public static final String PARSER_NAME_FLV = "android.media.mediaparser.FlvParser";
+    field public static final String PARSER_NAME_FMP4 = "android.media.mediaparser.FragmentedMp4Parser";
+    field public static final String PARSER_NAME_MATROSKA = "android.media.mediaparser.MatroskaParser";
+    field public static final String PARSER_NAME_MP3 = "android.media.mediaparser.Mp3Parser";
+    field public static final String PARSER_NAME_MP4 = "android.media.mediaparser.Mp4Parser";
+    field public static final String PARSER_NAME_OGG = "android.media.mediaparser.OggParser";
+    field public static final String PARSER_NAME_PS = "android.media.mediaparser.PsParser";
+    field public static final String PARSER_NAME_TS = "android.media.mediaparser.TsParser";
+    field public static final String PARSER_NAME_WAV = "android.media.mediaparser.WavParser";
   }
 
   public static interface MediaParser.InputReader {
