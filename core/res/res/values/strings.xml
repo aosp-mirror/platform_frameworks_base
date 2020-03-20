@@ -4350,6 +4350,35 @@
         accessibility feature.
     </string>
 
+    <!-- Dialog title for dialog shown when the multiple accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning_title">Turn on accessibility features?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the multiple accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning">Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="service" example="TalkBack">%1$s</xliff:g>\nYou can change selected features in Settings > Accessibility.</string>
+
+    <!-- Used in multiple service warning to list current features. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_list">\t• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
+
+    <!-- Dialog title for dialog shown when the TalkBack shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_talkback_warning_title">Turn on TalkBack?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the TalkBack via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_talkback_warning">Holding down both volume keys for a few seconds turns on TalkBack, a screen reader that is helpful for people who are blind or have low vision. TalkBack completely changes how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
+
+    <!-- Dialog title for dialog shown when this accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning_title">Turn on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling this accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning">Holding down both volume keys for a few seconds turns on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, an accessibility feature. This may change how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none]-->
+    <string name="accessibility_shortcut_on">Turn on</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_off">Don’t turn on</string>
+
     <!-- Title for a warning about security implications of enabling an accessibility
     service. [CHAR LIMIT=NONE] -->
     <string name="accessibility_enable_service_title">Allow
@@ -4432,15 +4461,11 @@
      shown in the warning dialog about the accessibility shortcut. -->
     <string name="color_correction_feature_name">Color Correction</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
-    service.-->
-    <string name="accessibility_shortcut_enabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> on</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility
-    service.-->
-    <string name="accessibility_shortcut_disabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> off</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_disabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned off.</string>
 
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_spoken_feedback">Press and hold both volume keys for three seconds to use
