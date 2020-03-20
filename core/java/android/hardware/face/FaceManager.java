@@ -29,9 +29,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricNativeHandleUtils;
 import android.hardware.biometrics.CryptoObject;
-import android.hardware.biometrics.IBiometricNativeHandle;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.os.Binder;
 import android.os.CancellationSignal;
@@ -40,7 +38,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.NativeHandle;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Trace;
@@ -250,19 +247,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
-     * Defaults to {@link FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback,
-     * int[], NativeHandle)} with {@code windowId} set to null.
-     *
-     * @see FaceManager#enroll(int, byte[], CancellationSignal, EnrollmentCallback, int[],
-     * NativeHandle)
-     */
-    @RequiresPermission(MANAGE_BIOMETRIC)
-    public void enroll(int userId, byte[] token, CancellationSignal cancel,
-            EnrollmentCallback callback, int[] disabledFeatures) {
-        enroll(userId, token, cancel, callback, disabledFeatures, null /* windowId */);
-    }
-
-    /**
      * Request face authentication enrollment. This call operates the face authentication hardware
      * and starts capturing images. Progress will be indicated by callbacks to the
      * {@link EnrollmentCallback} object. It terminates when
@@ -277,13 +261,11 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @param flags    optional flags
      * @param userId   the user to whom this face will belong to
      * @param callback an object to receive enrollment events
-     * @param windowId optional ID of a camera preview window for a single-camera device. Must be
-     *                 null if not used.
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] token, CancellationSignal cancel,
-            EnrollmentCallback callback, int[] disabledFeatures, @Nullable NativeHandle windowId) {
+            EnrollmentCallback callback, int[] disabledFeatures) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
@@ -298,72 +280,20 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         }
 
         if (mService != null) {
-            IBiometricNativeHandle handle = BiometricNativeHandleUtils.dup(windowId);
             try {
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enroll");
                 mService.enroll(userId, mToken, token, mServiceReceiver,
-                        mContext.getOpPackageName(), disabledFeatures, handle);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Remote exception in enroll: ", e);
-                // Though this may not be a hardware issue, it will cause apps to give up or
-                // try again later.
-                callback.onEnrollmentError(FACE_ERROR_HW_UNAVAILABLE,
-                        getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
-                                0 /* vendorCode */));
-            } finally {
-                Trace.endSection();
-                BiometricNativeHandleUtils.close(handle);
-            }
-        }
-    }
-
-    /**
-     * Request face authentication enrollment for a remote client, for example Android Auto.
-     * This call operates the face authentication hardware and starts capturing images.
-     * Progress will be indicated by callbacks to the
-     * {@link EnrollmentCallback} object. It terminates when
-     * {@link EnrollmentCallback#onEnrollmentError(int, CharSequence)} or
-     * {@link EnrollmentCallback#onEnrollmentProgress(int) is called with remaining == 0, at
-     * which point the object is no longer valid. The operation can be canceled by using the
-     * provided cancel object.
-     *
-     * @param token    a unique token provided by a recent creation or verification of device
-     *                 credentials (e.g. pin, pattern or password).
-     * @param cancel   an object that can be used to cancel enrollment
-     * @param userId   the user to whom this face will belong to
-     * @param callback an object to receive enrollment events
-     * @hide
-     */
-    @RequiresPermission(MANAGE_BIOMETRIC)
-    public void enrollRemotely(int userId, byte[] token, CancellationSignal cancel,
-            EnrollmentCallback callback, int[] disabledFeatures) {
-        if (callback == null) {
-            throw new IllegalArgumentException("Must supply an enrollment callback");
-        }
-
-        if (cancel != null) {
-            if (cancel.isCanceled()) {
-                Log.w(TAG, "enrollRemotely is already canceled.");
-                return;
-            } else {
-                cancel.setOnCancelListener(new OnEnrollCancelListener());
-            }
-        }
-
-        if (mService != null) {
-            try {
-                mEnrollmentCallback = callback;
-                Trace.beginSection("FaceManager#enrollRemotely");
-                mService.enrollRemotely(userId, mToken, token, mServiceReceiver,
                         mContext.getOpPackageName(), disabledFeatures);
             } catch (RemoteException e) {
-                Log.w(TAG, "Remote exception in enrollRemotely: ", e);
-                // Though this may not be a hardware issue, it will cause apps to give up or
-                // try again later.
-                callback.onEnrollmentError(FACE_ERROR_HW_UNAVAILABLE,
-                        getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
+                Log.w(TAG, "Remote exception in enroll: ", e);
+                if (callback != null) {
+                    // Though this may not be a hardware issue, it will cause apps to give up or
+                    // try again later.
+                    callback.onEnrollmentError(FACE_ERROR_HW_UNAVAILABLE,
+                            getErrorString(mContext, FACE_ERROR_HW_UNAVAILABLE,
                                 0 /* vendorCode */));
+                }
             } finally {
                 Trace.endSection();
             }
