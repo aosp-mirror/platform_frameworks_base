@@ -697,7 +697,8 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‏‎‎‎‎‎‎‏‏‎‏‏‎‏‎‏‎‎‏‎‎‎‎‎‏‎‏‏‏‏‎‎‎‏‎‎‎‎‏‎‏‎‎‎‏‎‎‏‎‏‎‏‎‏‎Gets your attention with sound or vibration.‎‏‎‎‏‎"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‎‎‏‏‎‏‎‏‏‎‎‏‏‎‏‎‎‏‎‏‏‏‏‎‎‏‏‎‎‎‎‎‎‎‎‎‎‎‏‎‎‏‎‏‎‏‎‎‎‎‏‏‏‏‎‎‏‎Keeps your attention with a floating shortcut to this content.‎‏‎‎‏‎"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‏‎‏‎‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‏‏‏‎‏‎‏‎‎‎‏‎‏‎‏‎‎‏‎‎‏‎‎‏‎‎‎‎‏‏‎‎‏‏‏‎‏‎‎No recent bubbles‎‏‎‎‏‎"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‎‏‎‏‏‎‎‎‎‎‎‎‏‎‏‏‎‎‏‏‏‏‎‏‎‎‎‏‎‏‏‏‏‎‎‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‎‎‎‎‎‏‎‏‏‎Recent bubbles and dismissed bubbles will appear here.‎‏‎‎‏‎"</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‎‎‏‎‎‏‏‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‎‎‎‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‏‎‏‎‎‎These notifications can\'t be modified.‎‏‎‎‏‎"</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‏‏‎‏‎‎‏‎‎‎‎‏‏‎‎‏‎‏‏‎‏‏‎‏‏‏‏‎‎‎‏‎‏‏‎‎‏‎‎‏‎‎‏‏‎This group of notifications cannot be configured here‎‏‎‎‏‎"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‏‎‎‎‏‏‎‎‎‏‏‏‎‎‎‏‎‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‎‎‎Proxied notification‎‏‎‎‏‎"</string>
@@ -967,13 +968,8 @@
     <string name="device_services" msgid="1549944177856658705">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‎‎‎‎‎‏‎‏‎‎‎‎‎‏‎‎‎‎‎‎‏‎‎‏‎‎‎‏‏‏‎‏‏‎‏‎‏‎‎‏‎‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎Device Services‎‏‎‎‏‎"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‏‎‏‎‎‏‎‎‏‎‏‏‏‏‏‎‎‎‎‎‎‎‏‏‏‎‎‏‎‎‏‏‎‎‎‏‏‏‎‎‏‏‎‏‏‏‎‎‏‏‏‏‎‏‎‎No title‎‏‎‎‏‎"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‏‎‏‏‎‏‏‎‎‎‏‎‎‎‎‎‎‏‎‎‎‎‏‏‏‏‏‏‏‎‎‎‎‏‎‏‎‏‏‎‎‎‎‎‎Tap to restart this app and go full screen.‎‏‎‎‏‎"</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‎‎‎‏‎‏‏‎‎‎‎‏‎‎‏‎‏‎‎‎‏‏‏‏‎‏‏‎‎‏‎‏‏‎‎‎‏‎‏‏‏‏‎‏‎‎‎‏‏‎‏‎‎‎‎Open ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‏‎‏‎‎‏‎‎‏‏‏‏‎‎‏‎‎‏‏‎‎‏‎‎‏‏‎‏‎‎‏‎‏‏‏‎‎‎‎‎‏‏‏‏‎‎‎‎‏‎‏‎‏‎‎‏‎Settings for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ bubbles‎‏‎‎‏‎"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‏‎‏‎‎‏‏‏‎‎‏‏‎‏‎‏‎‏‏‎‎‎‏‏‏‎‎‎‏‏‎‎‎‎‎‏‏‏‎‎Allow bubbles from ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‏‎‏‎‏‏‏‏‎‎‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‎‎‏‏‎‎‏‏‎‎‏‎‏‎‎‎‎‏‎‎Manage‎‏‎‎‏‎"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‏‏‏‏‏‎‎‎‎‎‏‏‏‏‏‏‎‎‎‏‏‎‏‎‏‏‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‏‏‏‎‏‏‎‏‎‏‎‏‎‎‎Deny‎‏‎‎‏‎"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎‏‏‏‎‏‎‎‏‏‏‏‏‎‏‎‎‏‎‎‎‎‏‎‎‎‎‎‏‏‏‎‎‎‎‎‎‏‏‎‎‏‎‏‏‏‏‎‎‎‏‎‏‎‎‎‏‎‎Allow‎‏‎‎‏‎"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‏‎‎‎‎‎‎‎‎‎‎‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‎Ask me later‎‏‎‎‏‎"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‏‏‏‎‏‎‎‎‏‏‏‎‏‏‏‎‏‎‎‏‏‎‏‏‎‏‏‎‏‎‏‏‏‎‏‎‏‏‏‎‎‎‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‎‎‏‎‎‏‏‎<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>‎‏‎‎‏‏‏‎ from ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%2$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‏‏‎‏‎‏‏‏‏‎‏‎‎‎‎‎‏‏‎‏‎‎‎‏‏‏‎‎‎‏‏‎‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‎<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>‎‏‎‎‏‏‏‎ from ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%2$s</xliff:g>‎‏‎‎‏‏‏‎ and ‎‏‎‎‏‏‎<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>‎‏‎‎‏‏‏‎ more‎‏‎‎‏‎"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‎‏‏‎‎‏‏‏‎‏‎‏‏‎‏‏‏‎‎‏‎‎‏‏‏‎‎‏‏‏‎‎‏‏‎‎‏‎‎‏‏‎‏‎‏‎‏‏‎‏‎‏‎‏‎‎Move‎‏‎‎‏‎"</string>
@@ -982,9 +978,17 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‎Move bottom left‎‏‎‎‏‎"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‎‎‏‎‏‎‎‏‏‏‎‏‎‎‎‎‎‏‎‏‎‏‎‏‎‏‏‎‎‏‎‎‎Move bottom right‎‏‎‎‏‎"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‎‏‎‏‏‎‎‏‏‎‏‎‏‏‏‏‎‏‏‏‏‎‎‎‎‎‎‏‎‏‏‏‏‎Dismiss‎‏‎‎‏‎"</string>
-    <string name="bubbles_user_education_title" msgid="3385222165904578710">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‏‏‏‏‎‏‎‏‎‏‏‏‎‎‏‏‎‎‏‏‏‏‏‏‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‎‏‎‏‏‎‎‎‏‎‎‏‎‏‏‎‎Keep chats up front‎‏‎‎‏‎"</string>
-    <string name="bubbles_user_education_description" msgid="6663205638091146934">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‎‎‎‏‏‏‎‏‏‎‎‎‏‏‏‎‎‏‏‎‎‎‎‎‏‏‏‏‎‎‏‏‎‏‏‎‎‎‎‏‏‎‏‎‏‏‎‏‏‎‎New chats from ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ will appear as bubbles. Tap a bubble to open it. Drag to move it.‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎‎‏‎‎‏‏‎\n‎‏‎‎‏‏‏‎Tap the bubble‎‏‎‎‏‎"</string>
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‏‎‎‎‎‎‎‎‏‏‎‎‎‎‏‏‏‏‎‎‎‎‎‏‏‏‎‏‎‎‎‎‏‎‏‎‎‎‏‎‏‎‏‎‏‎‎‎‎‎‏‏‏‎Tap Manage to turn off bubbles from this app‎‏‎‎‏‎"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‎‎‎‏‎‏‏‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎‏‏‏‎‏‏‎‎‎‎‎‏‎‎‎‎‏‏‎‏‎‎‎‎‎‎‎‎‎System navigation updated. To make changes, go to Settings.‎‏‎‎‏‎"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‏‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‏‏‏‏‏‎‎‎‏‎‏‏‏‎‎‏‎‏‎‎‎‏‏‏‏‏‎‎‎‏‎‏‏‎‎‎‎‎Go to Settings to update system navigation‎‏‎‎‏‎"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‎‎‎‎‎‎‎‎‏‏‏‎‏‏‎‏‏‏‎‏‏‎‎‎‎‏‏‎‎‏‎‏‎‎‏‎‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‎‎‏‎‏‎Standby‎‏‎‎‏‎"</string>
@@ -1010,4 +1014,6 @@
     <string name="controls_pin_instructions" msgid="6363309783822475238">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‎‎‎‎‏‎‎‏‎‎‎‏‎‎‎‏‎‏‏‏‏‎‎‏‎‎‎‎‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎Enter PIN‎‏‎‎‏‎"</string>
     <string name="controls_structure_tooltip" msgid="1392966215435667434">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‏‎‏‎‏‎‎‏‏‎‎‏‏‏‏‎‏‏‎‎‏‎‎‏‎‎‎‎‏‏‏‎‎‏‎‏‎‎‏‏‏‎‎‎‏‏‏‏‏‏‎‏‎‏‎‎Swipe to see other structures‎‏‎‎‏‎"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‏‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‏‎‏‎‏‎‎‎Loading recommendations‎‏‎‎‏‎"</string>
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
+    <skip />
 </resources>

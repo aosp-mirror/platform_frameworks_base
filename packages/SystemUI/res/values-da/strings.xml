@@ -699,7 +699,8 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Fanger din opmærksomhed med lyd eller vibration."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Fastholder din opmærksomhed med en svævende genvej til indholdet."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ingen seneste bobler"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Nye bobler og afviste bobler vises her."</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse notifikationer kan ikke redigeres."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Du kan ikke konfigurere denne gruppe notifikationer her"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Proxyforbundet notifikation"</string>
@@ -969,13 +970,8 @@
     <string name="device_services" msgid="1549944177856658705">"Enhedstjenester"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ingen titel"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Tryk for at genstarte denne app, og gå til fuld skærm."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Åbn <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Indstillinger for <xliff:g id="APP_NAME">%1$s</xliff:g>-bobler"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Vil du tillade bobler fra <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Administrer"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Afvis"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Tillad"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Spørg mig senere"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> fra <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> fra <xliff:g id="APP_NAME">%2$s</xliff:g> og <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> andre"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Flyt"</string>
@@ -984,9 +980,17 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Flyt ned til venstre"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Flyt ned til højre"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Afvis"</string>
-    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Hold chatsamtaler i forgrunden"</string>
-    <string name="bubbles_user_education_description" msgid="6663205638091146934">"Nye chatsamtaler fra <xliff:g id="APP_NAME">%1$s</xliff:g> vises som bobler. Tryk på en boble for at åbne samtalen. Træk boblen for at flytte den.\n\nTryk på boblen"</string>
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Tryk på Administrer for at deaktivere bobler fra denne app"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigationen blev opdateret. Gå til Indstillinger for at foretage ændringer."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gå til Indstillinger for at opdatere systemnavigationen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
@@ -1012,5 +1016,7 @@
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Angiv pinkode"</string>
     <string name="controls_structure_tooltip" msgid="1392966215435667434">"Stryg for at se andre strukturer"</string>
     <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
     <skip />
 </resources>
