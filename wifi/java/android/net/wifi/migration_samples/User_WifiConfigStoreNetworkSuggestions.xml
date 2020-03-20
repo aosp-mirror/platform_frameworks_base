@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<WifiConfigStoreData>
+<int name="Version" value="3" />
+<NetworkSuggestionMap>
+<NetworkSuggestionPerApp>
+<string name="SuggestorPackageName">com.android.cts.verifier</string>
+<null name="SuggestorFeatureId" />
+<boolean name="SuggestorHasUserApproved" value="true" />
+<int name="SuggestorMaxSize" value="1" />
+<int name="SuggestorUid" value="10228" />
+<int name="SuggestorCarrierId" value="-1" />
+<NetworkSuggestion>
+<WifiConfiguration>
+<string name="ConfigKey">&quot;OPEN_SSID&quot;NONE</string>
+<string name="SSID">&quot;OPEN_SSID&quot;</string>
+<null name="PreSharedKey" />
+<null name="WEPKeys" />
+<int name="WEPTxKeyIndex" value="0" />
+<boolean name="HiddenSSID" value="false" />
+<boolean name="RequirePMF" value="false" />
+<byte-array name="AllowedKeyMgmt" num="1">01</byte-array>
+<byte-array name="AllowedProtocols" num="0"></byte-array>
+<byte-array name="AllowedAuthAlgos" num="0"></byte-array>
+<byte-array name="AllowedGroupCiphers" num="0"></byte-array>
+<byte-array name="AllowedPairwiseCiphers" num="0"></byte-array>
+<byte-array name="AllowedGroupMgmtCiphers" num="0"></byte-array>
+<byte-array name="AllowedSuiteBCiphers" num="0"></byte-array>
+<boolean name="Shared" value="true" />
+<boolean name="AutoJoinEnabled" value="true" />
+<boolean name="Trusted" value="true" />
+<null name="BSSID" />
+<int name="Status" value="0" />
+<null name="FQDN" />
+<null name="ProviderFriendlyName" />
+<null name="LinkedNetworksList" />
+<null name="DefaultGwMacAddress" />
+<boolean name="ValidatedInternetAccess" value="false" />
+<boolean name="NoInternetAccessExpected" value="false" />
+<boolean name="MeteredHint" value="false" />
+<int name="MeteredOverride" value="1" />
+<boolean name="UseExternalScores" value="false" />
+<int name="NumAssociation" value="0" />
+<int name="CreatorUid" value="10228" />
+<string name="CreatorName">com.android.cts.verifier</string>
+<int name="LastUpdateUid" value="-1" />
+<null name="LastUpdateName" />
+<int name="LastConnectUid" value="0" />
+<boolean name="IsLegacyPasspointConfig" value="false" />
+<long-array name="RoamingConsortiumOIs" num="0" />
+<string name="RandomizedMacAddress">02:00:00:00:00:00</string>
+<int name="MacRandomizationSetting" value="1" />
+<int name="CarrierId" value="-1" />
+</WifiConfiguration>
+<boolean name="IsAppInteractionRequired" value="false" />
+<boolean name="IsUserInteractionRequired" value="false" />
+<boolean name="IsUserAllowedToManuallyConnect" value="false" />
+<boolean name="InitializedAutoJoinEnabled" value="true" />
+<boolean name="AutoJoinEnabled" value="true" />
+</NetworkSuggestion>
+<NetworkSuggestion>
+<WifiConfiguration>
+<string name="ConfigKey">passpoint.net</string>
+<null name="SSID" />
+<null name="PreSharedKey" />
+<null name="WEPKeys" />
+<int name="WEPTxKeyIndex" value="0" />
+<boolean name="HiddenSSID" value="false" />
+<boolean name="RequirePMF" value="false" />
+<byte-array name="AllowedKeyMgmt" num="0"></byte-array>
+<byte-array name="AllowedProtocols" num="0"></byte-array>
+<byte-array name="AllowedAuthAlgos" num="0"></byte-array>
+<byte-array name="AllowedGroupCiphers" num="0"></byte-array>
+<byte-array name="AllowedPairwiseCiphers" num="0"></byte-array>
+<byte-array name="AllowedGroupMgmtCiphers" num="0"></byte-array>
+<byte-array name="AllowedSuiteBCiphers" num="0"></byte-array>
+<boolean name="Shared" value="true" />
+<boolean name="AutoJoinEnabled" value="true" />
+<boolean name="Trusted" value="true" />
+<null name="BSSID" />
+<int name="Status" value="0" />
+<string name="FQDN">passpoint.net</string>
+<null name="ProviderFriendlyName" />
+<null name="LinkedNetworksList" />
+<null name="DefaultGwMacAddress" />
+<boolean name="ValidatedInternetAccess" value="false" />
+<boolean name="NoInternetAccessExpected" value="false" />
+<boolean name="MeteredHint" value="false" />
+<int name="MeteredOverride" value="0" />
+<boolean name="UseExternalScores" value="false" />
+<int name="NumAssociation" value="0" />
+<int name="CreatorUid" value="1000" />
+<string name="CreatorName">com.android.cts.verifier</string>
+<int name="LastUpdateUid" value="-1" />
+<null name="LastUpdateName" />
+<int name="LastConnectUid" value="0" />
+<boolean name="IsLegacyPasspointConfig" value="false" />
+<long-array name="RoamingConsortiumOIs" num="0" />
+<string name="RandomizedMacAddress">02:00:00:00:00:00</string>
+<int name="MacRandomizationSetting" value="1" />
+<int name="CarrierId" value="-1" />
+<boolean name="IsMostRecentlyConnected" value="false" />
+</WifiConfiguration>
+<PasspointConfiguration>
+<int name="UpdateIdentifier" value="-2147483648" />
+<int name="CredentialPriority" value="-2147483648" />
+<null name="TrustRootCertList" />
+<long name="SubscriptionCreationTime" value="-9223372036854775808" />
+<long name="SubscriptionExpirationTime" value="-9223372036854775808" />
+<null name="SubscriptionType" />
+<long name="UsageLimitTimePeriod" value="-9223372036854775808" />
+<long name="UsageLimitStartTime" value="-9223372036854775808" />
+<long name="UsageLimitDataLimit" value="-9223372036854775808" />
+<long name="UsageLimitTimeLimit" value="-9223372036854775808" />
+<HomeSP>
+<string name="FQDN">passpoint.net</string>
+<string name="FriendlyName">Passpoint Friendly Name</string>
+<null name="IconURL" />
+<null name="HomeNetworkIDs" />
+<null name="MatchAllOIs" />
+<null name="MatchAnyOIs" />
+<null name="OtherHomePartners" />
+<null name="RoamingConsortiumOIs" />
+</HomeSP>
+<Credential>
+<long name="CreationTime" value="-9223372036854775808" />
+<long name="ExpirationTime" value="-9223372036854775808" />
+<string name="Realm">passpoint.com</string>
+<boolean name="CheckAAAServerCertStatus" value="false" />
+<UserCredential>
+<string name="Username">blahblahblah</string>
+<string name="Password">doubleblahblah</string>
+<boolean name="MachineManaged" value="false" />
+<null name="SoftTokenApp" />
+<boolean name="AbleToShare" value="false" />
+<int name="EAPType" value="21" />
+<string name="NonEAPInnerMethod">PAP</string>
+</UserCredential>
+</Credential>
+<int name="CarrierId" value="-1" />
+<boolean name="AutoJoinEnabled" value="true" />
+<boolean name="IsMacRandomizationEnabled" value="true" />
+<int name="MeteredOverride" value="0" />
+</PasspointConfiguration>
+<boolean name="IsAppInteractionRequired" value="false" />
+<boolean name="IsUserInteractionRequired" value="false" />
+<boolean name="IsUserAllowedToManuallyConnect" value="true" />
+<boolean name="InitializedAutoJoinEnabled" value="true" />
+<boolean name="AutoJoinEnabled" value="true" />
+</NetworkSuggestion>
+</NetworkSuggestionPerApp>
+</NetworkSuggestionMap>
+<ImsiPrivacyProtectionExemptionMap>
+<map name="CarrierExemptionMap" />
+</ImsiPrivacyProtectionExemptionMap>
+</WifiConfigStoreData>
