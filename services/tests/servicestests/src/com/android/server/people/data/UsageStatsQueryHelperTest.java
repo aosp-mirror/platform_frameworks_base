@@ -21,15 +21,16 @@ import static com.android.server.people.data.TestUtils.timestamp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.LocusId;
@@ -50,6 +51,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Predicate;
@@ -58,7 +60,8 @@ import java.util.function.Predicate;
 public final class UsageStatsQueryHelperTest {
 
     private static final int USER_ID_PRIMARY = 0;
-    private static final String PKG_NAME = "pkg";
+    private static final String PKG_NAME_1 = "pkg_1";
+    private static final String PKG_NAME_2 = "pkg_2";
     private static final String ACTIVITY_NAME = "TestActivity";
     private static final String SHORTCUT_ID = "abc";
     private static final LocusId LOCUS_ID_1 = new LocusId("locus_1");
@@ -80,7 +83,7 @@ public final class UsageStatsQueryHelperTest {
         File testDir = new File(ctx.getCacheDir(), "testdir");
         ScheduledExecutorService scheduledExecutorService = new MockScheduledExecutorService();
 
-        mPackageData = new TestPackageData(PKG_NAME, USER_ID_PRIMARY, pkg -> false, pkg -> false,
+        mPackageData = new TestPackageData(PKG_NAME_1, USER_ID_PRIMARY, pkg -> false, pkg -> false,
                 scheduledExecutorService, testDir);
         mPackageData.mConversationStore.mConversationInfo = new ConversationInfo.Builder()
                 .setShortcutId(SHORTCUT_ID)
@@ -173,10 +176,72 @@ public final class UsageStatsQueryHelperTest {
         assertEquals(createInAppConversationEvent(130_000L, 30), events.get(2));
     }
 
+    @Test
+    public void testQueryAppMovingToForegroundEvents() {
+        addUsageEvents(
+                createShortcutInvocationEvent(100_000L),
+                createActivityResumedEvent(110_000L),
+                createActivityStoppedEvent(120_000L),
+                createActivityResumedEvent(130_000L));
+
+        List<UsageEvents.Event> events = mHelper.queryAppMovingToForegroundEvents(USER_ID_PRIMARY,
+                90_000L,
+                200_000L);
+
+        assertEquals(2, events.size());
+        assertEquals(UsageEvents.Event.ACTIVITY_RESUMED, events.get(0).getEventType());
+        assertEquals(110_000L, events.get(0).getTimeStamp());
+        assertEquals(UsageEvents.Event.ACTIVITY_RESUMED, events.get(1).getEventType());
+        assertEquals(130_000L, events.get(1).getTimeStamp());
+    }
+
+    @Test
+    public void testQueryAppLaunchCount() {
+
+        UsageStats packageStats1 = createUsageStats(PKG_NAME_1, 2);
+        UsageStats packageStats2 = createUsageStats(PKG_NAME_1, 3);
+        UsageStats packageStats3 = createUsageStats(PKG_NAME_2, 1);
+        when(mUsageStatsManagerInternal.queryUsageStatsForUser(anyInt(), anyInt(), anyLong(),
+                anyLong(), anyBoolean())).thenReturn(
+                List.of(packageStats1, packageStats2, packageStats3));
+
+        Map<String, Integer> appLaunchCounts = mHelper.queryAppLaunchCount(USER_ID_PRIMARY, 90_000L,
+                200_000L, Set.of(PKG_NAME_1, PKG_NAME_2));
+
+        assertEquals(2, appLaunchCounts.size());
+        assertEquals(5, (long) appLaunchCounts.get(PKG_NAME_1));
+        assertEquals(1, (long) appLaunchCounts.get(PKG_NAME_2));
+    }
+
+    @Test
+    public void testQueryAppLaunchCount_packageNameFiltered() {
+
+        UsageStats packageStats1 = createUsageStats(PKG_NAME_1, 2);
+        UsageStats packageStats2 = createUsageStats(PKG_NAME_1, 3);
+        UsageStats packageStats3 = createUsageStats(PKG_NAME_2, 1);
+        when(mUsageStatsManagerInternal.queryUsageStatsForUser(anyInt(), anyInt(), anyLong(),
+                anyLong(), anyBoolean())).thenReturn(
+                List.of(packageStats1, packageStats2, packageStats3));
+
+        Map<String, Integer> appLaunchCounts = mHelper.queryAppLaunchCount(USER_ID_PRIMARY, 90_000L,
+                200_000L,
+                Set.of(PKG_NAME_1));
+
+        assertEquals(1, appLaunchCounts.size());
+        assertEquals(5, (long) appLaunchCounts.get(PKG_NAME_1));
+    }
+
     private void addUsageEvents(UsageEvents.Event... events) {
         UsageEvents usageEvents = new UsageEvents(Arrays.asList(events), new String[]{});
         when(mUsageStatsManagerInternal.queryEventsForUser(anyInt(), anyLong(), anyLong(),
-                eq(UsageEvents.SHOW_ALL_EVENT_DATA))).thenReturn(usageEvents);
+                anyInt())).thenReturn(usageEvents);
+    }
+
+    private static UsageStats createUsageStats(String packageName, int launchCount) {
+        UsageStats packageStats = new UsageStats();
+        packageStats.mPackageName = packageName;
+        packageStats.mAppLaunchCount = launchCount;
+        return packageStats;
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
@@ -203,9 +268,15 @@ public final class UsageStatsQueryHelperTest {
         return e;
     }
 
+    private static UsageEvents.Event createActivityResumedEvent(long timestamp) {
+        UsageEvents.Event e = createUsageEvent(UsageEvents.Event.ACTIVITY_RESUMED, timestamp);
+        e.mClass = ACTIVITY_NAME;
+        return e;
+    }
+
     private static UsageEvents.Event createUsageEvent(int eventType, long timestamp) {
         UsageEvents.Event e = new UsageEvents.Event(eventType, timestamp);
-        e.mPackage = PKG_NAME;
+        e.mPackage = PKG_NAME_1;
         return e;
     }
 
