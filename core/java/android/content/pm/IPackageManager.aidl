@@ -743,8 +743,6 @@ interface IPackageManager {
 
     void setMimeGroup(String packageName, String group, in List<String> mimeTypes);
 
-    void clearMimeGroup(String packageName, String group);
-
     List<String> getMimeGroup(String packageName, String group);
 
     boolean isAutoRevokeWhitelisted(String packageName);
