@@ -21,28 +21,13 @@ filegroup {
 
 java_library {
     name: "service-statsd",
-    installable: true,
-
-    srcs: [
-        ":service-statsd-sources",
-    ],
-
-    // TODO(b/146757305) should be "module_current" since not allowed to use
-    // @CorePlatformApi's
-    sdk_version: "core_platform",
-
+    srcs: [ ":service-statsd-sources" ],
+    sdk_version: "system_server_current",
     libs: [
         "framework-annotations-lib",
-        "services-stubs",
         "framework-statsd",
-
-        // TODO(b/146757305): should be unnecessary once
-        // sdk_version="module_lib_current" or "module_current"
-        "android_module_lib_stubs_current",
     ],
-
     plugins: ["java_api_finder"],
-
     apex_available: [
         "com.android.os.statsd",
         "test_com.android.os.statsd",
