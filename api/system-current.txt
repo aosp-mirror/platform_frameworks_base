@@ -4940,7 +4940,7 @@ package android.media.tv.tuner.dvr {
   }
 
   public class DvrSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.dvr.DvrSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.dvr.DvrSettings.Builder builder();
     method public int getDataFormat();
     method public long getHighThreshold();
     method public long getLowThreshold();
@@ -4975,7 +4975,7 @@ package android.media.tv.tuner.dvr {
 package android.media.tv.tuner.filter {
 
   public final class AlpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.AlpFilterConfiguration.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.filter.AlpFilterConfiguration.Builder builder();
     method public int getLengthType();
     method public int getPacketType();
     method public int getType();
@@ -5006,7 +5006,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class AvSettings extends android.media.tv.tuner.filter.Settings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.AvSettings.Builder builder(@NonNull android.content.Context, int, boolean);
+    method @NonNull public static android.media.tv.tuner.filter.AvSettings.Builder builder(int, boolean);
     method public boolean isPassthrough();
   }
 
@@ -5024,7 +5024,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class DownloadSettings extends android.media.tv.tuner.filter.Settings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.DownloadSettings.Builder builder(@NonNull android.content.Context, int);
+    method @NonNull public static android.media.tv.tuner.filter.DownloadSettings.Builder builder(int);
     method public int getDownloadId();
   }
 
@@ -5086,7 +5086,7 @@ package android.media.tv.tuner.filter {
   }
 
   public final class IpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.IpFilterConfiguration.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.filter.IpFilterConfiguration.Builder builder();
     method @NonNull @Size(min=4, max=16) public byte[] getDstIpAddress();
     method public int getDstPort();
     method @NonNull @Size(min=4, max=16) public byte[] getSrcIpAddress();
@@ -5125,7 +5125,7 @@ package android.media.tv.tuner.filter {
   }
 
   public final class MmtpFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.MmtpFilterConfiguration.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.filter.MmtpFilterConfiguration.Builder builder();
     method public int getMmtpPacketId();
     method public int getType();
   }
@@ -5148,7 +5148,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class PesSettings extends android.media.tv.tuner.filter.Settings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.PesSettings.Builder builder(@NonNull android.content.Context, int);
+    method @NonNull public static android.media.tv.tuner.filter.PesSettings.Builder builder(int);
     method public int getStreamId();
     method public boolean isRaw();
   }
@@ -5160,7 +5160,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class RecordSettings extends android.media.tv.tuner.filter.Settings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.RecordSettings.Builder builder(@NonNull android.content.Context, int);
+    method @NonNull public static android.media.tv.tuner.filter.RecordSettings.Builder builder(int);
     method public int getScIndexMask();
     method public int getScIndexType();
     method public int getTsIndexMask();
@@ -5221,7 +5221,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class SectionSettingsWithSectionBits extends android.media.tv.tuner.filter.SectionSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.SectionSettingsWithSectionBits.Builder builder(@NonNull android.content.Context, int);
+    method @NonNull public static android.media.tv.tuner.filter.SectionSettingsWithSectionBits.Builder builder(int);
     method @NonNull public byte[] getFilterBytes();
     method @NonNull public byte[] getMask();
     method @NonNull public byte[] getMode();
@@ -5235,7 +5235,7 @@ package android.media.tv.tuner.filter {
   }
 
   public class SectionSettingsWithTableInfo extends android.media.tv.tuner.filter.SectionSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder builder(@NonNull android.content.Context, int);
+    method @NonNull public static android.media.tv.tuner.filter.SectionSettingsWithTableInfo.Builder builder(int);
     method public int getTableId();
     method public int getVersion();
   }
@@ -5265,7 +5265,7 @@ package android.media.tv.tuner.filter {
   }
 
   public final class TlvFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.TlvFilterConfiguration.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.filter.TlvFilterConfiguration.Builder builder();
     method public int getPacketType();
     method public int getType();
     method public boolean isCompressedIpPacket();
@@ -5286,7 +5286,7 @@ package android.media.tv.tuner.filter {
   }
 
   public final class TsFilterConfiguration extends android.media.tv.tuner.filter.FilterConfiguration {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.filter.TsFilterConfiguration.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.filter.TsFilterConfiguration.Builder builder();
     method public int getTpid();
     method public int getType();
   }
@@ -5314,7 +5314,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class AnalogFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.AnalogFrontendSettings.Builder builder();
     method public int getSifStandard();
     method public int getSignalType();
     method public int getType();
@@ -5365,7 +5365,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class Atsc3FrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.Atsc3FrontendSettings.Builder builder();
     method public int getBandwidth();
     method public int getDemodOutputFormat();
     method @NonNull public android.media.tv.tuner.frontend.Atsc3PlpSettings[] getPlpSettings();
@@ -5428,7 +5428,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class Atsc3PlpSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.Atsc3PlpSettings.Builder builder();
     method public int getCodeRate();
     method public int getFec();
     method public int getInterleaveMode();
@@ -5450,7 +5450,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class AtscFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.AtscFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.AtscFrontendSettings.Builder builder();
     method public int getModulation();
     method public int getType();
     field public static final int MODULATION_AUTO = 1; // 0x1
@@ -5472,7 +5472,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class DvbcFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.DvbcFrontendSettings.Builder builder();
     method public int getAnnex();
     method public long getInnerFec();
     method public int getModulation();
@@ -5511,7 +5511,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class DvbsCodeRate {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbsCodeRate.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.DvbsCodeRate.Builder builder();
     method public int getBitsPer1000Symbol();
     method public long getInnerFec();
     method public boolean isLinear();
@@ -5533,7 +5533,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class DvbsFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.DvbsFrontendSettings.Builder builder();
     method @Nullable public android.media.tv.tuner.frontend.DvbsCodeRate getCodeRate();
     method public int getInputStreamId();
     method public int getModulation();
@@ -5603,7 +5603,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class DvbtFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.DvbtFrontendSettings.Builder builder();
     method public int getBandwidth();
     method public int getConstellation();
     method public int getGuardInterval();
@@ -5822,7 +5822,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class Isdbs3FrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.Isdbs3FrontendSettings.Builder builder();
     method public int getCodeRate();
     method public int getModulation();
     method public int getRolloff();
@@ -5871,7 +5871,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class IsdbsFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.IsdbsFrontendSettings.Builder builder();
     method public int getCodeRate();
     method public int getModulation();
     method public int getRolloff();
@@ -5917,7 +5917,7 @@ package android.media.tv.tuner.frontend {
   }
 
   public class IsdbtFrontendSettings extends android.media.tv.tuner.frontend.FrontendSettings {
-    method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER) public static android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder builder(@NonNull android.content.Context);
+    method @NonNull public static android.media.tv.tuner.frontend.IsdbtFrontendSettings.Builder builder();
     method public int getBandwidth();
     method public int getCodeRate();
     method public int getGuardInterval();

@@ -17,8 +17,6 @@
 package android.media.tv.tuner;
 
 import android.annotation.Nullable;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.filter.Filter;
 
@@ -28,44 +26,6 @@ import android.media.tv.tuner.filter.Filter;
  * @hide
  */
 public final class TunerUtils {
-    private static final String TUNER_PERMISSION = android.Manifest.permission.ACCESS_TV_TUNER;
-    private static final String DESCRAMBLER_PERMISSION =
-            android.Manifest.permission.ACCESS_TV_DESCRAMBLER;
-
-    /**
-     * Checks whether the caller has permission to access tuner.
-     *
-     * @param context context of the caller.
-     * @throws SecurityException if the caller doesn't have the permission.
-     */
-    public static void checkTunerPermission(Context context) {
-        checkPermission(context, TUNER_PERMISSION);
-    }
-
-    /**
-     * Checks whether the caller has permission to access the descrambler.
-     *
-     * @param context context of the caller.
-     * @throws SecurityException if the caller doesn't have the permission.
-     */
-    public static void checkDescramblerPermission(Context context) {
-        checkPermission(context, DESCRAMBLER_PERMISSION);
-    }
-
-    /**
-     * Checks whether the caller has the given permission.
-     *
-     * @param context context of the caller.
-     * @param permission the given permission.
-     * @throws SecurityException if the caller doesn't have the permission.
-     */
-    public static void checkPermission(Context context, String permission) {
-        // TODO: remove checkPermission methods
-        if (context.checkCallingOrSelfPermission(permission)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller must have " + permission + " permission.");
-        }
-    }
 
     /**
      * Gets the corresponding filter subtype constant defined in tuner HAL.
