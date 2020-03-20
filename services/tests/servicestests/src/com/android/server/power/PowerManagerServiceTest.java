@@ -83,6 +83,7 @@ import com.android.server.power.PowerManagerService.NativeWrapper;
 import com.android.server.power.PowerManagerService.UserSwitchedReceiver;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
+import com.android.server.power.batterysaver.BatterySaverStateMachine;
 import com.android.server.power.batterysaver.BatterySavingStats;
 
 import org.junit.After;
@@ -109,6 +110,7 @@ public class PowerManagerServiceTest {
 
     @Mock private BatterySaverController mBatterySaverControllerMock;
     @Mock private BatterySaverPolicy mBatterySaverPolicyMock;
+    @Mock private BatterySaverStateMachine mBatterySaverStateMachineMock;
     @Mock private LightsManager mLightsManagerMock;
     @Mock private DisplayManagerInternal mDisplayManagerInternalMock;
     @Mock private BatteryManagerInternal mBatteryManagerInternalMock;
@@ -213,6 +215,12 @@ public class PowerManagerServiceTest {
                     Object lock, Context context, BatterySaverPolicy batterySaverPolicy,
                     BatterySavingStats batterySavingStats) {
                 return mBatterySaverControllerMock;
+            }
+
+            @Override
+            BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context,
+                    BatterySaverController batterySaverController) {
+                return mBatterySaverStateMachineMock;
             }
 
             @Override
