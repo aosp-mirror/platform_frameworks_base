@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static android.net.TestNetworkManager.TEST_TAP_PREFIX;
+import static android.net.TestNetworkManager.TEST_TUN_PREFIX;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -60,8 +63,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 class TestNetworkService extends ITestNetworkManager.Stub {
     @NonNull private static final String TAG = TestNetworkService.class.getSimpleName();
     @NonNull private static final String TEST_NETWORK_TYPE = "TEST_NETWORK";
-    @NonNull private static final String TEST_TUN_PREFIX = "testtun";
-    @NonNull private static final String TEST_TAP_PREFIX = "testtap";
     @NonNull private static final AtomicInteger sTestTunIndex = new AtomicInteger();
 
     @NonNull private final Context mContext;

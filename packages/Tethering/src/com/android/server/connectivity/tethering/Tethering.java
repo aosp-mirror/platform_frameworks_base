@@ -39,11 +39,12 @@ import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHERING_WIFI_P2P;
-import static android.net.TetheringManager.TETHER_ERROR_MASTER_ERROR;
+import static android.net.TetheringManager.TETHER_ERROR_INTERNAL_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
 import static android.net.TetheringManager.TETHER_ERROR_SERVICE_UNAVAIL;
 import static android.net.TetheringManager.TETHER_ERROR_UNAVAIL_IFACE;
 import static android.net.TetheringManager.TETHER_ERROR_UNKNOWN_IFACE;
+import static android.net.TetheringManager.TETHER_ERROR_UNKNOWN_TYPE;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_FAILED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STARTED;
 import static android.net.TetheringManager.TETHER_HARDWARE_OFFLOAD_STOPPED;
@@ -545,7 +546,7 @@ public class Tethering {
                 break;
             default:
                 Log.w(TAG, "Invalid tether type.");
-                result = TETHER_ERROR_UNKNOWN_IFACE;
+                result = TETHER_ERROR_UNKNOWN_TYPE;
         }
 
         // The result of Bluetooth tethering will be sent by #setBluetoothTethering.
@@ -586,7 +587,7 @@ public class Tethering {
             Binder.restoreCallingIdentity(ident);
         }
 
-        return TETHER_ERROR_MASTER_ERROR;
+        return TETHER_ERROR_INTERNAL_ERROR;
     }
 
     private void setBluetoothTethering(final boolean enable, final IIntResultListener listener) {
@@ -622,7 +623,7 @@ public class Tethering {
                 // We should figure out a way to bubble up that failure instead of sending success.
                 final int result = (((BluetoothPan) proxy).isTetheringOn() == enable)
                         ? TETHER_ERROR_NO_ERROR
-                        : TETHER_ERROR_MASTER_ERROR;
+                        : TETHER_ERROR_INTERNAL_ERROR;
                 sendTetherResult(listener, result, TETHERING_BLUETOOTH);
                 adapter.closeProfileProxy(BluetoothProfile.PAN, proxy);
             }
@@ -640,21 +641,21 @@ public class Tethering {
                 mEthernetIfaceRequest = em.requestTetheredInterface(mExecutor, mEthernetCallback);
             } else {
                 stopEthernetTetheringLocked();
-                if (mEthernetCallback != null) {
-                    mEthernetIfaceRequest.release();
-                    mEthernetCallback = null;
-                    mEthernetIfaceRequest = null;
-                }
             }
         }
         return TETHER_ERROR_NO_ERROR;
     }
 
     private void stopEthernetTetheringLocked() {
-        if (mConfiguredEthernetIface == null) return;
-        changeInterfaceState(mConfiguredEthernetIface, IpServer.STATE_AVAILABLE);
-        stopTrackingInterfaceLocked(mConfiguredEthernetIface);
-        mConfiguredEthernetIface = null;
+        if (mConfiguredEthernetIface != null) {
+            stopTrackingInterfaceLocked(mConfiguredEthernetIface);
+            mConfiguredEthernetIface = null;
+        }
+        if (mEthernetCallback != null) {
+            mEthernetIfaceRequest.release();
+            mEthernetCallback = null;
+            mEthernetIfaceRequest = null;
+        }
     }
 
     private class EthernetCallback implements EthernetManager.TetheredInterfaceCallback {
@@ -2180,7 +2181,7 @@ public class Tethering {
         // If TetherMasterSM is in ErrorState, TetherMasterSM stays there.
         // Thus we give a chance for TetherMasterSM to recover to InitialState
         // by sending CMD_CLEAR_ERROR
-        if (error == TETHER_ERROR_MASTER_ERROR) {
+        if (error == TETHER_ERROR_INTERNAL_ERROR) {
             mTetherMasterSM.sendMessage(TetherMasterSM.CMD_CLEAR_ERROR, who);
         }
         int which;

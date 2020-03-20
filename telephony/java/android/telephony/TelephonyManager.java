@@ -1036,7 +1036,9 @@ public class TelephonyManager {
             "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
 
     /**
-     * Broadcast intent that indicates multi-SIM configuration is changed. For example, it changed
+     * Broadcast action to be received by Broadcast receivers.
+     *
+     * Indicates multi-SIM configuration is changed. For example, it changed
      * from single SIM capable to dual-SIM capable (DSDS or DSDA) or triple-SIM mode.
      *
      * It doesn't indicate how many subscriptions are actually active, or which states SIMs are,
@@ -1279,7 +1281,6 @@ public class TelephonyManager {
      * <p>Note: this is a protected intent that can only be sent by the system.
      * @hide
      */
-    @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SERVICE_PROVIDERS_UPDATED =
             "android.telephony.action.SERVICE_PROVIDERS_UPDATED";
@@ -1289,7 +1290,6 @@ public class TelephonyManager {
      * whether the PLMN should be shown.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SHOW_PLMN = "android.telephony.extra.SHOW_PLMN";
 
     /**
@@ -1297,7 +1297,6 @@ public class TelephonyManager {
      * the operator name of the registered network.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_PLMN = "android.telephony.extra.PLMN";
 
     /**
@@ -1305,7 +1304,6 @@ public class TelephonyManager {
      * whether the PLMN should be shown.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SHOW_SPN = "android.telephony.extra.SHOW_SPN";
 
     /**
@@ -1313,7 +1311,6 @@ public class TelephonyManager {
      * the service provider name.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_SPN = "android.telephony.extra.SPN";
 
     /**
@@ -1321,7 +1318,6 @@ public class TelephonyManager {
      * the service provider name for data service.
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_DATA_SPN = "android.telephony.extra.DATA_SPN";
 
     /**
@@ -4926,7 +4922,7 @@ public class TelephonyManager {
             ITelephony telephony = getITelephony();
             if (telephony != null) {
                 telephony.sendVisualVoicemailSmsForSubscriber(
-                        mContext.getOpPackageName(), subId, number, port, text, sentIntent);
+                        mContext.getOpPackageName(), null, subId, number, port, text, sentIntent);
             }
         } catch (RemoteException ex) {
         }
@@ -9729,14 +9725,12 @@ public class TelephonyManager {
      * Powers down the SIM. SIM must be up prior.
      * @hide
      */
-    @SystemApi
     public static final int CARD_POWER_DOWN = 0;
 
     /**
      * Powers up the SIM normally. SIM must be down prior.
      * @hide
      */
-    @SystemApi
     public static final int CARD_POWER_UP = 1;
 
     /**
@@ -9754,7 +9748,6 @@ public class TelephonyManager {
      * is NOT persistent across boots. On reboot, SIM will power up normally.
      * @hide
      */
-    @SystemApi
     public static final int CARD_POWER_UP_PASS_THROUGH = 2;
 
     /**
@@ -13098,7 +13091,6 @@ public class TelephonyManager {
      * This should only be called from system Uid.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyUserActivity() {
         try {

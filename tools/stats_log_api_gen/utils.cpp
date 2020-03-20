@@ -98,20 +98,6 @@ const char* java_type_name(java_type_t type) {
     }
 }
 
-bool atom_needed_for_module(const AtomDecl& atomDecl, const string& moduleName) {
-    if (moduleName == DEFAULT_MODULE_NAME) {
-        return true;
-    }
-    return atomDecl.moduleNames.find(moduleName) != atomDecl.moduleNames.end();
-}
-
-bool signature_needed_for_module(const set<string>& modules, const string& moduleName) {
-    if (moduleName == DEFAULT_MODULE_NAME) {
-        return true;
-    }
-    return modules.find(moduleName) != modules.end();
-}
-
 // Native
 // Writes namespaces for the cpp and header files, returning the number of namespaces written.
 void write_namespace(FILE* out, const string& cppNamespaces) {
@@ -165,8 +151,7 @@ static void write_cpp_usage(
     fprintf(out, ");\n");
 }
 
-void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
-        const string& moduleName) {
+void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl) {
     fprintf(out, "/**\n");
     fprintf(out, " * Constants for atom codes.\n");
     fprintf(out, " */\n");
@@ -179,10 +164,6 @@ void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& 
     // Print atom constants
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
         atom != atoms.decls.end(); atom++) {
-        // Skip if the atom is not needed for the module.
-        if (!atom_needed_for_module(*atom, moduleName)) {
-            continue;
-        }
         string constant = make_constant_name(atom->name);
         fprintf(out, "\n");
         fprintf(out, "    /**\n");
@@ -264,7 +245,7 @@ void write_native_method_call(FILE* out, const string& methodName,
 }
 
 // Java
-void write_java_atom_codes(FILE* out, const Atoms& atoms, const string& moduleName) {
+void write_java_atom_codes(FILE* out, const Atoms& atoms) {
     fprintf(out, "    // Constants for atom codes.\n");
 
     std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
@@ -273,10 +254,6 @@ void write_java_atom_codes(FILE* out, const Atoms& atoms, const string& moduleNa
     // Print constants for the atom codes.
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
             atom != atoms.decls.end(); atom++) {
-        // Skip if the atom is not needed for the module.
-        if (!atom_needed_for_module(*atom, moduleName)) {
-            continue;
-        }
         string constant = make_constant_name(atom->name);
         fprintf(out, "\n");
         fprintf(out, "    /**\n");
@@ -292,14 +269,10 @@ void write_java_atom_codes(FILE* out, const Atoms& atoms, const string& moduleNa
     fprintf(out, "\n");
 }
 
-void write_java_enum_values(FILE* out, const Atoms& atoms, const string& moduleName) {
+void write_java_enum_values(FILE* out, const Atoms& atoms) {
     fprintf(out, "    // Constants for enum values.\n\n");
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
         atom != atoms.decls.end(); atom++) {
-        // Skip if the atom is not needed for the module.
-        if (!atom_needed_for_module(*atom, moduleName)) {
-            continue;
-        }
         for (vector<AtomField>::const_iterator field = atom->fields.begin();
             field != atom->fields.end(); field++) {
             if (field->javaType == JAVA_TYPE_ENUM) {
@@ -340,27 +313,20 @@ void write_java_usage(FILE* out, const string& method_name, const string& atom_c
 
 int write_java_non_chained_methods(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const string& moduleName
-        ) {
-    for (auto signature_to_modules_it = signatures_to_modules.begin();
-            signature_to_modules_it != signatures_to_modules.end(); signature_to_modules_it++) {
-        // Skip if this signature is not needed for the module.
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-            continue;
-        }
-
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap) {
+    for (auto signatureInfoMapIt = signatureInfoMap.begin();
+            signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
         fprintf(out, "    public static void write_non_chained(int code");
-        vector<java_type_t> signature = signature_to_modules_it->first;
+        vector<java_type_t> signature = signatureInfoMapIt->first;
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature.begin();
                 arg != signature.end(); arg++) {
             if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                // Non chained signatures should not have attribution chains.
+                fprintf(stderr, "Non chained signatures should not have attribution chains.\n");
                 return 1;
             } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                // Module logging does not yet support key value pair.
+                fprintf(stderr, "Module logging does not yet support key value pair.\n");
                 return 1;
             } else {
                 fprintf(out, ", %s arg%d", java_type_name(*arg), argIndex);
@@ -392,17 +358,11 @@ int write_java_non_chained_methods(
 
 int write_java_work_source_methods(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const string& moduleName
-        ) {
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap) {
     fprintf(out, "    // WorkSource methods.\n");
-    for (auto signature_to_modules_it = signatures_to_modules.begin();
-            signature_to_modules_it != signatures_to_modules.end(); signature_to_modules_it++) {
-        // Skip if this signature is not needed for the module.
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-            continue;
-        }
-        vector<java_type_t> signature = signature_to_modules_it->first;
+    for (auto signatureInfoMapIt = signatureInfoMap.begin();
+            signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
+        vector<java_type_t> signature = signatureInfoMapIt->first;
         // Determine if there is Attribution in this signature.
         int attributionArg = -1;
         int argIndexMax = 0;

@@ -27,11 +27,13 @@ import android.service.controls.DeviceTypes
  *
  * @property controlId unique identifier for this [Control].
  * @property controlTitle last title reported for this [Control].
+ * @property controlSubtitle last subtitle reported for this [Control].
  * @property deviceType last reported type for this [Control].
  */
 data class ControlInfo(
     val controlId: String,
     val controlTitle: CharSequence,
+    val controlSubtitle: CharSequence,
     @DeviceTypes.DeviceType val deviceType: Int
 ) {
 
@@ -51,8 +53,9 @@ data class ControlInfo(
     class Builder {
         lateinit var controlId: String
         lateinit var controlTitle: CharSequence
+        lateinit var controlSubtitle: CharSequence
         var deviceType: Int = DeviceTypes.TYPE_UNKNOWN
 
-        fun build() = ControlInfo(controlId, controlTitle, deviceType)
+        fun build() = ControlInfo(controlId, controlTitle, controlSubtitle, deviceType)
     }
 }

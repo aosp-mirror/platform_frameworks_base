@@ -355,7 +355,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         if (change.getLoggingOnly()) {
             return false;
         }
-        if (change.getEnableAfterTargetSdk() != 0) {
+        if (change.getEnableAfterTargetSdk() > 0) {
             if (change.getEnableAfterTargetSdk() < sMinTargetSdk
                     || change.getEnableAfterTargetSdk() > sMaxTargetSdk) {
                 return false;

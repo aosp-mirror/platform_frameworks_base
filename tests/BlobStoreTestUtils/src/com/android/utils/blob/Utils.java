@@ -124,7 +124,11 @@ public class Utils {
         final BlobStoreManager blobStoreManager = (BlobStoreManager) context.getSystemService(
                 Context.BLOB_STORE_SERVICE);
         blobStoreManager.releaseLease(blobHandle);
-        assertThat(blobStoreManager.getLeaseInfo(blobHandle)).isNull();
+        try {
+            assertThat(blobStoreManager.getLeaseInfo(blobHandle)).isNull();
+        } catch (SecurityException e) {
+            // Expected, ignore
+        }
     }
 
     private static void assertLeaseInfo(LeaseInfo leaseInfo, String packageName,

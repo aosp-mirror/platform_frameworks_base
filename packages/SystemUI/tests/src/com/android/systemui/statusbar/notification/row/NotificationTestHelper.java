@@ -50,6 +50,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
+import com.android.systemui.statusbar.notification.ConversationNotificationProcessor;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
@@ -70,6 +71,7 @@ import com.android.systemui.tests.R;
 import org.mockito.ArgumentCaptor;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -119,7 +121,9 @@ public class NotificationTestHelper {
                 mock(NotifRemoteViewCache.class),
                 mock(NotificationRemoteInputManager.class),
                 () -> mock(SmartReplyConstants.class),
-                () -> mock(SmartReplyController.class));
+                () -> mock(SmartReplyController.class),
+                mock(ConversationNotificationProcessor.class),
+                mock(Executor.class));
         contentBinder.setInflateSynchronously(true);
         mBindStage = new RowContentBindStage(contentBinder,
                 mock(NotifInflationErrorManager.class),
@@ -370,7 +374,7 @@ public class NotificationTestHelper {
                         notification.getChannelId(),
                         notification.getChannelId(),
                         importance);
-        channel.setBlockableSystem(true);
+        channel.setBlockable(true);
 
         NotificationEntry entry = new NotificationEntryBuilder()
                 .setPkg(pkg)

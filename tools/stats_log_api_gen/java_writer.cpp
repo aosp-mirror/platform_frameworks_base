@@ -23,10 +23,8 @@ namespace stats_log_api_gen {
 
 static int write_java_q_logger_class(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
-        const AtomDecl &attributionDecl,
-        const string& moduleName
-        ) {
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
+        const AtomDecl &attributionDecl) {
     fprintf(out, "\n");
     fprintf(out, "    // Write logging helper methods for statsd in Q and earlier.\n");
     fprintf(out, "    private static class QLogger {\n");
@@ -37,30 +35,59 @@ static int write_java_q_logger_class(
     fprintf(out, "\n");
     fprintf(out, "        // Write methods.\n");
     write_java_methods_q_schema(
-            out, signatures_to_modules, attributionDecl, moduleName, "        ");
+            out, signatureInfoMap, attributionDecl, "        ");
 
     fprintf(out, "    }\n");
     return 0;
 }
 
+static void write_annotations(
+        FILE* out, int argIndex,
+        const FieldNumberToAnnotations& fieldNumberToAnnotations) {
+    auto it = fieldNumberToAnnotations.find(argIndex);
+    if (it == fieldNumberToAnnotations.end()) {
+        return;
+    }
+    const set<shared_ptr<Annotation>>& annotations = it->second;
+    for (auto& annotation: annotations) {
+        // TODO(b/151744250): Group annotations for same atoms.
+        // TODO(b/151786433): Write atom constant name instead of atom id literal.
+        fprintf(out, "        if (code == %d) {\n", annotation->atomId);
+        switch(annotation->type) {
+            case ANNOTATION_TYPE_INT:
+                // TODO(b/151776731): Check for reset state annotation and only include reset state
+                // when field value == default state annotation value.
+                // TODO(b/151786433): Write annotation constant name instead of
+                // annotation id literal.
+                fprintf(out, "            builder.addIntAnnotation((byte) %d, %d);\n",
+                        annotation->annotationId, annotation->value.intValue);
+                break;
+            case ANNOTATION_TYPE_BOOL:
+                // TODO(b/151786433): Write annotation constant name instead of
+                // annotation id literal.
+                fprintf(out, "            builder.addBooleanAnnotation((byte) %d, %s);\n",
+                        annotation->annotationId,
+                        annotation->value.boolValue ? "true" : "false");
+                break;
+            default:
+                break;
+        }
+        fprintf(out, "        }\n");
+    }
+}
 
 static int write_java_methods(
         FILE* out,
-        const map<vector<java_type_t>, set<string>>& signatures_to_modules,
+        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
         const AtomDecl &attributionDecl,
-        const string& moduleName,
         const bool supportQ
         ) {
-    for (auto signature_to_modules_it = signatures_to_modules.begin();
-            signature_to_modules_it != signatures_to_modules.end(); signature_to_modules_it++) {
-        // Skip if this signature is not needed for the module.
-        if (!signature_needed_for_module(signature_to_modules_it->second, moduleName)) {
-            continue;
-        }
-
+    for (auto signatureInfoMapIt = signatureInfoMap.begin();
+            signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         // Print method signature.
         fprintf(out, "    public static void write(int code");
-        vector<java_type_t> signature = signature_to_modules_it->first;
+        const vector<java_type_t>& signature = signatureInfoMapIt->first;
+        const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt->second;
         int argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature.begin();
                 arg != signature.end(); arg++) {
@@ -210,6 +237,7 @@ static int write_java_methods(
                 fprintf(stderr, "Encountered unsupported type.");
                 return 1;
             }
+            write_annotations(out, argIndex, fieldNumberToAnnotations);
             argIndex++;
         }
 
@@ -249,7 +277,7 @@ static int write_java_methods(
 }
 
 int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-                                    const string& moduleName, const string& javaClass,
+                                    const string& javaClass,
                                     const string& javaPackage, const bool supportQ,
                                     const bool supportWorkSource) {
     // Print prelude
@@ -273,24 +301,24 @@ int write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attribut
     fprintf(out, " */\n");
     fprintf(out, "public class %s {\n", javaClass.c_str());
 
-    write_java_atom_codes(out, atoms, moduleName);
-    write_java_enum_values(out, atoms, moduleName);
+    write_java_atom_codes(out, atoms);
+    write_java_enum_values(out, atoms);
 
     int errors = 0;
 
     // Print write methods.
     fprintf(out, "    // Write methods\n");
     errors += write_java_methods(
-            out, atoms.signatures_to_modules, attributionDecl, moduleName, supportQ);
+            out, atoms.signatureInfoMap, attributionDecl, supportQ);
     errors += write_java_non_chained_methods(
-            out, atoms.non_chained_signatures_to_modules, moduleName);
+            out, atoms.nonChainedSignatureInfoMap);
     if (supportWorkSource) {
-        errors += write_java_work_source_methods(out, atoms.signatures_to_modules, moduleName);
+        errors += write_java_work_source_methods(out, atoms.signatureInfoMap);
     }
 
     if (supportQ) {
         errors += write_java_q_logger_class(
-                out, atoms.signatures_to_modules, attributionDecl, moduleName);
+                out, atoms.signatureInfoMap, attributionDecl);
     }
 
     fprintf(out, "}\n");

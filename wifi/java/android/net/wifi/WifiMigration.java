@@ -95,7 +95,7 @@ public final class WifiMigration {
     private static final SparseArray<String> STORE_ID_TO_FILE_NAME =
             new SparseArray<String>() {{
                 put(STORE_FILE_SHARED_GENERAL, "WifiConfigStore.xml");
-                put(STORE_FILE_SHARED_SOFTAP, "softap.conf");
+                put(STORE_FILE_SHARED_SOFTAP, "WifiConfigStoreSoftAp.xml");
                 put(STORE_FILE_USER_GENERAL, "WifiConfigStore.xml");
                 put(STORE_FILE_USER_NETWORK_SUGGESTIONS, "WifiConfigStoreNetworkSuggestions.xml");
             }};
@@ -176,6 +176,13 @@ public final class WifiMigration {
             // OEMs should do conversions necessary here before returning the stream.
             return getSharedAtomicFile(storeFileId).openRead();
         } catch (FileNotFoundException e) {
+            // Special handling for softap.conf.
+            // Note: OEM devices upgrading from Q -> R will only have the softap.conf file.
+            // Test devices running previous R builds however may have already migrated to the
+            // XML format. So, check for that above before falling back to check for legacy file.
+            if (storeFileId == STORE_FILE_SHARED_SOFTAP) {
+                return SoftApConfToXmlMigrationUtil.convert();
+            }
             return null;
         }
     }
@@ -191,7 +198,18 @@ public final class WifiMigration {
         if (storeFileId != STORE_FILE_SHARED_GENERAL && storeFileId !=  STORE_FILE_SHARED_SOFTAP) {
             throw new IllegalArgumentException("Invalid shared store file id");
         }
-        getSharedAtomicFile(storeFileId).delete();
+        AtomicFile file = getSharedAtomicFile(storeFileId);
+        if (file.exists()) {
+            file.delete();
+            return;
+        }
+        // Special handling for softap.conf.
+        // Note: OEM devices upgrading from Q -> R will only have the softap.conf file.
+        // Test devices running previous R builds however may have already migrated to the
+        // XML format. So, check for that above before falling back to check for legacy file.
+        if (storeFileId == STORE_FILE_SHARED_SOFTAP) {
+            SoftApConfToXmlMigrationUtil.remove();
+        }
     }
 
     /**
@@ -258,7 +276,10 @@ public final class WifiMigration {
             throw new IllegalArgumentException("Invalid user store file id");
         }
         Objects.requireNonNull(userHandle);
-        getUserAtomicFile(storeFileId, userHandle.getIdentifier()).delete();
+        AtomicFile file = getUserAtomicFile(storeFileId, userHandle.getIdentifier());
+        if (file.exists()) {
+            file.delete();
+        }
     }
 
     /**

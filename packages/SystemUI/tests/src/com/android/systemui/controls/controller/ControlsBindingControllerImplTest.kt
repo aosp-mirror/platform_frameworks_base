@@ -207,6 +207,56 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun testBindAndLoadSuggested() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        controller.bindAndLoadSuggested(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoadSuggested(any())
+    }
+
+    @Test
+    fun testLoadSuggested_onCompleteRemovesTimeout() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        val subscription = mock(IControlsSubscription::class.java)
+
+        controller.bindAndLoadSuggested(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoadSuggested(capture(subscriberCaptor))
+        val b = Binder()
+        subscriberCaptor.value.onSubscribe(b, subscription)
+
+        subscriberCaptor.value.onComplete(b)
+        verify(providers[0]).cancelLoadTimeout()
+    }
+
+    @Test
+    fun testLoadSuggested_onErrorRemovesTimeout() {
+        val callback = object : ControlsBindingController.LoadCallback {
+            override fun error(message: String) {}
+
+            override fun accept(t: List<Control>) {}
+        }
+        val subscription = mock(IControlsSubscription::class.java)
+
+        controller.bindAndLoadSuggested(TEST_COMPONENT_NAME_1, callback)
+
+        verify(providers[0]).maybeBindAndLoadSuggested(capture(subscriberCaptor))
+        val b = Binder()
+        subscriberCaptor.value.onSubscribe(b, subscription)
+
+        subscriberCaptor.value.onError(b, "")
+        verify(providers[0]).cancelLoadTimeout()
+    }
+
+    @Test
     fun testBindService() {
         controller.bindService(TEST_COMPONENT_NAME_1)
         executor.runAllReady()
@@ -216,8 +266,8 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testSubscribe() {
-        val controlInfo1 = ControlInfo("id_1", "", DeviceTypes.TYPE_UNKNOWN)
-        val controlInfo2 = ControlInfo("id_2", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo1 = ControlInfo("id_1", "", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo2 = ControlInfo("id_2", "", "", DeviceTypes.TYPE_UNKNOWN)
         val structure =
             StructureInfo(TEST_COMPONENT_NAME_1, "Home", listOf(controlInfo1, controlInfo2))
 
@@ -246,8 +296,8 @@ class ControlsBindingControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testUnsubscribe_refreshing() {
-        val controlInfo1 = ControlInfo("id_1", "", DeviceTypes.TYPE_UNKNOWN)
-        val controlInfo2 = ControlInfo("id_2", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo1 = ControlInfo("id_1", "", "", DeviceTypes.TYPE_UNKNOWN)
+        val controlInfo2 = ControlInfo("id_2", "", "", DeviceTypes.TYPE_UNKNOWN)
         val structure =
             StructureInfo(TEST_COMPONENT_NAME_1, "Home", listOf(controlInfo1, controlInfo2))
 

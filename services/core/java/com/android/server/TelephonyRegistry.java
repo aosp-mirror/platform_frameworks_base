@@ -61,7 +61,6 @@ import android.telephony.CellSignalStrengthTdscdma;
 import android.telephony.CellSignalStrengthWcdma;
 import android.telephony.DataFailCause;
 import android.telephony.DisconnectCause;
-import android.telephony.DisplayInfo;
 import android.telephony.LocationAccessPolicy;
 import android.telephony.PhoneCapability;
 import android.telephony.PhoneStateListener;
@@ -73,6 +72,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.telephony.emergency.EmergencyNumber;
@@ -206,7 +206,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private boolean[] mUserMobileDataState;
 
-    private DisplayInfo[] mDisplayInfos;
+    private TelephonyDisplayInfo[] mTelephonyDisplayInfos;
 
     private SignalStrength[] mSignalStrength;
 
@@ -447,7 +447,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallAttributes = copyOf(mCallAttributes, mNumPhones);
         mOutgoingCallEmergencyNumber = copyOf(mOutgoingCallEmergencyNumber, mNumPhones);
         mOutgoingSmsEmergencyNumber = copyOf(mOutgoingSmsEmergencyNumber, mNumPhones);
-        mDisplayInfos = copyOf(mDisplayInfos, mNumPhones);
+        mTelephonyDisplayInfos = copyOf(mTelephonyDisplayInfos, mNumPhones);
 
         // ds -> ss switch.
         if (mNumPhones < oldNumPhones) {
@@ -487,7 +487,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mPreciseDataConnectionStates.add(new HashMap<Integer, PreciseDataConnectionState>());
             mBarringInfo.add(i, new BarringInfo());
-            mDisplayInfos[i] = null;
+            mTelephonyDisplayInfos[i] = null;
         }
     }
 
@@ -546,7 +546,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mOutgoingCallEmergencyNumber = new EmergencyNumber[numPhones];
         mOutgoingSmsEmergencyNumber = new EmergencyNumber[numPhones];
         mBarringInfo = new ArrayList<>();
-        mDisplayInfos = new DisplayInfo[numPhones];
+        mTelephonyDisplayInfos = new TelephonyDisplayInfo[numPhones];
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -575,7 +575,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mBackgroundCallState[i] = PreciseCallState.PRECISE_CALL_STATE_IDLE;
             mPreciseDataConnectionStates.add(new HashMap<Integer, PreciseDataConnectionState>());
             mBarringInfo.add(i, new BarringInfo());
-            mDisplayInfos[i] = null;
+            mTelephonyDisplayInfos[i] = null;
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -988,8 +988,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
                     if ((events & PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED) != 0) {
                         try {
-                            if (mDisplayInfos[phoneId] != null) {
-                                r.callback.onDisplayInfoChanged(mDisplayInfos[phoneId]);
+                            if (mTelephonyDisplayInfos[phoneId] != null) {
+                                r.callback.onDisplayInfoChanged(mTelephonyDisplayInfos[phoneId]);
                             }
                         } catch (RemoteException ex) {
                             remove(r.binder);
@@ -1394,7 +1394,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public void notifyCarrierNetworkChange(boolean active) {
         // only CarrierService with carrier privilege rule should have the permission
         int[] subIds = Arrays.stream(SubscriptionManager.from(mContext)
-                    .getActiveAndHiddenSubscriptionIdList())
+                    .getCompleteActiveSubscriptionIdList())
                     .filter(i -> TelephonyPermissions.checkCarrierPrivilegeForSubId(mContext,
                             i)).toArray();
         if (ArrayUtils.isEmpty(subIds)) {
@@ -1523,28 +1523,28 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
      *
      * @param phoneId Phone id
      * @param subId Subscription id
-     * @param displayInfo Display network info
+     * @param telephonyDisplayInfo Display network info
      *
-     * @see PhoneStateListener#onDisplayInfoChanged(DisplayInfo)
+     * @see PhoneStateListener#onDisplayInfoChanged(TelephonyDisplayInfo)
      */
     public void notifyDisplayInfoChanged(int phoneId, int subId,
-                                         @NonNull DisplayInfo displayInfo) {
+                                         @NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
         if (!checkNotifyPermission("notifyDisplayInfoChanged()")) {
             return;
         }
         if (VDBG) {
             log("notifyDisplayInfoChanged: PhoneId=" + phoneId
-                    + " subId=" + subId + " displayInfo=" + displayInfo);
+                    + " subId=" + subId + " telephonyDisplayInfo=" + telephonyDisplayInfo);
         }
         synchronized (mRecords) {
             if (validatePhoneId(phoneId)) {
-                mDisplayInfos[phoneId] = displayInfo;
+                mTelephonyDisplayInfos[phoneId] = telephonyDisplayInfo;
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED)
                             && idMatch(r.subId, subId, phoneId)) {
                         try {
-                            r.callback.onDisplayInfoChanged(displayInfo);
+                            r.callback.onDisplayInfoChanged(telephonyDisplayInfo);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -2788,10 +2788,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             try {
                 if (VDBG) {
                     log("checkPossibleMissNotify: onDisplayInfoChanged phoneId="
-                            + phoneId + " dpi=" + mDisplayInfos[phoneId]);
+                            + phoneId + " dpi=" + mTelephonyDisplayInfos[phoneId]);
                 }
-                if (mDisplayInfos[phoneId] != null) {
-                    r.callback.onDisplayInfoChanged(mDisplayInfos[phoneId]);
+                if (mTelephonyDisplayInfos[phoneId] != null) {
+                    r.callback.onDisplayInfoChanged(mTelephonyDisplayInfos[phoneId]);
                 }
             } catch (RemoteException ex) {
                 mRemoveList.add(r.binder);

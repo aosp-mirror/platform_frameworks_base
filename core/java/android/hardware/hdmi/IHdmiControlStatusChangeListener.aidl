@@ -16,8 +16,6 @@
 
 package android.hardware.hdmi;
 
-import android.hardware.hdmi.HdmiDeviceInfo;
-
 /**
  * Callback interface definition for HDMI client to get informed of
  * the CEC availability change event.

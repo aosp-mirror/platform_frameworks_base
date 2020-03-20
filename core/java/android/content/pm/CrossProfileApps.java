@@ -334,7 +334,7 @@ public class CrossProfileApps {
      * Returns an {@link Intent} to open the settings page that allows the user to decide whether
      * the calling app can interact across profiles.
      *
-     * <p>Returns {@code null} if {@link #canRequestInteractAcrossProfiles()} is {@code false}.
+     * <p>The method {@link #canRequestInteractAcrossProfiles()} must be returning {@code true}.
      *
      * <p>Note that the user may already have given consent and the app may already be able to
      * interact across profiles, even if {@link #canRequestInteractAcrossProfiles()} is {@code
@@ -345,11 +345,12 @@ public class CrossProfileApps {
      * the app can interact across profiles
      *
      * @throws SecurityException if {@code mContext.getPackageName()} does not belong to the
-     * calling UID.
+     * calling UID, or {@link #canRequestInteractAcrossProfiles()} is {@code false}.
      */
-    public @Nullable Intent createRequestInteractAcrossProfilesIntent() {
+    public @NonNull Intent createRequestInteractAcrossProfilesIntent() {
         if (!canRequestInteractAcrossProfiles()) {
-            return null;
+            throw new SecurityException(
+                    "The calling package can not request to interact across profiles.");
         }
         final Intent settingsIntent = new Intent();
         settingsIntent.setAction(Settings.ACTION_MANAGE_CROSS_PROFILE_ACCESS);

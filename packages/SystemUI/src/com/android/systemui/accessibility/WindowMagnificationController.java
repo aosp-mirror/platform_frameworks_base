@@ -31,7 +31,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.AsyncTask;
-import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
@@ -45,7 +44,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -92,7 +90,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     private int mMirrorSurfaceMargin;
     private int mBorderDragSize;
     private int mOuterBorderSize;
-    private View mOverlayView;
     // The boundary of magnification frame.
     private final Rect mMagnificationFrameBoundary = new Rect();
 
@@ -130,43 +127,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
                 R.dimen.magnification_outer_border_margin);
     }
 
-    private void createOverlayWindow() {
-        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-                        | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSPARENT);
-        params.gravity = Gravity.TOP | Gravity.LEFT;
-        params.token = new Binder();
-        params.setTitle(mContext.getString(R.string.magnification_overlay_title));
-
-        mOverlayView = new View(mContext);
-        mOverlayView.getViewTreeObserver().addOnWindowAttachListener(
-                new ViewTreeObserver.OnWindowAttachListener() {
-                    @Override
-                    public void onWindowAttached() {
-                        mOverlayView.getViewTreeObserver().removeOnWindowAttachListener(this);
-                        createMirrorWindow();
-                        createControls();
-                    }
-
-                    @Override
-                    public void onWindowDetached() {
-
-                    }
-                });
-
-        mOverlayView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-
-        mWm.addView(mOverlayView, params);
-    }
-
     /**
      * Deletes the magnification window.
      */
@@ -174,11 +134,6 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (mMirrorSurface != null) {
             mTransaction.remove(mMirrorSurface).apply();
             mMirrorSurface = null;
-        }
-
-        if (mOverlayView != null) {
-            mWm.removeView(mOverlayView);
-            mOverlayView = null;
         }
 
         if (mMirrorView != null) {
@@ -255,12 +210,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
 
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 windowWidth, windowHeight,
-                WindowManager.LayoutParams.TYPE_APPLICATION_PANEL,
+                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSPARENT);
         params.gravity = Gravity.TOP | Gravity.LEFT;
-        params.token = mOverlayView.getWindowToken();
         params.x = mMagnificationFrame.left;
         params.y = mMagnificationFrame.top;
         params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -317,9 +271,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         return regionInsideDragBorder;
     }
 
-    private void createControls() {
+    private void showControls() {
         if (mMirrorWindowControl != null) {
-            mMirrorWindowControl.showControl(mOverlayView.getWindowToken());
+            mMirrorWindowControl.showControl();
         }
     }
 
@@ -530,7 +484,8 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         setMagnificationFrameBoundary();
         updateMagnificationFramePosition((int) offsetX, (int) offsetY);
         if (mMirrorView == null) {
-            createOverlayWindow();
+            createMirrorWindow();
+            showControls();
         } else {
             modifyWindowMagnification(mTransaction);
             mTransaction.apply();

@@ -23,7 +23,9 @@ import android.annotation.Nullable;
 import android.app.ActivityManager.RunningAppProcessInfo.Importance;
 import android.icu.text.SimpleDateFormat;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.DebugUtils;
@@ -31,12 +33,17 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.WireTypeMismatchException;
 
+import com.android.internal.util.ArrayUtils;
+
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Date;
 import java.util.Objects;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Describes the information of an application process's death.
@@ -321,84 +328,104 @@ public final class ApplicationExitInfo implements Parcelable {
     // be categorized in {@link #REASON_OTHER}, with subreason code starting from 1000.
 
     /**
-     * @see {@link #getPid}
+     * @see #getPid
      */
     private int mPid;
 
     /**
-     * @see {@link #getRealUid}
+     * @see #getRealUid
      */
     private int mRealUid;
 
     /**
-     * @see {@link #getPackageUid}
+     * @see #getPackageUid
      */
     private int mPackageUid;
 
     /**
-     * @see {@link #getDefiningUid}
+     * @see #getDefiningUid
      */
     private int mDefiningUid;
 
     /**
-     * @see {@link #getProcessName}
+     * @see #getProcessName
      */
     private String mProcessName;
 
     /**
-     * @see {@link #getReason}
+     * @see #getReason
      */
     private @Reason int mReason;
 
     /**
-     * @see {@link #getStatus}
+     * @see #getStatus
      */
     private int mStatus;
 
     /**
-     * @see {@link #getImportance}
+     * @see #getImportance
      */
     private @Importance int mImportance;
 
     /**
-     * @see {@link #getPss}
+     * @see #getPss
      */
     private long mPss;
 
     /**
-     * @see {@link #getRss}
+     * @see #getRss
      */
     private long mRss;
 
     /**
-     * @see {@link #getTimestamp}
+     * @see #getTimestamp
      */
     private @CurrentTimeMillisLong long mTimestamp;
 
     /**
-     * @see {@link #getDescription}
+     * @see #getDescription
      */
     private @Nullable String mDescription;
 
     /**
-     * @see {@link #getSubReason}
+     * @see #getSubReason
      */
     private @SubReason int mSubReason;
 
     /**
-     * @see {@link #getConnectionGroup}
+     * @see #getConnectionGroup
      */
     private int mConnectionGroup;
 
     /**
-     * @see {@link #getPackageName}
+     * @see #getPackageName
      */
     private String mPackageName;
 
     /**
-     * @see {@link #getPackageList}
+     * @see #getPackageList
      */
     private String[] mPackageList;
+
+    /**
+     * @see #getProcessStateSummary
+     */
+    private byte[] mState;
+
+    /**
+     * The file to the trace file in the storage;
+     *
+     * for system internal use only, will not retain across processes.
+     *
+     * @see #getTraceInputStream
+     */
+    private File mTraceFile;
+
+    /**
+     * The Binder interface to retrieve the file descriptor to
+     * the trace file from the system.
+     */
+    private IAppTraceRetriever mAppTraceRetriever;
 
     /** @hide */
     @IntDef(prefix = { "REASON_" }, value = {
@@ -557,6 +584,54 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
+     * Return the state data set by calling {@link ActivityManager#setProcessStateSummary}
+     * from the process before its death.
+     *
+     * @return The process-customized data
+     * @see ActivityManager#setProcessStateSummary(byte[])
+     */
+    public @Nullable byte[] getProcessStateSummary() {
+        return mState;
+    }
+
+    /**
+     * Return the InputStream to the traces that was taken by the system
+     * prior to the death of the process; typically it'll be available when
+     * the reason is {@link #REASON_ANR}, though if the process gets an ANR
+     * but recovers, and dies for another reason later, this trace will be included
+     * in the record of {@link ApplicationExitInfo} still.
+     *
+     * @return The input stream to the traces that was taken by the system
+     *         prior to the death of the process.
+     */
+    public @Nullable InputStream getTraceInputStream() throws IOException {
+        if (mAppTraceRetriever == null) {
+            return null;
+        }
+        try {
+            final ParcelFileDescriptor fd = mAppTraceRetriever.getTraceFileDescriptor(
+                    mPackageName, mPackageUid, mPid);
+            if (fd == null) {
+                return null;
+            }
+            return new GZIPInputStream(new ParcelFileDescriptor.AutoCloseInputStream(fd));
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Similar to {@link #getTraceInputStream} but return the File object.
+     *
+     * For internal use only.
+     *
+     * @hide
+     */
+    public @Nullable File getTraceFile() {
+        return mTraceFile;
+    }
+
+    /**
      * A subtype reason in conjunction with {@link #mReason}.
      *
      * For internal use only.
@@ -569,7 +644,7 @@ public final class ApplicationExitInfo implements Parcelable {
 
     /**
      * The connection group this process belongs to, if there is any.
-     * @see {@link android.content.Context#updateServiceGroup}.
+     * @see android.content.Context#updateServiceGroup
      *
      * For internal use only.
      *
@@ -581,8 +656,6 @@ public final class ApplicationExitInfo implements Parcelable {
 
     /**
      * Name of first package running in this process;
-     *
-     * For system internal use only, will not retain across processes.
      *
      * @hide
      */
@@ -602,7 +675,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getPid}
+     * @see #getPid
      *
      * @hide
      */
@@ -611,7 +684,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getRealUid}
+     * @see #getRealUid
      *
      * @hide
      */
@@ -620,7 +693,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getPackageUid}
+     * @see #getPackageUid
      *
      * @hide
      */
@@ -629,7 +702,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getDefiningUid}
+     * @see #getDefiningUid
      *
      * @hide
      */
@@ -638,7 +711,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getProcessName}
+     * @see #getProcessName
      *
      * @hide
      */
@@ -647,7 +720,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getReason}
+     * @see #getReason
      *
      * @hide
      */
@@ -656,7 +729,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getStatus}
+     * @see #getStatus
      *
      * @hide
      */
@@ -665,7 +738,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getImportance}
+     * @see #getImportance
      *
      * @hide
      */
@@ -674,7 +747,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getPss}
+     * @see #getPss
      *
      * @hide
      */
@@ -683,7 +756,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getRss}
+     * @see #getRss
      *
      * @hide
      */
@@ -692,7 +765,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getTimestamp}
+     * @see #getTimestamp
      *
      * @hide
      */
@@ -701,7 +774,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getDescription}
+     * @see #getDescription
      *
      * @hide
      */
@@ -710,7 +783,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getSubReason}
+     * @see #getSubReason
      *
      * @hide
      */
@@ -719,7 +792,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getConnectionGroup}
+     * @see #getConnectionGroup
      *
      * @hide
      */
@@ -728,7 +801,7 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getPackageName}
+     * @see #getPackageName
      *
      * @hide
      */
@@ -737,12 +810,39 @@ public final class ApplicationExitInfo implements Parcelable {
     }
 
     /**
-     * @see {@link #getPackageList}
+     * @see #getPackageList
      *
      * @hide
      */
     public void setPackageList(final String[] packageList) {
         mPackageList = packageList;
+    }
+
+    /**
+     * @see #getProcessStateSummary
+     *
+     * @hide
+     */
+    public void setProcessStateSummary(final byte[] state) {
+        mState = state;
+    }
+
+    /**
+     * @see #getTraceFile
+     *
+     * @hide
+     */
+    public void setTraceFile(final File traceFile) {
+        mTraceFile = traceFile;
+    }
+
+    /**
+     * @see #mAppTraceRetriever
+     *
+     * @hide
+     */
+    public void setAppTraceRetriever(final IAppTraceRetriever retriever) {
+        mAppTraceRetriever = retriever;
     }
 
     @Override
@@ -757,6 +857,7 @@ public final class ApplicationExitInfo implements Parcelable {
         dest.writeInt(mPackageUid);
         dest.writeInt(mDefiningUid);
         dest.writeString(mProcessName);
+        dest.writeString(mPackageName);
         dest.writeInt(mConnectionGroup);
         dest.writeInt(mReason);
         dest.writeInt(mSubReason);
@@ -766,6 +867,13 @@ public final class ApplicationExitInfo implements Parcelable {
         dest.writeLong(mRss);
         dest.writeLong(mTimestamp);
         dest.writeString(mDescription);
+        dest.writeByteArray(mState);
+        if (mAppTraceRetriever != null) {
+            dest.writeInt(1);
+            dest.writeStrongBinder(mAppTraceRetriever.asBinder());
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     /** @hide */
@@ -779,6 +887,7 @@ public final class ApplicationExitInfo implements Parcelable {
         mPackageUid = other.mPackageUid;
         mDefiningUid = other.mDefiningUid;
         mProcessName = other.mProcessName;
+        mPackageName = other.mPackageName;
         mConnectionGroup = other.mConnectionGroup;
         mReason = other.mReason;
         mStatus = other.mStatus;
@@ -790,6 +899,9 @@ public final class ApplicationExitInfo implements Parcelable {
         mDescription = other.mDescription;
         mPackageName = other.mPackageName;
         mPackageList = other.mPackageList;
+        mState = other.mState;
+        mTraceFile = other.mTraceFile;
+        mAppTraceRetriever = other.mAppTraceRetriever;
     }
 
     private ApplicationExitInfo(@NonNull Parcel in) {
@@ -798,6 +910,7 @@ public final class ApplicationExitInfo implements Parcelable {
         mPackageUid = in.readInt();
         mDefiningUid = in.readInt();
         mProcessName = in.readString();
+        mPackageName = in.readString();
         mConnectionGroup = in.readInt();
         mReason = in.readInt();
         mSubReason = in.readInt();
@@ -807,6 +920,10 @@ public final class ApplicationExitInfo implements Parcelable {
         mRss = in.readLong();
         mTimestamp = in.readLong();
         mDescription = in.readString();
+        mState = in.createByteArray();
+        if (in.readInt() == 1) {
+            mAppTraceRetriever = IAppTraceRetriever.Stub.asInterface(in.readStrongBinder());
+        }
     }
 
     public @NonNull static final Creator<ApplicationExitInfo> CREATOR =
@@ -839,6 +956,9 @@ public final class ApplicationExitInfo implements Parcelable {
         pw.print(prefix + "  pss="); DebugUtils.printSizeValue(pw, mPss << 10); pw.println();
         pw.print(prefix + "  rss="); DebugUtils.printSizeValue(pw, mRss << 10); pw.println();
         pw.println(prefix + "  description=" + mDescription);
+        pw.println(prefix + "  state=" + (ArrayUtils.isEmpty(mState)
+                ? "empty" : Integer.toString(mState.length) + " bytes"));
+        pw.println(prefix + "  trace=" + mTraceFile);
     }
 
     @Override
@@ -859,6 +979,9 @@ public final class ApplicationExitInfo implements Parcelable {
         sb.append(" pss="); DebugUtils.sizeValueToString(mPss << 10, sb);
         sb.append(" rss="); DebugUtils.sizeValueToString(mRss << 10, sb);
         sb.append(" description=").append(mDescription);
+        sb.append(" state=").append(ArrayUtils.isEmpty(mState)
+                ? "empty" : Integer.toString(mState.length) + " bytes");
+        sb.append(" trace=").append(mTraceFile);
         return sb.toString();
     }
 
@@ -961,6 +1084,9 @@ public final class ApplicationExitInfo implements Parcelable {
         proto.write(ApplicationExitInfoProto.RSS, mRss);
         proto.write(ApplicationExitInfoProto.TIMESTAMP, mTimestamp);
         proto.write(ApplicationExitInfoProto.DESCRIPTION, mDescription);
+        proto.write(ApplicationExitInfoProto.STATE, mState);
+        proto.write(ApplicationExitInfoProto.TRACE_FILE,
+                mTraceFile == null ? null : mTraceFile.getAbsolutePath());
         proto.end(token);
     }
 
@@ -1018,6 +1144,15 @@ public final class ApplicationExitInfo implements Parcelable {
                     break;
                 case (int) ApplicationExitInfoProto.DESCRIPTION:
                     mDescription = proto.readString(ApplicationExitInfoProto.DESCRIPTION);
+                    break;
+                case (int) ApplicationExitInfoProto.STATE:
+                    mState = proto.readBytes(ApplicationExitInfoProto.STATE);
+                    break;
+                case (int) ApplicationExitInfoProto.TRACE_FILE:
+                    final String path = proto.readString(ApplicationExitInfoProto.TRACE_FILE);
+                    if (!TextUtils.isEmpty(path)) {
+                        mTraceFile = new File(path);
+                    }
                     break;
             }
         }

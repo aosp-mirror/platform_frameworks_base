@@ -115,6 +115,10 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         mInjector = injector;
     }
 
+    protected boolean isQuietModeEnabled(UserHandle workProfileUserHandle) {
+        return mInjector.isQuietModeEnabled(workProfileUserHandle);
+    }
+
     void setOnProfileSelectedListener(OnProfileSelectedListener listener) {
         mOnProfileSelectedListener = listener;
     }
@@ -339,23 +343,32 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     protected abstract void showNoPersonalToWorkIntentsEmptyState(
             ResolverListAdapter activeListAdapter);
 
+    protected abstract void showNoPersonalAppsAvailableEmptyState(
+            ResolverListAdapter activeListAdapter);
+
+    protected abstract void showNoWorkAppsAvailableEmptyState(
+            ResolverListAdapter activeListAdapter);
+
     protected abstract void showNoWorkToPersonalIntentsEmptyState(
             ResolverListAdapter activeListAdapter);
 
-    void showEmptyState(ResolverListAdapter listAdapter) {
+    void showNoAppsAvailableEmptyState(ResolverListAdapter listAdapter) {
         UserHandle listUserHandle = listAdapter.getUserHandle();
-        if (UserHandle.myUserId() == listUserHandle.getIdentifier()
-                || !hasAppsInOtherProfile(listAdapter)) {
-            if (mWorkProfileUserHandle != null) {
-                DevicePolicyEventLogger.createEvent(
-                        DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_APPS_RESOLVED)
-                        .setStrings(getMetricsCategory())
-                        .write();
+        if (mWorkProfileUserHandle != null
+                && (UserHandle.myUserId() == listUserHandle.getIdentifier()
+                        || !hasAppsInOtherProfile(listAdapter))) {
+            DevicePolicyEventLogger.createEvent(
+                    DevicePolicyEnums.RESOLVER_EMPTY_STATE_NO_APPS_RESOLVED)
+                    .setStrings(getMetricsCategory())
+                    .setBoolean(/*isPersonalProfile*/ listUserHandle == mPersonalProfileUserHandle)
+                    .write();
+            if (listUserHandle == mPersonalProfileUserHandle) {
+                showNoPersonalAppsAvailableEmptyState(listAdapter);
+            } else {
+                showNoWorkAppsAvailableEmptyState(listAdapter);
             }
-            showEmptyState(listAdapter,
-                    R.drawable.ic_no_apps,
-                    R.string.resolver_no_apps_available,
-                    /* subtitleRes */ 0);
+        } else if (mWorkProfileUserHandle == null) {
+            showConsumerUserNoAppsAvailableEmptyState(listAdapter);
         }
     }
 
@@ -371,7 +384,7 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                 userHandleToPageIndex(activeListAdapter.getUserHandle()));
         descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
         View emptyStateView = descriptor.getEmptyStateView();
-        resetViewVisibilities(emptyStateView);
+        resetViewVisibilitiesForWorkProfileEmptyState(emptyStateView);
         emptyStateView.setVisibility(View.VISIBLE);
 
         ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
@@ -395,6 +408,17 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         activeListAdapter.markTabLoaded();
     }
 
+    private void showConsumerUserNoAppsAvailableEmptyState(ResolverListAdapter activeListAdapter) {
+        ProfileDescriptor descriptor = getItem(
+                userHandleToPageIndex(activeListAdapter.getUserHandle()));
+        descriptor.rootView.findViewById(R.id.resolver_list).setVisibility(View.GONE);
+        View emptyStateView = descriptor.getEmptyStateView();
+        resetViewVisibilitiesForConsumerUserEmptyState(emptyStateView);
+        emptyStateView.setVisibility(View.VISIBLE);
+
+        activeListAdapter.markTabLoaded();
+    }
+
     private void showSpinner(View emptyStateView) {
         emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.INVISIBLE);
@@ -402,14 +426,25 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
                 .setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.VISIBLE);
+        emptyStateView.findViewById(R.id.empty).setVisibility(View.GONE);
     }
 
-    private void resetViewVisibilities(View emptyStateView) {
+    private void resetViewVisibilitiesForWorkProfileEmptyState(View emptyStateView) {
         emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_subtitle).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.GONE);
+        emptyStateView.findViewById(R.id.empty).setVisibility(View.GONE);
+    }
+
+    private void resetViewVisibilitiesForConsumerUserEmptyState(View emptyStateView) {
+        emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.GONE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.GONE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_subtitle).setVisibility(View.GONE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.GONE);
+        emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.GONE);
+        emptyStateView.findViewById(R.id.empty).setVisibility(View.VISIBLE);
     }
 
     protected void showListView(ResolverListAdapter activeListAdapter) {

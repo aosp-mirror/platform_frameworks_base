@@ -186,6 +186,7 @@ import android.os.SystemService;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -1167,7 +1168,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mAnimator = new WindowAnimator(this);
         mRoot = new RootWindowContainer(this);
 
-        mUseBLAST = true;
+        mUseBLAST = DeviceConfig.getBoolean(
+                    DeviceConfig.NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT,
+                    WM_USE_BLAST_ADAPTER_FLAG, false);
 
         mWindowPlacerLocked = new WindowSurfacePlacer(this);
         mTaskSnapshotController = new TaskSnapshotController(this);
@@ -7583,6 +7586,14 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             return mInputManager.transferTouchFocus(sourceInputToken, destinationInputToken);
+        }
+
+        @Override
+        public String getWindowName(@NonNull IBinder binder) {
+            synchronized (mGlobalLock) {
+                final WindowState w = mWindowMap.get(binder);
+                return w != null ? w.getName() : null;
+            }
         }
     }
 

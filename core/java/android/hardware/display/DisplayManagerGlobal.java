@@ -18,6 +18,7 @@ package android.hardware.display;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -99,6 +100,20 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    private PropertyInvalidatedCache<Integer, DisplayInfo> mDisplayCache =
+            new PropertyInvalidatedCache<Integer, DisplayInfo>(
+                8, // size of display cache
+                CACHE_KEY_DISPLAY_INFO_PROPERTY) {
+                @Override
+                protected DisplayInfo recompute(Integer id) {
+                    try {
+                        return mDm.getDisplayInfo(id);
+                    } catch (RemoteException ex) {
+                        throw ex.rethrowFromSystemServer();
+                    }
+                }
+            };
+
     /**
      * Gets an instance of the display manager global singleton.
      *
@@ -127,33 +142,27 @@ public final class DisplayManagerGlobal {
      */
     @UnsupportedAppUsage
     public DisplayInfo getDisplayInfo(int displayId) {
-        try {
-            synchronized (mLock) {
-                DisplayInfo info;
-                if (USE_CACHE) {
-                    info = mDisplayInfoCache.get(displayId);
-                    if (info != null) {
-                        return info;
-                    }
+        synchronized (mLock) {
+            DisplayInfo info = null;
+            if (mDisplayCache != null) {
+                info = mDisplayCache.query(displayId);
+            } else {
+                try {
+                    info = mDm.getDisplayInfo(displayId);
+                } catch (RemoteException ex) {
+                    ex.rethrowFromSystemServer();
                 }
-
-                info = mDm.getDisplayInfo(displayId);
-                if (info == null) {
-                    return null;
-                }
-
-                if (USE_CACHE) {
-                    mDisplayInfoCache.put(displayId, info);
-                }
-                registerCallbackIfNeededLocked();
-
-                if (DEBUG) {
-                    Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
-                }
-                return info;
             }
-        } catch (RemoteException ex) {
-            throw ex.rethrowFromSystemServer();
+            if (info == null) {
+                return null;
+            }
+
+            registerCallbackIfNeededLocked();
+
+            if (DEBUG) {
+                Log.d(TAG, "getDisplayInfo: displayId=" + displayId + ", info=" + info);
+            }
+            return info;
         }
     }
 
@@ -776,5 +785,27 @@ public final class DisplayManagerGlobal {
                     break;
             }
         }
+    }
+
+    /**
+     * Name of the property containing a unique token which changes every time we update the
+     * system's display configuration.
+     */
+    public static final String CACHE_KEY_DISPLAY_INFO_PROPERTY =
+            "cache_key.display_info";
+
+    /**
+     * Invalidates the contents of the display info cache for all applications. Can only
+     * be called by system_server.
+     */
+    public static void invalidateLocalDisplayInfoCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DISPLAY_INFO_PROPERTY);
+    }
+
+    /**
+     * Disables the binder call cache.
+     */
+    public void disableLocalDisplayInfoCaches() {
+        mDisplayCache = null;
     }
 }

@@ -80,6 +80,10 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
     @Captor
     private lateinit var structureInfoCaptor: ArgumentCaptor<StructureInfo>
+
+    @Captor
+    private lateinit var booleanConsumer: ArgumentCaptor<Consumer<Boolean>>
+
     @Captor
     private lateinit var controlLoadCallbackCaptor:
             ArgumentCaptor<ControlsBindingController.LoadCallback>
@@ -100,20 +104,22 @@ class ControlsControllerImplTest : SysuiTestCase() {
         private val TEST_COMPONENT = ComponentName("test.pkg", "test.class")
         private const val TEST_CONTROL_ID = "control1"
         private const val TEST_CONTROL_TITLE = "Test"
+        private const val TEST_CONTROL_SUBTITLE = "TestSub"
         private const val TEST_DEVICE_TYPE = DeviceTypes.TYPE_AC_HEATER
         private const val TEST_STRUCTURE = ""
         private val TEST_CONTROL_INFO = ControlInfo(TEST_CONTROL_ID,
-                TEST_CONTROL_TITLE, TEST_DEVICE_TYPE)
+                TEST_CONTROL_TITLE, TEST_CONTROL_SUBTITLE, TEST_DEVICE_TYPE)
         private val TEST_STRUCTURE_INFO = StructureInfo(TEST_COMPONENT,
                 TEST_STRUCTURE, listOf(TEST_CONTROL_INFO))
 
         private val TEST_COMPONENT_2 = ComponentName("test.pkg", "test.class.2")
         private const val TEST_CONTROL_ID_2 = "control2"
         private const val TEST_CONTROL_TITLE_2 = "Test 2"
+        private const val TEST_CONTROL_SUBTITLE_2 = "TestSub 2"
         private const val TEST_DEVICE_TYPE_2 = DeviceTypes.TYPE_CAMERA
         private const val TEST_STRUCTURE_2 = "My House"
         private val TEST_CONTROL_INFO_2 = ControlInfo(TEST_CONTROL_ID_2,
-                TEST_CONTROL_TITLE_2, TEST_DEVICE_TYPE_2)
+                TEST_CONTROL_TITLE_2, TEST_CONTROL_SUBTITLE_2, TEST_DEVICE_TYPE_2)
         private val TEST_STRUCTURE_INFO_2 = StructureInfo(TEST_COMPONENT_2,
                 TEST_STRUCTURE_2, listOf(TEST_CONTROL_INFO_2))
     }
@@ -155,9 +161,13 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(listingController).addCallback(capture(listingCallbackCaptor))
     }
 
-    private fun builderFromInfo(controlInfo: ControlInfo): Control.StatelessBuilder {
+    private fun builderFromInfo(
+        controlInfo: ControlInfo,
+        structure: CharSequence = ""
+    ): Control.StatelessBuilder {
         return Control.StatelessBuilder(controlInfo.controlId, pendingIntent)
                 .setDeviceType(controlInfo.deviceType).setTitle(controlInfo.controlTitle)
+                .setSubtitle(controlInfo.controlSubtitle).setStructure(structure)
     }
 
     @Test
@@ -577,7 +587,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testGetFavoritesForComponent_multipleInOrder() {
-        val controlInfo = ControlInfo("id", "title", 0)
+        val controlInfo = ControlInfo("id", "title", "subtitle", 0)
 
         controller.replaceFavoritesForStructure(
             StructureInfo(
@@ -635,7 +645,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testReplaceFavoritesForStructure_oldFavoritesRemoved() {
-        val controlInfo = ControlInfo("id", "title", 0)
+        val controlInfo = ControlInfo("id", "title", "subtitle", 0)
         assertNotEquals(TEST_CONTROL_INFO, controlInfo)
 
         val newComponent = ComponentName("test.pkg", "test.class.3")
@@ -661,7 +671,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testReplaceFavoritesForStructure_favoritesInOrder() {
-        val controlInfo = ControlInfo("id", "title", 0)
+        val controlInfo = ControlInfo("id", "title", "subtitle", 0)
 
         val listOrder1 = listOf(TEST_CONTROL_INFO, controlInfo)
         val structure1 = StructureInfo(TEST_COMPONENT, "Home", listOrder1)
@@ -745,5 +755,71 @@ class ControlsControllerImplTest : SysuiTestCase() {
         inOrder.verify(listingController).removeCallback(listingCallbackCaptor.value)
         inOrder.verify(persistenceWrapper).readFavorites()
         inOrder.verify(listingController).addCallback(listingCallbackCaptor.value)
+    }
+
+    @Test
+    fun testSeedFavoritesForComponent() {
+        var succeeded = false
+        val control = builderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure).build()
+
+        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
+            succeeded = accepted
+        })
+
+        verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
+                capture(controlLoadCallbackCaptor))
+
+        controlLoadCallbackCaptor.value.accept(listOf(control))
+
+        delayableExecutor.runAllReady()
+
+        assertEquals(listOf(TEST_STRUCTURE_INFO),
+            controller.getFavoritesForComponent(TEST_COMPONENT))
+        assertTrue(succeeded)
+    }
+
+    @Test
+    fun testSeedFavoritesForComponent_error() {
+        var succeeded = false
+
+        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
+            succeeded = accepted
+        })
+
+        verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
+                capture(controlLoadCallbackCaptor))
+
+        controlLoadCallbackCaptor.value.error("Error loading")
+
+        delayableExecutor.runAllReady()
+
+        assertEquals(listOf<StructureInfo>(), controller.getFavoritesForComponent(TEST_COMPONENT))
+        assertFalse(succeeded)
+    }
+
+    @Test
+    fun testSeedFavoritesForComponent_inProgressCallback() {
+        var succeeded = false
+        var seeded = false
+        val control = builderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure).build()
+
+        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
+            succeeded = accepted
+        })
+
+        verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
+                capture(controlLoadCallbackCaptor))
+
+        controller.addSeedingFavoritesCallback(Consumer { accepted ->
+            seeded = accepted
+        })
+        controlLoadCallbackCaptor.value.accept(listOf(control))
+
+        delayableExecutor.runAllReady()
+
+        assertEquals(listOf(TEST_STRUCTURE_INFO),
+            controller.getFavoritesForComponent(TEST_COMPONENT))
+        assertTrue(succeeded)
+        assertTrue(seeded)
     }
 }

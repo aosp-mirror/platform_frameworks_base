@@ -2610,8 +2610,6 @@
     <string name="inattentive_sleep_warning_title">Standby</string>
 
     <!-- Window Magnification strings -->
-    <!-- Title for Magnification Overlay Window [CHAR LIMIT=NONE] -->
-    <string name="magnification_overlay_title">Magnification Overlay Window</string>
     <!-- Title for Magnification Window [CHAR LIMIT=NONE] -->
     <string name="magnification_window_title">Magnification Window</string>
     <!-- Title for Magnification Controls Window [CHAR LIMIT=NONE] -->
@@ -2657,4 +2655,11 @@
 
     <!-- Tooltip to show in management screen when there are multiple structures [CHAR_LIMIT=50] -->
     <string name="controls_structure_tooltip">Swipe to see other structures</string>
+
+    <!-- Message to tell the user to wait while systemui attempts to load a set of
+         recommended controls [CHAR_LIMIT=30] -->
+    <string name="controls_seeding_in_progress">Loading recommendations</string>
+
+    <!-- Close the controls associated with a specific media session [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_close_session">Close this media session</string>
 </resources>

@@ -102,6 +102,7 @@ public class PlatformCompatTest {
                 new CompatibilityChangeInfo(7L, "", -1, false, true, ""));
     }
 
+    @Test
     public void testListUIChanges() {
         mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
