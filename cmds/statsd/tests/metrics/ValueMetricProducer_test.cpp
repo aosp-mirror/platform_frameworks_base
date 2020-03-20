@@ -3155,1025 +3155,902 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenPullFailed) {
     EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
 }
 
-///*
-// * Test that MULTIPLE_BUCKETS_SKIPPED dump reason is logged when a log event
-// * skips over more than one bucket.
-// */
-// TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenMultipleBucketsSkipped) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            // Condition change to true.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-//                event->write("field1");
-//                event->write(10);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Dump report requested.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event =
-//                        make_shared<LogEvent>(tagId, bucket4StartTimeNs + 1000);
-//                event->write("field1");
-//                event->write(15);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager,
-//            metric);
-//
-//    // Condition change event.
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
-//
-//    // Condition change event that skips forward by three buckets.
-//    valueProducer->onConditionChanged(false, bucket4StartTimeNs + 10);
-//
-//    // Check dump report.
-//    ProtoOutputStream output;
-//    std::set<string> strSet;
-//    valueProducer->onDumpReport(bucket4StartTimeNs + 1000, true /* include recent buckets */,
-//    true,
-//                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
-//
-//    StatsLogReport report = outputStreamToProto(&output);
-//    EXPECT_TRUE(report.has_value_metrics());
-//    EXPECT_EQ(0, report.value_metrics().data_size());
-//    EXPECT_EQ(1, report.value_metrics().skipped_size());
-//
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
-//              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-//    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
-//              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
-//    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
-//
-//    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
-//    EXPECT_EQ(BucketDropReason::MULTIPLE_BUCKETS_SKIPPED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucket4StartTimeNs + 10), dropEvent.drop_time_millis());
-//}
-//
-///*
-// * Test that BUCKET_TOO_SMALL dump reason is logged when a flushed bucket size
-// * is smaller than the "min_bucket_size_nanos" specified in the metric config.
-// */
-// TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
-//    metric.set_min_bucket_size_nanos(10000000000);  // 10 seconds
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            // Condition change to true.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-//                event->write("field1");
-//                event->write(10);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Dump report requested.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event =
-//                        make_shared<LogEvent>(tagId, bucketStartTimeNs + 9000000);
-//                event->write("field1");
-//                event->write(15);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager,
-//            metric);
-//
-//    // Condition change event.
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
-//
-//    // Check dump report.
-//    ProtoOutputStream output;
-//    std::set<string> strSet;
-//    int64_t dumpReportTimeNs = bucketStartTimeNs + 9000000;
-//    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
-//                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
-//
-//    StatsLogReport report = outputStreamToProto(&output);
-//    EXPECT_TRUE(report.has_value_metrics());
-//    EXPECT_EQ(0, report.value_metrics().data_size());
-//    EXPECT_EQ(1, report.value_metrics().skipped_size());
-//
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
-//              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-//    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
-//              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
-//    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
-//
-//    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
-//    EXPECT_EQ(BucketDropReason::BUCKET_TOO_SMALL, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
-//}
-//
-///*
-// * Test multiple bucket drop events in the same bucket.
-// */
-// TEST(ValueMetricProducerTest_BucketDrop, TestMultipleBucketDropEvents) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            // Condition change to true.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-//                event->write("field1");
-//                event->write(10);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithNoInitialCondition(pullerManager,
-//                                                                                     metric);
-//
-//    // Condition change event.
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
-//
-//    // Check dump report.
-//    ProtoOutputStream output;
-//    std::set<string> strSet;
-//    int64_t dumpReportTimeNs = bucketStartTimeNs + 1000;
-//    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
-//                                FAST /* dumpLatency */, &strSet, &output);
-//
-//    StatsLogReport report = outputStreamToProto(&output);
-//    EXPECT_TRUE(report.has_value_metrics());
-//    EXPECT_EQ(0, report.value_metrics().data_size());
-//    EXPECT_EQ(1, report.value_metrics().skipped_size());
-//
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
-//              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-//    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
-//              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
-//    EXPECT_EQ(2, report.value_metrics().skipped(0).drop_event_size());
-//
-//    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
-//    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 10), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(1);
-//    EXPECT_EQ(BucketDropReason::DUMP_REPORT_REQUESTED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
-//}
-//
-///*
-// * Test that the number of logged bucket drop events is capped at the maximum.
-// * The maximum is currently 10 and is set in MetricProducer::maxDropEventsReached().
-// */
-// TEST(ValueMetricProducerTest_BucketDrop, TestMaxBucketDropEvents) {
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            // First condition change event.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                for (int i = 0; i < 2000; i++) {
-//                    shared_ptr<LogEvent> event =
-//                            make_shared<LogEvent>(tagId, bucketStartTimeNs + 1);
-//                    event->write(i);
-//                    event->write(i);
-//                    event->init();
-//                    data->push_back(event);
-//                }
-//                return true;
-//            }))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Return(false))
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs +
-//                220); event->write("field1"); event->write(10); event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithNoInitialCondition(pullerManager,
-//                                                                                     metric);
-//
-//    // First condition change event causes guardrail to be reached.
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
-//
-//    // 2-10 condition change events result in failed pulls.
-//    valueProducer->onConditionChanged(false, bucketStartTimeNs + 30);
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 50);
-//    valueProducer->onConditionChanged(false, bucketStartTimeNs + 70);
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 90);
-//    valueProducer->onConditionChanged(false, bucketStartTimeNs + 100);
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 150);
-//    valueProducer->onConditionChanged(false, bucketStartTimeNs + 170);
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 190);
-//    valueProducer->onConditionChanged(false, bucketStartTimeNs + 200);
-//
-//    // Condition change event 11
-//    valueProducer->onConditionChanged(true, bucketStartTimeNs + 220);
-//
-//    // Check dump report.
-//    ProtoOutputStream output;
-//    std::set<string> strSet;
-//    int64_t dumpReportTimeNs = bucketStartTimeNs + 1000;
-//    // Because we already have 10 dump events in the current bucket,
-//    // this case should not be added to the list of dump events.
-//    valueProducer->onDumpReport(bucketStartTimeNs + 1000, true /* include recent buckets */, true,
-//                                FAST /* dumpLatency */, &strSet, &output);
-//
-//    StatsLogReport report = outputStreamToProto(&output);
-//    EXPECT_TRUE(report.has_value_metrics());
-//    EXPECT_EQ(0, report.value_metrics().data_size());
-//    EXPECT_EQ(1, report.value_metrics().skipped_size());
-//
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
-//              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
-//    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
-//              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
-//    EXPECT_EQ(10, report.value_metrics().skipped(0).drop_event_size());
-//
-//    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
-//    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 10), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(1);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 30), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(2);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 50), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(3);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 70), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(4);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 90), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(5);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 100), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(6);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 150), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(7);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 170), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(8);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 190), dropEvent.drop_time_millis());
-//
-//    dropEvent = report.value_metrics().skipped(0).drop_event(9);
-//    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
-//    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 200), dropEvent.drop_time_millis());
-//}
-//
-///*
-// * Test metric with a simple sliced state
-// * - Increasing values
-// * - Using diff
-// * - Second field is value field
-// */
-// TEST(ValueMetricProducerTest, TestSlicedState) {
-//    // Set up ValueMetricProducer.
-//    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithState("SCREEN_STATE");
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            // ValueMetricProducer initialized.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
-//                event->write("field1");
-//                event->write(3);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Screen state change to ON.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 5);
-//                event->write("field1");
-//                event->write(5);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Screen state change to OFF.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-//                event->write("field1");
-//                event->write(9);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Screen state change to ON.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 15);
-//                event->write("field1");
-//                event->write(21);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Dump report requested.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
-//                event->write("field1");
-//                event->write(30);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithState(
-//                    pullerManager, metric, {util::SCREEN_STATE_CHANGED}, {});
-//
-//    // Set up StateManager and check that StateTrackers are initialized.
-//    StateManager::getInstance().clear();
-//    StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
-//    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
-//    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
-//
-//    // Bucket status after metric initialized.
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    auto it = valueProducer->mCurrentSlicedBucket.begin();
-//    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(3, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, kStateUnknown}
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Bucket status after screen state change kStateUnknown->ON.
-//    auto screenEvent = CreateScreenStateChangedEvent(
-//            android::view::DisplayStateEnum::DISPLAY_STATE_ON, bucketStartTimeNs + 5);
-//    StateManager::getInstance().onLogEvent(*screenEvent);
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(5, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, kStateUnknown}
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(2, it->second[0].value.long_value);
-//
-//    // Bucket status after screen state change ON->OFF.
-//    screenEvent =
-//    CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
-//                                                bucketStartTimeNs + 10);
-//    StateManager::getInstance().onLogEvent(*screenEvent);
-//    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(9, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, ON}
-//    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
-//              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(4, it->second[0].value.long_value);
-//    // Value for dimension, state key {{}, kStateUnknown}
-//    it++;
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(2, it->second[0].value.long_value);
-//
-//    // Bucket status after screen state change OFF->ON.
-//    screenEvent = CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
-//                                                bucketStartTimeNs + 15);
-//    StateManager::getInstance().onLogEvent(*screenEvent);
-//    EXPECT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(21, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, OFF}
-//    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
-//              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(12, it->second[0].value.long_value);
-//    // Value for dimension, state key {{}, ON}
-//    it++;
-//    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
-//              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(4, it->second[0].value.long_value);
-//    // Value for dimension, state key {{}, kStateUnknown}
-//    it++;
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(2, it->second[0].value.long_value);
-//
-//    // Start dump report and check output.
-//    ProtoOutputStream output;
-//    std::set<string> strSet;
-//    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
-//                                NO_TIME_CONSTRAINTS, &strSet, &output);
-//
-//    StatsLogReport report = outputStreamToProto(&output);
-//    EXPECT_TRUE(report.has_value_metrics());
-//    EXPECT_EQ(3, report.value_metrics().data_size());
-//
-//    auto data = report.value_metrics().data(0);
-//    EXPECT_EQ(1, data.bucket_info_size());
-//    EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
-//
-//    data = report.value_metrics().data(1);
-//    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
-//    EXPECT_EQ(13, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
-//    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-//    EXPECT_TRUE(data.slice_by_state(0).has_value());
-//    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
-//
-//    data = report.value_metrics().data(2);
-//    EXPECT_EQ(1, report.value_metrics().data(2).bucket_info_size());
-//    EXPECT_EQ(12, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
-//    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-//    EXPECT_TRUE(data.slice_by_state(0).has_value());
-//    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
-//}
-//
-///*
-// * Test metric with sliced state with map
-// * - Increasing values
-// * - Using diff
-// * - Second field is value field
-// */
-// TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
-//    // Set up ValueMetricProducer.
-//    ValueMetric metric =
-//    ValueMetricProducerTestHelper::createMetricWithState("SCREEN_STATE_ONOFF");
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            // ValueMetricProducer initialized.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
-//                event->write("field1");
-//                event->write(3);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Screen state change to ON.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 5);
-//                event->write("field1");
-//                event->write(5);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Screen state change to VR.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
-//                event->write("field1");
-//                event->write(9);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Screen state change to OFF.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 15);
-//                event->write("field1");
-//                event->write(21);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Dump report requested.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 50);
-//                event->write("field1");
-//                event->write(30);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    const StateMap& stateMap = CreateScreenStateOnOffMap();
-//    const StateMap_StateGroup screenOnGroup = stateMap.group(0);
-//    const StateMap_StateGroup screenOffGroup = stateMap.group(1);
-//
-//    unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
-//    for (auto group : stateMap.group()) {
-//        for (auto value : group.value()) {
-//            stateGroupMap[SCREEN_STATE_ATOM_ID][value] = group.group_id();
-//        }
-//    }
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithState(
-//                    pullerManager, metric, {util::SCREEN_STATE_CHANGED}, stateGroupMap);
-//
-//    // Set up StateManager and check that StateTrackers are initialized.
-//    StateManager::getInstance().clear();
-//    StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
-//    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
-//    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
-//
-//    // Bucket status after metric initialized.
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    auto it = valueProducer->mCurrentSlicedBucket.begin();
-//    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(3, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, {}}
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Bucket status after screen state change kStateUnknown->ON.
-//    auto screenEvent = CreateScreenStateChangedEvent(
-//            android::view::DisplayStateEnum::DISPLAY_STATE_ON, bucketStartTimeNs + 5);
-//    StateManager::getInstance().onLogEvent(*screenEvent);
-//    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(5, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, kStateUnknown}
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(2, it->second[0].value.long_value);
-//
-//    // Bucket status after screen state change ON->VR (also ON).
-//    screenEvent = CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_VR,
-//                                                bucketStartTimeNs + 10);
-//    StateManager::getInstance().onLogEvent(*screenEvent);
-//    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(9, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, ON GROUP}
-//    EXPECT_EQ(screenOnGroup.group_id(),
-//              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(4, it->second[0].value.long_value);
-//    // Value for dimension, state key {{}, kStateUnknown}
-//    it++;
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(2, it->second[0].value.long_value);
-//
-//    // Bucket status after screen state change VR->OFF.
-//    screenEvent =
-//    CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
-//                                                bucketStartTimeNs + 15);
-//    StateManager::getInstance().onLogEvent(*screenEvent);
-//    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {}
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(21, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{}, ON GROUP}
-//    EXPECT_EQ(screenOnGroup.group_id(),
-//              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(16, it->second[0].value.long_value);
-//    // Value for dimension, state key {{}, kStateUnknown}
-//    it++;
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(2, it->second[0].value.long_value);
-//
-//    // Start dump report and check output.
-//    ProtoOutputStream output;
-//    std::set<string> strSet;
-//    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
-//                                NO_TIME_CONSTRAINTS, &strSet, &output);
-//
-//    StatsLogReport report = outputStreamToProto(&output);
-//    EXPECT_TRUE(report.has_value_metrics());
-//    EXPECT_EQ(3, report.value_metrics().data_size());
-//
-//    auto data = report.value_metrics().data(0);
-//    EXPECT_EQ(1, data.bucket_info_size());
-//    EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
-//
-//    data = report.value_metrics().data(1);
-//    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
-//    EXPECT_EQ(16, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
-//    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-//    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-//    EXPECT_EQ(screenOnGroup.group_id(), data.slice_by_state(0).group_id());
-//
-//    data = report.value_metrics().data(2);
-//    EXPECT_EQ(1, report.value_metrics().data(2).bucket_info_size());
-//    EXPECT_EQ(9, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
-//    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-//    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
-//    EXPECT_EQ(screenOffGroup.group_id(), data.slice_by_state(0).group_id());
-//}
-//
-///*
-// * Test metric that slices by state with a primary field and has dimensions
-// * - Increasing values
-// * - Using diff
-// * - Second field is value field
-// */
-// TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
-//    // Set up ValueMetricProducer.
-//    ValueMetric metric =
-//    ValueMetricProducerTestHelper::createMetricWithState("UID_PROCESS_STATE");
-//    metric.mutable_dimensions_in_what()->set_field(tagId);
-//    metric.mutable_dimensions_in_what()->add_child()->set_field(1);
-//
-//    MetricStateLink* stateLink = metric.add_state_link();
-//    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
-//    auto fieldsInWhat = stateLink->mutable_fields_in_what();
-//    *fieldsInWhat = CreateDimensions(tagId, {1 /* uid */});
-//    auto fieldsInState = stateLink->mutable_fields_in_state();
-//    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
-//
-//    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-//    EXPECT_CALL(*pullerManager, Pull(tagId, _))
-//            // ValueMetricProducer initialized.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
-//                event->write(2 /* uid */);
-//                event->write(7);
-//                event->init();
-//                data->push_back(event);
-//
-//                event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
-//                event->write(1 /* uid */);
-//                event->write(3);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Uid 1 process state change from kStateUnknown -> Foreground
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
-//                event->write(1 /* uid */);
-//                event->write(6);
-//                event->init();
-//                data->push_back(event);
-//
-//                // This event should be skipped.
-//                event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 20);
-//                event->write(2 /* uid */);
-//                event->write(8);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Uid 2 process state change from kStateUnknown -> Background
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 40);
-//                event->write(2 /* uid */);
-//                event->write(9);
-//                event->init();
-//                data->push_back(event);
-//
-//                // This event should be skipped.
-//                event = make_shared<LogEvent>(tagId, bucketStartTimeNs + 40);
-//                event->write(1 /* uid */);
-//                event->write(12);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Uid 1 process state change from Foreground -> Background
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs +
-//                20); event->write(1 /* uid */); event->write(13); event->init();
-//                data->push_back(event);
-//
-//                // This event should be skipped.
-//                event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 20);
-//                event->write(2 /* uid */);
-//                event->write(11);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Uid 1 process state change from Background -> Foreground
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs +
-//                40); event->write(1 /* uid */); event->write(17); event->init();
-//                data->push_back(event);
-//
-//                // This event should be skipped.
-//                event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 40);
-//                event->write(2 /* uid */);
-//                event->write(15);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }))
-//            // Dump report pull.
-//            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
-//                data->clear();
-//                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs +
-//                50); event->write(2 /* uid */); event->write(20); event->init();
-//                data->push_back(event);
-//
-//                event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 50);
-//                event->write(1 /* uid */);
-//                event->write(21);
-//                event->init();
-//                data->push_back(event);
-//                return true;
-//            }));
-//
-//    sp<ValueMetricProducer> valueProducer =
-//            ValueMetricProducerTestHelper::createValueProducerWithState(
-//                    pullerManager, metric, {UID_PROCESS_STATE_ATOM_ID}, {});
-//
-//    // Set up StateManager and check that StateTrackers are initialized.
-//    StateManager::getInstance().clear();
-//    StateManager::getInstance().registerListener(UID_PROCESS_STATE_ATOM_ID, valueProducer);
-//    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
-//    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
-//
-//    // Bucket status after metric initialized.
-//    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {uid 1}.
-//    auto it = valueProducer->mCurrentSlicedBucket.begin();
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(3, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{uid 1}, kStateUnknown}
-//    // TODO(tsaichristine): test equality of state values key
-//    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//    // Base for dimension key {uid 2}
-//    it++;
-//    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(7, itBase->second[0].base.long_value);
-//    // Value for dimension, state key {{uid 2}, kStateUnknown}
-//    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Bucket status after uid 1 process state change kStateUnknown -> Foreground.
-//    auto uidProcessEvent = CreateUidProcessStateChangedEvent(
-//            1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, bucketStartTimeNs +
-//            20);
-//    StateManager::getInstance().onLogEvent(*uidProcessEvent);
-//    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {uid 1}.
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(6, itBase->second[0].base.long_value);
-//    // Value for key {uid 1, kStateUnknown}.
-//    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(3, it->second[0].value.long_value);
-//
-//    // Base for dimension key {uid 2}
-//    it++;
-//    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(7, itBase->second[0].base.long_value);
-//    // Value for key {uid 2, kStateUnknown}
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Bucket status after uid 2 process state change kStateUnknown -> Background.
-//    uidProcessEvent = CreateUidProcessStateChangedEvent(
-//            2 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, bucketStartTimeNs +
-//            40);
-//    StateManager::getInstance().onLogEvent(*uidProcessEvent);
-//    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-//    // Base for dimension key {uid 1}.
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(6, itBase->second[0].base.long_value);
-//    // Value for key {uid 1, kStateUnknown}.
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(3, it->second[0].value.long_value);
-//
-//    // Base for dimension key {uid 2}
-//    it++;
-//    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(9, itBase->second[0].base.long_value);
-//    // Value for key {uid 2, kStateUnknown}
-//    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(2, it->second[0].value.long_value);
-//
-//    // Pull at end of first bucket.
-//    vector<shared_ptr<LogEvent>> allData;
-//    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs);
-//    event->write(1 /* uid */);
-//    event->write(10);
-//    event->init();
-//    allData.push_back(event);
-//
-//    event = make_shared<LogEvent>(tagId, bucket2StartTimeNs);
-//    event->write(2 /* uid */);
-//    event->write(15);
-//    event->init();
-//    allData.push_back(event);
-//
-//    valueProducer->onDataPulled(allData, /** succeeds */ true, bucket2StartTimeNs + 1);
-//
-//    // Buckets flushed after end of first bucket.
-//    // None of the buckets should have a value.
-//    EXPECT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
-//    EXPECT_EQ(4UL, valueProducer->mPastBuckets.size());
-//    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
-//    // Base for dimension key {uid 2}.
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(15, itBase->second[0].base.long_value);
-//    // Value for key {uid 2, BACKGROUND}.
-//    EXPECT_EQ(1, it->first.getStateValuesKey().getValues().size());
-//    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Base for dimension key {uid 1}
-//    it++;
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(10, itBase->second[0].base.long_value);
-//    // Value for key {uid 1, kStateUnknown}
-//    EXPECT_EQ(0, it->first.getStateValuesKey().getValues().size());
-//    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Value for key {uid 1, FOREGROUND}
-//    it++;
-//    EXPECT_EQ(1, it->first.getStateValuesKey().getValues().size());
-//    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Value for key {uid 2, kStateUnknown}
-//    it++;
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Bucket status after uid 1 process state change from Foreground -> Background.
-//    uidProcessEvent = CreateUidProcessStateChangedEvent(
-//            1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND, bucket2StartTimeNs +
-//            20);
-//    StateManager::getInstance().onLogEvent(*uidProcessEvent);
-//
-//    EXPECT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
-//    EXPECT_EQ(4UL, valueProducer->mPastBuckets.size());
-//    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
-//    // Base for dimension key {uid 2}.
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(15, itBase->second[0].base.long_value);
-//    // Value for key {uid 2, BACKGROUND}.
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//    // Base for dimension key {uid 1}
-//    it++;
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(13, itBase->second[0].base.long_value);
-//    // Value for key {uid 1, kStateUnknown}
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//    // Value for key {uid 1, FOREGROUND}
-//    it++;
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(3, it->second[0].value.long_value);
-//    // Value for key {uid 2, kStateUnknown}
-//    it++;
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Bucket status after uid 1 process state change Background->Foreground.
-//    uidProcessEvent = CreateUidProcessStateChangedEvent(
-//            1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND, bucket2StartTimeNs +
-//            40);
-//    StateManager::getInstance().onLogEvent(*uidProcessEvent);
-//
-//    EXPECT_EQ(5UL, valueProducer->mCurrentSlicedBucket.size());
-//    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
-//    // Base for dimension key {uid 2}
-//    it = valueProducer->mCurrentSlicedBucket.begin();
-//    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(true, itBase->second[0].hasBase);
-//    EXPECT_EQ(15, itBase->second[0].base.long_value);
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    it++;
-//    EXPECT_EQ(false, it->second[0].hasValue);
-//
-//    // Base for dimension key {uid 1}
-//    it++;
-//    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-//    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-//    EXPECT_EQ(17, itBase->second[0].base.long_value);
-//    // Value for key {uid 1, BACKGROUND}
-//    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(4, it->second[0].value.long_value);
-//    // Value for key {uid 1, FOREGROUND}
-//    it++;
-//    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-//    EXPECT_EQ(true, it->second[0].hasValue);
-//    EXPECT_EQ(3, it->second[0].value.long_value);
-//
-//    // Start dump report and check output.
-//    ProtoOutputStream output;
-//    std::set<string> strSet;
-//    valueProducer->onDumpReport(bucket2StartTimeNs + 50, true /* include recent buckets */, true,
-//                                NO_TIME_CONSTRAINTS, &strSet, &output);
-//
-//    StatsLogReport report = outputStreamToProto(&output);
-//    EXPECT_TRUE(report.has_value_metrics());
-//    EXPECT_EQ(5, report.value_metrics().data_size());
-//
-//    auto data = report.value_metrics().data(0);
-//    EXPECT_EQ(1, data.bucket_info_size());
-//    EXPECT_EQ(4, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
-//    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-//    EXPECT_TRUE(data.slice_by_state(0).has_value());
-//    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
-//              data.slice_by_state(0).value());
-//
-//    data = report.value_metrics().data(1);
-//    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
-//    EXPECT_EQ(2, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
-//
-//    data = report.value_metrics().data(2);
-//    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-//    EXPECT_TRUE(data.slice_by_state(0).has_value());
-//    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
-//              data.slice_by_state(0).value());
-//    EXPECT_EQ(2, report.value_metrics().data(2).bucket_info_size());
-//    EXPECT_EQ(4, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
-//    EXPECT_EQ(7, report.value_metrics().data(2).bucket_info(1).values(0).value_long());
-//
-//    data = report.value_metrics().data(3);
-//    EXPECT_EQ(1, report.value_metrics().data(3).bucket_info_size());
-//    EXPECT_EQ(3, report.value_metrics().data(3).bucket_info(0).values(0).value_long());
-//
-//    data = report.value_metrics().data(4);
-//    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
-//    EXPECT_TRUE(data.slice_by_state(0).has_value());
-//    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
-//              data.slice_by_state(0).value());
-//    EXPECT_EQ(2, report.value_metrics().data(4).bucket_info_size());
-//    EXPECT_EQ(6, report.value_metrics().data(4).bucket_info(0).values(0).value_long());
-//    EXPECT_EQ(5, report.value_metrics().data(4).bucket_info(1).values(0).value_long());
-//}
+/*
+ * Test that MULTIPLE_BUCKETS_SKIPPED dump reason is logged when a log event
+ * skips over more than one bucket.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenMultipleBucketsSkipped) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 10));
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucket4StartTimeNs + 1000, 15));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // Condition change event that skips forward by three buckets.
+    valueProducer->onConditionChanged(false, bucket4StartTimeNs + 10);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket4StartTimeNs + 1000, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::MULTIPLE_BUCKETS_SKIPPED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucket4StartTimeNs + 10), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that BUCKET_TOO_SMALL dump reason is logged when a flushed bucket size
+ * is smaller than the "min_bucket_size_nanos" specified in the metric config.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+    metric.set_min_bucket_size_nanos(10000000000);  // 10 seconds
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 10));
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 9000000, 15));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 9000000;
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::BUCKET_TOO_SMALL, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test multiple bucket drop events in the same bucket.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestMultipleBucketDropEvents) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 10));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithNoInitialCondition(pullerManager,
+                                                                                     metric);
+
+    // Condition change event.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 1000;
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include recent buckets */, true,
+                                FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(2, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 10), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(1);
+    EXPECT_EQ(BucketDropReason::DUMP_REPORT_REQUESTED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that the number of logged bucket drop events is capped at the maximum.
+ * The maximum is currently 10 and is set in MetricProducer::maxDropEventsReached().
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestMaxBucketDropEvents) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // First condition change event.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                for (int i = 0; i < 2000; i++) {
+                    data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 1, i));
+                }
+                return true;
+            }))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Return(false))
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 220, 10));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithNoInitialCondition(pullerManager,
+                                                                                     metric);
+
+    // First condition change event causes guardrail to be reached.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 10);
+
+    // 2-10 condition change events result in failed pulls.
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 30);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 50);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 70);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 90);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 100);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 150);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 170);
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 190);
+    valueProducer->onConditionChanged(false, bucketStartTimeNs + 200);
+
+    // Condition change event 11
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 220);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 1000;
+    // Because we already have 10 dump events in the current bucket,
+    // this case should not be added to the list of dump events.
+    valueProducer->onDumpReport(bucketStartTimeNs + 1000, true /* include recent buckets */, true,
+                                FAST /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(0, report.value_metrics().data_size());
+    EXPECT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    EXPECT_EQ(10, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 10), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(1);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 30), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(2);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 50), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(3);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 70), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(4);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 90), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(5);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 100), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(6);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 150), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(7);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 170), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(8);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 190), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(9);
+    EXPECT_EQ(BucketDropReason::PULL_FAILED, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs + 200), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test metric with a simple sliced state
+ * - Increasing values
+ * - Using diff
+ * - Second field is value field
+ */
+TEST(ValueMetricProducerTest, TestSlicedState) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithState("SCREEN_STATE");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs, 3));
+                return true;
+            }))
+            // Screen state change to ON.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 5, 5));
+                return true;
+            }))
+            // Screen state change to OFF.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 9));
+                return true;
+            }))
+            // Screen state change to ON.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 15, 21));
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 50, 30));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {util::SCREEN_STATE_CHANGED}, {});
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().clear();
+    StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    // Bucket status after metric initialized.
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(3, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after screen state change kStateUnknown->ON.
+    auto screenEvent = CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 5, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(5, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change ON->OFF.
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 10,
+                                                android::view::DisplayStateEnum::DISPLAY_STATE_OFF);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(9, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, ON}
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change OFF->ON.
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 15,
+                                                android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(21, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, OFF}
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(12, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, ON}
+    it++;
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(3, report.value_metrics().data_size());
+
+    auto data = report.value_metrics().data(0);
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
+    EXPECT_EQ(13, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON, data.slice_by_state(0).value());
+
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(1, report.value_metrics().data(2).bucket_info_size());
+    EXPECT_EQ(12, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF, data.slice_by_state(0).value());
+}
+
+/*
+ * Test metric with sliced state with map
+ * - Increasing values
+ * - Using diff
+ * - Second field is value field
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithState("SCREEN_STATE_ONOFF");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs, 3));
+                return true;
+            }))
+            // Screen state change to ON.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 5, 5));
+                return true;
+            }))
+            // Screen state change to VR.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 9));
+                return true;
+            }))
+            // Screen state change to OFF.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 15, 21));
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 50, 30));
+                return true;
+            }));
+
+    const StateMap& stateMap = CreateScreenStateOnOffMap();
+    const StateMap_StateGroup screenOnGroup = stateMap.group(0);
+    const StateMap_StateGroup screenOffGroup = stateMap.group(1);
+
+    unordered_map<int, unordered_map<int, int64_t>> stateGroupMap;
+    for (auto group : stateMap.group()) {
+        for (auto value : group.value()) {
+            stateGroupMap[SCREEN_STATE_ATOM_ID][value] = group.group_id();
+        }
+    }
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {util::SCREEN_STATE_CHANGED}, stateGroupMap);
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().clear();
+    StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
+
+    // Bucket status after metric initialized.
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(3, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, {}}
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after screen state change kStateUnknown->ON.
+    auto screenEvent = CreateScreenStateChangedEvent(
+            bucketStartTimeNs + 5, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(5, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change ON->VR (also ON).
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 10,
+                                                android::view::DisplayStateEnum::DISPLAY_STATE_VR);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(9, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(screenOnGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Bucket status after screen state change VR->OFF.
+    screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 15,
+                                                android::view::DisplayStateEnum::DISPLAY_STATE_OFF);
+    StateManager::getInstance().onLogEvent(*screenEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(21, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(screenOnGroup.group_id(),
+              it->first.getStateValuesKey().getValues()[0].mValue.long_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(16, it->second[0].value.long_value);
+    // Value for dimension, state key {{}, kStateUnknown}
+    it++;
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucketStartTimeNs + 50, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(3, report.value_metrics().data_size());
+
+    auto data = report.value_metrics().data(0);
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
+    EXPECT_EQ(16, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(screenOnGroup.group_id(), data.slice_by_state(0).group_id());
+
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(1, report.value_metrics().data(2).bucket_info_size());
+    EXPECT_EQ(9, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_group_id());
+    EXPECT_EQ(screenOffGroup.group_id(), data.slice_by_state(0).group_id());
+}
+
+/*
+ * Test metric that slices by state with a primary field and has dimensions
+ * - Increasing values
+ * - Using diff
+ * - Second field is value field
+ */
+TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithState("UID_PROCESS_STATE");
+    metric.mutable_dimensions_in_what()->set_field(tagId);
+    metric.mutable_dimensions_in_what()->add_child()->set_field(1);
+
+    MetricStateLink* stateLink = metric.add_state_link();
+    stateLink->set_state_atom_id(UID_PROCESS_STATE_ATOM_ID);
+    auto fieldsInWhat = stateLink->mutable_fields_in_what();
+    *fieldsInWhat = CreateDimensions(tagId, {1 /* uid */});
+    auto fieldsInState = stateLink->mutable_fields_in_state();
+    *fieldsInState = CreateDimensions(UID_PROCESS_STATE_ATOM_ID, {1 /* uid */});
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, _))
+            // ValueMetricProducer initialized.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(CreateTwoValueLogEvent(tagId, bucketStartTimeNs, 2 /*uid*/, 7));
+                data->push_back(CreateTwoValueLogEvent(tagId, bucketStartTimeNs, 1 /*uid*/, 3));
+                return true;
+            }))
+            // Uid 1 process state change from kStateUnknown -> Foreground
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 20, 1 /*uid*/, 6));
+
+                // This event should be skipped.
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 20, 2 /*uid*/, 8));
+                return true;
+            }))
+            // Uid 2 process state change from kStateUnknown -> Background
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 40, 2 /*uid*/, 9));
+
+                // This event should be skipped.
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucketStartTimeNs + 40, 1 /*uid*/, 12));
+                return true;
+            }))
+            // Uid 1 process state change from Foreground -> Background
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 20, 1 /*uid*/, 13));
+
+                // This event should be skipped.
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 20, 2 /*uid*/, 11));
+                return true;
+            }))
+            // Uid 1 process state change from Background -> Foreground
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 40, 1 /*uid*/, 17));
+
+                // This event should be skipped.
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 40, 2 /*uid */, 15));
+                return true;
+            }))
+            // Dump report pull.
+            .WillOnce(Invoke([](int tagId, vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 50, 2 /*uid*/, 20));
+                data->push_back(
+                        CreateTwoValueLogEvent(tagId, bucket2StartTimeNs + 50, 1 /*uid*/, 21));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithState(
+                    pullerManager, metric, {UID_PROCESS_STATE_ATOM_ID}, {});
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().clear();
+    StateManager::getInstance().registerListener(UID_PROCESS_STATE_ATOM_ID, valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
+
+    // Bucket status after metric initialized.
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {uid 1}.
+    auto it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(3, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{uid 1}, kStateUnknown}
+    // TODO(tsaichristine): test equality of state values key
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+    // Base for dimension key {uid 2}
+    it++;
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(7, itBase->second[0].base.long_value);
+    // Value for dimension, state key {{uid 2}, kStateUnknown}
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 1 process state change kStateUnknown -> Foreground.
+    auto uidProcessEvent = CreateUidProcessStateChangedEvent(
+            bucketStartTimeNs + 20, 1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {uid 1}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(6, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}.
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+
+    // Base for dimension key {uid 2}
+    it++;
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(7, itBase->second[0].base.long_value);
+    // Value for key {uid 2, kStateUnknown}
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 2 process state change kStateUnknown -> Background.
+    uidProcessEvent = CreateUidProcessStateChangedEvent(
+            bucketStartTimeNs + 40, 2 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+    EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {uid 1}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(6, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}.
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+
+    // Base for dimension key {uid 2}
+    it++;
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(9, itBase->second[0].base.long_value);
+    // Value for key {uid 2, kStateUnknown}
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Pull at end of first bucket.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs, 1 /*uid*/, 10));
+    allData.push_back(CreateTwoValueLogEvent(tagId, bucket2StartTimeNs, 2 /*uid*/, 15));
+    valueProducer->onDataPulled(allData, /** succeeds */ true, bucket2StartTimeNs + 1);
+
+    // Buckets flushed after end of first bucket.
+    // None of the buckets should have a value.
+    EXPECT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(4UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension key {uid 2}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(15, itBase->second[0].base.long_value);
+    // Value for key {uid 2, BACKGROUND}.
+    EXPECT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Base for dimension key {uid 1}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(10, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}
+    EXPECT_EQ(0, it->first.getStateValuesKey().getValues().size());
+    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Value for key {uid 1, FOREGROUND}
+    it++;
+    EXPECT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Value for key {uid 2, kStateUnknown}
+    it++;
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 1 process state change from Foreground -> Background.
+    uidProcessEvent = CreateUidProcessStateChangedEvent(
+            bucket2StartTimeNs + 20, 1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_BACKGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+
+    EXPECT_EQ(4UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(4UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension key {uid 2}.
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(15, itBase->second[0].base.long_value);
+    // Value for key {uid 2, BACKGROUND}.
+    EXPECT_EQ(false, it->second[0].hasValue);
+    // Base for dimension key {uid 1}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(13, itBase->second[0].base.long_value);
+    // Value for key {uid 1, kStateUnknown}
+    EXPECT_EQ(false, it->second[0].hasValue);
+    // Value for key {uid 1, FOREGROUND}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+    // Value for key {uid 2, kStateUnknown}
+    it++;
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Bucket status after uid 1 process state change Background->Foreground.
+    uidProcessEvent = CreateUidProcessStateChangedEvent(
+            bucket2StartTimeNs + 40, 1 /* uid */, android::app::PROCESS_STATE_IMPORTANT_FOREGROUND);
+    StateManager::getInstance().onLogEvent(*uidProcessEvent);
+
+    EXPECT_EQ(5UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
+    // Base for dimension key {uid 2}
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_EQ(15, itBase->second[0].base.long_value);
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    it++;
+    EXPECT_EQ(false, it->second[0].hasValue);
+
+    // Base for dimension key {uid 1}
+    it++;
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_EQ(17, itBase->second[0].base.long_value);
+    // Value for key {uid 1, BACKGROUND}
+    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+    // Value for key {uid 1, FOREGROUND}
+    it++;
+    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(3, it->second[0].value.long_value);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 50, true /* include recent buckets */, true,
+                                NO_TIME_CONSTRAINTS, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    EXPECT_EQ(5, report.value_metrics().data_size());
+
+    auto data = report.value_metrics().data(0);
+    EXPECT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(4, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(1, report.value_metrics().data(1).bucket_info_size());
+    EXPECT_EQ(2, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(2);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(2, report.value_metrics().data(2).bucket_info_size());
+    EXPECT_EQ(4, report.value_metrics().data(2).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(7, report.value_metrics().data(2).bucket_info(1).values(0).value_long());
+
+    data = report.value_metrics().data(3);
+    EXPECT_EQ(1, report.value_metrics().data(3).bucket_info_size());
+    EXPECT_EQ(3, report.value_metrics().data(3).bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(4);
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(android::app::ProcessStateEnum::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              data.slice_by_state(0).value());
+    EXPECT_EQ(2, report.value_metrics().data(4).bucket_info_size());
+    EXPECT_EQ(6, report.value_metrics().data(4).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(5, report.value_metrics().data(4).bucket_info(1).values(0).value_long());
+}
 
 }  // namespace statsd
 }  // namespace os
