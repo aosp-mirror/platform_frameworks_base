@@ -5010,7 +5010,7 @@ package android.media.tv.tuner.filter {
     method public boolean isPassthrough();
   }
 
-  public static class AvSettings.Builder extends android.media.tv.tuner.filter.Settings.Builder<android.media.tv.tuner.filter.AvSettings.Builder> {
+  public static class AvSettings.Builder {
     method @NonNull public android.media.tv.tuner.filter.AvSettings build();
     method @NonNull public android.media.tv.tuner.filter.AvSettings.Builder setPassthrough(boolean);
   }
@@ -5028,7 +5028,7 @@ package android.media.tv.tuner.filter {
     method public int getDownloadId();
   }
 
-  public static class DownloadSettings.Builder extends android.media.tv.tuner.filter.Settings.Builder<android.media.tv.tuner.filter.DownloadSettings.Builder> {
+  public static class DownloadSettings.Builder {
     method @NonNull public android.media.tv.tuner.filter.DownloadSettings build();
     method @NonNull public android.media.tv.tuner.filter.DownloadSettings.Builder setDownloadId(int);
   }
@@ -5194,7 +5194,7 @@ package android.media.tv.tuner.filter {
     field public static final int TS_INDEX_SPLICING_POINT_FLAG = 1024; // 0x400
   }
 
-  public static class RecordSettings.Builder extends android.media.tv.tuner.filter.Settings.Builder<android.media.tv.tuner.filter.RecordSettings.Builder> {
+  public static class RecordSettings.Builder {
     method @NonNull public android.media.tv.tuner.filter.RecordSettings build();
     method @NonNull public android.media.tv.tuner.filter.RecordSettings.Builder setScIndexMask(int);
     method @NonNull public android.media.tv.tuner.filter.RecordSettings.Builder setScIndexType(int);
@@ -5214,7 +5214,7 @@ package android.media.tv.tuner.filter {
     method public boolean isRepeat();
   }
 
-  public abstract static class SectionSettings.Builder<T extends android.media.tv.tuner.filter.SectionSettings.Builder<T>> extends android.media.tv.tuner.filter.Settings.Builder<android.media.tv.tuner.filter.SectionSettings.Builder<T>> {
+  public abstract static class SectionSettings.Builder<T extends android.media.tv.tuner.filter.SectionSettings.Builder<T>> {
     method @NonNull public T setCrcEnabled(boolean);
     method @NonNull public T setRaw(boolean);
     method @NonNull public T setRepeat(boolean);
@@ -5248,9 +5248,6 @@ package android.media.tv.tuner.filter {
 
   public abstract class Settings {
     method public int getType();
-  }
-
-  public abstract static class Settings.Builder<T extends android.media.tv.tuner.filter.Settings.Builder<T>> {
   }
 
   public class TemiEvent extends android.media.tv.tuner.filter.FilterEvent {
@@ -5707,7 +5704,7 @@ package android.media.tv.tuner.frontend {
     method public int getAcquireRange();
     method public int getExclusiveGroupId();
     method @NonNull public android.util.Range<java.lang.Integer> getFrequencyRange();
-    method @NonNull public android.media.tv.tuner.frontend.FrontendCapabilities getFrontendCapability();
+    method @NonNull public android.media.tv.tuner.frontend.FrontendCapabilities getFrontendCapabilities();
     method public int getId();
     method @NonNull public int[] getStatusCapabilities();
     method @NonNull public android.util.Range<java.lang.Integer> getSymbolRateRange();

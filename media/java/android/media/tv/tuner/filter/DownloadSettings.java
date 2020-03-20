@@ -59,11 +59,12 @@ public class DownloadSettings extends Settings {
     /**
      * Builder for {@link DownloadSettings}.
      */
-    public static class Builder extends Settings.Builder<Builder> {
+    public static class Builder {
+        private final int mMainType;
         private int mDownloadId;
 
         private Builder(int mainType) {
-            super(mainType);
+            mMainType = mainType;
         }
 
         /**
@@ -81,11 +82,6 @@ public class DownloadSettings extends Settings {
         @NonNull
         public DownloadSettings build() {
             return new DownloadSettings(mMainType, mDownloadId);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 }
