@@ -27,7 +27,9 @@ import android.media.MediaCodec.LinearBlock;
  * @hide
  */
 @SystemApi
-public class MediaEvent extends FilterEvent{
+public class MediaEvent extends FilterEvent {
+    private native int nativeGetAudioHandle();
+
     private final int mStreamId;
     private final boolean mIsPtsPresent;
     private final long mPts;
@@ -134,7 +136,7 @@ public class MediaEvent extends FilterEvent{
      * @see android.media.AudioTrack#ENCAPSULATION_MODE_HANDLE
      */
     public long getAudioHandle() {
-        // TODO: implement
+        nativeGetAudioHandle();
         return mDataId;
     }
 
