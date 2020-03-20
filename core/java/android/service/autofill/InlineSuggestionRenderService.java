@@ -24,6 +24,7 @@ import android.annotation.TestApi;
 import android.app.Service;
 import android.app.slice.Slice;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,6 +61,8 @@ public abstract class InlineSuggestionRenderService extends Service {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
+    private IInlineSuggestionUiCallback mCallback;
+
     private void handleRenderSuggestion(IInlineSuggestionUiCallback callback,
             InlinePresentation presentation, int width, int height, IBinder hostInputToken,
             int displayId) {
@@ -84,6 +87,7 @@ public abstract class InlineSuggestionRenderService extends Service {
                 }
                 return;
             }
+            mCallback = callback;
 
             final InlineSuggestionRoot suggestionRoot = new InlineSuggestionRoot(this, callback);
             suggestionRoot.addView(suggestionView);
@@ -152,6 +156,20 @@ public abstract class InlineSuggestionRenderService extends Service {
 
         Log.w(TAG, "Tried to bind to wrong intent (should be " + SERVICE_INTERFACE + ": " + intent);
         return null;
+    }
+
+    /**
+     * Starts the {@link IntentSender} from the client app.
+     *
+     * @param intentSender the {@link IntentSender} to start the attribution UI from the client app.
+     */
+    public final void startIntentSender(@NonNull IntentSender intentSender) {
+        if (mCallback == null) return;
+        try {
+            mCallback.onStartIntentSender(intentSender);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 
     /**
