@@ -150,7 +150,7 @@ public class NetworkNotificationManager {
         if (nai != null) {
             transportType = approximateTransportType(nai);
             final String extraInfo = nai.networkInfo.getExtraInfo();
-            name = TextUtils.isEmpty(extraInfo) ? nai.networkCapabilities.getSSID() : extraInfo;
+            name = TextUtils.isEmpty(extraInfo) ? nai.networkCapabilities.getSsid() : extraInfo;
             // Only notify for Internet-capable networks.
             if (!nai.networkCapabilities.hasCapability(NET_CAPABILITY_INTERNET)) return;
         } else {
@@ -183,14 +183,14 @@ public class NetworkNotificationManager {
         int icon = getIcon(transportType);
         if (notifyType == NotificationType.NO_INTERNET && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
-                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSsid()));
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.PRIVATE_DNS_BROKEN) {
             if (transportType == TRANSPORT_CELLULAR) {
                 title = r.getString(R.string.mobile_no_internet);
             } else if (transportType == TRANSPORT_WIFI) {
                 title = r.getString(R.string.wifi_no_internet,
-                        WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
+                        WifiInfo.sanitizeSsid(nai.networkCapabilities.getSsid()));
             } else {
                 title = r.getString(R.string.other_networks_no_internet);
             }
@@ -198,19 +198,19 @@ public class NetworkNotificationManager {
         } else if (notifyType == NotificationType.PARTIAL_CONNECTIVITY
                 && transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.network_partial_connectivity,
-                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSsid()));
             details = r.getString(R.string.network_partial_connectivity_detailed);
         } else if (notifyType == NotificationType.LOST_INTERNET &&
                 transportType == TRANSPORT_WIFI) {
             title = r.getString(R.string.wifi_no_internet,
-                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
+                    WifiInfo.sanitizeSsid(nai.networkCapabilities.getSsid()));
             details = r.getString(R.string.wifi_no_internet_detailed);
         } else if (notifyType == NotificationType.SIGN_IN) {
             switch (transportType) {
                 case TRANSPORT_WIFI:
                     title = r.getString(R.string.wifi_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
-                            WifiInfo.sanitizeSsid(nai.networkCapabilities.getSSID()));
+                            WifiInfo.sanitizeSsid(nai.networkCapabilities.getSsid()));
                     break;
                 case TRANSPORT_CELLULAR:
                     title = r.getString(R.string.network_available_sign_in, 0);
