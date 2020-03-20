@@ -1208,6 +1208,81 @@ public class AppStandbyControllerTests {
                 STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController, PACKAGE_1));
     }
 
+    @Test
+    public void testAppUpdateOnRestrictedBucketStatus() {
+        // Updates shouldn't change bucket if the app timed out.
+        // Way past all timeouts. App times out into RESTRICTED bucket.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Updates shouldn't change bucket if the app was forced by the system for a non-buggy
+        // reason.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BACKGROUND_RESOURCE_USAGE);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Updates should change bucket if the app was forced by the system for a buggy reason.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertNotEquals(STANDBY_BUCKET_RESTRICTED, getStandbyBucket(mController, PACKAGE_1));
+
+        // Updates shouldn't change bucket if the app was forced by the system for more than just
+        // a buggy reason.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE
+                        | REASON_SUB_FORCED_SYSTEM_FLAG_BUGGY);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        assertEquals(REASON_MAIN_FORCED_BY_SYSTEM | REASON_SUB_FORCED_SYSTEM_FLAG_ABUSE,
+                getStandbyBucketReason(PACKAGE_1));
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+
+        // Updates shouldn't change bucket if the app was forced by the user.
+        reportEvent(mController, USER_INTERACTION, mInjector.mElapsedRealtime, PACKAGE_1);
+        mInjector.mElapsedRealtime += RESTRICTED_THRESHOLD * 4;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_RESTRICTED,
+                REASON_MAIN_FORCED_BY_USER);
+
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp(PACKAGE_1, USER_ID2);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+        mController.maybeUnrestrictBuggyApp("com.random.package", USER_ID);
+        assertBucket(STANDBY_BUCKET_RESTRICTED);
+    }
+
     private String getAdminAppsStr(int userId) {
         return getAdminAppsStr(userId, mController.getActiveAdminAppsForTest(userId));
     }
