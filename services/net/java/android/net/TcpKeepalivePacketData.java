@@ -152,10 +152,12 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     public boolean equals(@Nullable final Object o) {
         if (!(o instanceof TcpKeepalivePacketData)) return false;
         final TcpKeepalivePacketData other = (TcpKeepalivePacketData) o;
-        return this.srcAddress.equals(other.srcAddress)
-                && this.dstAddress.equals(other.dstAddress)
-                && this.srcPort == other.srcPort
-                && this.dstPort == other.dstPort
+        final InetAddress srcAddress = getSrcAddress();
+        final InetAddress dstAddress = getDstAddress();
+        return srcAddress.equals(other.getSrcAddress())
+                && dstAddress.equals(other.getDstAddress())
+                && getSrcPort() == other.getSrcPort()
+                && getDstPort() == other.getDstPort()
                 && this.tcpAck == other.tcpAck
                 && this.tcpSeq == other.tcpSeq
                 && this.tcpWnd == other.tcpWnd
@@ -166,8 +168,8 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     @Override
     public int hashCode() {
-        return Objects.hash(srcAddress, dstAddress, srcPort, dstPort, tcpAck, tcpSeq, tcpWnd,
-                tcpWndScale, ipTos, ipTtl);
+        return Objects.hash(getSrcAddress(), getDstAddress(), getSrcPort(), getDstPort(),
+                tcpAck, tcpSeq, tcpWnd, tcpWndScale, ipTos, ipTtl);
     }
 
     /**
@@ -182,10 +184,10 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     /** Write to parcel. */
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(srcAddress.getHostAddress());
-        out.writeString(dstAddress.getHostAddress());
-        out.writeInt(srcPort);
-        out.writeInt(dstPort);
+        out.writeString(getSrcAddress().getHostAddress());
+        out.writeString(getDstAddress().getHostAddress());
+        out.writeInt(getSrcPort());
+        out.writeInt(getDstPort());
         out.writeByteArray(getPacket());
         out.writeInt(tcpSeq);
         out.writeInt(tcpAck);
@@ -219,7 +221,7 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
                         return readFromParcel(in);
                     } catch (InvalidPacketException e) {
                         throw new IllegalArgumentException(
-                                "Invalid NAT-T keepalive data: " + e.error);
+                                "Invalid NAT-T keepalive data: " + e.getError());
                     }
                 }
 
@@ -234,10 +236,12 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
     @NonNull
     public TcpKeepalivePacketDataParcelable toStableParcelable() {
         final TcpKeepalivePacketDataParcelable parcel = new TcpKeepalivePacketDataParcelable();
+        final InetAddress srcAddress = getSrcAddress();
+        final InetAddress dstAddress = getDstAddress();
         parcel.srcAddress = srcAddress.getAddress();
-        parcel.srcPort = srcPort;
+        parcel.srcPort = getSrcPort();
         parcel.dstAddress = dstAddress.getAddress();
-        parcel.dstPort = dstPort;
+        parcel.dstPort = getDstPort();
         parcel.seq = tcpSeq;
         parcel.ack = tcpAck;
         parcel.rcvWnd = tcpWnd;
@@ -249,10 +253,10 @@ public class TcpKeepalivePacketData extends KeepalivePacketData implements Parce
 
     @Override
     public String toString() {
-        return "saddr: " + srcAddress
-                + " daddr: " + dstAddress
-                + " sport: " + srcPort
-                + " dport: " + dstPort
+        return "saddr: " + getSrcAddress()
+                + " daddr: " + getDstAddress()
+                + " sport: " + getSrcPort()
+                + " dport: " + getDstPort()
                 + " seq: " + tcpSeq
                 + " ack: " + tcpAck
                 + " wnd: " + tcpWnd
