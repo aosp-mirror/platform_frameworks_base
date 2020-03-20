@@ -336,12 +336,6 @@ public class DisplayPolicy {
     @GuardedBy("mHandler")
     private SleepToken mDreamingSleepToken;
 
-    @GuardedBy("mHandler")
-    private SleepToken mWindowSleepToken;
-
-    private final Runnable mAcquireSleepTokenRunnable;
-    private final Runnable mReleaseSleepTokenRunnable;
-
     // The windows we were told about in focusChanged.
     private WindowState mFocusedWindow;
     private WindowState mLastFocusedWindow;
@@ -401,8 +395,6 @@ public class DisplayPolicy {
     private boolean mLastShowingDream;
     private boolean mDreamingLockscreen;
     private boolean mDreamingSleepTokenNeeded;
-    private boolean mWindowSleepTokenNeeded;
-    private boolean mLastWindowSleepTokenNeeded;
     private boolean mAllowLockscreenWhenOn;
 
     private InputConsumer mInputConsumer = null;
@@ -618,20 +610,6 @@ public class DisplayPolicy {
                 mStatusBarController.getAppTransitionListener());
         mImmersiveModeConfirmation = new ImmersiveModeConfirmation(mContext, looper,
                 mService.mVrModeEnabled);
-        mAcquireSleepTokenRunnable = () -> {
-            if (mWindowSleepToken != null) {
-                return;
-            }
-            mWindowSleepToken = service.mAtmInternal.acquireSleepToken(
-                    "WindowSleepTokenOnDisplay" + displayId, displayId);
-        };
-        mReleaseSleepTokenRunnable = () -> {
-            if (mWindowSleepToken == null) {
-                return;
-            }
-            mWindowSleepToken.release();
-            mWindowSleepToken = null;
-        };
 
         // TODO: Make it can take screenshot on external display
         mScreenshotHelper = displayContent.isDefaultDisplay
@@ -2531,7 +2509,6 @@ public class DisplayPolicy {
 
         mAllowLockscreenWhenOn = false;
         mShowingDream = false;
-        mWindowSleepTokenNeeded = false;
         mIsFreeformWindowOverlappingWithNavBar = false;
     }
 
@@ -2745,21 +2722,8 @@ public class DisplayPolicy {
             mService.notifyShowingDreamChanged();
         }
 
-        updateWindowSleepToken();
-
         mService.mPolicy.setAllowLockscreenWhenOn(getDisplayId(), mAllowLockscreenWhenOn);
         return changes;
-    }
-
-    private void updateWindowSleepToken() {
-        if (mWindowSleepTokenNeeded && !mLastWindowSleepTokenNeeded) {
-            mHandler.removeCallbacks(mReleaseSleepTokenRunnable);
-            mHandler.post(mAcquireSleepTokenRunnable);
-        } else if (!mWindowSleepTokenNeeded && mLastWindowSleepTokenNeeded) {
-            mHandler.removeCallbacks(mAcquireSleepTokenRunnable);
-            mHandler.post(mReleaseSleepTokenRunnable);
-        }
-        mLastWindowSleepTokenNeeded = mWindowSleepTokenNeeded;
     }
 
     /**
