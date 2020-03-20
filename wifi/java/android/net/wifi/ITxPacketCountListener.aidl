@@ -18,6 +18,7 @@ package android.net.wifi;
 
 /**
  * Interface for tx packet counter callback.
+ * @deprecated no longer used, remove once removed from BaseWifiService
  * @hide
  */
 oneway interface ITxPacketCountListener
