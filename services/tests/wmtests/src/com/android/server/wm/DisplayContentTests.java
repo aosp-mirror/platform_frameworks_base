@@ -56,6 +56,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -1006,6 +1007,13 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.computeScreenConfiguration(config);
         mDisplayContent.onRequestedOverrideConfigurationChanged(config);
 
+        final ActivityRecord closingApp = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(mDisplayContent).setOnTop(false).build().getTopMostActivity();
+        closingApp.nowVisible = true;
+        closingApp.startAnimation(closingApp.getPendingTransaction(), mock(AnimationAdapter.class),
+                false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
+        assertTrue(closingApp.isAnimating());
+
         final ActivityRecord app = mAppWindow.mActivityRecord;
         mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */);
@@ -1033,6 +1041,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 
+        // The animation in old rotation should be cancelled.
+        assertFalse(closingApp.isAnimating());
         // The display should be rotated after the launch is finished.
         assertFalse(app.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
