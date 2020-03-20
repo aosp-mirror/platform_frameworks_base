@@ -340,8 +340,10 @@ void StreamManager::run(int32_t id)
     int64_t waitTimeNs = kWaitTimeBeforeCloseNs;
     std::unique_lock lock(mStreamManagerLock);
     while (!mQuit) {
-        mStreamManagerCondition.wait_for(
-                lock, std::chrono::duration<int64_t, std::nano>(waitTimeNs));
+        if (mRestartStreams.empty()) { // on thread start, mRestartStreams can be non-empty.
+            mStreamManagerCondition.wait_for(
+                    lock, std::chrono::duration<int64_t, std::nano>(waitTimeNs));
+        }
         ALOGV("%s(%d) awake", __func__, id);
 
         sanityCheckQueue_l();
