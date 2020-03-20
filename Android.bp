@@ -1321,41 +1321,6 @@ java_library {
     libs: ["android_system_stubs_current"],
 }
 
-java_library {
-    name: "framework-telephony",
-    srcs: [
-        //":framework-telephony-sources",
-        //":framework-telephony-shared-srcs",
-    ],
-    // TODO: change to framework-system-stub to build against system APIs.
-    libs: [
-        "framework-minus-apex",
-        "unsupportedappusage",
-    ],
-    static_libs: [
-        "libphonenumber-platform",
-        "app-compat-annotations",
-    ],
-    sdk_version: "core_platform",
-    aidl: {
-        export_include_dirs: ["telephony/java"],
-        include_dirs: [
-            "frameworks/native/aidl/binder",
-            "frameworks/native/aidl/gui",
-        ]
-    },
-    jarjar_rules: ":framework-telephony-jarjar-rules",
-    dxflags: [
-        "--core-library",
-        "--multi-dex",
-    ],
-    // This is to break the dependency from boot jars.
-    dex_preopt: {
-        enabled: false,
-    },
-    installable: true,
-}
-
 filegroup {
     // TODO (b/147690217): move to frameworks/base/telephony/common.
     name: "framework-telephony-annotations",
