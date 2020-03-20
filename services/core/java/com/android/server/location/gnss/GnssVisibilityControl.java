@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -514,7 +514,7 @@ class GnssVisibilityControl {
         // is enabled and the proxy app has location permission.
         final boolean isLocationRequestAccepted = nfwNotification.isRequestAccepted();
         return (proxyAppState == null || !mIsGpsEnabled) ? isLocationRequestAccepted
-                        : (proxyAppState.mHasLocationPermission != isLocationRequestAccepted);
+                : (proxyAppState.mHasLocationPermission != isLocationRequestAccepted);
     }
 
     private void showLocationIcon(ProxyAppState proxyAppState, NfwNotification nfwNotification,
@@ -633,7 +633,7 @@ class GnssVisibilityControl {
         // NOTE: Do not reuse the returned notification object as it will not reflect
         //       changes to notification text when the system language is changed.
         final String firstLineText = context.getString(R.string.gpsNotifTitle);
-        final String secondLineText =  context.getString(R.string.global_action_emergency);
+        final String secondLineText = context.getString(R.string.global_action_emergency);
         final String accessibilityServicesText = firstLineText + " (" + secondLineText + ")";
         return new Notification.Builder(context, SystemNotificationChannels.NETWORK_ALERTS)
                 .setSmallIcon(com.android.internal.R.drawable.stat_sys_gps_on)

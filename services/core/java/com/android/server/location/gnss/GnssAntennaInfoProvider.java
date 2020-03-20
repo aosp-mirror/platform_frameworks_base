@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.location.GnssAntennaInfo;
 import android.location.IGnssAntennaInfoListener;
@@ -23,8 +23,10 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.location.gnss.GnssListenerManager;
-import com.android.server.location.gnss.GnssManagerService;
+import com.android.server.location.AppForegroundHelper;
+import com.android.server.location.AppOpsHelper;
+import com.android.server.location.SettingsHelper;
+import com.android.server.location.UserInfoHelper;
 
 import java.util.List;
 

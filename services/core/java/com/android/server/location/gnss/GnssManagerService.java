@@ -45,14 +45,6 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.location.AppForegroundHelper;
 import com.android.server.location.AppOpsHelper;
-import com.android.server.location.GnssAntennaInfoProvider;
-import com.android.server.location.GnssBatchingProvider;
-import com.android.server.location.GnssCapabilitiesProvider;
-import com.android.server.location.GnssLocationProvider;
-import com.android.server.location.GnssMeasurementCorrectionsProvider;
-import com.android.server.location.GnssMeasurementsProvider;
-import com.android.server.location.GnssNavigationMessageProvider;
-import com.android.server.location.GnssStatusProvider;
 import com.android.server.location.LocationUsageLogger;
 import com.android.server.location.SettingsHelper;
 import com.android.server.location.UserInfoHelper;
@@ -95,11 +87,11 @@ public class GnssManagerService {
     private final Object mGnssBatchingLock = new Object();
 
     @GuardedBy("mGnssBatchingLock")
-    private @Nullable IBatchedLocationCallback mGnssBatchingCallback;
+    @Nullable private IBatchedLocationCallback mGnssBatchingCallback;
     @GuardedBy("mGnssBatchingLock")
-    private @Nullable CallerIdentity mGnssBatchingIdentity;
+    @Nullable private CallerIdentity mGnssBatchingIdentity;
     @GuardedBy("mGnssBatchingLock")
-    private @Nullable Binder.DeathRecipient mGnssBatchingDeathRecipient;
+    @Nullable private Binder.DeathRecipient mGnssBatchingDeathRecipient;
     @GuardedBy("mGnssBatchingLock")
     private boolean mGnssBatchingInProgress = false;
 

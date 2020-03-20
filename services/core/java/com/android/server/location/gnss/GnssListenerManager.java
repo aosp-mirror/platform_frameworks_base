@@ -50,7 +50,7 @@ import java.util.Objects;
  */
 public abstract class GnssListenerManager<TRequest, TListener extends IInterface, TMergedRequest>
         extends AbstractListenerManager<IBinder, TRequest, TListener, GnssListenerManager<TRequest,
-                TListener, TMergedRequest>.GnssRegistration, TMergedRequest> {
+        TListener, TMergedRequest>.GnssRegistration, TMergedRequest> {
 
     /**
      * Registration object for GNSS listeners.
@@ -58,7 +58,7 @@ public abstract class GnssListenerManager<TRequest, TListener extends IInterface
     protected class GnssRegistration extends
             IdentifiedRegistration<TRequest, TListener> implements Binder.DeathRecipient {
 
-        private volatile @Nullable IBinder mKey;
+        @Nullable private volatile IBinder mKey;
 
         @GuardedBy("this")
         private boolean mAppOpsAllowed;
