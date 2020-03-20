@@ -26,6 +26,7 @@
 
 #include <memory>
 
+#include <android-base/unique_fd.h>
 #include <utils/Compat.h>
 #include <utils/Errors.h>
 #include <utils/String8.h>
@@ -158,6 +159,7 @@ private:
     /* AssetManager needs access to our "create" functions */
     friend class AssetManager;
     friend class ApkAssets;
+    friend class ZipAssetsProvider;
 
     /*
      * Create the asset from a named file on disk.
@@ -202,8 +204,14 @@ private:
      */
     static Asset* createFromUncompressedMap(FileMap* dataMap, AccessMode mode);
 
+    /*
+     * Create the asset from a memory-mapped file segment.
+     *
+     * The asset takes ownership of the FileMap and the file descriptor "fd". The file descriptor is
+     * used to request new file descriptors using "openFileDescriptor".
+     */
     static std::unique_ptr<Asset> createFromUncompressedMap(std::unique_ptr<FileMap> dataMap,
-        AccessMode mode);
+        base::unique_fd fd, AccessMode mode);
 
     /*
      * Create the asset from a memory-mapped file segment with compressed
@@ -256,9 +264,9 @@ public:
     /*
      * Use a memory-mapped region.
      *
-     * On success, the object takes ownership of "dataMap".
+     * On success, the object takes ownership of "dataMap" and "fd".
      */
-    status_t openChunk(FileMap* dataMap);
+    status_t openChunk(FileMap* dataMap, base::unique_fd fd);
 
     /*
      * Standard Asset interfaces.
@@ -273,11 +281,12 @@ public:
     virtual bool isAllocated(void) const { return mBuf != NULL; }
 
 private:
-    off64_t     mStart;         // absolute file offset of start of chunk
-    off64_t     mLength;        // length of the chunk
-    off64_t     mOffset;        // current local offset, 0 == mStart
-    FILE*       mFp;            // for read/seek
-    char*       mFileName;      // for opening
+    off64_t         mStart;         // absolute file offset of start of chunk
+    off64_t         mLength;        // length of the chunk
+    off64_t         mOffset;        // current local offset, 0 == mStart
+    FILE*           mFp;            // for read/seek
+    char*           mFileName;      // for opening
+    base::unique_fd mFd;            // for opening file descriptors
 
     /*
      * To support getBuffer() we either need to read the entire thing into
