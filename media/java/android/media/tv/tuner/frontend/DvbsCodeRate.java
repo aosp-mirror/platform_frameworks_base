@@ -17,10 +17,7 @@
 package android.media.tv.tuner.frontend;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.content.Context;
-import android.media.tv.tuner.TunerUtils;
 
 /**
  * Code rate for DVBS.
@@ -69,13 +66,9 @@ public class DvbsCodeRate {
 
     /**
      * Creates a builder for {@link DvbsCodeRate}.
-     *
-     * @param context the context of the caller.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context) {
-        TunerUtils.checkTunerPermission(context);
+    public static Builder builder() {
         return new Builder();
     }
 
