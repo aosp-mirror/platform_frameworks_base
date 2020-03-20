@@ -170,9 +170,15 @@ public class AdminSecondaryLockScreenController {
 
     private void onSurfaceReady() {
         try {
-            mClient.onSurfaceReady(mView.getHostToken(), mCallback);
+            IBinder hostToken = mView.getHostToken();
+            // Should never be null when SurfaceView is attached to window.
+            if (hostToken != null) {
+                mClient.onCreateKeyguardSurface(hostToken, mCallback);
+            } else {
+                hide();
+            }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error in onSurfaceReady", e);
+            Log.e(TAG, "Error in onCreateKeyguardSurface", e);
             dismiss(KeyguardUpdateMonitor.getCurrentUser());
         }
     }
