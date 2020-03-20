@@ -19,9 +19,11 @@ package com.android.internal.telephony;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.Resources;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.Log;
+import android.text.TextUtils;
 import android.util.SparseIntArray;
+
+import com.android.internal.R;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -1085,10 +1087,8 @@ public class GsmAlphabet {
     private static void enableCountrySpecificEncodings() {
         Resources r = Resources.getSystem();
         // See comments in frameworks/base/core/res/res/values/config.xml for allowed values
-        sEnabledSingleShiftTables = r.getIntArray(
-                android.R.array.config_sms_enabled_single_shift_tables);
-        sEnabledLockingShiftTables = r.getIntArray(
-                android.R.array.config_sms_enabled_locking_shift_tables);
+        sEnabledSingleShiftTables = r.getIntArray(R.array.config_sms_enabled_single_shift_tables);
+        sEnabledLockingShiftTables = r.getIntArray(R.array.config_sms_enabled_locking_shift_tables);
 
         if (sEnabledSingleShiftTables.length > 0) {
             sHighestEnabledSingleShiftCode =

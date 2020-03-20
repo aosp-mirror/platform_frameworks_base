@@ -165,12 +165,6 @@ PublicTypedef: android.content.integrity.Formula.Tag: Don't expose @IntDef: @Tag
 PublicTypedef: android.content.integrity.Rule.Effect: Don't expose @IntDef: @Effect must be hidden.
 
 
-ResourceValueFieldName: android.R.array#config_sms_enabled_locking_shift_tables:
-    Expected resource name in `android.R.array` to be in the `fooBarBaz` style, was `config_sms_enabled_locking_shift_tables`
-ResourceValueFieldName: android.R.array#config_sms_enabled_single_shift_tables:
-    Expected resource name in `android.R.array` to be in the `fooBarBaz` style, was `config_sms_enabled_single_shift_tables`
-
-
 SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
     
 SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean):
