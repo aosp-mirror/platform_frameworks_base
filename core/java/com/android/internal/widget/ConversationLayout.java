@@ -133,6 +133,7 @@ public class ConversationLayout extends FrameLayout
     private boolean mExpandable = true;
     private int mContentMarginEnd;
     private Rect mMessagingClipRect;
+    private TextView mAppName;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -202,6 +203,7 @@ public class ConversationLayout extends FrameLayout
                 R.string.conversation_title_fallback_one_to_one);
         mFallbackGroupChatName = getResources().getString(
                 R.string.conversation_title_fallback_group_chat);
+        mAppName = findViewById(R.id.app_name_text);
     }
 
     @RemotableViewMethod
@@ -384,6 +386,7 @@ public class ConversationLayout extends FrameLayout
         }
         updateIconPositionAndSize();
         updateImageMessages();
+        updateAppName();
     }
 
     private void updateImageMessages() {
@@ -460,6 +463,10 @@ public class ConversationLayout extends FrameLayout
             secondLastIcon = createAvatarSymbol("", "", mLayoutColor);
         }
         topView.setImageIcon(secondLastIcon);
+    }
+
+    private void updateAppName() {
+        mAppName.setVisibility(mIsCollapsed ? GONE : VISIBLE);
     }
 
     /**
