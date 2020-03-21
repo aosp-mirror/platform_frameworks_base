@@ -7585,7 +7585,9 @@ public class Notification implements Parcelable
             }
             boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
             boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
-            Icon largeIcon = isConversationLayout ? mShortcutIcon : mBuilder.mN.mLargeIcon;
+            Icon largeIcon = isConversationLayout && mShortcutIcon != null
+                    ? mShortcutIcon
+                    : mBuilder.mN.mLargeIcon;
             TemplateBindResult bindResult = new TemplateBindResult();
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .hasProgress(false)
