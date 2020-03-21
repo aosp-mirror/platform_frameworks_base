@@ -30,7 +30,7 @@ import android.util.Size;
  * Immutable class to store the camera capability, its corresponding maximum
  * streaming dimension and zoom range.
  *
- * @see CameraCharacteristics#CONTROL_AVAILABLE_BOKEH_CAPABILITIES
+ * @see CameraCharacteristics#CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_CAPABILITIES
  */
 
 public final class Capability {
@@ -72,10 +72,10 @@ public final class Capability {
     /**
      * Return the supported mode for this capability.
      *
-     * @return One of supported modes for the capability. For example, for available bokeh modes,
-     * this will be one of {@link CameraMetadata#CONTROL_BOKEH_MODE_OFF},
-     * {@link CameraMetadata#CONTROL_BOKEH_MODE_STILL_CAPTURE}, and
-     * {@link CameraMetadata#CONTROL_BOKEH_MODE_CONTINUOUS}.
+     * @return One of supported modes for the capability. For example, for available extended
+     * scene modes, this will be one of {@link CameraMetadata#CONTROL_EXTENDED_SCENE_MODE_DISABLED},
+     * {@link CameraMetadata#CONTROL_EXTENDED_SCENE_MODE_BOKEH_STILL_CAPTURE}, and
+     * {@link CameraMetadata#CONTROL_EXTENDED_SCENE_MODE_BOKEH_CONTINUOUS}.
      */
     public int getMode() {
         return mMode;
