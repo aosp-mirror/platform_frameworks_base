@@ -4424,13 +4424,13 @@
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
     from accessibility button. [CHAR LIMIT=100] -->
-    <string name="accessibility_edit_shortcut_menu_button_title">Choose apps to use with the
+    <string name="accessibility_edit_shortcut_menu_button_title">Choose features to use with the
         accessibility button
     </string>
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
     from volume key shortcut. [CHAR LIMIT=100] -->
-    <string name="accessibility_edit_shortcut_menu_volume_title">Choose apps to use with the
+    <string name="accessibility_edit_shortcut_menu_volume_title">Choose features to use with the
         volume key shortcut
     </string>
 
