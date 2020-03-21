@@ -17,7 +17,6 @@
 package android.bluetooth;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,7 +31,6 @@ import java.util.Objects;
  *
  * {@hide}
  */
-@SystemApi
 public final class BluetoothCodecStatus implements Parcelable {
     /**
      * Extra for the codec configuration intents of the individual profiles.
