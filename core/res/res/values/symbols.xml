@@ -3860,6 +3860,8 @@
   <java-symbol type="string" name="conversation_title_fallback_group_chat" />
   <java-symbol type="id" name="conversation_icon" />
   <java-symbol type="id" name="conversation_icon_badge" />
+  <java-symbol type="id" name="conversation_icon_badge_ring" />
+  <java-symbol type="id" name="conversation_icon_badge_bg" />
   <java-symbol type="id" name="expand_button_container" />
   <java-symbol type="id" name="messaging_group_content_container" />
   <java-symbol type="id" name="expand_button_and_content_container" />
