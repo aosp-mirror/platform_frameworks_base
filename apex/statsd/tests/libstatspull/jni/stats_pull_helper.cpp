@@ -44,30 +44,27 @@ static AStatsManager_PullAtomCallbackReturn pullAtomCallback(int32_t atomTag, AS
     return sPullReturnVal;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_android_internal_os_statsd_libstats_LibStatsPullTests_registerStatsPuller(
-        JNIEnv* /*env*/, jobject /* this */, jint atomTag, jlong timeoutNs, jlong coolDownNs,
-        jint pullRetVal, jlong latencyMillis, int atomsPerPull)
-{
+extern "C" JNIEXPORT void JNICALL
+Java_com_android_internal_os_statsd_libstats_LibStatsPullTests_setStatsPuller(
+        JNIEnv* /*env*/, jobject /* this */, jint atomTag, jlong timeoutMillis,
+        jlong coolDownMillis, jint pullRetVal, jlong latencyMillis, int atomsPerPull) {
     sAtomTag = atomTag;
     sPullReturnVal = pullRetVal;
     sLatencyMillis = latencyMillis;
     sAtomsPerPull = atomsPerPull;
     sNumPulls = 0;
     AStatsManager_PullAtomMetadata* metadata = AStatsManager_PullAtomMetadata_obtain();
-    AStatsManager_PullAtomMetadata_setCoolDownNs(metadata, coolDownNs);
-    AStatsManager_PullAtomMetadata_setTimeoutNs(metadata, timeoutNs);
+    AStatsManager_PullAtomMetadata_setCoolDownMillis(metadata, coolDownMillis);
+    AStatsManager_PullAtomMetadata_setTimeoutMillis(metadata, timeoutMillis);
 
-    AStatsManager_registerPullAtomCallback(sAtomTag, &pullAtomCallback, metadata, nullptr);
+    AStatsManager_setPullAtomCallback(sAtomTag, metadata, &pullAtomCallback, nullptr);
     AStatsManager_PullAtomMetadata_release(metadata);
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_android_internal_os_statsd_libstats_LibStatsPullTests_unregisterStatsPuller(
-        JNIEnv* /*env*/, jobject /* this */, jint /*atomTag*/)
-{
-    AStatsManager_unregisterPullAtomCallback(sAtomTag);
+extern "C" JNIEXPORT void JNICALL
+Java_com_android_internal_os_statsd_libstats_LibStatsPullTests_clearStatsPuller(JNIEnv* /*env*/,
+                                                                                jobject /* this */,
+                                                                                jint /*atomTag*/) {
+    AStatsManager_clearPullAtomCallback(sAtomTag);
 }
 } // namespace

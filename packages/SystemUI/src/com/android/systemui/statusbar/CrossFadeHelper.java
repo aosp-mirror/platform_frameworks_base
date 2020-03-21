@@ -50,7 +50,9 @@ public class CrossFadeHelper {
                         if (endRunnable != null) {
                             endRunnable.run();
                         }
-                        view.setVisibility(View.INVISIBLE);
+                        if (view.getVisibility() != View.GONE) {
+                            view.setVisibility(View.INVISIBLE);
+                        }
                     }
                 });
         if (view.hasOverlappingRendering()) {
@@ -75,7 +77,7 @@ public class CrossFadeHelper {
      */
     public static void fadeOut(View view, float fadeOutAmount, boolean remap) {
         view.animate().cancel();
-        if (fadeOutAmount == 1.0f) {
+        if (fadeOutAmount == 1.0f && view.getVisibility() != View.GONE) {
             view.setVisibility(View.INVISIBLE);
         } else if (view.getVisibility() == View.INVISIBLE) {
             view.setVisibility(View.VISIBLE);

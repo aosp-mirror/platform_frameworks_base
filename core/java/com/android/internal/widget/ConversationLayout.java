@@ -120,6 +120,7 @@ public class ConversationLayout extends FrameLayout
     private int mIconSizeBadged;
     private int mIconSizeCentered;
     private CachingIconView mIcon;
+    private View mImportanceRingView;
     private int mExpandedGroupTopMargin;
     private View mConversationFacePile;
     private int mNotificationBackgroundColor;
@@ -132,6 +133,7 @@ public class ConversationLayout extends FrameLayout
     private boolean mExpandable = true;
     private int mContentMarginEnd;
     private Rect mMessagingClipRect;
+    private TextView mAppName;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -169,6 +171,7 @@ public class ConversationLayout extends FrameLayout
         mTextPaint.setAntiAlias(true);
         mConversationIcon = findViewById(R.id.conversation_icon);
         mIcon = findViewById(R.id.icon);
+        mImportanceRingView = findViewById(R.id.conversation_icon_badge_ring);
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
         mIcon.setOnVisibilityChangedListener((visibility) -> {
             // Always keep the badge visibility in sync with the icon. This is necessary in cases
@@ -200,6 +203,7 @@ public class ConversationLayout extends FrameLayout
                 R.string.conversation_title_fallback_one_to_one);
         mFallbackGroupChatName = getResources().getString(
                 R.string.conversation_title_fallback_group_chat);
+        mAppName = findViewById(R.id.app_name_text);
     }
 
     @RemotableViewMethod
@@ -210,6 +214,14 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setNameReplacement(CharSequence nameReplacement) {
         mNameReplacement = nameReplacement;
+    }
+
+    /**
+     * Sets this conversation as "important", adding some additional UI treatment.
+     */
+    @RemotableViewMethod
+    public void setIsImportantConversation(boolean isImportantConversation) {
+        mImportanceRingView.setVisibility(isImportantConversation ? VISIBLE : GONE);
     }
 
     /**
@@ -309,14 +321,12 @@ public class ConversationLayout extends FrameLayout
         updateTitleAndNamesDisplay();
 
         updateConversationLayout();
-
     }
 
     /**
      * Update the layout according to the data provided (i.e mIsOneToOne, expanded etc);
      */
     private void updateConversationLayout() {
-        // TODO: resolve this from shortcuts
         // Set avatar and name
         CharSequence conversationText = mConversationTitle;
         // TODO: display the secondary text somewhere
@@ -376,6 +386,7 @@ public class ConversationLayout extends FrameLayout
         }
         updateIconPositionAndSize();
         updateImageMessages();
+        updateAppName();
     }
 
     private void updateImageMessages() {
@@ -454,6 +465,14 @@ public class ConversationLayout extends FrameLayout
         topView.setImageIcon(secondLastIcon);
     }
 
+    private void updateAppName() {
+        mAppName.setVisibility(mIsCollapsed ? GONE : VISIBLE);
+    }
+
+    public boolean shouldHideAppName() {
+        return mIsCollapsed;
+    }
+
     /**
      * update the icon position and sizing
      */
@@ -463,7 +482,7 @@ public class ConversationLayout extends FrameLayout
         int marginTop;
         int iconSize;
         if (mIsOneToOne || mIsCollapsed) {
-            // Baded format
+            // Badged format
             gravity = Gravity.LEFT;
             marginStart = mBadgedSideMargins;
             marginTop = mBadgedSideMargins;
@@ -479,11 +498,9 @@ public class ConversationLayout extends FrameLayout
         layoutParams.gravity = gravity;
         layoutParams.topMargin = marginTop;
         layoutParams.setMarginStart(marginStart);
+        layoutParams.width = iconSize;
+        layoutParams.height = iconSize;
         mConversationIconBadge.setLayoutParams(layoutParams);
-        ViewGroup.LayoutParams iconParams = mIcon.getLayoutParams();
-        iconParams.width = iconSize;
-        iconParams.height = iconSize;
-        mIcon.setLayoutParams(iconParams);
     }
 
     @RemotableViewMethod

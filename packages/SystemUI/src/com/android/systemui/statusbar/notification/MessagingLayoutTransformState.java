@@ -102,11 +102,11 @@ public class MessagingLayoutTransformState extends TransformState {
             MessagingGroup matchingGroup = pairs.get(ownGroup);
             if (!isGone(ownGroup)) {
                 if (matchingGroup != null) {
-                    transformGroups(ownGroup, matchingGroup, transformationAmount, to);
+                    int totalTranslation = transformGroups(ownGroup, matchingGroup,
+                            transformationAmount, to);
                     if (lastPairedGroup == null) {
                         lastPairedGroup = ownGroup;
                         if (to){
-                            float totalTranslation = ownGroup.getTop() - matchingGroup.getTop();
                             currentTranslation = matchingGroup.getAvatar().getTranslationY()
                                     - totalTranslation;
                         } else {
@@ -229,14 +229,19 @@ public class MessagingLayoutTransformState extends TransformState {
         return result;
     }
 
-    private void transformGroups(MessagingGroup ownGroup, MessagingGroup otherGroup,
+    /**
+     * Transform two groups towards each other.
+     *
+     * @return the total transformation distance that the group goes through
+     */
+    private int transformGroups(MessagingGroup ownGroup, MessagingGroup otherGroup,
             float transformationAmount, boolean to) {
         boolean useLinearTransformation =
                 otherGroup.getIsolatedMessage() == null && !mTransformInfo.isAnimating();
         transformView(transformationAmount, to, ownGroup.getSenderView(), otherGroup.getSenderView(),
                 true /* sameAsAny */, useLinearTransformation);
-        transformView(transformationAmount, to, ownGroup.getAvatar(), otherGroup.getAvatar(),
-                true /* sameAsAny */, useLinearTransformation);
+        int totalAvatarTranslation = transformView(transformationAmount, to, ownGroup.getAvatar(),
+                otherGroup.getAvatar(), true /* sameAsAny */, useLinearTransformation);
         List<MessagingMessage> ownMessages = ownGroup.getMessages();
         List<MessagingMessage> otherMessages = otherGroup.getMessages();
         float previousTranslation = 0;
@@ -264,8 +269,8 @@ public class MessagingLayoutTransformState extends TransformState {
                     messageAmount = 1.0f - messageAmount;
                 }
             }
-            transformView(messageAmount, to, child, otherChild, false, /* sameAsAny */
-                    useLinearTransformation);
+            int totalTranslation = transformView(messageAmount, to, child, otherChild,
+                    false /* sameAsAny */, useLinearTransformation);
             boolean otherIsIsolated = otherGroup.getIsolatedMessage() == otherChild;
             if (messageAmount == 0.0f
                     && (otherIsIsolated || otherGroup.isSingleLine())) {
@@ -278,23 +283,28 @@ public class MessagingLayoutTransformState extends TransformState {
             } else if (ownGroup.getIsolatedMessage() == child || otherIsIsolated) {
                 // We don't want to add any translation for the image that is transforming
             } else if (to) {
-                float totalTranslation = child.getTop() + ownGroup.getTop()
-                        - otherChild.getTop() - otherChild.getTop();
                 previousTranslation = otherChild.getTranslationY() - totalTranslation;
             } else {
                 previousTranslation = child.getTranslationY();
             }
         }
         ownGroup.updateClipRect();
+        return totalAvatarTranslation;
     }
 
-    private void transformView(float transformationAmount, boolean to, View ownView,
+    /**
+     * Transform a view to another view.
+     *
+     * @return the total translationY this view goes through
+     */
+    private int transformView(float transformationAmount, boolean to, View ownView,
             View otherView, boolean sameAsAny, boolean useLinearTransformation) {
         TransformState ownState = TransformState.createFrom(ownView, mTransformInfo);
         if (useLinearTransformation) {
             ownState.setDefaultInterpolator(Interpolators.LINEAR);
         }
         ownState.setIsSameAsAnyView(sameAsAny && !isGone(otherView));
+        int totalTranslationDistance = 0;
         if (to) {
             if (otherView != null) {
                 TransformState otherState = TransformState.createFrom(otherView, mTransformInfo);
@@ -308,6 +318,8 @@ public class MessagingLayoutTransformState extends TransformState {
                     // since avatars serve as anchors for the rest of the layout transition
                     ownState.transformViewVerticalTo(otherState, transformationAmount);
                 }
+                totalTranslationDistance = ownState.getLaidOutLocationOnScreen()[1]
+                        - otherState.getLaidOutLocationOnScreen()[1];
                 otherState.recycle();
             } else {
                 ownState.disappear(transformationAmount, null);
@@ -325,12 +337,15 @@ public class MessagingLayoutTransformState extends TransformState {
                     // since avatars serve as anchors for the rest of the layout transition
                     ownState.transformViewVerticalFrom(otherState, transformationAmount);
                 }
+                totalTranslationDistance = ownState.getLaidOutLocationOnScreen()[1]
+                        - otherState.getLaidOutLocationOnScreen()[1];
                 otherState.recycle();
             } else {
                 ownState.appear(transformationAmount, null);
             }
         }
         ownState.recycle();
+        return totalTranslationDistance;
     }
 
     private HashMap<MessagingGroup, MessagingGroup> findPairs(ArrayList<MessagingGroup> ownGroups,

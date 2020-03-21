@@ -49,6 +49,14 @@ public class ViewTransformationHelper implements TransformableView,
         mTransformedViews.put(key, transformedView);
     }
 
+    public void addTransformedView(View transformedView) {
+        int key = transformedView.getId();
+        if (key == View.NO_ID) {
+            throw new IllegalArgumentException("View argument does not have a valid id");
+        }
+        addTransformedView(key, transformedView);
+    }
+
     /**
      * Add a view that transforms to a similar sibling, meaning that we should consider any mapping
      * found treated as the same viewType. This is useful for imageViews, where it's hard to compare
@@ -60,6 +68,14 @@ public class ViewTransformationHelper implements TransformableView,
     public void addViewTransformingToSimilar(int key, View transformedView) {
         addTransformedView(key, transformedView);
         mKeysTransformingToSimilar.add(key);
+    }
+
+    public void addViewTransformingToSimilar(View transformedView) {
+        int key = transformedView.getId();
+        if (key == View.NO_ID) {
+            throw new IllegalArgumentException("View argument does not have a valid id");
+        }
+        addViewTransformingToSimilar(key, transformedView);
     }
 
     public void reset() {

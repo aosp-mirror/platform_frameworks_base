@@ -2635,13 +2635,15 @@
     <string name="magnification_controls_title">Magnification Window Controls</string>
 
     <!-- Quick Controls strings -->
-    <!-- Quick Controls view header [CHAR LIMIT=30] -->
+    <!-- Quick Controls empty state, title [CHAR LIMIT=30] -->
     <string name="quick_controls_title">Quick Controls</string>
+    <!-- Quick Controls empty state, subtitle [CHAR LIMIT=100] -->
+    <string name="quick_controls_subtitle">Add controls for your connected devices</string>
 
     <!-- Controls management providers screen title [CHAR LIMIT=30]-->
     <string name="controls_providers_title">Add Controls</string>
     <!-- Controls management providers screen subtitle [CHAR LIMIT=NONE] -->
-    <string name="controls_providers_subtitle">Choose an app from which to add controls</string>
+    <string name="controls_providers_subtitle">Choose app to add controls</string>
     <!-- Number of favorites for controls management screen [CHAR LIMIT=NONE]-->
     <plurals name="controls_number_of_favorites">
         <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> control added.</item>
@@ -2651,7 +2653,9 @@
     <!-- Controls management controls screen default title [CHAR LIMIT=30] -->
     <string name="controls_favorite_default_title">Controls</string>
     <!-- Controls management controls screen subtitle [CHAR LIMIT=NONE] -->
-    <string name="controls_favorite_subtitle">Choose controls for quick access</string>
+    <string name="controls_favorite_subtitle">Choose controls to access from the power menu</string>
+    <!-- Controls management controls screen, user direction for rearranging controls [CHAR LIMIT=NONE] -->
+    <string name="controls_favorite_rearrange">Hold and drag a control to move it</string>
 
     <!-- Controls management controls screen error on load message [CHAR LIMIT=60] -->
     <string name="controls_favorite_load_error">The list of all controls could not be loaded.</string>
@@ -2659,21 +2663,35 @@
     <string name="controls_favorite_other_zone_header">Other</string>
 
     <!-- Controls dialog title [CHAR LIMIT=30] -->
-    <string name="controls_dialog_title">Add to Quick Controls</string>
+    <string name="controls_dialog_title">Add to quick controls</string>
     <!-- Controls dialog add to favorites [CHAR LIMIT=30] -->
     <string name="controls_dialog_ok">Add to favorites</string>
     <!-- Controls dialog message [CHAR LIMIT=NONE] -->
     <string name="controls_dialog_message"><xliff:g id="app" example="System UI">%s</xliff:g> suggested this control to add to your favorites.</string>
+    <!-- Controls dialog confirmation [CHAR LIMIT=30] -->
+    <string name="controls_dialog_confirmation">Controls updated</string>
 
     <!-- Controls PIN entry dialog, switch to alphanumeric keyboard [CHAR LIMIT=100] -->
     <string name="controls_pin_use_alphanumeric">PIN contains letters or symbols</string>
     <!-- Controls PIN entry dialog, title [CHAR LIMIT=30] -->
-    <string name="controls_pin_verify">Verify device PIN</string>
+    <string name="controls_pin_verify">Verify <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
+    <!-- Controls PIN entry dialog, waiting to verify [CHAR LIMIT=30] -->
+    <string name="controls_pin_verifying">Verifying\u2026</string>
     <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
     <string name="controls_pin_instructions">Enter PIN</string>
+    <!-- Controls passphrase entry dialog, text hint [CHAR LIMIT=30] -->
+    <string name="controls_passphrase_instructions">Enter passphrase</string>
+    <!-- Controls PIN entry dialog, text hint, retry [CHAR LIMIT=30] -->
+    <string name="controls_pin_instructions_retry">Try another PIN</string>
+    <!-- Controls passphrase entry dialog, text hint, retry [CHAR LIMIT=50] -->
+    <string name="controls_passphrase_instructions_retry">Try another passphrase</string>
+    <!-- Controls confirmation dialog, waiting to confirm [CHAR LIMIT=30] -->
+    <string name="controls_confirmation_confirming">Confirming\u2026</string>
+    <!-- Controls confirmation dialog, user prompt [CHAR LIMIT=NONE] -->
+    <string name="controls_confirmation_message">Confirm change for <xliff:g id="device" example="Backdoor lock">%s</xliff:g></string>
 
     <!-- Tooltip to show in management screen when there are multiple structures [CHAR_LIMIT=50] -->
-    <string name="controls_structure_tooltip">Swipe to see other structures</string>
+    <string name="controls_structure_tooltip">Swipe to see more</string>
 
     <!-- Message to tell the user to wait while systemui attempts to load a set of
          recommended controls [CHAR_LIMIT=30] -->
@@ -2681,4 +2699,18 @@
 
     <!-- Close the controls associated with a specific media session [CHAR_LIMIT=NONE] -->
     <string name="controls_media_close_session">Close this media session</string>
+
+    <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
+    <string name="controls_error_timeout">Inactive, check app</string>
+    <!-- Error message indicating that a control action failed [CHAR_LIMIT=30] -->
+    <string name="controls_error_failed">Error, try again</string>
+    <!-- Stateless control message informing the user that a routine has started [CHAR_LIMIT=30] -->
+    <string name="controls_in_progress">In progress</string>
+    <!-- Tooltip informing user where the recently added controls are [CHAR_LIMIT=100] -->
+    <string name="controls_added_tooltip">Hold Power button to see new controls</string>
+
+    <!-- Controls menu, add [CHAR_LIMIT=30] -->
+    <string name="controls_menu_add">Add controls</string>
+    <!-- Controls menu, edit [CHAR_LIMIT=30] -->
+    <string name="controls_menu_edit">Edit controls</string>
 </resources>
