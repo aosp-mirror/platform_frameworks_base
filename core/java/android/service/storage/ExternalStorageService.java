@@ -25,11 +25,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
+import android.os.storage.StorageVolume;
+
+import com.android.internal.os.BackgroundThread;
 
 import java.io.File;
 import java.io.IOException;
@@ -97,7 +99,7 @@ public abstract class ExternalStorageService extends Service {
     public @interface SessionFlag {}
 
     private final ExternalStorageServiceWrapper mWrapper = new ExternalStorageServiceWrapper();
-    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
+    private final Handler mHandler = BackgroundThread.getHandler();
 
     /**
      * Called when the system starts a session associated with {@code deviceFd}
@@ -131,6 +133,20 @@ public abstract class ExternalStorageService extends Service {
      */
     public abstract void onEndSession(@NonNull String sessionId) throws IOException;
 
+    /**
+     * Called when any volume's state changes.
+     *
+     * <p> This is required to communicate volume state changes with the Storage Service before
+     * broadcasting to other apps. The Storage Service needs to process any change in the volume
+     * state (before other apps receive a broadcast for the same) to update the database so that
+     * other apps have the correct view of the volume.
+     *
+     * <p> Blocks until the Storage Service processes/scans the volume or fails in doing so.
+     *
+     * @param vol name of the volume that was changed
+     */
+    public abstract void onVolumeStateChanged(@NonNull StorageVolume vol) throws IOException;
+
     @Override
     @NonNull
     public final IBinder onBind(@NonNull Intent intent) {
@@ -146,6 +162,19 @@ public abstract class ExternalStorageService extends Service {
                 try {
                     onStartSession(sessionId, flag, deviceFd, new File(upperPath),
                             new File(lowerPath));
+                    sendResult(sessionId, null /* throwable */, callback);
+                } catch (Throwable t) {
+                    sendResult(sessionId, t, callback);
+                }
+            });
+        }
+
+        @Override
+        public void notifyVolumeStateChanged(String sessionId, StorageVolume vol,
+                RemoteCallback callback) {
+            mHandler.post(() -> {
+                try {
+                    onVolumeStateChanged(vol);
                     sendResult(sessionId, null /* throwable */, callback);
                 } catch (Throwable t) {
                     sendResult(sessionId, t, callback);
