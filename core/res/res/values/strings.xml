@@ -535,26 +535,28 @@
     <!-- Title of the Global Actions Dialog -->
     <string name="global_actions" product="default">Phone options</string>
 
-    <!-- label for item that locks the phone in the phone options dialog -->
+    <!-- label for item that locks the phone in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_lock">Screen lock</string>
 
-    <!-- label for item that turns off power in phone options dialog -->
+    <!-- label for item that turns off power in phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_power_off">Power off</string>
 
-    <!-- label for item that restarts phone in phone options dialog -->
-    <!-- TODO: promote to separate string-->
-    <string name="global_action_restart" translatable="false">@string/sim_restart_button</string>
+    <!-- label for item that shows options to power off and restart the phone [CHAR LIMIT=24]-->
+    <string name="global_action_power_options">Power</string>
 
-    <!-- label for item that starts emergency call -->
+    <!-- label for item that restarts phone in phone options dialog [CHAR LIMIT=24]-->
+    <string name="global_action_restart">Restart</string>
+
+    <!-- label for item that opens emergency features in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_emergency">Emergency</string>
 
-    <!-- label for item that generates a bug report in the phone options dialog -->
+    <!-- label for item that generates a bug report in the phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_bug_report">Bug report</string>
 
-    <!-- label for item that logouts the current user -->
+    <!-- label for item that logouts the current user [CHAR LIMIT=24]-->
     <string name="global_action_logout">End session</string>
 
-    <!-- label for screenshot item in power menu -->
+    <!-- label for screenshot item in power menu [CHAR LIMIT=24]-->
     <string name="global_action_screenshot">Screenshot</string>
 
     <!-- Take bug report menu title [CHAR LIMIT=30] -->
@@ -619,7 +621,7 @@
     <!-- label for item that launches voice assist in phone options dialog [CHAR LIMIT=15]-->
     <string name="global_action_voice_assist">Voice Assist</string>
 
-    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=15] -->
+    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=24] -->
     <string name="global_action_lockdown">Lockdown</string>
 
     <!-- Text to use when the number in a notification info is too large
