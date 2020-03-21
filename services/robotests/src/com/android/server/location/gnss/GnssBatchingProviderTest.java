@@ -1,4 +1,20 @@
-package com.android.server.location;
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.location.gnss;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -11,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.location.GnssBatchingProvider.GnssBatchingProviderNative;
+import com.android.server.location.gnss.GnssBatchingProvider.GnssBatchingProviderNative;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,6 +50,9 @@ public class GnssBatchingProviderTest {
     private GnssBatchingProviderNative mMockNative;
     private GnssBatchingProvider mTestProvider;
 
+    /**
+     * Mocks native methods and starts GnssBatchingProvider.
+     */
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -46,34 +65,52 @@ public class GnssBatchingProviderTest {
         mTestProvider.start(PERIOD_NANOS, WAKE_ON_FIFO_FULL);
     }
 
+    /**
+     * Test native start method is called.
+     */
     @Test
     public void start_nativeStarted() {
         verify(mMockNative).startBatch(eq(PERIOD_NANOS), eq(WAKE_ON_FIFO_FULL));
     }
 
+    /**
+     * Verify native stop method is called.
+     */
     @Test
     public void stop_nativeStopped() {
         mTestProvider.stop();
         verify(mMockNative).stopBatch();
     }
 
+    /**
+     * Verify native flush method is called.
+     */
     @Test
     public void flush_nativeFlushed() {
         mTestProvider.flush();
         verify(mMockNative).flushBatch();
     }
 
+    /**
+     * Verify getBatchSize returns value from native batch size method.
+     */
     @Test
     public void getBatchSize_nativeGetBatchSize() {
         assertThat(mTestProvider.getBatchSize()).isEqualTo(BATCH_SIZE);
     }
 
+    /**
+     * Verify resumeIfStarted method will call native start method a second time.
+     */
     @Test
     public void started_resume_started() {
         mTestProvider.resumeIfStarted();
         verify(mMockNative, times(2)).startBatch(eq(PERIOD_NANOS), eq(WAKE_ON_FIFO_FULL));
     }
 
+    /**
+     * Verify that if batching is stopped, resume will not call native start method.
+     */
     @Test
     public void stopped_resume_notStarted() {
         mTestProvider.stop();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.location.GnssNavigationMessage;
 import android.location.IGnssNavigationMessageListener;
@@ -23,8 +23,10 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.location.gnss.GnssListenerManager;
-import com.android.server.location.gnss.GnssManagerService;
+import com.android.server.location.AppForegroundHelper;
+import com.android.server.location.AppOpsHelper;
+import com.android.server.location.SettingsHelper;
+import com.android.server.location.UserInfoHelper;
 
 /**
  * An base implementation for GPS navigation messages provider.
@@ -105,16 +107,16 @@ public class GnssNavigationMessageProvider extends
     }
 
     @VisibleForTesting
-    public static class GnssNavigationMessageProviderNative {
-        public boolean isNavigationMessageSupported() {
+    static class GnssNavigationMessageProviderNative {
+        boolean isNavigationMessageSupported() {
             return native_is_navigation_message_supported();
         }
 
-        public boolean startNavigationMessageCollection() {
+        boolean startNavigationMessageCollection() {
             return native_start_navigation_message_collection();
         }
 
-        public boolean stopNavigationMessageCollection() {
+        boolean stopNavigationMessageCollection() {
             return native_stop_navigation_message_collection();
         }
     }

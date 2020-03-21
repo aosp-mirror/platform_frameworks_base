@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.location.GnssMeasurementsEvent;
 import android.location.GnssRequest;
@@ -26,8 +26,11 @@ import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.location.gnss.GnssListenerManager;
-import com.android.server.location.gnss.GnssManagerService;
+import com.android.server.location.AppForegroundHelper;
+import com.android.server.location.AppOpsHelper;
+import com.android.server.location.LocationUsageLogger;
+import com.android.server.location.SettingsHelper;
+import com.android.server.location.UserInfoHelper;
 
 import java.util.List;
 import java.util.Objects;
@@ -173,16 +176,16 @@ public class GnssMeasurementsProvider extends
     }
 
     @VisibleForTesting
-    public static class GnssMeasurementProviderNative {
-        public boolean isMeasurementSupported() {
+    static class GnssMeasurementProviderNative {
+        boolean isMeasurementSupported() {
             return native_is_measurement_supported();
         }
 
-        public boolean startMeasurementCollection(boolean enableFullTracking) {
+        boolean startMeasurementCollection(boolean enableFullTracking) {
             return native_start_measurement_collection(enableFullTracking);
         }
 
-        public boolean stopMeasurementCollection() {
+        boolean stopMeasurementCollection() {
             return native_stop_measurement_collection();
         }
     }
