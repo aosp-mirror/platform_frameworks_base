@@ -697,9 +697,9 @@
     <!-- size of the notification badge when applied to the conversation icon -->
     <dimen name="conversation_icon_size_badged">20dp</dimen>
     <!-- size of the notification badge when centered in a conversation -->
-    <dimen name="conversation_icon_size_centered">25dp</dimen>
+    <dimen name="conversation_icon_size_centered">26dp</dimen>
     <!-- margin on the top when the icon is centered for group conversations -->
-    <dimen name="conversation_icon_margin_top_centered">5dp</dimen>
+    <dimen name="conversation_icon_margin_top_centered">12dp</dimen>
 
     <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
     <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
