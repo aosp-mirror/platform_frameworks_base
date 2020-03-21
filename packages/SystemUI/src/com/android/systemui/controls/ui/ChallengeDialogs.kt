@@ -50,7 +50,8 @@ object ChallengeDialogs {
             cvh.context,
             android.R.style.Theme_DeviceDefault_Dialog_Alert
         ).apply {
-            setTitle(R.string.controls_pin_verify)
+            val res = cvh.context.resources
+            setTitle(res.getString(R.string.controls_pin_verify, *arrayOf(cvh.title.getText())))
             setView(R.layout.controls_dialog_pin)
             setPositiveButton(
                 android.R.string.ok,
