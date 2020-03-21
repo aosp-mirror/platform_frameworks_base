@@ -17,7 +17,7 @@
 package android.bluetooth;
 
 import android.Manifest;
-import android.annotation.Nullable;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -120,7 +120,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      * @return false on immediate error, true otherwise
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothA2dpSink service = getService();
@@ -277,7 +277,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
@@ -297,7 +297,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean setConnectionPolicy(@Nullable BluetoothDevice device,
+    public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
         final IBluetoothA2dpSink service = getService();
@@ -327,7 +327,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
@@ -346,7 +346,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public @ConnectionPolicy int getConnectionPolicy(@Nullable BluetoothDevice device) {
+    public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothA2dpSink service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -371,7 +371,7 @@ public final class BluetoothA2dpSink implements BluetoothProfile {
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
-    public boolean isAudioPlaying(@Nullable BluetoothDevice device) {
+    public boolean isAudioPlaying(@NonNull BluetoothDevice device) {
         final IBluetoothA2dpSink service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
             try {

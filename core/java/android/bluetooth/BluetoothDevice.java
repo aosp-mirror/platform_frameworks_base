@@ -36,8 +36,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Retention;
@@ -1100,8 +1098,8 @@ public final class BluetoothDevice implements Parcelable {
      * @return true on success, false on error
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean setAlias(@NonNull String alias) {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1124,8 +1122,8 @@ public final class BluetoothDevice implements Parcelable {
      * not have any battery reporting service, or return value is invalid
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getBatteryLevel() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1215,8 +1213,8 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean isBondingInitiatedLocally() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1539,7 +1537,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return true pin has been set false for error
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean setPin(@NonNull String pin) {
         byte[] pinBytes = convertPinToBytes(pin);
@@ -1576,8 +1574,8 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public boolean cancelPairing() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1608,8 +1606,8 @@ public final class BluetoothDevice implements Parcelable {
      * #ACCESS_UNKNOWN}, {@link #ACCESS_ALLOWED} or {@link #ACCESS_REJECTED}.
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public @AccessPermission int getPhonebookAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1716,8 +1714,8 @@ public final class BluetoothDevice implements Parcelable {
      * @return Whether the message access is allowed to this device.
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public @AccessPermission int getMessageAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -1766,7 +1764,7 @@ public final class BluetoothDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public @AccessPermission int getSimAccessPermission() {
         final IBluetooth service = sService;
         if (service == null) {
@@ -2021,7 +2019,7 @@ public final class BluetoothDevice implements Parcelable {
      * @return the pin code as a UTF-8 byte array, or null if it is an invalid Bluetooth pin.
      * @hide
      */
-    @VisibleForTesting
+    @UnsupportedAppUsage
     public static byte[] convertPinToBytes(String pin) {
         if (pin == null) {
             return null;
