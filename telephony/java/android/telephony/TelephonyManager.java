@@ -12975,6 +12975,7 @@ public class TelephonyManager {
      */
     @WorkerThread
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
     public boolean isIccLockEnabled() {
         try {
             ITelephony telephony = getITelephony();
