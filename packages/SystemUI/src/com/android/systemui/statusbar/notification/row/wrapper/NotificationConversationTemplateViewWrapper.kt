@@ -45,12 +45,12 @@ class NotificationConversationTemplateViewWrapper constructor(
     private val conversationLayout: ConversationLayout = view as ConversationLayout
 
     private lateinit var conversationIcon: View
-    private lateinit var conversationBadge: View
     private lateinit var conversationBadgeBg: View
     private lateinit var expandButton: View
     private lateinit var expandButtonContainer: View
     private lateinit var imageMessageContainer: ViewGroup
     private lateinit var messagingLinearLayout: MessagingLinearLayout
+    private lateinit var conversationTitle: View
     private lateinit var importanceRing: View
     private lateinit var appName: View
 
@@ -59,7 +59,6 @@ class NotificationConversationTemplateViewWrapper constructor(
         imageMessageContainer = conversationLayout.imageMessageContainer
         with(conversationLayout) {
             conversationIcon = requireViewById(com.android.internal.R.id.conversation_icon)
-            conversationBadge = requireViewById(com.android.internal.R.id.conversation_icon_badge)
             conversationBadgeBg =
                     requireViewById(com.android.internal.R.id.conversation_icon_badge_bg)
             expandButton = requireViewById(com.android.internal.R.id.expand_button)
@@ -67,6 +66,7 @@ class NotificationConversationTemplateViewWrapper constructor(
                     requireViewById(com.android.internal.R.id.expand_button_container)
             importanceRing = requireViewById(com.android.internal.R.id.conversation_icon_badge_ring)
             appName = requireViewById(com.android.internal.R.id.app_name_text)
+            conversationTitle = requireViewById(com.android.internal.R.id.conversation_text)
         }
     }
 
@@ -81,7 +81,10 @@ class NotificationConversationTemplateViewWrapper constructor(
         // This also clears the existing types
         super.updateTransformedTypes()
 
-        addTransformedViews(messagingLinearLayout, appName)
+        addTransformedViews(
+                messagingLinearLayout,
+                appName,
+                conversationTitle)
 
         // Let's ignore the image message container since that is transforming as part of the
         // messages already
@@ -113,7 +116,6 @@ class NotificationConversationTemplateViewWrapper constructor(
 
         addViewsTransformingToSimilar(
                 conversationIcon,
-                conversationBadge,
                 conversationBadgeBg,
                 expandButton,
                 importanceRing
