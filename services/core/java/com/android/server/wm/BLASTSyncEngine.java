@@ -19,7 +19,7 @@ package com.android.server.wm;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.ITaskOrganizer;
+import android.window.ITaskOrganizer;
 import android.view.SurfaceControl;
 
 import java.util.HashMap;

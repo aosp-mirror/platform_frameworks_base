@@ -27,17 +27,14 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.view.Gravity;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowContainerTransaction;
-import android.widget.FrameLayout;
+import android.window.ITaskOrganizer;
+import android.window.WindowContainerTransaction;
 import android.widget.LinearLayout;
 
 public class TaskOrganizerMultiWindowTest extends Activity {
