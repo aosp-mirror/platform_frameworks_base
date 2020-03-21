@@ -764,8 +764,13 @@ public class BiometricService extends SystemService {
                         + " config_biometric_sensors?");
             }
 
+            // Note that we allow BIOMETRIC_CONVENIENCE to register because BiometricService
+            // also does / will do other things such as keep track of lock screen timeout, etc.
+            // Just because a biometric is registered does not mean it can participate in
+            // the android.hardware.biometrics APIs.
             if (strength != Authenticators.BIOMETRIC_STRONG
-                    && strength != Authenticators.BIOMETRIC_WEAK) {
+                    && strength != Authenticators.BIOMETRIC_WEAK
+                    && strength != Authenticators.BIOMETRIC_CONVENIENCE) {
                 throw new IllegalStateException("Unsupported strength");
             }
 
@@ -1192,8 +1197,10 @@ public class BiometricService extends SystemService {
                         BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL);
             }
         } else {
+            // This should not be possible via the public API surface and is here mainly for
+            // "correctness". An exception should have been thrown before getting here.
             Slog.e(TAG, "No authenticators requested");
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
         }
     }
 

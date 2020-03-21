@@ -1276,20 +1276,6 @@ public class BiometricServiceTest {
                 mFingerprintAuthenticator);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testRegistrationWithUnsupportedStrength_throwsIllegalStateException()
-            throws Exception {
-        mBiometricService = new BiometricService(mContext, mInjector);
-        mBiometricService.onStart();
-
-        // Only STRONG and WEAK are supported. Let's enforce that CONVENIENCE cannot be
-        // registered. If there is a compelling reason, we can remove this constraint.
-        mBiometricService.mImpl.registerAuthenticator(
-                0 /* id */, 2 /* modality */,
-                Authenticators.BIOMETRIC_CONVENIENCE /* strength */,
-                mFingerprintAuthenticator);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testRegistrationWithNullAuthenticator_throwsIllegalArgumentException()
             throws Exception {
