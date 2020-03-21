@@ -48,9 +48,6 @@ static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
             "  const static std::map<int, StateAtomFieldOptions> "
             "kStateAtomsFieldOptions;\n");
     fprintf(out,
-            "  const static std::map<int, std::vector<int>> "
-            "kBytesFieldAtoms;\n");
-    fprintf(out,
             "  const static std::set<int> kWhitelistedAtoms;\n");
     fprintf(out, "};\n");
     fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n", atoms.maxPushedAtomId);
@@ -175,35 +172,6 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
             "const std::map<int, StateAtomFieldOptions> "
             "AtomsInfo::kStateAtomsFieldOptions = "
             "getStateAtomFieldOptions();\n");
-
-    fprintf(out,
-            "static std::map<int, std::vector<int>> "
-            "getBinaryFieldAtoms() {\n");
-    fprintf(out, "    std::map<int, std::vector<int>> options;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
-        if (atom->binaryFields.size() == 0) {
-            continue;
-        }
-        fprintf(out,
-                "\n    // Adding binary fields for atom "
-                "(%d)%s\n",
-                atom->code, atom->name.c_str());
-
-        for (const auto& field : atom->binaryFields) {
-            fprintf(out, "    options[%d /* %s */].push_back(%d);\n",
-                    atom->code, make_constant_name(atom->name).c_str(), field);
-        }
-    }
-
-    fprintf(out, "    return options;\n");
-    fprintf(out, "}\n");
-
-    fprintf(out,
-            "const std::map<int, std::vector<int>> "
-            "AtomsInfo::kBytesFieldAtoms = "
-            "getBinaryFieldAtoms();\n");
-
 }
 
 int write_atoms_info_header(FILE* out, const Atoms &atoms, const string& namespaceStr) {

@@ -1222,7 +1222,7 @@
   <java-symbol type="array" name="preloaded_color_state_lists" />
   <java-symbol type="array" name="preloaded_drawables" />
   <java-symbol type="array" name="preloaded_freeform_multi_window_drawables" />
-  <java-symbol type="array" name="simColors" />
+  <java-symbol type="array" name="sim_colors" />
   <java-symbol type="array" name="special_locale_codes" />
   <java-symbol type="array" name="special_locale_names" />
   <java-symbol type="array" name="supported_locales" />
@@ -3870,8 +3870,8 @@
   <java-symbol type="id" name="conversation_face_pile" />
   <java-symbol type="id" name="conversation_text" />
   <java-symbol type="id" name="message_icon_container" />
+  <java-symbol type="id" name="conversation_image_message_container" />
   <java-symbol type="dimen" name="conversation_expand_button_top_margin_expanded" />
-  <java-symbol type="dimen" name="conversation_expand_button_expanded_size" />
   <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
   <java-symbol type="dimen" name="conversation_badge_side_margin" />
   <java-symbol type="dimen" name="conversation_icon_size_badged" />
@@ -3885,7 +3885,9 @@
 
   <!-- Intent resolver and share sheet -->
   <java-symbol type="string" name="resolver_personal_tab" />
+  <java-symbol type="string" name="resolver_personal_tab_accessibility" />
   <java-symbol type="string" name="resolver_work_tab" />
+  <java-symbol type="string" name="resolver_work_tab_accessibility" />
   <java-symbol type="id" name="stub" />
   <java-symbol type="id" name="resolver_empty_state" />
   <java-symbol type="id" name="resolver_empty_state_icon" />

@@ -1820,14 +1820,37 @@ package android.net {
 
   public class Network implements android.os.Parcelable {
     ctor public Network(@NonNull android.net.Network);
+    method public int getNetId();
     method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method @NonNull public int[] getAdministratorUids();
     method public int[] getCapabilities();
+    method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
     field public static final int TRANSPORT_TEST = 7; // 0x7
+  }
+
+  public static class NetworkCapabilities.Builder {
+    ctor public NetworkCapabilities.Builder();
+    ctor public NetworkCapabilities.Builder(@NonNull android.net.NetworkCapabilities);
+    method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder addTransportType(int);
+    method @NonNull public android.net.NetworkCapabilities build();
+    method @NonNull public android.net.NetworkCapabilities.Builder removeCapability(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder removeTransportType(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setAdministratorUids(@NonNull int[]);
+    method @NonNull public android.net.NetworkCapabilities.Builder setLinkDownstreamBandwidthKbps(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder setLinkUpstreamBandwidthKbps(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder setNetworkSpecifier(@Nullable android.net.NetworkSpecifier);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setOwnerUid(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setRequestorPackageName(@Nullable String);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setRequestorUid(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP") public android.net.NetworkCapabilities.Builder setSignalStrength(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setSsid(@Nullable String);
+    method @NonNull public android.net.NetworkCapabilities.Builder setTransportInfo(@Nullable android.net.TransportInfo);
   }
 
   public class NetworkStack {
@@ -2997,6 +3020,7 @@ package android.provider {
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
+    field public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
@@ -3169,6 +3193,7 @@ package android.service.autofill {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public android.os.Bundle onGetInlineSuggestionsRendererInfo();
     method @Nullable public android.view.View onRenderSuggestion(@NonNull android.service.autofill.InlinePresentation, int, int);
+    method public final void startIntentSender(@NonNull android.content.IntentSender);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.InlineSuggestionRenderService";
   }
 

@@ -52,8 +52,7 @@
             android:layout_centerVertical="true"
             android:gravity="center_vertical"
             android:layout_alignEnd="@id/pkg_icon"
-            android:layout_toEndOf="@id/pkg_icon"
-            android:layout_alignStart="@id/mute">
+            android:layout_toEndOf="@id/pkg_icon">
             <TextView
                 android:id="@+id/channel_name"
                 android:layout_width="match_parent"

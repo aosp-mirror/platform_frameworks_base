@@ -22,6 +22,8 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Binder;
@@ -229,7 +231,7 @@ public class AudioTrack extends PlayerBase
     @IntDef({
         ENCAPSULATION_MODE_NONE,
         ENCAPSULATION_MODE_ELEMENTARY_STREAM,
-        ENCAPSULATION_MODE_HANDLE,
+        // ENCAPSULATION_MODE_HANDLE, @SystemApi
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EncapsulationMode {}
@@ -244,16 +246,17 @@ public class AudioTrack extends PlayerBase
     /**
      * This mode indicates metadata encapsulation with an elementary stream payload.
      * Both compressed and PCM format is allowed.
-     *
-     * TODO(b/147778408) Link: See the Android developers guide for more information.
      */
     public static final int ENCAPSULATION_MODE_ELEMENTARY_STREAM = 1;
     /**
-     * This mode indicates metadata encapsulation with a handle payload.
-     * The handle is a 64 bit long, provided by the Tuner API.
-     *
-     * TODO(b/147778408) Link: Fill in Tuner API to obtain the handle.
+     * This mode indicates metadata encapsulation with a handle payload
+     * and is set through {@link Builder#setEncapsulationMode(int)}.
+     * The handle is a 64 bit long, provided by the Tuner API
+     * in {@link android.os.Build.VERSION_CODES#R}.
+     * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     public static final int ENCAPSULATION_MODE_HANDLE = 2;
 
     /* Enumeration of metadata types permitted for use by
@@ -908,7 +911,9 @@ public class AudioTrack extends PlayerBase
      *
      * Use the Builder to construct the TunerConfiguration object,
      * which is then used by the {@link AudioTrack.Builder} to create an AudioTrack.
+     * @hide
      */
+    @SystemApi
     public static class TunerConfiguration {
         private final int mContentId;
         private final int mSyncId;
@@ -921,15 +926,17 @@ public class AudioTrack extends PlayerBase
         /**
          * Returns the contentId.
          */
-        public int getContentId() {
-            return mContentId;
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public @IntRange(from = 1) int getContentId() {
+            return mContentId; // The Builder ensures this is > 0.
         }
 
         /**
          * Returns the syncId.
          */
-        public int getSyncId() {
-            return mSyncId;
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+        public @IntRange(from = 1) int getSyncId() {
+            return mSyncId;  // The Builder ensures this is > 0.
         }
 
         /**
@@ -943,11 +950,13 @@ public class AudioTrack extends PlayerBase
              * Sets the contentId from the Tuner filter.
              *
              * @param contentId selects the audio stream to use.
-             *     See android.media.tv.tuner.filter.Filter#getId().
+             *     The contentId may be obtained from
+             *     {@link android.media.tv.tuner.filter.Filter#getId()}.
              *     This is always a positive number.
-             *     TODO(b/147778408) Link to tuner filter doc when unhidden.
+             *
              * @return the same Builder instance.
              */
+            @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
             public @NonNull Builder setContentId(@IntRange(from = 1) int contentId) {
                 if (contentId < 1) {
                     throw new IllegalArgumentException(
@@ -962,11 +971,13 @@ public class AudioTrack extends PlayerBase
              *
              * @param syncId selects the clock to use for synchronization
              *     of audio with other streams such as video.
-             *     See android.media.tv.tuner.Tuner#getAvSyncHwId().
+             *     The syncId may be obtained from
+             *     {@link android.media.tv.tuner.Tuner#getAvSyncHwId()}.
              *     This is always a positive number.
-             *     TODO(b/147778408) Link to tuner filter doc when unhidden.
+             *
              * @return the same Builder instance.
              */
+            @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
             public @NonNull Builder setSyncId(@IntRange(from = 1) int syncId) {
                 if (syncId < 1) {
                     throw new IllegalArgumentException("syncId " + syncId + " must be positive");
@@ -983,11 +994,12 @@ public class AudioTrack extends PlayerBase
              * @throws UnsupportedOperationException if the parameters set on the
              *     {@code Builder} are incompatible.
              */
+            @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
             public @NonNull TunerConfiguration build() {
                 if (mContentId < 1 || mSyncId < 1) {
                     throw new UnsupportedOperationException(
-                            "contentId " + mContentId
-                            + " syncId " + mSyncId
+                            "mContentId " + mContentId
+                            + " mSyncId " + mSyncId
                             + " must be set");
                 }
                 return new TunerConfiguration(mContentId, mSyncId);
@@ -1113,15 +1125,14 @@ public class AudioTrack extends PlayerBase
          *
          * Encapsulation mode allows metadata to be sent together with
          * the audio data payload in a {@code ByteBuffer}.
-         * The data format is specified in the Android developers site.
-         *
-         * TODO(b/147778408) Link to doc page.
+         * This requires a compatible hardware audio codec.
          *
          * @param encapsulationMode one of {@link AudioTrack#ENCAPSULATION_MODE_NONE},
-         *        {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM},
-         *        {@link AudioTrack#ENCAPSULATION_MODE_HANDLE}.
+         *        or {@link AudioTrack#ENCAPSULATION_MODE_ELEMENTARY_STREAM}.
          * @return the same Builder instance.
          */
+        // Note: with the correct permission {@code AudioTrack#ENCAPSULATION_MODE_HANDLE}
+        // may be used as well.
         public @NonNull Builder setEncapsulationMode(@EncapsulationMode int encapsulationMode) {
             switch (encapsulationMode) {
                 case ENCAPSULATION_MODE_NONE:
@@ -1225,7 +1236,10 @@ public class AudioTrack extends PlayerBase
          *
          * @param tunerConfiguration obtained by {@link AudioTrack.TunerConfiguration.Builder}.
          * @return the same Builder instance.
+         * @hide
          */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
         public @NonNull Builder setTunerConfiguration(
                 @NonNull TunerConfiguration tunerConfiguration) {
             if (tunerConfiguration == null) {
@@ -1475,7 +1489,7 @@ public class AudioTrack extends PlayerBase
      *
      * For AudioTracks incorporating a secondary Audio Description stream
      * (where such contents may be sent through an Encapsulation Mode
-     * {@link #ENCAPSULATION_MODE_ELEMENTARY_STREAM} or {@link #ENCAPSULATION_MODE_HANDLE}
+     * other than {@link #ENCAPSULATION_MODE_NONE}).
      * or internally by a HW channel),
      * the level of mixing of the Audio Description to the Main Audio stream
      * is controlled by this method.

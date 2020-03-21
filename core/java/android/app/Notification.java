@@ -33,6 +33,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -2535,8 +2536,8 @@ public class Notification implements Parcelable
             }
         }
 
-        if (mBubbleMetadata != null && mBubbleMetadata.getBubbleIcon() != null) {
-            final Icon icon = mBubbleMetadata.getBubbleIcon();
+        if (mBubbleMetadata != null && mBubbleMetadata.getIcon() != null) {
+            final Icon icon = mBubbleMetadata.getIcon();
             final int iconType = icon.getType();
             if (iconType == TYPE_URI_ADAPTIVE_BITMAP || iconType == TYPE_URI) {
                 visitor.accept(icon.getUri());
@@ -3597,15 +3598,14 @@ public class Notification implements Parcelable
          * notification content, or don't show {@link android.content.pm.ShortcutManager shortcuts}.
          *
          * If this notification has {@link BubbleMetadata} attached that was created with
-         * {@link BubbleMetadata.Builder#createShortcutBubble(String)} a check will be performed
-         * to ensure the shortcutId supplied to bubble metadata matches the shortcutId set here,
-         * if one was set. If the shortcutId's were specified but do not match, an exception
-         * is thrown.
+         * a shortcutId a check will be performed to ensure the shortcutId supplied to bubble
+         * metadata matches the shortcutId set here, if one was set. If the shortcutId's were
+         * specified but do not match, an exception is thrown.
          *
          * @param shortcutId the {@link ShortcutInfo#getId() id} of the shortcut this notification
          *                   supersedes
          *
-         * @see BubbleMetadata.Builder#createShortcutBubble(String)
+         * @see Notification.BubbleMetadata.Builder#Builder(String)
          */
         @NonNull
         public Builder setShortcutId(String shortcutId) {
@@ -5963,12 +5963,11 @@ public class Notification implements Parcelable
          * object.
          *
          * If this notification has {@link BubbleMetadata} attached that was created with
-         * {@link BubbleMetadata.Builder#createShortcutBubble(String)} a check will be performed
-         * to ensure the shortcutId supplied to bubble metadata matches the shortcutId set on the
-         * notification builder, if one was set. If the shortcutId's were specified but do not
-         * match, an exception is thrown here.
+         * a shortcutId a check will be performed to ensure the shortcutId supplied to bubble
+         * metadata matches the shortcutId set on the  notification builder, if one was set.
+         * If the shortcutId's were specified but do not match, an exception is thrown here.
          *
-         * @see BubbleMetadata.Builder#createShortcutBubble(String)
+         * @see Notification.BubbleMetadata.Builder#Builder(String)
          * @see #setShortcutId(String)
          */
         @NonNull
@@ -8744,9 +8743,8 @@ public class Notification implements Parcelable
      * <p>A bubble is used to display app content in a floating window over the existing
      * foreground activity. A bubble has a collapsed state represented by an icon and an
      * expanded state that displays an activity. These may be defined via
-     * {@link BubbleMetadata.Builder#createIntentBubble(PendingIntent, Icon)} or they may
-     * be definied via an existing shortcut using
-     * {@link BubbleMetadata.Builder#createShortcutBubble(String)}.
+     * {@link Builder#Builder(PendingIntent, Icon)} or they may
+     * be defined via an existing shortcut using {@link Builder#Builder(String)}.
      * </p>
      *
      * <b>Notifications with a valid and allowed bubble will display in collapsed state
@@ -8767,8 +8765,7 @@ public class Notification implements Parcelable
 
         /**
          * If set and the app creating the bubble is in the foreground, the bubble will be posted
-         * in its expanded state, with the contents of {@link #getBubbleIntent()} in a floating
-         * window.
+         * in its expanded state.
          *
          * <p>This flag has no effect if the app posting the bubble is not in the foreground.
          * The app is considered foreground if it is visible and on the screen, note that
@@ -8834,7 +8831,9 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @return the shortcut id used to populate the bubble, if it exists.
+         * @return the shortcut id used for this bubble if created via
+         * {@link Builder#Builder(String)} or null if created
+         * via {@link Builder#Builder(PendingIntent, Icon)}.
          */
         @Nullable
         public String getShortcutId() {
@@ -8842,20 +8841,20 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @deprecated use {@link #getBubbleIntent()} or use {@link #getShortcutId()} if created
-         * with a valid shortcut instead.
+         * @return the pending intent used to populate the floating window for this bubble, or
+         * null if this bubble is created via {@link Builder#Builder(String)}.
          */
-        @Deprecated
-        @NonNull
+        @SuppressLint("InvalidNullConversion")
+        @Nullable
         public PendingIntent getIntent() {
             return mPendingIntent;
         }
 
         /**
-         * @return the pending intent used to populate the floating window for this bubble, or
-         * null if this bubble is shortcut based.
+         * @deprecated use {@link #getIntent()} instead.
          */
         @Nullable
+        @Deprecated
         public PendingIntent getBubbleIntent() {
             return mPendingIntent;
         }
@@ -8869,27 +8868,27 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @deprecated use {@link #getBubbleIcon()} or use {@link #getShortcutId()} if created
-         * with a valid shortcut instead.
+         * @return the icon that will be displayed for this bubble when it is collapsed, or null
+         * if the bubble is created via {@link Builder#Builder(String)}.
          */
-        @Deprecated
-        @NonNull
+        @SuppressLint("InvalidNullConversion")
+        @Nullable
         public Icon getIcon() {
             return mIcon;
         }
 
         /**
-         * @return the icon that will be displayed for this bubble when it is collapsed, or null
-         * if the bubble is shortcut based.
+         * @deprecated use {@link #getIcon()} instead.
          */
         @Nullable
+        @Deprecated
         public Icon getBubbleIcon() {
             return mIcon;
         }
 
         /**
          * @return the ideal height, in DPs, for the floating window that app content defined by
-         * {@link #getBubbleIntent()} for this bubble. A value of 0 indicates a desired height has
+         * {@link #getIntent()} for this bubble. A value of 0 indicates a desired height has
          * not been set.
          */
         @Dimension(unit = DP)
@@ -8899,7 +8898,7 @@ public class Notification implements Parcelable
 
         /**
          * @return the resId of ideal height for the floating window that app content defined by
-         * {@link #getBubbleIntent()} for this bubble. A value of 0 indicates a res value has not
+         * {@link #getIntent()} for this bubble. A value of 0 indicates a res value has not
          * been provided for the desired height.
          */
         @DimenRes
@@ -9013,15 +9012,20 @@ public class Notification implements Parcelable
             private String mShortcutId;
 
             /**
-             * Constructs a new builder object.
+             * @deprecated use {@link Builder#Builder(String)} for a bubble created via a
+             * {@link ShortcutInfo} or {@link Builder#Builder(PendingIntent, Icon)} for a bubble
+             * created via a {@link PendingIntent}.
              */
+            @Deprecated
             public Builder() {
             }
 
             /**
-             * Creates a {@link BubbleMetadata.Builder} based on a shortcut. Only
-             * {@link android.content.pm.ShortcutManager#addDynamicShortcuts(List)} shortcuts are
-             * supported.
+             * Creates a {@link BubbleMetadata.Builder} based on a {@link ShortcutInfo}. To create
+             * a shortcut bubble, ensure that the shortcut associated with the provided
+             * {@param shortcutId} is published as a dynamic shortcut that was built with
+             * {@link ShortcutInfo.Builder#setLongLived(boolean)} being true, otherwise your
+             * notification will not be able to bubble.
              *
              * <p>The shortcut icon will be used to represent the bubble when it is collapsed.</p>
              *
@@ -9032,11 +9036,55 @@ public class Notification implements Parcelable
              * no bubble will be produced. If the shortcut is deleted while the bubble is active,
              * the bubble will be removed.</p>
              *
-             * <p>Calling this method will clear the contents of
-             * {@link #createIntentBubble(PendingIntent, Icon)} if it was previously called on
-             * this builder.</p>
+             * @throws NullPointerException if shortcutId is null.
+             *
+             * @see ShortcutInfo
+             * @see ShortcutInfo.Builder#setLongLived(boolean)
+             * @see android.content.pm.ShortcutManager#addDynamicShortcuts(List)
+             */
+            public Builder(@NonNull String shortcutId) {
+                if (TextUtils.isEmpty(shortcutId)) {
+                    throw new NullPointerException("Bubble requires a non-null shortcut id");
+                }
+                mShortcutId = shortcutId;
+            }
+
+            /**
+             * Creates a {@link BubbleMetadata.Builder} based on the provided intent and icon.
+             *
+             * <p>The icon will be used to represent the bubble when it is collapsed. An icon
+             * should be representative of the content within the bubble. If your app produces
+             * multiple bubbles, the icon should be unique for each of them.</p>
+             *
+             * <p>The intent that will be used when the bubble is expanded. This will display the
+             * app content in a floating window over the existing foreground activity. The intent
+             * should point to a resizable activity. </p>
+             *
+             * @throws NullPointerException if intent is null.
+             * @throws NullPointerException if icon is null.
+             */
+            public Builder(@NonNull PendingIntent intent, @NonNull Icon icon) {
+                if (intent == null) {
+                    throw new NullPointerException("Bubble requires non-null pending intent");
+                }
+                if (icon == null) {
+                    throw new NullPointerException("Bubbles require non-null icon");
+                }
+                if (icon.getType() != TYPE_URI_ADAPTIVE_BITMAP
+                        && icon.getType() != TYPE_URI) {
+                    Log.w(TAG, "Bubbles work best with icons of TYPE_URI or "
+                            + "TYPE_URI_ADAPTIVE_BITMAP. "
+                            + "In the future, using an icon of this type will be required.");
+                }
+                mPendingIntent = intent;
+                mIcon = icon;
+            }
+
+            /**
+             * @deprecated use {@link Builder#Builder(String)} instead.
              */
             @NonNull
+            @Deprecated
             public BubbleMetadata.Builder createShortcutBubble(@NonNull String shortcutId) {
                 if (!TextUtils.isEmpty(shortcutId)) {
                     // If shortcut id is set, we don't use these if they were previously set.
@@ -9048,23 +9096,10 @@ public class Notification implements Parcelable
             }
 
             /**
-             * Creates a {@link BubbleMetadata.Builder} based on the provided intent and icon.
-             *
-             * <p>The icon will be used to represent the bubble when it is collapsed. An icon
-             * should be representative of the content within the bubble. If your app produces
-             * multiple bubbles, the icon should be unique for each of them.</p>
-             *
-             * <p>The intent that will be used when the bubble is expanded. This will display the
-             * app content in a floating window over the existing foreground activity.</p>
-             *
-             * <p>Calling this method will clear the contents of
-             * {@link #createShortcutBubble(String)} if it was previously called on this builder.
-             * </p>
-             *
-             * @throws IllegalArgumentException if intent is null.
-             * @throws IllegalArgumentException if icon is null.
+             * @deprecated use {@link Builder#Builder(PendingIntent, Icon)} instead.
              */
             @NonNull
+            @Deprecated
             public BubbleMetadata.Builder createIntentBubble(@NonNull PendingIntent intent,
                     @NonNull Icon icon) {
                 if (intent == null) {
@@ -9086,31 +9121,61 @@ public class Notification implements Parcelable
             }
 
             /**
-             * @deprecated use {@link #createIntentBubble(PendingIntent, Icon)}
-             * or {@link #createShortcutBubble(String)} instead.
+             * Sets the intent for the bubble.
+             *
+             * <p>The intent that will be used when the bubble is expanded. This will display the
+             * app content in a floating window over the existing foreground activity. The intent
+             * should point to a resizable activity. </p>
+             *
+             * @throws NullPointerException  if intent is null.
+             * @throws IllegalStateException if this builder was created via
+             *                               {@link Builder#Builder(String)}.
              */
-            @Deprecated
             @NonNull
             public BubbleMetadata.Builder setIntent(@NonNull PendingIntent intent) {
-                if (intent == null) {
-                    throw new IllegalArgumentException("Bubble requires non-null pending intent");
+                if (mShortcutId != null) {
+                    throw new IllegalStateException("Created as a shortcut bubble, cannot set a "
+                            + "PendingIntent. Consider using "
+                            + "BubbleMetadata.Builder(PendingIntent,Icon) instead.");
                 }
-                mShortcutId = null;
+                if (intent == null) {
+                    throw new NullPointerException("Bubble requires non-null pending intent");
+                }
                 mPendingIntent = intent;
                 return this;
             }
 
             /**
-             * @deprecated use {@link #createIntentBubble(PendingIntent, Icon)}
-             * or {@link #createShortcutBubble(String)} instead.
+             * Sets the icon for the bubble. Can only be used if the bubble was created
+             * via {@link Builder#Builder(PendingIntent, Icon)}.
+             *
+             * <p>The icon will be used to represent the bubble when it is collapsed. An icon
+             * should be representative of the content within the bubble. If your app produces
+             * multiple bubbles, the icon should be unique for each of them.</p>
+             *
+             * <p>It is recommended to use an {@link Icon} of type {@link Icon#TYPE_URI}
+             * or {@link Icon#TYPE_URI_ADAPTIVE_BITMAP}</p>
+             *
+             * @throws NullPointerException  if icon is null.
+             * @throws IllegalStateException if this builder was created via
+             *                               {@link Builder#Builder(String)}.
              */
-            @Deprecated
             @NonNull
             public BubbleMetadata.Builder setIcon(@NonNull Icon icon) {
-                if (icon == null) {
-                    throw new IllegalArgumentException("Bubbles require non-null icon");
+                if (mShortcutId != null) {
+                    throw new IllegalStateException("Created as a shortcut bubble, cannot set an "
+                            + "Icon. Consider using "
+                            + "BubbleMetadata.Builder(PendingIntent,Icon) instead.");
                 }
-                mShortcutId = null;
+                if (icon == null) {
+                    throw new NullPointerException("Bubbles require non-null icon");
+                }
+                if (icon.getType() != TYPE_URI_ADAPTIVE_BITMAP
+                        && icon.getType() != TYPE_URI) {
+                    Log.w(TAG, "Bubbles work best with icons of TYPE_URI or "
+                            + "TYPE_URI_ADAPTIVE_BITMAP. "
+                            + "In the future, using an icon of this type will be required.");
+                }
                 mIcon = icon;
                 return this;
             }
@@ -9159,8 +9224,7 @@ public class Notification implements Parcelable
             }
 
             /**
-             * Sets whether the bubble will be posted in its expanded state (with the contents of
-             * {@link #getBubbleIntent()} in a floating window).
+             * Sets whether the bubble will be posted in its expanded state.
              *
              * <p>This flag has no effect if the app posting the bubble is not in the foreground.
              * The app is considered foreground if it is visible and on the screen, note that
@@ -9213,17 +9277,16 @@ public class Notification implements Parcelable
             /**
              * Creates the {@link BubbleMetadata} defined by this builder.
              *
-             * @throws IllegalStateException if neither {@link #createShortcutBubble(String)} or
-             * {@link #createIntentBubble(PendingIntent, Icon)} have been called on this builder.
+             * @throws NullPointerException if required elements have not been set.
              */
             @NonNull
             public BubbleMetadata build() {
                 if (mShortcutId == null && mPendingIntent == null) {
-                    throw new IllegalStateException(
+                    throw new NullPointerException(
                             "Must supply pending intent or shortcut to bubble");
                 }
                 if (mShortcutId == null && mIcon == null) {
-                    throw new IllegalStateException(
+                    throw new NullPointerException(
                             "Must supply an icon or shortcut for the bubble");
                 }
                 BubbleMetadata data = new BubbleMetadata(mPendingIntent, mDeleteIntent,

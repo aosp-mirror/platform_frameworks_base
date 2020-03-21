@@ -42,7 +42,7 @@ public class PowerUtilTest {
     private static final long THIRTY_HOURS_MILLIS = Duration.ofHours(30).toMillis();
     private static final String NORMAL_CASE_EXPECTED_PREFIX = "Should last until about";
     private static final String ENHANCED_SUFFIX = " based on your usage";
-    private static final String EXTEND_PREFIX = "Extend battery life past";
+    private static final String BATTERY_RUN_OUT_PREFIX = "Battery may run out by";
     // matches a time (ex: '1:15 PM', '2 AM', '23:00')
     private static final String TIME_OF_DAY_REGEX = " (\\d)+:?(\\d)* ((AM)*)|((PM)*)";
     // matches a percentage with parenthesis (ex: '(10%)')
@@ -189,9 +189,9 @@ public class PowerUtilTest {
         String info = PowerUtil.getBatteryTipStringFormatted(mContext,
                 SEVENTEEN_MIN_MILLIS);
 
-        // ex: Extend battery life past 1:15 PM
+        // ex: Battery may run out by 1:15 PM
         assertThat(info).containsMatch(Pattern.compile(
-                EXTEND_PREFIX + TIME_OF_DAY_REGEX));
+                BATTERY_RUN_OUT_PREFIX + TIME_OF_DAY_REGEX));
     }
 
     @Test

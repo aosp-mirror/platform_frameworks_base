@@ -138,7 +138,10 @@ public final class WifiMigration {
 
     /**
      * Load data from legacy shared wifi config store file.
-     * TODO(b/149418926): Add XSD for the AOSP file format for each file from R.
+     * <p>
+     * Expected AOSP format is available in the sample files under {@code /frameworks/base/wifi/
+     * java/android/net/wifi/migration_samples}.
+     * </p>
      * <p>
      * Note:
      * <li>OEMs need to change the implementation of
@@ -214,7 +217,10 @@ public final class WifiMigration {
 
     /**
      * Load data from legacy user wifi config store file.
-     * TODO(b/149418926): Add XSD for the AOSP file format for each file from R.
+     * <p>
+     * Expected AOSP format is available in the sample files under {@code /frameworks/base/wifi/
+     * java/android/net/wifi/migration_samples}.
+     * </p>
      * <p>
      * Note:
      * <li>OEMs need to change the implementation of

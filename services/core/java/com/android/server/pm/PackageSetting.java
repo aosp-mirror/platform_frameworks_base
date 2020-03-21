@@ -241,7 +241,8 @@ public class PackageSetting extends PackageSettingBase {
     public boolean setMimeGroup(String mimeGroup, List<String> mimeTypes) {
         ArraySet<String> oldMimeTypes = getMimeGroupInternal(mimeGroup);
         if (oldMimeTypes == null) {
-            return false;
+            throw new IllegalArgumentException("Unknown MIME group " + mimeGroup
+                    + " for package " + name);
         }
 
         ArraySet<String> newMimeTypes = new ArraySet<>(mimeTypes);
@@ -250,21 +251,11 @@ public class PackageSetting extends PackageSettingBase {
         return hasChanges;
     }
 
-    public boolean clearMimeGroup(String mimeGroup) {
-        ArraySet<String> mimeTypes = getMimeGroupInternal(mimeGroup);
-
-        if (mimeTypes == null || mimeTypes.isEmpty()) {
-            return false;
-        }
-
-        mimeTypes.clear();
-        return true;
-    }
-
     public List<String> getMimeGroup(String mimeGroup) {
         ArraySet<String> mimeTypes = getMimeGroupInternal(mimeGroup);
         if (mimeTypes == null) {
-            return null;
+            throw new IllegalArgumentException("Unknown MIME group " + mimeGroup
+                    + " for package " + name);
         }
         return new ArrayList<>(mimeTypes);
     }

@@ -68,7 +68,6 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private final @InsetsType int mTypes;
     private final InsetsAnimationControlCallbacks mController;
     private final WindowInsetsAnimation mAnimation;
-    private final boolean mFade;
     private Insets mCurrentInsets;
     private Insets mPendingInsets;
     private float mPendingFraction;
@@ -83,11 +82,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            boolean fade, @AnimationType int animationType) {
+            @AnimationType int animationType) {
         mControls = controls;
         mListener = listener;
         mTypes = types;
-        mFade = fade;
         mController = controller;
         mInitialInsetsState = new InsetsState(state, true /* copySources */);
         mCurrentInsets = getInsetsFromState(mInitialInsetsState, frame, null /* typeSideMap */);
@@ -299,8 +297,6 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
 
             // If the system is controlling the insets source, the leash can be null.
             if (leash != null) {
-                // TODO: use a better interpolation for fade.
-                alpha = mFade ? ((float) inset / maxInset * 0.3f + 0.7f) : alpha;
                 SurfaceParams params = new SurfaceParams.Builder(leash)
                         .withAlpha(side == ISIDE_FLOATING ? 1 : alpha)
                         .withMatrix(mTmpMatrix)

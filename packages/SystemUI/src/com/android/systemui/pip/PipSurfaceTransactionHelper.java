@@ -18,7 +18,9 @@ package com.android.systemui.pip;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.view.SurfaceControl;
 
 import com.android.systemui.R;
@@ -34,6 +36,12 @@ public class PipSurfaceTransactionHelper {
 
     private final boolean mEnableCornerRadius;
     private final int mCornerRadius;
+
+    /** for {@link #scale(SurfaceControl.Transaction, SurfaceControl, Rect, Rect)} operation */
+    private final Matrix mTmpTransform = new Matrix();
+    private final float[] mTmpFloat9 = new float[9];
+    private final RectF mTmpSourceRectF = new RectF();
+    private final RectF mTmpDestinationRectF = new RectF();
 
     @Inject
     public PipSurfaceTransactionHelper(Context context) {
@@ -59,6 +67,31 @@ public class PipSurfaceTransactionHelper {
     PipSurfaceTransactionHelper crop(SurfaceControl.Transaction tx, SurfaceControl leash,
             Rect destinationBounds) {
         tx.setWindowCrop(leash, destinationBounds.width(), destinationBounds.height())
+                .setPosition(leash, destinationBounds.left, destinationBounds.top);
+        return this;
+    }
+
+    /**
+     * Operates the scale (setMatrix) on a given transaction and leash
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, Rect destinationBounds) {
+        mTmpSourceRectF.set(sourceBounds);
+        mTmpDestinationRectF.set(destinationBounds);
+        mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
+                .setPosition(leash, destinationBounds.left, destinationBounds.top);
+        return this;
+    }
+
+    /**
+     * Resets the scale (setMatrix) on a given transaction and leash if there's any
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    PipSurfaceTransactionHelper resetScale(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect destinationBounds) {
+        tx.setMatrix(leash, Matrix.IDENTITY_MATRIX, mTmpFloat9)
                 .setPosition(leash, destinationBounds.left, destinationBounds.top);
         return this;
     }

@@ -1635,6 +1635,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ઍક્સેસિબિલિટી શૉર્ટકટે <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ચાલુ કરી"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ઍક્સેસિબિલિટી શૉર્ટકટે <xliff:g id="SERVICE_NAME">%1$s</xliff:g> બંધ કરી"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>નો ઉપયોગ કરવા માટે બન્ને વૉલ્યૂમ કીને ત્રણ સેકન્ડ સુધી દબાવી રાખો"</string>
+    <!-- no translation found for accessibility_button_prompt_text (29591089269861261) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (1950992471955288772) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1754236312534510178) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (1761210320049107435) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (6207697277963860927) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (8774465424241303774) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"વિસ્તૃતીકરણ"</string>
     <string name="user_switched" msgid="7249833311585228097">"વર્તમાન વપરાશકર્તા <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> પર સ્વિચ કરી રહ્યાં છે…"</string>
@@ -2025,19 +2037,33 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ગ્રૂપ વાતચીત"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"વ્યક્તિગત"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"કાર્યાલય"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"વ્યક્તિગત વ્યૂ"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"ઑફિસ વ્યૂ"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ઑફિસ માટેની ઍપની સાથે શેર કરી શકતાં નથી"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"વ્યક્તિગત ઍપની સાથે શેર કરી શકતાં નથી"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"તમારા IT વ્યવસ્થાપકે વ્યક્તિગત અને કાર્યાલયની પ્રોફાઇલ વચ્ચે શેરિંગની સુવિધાને બ્લૉક કરી છે"</string>
-    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"ઑફિસ માટેની ઍપનો ઍક્સેસ કરી શકતાં નથી"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"તમારા IT વ્યવસ્થાપક તમને ઑફિસ માટેની ઍપમાં વ્યક્તિગત કન્ટેન્ટ જોવા દેતા નથી"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"વ્યક્તિગત ઍપનો ઍક્સેસ કરી શકતાં નથી"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"તમારા IT વ્યવસ્થાપક તમને વ્યક્તિગત ઍપમાં ઑફિસ માટેનું કન્ટેન્ટ જોવા દેતા નથી"</string>
-    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"કન્ટેન્ટ શેર કરવા માટે કાર્યાલયની પ્રોફાઇલ શેર કરો"</string>
-    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"કન્ટેન્ટ જોવા માટે કાર્યાલયની પ્રોફાઇલ ચાલુ કરો"</string>
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"કોઈ ઍપ ઉપલબ્ધ નથી"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
+    <skip />
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ચાલુ કરો"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરો અથવા ચલાવો"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ડિફૉલ્ટ ડાયલર ઍપ તરીકે સોંપણી કરવામાં આવવા પર આ ઍપને ટેલિફોની કૉલમાં ઑડિયો રેકૉર્ડ કરવાની અથવા ચલાવવાની મંજૂરી આપે છે."</string>
 </resources>

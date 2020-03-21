@@ -24,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -175,6 +176,12 @@ public class PipAnimationControllerTest extends SysuiTestCase {
 
         @Override
         public SurfaceControl.Transaction setCornerRadius(SurfaceControl leash, float radius) {
+            return this;
+        }
+
+        @Override
+        public SurfaceControl.Transaction setMatrix(SurfaceControl leash, Matrix matrix,
+                float[] float9) {
             return this;
         }
 

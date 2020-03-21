@@ -416,7 +416,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"වර්ණ දුර්වලතාවය (රතු-කොළ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"වර්ණ අන්ධතාවය (නිල්-කහ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"වර්ණ නිවැරදි කිරීම"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"වර්ණ අන්ධතාවෙන් පෙළෙන පුද්ගලයන්ට වඩාත් නිරවද්‍ය වර්ණ බැලීමට වර්ණ නිවැරදි කිරීම සහාය වේ"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> මගින් ඉක්මවන ලදී"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ක් පමණ ඉතිරියි"</string>

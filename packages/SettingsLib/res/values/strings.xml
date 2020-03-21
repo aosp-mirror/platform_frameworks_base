@@ -605,6 +605,8 @@
     <string name="adb_wireless_qrcode_pairing_title">Scan QR code</string>
     <!-- [CHAR LIMIT=NONE] Adb Wireless QR code pairing description -->
     <string name="adb_wireless_qrcode_pairing_description">Pair device over Wi\u2011Fi by scanning a QR Code</string>
+    <!-- [CHAR LIMIT=NONE] Toast message when trying to enable Wi-Fi debugging and no Wi-Fi network connected -->
+    <string name="adb_wireless_no_network_msg">Please connect to a Wi\u2011Fi network</string>
     <!--Adb wireless search Keywords [CHAR LIMIT=NONE]-->
     <string name="keywords_adb_wireless">adb, debug, dev</string>
     <!-- [CHAR LIMIT=NONE] Setting checkbox title for Whether to include bug report item in power menu. -->
@@ -1066,8 +1068,8 @@
     <string name="power_discharge_by_only">Should last until about <xliff:g id="time">%1$s</xliff:g></string>
     <!-- [CHAR_LIMIT=20] Label for estimated time that phone will run out of battery -->
     <string name="power_discharge_by_only_short">Until <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
-    <!-- [CHAR_LIMIT=100] Extend the battery life past a certain time -->
-    <string name="power_suggestion_extend_battery">Extend battery life past <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
+    <!-- [CHAR_LIMIT=100] Label for estimated time that phone will run out of battery -->
+    <string name="power_suggestion_battery_run_out">Battery may run out by <xliff:g id="time" example="12 PM">%1$s</xliff:g></string>
 
     <!-- [CHAR_LIMIT=60] label for estimated remaining duration of battery when under a certain amount -->
     <string name="power_remaining_less_than_duration_only">Less than <xliff:g id="threshold">%1$s</xliff:g> remaining</string>

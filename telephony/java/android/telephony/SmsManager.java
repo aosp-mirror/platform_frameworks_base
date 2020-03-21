@@ -697,7 +697,7 @@ public final class SmsManager {
                         ISms iSms = getISmsServiceOrThrow();
                         if (iSms != null) {
                             iSms.sendTextForSubscriberWithOptions(subId,
-                                    null, destinationAddress,
+                                    null, null, destinationAddress,
                                     scAddress,
                                     text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                                     expectMore, finalValidity);
@@ -719,7 +719,7 @@ public final class SmsManager {
                 ISms iSms = getISmsServiceOrThrow();
                 if (iSms != null) {
                     iSms.sendTextForSubscriberWithOptions(getSubscriptionId(),
-                            null, destinationAddress,
+                            null, null, destinationAddress,
                             scAddress,
                             text, sentIntent, deliveryIntent, persistMessage, finalPriority,
                             expectMore, finalValidity);
@@ -1672,7 +1672,6 @@ public final class SmsManager {
      * @throws IllegalArgumentException if pdu is null.
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean copyMessageToIcc(
             @Nullable byte[] smsc, @NonNull byte[] pdu, @StatusOnIcc int status) {
@@ -1717,7 +1716,6 @@ public final class SmsManager {
      *
      * {@hide}
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
@@ -1798,7 +1796,6 @@ public final class SmsManager {
      *
      * {@hide}
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public @NonNull List<SmsMessage> getMessagesFromIcc() {
         return getAllMessagesFromIcc();

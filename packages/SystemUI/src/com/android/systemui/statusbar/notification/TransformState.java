@@ -100,7 +100,7 @@ public class TransformState {
         transformViewFullyFrom(otherState, transformationAmount);
     }
 
-    protected void ensureVisible() {
+    public void ensureVisible() {
         if (mTransformedView.getVisibility() == View.INVISIBLE
                 || mTransformedView.getAlpha() != 1.0f) {
             // We have the same content, lets show ourselves

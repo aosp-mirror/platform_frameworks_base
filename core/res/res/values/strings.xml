@@ -533,26 +533,28 @@
     <!-- Title of the Global Actions Dialog -->
     <string name="global_actions" product="default">Phone options</string>
 
-    <!-- label for item that locks the phone in the phone options dialog -->
+    <!-- label for item that locks the phone in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_lock">Screen lock</string>
 
-    <!-- label for item that turns off power in phone options dialog -->
+    <!-- label for item that turns off power in phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_power_off">Power off</string>
 
-    <!-- label for item that restarts phone in phone options dialog -->
-    <!-- TODO: promote to separate string-->
-    <string name="global_action_restart" translatable="false">@string/sim_restart_button</string>
+    <!-- label for item that shows options to power off and restart the phone [CHAR LIMIT=24]-->
+    <string name="global_action_power_options">Power</string>
 
-    <!-- label for item that starts emergency call -->
+    <!-- label for item that restarts phone in phone options dialog [CHAR LIMIT=24]-->
+    <string name="global_action_restart">Restart</string>
+
+    <!-- label for item that opens emergency features in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_emergency">Emergency</string>
 
-    <!-- label for item that generates a bug report in the phone options dialog -->
+    <!-- label for item that generates a bug report in the phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_bug_report">Bug report</string>
 
-    <!-- label for item that logouts the current user -->
+    <!-- label for item that logouts the current user [CHAR LIMIT=24]-->
     <string name="global_action_logout">End session</string>
 
-    <!-- label for screenshot item in power menu -->
+    <!-- label for screenshot item in power menu [CHAR LIMIT=24]-->
     <string name="global_action_screenshot">Screenshot</string>
 
     <!-- Take bug report menu title [CHAR LIMIT=30] -->
@@ -617,7 +619,7 @@
     <!-- label for item that launches voice assist in phone options dialog [CHAR LIMIT=15]-->
     <string name="global_action_voice_assist">Voice Assist</string>
 
-    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=15] -->
+    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=24] -->
     <string name="global_action_lockdown">Lockdown</string>
 
     <!-- Text to use when the number in a notification info is too large
@@ -4348,6 +4350,35 @@
         accessibility feature.
     </string>
 
+    <!-- Dialog title for dialog shown when the multiple accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning_title">Turn on accessibility features?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the multiple accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning">Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="service" example="TalkBack">%1$s</xliff:g>\nYou can change selected features in Settings > Accessibility.</string>
+
+    <!-- Used in multiple service warning to list current features. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_list">\t• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
+
+    <!-- Dialog title for dialog shown when the TalkBack shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_talkback_warning_title">Turn on TalkBack?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the TalkBack via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_talkback_warning">Holding down both volume keys for a few seconds turns on TalkBack, a screen reader that is helpful for people who are blind or have low vision. TalkBack completely changes how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
+
+    <!-- Dialog title for dialog shown when this accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning_title">Turn on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling this accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning">Holding down both volume keys for a few seconds turns on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, an accessibility feature. This may change how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none]-->
+    <string name="accessibility_shortcut_on">Turn on</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_off">Don’t turn on</string>
+
     <!-- Title for a warning about security implications of enabling an accessibility
     service. [CHAR LIMIT=NONE] -->
     <string name="accessibility_enable_service_title">Allow
@@ -4430,33 +4461,29 @@
      shown in the warning dialog about the accessibility shortcut. -->
     <string name="color_correction_feature_name">Color Correction</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
-    service.-->
-    <string name="accessibility_shortcut_enabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> on</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility
-    service.-->
-    <string name="accessibility_shortcut_disabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> off</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_disabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned off.</string>
 
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_spoken_feedback">Press and hold both volume keys for three seconds to use
         <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g></string>
 
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_prompt_text">Choose a app to use when you tap the accessibility button:</string>
+    <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_prompt_text">Choose a app to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
+    <string name="accessibility_gesture_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_prompt_text">Choose a app to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
+    <string name="accessibility_gesture_3finger_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
 
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_instructional_text">To switch between apps, touch &amp; hold the accessibility button.</string>
+    <string name="accessibility_button_instructional_text">To switch between features, touch &amp; hold the accessibility button.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_instructional_text">To switch between apps, swipe up with two fingers and hold.</string>
+    <string name="accessibility_gesture_instructional_text">To switch between features, swipe up with two fingers and hold.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_instructional_text">To switch between apps, swipe up with three fingers and hold.</string>
+    <string name="accessibility_gesture_3finger_instructional_text">To switch between features, swipe up with three fingers and hold.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
@@ -5352,7 +5379,7 @@
     </plurals>
 
     <!-- ChooserActivity - No direct share targets are available. [CHAR LIMIT=NONE] -->
-    <string name="chooser_no_direct_share_targets">Direct share not available</string>
+    <string name="chooser_no_direct_share_targets">No recommended people to share with</string>
 
     <!-- ChooserActivity - Alphabetically sorted apps list label. [CHAR LIMIT=NONE] -->
     <string name="chooser_all_apps_button_label">Apps list</string>
@@ -5402,6 +5429,11 @@
     <string name="resolver_personal_tab">Personal</string>
     <!-- Label of a tab on a screen. A user can tap this tab to switch to the 'Work' view (that shows their work content) if they have a work profile on their device. [CHAR LIMIT=NONE] -->
     <string name="resolver_work_tab">Work</string>
+
+    <!-- Accessibility label for the personal tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_personal_tab_accessibility">Personal view</string>
+    <!-- Accessibility label for the work tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_work_tab_accessibility">Work view</string>
 
     <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with work apps. [CHAR LIMIT=NONE] -->
     <string name="resolver_cant_share_with_work_apps">Can\u2019t share this with work apps</string>

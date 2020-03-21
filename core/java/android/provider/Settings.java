@@ -8058,8 +8058,11 @@ public final class Settings {
         @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
         public static final String SYNC_PARENT_SOUNDS = "sync_parent_sounds";
 
-        /** @hide */
+        /**
+         * @hide
+         */
         @UnsupportedAppUsage
+        @TestApi
         public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
 
         /**

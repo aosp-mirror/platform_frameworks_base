@@ -17,9 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.content.Context;
 import android.media.tv.tuner.TunerUtils;
 
 /**
@@ -50,27 +48,24 @@ public class AvSettings extends Settings {
     /**
      * Creates a builder for {@link AvSettings}.
      *
-     * @param context the context of the caller.
      * @param mainType the filter main type.
      * @param isAudio {@code true} if it's audio settings; {@code false} if it's video settings.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(
-            @NonNull Context context, @Filter.Type int mainType, boolean isAudio) {
-        TunerUtils.checkTunerPermission(context);
+    public static Builder builder(@Filter.Type int mainType, boolean isAudio) {
         return new Builder(mainType, isAudio);
     }
 
     /**
      * Builder for {@link AvSettings}.
      */
-    public static class Builder extends Settings.Builder<Builder> {
+    public static class Builder {
+        private final int mMainType;
         private final boolean mIsAudio;
         private boolean mIsPassthrough;
 
         private Builder(int mainType, boolean isAudio) {
-            super(mainType);
+            mMainType = mainType;
             mIsAudio = isAudio;
         }
 
@@ -89,11 +84,6 @@ public class AvSettings extends Settings {
         @NonNull
         public AvSettings build() {
             return new AvSettings(mMainType, mIsAudio, mIsPassthrough);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 }

@@ -43,6 +43,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Enrollment information about the different available keyphrases.
@@ -119,6 +120,11 @@ public class KeyphraseEnrollmentInfo {
     private final KeyphraseMetadata[] mKeyphrases;
 
     /**
+     * Set of UIDs associated with the detected enrollment applications.
+     */
+    private final Set<Integer> mEnrollmentApplicationUids;
+
+    /**
      * Map between KeyphraseMetadata and the package name of the enrollment app that provides it.
      */
     final private Map<KeyphraseMetadata, String> mKeyphrasePackageMap;
@@ -136,11 +142,13 @@ public class KeyphraseEnrollmentInfo {
             mParseError = "No enrollment applications found";
             mKeyphrasePackageMap = Collections.<KeyphraseMetadata, String>emptyMap();
             mKeyphrases = null;
+            mEnrollmentApplicationUids = Collections.emptySet();
             return;
         }
 
         List<String> parseErrors = new LinkedList<String>();
         mKeyphrasePackageMap = new HashMap<KeyphraseMetadata, String>();
+        mEnrollmentApplicationUids = new ArraySet<>();
         for (ResolveInfo ri : ris) {
             try {
                 ApplicationInfo ai = pm.getApplicationInfo(
@@ -162,6 +170,7 @@ public class KeyphraseEnrollmentInfo {
                         getKeyphraseMetadataFromApplicationInfo(pm, ai, parseErrors);
                 if (metadata != null) {
                     mKeyphrasePackageMap.put(metadata, ai.packageName);
+                    mEnrollmentApplicationUids.add(ai.uid);
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 String error = "error parsing voice enrollment meta-data for "
@@ -364,9 +373,21 @@ public class KeyphraseEnrollmentInfo {
         return null;
     }
 
+    /**
+     * Tests if the input UID matches a supported enrollment application.
+     *
+     * @param uid UID of the caller to test against.
+     * @return Returns true if input uid matches the uid of a supported enrollment application.
+     *         False if not.
+     */
+    public boolean isUidSupportedEnrollmentApplication(int uid) {
+        return mEnrollmentApplicationUids.contains(uid);
+    }
+
     @Override
     public String toString() {
         return "KeyphraseEnrollmentInfo [KeyphrasePackageMap=" + mKeyphrasePackageMap.toString()
+                + ", enrollmentApplicationUids=" + mEnrollmentApplicationUids.toString()
                 + ", ParseError=" + mParseError + "]";
     }
 }

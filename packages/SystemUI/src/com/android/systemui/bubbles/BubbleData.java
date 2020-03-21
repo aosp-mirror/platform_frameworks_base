@@ -203,10 +203,7 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "promoteBubbleFromOverflow: " + bubble);
         }
-
-        // Preserve new order for next repack, which sorts by last updated time.
-        bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
-        mOverflowBubbles.remove(bubble);
+        moveOverflowBubbleToPending(bubble);
         bubble.inflate(
                 b -> {
                     notificationEntryUpdated(bubble, /* suppressFlyout */
@@ -215,6 +212,13 @@ public class BubbleData {
                 },
                 mContext, stack, factory);
         dispatchPendingChanges();
+    }
+
+    private void moveOverflowBubbleToPending(Bubble b) {
+        // Preserve new order for next repack, which sorts by last updated time.
+        b.markUpdatedAt(mTimeSource.currentTimeMillis());
+        mOverflowBubbles.remove(b);
+        mPendingBubbles.add(b);
     }
 
     /**
@@ -228,8 +232,7 @@ public class BubbleData {
             for (int i = 0; i < mOverflowBubbles.size(); i++) {
                 Bubble b = mOverflowBubbles.get(i);
                 if (b.getKey().equals(entry.getKey())) {
-                    mOverflowBubbles.remove(b);
-                    mPendingBubbles.add(b);
+                    moveOverflowBubbleToPending(b);
                     return b;
                 }
             }
@@ -445,6 +448,7 @@ public class BubbleData {
                 Log.d(TAG, "overflowing bubble: " + bubble);
             }
             mOverflowBubbles.add(0, bubble);
+            bubble.stopInflation();
 
             if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
                 // Remove oldest bubble.

@@ -35,6 +35,7 @@ import android.os.ParcelableException;
 import android.os.RemoteCallback;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
+import android.os.storage.StorageVolume;
 import android.service.storage.ExternalStorageService;
 import android.service.storage.IExternalStorageService;
 import android.text.TextUtils;
@@ -96,6 +97,23 @@ public final class StorageUserConnection {
             Session session = new Session(sessionId, upperPath, lowerPath);
             mSessions.put(sessionId, session);
             mActiveConnection.startSessionLocked(session, pfd);
+        }
+    }
+
+    /**
+     * Notifies Storage Service about volume state changed.
+     *
+     * @throws ExternalStorageServiceException if failed to notify the Storage Service that
+     * {@code StorageVolume} is changed
+     */
+    public void notifyVolumeStateChanged(String sessionId, StorageVolume vol)
+            throws ExternalStorageServiceException {
+        Objects.requireNonNull(sessionId);
+        Objects.requireNonNull(vol);
+
+        prepareRemote();
+        synchronized (mLock) {
+            mActiveConnection.notifyVolumeStateChangedLocked(sessionId, vol);
         }
     }
 
@@ -284,6 +302,20 @@ public final class StorageUserConnection {
                 maybeThrowExceptionLocked();
             } catch (Exception e) {
                 throw new ExternalStorageServiceException("Failed to end session: " + session, e);
+            }
+        }
+
+        public void notifyVolumeStateChangedLocked(String sessionId, StorageVolume vol) throws
+                ExternalStorageServiceException {
+            CountDownLatch latch = new CountDownLatch(1);
+            try {
+                mRemote.notifyVolumeStateChanged(sessionId, vol, new RemoteCallback(
+                        result -> setResultLocked(latch, result)));
+                waitForLatch(latch, "notify_volume_state_changed " + vol);
+                maybeThrowExceptionLocked();
+            } catch (Exception e) {
+                throw new ExternalStorageServiceException("Failed to notify volume state changed "
+                        + "for vol : " + vol, e);
             }
         }
 

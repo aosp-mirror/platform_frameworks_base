@@ -416,7 +416,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"क्षीण रक्तवर्णांधता (लाल-हिरवा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"रंग दृष्टी कमतरता (निळा-पिवळा)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधारणा"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"रंग सुधारणा ही रंगांधळेपणा असलेल्या लोकांना रंग अधिक अचूक दिसण्यात मदत करते"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> द्वारे अधिलिखित"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"अंदाजे <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाकी आहे"</string>

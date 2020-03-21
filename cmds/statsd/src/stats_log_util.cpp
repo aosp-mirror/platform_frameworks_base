@@ -357,30 +357,7 @@ void writeFieldValueTreeToStreamHelper(int tagId, const std::vector<FieldValue>&
                     protoOutput->write(FIELD_TYPE_FLOAT | fieldNum, dim.mValue.float_value);
                     break;
                 case STRING: {
-                    bool isBytesField = false;
-                    // Bytes field is logged via string format in log_msg format. So here we check
-                    // if this string field is a byte field.
-                    std::map<int, std::vector<int>>::const_iterator itr;
-                    if (depth == 0 && (itr = AtomsInfo::kBytesFieldAtoms.find(tagId)) !=
-                                              AtomsInfo::kBytesFieldAtoms.end()) {
-                        const std::vector<int>& bytesFields = itr->second;
-                        for (int bytesField : bytesFields) {
-                            if (bytesField == fieldNum) {
-                                // This is a bytes field
-                                isBytesField = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (isBytesField) {
-                        if (dim.mValue.str_value.length() > 0) {
-                            protoOutput->write(FIELD_TYPE_MESSAGE | fieldNum,
-                                               (const char*)dim.mValue.str_value.c_str(),
-                                               dim.mValue.str_value.length());
-                        }
-                    } else {
-                        protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
-                    }
+                    protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
                     break;
                 }
                 case STORAGE:
