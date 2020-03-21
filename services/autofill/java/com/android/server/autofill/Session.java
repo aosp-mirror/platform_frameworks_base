@@ -2604,17 +2604,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void updateViewStateAndUiOnValueChangedLocked(AutofillId id, AutofillValue value,
             ViewState viewState, int flags) {
-        viewState.setCurrentValue(value);
-
-        final String filterText;
+        final String textValue;
         if (value == null || !value.isText()) {
-            filterText = null;
+            textValue = null;
         } else {
             final CharSequence text = value.getTextValue();
             // Text should never be null, but it doesn't hurt to check to avoid a
             // system crash...
-            filterText = (text == null) ? null : text.toString();
+            textValue = (text == null) ? null : text.toString();
         }
+        updateFilteringStateOnValueChangedLocked(textValue, viewState);
+
+        viewState.setCurrentValue(value);
+
+        final String filterText = textValue;
 
         final AutofillValue filledValue = viewState.getAutofilledValue();
         if (filledValue != null) {
@@ -2643,6 +2646,52 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         viewState.setState(ViewState.STATE_CHANGED);
         getUiForShowing().filterFillUi(filterText, this);
+    }
+
+    /**
+     * Disable filtering of inline suggestions for further text changes in this view if any
+     * character was removed earlier and now any character is being added. Such behaviour may
+     * indicate the IME attempting to probe the potentially sensitive content of inline suggestions.
+     */
+    @GuardedBy("mLock")
+    private void updateFilteringStateOnValueChangedLocked(@Nullable String newTextValue,
+            ViewState viewState) {
+        if (newTextValue == null) {
+            // Don't just return here, otherwise the IME can circumvent this logic using non-text
+            // values.
+            newTextValue = "";
+        }
+        final AutofillValue currentValue = viewState.getCurrentValue();
+        final String currentTextValue;
+        if (currentValue == null || !currentValue.isText()) {
+            currentTextValue = "";
+        } else {
+            currentTextValue = currentValue.getTextValue().toString();
+        }
+
+        if ((viewState.getState() & ViewState.STATE_CHAR_REMOVED) == 0) {
+            if (!containsCharsInOrder(newTextValue, currentTextValue)) {
+                viewState.setState(ViewState.STATE_CHAR_REMOVED);
+            }
+        } else if (!containsCharsInOrder(currentTextValue, newTextValue)) {
+            // Characters were added or replaced.
+            viewState.setState(ViewState.STATE_INLINE_DISABLED);
+        }
+    }
+
+    /**
+     * Returns true if {@code s1} contains all characters of {@code s2}, in order.
+     */
+    private static boolean containsCharsInOrder(String s1, String s2) {
+        int prevIndex = -1;
+        for (char ch : s2.toCharArray()) {
+            int index = TextUtils.indexOf(s1, ch, prevIndex + 1);
+            if (index == -1) {
+                return false;
+            }
+            prevIndex = index;
+        }
+        return true;
     }
 
     @Override
@@ -2735,6 +2784,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
+        final ViewState currentView = mViewStates.get(mCurrentViewId);
+        if ((currentView.getState() & ViewState.STATE_INLINE_DISABLED) != 0) {
+            response.getDatasets().clear();
+        }
         InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createInlineSuggestionsResponse(
                         inlineSuggestionsRequest.get(), response, filterText, mCurrentViewId,

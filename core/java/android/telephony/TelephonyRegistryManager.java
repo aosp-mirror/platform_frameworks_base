@@ -61,7 +61,6 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-@TestApi
 public class TelephonyRegistryManager {
 
     private static final String TAG = "TelephonyRegistryManager";

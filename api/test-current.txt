@@ -974,6 +974,7 @@ package android.content.pm {
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_GRANTED_BY_ROLE = 32768; // 0x8000
+    field public static final int FLAG_PERMISSION_ONE_TIME = 65536; // 0x10000
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT = 2048; // 0x800
     field public static final int FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT = 4096; // 0x1000
@@ -3799,43 +3800,6 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1; // 0xffffffff
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
-  }
-
-  public class TelephonyRegistryManager {
-    method public void addOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
-    method public void addOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
-    method public void listenForSubscriber(int, @NonNull String, @NonNull String, @NonNull android.telephony.PhoneStateListener, int, boolean);
-    method public void notifyActiveDataSubIdChanged(int);
-    method public void notifyBarringInfoChanged(int, int, @NonNull android.telephony.BarringInfo);
-    method public void notifyCallForwardingChanged(int, boolean);
-    method public void notifyCallQualityChanged(int, int, @NonNull android.telephony.CallQuality, int);
-    method public void notifyCallStateChanged(int, int, int, @Nullable String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyCallStateChangedForAllSubscriptions(int, @Nullable String);
-    method public void notifyCarrierNetworkChange(boolean);
-    method public void notifyCellInfoChanged(int, @NonNull java.util.List<android.telephony.CellInfo>);
-    method public void notifyCellLocation(int, @NonNull android.telephony.CellIdentity);
-    method public void notifyDataActivationStateChanged(int, int, int);
-    method public void notifyDataActivityChanged(int, int);
-    method public void notifyDataConnectionForSubscriber(int, int, int, @Nullable android.telephony.PreciseDataConnectionState);
-    method public void notifyDisconnectCause(int, int, int, int);
-    method public void notifyDisplayInfoChanged(int, int, @NonNull android.telephony.TelephonyDisplayInfo);
-    method public void notifyEmergencyNumberList(int, int);
-    method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
-    method public void notifyMessageWaitingChanged(int, int, boolean);
-    method public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
-    method public void notifyOutgoingEmergencySms(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
-    method public void notifyPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
-    method public void notifyPreciseCallState(int, int, int, int, int);
-    method public void notifyPreciseDataConnectionFailed(int, int, int, @Nullable String, int);
-    method public void notifyRadioPowerStateChanged(int, int, int);
-    method public void notifyRegistrationFailed(int, int, @NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
-    method public void notifyServiceStateChanged(int, int, @NonNull android.telephony.ServiceState);
-    method public void notifySignalStrengthChanged(int, int, @NonNull android.telephony.SignalStrength);
-    method public void notifySrvccStateChanged(int, int);
-    method public void notifyUserMobileDataStateChanged(int, int, boolean);
-    method public void notifyVoiceActivationStateChanged(int, int, int);
-    method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
-    method public void removeOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
   }
 
 }
