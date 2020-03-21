@@ -17,7 +17,6 @@
 package android.telephony;
 
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
 import android.os.TelephonyServiceManager;
@@ -33,7 +32,6 @@ import com.android.internal.util.Preconditions;
  *
  * @hide
  */
-@SystemApi
 public class TelephonyFrameworkInitializer {
 
     private TelephonyFrameworkInitializer() {
