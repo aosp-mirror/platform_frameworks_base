@@ -21,6 +21,8 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Intent;
+import android.content.IntentSender;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.service.autofill.Dataset;
@@ -49,6 +51,7 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public final class InlineSuggestionFactory {
@@ -62,6 +65,11 @@ public final class InlineSuggestionFactory {
          * Callback to autofill a dataset to the client app.
          */
         void autofill(@NonNull Dataset dataset);
+
+        /**
+         * Callback to start Intent in client app.
+         */
+        void startIntentSender(@NonNull IntentSender intentSender, @NonNull Intent intent);
     }
 
     /**
@@ -94,7 +102,8 @@ public final class InlineSuggestionFactory {
                 response.getAuthentication() == null ? null : response.getInlinePresentation();
         return createInlineSuggestionsResponseInternal(/* isAugmented= */ false, request,
                 response.getDatasets(), filterText, inlineAuthentication, autofillId,
-                onErrorCallback, onClickFactory, remoteRenderService);
+                onErrorCallback, onClickFactory, (intentSender) ->
+                        client.startIntentSender(intentSender, new Intent()), remoteRenderService);
     }
 
     /**
@@ -111,8 +120,12 @@ public final class InlineSuggestionFactory {
         if (sDebug) Slog.d(TAG, "createAugmentedInlineSuggestionsResponse called");
         return createInlineSuggestionsResponseInternal(/* isAugmented= */ true, request,
                 datasets, /* filterText= */ null, /* inlineAuthentication= */ null,
-                autofillId, onErrorCallback, (dataset, datasetIndex) ->
-                        inlineSuggestionUiCallback.autofill(dataset), remoteRenderService);
+                autofillId, onErrorCallback,
+                (dataset, datasetIndex) ->
+                        inlineSuggestionUiCallback.autofill(dataset),
+                (intentSender) ->
+                        inlineSuggestionUiCallback.startIntentSender(intentSender, new Intent()),
+                remoteRenderService);
     }
 
     @Nullable
@@ -121,12 +134,13 @@ public final class InlineSuggestionFactory {
             @Nullable List<Dataset> datasets, @Nullable String filterText,
             @Nullable InlinePresentation inlineAuthentication, @NonNull AutofillId autofillId,
             @NonNull Runnable onErrorCallback, @NonNull BiConsumer<Dataset, Integer> onClickFactory,
+            @NonNull Consumer<IntentSender> intentSenderConsumer,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
 
         final ArrayList<InlineSuggestion> inlineSuggestions = new ArrayList<>();
         if (inlineAuthentication != null) {
             InlineSuggestion inlineAuthSuggestion = createInlineAuthSuggestion(inlineAuthentication,
-                    remoteRenderService, onClickFactory, onErrorCallback,
+                    remoteRenderService, onClickFactory, onErrorCallback, intentSenderConsumer,
                     request.getHostInputToken(), request.getHostDisplayId());
             inlineSuggestions.add(inlineAuthSuggestion);
 
@@ -157,7 +171,7 @@ public final class InlineSuggestionFactory {
             InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
                     datasetIndex,
                     mergedInlinePresentation(request, datasetIndex, inlinePresentation),
-                    onClickFactory, remoteRenderService, onErrorCallback,
+                    onClickFactory, remoteRenderService, onErrorCallback, intentSenderConsumer,
                     request.getHostInputToken(), request.getHostDisplayId());
 
             inlineSuggestions.add(inlineSuggestion);
@@ -201,7 +215,8 @@ public final class InlineSuggestionFactory {
             @NonNull InlinePresentation inlinePresentation,
             @NonNull BiConsumer<Dataset, Integer> onClickFactory,
             @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
-            @NonNull Runnable onErrorCallback, @Nullable IBinder hostInputToken,
+            @NonNull Runnable onErrorCallback, @NonNull Consumer<IntentSender> intentSenderConsumer,
+            @Nullable IBinder hostInputToken,
             int displayId) {
         final String suggestionSource = isAugmented ? InlineSuggestionInfo.SOURCE_PLATFORM
                 : InlineSuggestionInfo.SOURCE_AUTOFILL;
@@ -216,7 +231,7 @@ public final class InlineSuggestionFactory {
         final InlineSuggestion inlineSuggestion = new InlineSuggestion(inlineSuggestionInfo,
                 createInlineContentProvider(inlinePresentation,
                         () -> onClickFactory.accept(dataset, datasetIndex), onErrorCallback,
-                        remoteRenderService, hostInputToken, displayId));
+                        intentSenderConsumer, remoteRenderService, hostInputToken, displayId));
 
         return inlineSuggestion;
     }
@@ -225,6 +240,7 @@ public final class InlineSuggestionFactory {
             @NonNull InlinePresentation inlinePresentation,
             @NonNull RemoteInlineSuggestionRenderService remoteRenderService,
             @NonNull BiConsumer<Dataset, Integer> onClickFactory, @NonNull Runnable onErrorCallback,
+            @NonNull Consumer<IntentSender> intentSenderConsumer,
             @Nullable IBinder hostInputToken, int displayId) {
         final InlineSuggestionInfo inlineSuggestionInfo = new InlineSuggestionInfo(
                 inlinePresentation.getInlinePresentationSpec(),
@@ -235,7 +251,8 @@ public final class InlineSuggestionFactory {
                 createInlineContentProvider(inlinePresentation,
                         () -> onClickFactory.accept(null,
                                 AutofillManager.AUTHENTICATION_ID_DATASET_ID_UNDEFINED),
-                        onErrorCallback, remoteRenderService, hostInputToken, displayId));
+                        onErrorCallback, intentSenderConsumer, remoteRenderService, hostInputToken,
+                        displayId));
     }
 
     /**
@@ -261,6 +278,7 @@ public final class InlineSuggestionFactory {
     private static IInlineContentProvider.Stub createInlineContentProvider(
             @NonNull InlinePresentation inlinePresentation, @Nullable Runnable onClickAction,
             @NonNull Runnable onErrorCallback,
+            @NonNull Consumer<IntentSender> intentSenderConsumer,
             @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
             @Nullable IBinder hostInputToken,
             int displayId) {
@@ -269,7 +287,7 @@ public final class InlineSuggestionFactory {
             public void provideContent(int width, int height, IInlineContentCallback callback) {
                 UiThread.getHandler().post(() -> {
                     final IInlineSuggestionUiCallback uiCallback = createInlineSuggestionUiCallback(
-                            callback, onClickAction, onErrorCallback);
+                            callback, onClickAction, onErrorCallback, intentSenderConsumer);
 
                     if (remoteRenderService == null) {
                         Slog.e(TAG, "RemoteInlineSuggestionRenderService is null");
@@ -285,7 +303,8 @@ public final class InlineSuggestionFactory {
 
     private static IInlineSuggestionUiCallback.Stub createInlineSuggestionUiCallback(
             @NonNull IInlineContentCallback callback, @NonNull Runnable onAutofillCallback,
-            @NonNull Runnable onErrorCallback) {
+            @NonNull Runnable onErrorCallback,
+            @NonNull Consumer<IntentSender> intentSenderConsumer) {
         return new IInlineSuggestionUiCallback.Stub() {
             @Override
             public void onClick() throws RemoteException {
@@ -319,6 +338,11 @@ public final class InlineSuggestionFactory {
                     Slog.e(TAG, "Cannot transfer touch focus from suggestion to IME");
                     onErrorCallback.run();
                 }
+            }
+
+            @Override
+            public void onStartIntentSender(IntentSender intentSender) {
+                intentSenderConsumer.accept(intentSender);
             }
         };
     }
