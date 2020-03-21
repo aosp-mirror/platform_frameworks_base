@@ -374,8 +374,8 @@ public final class MediaRouter2 {
      * @param route the route you want to transfer the current media to. Pass {@code null} to
      *              stop routing of the current media.
      *
-     * @see TransferCallback#onTransferred
-     * @see TransferCallback#onTransferFailed
+     * @see TransferCallback#onTransfer
+     * @see TransferCallback#onTransferFailure
      */
     public void transferTo(@NonNull MediaRoute2Info route) {
         Objects.requireNonNull(route, "route must not be null");
@@ -565,9 +565,9 @@ public final class MediaRouter2 {
     }
 
     /**
-     * Creates a controller and calls the {@link TransferCallback#onTransferred}.
+     * Creates a controller and calls the {@link TransferCallback#onTransfer}.
      * If the controller creation has failed, then it calls
-     * {@link TransferCallback#onTransferFailed}.
+     * {@link TransferCallback#onTransferFailure}.
      * <p>
      * Pass {@code null} to sessionInfo for the failure case.
      */
@@ -740,21 +740,21 @@ public final class MediaRouter2 {
             RoutingController newController) {
         for (TransferCallbackRecord record: mTransferCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mTransferCallback.onTransferred(oldController, newController));
+                    () -> record.mTransferCallback.onTransfer(oldController, newController));
         }
     }
 
     private void notifyTransferFailed(MediaRoute2Info route) {
         for (TransferCallbackRecord record: mTransferCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mTransferCallback.onTransferFailed(route));
+                    () -> record.mTransferCallback.onTransferFailure(route));
         }
     }
 
     private void notifyStopped(RoutingController controller) {
         for (TransferCallbackRecord record: mTransferCallbackRecords) {
             record.mExecutor.execute(
-                    () -> record.mTransferCallback.onStopped(controller));
+                    () -> record.mTransferCallback.onStop(controller));
         }
     }
 
@@ -805,7 +805,7 @@ public final class MediaRouter2 {
          * @param newController the new controller to control routing
          * @see #transferTo(MediaRoute2Info)
          */
-        public void onTransferred(@NonNull RoutingController oldController,
+        public void onTransfer(@NonNull RoutingController oldController,
                 @NonNull RoutingController newController) {}
 
         /**
@@ -813,14 +813,14 @@ public final class MediaRouter2 {
          *
          * @param requestedRoute the route info which was used for the transfer
          */
-        public void onTransferFailed(@NonNull MediaRoute2Info requestedRoute) {}
+        public void onTransferFailure(@NonNull MediaRoute2Info requestedRoute) {}
 
         /**
          * Called when a media routing stops. It can be stopped by a user or a provider.
          *
          * @param controller the controller that controlled the stopped media routing.
          */
-        public void onStopped(@NonNull RoutingController controller) { }
+        public void onStop(@NonNull RoutingController controller) { }
     }
 
     /**
