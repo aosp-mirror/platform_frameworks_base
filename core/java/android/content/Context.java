@@ -5104,7 +5104,6 @@ public abstract class Context {
      * {@link TelephonyRegistryManager}.
      * @hide
      */
-    @SystemApi
     public static final String TELEPHONY_REGISTRY_SERVICE = "telephony_registry";
 
     /**
