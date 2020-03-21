@@ -378,55 +378,55 @@ cc_test {
 // statsd micro benchmark
 //#############################
 
-//cc_benchmark {
-//    name: "statsd_benchmark",
-//    defaults: ["statsd_defaults"],
-//
-//    srcs: [
-//        // atom_field_options.proto needs field_options.proto, but that is
-//        // not included in libprotobuf-cpp-lite, so compile it here.
-//        ":libprotobuf-internal-protos",
-//
-//        "benchmark/duration_metric_benchmark.cpp",
-//        "benchmark/filter_value_benchmark.cpp",
-//        "benchmark/get_dimensions_for_condition_benchmark.cpp",
-//        "benchmark/hello_world_benchmark.cpp",
-//        "benchmark/log_event_benchmark.cpp",
-//        "benchmark/main.cpp",
-//        "benchmark/metric_util.cpp",
-//        "benchmark/stats_write_benchmark.cpp",
-//        "src/atom_field_options.proto",
-//        "src/atoms.proto",
-//        "src/stats_log.proto",
-//    ],
-//
-//    proto: {
-//        type: "lite",
-//        include_dirs: ["external/protobuf/src"],
-//    },
-//
-//    cflags: [
-//        "-Wall",
-//        "-Werror",
-//        "-Wno-unused-parameter",
-//        "-Wno-unused-variable",
-//        "-Wno-unused-function",
-//
-//        // Bug: http://b/29823425 Disable -Wvarargs for Clang update to r271374
-//        "-Wno-varargs",
-//    ],
-//
-//    static_libs: [
-//        "libplatformprotos",
-//    ],
-//
-//    shared_libs: [
-//        "libgtest_prod",
-//        "libprotobuf-cpp-lite",
-//        "libstatslog",
-//        "libstatssocket",
-//    ],
-//}
+cc_benchmark {
+    name: "statsd_benchmark",
+    defaults: ["statsd_defaults"],
+
+    srcs: [
+        // atom_field_options.proto needs field_options.proto, but that is
+        // not included in libprotobuf-cpp-lite, so compile it here.
+        ":libprotobuf-internal-protos",
+
+        "benchmark/duration_metric_benchmark.cpp",
+        "benchmark/filter_value_benchmark.cpp",
+        "benchmark/get_dimensions_for_condition_benchmark.cpp",
+        "benchmark/hello_world_benchmark.cpp",
+        "benchmark/log_event_benchmark.cpp",
+        "benchmark/main.cpp",
+        "benchmark/metric_util.cpp",
+        "benchmark/stats_write_benchmark.cpp",
+        "src/atom_field_options.proto",
+        "src/atoms.proto",
+        "src/stats_log.proto",
+    ],
+
+    proto: {
+        type: "lite",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
+
+        // Bug: http://b/29823425 Disable -Wvarargs for Clang update to r271374
+        "-Wno-varargs",
+    ],
+
+    static_libs: [
+        "libplatformprotos",
+        "libstatssocket_private",
+    ],
+
+    shared_libs: [
+        "libgtest_prod",
+        "libprotobuf-cpp-lite",
+        "libstatslog",
+    ],
+}
 
 // ====  java proto device library (for test only)  ==============================
 java_library {
