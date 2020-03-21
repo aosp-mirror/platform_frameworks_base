@@ -714,12 +714,12 @@ public class CameraMetadataNative implements Parcelable {
                     }
                 });
         sGetCommandMap.put(
-                CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_CAPABILITIES.getNativeKey(),
+                CameraCharacteristics.CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_CAPABILITIES.getNativeKey(),
                         new GetCommand() {
                     @Override
                     @SuppressWarnings("unchecked")
                     public <T> T getValue(CameraMetadataNative metadata, Key<T> key) {
-                        return (T) metadata.getBokehCapabilities();
+                        return (T) metadata.getExtendedSceneModeCapabilities();
                     }
                 });
     }
@@ -1442,53 +1442,55 @@ public class CameraMetadataNative implements Parcelable {
         return samples;
     }
 
-    private Capability[] getBokehCapabilities() {
-        int[] bokehMaxSizes = getBase(CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_MAX_SIZES);
-        float[] bokehZoomRanges = getBase(
-                CameraCharacteristics.CONTROL_AVAILABLE_BOKEH_ZOOM_RATIO_RANGES);
+    private Capability[] getExtendedSceneModeCapabilities() {
+        int[] maxSizes =
+                getBase(CameraCharacteristics.CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_MAX_SIZES);
+        float[] zoomRanges = getBase(
+                CameraCharacteristics.CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_ZOOM_RATIO_RANGES);
         Range<Float> zoomRange = getBase(CameraCharacteristics.CONTROL_ZOOM_RATIO_RANGE);
         float maxDigitalZoom = getBase(CameraCharacteristics.SCALER_AVAILABLE_MAX_DIGITAL_ZOOM);
 
-        if (bokehMaxSizes == null) {
+        if (maxSizes == null) {
             return null;
         }
-        if (bokehMaxSizes.length % 3 != 0) {
-            throw new AssertionError("availableBokehMaxSizes must be tuples of " +
-                    "[mode, width, height]");
+        if (maxSizes.length % 3 != 0) {
+            throw new AssertionError("availableExtendedSceneModeMaxSizes must be tuples of "
+                    + "[mode, width, height]");
         }
-        int numBokehModes = bokehMaxSizes.length / 3;
-        int numBokehZoomRanges = 0;
-        if (bokehZoomRanges != null) {
-            if (bokehZoomRanges.length % 2 != 0) {
-                throw new AssertionError("availableBokehZoomRanges must be tuples of " +
-                        "[minZoom, maxZoom]");
+        int numExtendedSceneModes = maxSizes.length / 3;
+        int numExtendedSceneModeZoomRanges = 0;
+        if (zoomRanges != null) {
+            if (zoomRanges.length % 2 != 0) {
+                throw new AssertionError("availableExtendedSceneModeZoomRanges must be tuples of "
+                        + "[minZoom, maxZoom]");
             }
-            numBokehZoomRanges = bokehZoomRanges.length / 2;
-            if (numBokehModes - numBokehZoomRanges != 1) {
-                throw new AssertionError("Number of bokeh zoom ranges must be 1 less than " +
-                        "number of supported bokeh modes");
+            numExtendedSceneModeZoomRanges = zoomRanges.length / 2;
+            if (numExtendedSceneModes - numExtendedSceneModeZoomRanges != 1) {
+                throw new AssertionError("Number of extended scene mode zoom ranges must be 1 "
+                        + "less than number of supported modes");
             }
         }
 
-        float bokehOffMinZoomRatio = 1.0f;
-        float bokehOffMaxZoomRatio = maxDigitalZoom;
+        float modeOffMinZoomRatio = 1.0f;
+        float modeOffMaxZoomRatio = maxDigitalZoom;
         if (zoomRange != null) {
-            bokehOffMinZoomRatio = zoomRange.getLower();
-            bokehOffMaxZoomRatio = zoomRange.getUpper();
+            modeOffMinZoomRatio = zoomRange.getLower();
+            modeOffMaxZoomRatio = zoomRange.getUpper();
         }
 
-        Capability[] capabilities = new Capability[numBokehModes];
-        for (int i = 0, j = 0; i < numBokehModes; i++) {
-            int mode = bokehMaxSizes[3 * i];
-            int width = bokehMaxSizes[3 * i + 1];
-            int height = bokehMaxSizes[3 * i + 2];
-            if (mode != CameraMetadata.CONTROL_BOKEH_MODE_OFF && j < numBokehZoomRanges) {
-                capabilities[i] = new Capability(mode, width, height, bokehZoomRanges[2 * j],
-                        bokehZoomRanges[2 * j + 1]);
+        Capability[] capabilities = new Capability[numExtendedSceneModes];
+        for (int i = 0, j = 0; i < numExtendedSceneModes; i++) {
+            int mode = maxSizes[3 * i];
+            int width = maxSizes[3 * i + 1];
+            int height = maxSizes[3 * i + 2];
+            if (mode != CameraMetadata.CONTROL_EXTENDED_SCENE_MODE_DISABLED
+                    && j < numExtendedSceneModeZoomRanges) {
+                capabilities[i] = new Capability(mode, width, height, zoomRanges[2 * j],
+                        zoomRanges[2 * j + 1]);
                 j++;
             } else {
-                capabilities[i] = new Capability(mode, width, height, bokehOffMinZoomRatio,
-                        bokehOffMaxZoomRatio);
+                capabilities[i] = new Capability(mode, width, height, modeOffMinZoomRatio,
+                        modeOffMaxZoomRatio);
             }
         }
 
