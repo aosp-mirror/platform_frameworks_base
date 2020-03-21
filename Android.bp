@@ -239,6 +239,7 @@ filegroup {
         ":framework-sax-sources",
         ":framework-telecomm-sources",
         ":framework-telephony-common-sources",
+        ":framework-telephony-sources",
         ":framework-wifi-annotations",
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
@@ -285,7 +286,6 @@ filegroup {
         ":framework-permission-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
-        ":framework-telephony-sources",
         ":framework-tethering-srcs",
         ":framework-wifi-updatable-sources",
         ":updatable-media-srcs",
@@ -300,7 +300,6 @@ java_library {
         "framework-permission-stubs-module_libs_api",
         "framework-sdkextensions-stubs-module_libs_api",
         "framework-statsd-stubs-module_libs_api",
-        "framework-telephony-stubs", // TODO: Update to module_libs_api when there is one.
         "framework-tethering-stubs-module_libs_api",
         "framework-wifi-stubs-module_libs_api",
     ],
@@ -523,9 +522,8 @@ java_library {
     defaults: ["framework-aidl-export-defaults"],
     installable: false, // this lib is a build-only library
     static_libs: [
+        "app-compat-annotations",
         "framework-minus-apex",
-        // TODO (b/147688669) should be removed
-        "framework-telephony",
         "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
@@ -1327,8 +1325,8 @@ java_library {
 java_library {
     name: "framework-telephony",
     srcs: [
-        ":framework-telephony-sources",
-        ":framework-telephony-shared-srcs",
+        //":framework-telephony-sources",
+        //":framework-telephony-shared-srcs",
     ],
     // TODO: change to framework-system-stub to build against system APIs.
     libs: [
