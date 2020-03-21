@@ -107,6 +107,7 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
         final ImageView frictionImageView = (ImageView) view.findViewById(
                 R.id.friction_icon);
         if (mWifiEntry.canManageSubscription() && !mWifiEntry.isSaved()
+                && !mWifiEntry.isSubscription()
                 && mWifiEntry.getConnectedState() == WifiEntry.CONNECTED_STATE_DISCONNECTED) {
             final Drawable drawablehelp = getDrawable(R.drawable.ic_help);
             drawablehelp.setTintList(
@@ -114,6 +115,9 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
             ((ImageView) imageButton).setImageDrawable(drawablehelp);
             imageButton.setVisibility(View.VISIBLE);
             imageButton.setOnClickListener(this);
+            imageButton.setContentDescription(
+                    getContext().getText(R.string.help_label));
+
             if (frictionImageView != null) {
                 frictionImageView.setVisibility(View.GONE);
             }
