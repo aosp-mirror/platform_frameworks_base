@@ -158,17 +158,17 @@ static AStatsManager_PullAtomCallbackReturn graphicsStatsPullCallback(int32_t at
 static void nativeInit(JNIEnv* env, jobject javaObject) {
     gGraphicsStatsServiceObject = env->NewGlobalRef(javaObject);
     AStatsManager_PullAtomMetadata* metadata = AStatsManager_PullAtomMetadata_obtain();
-    AStatsManager_PullAtomMetadata_setCoolDownNs(metadata, 10 * 1000000);  // 10 milliseconds
-    AStatsManager_PullAtomMetadata_setTimeoutNs(metadata, 2 * NS_PER_SEC); // 2 seconds
+    AStatsManager_PullAtomMetadata_setCoolDownMillis(metadata, 10);             // 10 milliseconds
+    AStatsManager_PullAtomMetadata_setTimeoutMillis(metadata, 2 * MS_PER_SEC);  // 2 seconds
 
-    AStatsManager_registerPullAtomCallback(android::util::GRAPHICS_STATS,
-                                           &graphicsStatsPullCallback, metadata, nullptr);
+    AStatsManager_setPullAtomCallback(android::util::GRAPHICS_STATS, metadata,
+                                      &graphicsStatsPullCallback, nullptr);
 
     AStatsManager_PullAtomMetadata_release(metadata);
 }
 
 static void nativeDestructor(JNIEnv* env, jobject javaObject) {
-    AStatsManager_unregisterPullAtomCallback(android::util::GRAPHICS_STATS);
+    AStatsManager_clearPullAtomCallback(android::util::GRAPHICS_STATS);
     env->DeleteGlobalRef(gGraphicsStatsServiceObject);
     gGraphicsStatsServiceObject = nullptr;
 }

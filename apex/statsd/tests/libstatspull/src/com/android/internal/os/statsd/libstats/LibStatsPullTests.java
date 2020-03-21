@@ -58,8 +58,8 @@ public class LibStatsPullTests {
     private static int sPullReturnValue;
     private static long sConfigId;
     private static long sPullLatencyMillis;
-    private static long sPullTimeoutNs;
-    private static long sCoolDownNs;
+    private static long sPullTimeoutMillis;
+    private static long sCoolDownMillis;
     private static int sAtomsPerPull;
 
     static {
@@ -75,8 +75,8 @@ public class LibStatsPullTests {
         assertThat(InstrumentationRegistry.getInstrumentation()).isNotNull();
         sPullReturnValue = StatsManager.PULL_SUCCESS;
         sPullLatencyMillis = 0;
-        sPullTimeoutNs = 10_000_000_000L;
-        sCoolDownNs = 1_000_000_000L;
+        sPullTimeoutMillis = 10_000L;
+        sCoolDownMillis = 1_000L;
         sAtomsPerPull = 1;
     }
 
@@ -85,7 +85,7 @@ public class LibStatsPullTests {
      */
     @After
     public void tearDown() throws Exception {
-        unregisterStatsPuller(PULL_ATOM_TAG);
+        clearStatsPuller(PULL_ATOM_TAG);
         StatsManager statsManager = (StatsManager) mContext.getSystemService(
                 Context.STATS_MANAGER);
         statsManager.removeConfig(sConfigId);
@@ -102,14 +102,14 @@ public class LibStatsPullTests {
         createAndAddConfigToStatsd(statsManager);
 
         // Add the puller.
-        registerStatsPuller(PULL_ATOM_TAG, sPullTimeoutNs, sCoolDownNs, sPullReturnValue,
+        setStatsPuller(PULL_ATOM_TAG, sPullTimeoutMillis, sCoolDownMillis, sPullReturnValue,
                 sPullLatencyMillis, sAtomsPerPull);
         Thread.sleep(SHORT_SLEEP_MILLIS);
         StatsLog.logStart(APP_BREADCRUMB_LABEL);
         // Let the current bucket finish.
         Thread.sleep(LONG_SLEEP_MILLIS);
         List<Atom> data = StatsConfigUtils.getGaugeMetricDataList(statsManager, sConfigId);
-        unregisterStatsPuller(PULL_ATOM_TAG);
+        clearStatsPuller(PULL_ATOM_TAG);
         assertThat(data.size()).isEqualTo(1);
         TestAtoms.PullCallbackAtomWrapper atomWrapper = null;
         try {
@@ -135,14 +135,14 @@ public class LibStatsPullTests {
         createAndAddConfigToStatsd(statsManager);
         sPullReturnValue = StatsManager.PULL_SKIP;
         // Add the puller.
-        registerStatsPuller(PULL_ATOM_TAG, sPullTimeoutNs, sCoolDownNs, sPullReturnValue,
+        setStatsPuller(PULL_ATOM_TAG, sPullTimeoutMillis, sCoolDownMillis, sPullReturnValue,
                 sPullLatencyMillis, sAtomsPerPull);
         Thread.sleep(SHORT_SLEEP_MILLIS);
         StatsLog.logStart(APP_BREADCRUMB_LABEL);
         // Let the current bucket finish.
         Thread.sleep(LONG_SLEEP_MILLIS);
         List<Atom> data = StatsConfigUtils.getGaugeMetricDataList(statsManager, sConfigId);
-        unregisterStatsPuller(PULL_ATOM_TAG);
+        clearStatsPuller(PULL_ATOM_TAG);
         assertThat(data.size()).isEqualTo(0);
     }
 
@@ -157,17 +157,17 @@ public class LibStatsPullTests {
         // The puller will sleep for 1.5 sec.
         sPullLatencyMillis = 1_500;
         // 1 second timeout
-        sPullTimeoutNs = 1_000_000_000;
+        sPullTimeoutMillis = 1_000;
 
         // Add the puller.
-        registerStatsPuller(PULL_ATOM_TAG, sPullTimeoutNs, sCoolDownNs, sPullReturnValue,
+        setStatsPuller(PULL_ATOM_TAG, sPullTimeoutMillis, sCoolDownMillis, sPullReturnValue,
                 sPullLatencyMillis, sAtomsPerPull);
         Thread.sleep(SHORT_SLEEP_MILLIS);
         StatsLog.logStart(APP_BREADCRUMB_LABEL);
         // Let the current bucket finish and the pull timeout.
         Thread.sleep(sPullLatencyMillis * 2);
         List<Atom> data = StatsConfigUtils.getGaugeMetricDataList(statsManager, sConfigId);
-        unregisterStatsPuller(PULL_ATOM_TAG);
+        clearStatsPuller(PULL_ATOM_TAG);
         assertThat(data.size()).isEqualTo(0);
     }
 
@@ -181,9 +181,9 @@ public class LibStatsPullTests {
         createAndAddConfigToStatsd(statsManager);
 
         // Set the cooldown to 10 seconds
-        sCoolDownNs = 10_000_000_000L;
+        sCoolDownMillis = 10_000L;
         // Add the puller.
-        registerStatsPuller(PULL_ATOM_TAG, sPullTimeoutNs, sCoolDownNs, sPullReturnValue,
+        setStatsPuller(PULL_ATOM_TAG, sPullTimeoutMillis, sCoolDownMillis, sPullReturnValue,
                 sPullLatencyMillis, sAtomsPerPull);
 
         Thread.sleep(SHORT_SLEEP_MILLIS);
@@ -192,7 +192,7 @@ public class LibStatsPullTests {
         StatsLog.logStart(APP_BREADCRUMB_LABEL);
         Thread.sleep(LONG_SLEEP_MILLIS);
         List<Atom> data = StatsConfigUtils.getGaugeMetricDataList(statsManager, sConfigId);
-        unregisterStatsPuller(PULL_ATOM_TAG);
+        clearStatsPuller(PULL_ATOM_TAG);
         assertThat(data.size()).isEqualTo(2);
         for (int i = 0; i < data.size(); i++) {
             TestAtoms.PullCallbackAtomWrapper atomWrapper = null;
@@ -221,7 +221,7 @@ public class LibStatsPullTests {
         createAndAddConfigToStatsd(statsManager);
         sAtomsPerPull = 1000;
         // Add the puller.
-        registerStatsPuller(PULL_ATOM_TAG, sPullTimeoutNs, sCoolDownNs, sPullReturnValue,
+        setStatsPuller(PULL_ATOM_TAG, sPullTimeoutMillis, sCoolDownMillis, sPullReturnValue,
                 sPullLatencyMillis, sAtomsPerPull);
 
         Thread.sleep(SHORT_SLEEP_MILLIS);
@@ -229,7 +229,7 @@ public class LibStatsPullTests {
         // Let the current bucket finish.
         Thread.sleep(LONG_SLEEP_MILLIS);
         List<Atom> data = StatsConfigUtils.getGaugeMetricDataList(statsManager, sConfigId);
-        unregisterStatsPuller(PULL_ATOM_TAG);
+        clearStatsPuller(PULL_ATOM_TAG);
         assertThat(data.size()).isEqualTo(sAtomsPerPull);
 
         for (int i = 0; i < data.size(); i++) {
@@ -276,9 +276,9 @@ public class LibStatsPullTests {
         assertThat(StatsConfigUtils.verifyValidConfigExists(statsManager, sConfigId)).isTrue();
     }
 
-    private native void registerStatsPuller(int atomTag, long timeoutNs, long coolDownNs,
+    private native void setStatsPuller(int atomTag, long timeoutMillis, long coolDownMillis,
             int pullReturnVal, long latencyMillis, int atomPerPull);
 
-    private native void unregisterStatsPuller(int atomTag);
+    private native void clearStatsPuller(int atomTag);
 }
 

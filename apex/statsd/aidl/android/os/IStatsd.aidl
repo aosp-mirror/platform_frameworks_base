@@ -196,7 +196,7 @@ interface IStatsd {
      *
      * Enforces the REGISTER_STATS_PULL_ATOM permission.
      */
-    oneway void registerNativePullAtomCallback(int atomTag, long coolDownNs, long timeoutNs,
+    oneway void registerNativePullAtomCallback(int atomTag, long coolDownMillis, long timeoutMillis,
                            in int[] additiveFields, IPullAtomCallback pullerCallback);
 
     /**
