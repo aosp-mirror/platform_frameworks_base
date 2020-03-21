@@ -1284,4 +1284,25 @@
 
     <!-- Help button label [CHAR LIMIT=40] -->
     <string name="help_label">Help &amp; feedback</string>
+
+    <!-- Preference category for storage development settings. [CHAR LIMIT=50] -->
+    <string name="storage_category">Storage</string>
+    <!-- Storage: view and access information about shared blobs [CHAR LIMIT=50] -->
+    <string name="shared_data_title">Shared data</string>
+    <!-- Storage: shared data summary [CHAR LIMIT=80] -->
+    <string name="shared_data_summary">View and modify shared data</string>
+    <!-- Shared data: shared data id [CHAR LIMIT=50] -->
+    <string name="blob_id_text">Shared data ID: <xliff:g id="blob_id" example="100">%d</xliff:g></string>
+    <!-- Shared data: label to indicate when the shared data expires [CHAR LIMIT=80] -->
+    <string name="blob_expires_text">Expires at <xliff:g id="date" example="Mar 20, 2020 11:59:59 GMT">%s</xliff:g></string>
+    <!-- Shared data: title for screen showing list of packages accessing some shared data [CHAR LIMIT=50] -->
+    <string name="accessor_info_title">Apps sharing data</string>
+    <!-- Shared data: text indicating that no description was provided by the app for this shared data [CHAR LIMIT=80] -->
+    <string name="accessor_no_description_text">No description provided by the app.</string>
+    <!-- Shared data: label to indicate when the lease acquired by an app expires [CHAR LIMIT=80] -->
+    <string name="accessor_expires_text">Lease expires at <xliff:g id="date" example="Mar 20, 2020 11:59:59 GMT">%s</xliff:g></string>
+    <!-- Shared data: button text for deleting some shared data [CHAR LIMIT=50] -->
+    <string name="delete_blob_text">Delete shared data</string>
+    <!-- Shared data: confirmation dialog text when attempting delete some shared data [CHAR LIMIT=NONE] -->
+    <string name="delete_blob_confirmation_text">Are you sure you want to delete this shared data?</string>
 </resources>
