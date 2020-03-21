@@ -27,6 +27,7 @@ import static android.app.usage.UsageEvents.Event.FLUSH_TO_DISK;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_START;
 import static android.app.usage.UsageEvents.Event.FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageEvents.Event.ROLLOVER_FOREGROUND_SERVICE;
+import static android.app.usage.UsageEvents.Event.USER_INTERACTION;
 
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -578,6 +579,18 @@ public final class UsageStats implements Parcelable {
                 }
                 if (anyForegroundServiceStarted()) {
                     incrementServiceTimeUsed(timeStamp);
+                }
+                break;
+            case USER_INTERACTION:
+                if (hasForegroundActivity()) {
+                    incrementTimeUsed(timeStamp);
+                } else {
+                    mLastTimeUsed = timeStamp;
+                }
+                if (hasVisibleActivity()) {
+                    incrementTimeVisible(timeStamp);
+                } else {
+                    mLastTimeVisible = timeStamp;
                 }
                 break;
             default:
