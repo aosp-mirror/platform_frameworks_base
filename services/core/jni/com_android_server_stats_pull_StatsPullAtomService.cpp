@@ -46,17 +46,15 @@ static AStatsManager_PullAtomCallbackReturn subsystemSleepStateCallback(int32_t 
 static void nativeInit(JNIEnv* env, jobject javaObject) {
     // on device power measurement
     gPowerStatsPuller = server::stats::PowerStatsPuller();
-    AStatsManager_registerPullAtomCallback(android::util::ON_DEVICE_POWER_MEASUREMENT,
-                                           onDevicePowerMeasurementCallback,
-                                           /* metadata= */ nullptr,
-                                           /* cookie= */ nullptr);
+    AStatsManager_setPullAtomCallback(android::util::ON_DEVICE_POWER_MEASUREMENT,
+                                      /* metadata= */ nullptr, onDevicePowerMeasurementCallback,
+                                      /* cookie= */ nullptr);
 
     // subsystem sleep state
     gSubsystemSleepStatePuller = server::stats::SubsystemSleepStatePuller();
-    AStatsManager_registerPullAtomCallback(android::util::SUBSYSTEM_SLEEP_STATE,
-                                           subsystemSleepStateCallback,
-                                           /* metadata= */ nullptr,
-                                           /* cookie= */ nullptr);
+    AStatsManager_setPullAtomCallback(android::util::SUBSYSTEM_SLEEP_STATE,
+                                      /* metadata= */ nullptr, subsystemSleepStateCallback,
+                                      /* cookie= */ nullptr);
 }
 
 static const JNINativeMethod sMethods[] = {{"nativeInit", "()V", (void*)nativeInit}};
