@@ -469,6 +469,10 @@ public class ConversationLayout extends FrameLayout
         mAppName.setVisibility(mIsCollapsed ? GONE : VISIBLE);
     }
 
+    public boolean shouldHideAppName() {
+        return mIsCollapsed;
+    }
+
     /**
      * update the icon position and sizing
      */
