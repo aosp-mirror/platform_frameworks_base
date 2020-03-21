@@ -122,6 +122,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:paddingTop="16dp"
+                    android:layout_marginBottom="2dp"
                     android:paddingStart="@dimen/conversation_content_start"
                 >
                     <TextView
@@ -180,8 +181,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/conversation_content_start"
-                    android:paddingBottom="16dp"
                     android:textSize="12sp"
+                    android:layout_marginBottom="16dp"
                     android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
                 />
 
@@ -190,7 +191,6 @@
                     android:id="@+id/notification_messaging"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
                     android:spacing="@dimen/notification_messaging_spacing"
                     android:clipToPadding="false"
                     android:clipChildren="false"
