@@ -167,4 +167,35 @@ public class WifiEntryPreferenceTest {
 
         assertThat(view.findViewById(R.id.icon_button).getVisibility()).isEqualTo(View.VISIBLE);
     }
+
+    @Test
+    public void helpButton_whenCanManageSubscription_shouldSetCorrectContentDescription() {
+        when(mMockWifiEntry.canManageSubscription()).thenReturn(true);
+        final WifiEntryPreference pref =
+                new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
+        final LayoutInflater inflater = LayoutInflater.from(mContext);
+        final View view = inflater.inflate(pref.getLayoutResource(), new LinearLayout(mContext),
+                false);
+        final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(view);
+
+        pref.onBindViewHolder(holder);
+
+        assertThat(view.findViewById(R.id.icon_button).getContentDescription()).isEqualTo(
+                mContext.getString(R.string.help_label));
+    }
+
+    @Test
+    public void subscriptionEntry_shouldSetImageButtonGone() {
+        when(mMockWifiEntry.isSubscription()).thenReturn(true);
+        final WifiEntryPreference pref =
+                new WifiEntryPreference(mContext, mMockWifiEntry, mMockIconInjector);
+        final LayoutInflater inflater = LayoutInflater.from(mContext);
+        final View view = inflater.inflate(pref.getLayoutResource(), new LinearLayout(mContext),
+                false);
+        final PreferenceViewHolder holder = PreferenceViewHolder.createInstanceForTests(view);
+
+        pref.onBindViewHolder(holder);
+
+        assertThat(view.findViewById(R.id.icon_button).getVisibility()).isEqualTo(View.GONE);
+    }
 }
