@@ -1240,4 +1240,18 @@ public class AppWidgetManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Note an app widget is tapped on.
+     * @param uid App UID.
+     * @param packageName App package name.
+     * @hide
+     */
+    public void noteAppWidgetTapped(int uid, @NonNull String packageName) {
+        try {
+            mService.noteAppWidgetTapped(uid, packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

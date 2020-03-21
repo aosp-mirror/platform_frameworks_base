@@ -35,6 +35,8 @@ import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicyManagerInternal.OnCrossProfileWidgetProvidersChangeListener;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetManagerInternal;
 import android.appwidget.AppWidgetProviderInfo;
@@ -235,6 +237,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private PackageManagerInternal mPackageManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private AppOpsManagerInternal mAppOpsManagerInternal;
+    private UsageStatsManagerInternal mUsageStatsManagerInternal;
 
     private SecurityPolicy mSecurityPolicy;
 
@@ -278,6 +281,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     void systemServicesReady() {
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mAppOpsManagerInternal = LocalServices.getService(AppOpsManagerInternal.class);
+        mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
     }
 
     private void computeMaximumWidgetBitmapMemory() {
@@ -879,8 +883,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     outUpdates.add(updatesMap.valueAt(j));
                 }
             }
-            updateAppOpsLocked(host, true);
-
             // Reset the update counter once all the updates have been calculated
             host.lastWidgetUpdateSequenceNo = updateSequenceNo;
             return new ParceledListSlice<>(outUpdates);
@@ -909,7 +911,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             if (host != null) {
                 host.callbacks = null;
                 pruneHostLocked(host);
-                updateAppOpsLocked(host, false);
+                mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUids(), false);
             }
         }
     }
@@ -3646,26 +3648,49 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         return false;
     }
 
-    private void updateAppOpsLocked(Host host, boolean visible) {
-        if (visible) {
-            final int procState = mActivityManagerInternal.getUidProcessState(host.id.uid);
+    /**
+     * Note an app widget is tapped on. If a app widget is tapped, the underlying app is treated as
+     * foreground so the app can get while-in-use permission.
+     *
+     * @param uid UID of the underlying app.
+     * @param packageName Package name of the app.
+     */
+    @Override
+    public void noteAppWidgetTapped(int uid, String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            // The launcher must be at TOP.
+            final int procState = mActivityManagerInternal.getUidProcessState(callingUid);
             if (procState > ActivityManager.PROCESS_STATE_TOP) {
-                // The launcher must be at TOP.
                 return;
             }
-        }
 
-        final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
-        // Default launcher from package manager.
-        final ComponentName defaultLauncher = mPackageManagerInternal
-                .getHomeActivitiesAsUser(allHomeCandidates, UserHandle.getUserId(host.id.uid));
-        // The launcher must be default launcher.
-        if (defaultLauncher == null
-                || !defaultLauncher.getPackageName().equals(host.id.packageName)) {
-            return;
+            // Default launcher from package manager.
+            final ComponentName defaultLauncher = mPackageManagerInternal
+                    .getDefaultHomeActivity(UserHandle.getUserId(callingUid));
+            int defaultLauncherUid  = 0;
+            try {
+                defaultLauncherUid = mPackageManager.getApplicationInfo(
+                        defaultLauncher.getPackageName(), 0 ,
+                        UserHandle.getUserId(callingUid)).uid;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to getApplicationInfo for package:"
+                        + defaultLauncher.getPackageName(), e);
+                return;
+            }
+            // The callingUid must be default launcher uid.
+            if (defaultLauncherUid != callingUid) {
+                return;
+            }
+            final SparseArray<String> uid2PackageName = new SparseArray<String>();
+            uid2PackageName.put(uid, packageName);
+            mAppOpsManagerInternal.updateAppWidgetVisibility(uid2PackageName, true);
+            mUsageStatsManagerInternal.reportEvent(packageName, UserHandle.getUserId(uid),
+                    UsageEvents.Event.USER_INTERACTION);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
-
-        mAppOpsManagerInternal.updateAppWidgetVisibility(host.getWidgetUids(), visible);
     }
 
     private final class CallbackHandler extends Handler {
