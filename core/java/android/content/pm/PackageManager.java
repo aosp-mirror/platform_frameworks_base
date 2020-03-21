@@ -3399,6 +3399,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_ONE_TIME = 1 << 16;
 
     /**
