@@ -1819,6 +1819,18 @@
     <!-- [CHAR LIMIT=150] Notification Importance title: bubble level summary -->
     <string name="notification_channel_summary_bubble">Keeps your attention with a floating shortcut to this content.</string>
 
+    <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
+    <string name="notification_channel_summary_priority">Shows at top of conversation section and appears as a bubble.</string>
+
+    <!--[CHAR LIMIT=150] Conversation inline controls footer shown when all conversations from the app are allowed to show as bubbles -->
+    <string name="notification_conversation_channel_all_bubble">All conversations from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubble by default. Manage in <xliff:g id="app_name" example="Settings">%2$s</xliff:g>.</string>
+
+    <!--[CHAR LIMIT=30] Linkable text to Settings app -->
+    <string name="notification_conversation_channel_settings">Settings</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level -->
+    <string name="notification_priority_title">Priority</string>
+
     <!-- [CHAR LIMIT=NONE] Empty overflow title -->
     <string name="bubble_overflow_empty_title">No recent bubbles</string>
 
