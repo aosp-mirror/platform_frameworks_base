@@ -102,11 +102,11 @@ public class MessagingLayoutTransformState extends TransformState {
             MessagingGroup matchingGroup = pairs.get(ownGroup);
             if (!isGone(ownGroup)) {
                 if (matchingGroup != null) {
-                    transformGroups(ownGroup, matchingGroup, transformationAmount, to);
+                    int totalTranslation = transformGroups(ownGroup, matchingGroup,
+                            transformationAmount, to);
                     if (lastPairedGroup == null) {
                         lastPairedGroup = ownGroup;
                         if (to){
-                            float totalTranslation = ownGroup.getTop() - matchingGroup.getTop();
                             currentTranslation = matchingGroup.getAvatar().getTranslationY()
                                     - totalTranslation;
                         } else {
@@ -229,14 +229,19 @@ public class MessagingLayoutTransformState extends TransformState {
         return result;
     }
 
-    private void transformGroups(MessagingGroup ownGroup, MessagingGroup otherGroup,
+    /**
+     * Transform two groups towards each other.
+     *
+     * @return the total transformation distance that the group goes through
+     */
+    private int transformGroups(MessagingGroup ownGroup, MessagingGroup otherGroup,
             float transformationAmount, boolean to) {
         boolean useLinearTransformation =
                 otherGroup.getIsolatedMessage() == null && !mTransformInfo.isAnimating();
         transformView(transformationAmount, to, ownGroup.getSenderView(), otherGroup.getSenderView(),
                 true /* sameAsAny */, useLinearTransformation);
-        transformView(transformationAmount, to, ownGroup.getAvatar(), otherGroup.getAvatar(),
-                true /* sameAsAny */, useLinearTransformation);
+        int totalAvatarTranslation = transformView(transformationAmount, to, ownGroup.getAvatar(),
+                otherGroup.getAvatar(), true /* sameAsAny */, useLinearTransformation);
         List<MessagingMessage> ownMessages = ownGroup.getMessages();
         List<MessagingMessage> otherMessages = otherGroup.getMessages();
         float previousTranslation = 0;
@@ -284,6 +289,7 @@ public class MessagingLayoutTransformState extends TransformState {
             }
         }
         ownGroup.updateClipRect();
+        return totalAvatarTranslation;
     }
 
     /**
