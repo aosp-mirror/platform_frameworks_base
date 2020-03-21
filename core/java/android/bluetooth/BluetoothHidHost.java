@@ -263,13 +263,11 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * the state. Users can get the connection state of the profile
      * from this intent.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission.
-     *
      * @param device Remote Bluetooth Device
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean connect(BluetoothDevice device) {
         if (DBG) log("connect(" + device + ")");
         final IBluetoothHidHost service = getService();
@@ -303,13 +301,11 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * {@link #STATE_DISCONNECTING} can be used to distinguish between the
      * two scenarios.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission.
-     *
      * @param device Remote Bluetooth Device
      * @return false on immediate error, true otherwise
      * @hide
      */
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean disconnect(BluetoothDevice device) {
         if (DBG) log("disconnect(" + device + ")");
         final IBluetoothHidHost service = getService();
@@ -327,7 +323,10 @@ public final class BluetoothHidHost implements BluetoothProfile {
 
     /**
      * {@inheritDoc}
+     *
+     * @hide
      */
+    @SystemApi
     @Override
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
@@ -368,7 +367,10 @@ public final class BluetoothHidHost implements BluetoothProfile {
 
     /**
      * {@inheritDoc}
+     *
+     * @hide
      */
+    @SystemApi
     @Override
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public int getConnectionState(@NonNull BluetoothDevice device) {
@@ -400,7 +402,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @return true if priority is set, false on error
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
         return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
@@ -419,7 +421,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -453,7 +455,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @return priority of the device
      * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
         return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
@@ -471,7 +473,7 @@ public final class BluetoothHidHost implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         if (device == null) {
