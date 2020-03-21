@@ -40,6 +40,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.Immutable;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -84,10 +85,25 @@ public final class PermissionManager {
      */
     public PermissionManager(@NonNull Context context, IPackageManager packageManager)
             throws ServiceManager.ServiceNotFoundException {
+        this(context, packageManager, IPermissionManager.Stub.asInterface(
+                ServiceManager.getServiceOrThrow("permissionmgr")));
+    }
+
+    /**
+     * Creates a new instance with the provided instantiation of the IPermissionManager.
+     *
+     * @param context           the current context in which to operate
+     * @param packageManager    package manager service to be used for package related permission
+     *                          requests
+     * @param permissionManager injectable permission manager service
+     * @hide
+     */
+    @VisibleForTesting
+    public PermissionManager(@NonNull Context context, IPackageManager packageManager,
+            IPermissionManager permissionManager) {
         mContext = context;
         mPackageManager = packageManager;
-        mPermissionManager = IPermissionManager.Stub.asInterface(
-                ServiceManager.getServiceOrThrow("permissionmgr"));
+        mPermissionManager = permissionManager;
     }
 
     /**
@@ -483,6 +499,30 @@ public final class PermissionManager {
                     mContext.getUserId());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Checks whether the package with the given pid/uid can read device identifiers.
+     *
+     * @param packageName      the name of the package to be checked for identifier access
+     * @param message          the message to be used for logging during identifier access
+     *                         verification
+     * @param callingFeatureId the feature in the package
+     * @param pid              the process id of the package to be checked
+     * @param uid              the uid of the package to be checked
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the package is allowed identifier
+     * access, {@link PackageManager#PERMISSION_DENIED} otherwise
+     * @hide
+     */
+    @SystemApi
+    public int checkDeviceIdentifierAccess(@Nullable String packageName, @Nullable String message,
+            @Nullable String callingFeatureId, int pid, int uid) {
+        try {
+            return mPermissionManager.checkDeviceIdentifierAccess(packageName, message,
+                    callingFeatureId, pid, uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
