@@ -210,7 +210,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"ୱେୟାରଲେସ୍‌କୁ ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"ୱେୟାରଲେସ୍‌କୁ ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="screen_lock" msgid="2072642720826409809">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
-    <string name="power_off" msgid="4111692782492232778">"ପାୱାର୍ ଅଫ୍"</string>
+    <string name="power_off" msgid="4111692782492232778">"ପାୱାର୍ ବନ୍ଦ"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"ରିଙ୍ଗର୍‍ ଅଫ୍‍ ଅଛି"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"ରିଙ୍ଗର୍‍ କମ୍ପନ"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"ରିଙ୍ଗର୍‍ ଅନ୍‍ ଅଛି"</string>
@@ -234,11 +234,11 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android ଟିଭିର ବିକଳ୍ପଗୁଡ଼ିକ"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ଫୋନ ବିକଳ୍ପ"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"ସ୍କ୍ରୀନ୍‌ ଲକ୍‌"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"ପାୱାର୍ ଅଫ୍"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"ପାୱାର୍ ବନ୍ଦ"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ଜରୁରୀକାଳୀନ"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"ସେସନ୍‍ ଶେଷ କରନ୍ତୁ"</string>
-    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରୀନଶଟ୍‌"</string>
+    <string name="global_action_screenshot" msgid="2610053466156478564">"ସ୍କ୍ରିନସଟ୍‌"</string>
     <string name="bugreport_title" msgid="8549990811777373050">"ବଗ୍‌ ରିପୋର୍ଟ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"ଇ-ମେଲ୍ ମେସେଜ୍‍ ଭାବରେ ପଠାଇବାକୁ, ଆପଣଙ୍କ ବର୍ତ୍ତମାନର ଡିଭାଇସ୍‌ ବିଷୟରେ ଏହା ସୂଚନା ସଂଗ୍ରହ କରିବ। ବଗ୍ ରିପୋର୍ଟ ଆରମ୍ଭ ହେବାପରଠାରୁ ଏହାକୁ ପଠାଇବା ପାଇଁ କିଛି ସମୟ ଲାଗିବ, ଦୟାକରି ଧୈର୍ଯ୍ୟ ରଖନ୍ତୁ।"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ଇଣ୍ଟରାକ୍ଟିଭ୍‍ ରିପୋର୍ଟ"</string>
@@ -1635,6 +1635,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ଆକ୍ସେସିବିଲିଟୀ ଶର୍ଟକଟ୍‍ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଅନ୍‍ କରାଯାଇଛି"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ଆକ୍ସେସିବିଲିଟୀ ଶର୍ଟକଟ୍‍ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ଅଫ୍‍ କରାଯାଇଛି"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ବ୍ୟବହାର କରିବାକୁ ତିନି ସେକେଣ୍ଡ ପାଇଁ ଉଭୟ ଭଲ୍ୟୁମ୍‍ କୀ ଦବାଇ ଧରି ରଖନ୍ତୁ"</string>
+    <!-- no translation found for accessibility_button_prompt_text (29591089269861261) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (1950992471955288772) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1754236312534510178) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (1761210320049107435) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (6207697277963860927) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (8774465424241303774) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ମ୍ୟାଗ୍ନିଫିକେସନ୍‍"</string>
     <string name="user_switched" msgid="7249833311585228097">"ବର୍ତ୍ତମାନର ୟୁଜର୍‌ ହେଉଛନ୍ତି <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ରେ ସୁଇଚ୍ କରନ୍ତୁ…"</string>
@@ -2020,27 +2032,38 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ଆକ୍ସେସିବିଲିଟୀ ମେନୁ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g>ର କ୍ୟାପ୍ସନ୍ ବାର୍।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g>କୁ ପ୍ରତିବନ୍ଧିତ ବକେଟରେ ରଖାଯାଇଛି"</string>
-    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
-    <skip />
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"ବାର୍ତ୍ତାଳାପ"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"ଗୋଷ୍ଠୀ ବାର୍ତ୍ତାଳାପ"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ବ୍ୟକ୍ତିଗତ"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"କାର୍ଯ୍ୟ"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ବ୍ୟକ୍ତିଗତ ଭ୍ୟୁ"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଭ୍ୟୁ"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"କାର୍ଯ୍ୟସ୍ଥଳୀ ଆପଗୁଡ଼ିକ ସହ ସେୟାର୍ କରିପାରିବ ନାହିଁ"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକ ସହ ସେୟାର୍ କରିପାରିବ ନାହିଁ"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ବ୍ୟକ୍ତିଗତ ଏବଂ ୱାର୍କ ପ୍ରୋଫାଇଲଗୁଡ଼ିକ ମଧ୍ୟରେ ସେୟାରିଂ ବ୍ଲକ୍ କରିଛନ୍ତି"</string>
-    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଆପଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିପାରିବେ ନାହିଁ"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ଆପଗୁଡ଼ିକରେ ବ୍ୟକ୍ତିଗତ ବିଷୟବସ୍ତୁ ଦେଖିବାକୁ ଦିଅନ୍ତି ନାହିଁ"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକୁ ଆକ୍ସେସ୍ କରିପାରିବେ ନାହିଁ"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"ଆପଣଙ୍କ IT ଆଡମିନ୍ ଆପଣଙ୍କୁ ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକରେ କାର୍ଯ୍ୟସ୍ଥଳୀ ସମ୍ବନ୍ଧିତ ବିଷୟବସ୍ତୁ ଦେଖିବାକୁ ଦିଅନ୍ତି ନାହିଁ"</string>
-    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"ବିଷୟବସ୍ତୁ ସେୟାର୍ କରିବାକୁ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"ବିଷୟବସ୍ତୁ ଦେଖିବାକୁ ୱାର୍କ ପ୍ରୋଫାଇଲ୍ ଚାଲୁ କରନ୍ତୁ"</string>
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"କୌଣସି ଆପ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
+    <skip />
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ଚାଲୁ କରନ୍ତୁ"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ଟେଲିଫୋନି କଲଗୁଡ଼ିକରେ ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ ବା ଚଲାନ୍ତୁ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ଏହି ଆପ୍ ଡିଫଲ୍ଟ ଡାଏଲର୍ ଆପ୍ଲିକେସନ୍ ଭାବରେ ଆସାଇନ୍ ହୋଇଥିଲେ ଟେଲିଫୋନି କଲଗୁଡ଼ିକରେ ଅଡିଓ ରେକର୍ଡ କରିବା ବା ଚଲାଇବା ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ।"</string>
 </resources>

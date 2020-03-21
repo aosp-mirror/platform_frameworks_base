@@ -435,6 +435,9 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"ਇਹ ਐਪ ਕਿਸੇ ਵੀ ਸਮੇਂ ਕੈਮਰੇ ਨੂੰ ਵਰਤ ਕੇ ਤਸਵੀਰਾਂ ਖਿੱਚ ਸਕਦੀ ਹੈ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"ਸਿਸਟਮ ਕੈਮਰੇ ਨੂੰ ਤਸਵੀਰਾਂ ਅਤੇ ਵੀਡੀਓ ਬਣਾਉਣ ਲਈ ਐਪਲੀਕੇਸ਼ਨ ਜਾਂ ਸੇਵਾ ਤੱਕ ਪਹੁੰਚ ਦਿਓ"</string>
     <string name="permdesc_systemCamera" msgid="544730545441964482">"ਇਹ ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰ ਸਿਸਟਮ ਐਪ ਕਿਸੇ ਵੇਲੇ ਵੀ ਸਿਸਟਮ ਕੈਮਰੇ ਨੂੰ ਵਰਤ ਕੇ ਤਸਵੀਰਾਂ ਖਿੱਚ ਸਕਦੀ ਹੈ ਅਤੇ ਵੀਡੀਓ ਫ਼ਾਈਲਾਂ ਰਿਕਾਰਡ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਨੂੰ ਵੀ android.permission.CAMERA ਇਜਾਜ਼ਤ ਦੀ ਲੋੜ ਹੈ।"</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ਐਪਲੀਕੇਸ਼ਨ ਜਾਂ ਸੇਵਾ ਨੂੰ ਕੈਮਰਾ ਡੀਵਾਈਸਾਂ ਦੇ ਚਾਲੂ ਜਾਂ ਬੰਦ ਕੀਤੇ ਜਾਣ ਬਾਰੇ ਕਾਲਬੈਕ ਪ੍ਰਾਪਤ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ।"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ਵਾਈਬ੍ਰੇਸ਼ਨ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ਐਪ ਨੂੰ ਵਾਈਬ੍ਰੇਟਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ਐਪ ਨੂੰ ਥਰਥਰਾਹਟ ਸਥਿਤੀ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਦਿੰਦਾ ਹੈ।"</string>
@@ -448,6 +451,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"ਕਾਲ ਕਰਨ ਦੇ ਅਨੁਭਵ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਣ ਲਈ ਐਪ ਨੂੰ ਇਸਦੀਆਂ ਕਾਲਾਂ ਨੂੰ ਸਿਸਟਮ ਰਾਹੀਂ ਰੂਟ ਕਰਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿੰਦੀ ਹੈ।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ਸਿਸਟਮ ਰਾਹੀਂ ਕਾਲਾਂ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ।"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"ਐਪ ਨੂੰ ਡੀਵਾਈਸ \'ਤੇ ਜਾਰੀ ਕਾਲਾਂ ਦੇਖਣ ਅਤੇ ਕੰਟਰੋਲ ਕਰਨ ਦਿਓ। ਇਸ ਵਿੱਚ ਕਾਲਾਂ ਦੇ ਨੰਬਰਾਂ ਅਤੇ ਉਹਨਾਂ ਦੀ ਸਥਿਤੀ ਬਾਰੇ ਜਾਣਕਾਰੀ ਸ਼ਾਮਲ ਹੈ।"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"ਆਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੀਆਂ ਪਾਬੰਦੀਆਂ ਤੋਂ ਛੋਟ ਦਿਓ"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"ਐਪ ਨੂੰ ਆਡੀਓ ਰਿਕਾਰਡ ਕਰਨ ਦੀ ਪਾਬੰਦੀਆਂ ਤੋਂ ਛੋਟ ਦਿਓ।"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ਕਿਸੇ ਹੋਰ ਐਪ ਤੋਂ ਕਾਲ ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ਐਪ ਨੂੰ ਉਹ ਕਾਲ ਜਾਰੀ ਰੱਖਣ ਦਿਓ ਜਿਸਨੂੰ ਹੋਰ ਐਪ ਤੋਂ ਚਾਲੂ ਕੀਤਾ ਗਿਆ ਸੀ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ਫ਼ੋਨ ਨੰਬਰ ਪੜ੍ਹੋ"</string>
@@ -1099,28 +1104,6 @@
     <string name="deleteText" msgid="4200807474529938112">"ਮਿਟਾਓ"</string>
     <string name="inputMethod" msgid="1784759500516314751">"ਇਨਪੁੱਟ ਵਿਧੀ"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"ਟੈਕਸਟ ਕਿਰਿਆਵਾਂ"</string>
-    <string name="email" msgid="2503484245190492693">"ਈਮੇਲ ਖੋਲ੍ਹੋ"</string>
-    <string name="email_desc" msgid="8291893932252173537">"ਚੁਣੇ ਹੋਏ ਪਤੇ \'ਤੇ ਈਮੇਲ ਭੇਜੋ"</string>
-    <string name="dial" msgid="4954567785798679706">"ਕਾਲ ਕਰੋ"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"ਚੁਣੇ ਗਏ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਕਾਲ ਕਰੋ"</string>
-    <string name="map" msgid="6865483125449986339">"ਨਕਸ਼ਾ ਖੋਲ੍ਹੋ"</string>
-    <string name="map_desc" msgid="1068169741300922557">"ਚੁਣਿਆ ਗਿਆ ਪਤਾ ਨਕਸ਼ੇ \'ਤੇ ਦਿਖਾਓ"</string>
-    <string name="browse" msgid="8692753594669717779">"ਖੋਲ੍ਹੋ"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"ਚੁਣਿਆ ਗਿਆ URL ਖੋਲ੍ਹੋ"</string>
-    <string name="sms" msgid="3976991545867187342">"ਸੁਨੇਹਾ ਭੇਜੋ"</string>
-    <string name="sms_desc" msgid="997349906607675955">"ਚੁਣੇ ਗਏ ਫ਼ੋਨ ਨੰਬਰ \'ਤੇ ਸੁਨੇਹਾ ਭੇਜੋ"</string>
-    <string name="add_contact" msgid="7404694650594333573">"ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"ਸੰਪਰਕਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"ਦੇਖੋ"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"ਕੈਲੰਡਰ ਵਿੱਚ ਚੁਣਿਆ ਗਿਆ ਸਮਾਂ ਦੇਖੋ"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"ਸਮਾਂ-ਸੂਚੀ ਬਣਾਓ"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"ਚੁਣੇ ਗਏ ਸਮੇਂ ਲਈ ਇਵੈਂਟ ਦੀ ਸਮਾਂ-ਸੂਚੀ ਬਣਾਓ"</string>
-    <string name="view_flight" msgid="2042802613849690108">"ਟਰੈਕ ਕਰੋ"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"ਚੁਣੀ ਗਈ ਉਡਾਣ ਨੂੰ ਟਰੈਕ ਕਰੋ"</string>
-    <string name="translate" msgid="1416909787202727524">"ਅਨੁਵਾਦ ਕਰੋ"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"ਚੋਣਵੀਂ ਲਿਖਤ ਦਾ ਅਨੁਵਾਦ ਕਰੋ"</string>
-    <string name="define" msgid="5214255850068764195">"ਪਰਿਭਾਸ਼ਾ ਦਿਓ"</string>
-    <string name="define_desc" msgid="6916651934713282645">"ਚੋਣਵੀਂ ਲਿਖਤ ਦਾ ਅਨੁਵਾਦ ਕਰੋ"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"ਸਟੋਰੇਜ ਦੀ ਜਗ੍ਹਾ ਖਤਮ ਹੋ ਰਹੀ ਹੈ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"ਕੁਝ ਸਿਸਟਮ ਫੰਕਸ਼ਨ ਕੰਮ ਨਹੀਂ ਵੀ ਕਰ ਸਕਦੇ"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"ਸਿਸਟਮ ਲਈ ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ। ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਕੋਲ 250MB ਖਾਲੀ ਜਗ੍ਹਾ ਹੈ ਅਤੇ ਮੁੜ-ਚਾਲੂ ਕਰੋ।"</string>
@@ -1259,7 +1242,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਕੋਲ ਇੰਟਰਨੈੱਟ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ਨੈੱਟਵਰਕ ਕੋਲ ਇੰਟਰਨੈੱਟ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਹੈ"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"ਨਿੱਜੀ ਡੋਮੇਨ ਨਾਮ ਪ੍ਰਣਾਲੀ (DNS) ਸਰਵਰ \'ਤੇ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"ਕਨੈਕਟ ਹੋਏ"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ਕੋਲ ਸੀਮਤ ਕਨੈਕਟੀਵਿਟੀ ਹੈ"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ਫਿਰ ਵੀ ਕਨੈਕਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"ਬਦਲਕੇ <xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ਲਿਆਂਦਾ ਗਿਆ"</string>
@@ -1631,14 +1613,21 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ਕੀ ਵੌਲਿਊਮ  ਸਿਫ਼ਾਰਸ਼  ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (7310194076629867377) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (6096484087245145325) -->
-    <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (4849108668454490699) -->
-    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"ਕੀ <xliff:g id="SERVICE">%1$s</xliff:g> ਨੂੰ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਦਾ ਪੂਰਾ ਕੰਟਰੋਲ ਦੇਣਾ ਹੈ?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"ਜੇਕਰ ਤੁਸੀਂ <xliff:g id="SERVICE">%1$s</xliff:g> ਚਾਲੂ ਕਰਦੇ ਹੋ, ਤਾਂ ਤੁਹਾਡਾ ਡੀਵਾਈਸ ਇਨਕ੍ਰਿਪਸ਼ਨ ਦਾ ਵਿਸਤਾਰ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਵਰਤੋਂ ਨਹੀਂ ਕਰੇਗਾ।"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"ਪੂਰਾ ਕੰਟਰੋਲ ਉਹਨਾਂ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਹੈ ਜੋ ਪਹੁੰਚਯੋਗਤਾ ਸੰਬੰਧੀ ਲੋੜਾਂ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਦੀਆਂ ਹਨ, ਪਰ ਜ਼ਿਆਦਾਤਰ ਐਪਾਂ ਲਈ ਢੁਕਵਾਂ ਨਹੀਂ ਹੁੰਦਾ।"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"ਸਕ੍ਰੀਨ ਨੂੰ ਦੇਖੋ ਅਤੇ ਕੰਟਰੋਲ ਕਰੋ"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"ਇਹ ਸਕ੍ਰੀਨ \'ਤੇ ਸਾਰੀ ਸਮੱਗਰੀ ਪੜ੍ਹ ਸਕਦੀ ਹੈ ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ ਦੂਜੀਆਂ ਐਪਾਂ ਦੇ ਉੱਪਰ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"ਕਾਰਵਾਈਆਂ ਦੇਖੋ ਅਤੇ ਕਰੋ"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ਇਹ ਕਿਸੇ ਐਪ ਜਾਂ ਹਾਰਡਵੇਅਰ ਸੈਂਸਰ ਦੇ ਨਾਲ ਤੁਹਾਡੀਆਂ ਅੰਤਰਕਿਰਿਆਵਾਂ ਨੂੰ ਟਰੈਕ ਕਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਤੁਹਾਡੀ ਤਰਫ਼ੋਂ ਐਪਾਂ ਦੇ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰ ਸਕਦੀ ਹੈ।"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ਕਰਨ ਦਿਓ"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ਮਨ੍ਹਾਂ ਕਰੋ"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ਕਿਸੇ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉਸ \'ਤੇ ਟੈਪ ਕਰੋ:"</string>
+    <string name="accessibility_edit_shortcut_menu_button_title" msgid="2062625107544922685">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨਾਲ ਵਰਤਣ ਲਈ ਐਪਾਂ ਚੁਣੋ"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="2831697927653841895">"ਅਵਾਜ਼ ਕੁੰਜੀ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਵਰਤਣ ਲਈ ਐਪਾਂ ਚੁਣੋ"</string>
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ਨੂੰ ਬੰਦ ਕਰ ਦਿੱਤਾ ਗਿਆ ਹੈ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ਸ਼ਾਰਟਕੱਟਾਂ ਦਾ ਸੰਪਾਦਨ ਕਰੋ"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"ਰੱਦ ਕਰੋ"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ਹੋ ਗਿਆ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ਸ਼ਾਰਟਕੱਟ ਬੰਦ ਕਰੋ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋ"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ਰੰਗ ਦੀ ਉਲਟੀ ਤਰਤੀਬ"</string>
@@ -1646,6 +1635,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਨੇ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦਬਾਈ ਰੱਖੋ"</string>
+    <!-- no translation found for accessibility_button_prompt_text (29591089269861261) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (1950992471955288772) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1754236312534510178) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (1761210320049107435) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (6207697277963860927) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (8774465424241303774) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
@@ -1859,8 +1860,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"ਗੈਰ-ਸ਼੍ਰੇਣੀਕਿਰਤ"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ਤੁਸੀਂ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਦੀ ਮਹੱਤਤਾ ਸੈੱਟ ਕੀਤੀ।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"ਇਹ ਸ਼ਾਮਲ ਲੋਕਾਂ ਦੇ ਕਾਰਨ ਮਹੱਤਵਪੂਰਨ ਹੈ।"</string>
-    <!-- no translation found for notification_history_title_placeholder (7748630986182249599) -->
-    <skip />
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"ਵਿਉਂਤੀ ਐਪ ਸੂਚਨਾ"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ (ਇਸ ਖਾਤੇ ਨਾਲ ਇੱਕ ਵਰਤੋਂਕਾਰ ਪਹਿਲਾਂ ਤੋਂ ਹੀ ਮੌਜੂਦ ਹੈ)?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"ਕੀ <xliff:g id="APP">%1$s</xliff:g> ਨੂੰ <xliff:g id="ACCOUNT">%2$s</xliff:g> ਨਾਲ ਨਵਾਂ ਵਰਤੋਂਕਾਰ ਬਣਾਉਣ ਦੀ ਇਜਾਜ਼ਤ ਦੇਣੀ ਹੈ?"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ਇੱਕ ਭਾਸ਼ਾ ਸ਼ਾਮਲ ਕਰੋ"</string>
@@ -2032,30 +2032,40 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ਪਹੁੰਚਯੋਗਤਾ ਮੀਨੂ"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਦੀ ਸੁਰਖੀ ਪੱਟੀ।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> ਨੂੰ ਪ੍ਰਤਿਬੰਧਿਤ ਖਾਨੇ ਵਿੱਚ ਪਾਇਆ ਗਿਆ ਹੈ"</string>
+    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
+    <skip />
+    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
+    <skip />
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ਨਿੱਜੀ"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"ਕੰਮ"</string>
-    <!-- no translation found for resolver_personal_tab_accessibility (5739524949153091224) -->
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
     <skip />
-    <!-- no translation found for resolver_work_tab_accessibility (4753168230363802734) -->
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
     <skip />
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"ਕੰਮ ਸੰਬੰਧੀ ਐਪਾਂ ਨਾਲ ਸਾਂਝਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ਨਿੱਜੀ ਐਪਾਂ ਨਾਲ ਸਾਂਝਾ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (5556640604460901386) -->
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
     <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (375634344111233790) -->
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
     <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3958762224516867388) -->
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
     <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (1953215925406474177) -->
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
     <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (1725572276741281136) -->
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
     <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_share (619263911204978175) -->
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
     <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_view (3073389230905543680) -->
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
     <skip />
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"ਕੋਈ ਐਪ ਉਪਲਬਧ ਨਹੀਂ"</string>
-    <!-- no translation found for resolver_switch_on_work (2873009160846966379) -->
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"ਚਾਲੂ ਕਰੋ"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
     <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ਟੈਲੀਫ਼ੋਨੀ ਕਾਲਾਂ ਵਿੱਚ ਰਿਕਾਰਡ ਕਰੋ ਜਾਂ ਆਡੀਓ ਚਲਾਓ"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ਇਹ ਇਸ ਐਪ ਨੂੰ, ਪੂਰਵ-ਨਿਰਧਾਰਤ ਡਾਇਲਰ ਐਪਲੀਕੇਸ਼ਨ ਵਜੋਂ ਜਿੰਮੇ ਲਾਏ ਜਾਣ \'ਤੇ, ਟੈਲੀਫ਼ੋਨੀ ਕਾਲਾਂ ਵਿੱਚ ਰਿਕਾਰਡ ਕਰਨ ਜਾਂ ਆਡੀਓ ਚਲਾਉਣ ਦਿੰਦਾ ਹੈ।"</string>

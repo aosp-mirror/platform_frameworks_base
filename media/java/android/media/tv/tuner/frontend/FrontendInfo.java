@@ -112,7 +112,7 @@ public class FrontendInfo {
      * Gets frontend capabilities.
      */
     @NonNull
-    public FrontendCapabilities getFrontendCapability() {
+    public FrontendCapabilities getFrontendCapabilities() {
         return mFrontendCap;
     }
 }

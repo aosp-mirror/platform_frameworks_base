@@ -105,7 +105,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
             IKeyguardCallback callback = (IKeyguardCallback) invocation.getArguments()[1];
             callback.onRemoteContentReady(mSurfacePackage);
             return null;
-        }).when(mKeyguardClient).onSurfaceReady(any(), any(IKeyguardCallback.class));
+        }).when(mKeyguardClient).onCreateKeyguardSurface(any(), any(IKeyguardCallback.class));
 
         mTestController.show(mServiceIntent);
 
@@ -119,7 +119,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
             IKeyguardCallback callback = (IKeyguardCallback) invocation.getArguments()[1];
             callback.onDismiss();
             return null;
-        }).when(mKeyguardClient).onSurfaceReady(any(), any(IKeyguardCallback.class));
+        }).when(mKeyguardClient).onCreateKeyguardSurface(any(), any(IKeyguardCallback.class));
 
         mTestController.show(mServiceIntent);
 
@@ -133,7 +133,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
             IKeyguardCallback callback = (IKeyguardCallback) invocation.getArguments()[1];
             callback.onRemoteContentReady(mSurfacePackage);
             return null;
-        }).when(mKeyguardClient).onSurfaceReady(any(), any(IKeyguardCallback.class));
+        }).when(mKeyguardClient).onCreateKeyguardSurface(any(), any(IKeyguardCallback.class));
 
         mTestController.show(mServiceIntent);
         SurfaceView v = verifySurfaceReady();
@@ -151,9 +151,9 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDismissed_onSurfaceReady_RemoteException() throws Exception {
+    public void testDismissed_onCreateKeyguardSurface_RemoteException() throws Exception {
         doThrow(new RemoteException()).when(mKeyguardClient)
-                .onSurfaceReady(any(), any(IKeyguardCallback.class));
+                .onCreateKeyguardSurface(any(), any(IKeyguardCallback.class));
 
         mTestController.show(mServiceIntent);
 
@@ -161,9 +161,9 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testDismissed_onSurfaceReady_timeout() throws Exception {
-        // Mocked KeyguardClient never handles the onSurfaceReady, so the operation times out,
-        // resulting in the view being dismissed.
+    public void testDismissed_onCreateKeyguardSurface_timeout() throws Exception {
+        // Mocked KeyguardClient never handles the onCreateKeyguardSurface, so the operation
+        // times out, resulting in the view being dismissed.
         doAnswer(answerVoid(Runnable::run)).when(mHandler)
                 .postDelayed(any(Runnable.class), anyLong());
 
@@ -178,7 +178,7 @@ public class AdminSecondaryLockScreenControllerTest extends SysuiTestCase {
         verify(mParent).addView(captor.capture());
 
         mTestableLooper.processAllMessages();
-        verify(mKeyguardClient).onSurfaceReady(any(), any(IKeyguardCallback.class));
+        verify(mKeyguardClient).onCreateKeyguardSurface(any(), any(IKeyguardCallback.class));
         return captor.getValue();
     }
 

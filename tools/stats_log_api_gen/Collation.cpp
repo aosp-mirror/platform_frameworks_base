@@ -55,8 +55,7 @@ AtomDecl::AtomDecl(const AtomDecl &that)
         resetState(that.resetState),
         nested(that.nested),
         uidField(that.uidField),
-        whitelisted(that.whitelisted),
-        binaryFields(that.binaryFields) {}
+        whitelisted(that.whitelisted) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
     :code(c),
@@ -421,10 +420,6 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
             errorCount++;
             continue;
         }
-    }
-    // Binary field validity is already checked above.
-    if (isBinaryField) {
-        atomDecl->binaryFields.push_back(it->first);
     }
   }
 

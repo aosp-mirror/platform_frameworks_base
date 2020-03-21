@@ -670,6 +670,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             });
         }
         startConnectionToCurrentUser();
+
+        // Clean up the minimized state if launcher dies
+        Divider divider = mDividerOptional.get();
+        if (divider != null) {
+            divider.setMinimized(false);
+        }
     }
 
     public void startConnectionToCurrentUser() {

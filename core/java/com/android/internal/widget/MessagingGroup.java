@@ -17,6 +17,7 @@
 package com.android.internal.widget;
 
 import android.annotation.AttrRes;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleRes;
@@ -44,6 +45,8 @@ import android.widget.RemoteViews;
 
 import com.android.internal.R;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +57,23 @@ import java.util.List;
 public class MessagingGroup extends LinearLayout implements MessagingLinearLayout.MessagingChild {
     private static Pools.SimplePool<MessagingGroup> sInstancePool
             = new Pools.SynchronizedPool<>(10);
+
+    /**
+     * Images are displayed inline.
+     */
+    public static final int IMAGE_DISPLAY_LOCATION_INLINE = 0;
+
+    /**
+     * Images are displayed at the end of the group.
+     */
+    public static final int IMAGE_DISPLAY_LOCATION_AT_END = 1;
+
+    /**
+     *     Images are displayed externally.
+     */
+    public static final int IMAGE_DISPLAY_LOCATION_EXTERNAL = 2;
+
+
     private MessagingLinearLayout mMessageContainer;
     ImageFloatingTextView mSenderView;
     private ImageView mAvatarView;
@@ -70,7 +90,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private boolean mIsHidingAnimated;
     private boolean mNeedsGeneratedAvatar;
     private Person mSender;
-    private boolean mImagesAtEnd;
+    private @ImageDisplayLocation int mImageDisplayLocation;
     private ViewGroup mImageContainer;
     private MessagingImageMessage mIsolatedMessage;
     private boolean mClippingDisabled;
@@ -476,7 +496,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 mAddedMessages.add(message);
             }
             boolean isImage = message instanceof MessagingImageMessage;
-            if (mImagesAtEnd && isImage) {
+            if (mImageDisplayLocation != IMAGE_DISPLAY_LOCATION_INLINE && isImage) {
                 isolatedMessage = (MessagingImageMessage) message;
             } else {
                 if (removeFromParentIfDifferent(message, mMessageContainer)) {
@@ -500,9 +520,12 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             }
         }
         if (isolatedMessage != null) {
-            if (removeFromParentIfDifferent(isolatedMessage, mImageContainer)) {
+            if (mImageDisplayLocation == IMAGE_DISPLAY_LOCATION_AT_END
+                    && removeFromParentIfDifferent(isolatedMessage, mImageContainer)) {
                 mImageContainer.removeAllViews();
                 mImageContainer.addView(isolatedMessage.getView());
+            } else if (mImageDisplayLocation == IMAGE_DISPLAY_LOCATION_EXTERNAL) {
+                mImageContainer.removeAllViews();
             }
             isolatedMessage.setIsolated(true);
         } else if (mIsolatedMessage != null) {
@@ -515,7 +538,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     }
 
     private void updateImageContainerVisibility() {
-        mImageContainer.setVisibility(mIsolatedMessage != null && mImagesAtEnd
+        mImageContainer.setVisibility(mIsolatedMessage != null
+                && mImageDisplayLocation == IMAGE_DISPLAY_LOCATION_AT_END
                 ? View.VISIBLE : View.GONE);
     }
 
@@ -620,9 +644,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mClippingDisabled = disabled;
     }
 
-    public void setDisplayImagesAtEnd(boolean atEnd) {
-        if (mImagesAtEnd != atEnd) {
-            mImagesAtEnd = atEnd;
+    public void setImageDisplayLocation(@ImageDisplayLocation int displayLocation) {
+        if (mImageDisplayLocation != displayLocation) {
+            mImageDisplayLocation = displayLocation;
             updateImageContainerVisibility();
         }
     }
@@ -669,5 +693,14 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             layoutParams.setMarginEnd(mIsInConversation ? 0 : mNonConversationMarginEnd);
             mMessagingIconContainer.setLayoutParams(layoutParams);
         }
+    }
+
+    @IntDef(prefix = {"IMAGE_DISPLAY_LOCATION_"}, value = {
+            IMAGE_DISPLAY_LOCATION_INLINE,
+            IMAGE_DISPLAY_LOCATION_AT_END,
+            IMAGE_DISPLAY_LOCATION_EXTERNAL
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface ImageDisplayLocation {
     }
 }

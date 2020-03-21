@@ -16,6 +16,9 @@
 
 package com.android.server.attention;
 
+import static android.content.Context.BIND_AUTO_CREATE;
+import static android.content.Context.BIND_FOREGROUND_SERVICE;
+import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import static android.provider.DeviceConfig.NAMESPACE_ATTENTION_MANAGER_SERVICE;
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_CANCELLED;
 import static android.service.attention.AttentionService.ATTENTION_FAILURE_UNKNOWN;
@@ -583,8 +586,8 @@ public class AttentionManagerService extends SystemService {
                         mComponentName);
                 // Note: no reason to clear the calling identity, we won't have one in a handler.
                 mContext.bindServiceAsUser(serviceIntent, mConnection,
-                        Context.BIND_AUTO_CREATE, UserHandle.CURRENT);
-
+                        BIND_AUTO_CREATE | BIND_FOREGROUND_SERVICE | BIND_INCLUDE_CAPABILITIES,
+                        UserHandle.CURRENT);
             });
         }
 

@@ -21,44 +21,44 @@ android_test {
     ],
     libs: [
         "android.test.runner",
-        "android.test.base",
+        "android.test.base"
     ],
     static_libs: [
+        "FrameworksResourceLoaderTests_Providers",
         "androidx.test.espresso.core",
         "androidx.test.ext.junit",
         "androidx.test.runner",
         "androidx.test.rules",
         "mockito-target-minus-junit4",
-        "truth-prebuilt",
+        "truth-prebuilt"
     ],
-    resource_zips: [ ":FrameworksResourceLoaderTestsAssets" ],
+    resource_dirs: ["res", "resources/provider_stable/res"],
     platform_apis: true,
     test_suites: ["device-tests"],
-    aaptflags: [
-        "--no-compress",
-    ],
+    aaptflags: ["-0 .txt"],
     data: [
-        ":FrameworksResourceLoaderTestsSplitOne",
-        ":FrameworksResourceLoaderTestsSplitTwo",
-        ":FrameworksResourceLoaderTestsSplitThree",
-        ":FrameworksResourceLoaderTestsSplitFour",
-    ],
-    java_resources: [ "NonAsset.txt" ]
+        ":FrameworksResourceLoaderTests_ProviderOne_Split",
+        ":FrameworksResourceLoaderTests_ProviderTwo_Split",
+        ":FrameworksResourceLoaderTests_ProviderThree_Split",
+        ":FrameworksResourceLoaderTests_ProviderFour_Split"
+    ]
 }
 
-filegroup {
-    name: "FrameworksResourceLoaderTestsResources",
-    srcs: ["resources"],
-}
-
-genrule {
-    name: "FrameworksResourceLoaderTestsAssets",
-    srcs: [
-        ":framework-res",
-        ":FrameworksResourceLoaderTestsResources",
+java_genrule {
+    name: "FrameworksResourceLoaderTests_Providers",
+    tools: ["soong_zip"],
+    srcs : [
+        ":FrameworksResourceLoaderTests_ProviderOne",
+        ":FrameworksResourceLoaderTests_ProviderOne_ARSC",
+        ":FrameworksResourceLoaderTests_ProviderTwo",
+        ":FrameworksResourceLoaderTests_ProviderTwo_ARSC",
+        ":FrameworksResourceLoaderTests_ProviderThree",
+        ":FrameworksResourceLoaderTests_ProviderThree_ARSC",
+        ":FrameworksResourceLoaderTests_ProviderFour",
+        ":FrameworksResourceLoaderTests_ProviderFour_ARSC"
     ],
-    tools: [ ":aapt2", ":soong_zip" ],
-    tool_files: [ "resources/compileAndLink.sh" ],
-    cmd: "$(location resources/compileAndLink.sh) $(location :aapt2) $(location :soong_zip) $(genDir) $(in) $(in)",
-    out: [ "out.zip" ]
+    out: ["FrameworksResourceLoaderTests_Providers.jar"],
+    cmd: "mkdir -p $(genDir)/assets/ && cp $(in) $(genDir)/assets/ && " +
+         "$(location soong_zip) -o $(out) " +
+         "-L 0 -C $(genDir) -D $(genDir)/assets/"
 }

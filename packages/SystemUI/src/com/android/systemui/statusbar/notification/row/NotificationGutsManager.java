@@ -394,7 +394,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
         notificationInfoView.bindNotification(
                 mShortcutManager,
-                mLauncherApps,
                 pmUser,
                 mNotificationManager,
                 mVisualStabilityManager,
@@ -402,7 +401,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 row.getEntry().getChannel(),
                 row.getEntry(),
                 onSettingsClick,
-                onAppSettingsClick,
                 onSnoozeClickListener,
                 iconFactoryLoader,
                 mDeviceProvisionedController.isDeviceProvisioned());

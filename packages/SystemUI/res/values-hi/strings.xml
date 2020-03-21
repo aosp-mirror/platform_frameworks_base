@@ -562,8 +562,7 @@
     <string name="monitoring_description_app_personal_work" msgid="6175816356939166101">"आपकी वर्क प्रोफ़ाइल का प्रबंधन <xliff:g id="ORGANIZATION">%1$s</xliff:g> करता है. प्रोफ़ाइल <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> से कनेक्ट है, जो ईमेल, ऐप्लिकेशन और वेबसाइटों सहित आपकी नेटवर्क गतिविधि की निगरानी कर सकता है.\n\nआप <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> से भी कनेक्ट हैं, जो आपकी व्यक्तिगत नेटवर्क गतिविधि की निगरानी कर सकता है."</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"TrustAgent की वजह से अनलॉक रखा गया है"</string>
     <string name="keyguard_indication_trust_disabled" msgid="6820793704816727918">"जब तक कि आप मैन्‍युअल रूप से अनलॉक नहीं करते तब तक डिवाइस लॉक रहेगा"</string>
-    <!-- no translation found for keyguard_indication_trust_unlocked_plugged_in (2323452175329362855) -->
-    <skip />
+    <string name="keyguard_indication_trust_unlocked_plugged_in" msgid="2323452175329362855">"<xliff:g id="KEYGUARD_INDICATION">%1$s</xliff:g>\n<xliff:g id="POWER_INDICATION">%2$s</xliff:g>"</string>
     <string name="hidden_notifications_title" msgid="1782412844777612795">"सूचनाएं ज़्यादा तेज़ी से पाएं"</string>
     <string name="hidden_notifications_text" msgid="5899627470450792578">"  उन्हें अनलॉक किए जाने से पहले देखें"</string>
     <string name="hidden_notifications_cancel" msgid="4805370226181001278">"रहने दें"</string>
@@ -700,7 +699,8 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"आवाज़ या वाइब्रेशन होने की वजह से आपका ध्यान सूचनाओं पर जाता है."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"फ़्लोट करने वाले शॉर्टकट की मदद से इस सामग्री पर आपका ध्यान बना रहता है."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे."</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"सूचनाओं के इस समूह को यहां कॉन्फ़िगर नहीं किया जा सकता"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"प्रॉक्सी सूचना"</string>
@@ -970,13 +970,8 @@
     <string name="device_services" msgid="1549944177856658705">"डिवाइस सेवाएं"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"कोई शीर्षक नहीं"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"इस ऐप्लिकेशन को रीस्टार्ट करने और फ़ुल स्क्रीन चालू करने के लिए टैप करें."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g> खोलें"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> बबल की सेटिंग"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> से बबल की अनुमति दें?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"प्रबंधित करें"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"अनुमति न दें"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"अनुमति दें"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"मुझसे बाद में पूछें"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> और <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g> अन्य ऐप्लिकेशन से <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"ले जाएं"</string>
@@ -985,9 +980,17 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"बाईं ओर सबसे नीचे ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"सबसे नीचे दाईं ओर ले जाएं"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"खारिज करें"</string>
-    <string name="bubbles_user_education_title" msgid="3385222165904578710">"चैट को पहले से तैयार रखें"</string>
-    <string name="bubbles_user_education_description" msgid="6663205638091146934">"<xliff:g id="APP_NAME">%1$s</xliff:g> की नई चैट बबल्स की तरह दिखेंगी. इसे खोलने के लिए किसी बबल पर टैप करें. इसे एक जगह से दूसरी जगह ले जाने के लिए, खींचें और छोड़ें.\n\nबबल पर टैप करें"</string>
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"इस ऐप्लिकेशन पर बबल्स को बंद करने के लिए \'प्रबंधित करें\' पर टैप करें"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
@@ -1005,12 +1008,9 @@
     <string name="controls_favorite_subtitle" msgid="4049644994401173949">"झटपट ऐक्सेस पाने के लिए कंट्राेल चुनें"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
-    <!-- no translation found for controls_dialog_title (8806193219278278442) -->
-    <skip />
-    <!-- no translation found for controls_dialog_ok (7011816381344485651) -->
-    <skip />
-    <!-- no translation found for controls_dialog_message (6292099631702047540) -->
-    <skip />
+    <string name="controls_dialog_title" msgid="8806193219278278442">"फटाफट कंट्रोल में जोड़ें"</string>
+    <string name="controls_dialog_ok" msgid="7011816381344485651">"पसंदीदा में जोड़ें"</string>
+    <string name="controls_dialog_message" msgid="6292099631702047540">"<xliff:g id="APP">%s</xliff:g> आपको इस कंट्रोल को अपनी पसंदीदा में जोड़ने का सुझाव देता है."</string>
     <!-- no translation found for controls_pin_use_alphanumeric (8478371861023048414) -->
     <skip />
     <!-- no translation found for controls_pin_verify (414043854030774349) -->
@@ -1019,5 +1019,7 @@
     <skip />
     <string name="controls_structure_tooltip" msgid="1392966215435667434">"दूसरे स्ट्रक्चर देखने के लिए स्वाइप करें"</string>
     <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
     <skip />
 </resources>

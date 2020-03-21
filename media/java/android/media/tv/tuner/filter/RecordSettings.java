@@ -18,9 +18,7 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.TunerUtils;
 
@@ -270,26 +268,24 @@ public class RecordSettings extends Settings {
     /**
      * Creates a builder for {@link RecordSettings}.
      *
-     * @param context the context of the caller.
      * @param mainType the filter main type.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context, @Filter.Type int mainType) {
-        TunerUtils.checkTunerPermission(context);
+    public static Builder builder(@Filter.Type int mainType) {
         return new Builder(mainType);
     }
 
     /**
      * Builder for {@link RecordSettings}.
      */
-    public static class Builder extends Settings.Builder<Builder> {
+    public static class Builder {
+        private final int mMainType;
         private int mTsIndexMask;
         private int mScIndexType;
         private int mScIndexMask;
 
         private Builder(int mainType) {
-            super(mainType);
+            mMainType = mainType;
         }
 
         /**
@@ -323,11 +319,6 @@ public class RecordSettings extends Settings {
         @NonNull
         public RecordSettings build() {
             return new RecordSettings(mMainType, mTsIndexMask, mScIndexType, mScIndexMask);
-        }
-
-        @Override
-        Builder self() {
-            return this;
         }
     }
 

@@ -17,10 +17,7 @@
 package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
-import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.content.Context;
-import android.media.tv.tuner.TunerUtils;
 
 /**
  * Bits Settings for Section Filters.
@@ -74,13 +71,10 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
     /**
      * Creates a builder for {@link SectionSettingsWithSectionBits}.
      *
-     * @param context the context of the caller.
      * @param mainType the filter main type.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context, @Filter.Type int mainType) {
-        TunerUtils.checkTunerPermission(context);
+    public static Builder builder(@Filter.Type int mainType) {
         return new Builder(mainType);
     }
 
@@ -88,9 +82,9 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
      * Builder for {@link SectionSettingsWithSectionBits}.
      */
     public static class Builder extends SectionSettings.Builder<Builder> {
-        private byte[] mFilter;
-        private byte[] mMask;
-        private byte[] mMode;
+        private byte[] mFilter = {};
+        private byte[] mMask = {};
+        private byte[] mMode = {};
 
         private Builder(int mainType) {
             super(mainType);
@@ -98,6 +92,8 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
 
         /**
          * Sets filter bytes.
+         *
+         * <p>Default value is an empty byte array.
          */
         @NonNull
         public Builder setFilter(@NonNull byte[] filter) {
@@ -106,6 +102,8 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
         }
         /**
          * Sets bit mask.
+         *
+         * <p>Default value is an empty byte array.
          */
         @NonNull
         public Builder setMask(@NonNull byte[] mask) {
@@ -114,6 +112,8 @@ public class SectionSettingsWithSectionBits extends SectionSettings {
         }
         /**
          * Sets mode.
+         *
+         * <p>Default value is an empty byte array.
          */
         @NonNull
         public Builder setMode(@NonNull byte[] mode) {

@@ -1635,6 +1635,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ဖွင့်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"အများသုံးစွဲနိုင်မှု ဖြတ်လမ်းလင့်ခ်သည် <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို ပိတ်လိုက်ပါသည်"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ကို သုံးရန် အသံအတိုးအလျှော့ ခလုတ်နှစ်ခုလုံးကို သုံးစက္ကန့်ကြာ ဖိထားပါ"</string>
+    <!-- no translation found for accessibility_button_prompt_text (29591089269861261) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (1950992471955288772) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1754236312534510178) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (1761210320049107435) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (6207697277963860927) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (8774465424241303774) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ချဲ့ခြင်း"</string>
     <string name="user_switched" msgid="7249833311585228097">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေ…"</string>
@@ -2025,19 +2037,33 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"အဖွဲ့စကားဝိုင်း"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"ကိုယ်ပိုင်"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"အလုပ်"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ပုဂ္ဂိုလ်ရေးဆိုင်ရာ မြင်ကွင်း"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"အလုပ် မြင်ကွင်း"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"အလုပ်သုံးအက်ပ်များနှင့် မျှဝေ၍ မရပါ"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"ကိုယ်ပိုင်သုံးအက်ပ်များနှင့် မျှဝေ၍ မရပါ"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"သင့် အိုင်တီစီမံခန့်ခွဲသူသည် ပုဂ္ဂိုလ်ရေးဆိုင်ရာနှင့် အလုပ် ပရိုဖိုင်များအကြား မျှဝေခြင်းကို ပိတ်ထားသည်"</string>
-    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"အလုပ်သုံးအက်ပ်များကို ဖွင့်၍မရပါ"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"သင့် အိုင်တီစီမံခန့်ခွဲသူသည် အလုပ်သုံးအက်ပ်များတွင် ပုဂ္ဂိုလ်ရေးဆိုင်ရာ အကြောင်းအရာကို ကြည့်ခွင့်မပြုပါ"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"ပုဂ္ဂိုလ်ရေးဆိုင်ရာ အက်ပ်များကို သုံးခွင့်မရှိပါ"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"သင့် အိုင်တီ စီမံခန့်ခွဲသူသည် ပုဂ္ဂိုလ်ရေးဆိုင်ရာအက်ပ်များတွင် အလုပ်သုံး အကြောင်းအရာကို ကြည့်ခွင့်မပြုပါ"</string>
-    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"အကြောင်းအရာမျှဝေရန် အလုပ်ပရိုဖိုင်ကို ဖွင့်ပါ"</string>
-    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"အကြောင်းအရာကို ကြည့်ရန် အလုပ်ပရိုဖိုင်ကို ဖွင့်ပါ"</string>
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"မည်သည့်အက်ပ်မျှ မရှိပါ"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
+    <skip />
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ဖွင့်ရန်"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ဤအက်ပ်အား မူလ dialer အပလီကေးရှင်းအဖြစ် သတ်မှတ်ထားစဉ် ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း ပြုလုပ်ရန် ခွင့်ပြုပါ။"</string>
 </resources>

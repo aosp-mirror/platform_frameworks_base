@@ -91,7 +91,7 @@ java_library_static {
     ],
 
     libs: [
-        "services-stubs",
+        "android_system_server_stubs_current",
         "services.net",
         "android.hardware.light-V2.0-java",
         "android.hardware.power-java",
@@ -118,7 +118,7 @@ java_library_static {
         "android.hardware.health-V2.1-java",
         "android.hardware.light-java",
         "android.hardware.weaver-V1.0-java",
-        "android.hardware.biometrics.face-V1.1-java",
+        "android.hardware.biometrics.face-V1.0-java",
         "android.hardware.biometrics.fingerprint-V2.2-java",
         "android.hardware.oemlock-V1.0-java",
         "android.hardware.configstore-V1.0-java",

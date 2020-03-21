@@ -204,6 +204,16 @@ public final class UsageStatsManager {
     /** @hide */
     public static final int REASON_SUB_MASK = 0x00FF;
     /**
+     * The reason for using the default main reason is unknown or undefined.
+     * @hide
+     */
+    public static final int REASON_SUB_DEFAULT_UNDEFINED = 0x0000;
+    /**
+     * The app was updated.
+     * @hide
+     */
+    public static final int REASON_SUB_DEFAULT_APP_UPDATE = 0x0001;
+    /**
      * The app was interacted with in some way by the system.
      * @hide
      */
@@ -1069,6 +1079,14 @@ public final class UsageStatsManager {
         switch (standbyReason & REASON_MAIN_MASK) {
             case REASON_MAIN_DEFAULT:
                 sb.append("d");
+                switch (subReason) {
+                    case REASON_SUB_DEFAULT_UNDEFINED:
+                        // Historically, undefined didn't have a string, so don't add anything here.
+                        break;
+                    case REASON_SUB_DEFAULT_APP_UPDATE:
+                        sb.append("-au");
+                        break;
+                }
                 break;
             case REASON_MAIN_FORCED_BY_SYSTEM:
                 sb.append("s");

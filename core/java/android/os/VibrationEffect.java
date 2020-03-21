@@ -343,6 +343,14 @@ public abstract class VibrationEffect implements Parcelable {
     @TestApi
     @Nullable
     public static VibrationEffect get(Uri uri, Context context) {
+        String[] uris = context.getResources().getStringArray(
+                com.android.internal.R.array.config_ringtoneEffectUris);
+
+        // Skip doing any IPC if we don't have any effects configured.
+        if (uris.length == 0) {
+            return null;
+        }
+
         final ContentResolver cr = context.getContentResolver();
         Uri uncanonicalUri = cr.uncanonicalize(uri);
         if (uncanonicalUri == null) {
@@ -351,8 +359,7 @@ public abstract class VibrationEffect implements Parcelable {
             // place.
             uncanonicalUri = uri;
         }
-        String[] uris = context.getResources().getStringArray(
-                com.android.internal.R.array.config_ringtoneEffectUris);
+
         for (int i = 0; i < uris.length && i < RINGTONES.length; i++) {
             if (uris[i] == null) {
                 continue;

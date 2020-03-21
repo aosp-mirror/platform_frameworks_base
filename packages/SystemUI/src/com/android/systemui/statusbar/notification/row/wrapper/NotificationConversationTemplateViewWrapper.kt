@@ -18,12 +18,16 @@ package com.android.systemui.statusbar.notification.row.wrapper
 
 import android.content.Context
 import android.view.View
-
+import android.view.ViewGroup
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingLinearLayout
 import com.android.systemui.R
+import com.android.systemui.statusbar.TransformableView
+import com.android.systemui.statusbar.ViewTransformationHelper
 import com.android.systemui.statusbar.notification.NotificationUtils
+import com.android.systemui.statusbar.notification.TransformState
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
+import com.android.systemui.statusbar.notification.row.HybridNotificationView
 
 /**
  * Wraps a notification containing a converation template
@@ -41,6 +45,7 @@ class NotificationConversationTemplateViewWrapper constructor(
     private var conversationBadge: View? = null
     private var expandButton: View? = null
     private lateinit var expandButtonContainer: View
+    private lateinit var imageMessageContainer: ViewGroup
     private var messagingLinearLayout: MessagingLinearLayout? = null
 
     init {
@@ -51,6 +56,7 @@ class NotificationConversationTemplateViewWrapper constructor(
 
     private fun resolveViews() {
         messagingLinearLayout = conversationLayout.messagingLinearLayout
+        imageMessageContainer = conversationLayout.imageMessageContainer
         conversationIcon = conversationLayout.requireViewById(
                 com.android.internal.R.id.conversation_icon)
         conversationBadge = conversationLayout.requireViewById(
@@ -74,6 +80,36 @@ class NotificationConversationTemplateViewWrapper constructor(
         messagingLinearLayout?.let {
             mTransformationHelper.addTransformedView(it.id, it)
         }
+
+        // Let's ignore the image message container since that is transforming as part of the
+        // messages already
+        mTransformationHelper.setCustomTransformation(
+                object : ViewTransformationHelper.CustomTransformation() {
+            override fun transformTo(ownState: TransformState,
+                                     otherView: TransformableView,
+                                     transformationAmount: Float): Boolean {
+                if (otherView is HybridNotificationView) {
+                    return false
+                }
+                // we're hidden by default by the transformState
+                ownState.ensureVisible();
+                // Let's do nothing otherwise, this is already handled by the messages
+                return true
+            }
+
+            override fun transformFrom(ownState: TransformState,
+                                       otherView: TransformableView,
+                                       transformationAmount: Float): Boolean {
+                if (otherView is HybridNotificationView) {
+                    return false
+                }
+                // we're hidden by default by the transformState
+                ownState.ensureVisible();
+                // Let's do nothing otherwise, this is already handled by the messages
+                return true
+            }
+        }, imageMessageContainer.id)
+
         conversationIcon?.let {
             mTransformationHelper.addViewTransformingToSimilar(it.id, it)
         }

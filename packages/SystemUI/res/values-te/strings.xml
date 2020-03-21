@@ -699,7 +699,8 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"శబ్దం లేదా వైబ్రేషన్‌తో మీరు దృష్టి సారించేలా చేస్తుంది."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ఫ్లోటింగ్ షార్ట్‌కట్‌తో మీ దృష్టిని ఈ కంటెంట్‌పై నిలిపి ఉంచుతుంది."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ఇటీవల బబుల్‌లు ఏవీ లేవు"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"ఇటీవలి బబుల్‌లు, తీసివేసిన బబుల్‌లు ఇక్కడ కనిపిస్తాయి."</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
@@ -969,13 +970,8 @@
     <string name="device_services" msgid="1549944177856658705">"పరికర సేవలు"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"శీర్షిక లేదు"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"ఈ యాప్‌ను పునఃప్రారంభించేలా నొక్కి, ఆపై పూర్తి స్క్రీన్‌‍లోకి వెళ్లండి."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని తెరువు"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> బబుల్‌ల సెట్టింగ్‌లు"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"<xliff:g id="APP_NAME">%1$s</xliff:g> నుండి బబుల్‌లను అనుమతించాలా?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"నిర్వహించండి"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"తిరస్కరించు"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"అనుమతించు"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"నన్ను తర్వాత అడగు"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> నుండి <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> మరియు మరో <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"తరలించు"</string>
@@ -984,9 +980,17 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"దిగువ ఎడమవైపునకు తరలించు"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"దిగవు కుడివైపునకు జరుపు"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"విస్మరించు"</string>
-    <string name="bubbles_user_education_title" msgid="3385222165904578710">"చాట్‌లను ముందుగా ఉంచండి"</string>
-    <string name="bubbles_user_education_description" msgid="6663205638091146934">"<xliff:g id="APP_NAME">%1$s</xliff:g> నుండి వచ్చే కొత్త చాట్‌లు బబుల్‌లుగా కనిపిస్తాయి. దానిని తెరవడానికి బబుల్‌ను ట్యాప్ చేయండి. దానిని తరలించడానికి లాగండి.\n\nబబుల్‌ను ట్యాప్ చేయండి"</string>
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ఈ యాప్ నుండి వచ్చే బబుల్‌లను ఆఫ్ చేయడానికి మేనేజ్ బటన్‌ను ట్యాప్ చేయండి"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"సిస్టమ్ నావిగేషన్ అప్‌డేట్ చేయబడింది. మార్పులు చేయడానికి, సెట్టింగ్‌లకు వెళ్లండి."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"సిస్టమ్ నావిగేషన్‌ను అప్‌డేట్ చేయడానికి సెట్టింగ్‌లకు వెళ్లండి"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"స్టాండ్‌బై"</string>
@@ -1012,5 +1016,7 @@
     <string name="controls_pin_instructions" msgid="6363309783822475238">"పిన్‌ని ఎంటర్ చేయండి"</string>
     <string name="controls_structure_tooltip" msgid="1392966215435667434">"ఇతర నిర్మాణాలను చూడటానికి స్వైప్ చేయండి"</string>
     <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
     <skip />
 </resources>

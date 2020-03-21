@@ -2649,7 +2649,7 @@ static int android_media_tv_Tuner_time_filter_close(JNIEnv *env, jobject filter)
     return (int) r;
 }
 
-static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz) {
+static jobject android_media_tv_Tuner_open_descrambler(JNIEnv *env, jobject thiz, jint) {
     sp<JTuner> tuner = getTuner(env, thiz);
     return tuner->openDescrambler();
 }
@@ -2961,7 +2961,7 @@ static const JNINativeMethod gTunerMethods[] = {
             (void *)android_media_tv_Tuner_open_lnb_by_handle },
     { "nativeOpenLnbByName", "(Ljava/lang/String;)Landroid/media/tv/tuner/Lnb;",
             (void *)android_media_tv_Tuner_open_lnb_by_name },
-    { "nativeOpenDescrambler", "()Landroid/media/tv/tuner/Descrambler;",
+    { "nativeOpenDescramblerByHandle", "(I)Landroid/media/tv/tuner/Descrambler;",
             (void *)android_media_tv_Tuner_open_descrambler },
     { "nativeOpenDvrRecorder", "(J)Landroid/media/tv/tuner/dvr/DvrRecorder;",
             (void *)android_media_tv_Tuner_open_dvr_recorder },

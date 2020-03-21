@@ -1641,6 +1641,18 @@
     <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई सक्रिय पार्‍यो"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई निष्क्रिय पार्‍यो"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
+    <!-- no translation found for accessibility_button_prompt_text (29591089269861261) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (1950992471955288772) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (1754236312534510178) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (1761210320049107435) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (6207697277963860927) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (8774465424241303774) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"म्याग्निफिकेसन"</string>
     <string name="user_switched" msgid="7249833311585228097">"अहिलेको प्रयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> मा स्विच गर्दै..."</string>
@@ -2026,27 +2038,38 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"पहुँचसम्बन्धी मेनु"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> को क्याप्सन बार।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> लाई प्रतिबन्धित बाल्टीमा राखियो"</string>
-    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
-    <skip />
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"वार्तालाप"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"सामूहिक वार्तालाप"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"व्यक्तिगत"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"काम"</string>
-    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"व्यक्तिगत दृश्य"</string>
-    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"कार्य दृश्य"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"कामसम्बन्धी अनुप्रयोगहरूसँग आदान प्रदान गर्न सकिँदैन"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"व्यक्तिगत अनुप्रयोगहरूसँग आदान प्रदान गर्न सकिँदैन"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"तपाईंका IT प्रशासकले व्यक्तिगत र कामसम्बन्धी कार्य प्रोफाइलहरूबिच आदान प्रदान गर्ने सुविधामाथि रोक लगाउनुभयो"</string>
-    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"कामसम्बन्धी अनुप्रयोगहरूमाथि पहुँच राख्न सकिएन"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"तपाईंका IT प्रशासकले तपाईंलाई कामसम्बन्धी अनुप्रयोगहरूमा व्यक्तिगत सामग्री हेर्ने अनुमति दिनुभएको छैन"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"व्यक्तिगत अनुप्रयोगहरूमाथि पहुँच राख्न सकिएन"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"तपाईंका IT प्रशासकले तपाईंलाई व्यक्तिगत अनुप्रयोगहरूमा कामसम्बन्धी सामग्री हेर्ने अनुमति दिनुभएको छैन"</string>
-    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"सामग्री आदान प्रदान गर्न कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
-    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"सामग्री हेर्न कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"कुनै पनि अनुप्रयोग उपलब्ध छैन"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
+    <skip />
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"सक्रिय गर्नुहोस्"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"टेलिफोन कल गर्दै गर्दा अडियो रेकर्ड गर्नुहोस् वा प्ले गर्नुहोस्"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"यस अनुप्रयोगलाई पूर्वनिर्धारित डायलर अनुप्रयोग निर्धारण गर्दा टेलिफोन कलको अडियो रेकर्ड गर्ने र प्ले गर्ने अनुमति दिन्छ।"</string>
 </resources>

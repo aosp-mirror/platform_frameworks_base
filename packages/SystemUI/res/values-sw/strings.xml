@@ -699,7 +699,8 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Hupata umakinifu wako kwa sauti na mtetemo."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Huweka umakinifu wako kwenye maudhui haya kwa kutumia njia ya mkato ya kuelea."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hakuna viputo vya hivi majuzi"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="198257239740933131">"Viputo vya hivi karibuni na viputo vilivyoondolewa vitaonekana hapa."</string>
+    <!-- no translation found for bubble_overflow_empty_subtitle (2030874469510497397) -->
+    <skip />
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Arifa hizi haziwezi kubadilishwa."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Kikundi hiki cha arifa hakiwezi kuwekewa mipangilio hapa"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Arifa wakilishi"</string>
@@ -969,13 +970,8 @@
     <string name="device_services" msgid="1549944177856658705">"Huduma za Kifaa"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Wimbo hauna jina"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"Gusa ili uzime na uwashe upya programu hii kisha nenda kwenye skrini nzima."</string>
-    <string name="bubbles_deep_link_button_description" msgid="3532375322003698792">"Fungua <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Mipangilio ya viputo vya <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="bubbles_prompt" msgid="8172381116778530318">"Je, ungependa kuruhusu viputo kutoka <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"Dhibiti"</string>
-    <string name="no_bubbles" msgid="1187859094003006292">"Kataa"</string>
-    <string name="yes_bubbles" msgid="3014008797151197346">"Ruhusu"</string>
-    <string name="ask_me_later_bubbles" msgid="2666199914636253557">"Niulize baadaye"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> kutoka kwa <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> kutoka kwa <xliff:g id="APP_NAME">%2$s</xliff:g> na nyingine<xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Sogeza"</string>
@@ -984,9 +980,17 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Sogeza chini kushoto"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Sogeza chini kulia"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ondoa"</string>
-    <string name="bubbles_user_education_title" msgid="3385222165904578710">"Zipe gumzo kipaumbele"</string>
-    <string name="bubbles_user_education_description" msgid="6663205638091146934">"Gumzo mpya kutoka <xliff:g id="APP_NAME">%1$s</xliff:g> zitaonekana kama viputo. Gusa kiputo ili ukifungue. Buruta ili ukisogeze.\n\nGusa kiputo"</string>
+    <!-- no translation found for bubbles_dont_bubble_conversation (1033040343437428822) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_title (5547017089271445797) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_description (1160281719576715211) -->
+    <skip />
+    <!-- no translation found for bubbles_user_education_manage_title (2848511858160342320) -->
+    <skip />
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Gusa Dhibiti ili uzime viputo kwenye programu hii"</string>
+    <!-- no translation found for bubbles_user_education_got_it (8282812431953161143) -->
+    <skip />
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Umesasisha usogezaji kwenye mfumo. Ili ubadilishe, nenda kwenye Mipangilio."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Nenda kwenye mipangilio ili usasishe usogezaji kwenye mfumo"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Hali tuli"</string>
@@ -1012,5 +1016,7 @@
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Weka PIN"</string>
     <string name="controls_structure_tooltip" msgid="1392966215435667434">"Telezesha kidole ili uone miundo mingine"</string>
     <!-- no translation found for controls_seeding_in_progress (3033855341410264148) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (9023534788828414585) -->
     <skip />
 </resources>
