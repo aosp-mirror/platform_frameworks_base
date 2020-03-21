@@ -59,6 +59,7 @@ import android.app.AppOpsManager;
 import android.app.ApplicationPackageManager;
 import android.app.IActivityManager;
 import android.app.admin.DeviceAdminInfo;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -113,6 +114,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -243,6 +245,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     @GuardedBy("mLock")
     private final PermissionSettings mSettings;
 
+    /** Injector that can be used to facilitate testing. */
+    private final Injector mInjector;
+
     @GuardedBy("mLock")
     private ArraySet<String> mPrivappPermissionsViolations;
 
@@ -352,10 +357,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     PermissionManagerService(Context context,
             @NonNull Object externalLock) {
+        this(context, externalLock, new Injector(context));
+    }
+
+    @VisibleForTesting
+    PermissionManagerService(Context context, @NonNull Object externalLock,
+            @NonNull Injector injector) {
+        mInjector = injector;
         // The package info cache is the cache for package and permission information.
-        PackageManager.invalidatePackageInfoCache();
-        PermissionManager.disablePermissionCache();
-        PermissionManager.disablePackageNamePermissionCache();
+        mInjector.invalidatePackageInfoCache();
+        mInjector.disablePermissionCache();
+        mInjector.disablePackageNamePermissionCache();
 
         mContext = context;
         mLock = externalLock;
@@ -949,6 +961,59 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             ArraySet<String> permissions = mSystemPermissions.get(uid);
             return permissions != null && permissions.contains(permissionName);
         }
+    }
+
+    @Override
+    public int checkDeviceIdentifierAccess(@Nullable String packageName, @Nullable String message,
+            @Nullable String callingFeatureId, int pid, int uid) {
+        // If the check is being requested by an app then only allow the app to query its own
+        // access status.
+        int callingUid = mInjector.getCallingUid();
+        int callingPid = mInjector.getCallingPid();
+        if (UserHandle.getAppId(callingUid) >= Process.FIRST_APPLICATION_UID && (callingUid != uid
+                || callingPid != pid)) {
+            String response = String.format(
+                    "Calling uid %d, pid %d cannot check device identifier access for package %s "
+                            + "(uid=%d, pid=%d)",
+                    callingUid, callingPid, packageName, uid, pid);
+            Log.w(TAG, response);
+            throw new SecurityException(response);
+        }
+        // Allow system and root access to the device identifiers.
+        final int appId = UserHandle.getAppId(uid);
+        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // Allow access to packages that have the READ_PRIVILEGED_PHONE_STATE permission.
+        if (mInjector.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid,
+                uid) == PackageManager.PERMISSION_GRANTED) {
+            return PackageManager.PERMISSION_GRANTED;
+        }
+        // If the calling package is not null then perform the appop and device / profile owner
+        // check.
+        if (packageName != null) {
+            // Allow access to a package that has been granted the READ_DEVICE_IDENTIFIERS appop.
+            long token = mInjector.clearCallingIdentity();
+            AppOpsManager appOpsManager = (AppOpsManager) mInjector.getSystemService(
+                    Context.APP_OPS_SERVICE);
+            try {
+                if (appOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_READ_DEVICE_IDENTIFIERS, uid,
+                        packageName, callingFeatureId, message) == AppOpsManager.MODE_ALLOWED) {
+                    return PackageManager.PERMISSION_GRANTED;
+                }
+            } finally {
+                mInjector.restoreCallingIdentity(token);
+            }
+            // Check if the calling packages meets the device / profile owner requirements for
+            // identifier access.
+            DevicePolicyManager devicePolicyManager =
+                    (DevicePolicyManager) mInjector.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            if (devicePolicyManager != null && devicePolicyManager.hasDeviceIdentifierAccess(
+                    packageName, pid, uid)) {
+                return PackageManager.PERMISSION_GRANTED;
+            }
+        }
+        return PackageManager.PERMISSION_DENIED;
     }
 
     @Override
@@ -4800,6 +4865,96 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             } finally {
                 mPermissionListeners.finishBroadcast();
             }
+        }
+    }
+
+    /**
+     * Allows injection of services and method responses to facilitate testing.
+     *
+     * <p>Test classes can create a mock of this class and pass it to the PermissionManagerService
+     * constructor to control behavior of services and external methods during execution.
+     * @hide
+     */
+    @VisibleForTesting
+    public static class Injector {
+        private final Context mContext;
+
+        /**
+         * Public constructor that accepts a {@code context} within which to operate.
+         */
+        public Injector(@NonNull Context context) {
+            mContext = context;
+        }
+
+        /**
+         * Returns the UID of the calling package.
+         */
+        public int getCallingUid() {
+            return Binder.getCallingUid();
+        }
+
+        /**
+         * Returns the process ID of the calling package.
+         */
+        public int getCallingPid() {
+            return Binder.getCallingPid();
+        }
+
+        /**
+         * Invalidates the package info cache.
+         */
+        public void invalidatePackageInfoCache() {
+            PackageManager.invalidatePackageInfoCache();
+        }
+
+        /**
+         * Disables the permission cache.
+         */
+        public void disablePermissionCache() {
+            PermissionManager.disablePermissionCache();
+        }
+
+        /**
+         * Disables the package name permission cache.
+         */
+        public void disablePackageNamePermissionCache() {
+            PermissionManager.disablePackageNamePermissionCache();
+        }
+
+        /**
+         * Checks if the package running under the specified {@code pid} and {@code uid} has been
+         * granted the provided {@code permission}.
+         *
+         * @return {@link PackageManager#PERMISSION_GRANTED} if the package has been granted the
+         * permission, {@link PackageManager#PERMISSION_DENIED} otherwise
+         */
+        public int checkPermission(@NonNull String permission, int pid, int uid) {
+            return mContext.checkPermission(permission, pid, uid);
+        }
+
+        /**
+         * Clears the calling identity to allow subsequent calls to be treated as coming from this
+         * package.
+         *
+         * @return a token that can be used to restore the calling identity
+         */
+        public long clearCallingIdentity() {
+            return Binder.clearCallingIdentity();
+        }
+
+        /**
+         * Restores the calling identity to that of the calling package based on the provided
+         * {@code token}.
+         */
+        public void restoreCallingIdentity(long token) {
+            Binder.restoreCallingIdentity(token);
+        }
+
+        /**
+         * Returns the system service with the provided {@code name}.
+         */
+        public Object getSystemService(@NonNull String name) {
+            return mContext.getSystemService(name);
         }
     }
 }
