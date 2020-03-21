@@ -245,6 +245,7 @@ public class MessagingLayoutTransformState extends TransformState {
             if (isGone(child)) {
                 continue;
             }
+            float messageAmount = transformationAmount;
             int otherIndex = otherMessages.size() - 1 - i;
             View otherChild = null;
             if (otherIndex >= 0) {
@@ -257,18 +258,19 @@ public class MessagingLayoutTransformState extends TransformState {
                 // Let's fade out as we approach the top of the screen. We can only do this if
                 // we're actually moving up
                 float distanceToTop = child.getTop() + child.getHeight() + previousTranslation;
-                transformationAmount = distanceToTop / child.getHeight();
-                transformationAmount = Math.max(0.0f, Math.min(1.0f, transformationAmount));
+                messageAmount = distanceToTop / child.getHeight();
+                messageAmount = Math.max(0.0f, Math.min(1.0f, messageAmount));
                 if (to) {
-                    transformationAmount = 1.0f - transformationAmount;
+                    messageAmount = 1.0f - messageAmount;
                 }
             }
-            transformView(transformationAmount, to, child, otherChild, false, /* sameAsAny */
+            transformView(messageAmount, to, child, otherChild, false, /* sameAsAny */
                     useLinearTransformation);
             boolean otherIsIsolated = otherGroup.getIsolatedMessage() == otherChild;
-            if (transformationAmount == 0.0f
+            if (messageAmount == 0.0f
                     && (otherIsIsolated || otherGroup.isSingleLine())) {
                 ownGroup.setClippingDisabled(true);
+                mMessagingLayout.setMessagingClippingDisabled(true);
             }
             if (otherChild == null) {
                 child.setTranslationY(previousTranslation);
@@ -362,6 +364,9 @@ public class MessagingLayoutTransformState extends TransformState {
         if (view.getVisibility() == View.GONE) {
             return true;
         }
+        if (view.getParent() == null) {
+            return true;
+        }
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
         if (lp instanceof MessagingLinearLayout.LayoutParams
                 && ((MessagingLinearLayout.LayoutParams) lp).hide) {
@@ -433,6 +438,7 @@ public class MessagingLayoutTransformState extends TransformState {
             ownGroup.setClippingDisabled(false);
             ownGroup.updateClipRect();
         }
+        mMessagingLayout.setMessagingClippingDisabled(false);
     }
 
     @Override
