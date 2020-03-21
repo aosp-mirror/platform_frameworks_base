@@ -53,6 +53,9 @@ class NotificationConversationTemplateViewWrapper constructor(
     private lateinit var conversationTitle: View
     private lateinit var importanceRing: View
     private lateinit var appName: View
+    private var facePileBottomBg: View? = null
+    private var facePileBottom: View? = null
+    private var facePileTop: View? = null
 
     private fun resolveViews() {
         messagingLinearLayout = conversationLayout.messagingLinearLayout
@@ -67,6 +70,10 @@ class NotificationConversationTemplateViewWrapper constructor(
             importanceRing = requireViewById(com.android.internal.R.id.conversation_icon_badge_ring)
             appName = requireViewById(com.android.internal.R.id.app_name_text)
             conversationTitle = requireViewById(com.android.internal.R.id.conversation_text)
+            facePileTop = findViewById(com.android.internal.R.id.conversation_face_pile_top)
+            facePileBottom = findViewById(com.android.internal.R.id.conversation_face_pile_bottom)
+            facePileBottomBg =
+                    findViewById(com.android.internal.R.id.conversation_face_pile_bottom_background)
         }
     }
 
@@ -118,7 +125,10 @@ class NotificationConversationTemplateViewWrapper constructor(
                 conversationIcon,
                 conversationBadgeBg,
                 expandButton,
-                importanceRing
+                importanceRing,
+                facePileTop,
+                facePileBottom,
+                facePileBottomBg
         )
     }
 
@@ -140,9 +150,9 @@ class NotificationConversationTemplateViewWrapper constructor(
             else
                 super.getMinLayoutHeight()
 
-    private fun addTransformedViews(vararg vs: View) =
-            vs.forEach(mTransformationHelper::addTransformedView)
+    private fun addTransformedViews(vararg vs: View?) =
+            vs.forEach { view -> view?.let(mTransformationHelper::addTransformedView) }
 
-    private fun addViewsTransformingToSimilar(vararg vs: View) =
-            vs.forEach(mTransformationHelper::addViewTransformingToSimilar)
+    private fun addViewsTransformingToSimilar(vararg vs: View?) =
+            vs.forEach { view -> view?.let(mTransformationHelper::addViewTransformingToSimilar) }
 }
