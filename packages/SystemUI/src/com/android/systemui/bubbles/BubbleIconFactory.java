@@ -17,6 +17,7 @@ package com.android.systemui.bubbles;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
@@ -57,8 +58,14 @@ public class BubbleIconFactory extends BaseIconFactory {
             int density = context.getResources().getConfiguration().densityDpi;
             return launcherApps.getShortcutIconDrawable(shortcutInfo, density);
         } else {
-            Icon ic = metadata.getBubbleIcon();
+            Icon ic = metadata.getIcon();
             if (ic != null) {
+                if (ic.getType() == Icon.TYPE_URI
+                        || ic.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+                    context.grantUriPermission(context.getPackageName(),
+                            ic.getUri(),
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                }
                 return ic.loadDrawable(context);
             }
             return null;

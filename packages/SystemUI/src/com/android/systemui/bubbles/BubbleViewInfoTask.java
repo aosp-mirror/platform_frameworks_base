@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.Person;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
@@ -33,6 +34,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.service.notification.StatusBarNotification;
@@ -246,9 +248,17 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                     bubbleMessage.senderName = sender != null
                             ? sender.getName()
                             : null;
-                    bubbleMessage.senderAvatar = sender != null && sender.getIcon() != null
-                            ? sender.getIcon().loadDrawable(context)
-                            : null;
+
+                    bubbleMessage.senderAvatar = null;
+                    if (sender != null && sender.getIcon() != null) {
+                        if (sender.getIcon().getType() == Icon.TYPE_URI
+                                || sender.getIcon().getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+                            context.grantUriPermission(context.getPackageName(),
+                                    sender.getIcon().getUri(),
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        }
+                        bubbleMessage.senderAvatar = sender.getIcon().loadDrawable(context);
+                    }
                     return bubbleMessage;
                 }
             } else if (Notification.InboxStyle.class.equals(style)) {

@@ -78,12 +78,6 @@ open class NotificationRankingManager @Inject constructor(
         val aPersonType = a.getPeopleNotificationType()
         val bPersonType = b.getPeopleNotificationType()
 
-        val aIsPeople = aPersonType == TYPE_PERSON
-        val bIsPeople = bPersonType == TYPE_PERSON
-
-        val aIsImportantPeople = aPersonType == TYPE_IMPORTANT_PERSON
-        val bIsImportantPeople = bPersonType == TYPE_IMPORTANT_PERSON
-
         val aMedia = isImportantMedia(a)
         val bMedia = isImportantMedia(b)
 
@@ -100,9 +94,14 @@ open class NotificationRankingManager @Inject constructor(
             aHeadsUp != bHeadsUp -> if (aHeadsUp) -1 else 1
             // Provide consistent ranking with headsUpManager
             aHeadsUp -> headsUpManager.compare(a, b)
-            usePeopleFiltering && aIsPeople != bIsPeople -> if (aIsPeople) -1 else 1
-            usePeopleFiltering && aIsImportantPeople != bIsImportantPeople ->
-                if (aIsImportantPeople) -1 else 1
+            usePeopleFiltering && aPersonType != bPersonType -> when (aPersonType) {
+                TYPE_IMPORTANT_PERSON -> -1
+                TYPE_PERSON -> when (bPersonType) {
+                    TYPE_IMPORTANT_PERSON -> 1
+                    else -> -1
+                }
+                else -> 1
+            }
             // Upsort current media notification.
             aMedia != bMedia -> if (aMedia) -1 else 1
             // Upsort PRIORITY_MAX system notifications

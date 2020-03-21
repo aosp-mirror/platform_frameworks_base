@@ -878,8 +878,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void notifyImeHidden() {
-        setImeWindowStatus(IME_ACTIVE | IME_INVISIBLE, mBackDisposition);
-        onPreRenderedWindowVisibilityChanged(false /* setVisible */);
+        doHideWindow();
     }
 
     private void removeImeSurface() {
@@ -2284,7 +2283,9 @@ public class InputMethodService extends AbstractInputMethodService {
         if (mDecorViewVisible) {
             // When insets API is enabled, it is responsible for client and server side
             // visibility of IME window.
-            if (!isVisibilityAppliedUsingInsetsConsumer()) {
+            if (isVisibilityAppliedUsingInsetsConsumer()) {
+                mInputView.dispatchWindowVisibilityChanged(View.GONE);
+            } else {
                 mWindow.hide();
             }
             mDecorViewVisible = false;

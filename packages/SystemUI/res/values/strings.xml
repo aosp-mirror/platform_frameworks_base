@@ -374,6 +374,17 @@
     <string name="biometric_dialog_wrong_password">Wrong password</string>
     <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
     <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
+    <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>
+
+    <!-- Content of a dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_device">Too many incorrect attempts. This device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user has failed to provide the user lock too many times and the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_user">Too many incorrect attempts. This user will be deleted.</string>
+    <!-- Content of a dialog shown when the user has failed to provide the work lock too many times and the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile">Too many incorrect attempts. This work profile and its data will be deleted.</string>
+    <!-- Button label to dismiss the dialog telling the user the device, user, or work profile has been wiped. [CHAR LIMIT=40] -->
+    <string name="biometric_dialog_now_wiping_dialog_dismiss">Dismiss</string>
 
     <!-- Message shown when the system-provided fingerprint dialog is shown, asking for authentication -->
     <string name="fingerprint_dialog_touch_sensor">Touch the fingerprint sensor</string>
@@ -1812,7 +1823,7 @@
     <string name="bubble_overflow_empty_title">No recent bubbles</string>
 
     <!-- [CHAR LIMIT=NONE] Empty overflow subtitle -->
-    <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here.</string>
+    <string name="bubble_overflow_empty_subtitle">Recent bubbles and dismissed bubbles will appear here</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be modified.</string>
@@ -2560,23 +2571,11 @@
     <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
     <string name="restart_button_description">Tap to restart this app and go full screen.</string>
 
-    <!-- Text used for content description of deep link button in the header of expanded bubble
-         view. [CHAR_LIMIT=NONE] -->
-    <string name="bubbles_deep_link_button_description">Open <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
     <!-- Text used for content description of settings button in the header of expanded bubble
          view. [CHAR_LIMIT=NONE] -->
     <string name="bubbles_settings_button_description">Settings for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> bubbles</string>
-    <!-- Text for asking the user whether bubbles (floating app content) should be enabled for an
-         app. [CHAR LIMIT=NONE] -->
-    <string name="bubbles_prompt">Allow bubbles from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
     <!-- The text for the manage bubbles link. [CHAR LIMIT=NONE] -->
     <string name="manage_bubbles_text">Manage</string>
-    <!-- Text used for button allowing user to opt out of bubbles [CHAR LIMIT=20] -->
-    <string name="no_bubbles">Deny</string>
-    <!-- Text used for button allowing user to approve / enable bubbles [CHAR LIMIT=20] -->
-    <string name="yes_bubbles">Allow</string>
-    <!-- Text used for the button allowing users to postpone their decision to allow or deny bubbles [CHAR LIMIT=40] -->
-    <string name="ask_me_later_bubbles">Ask me later</string>
     <!-- Content description when a bubble is focused. [CHAR LIMIT=NONE] -->
     <string name="bubble_content_description_single"><xliff:g id="notification_title" example="some title">%1$s</xliff:g> from <xliff:g id="app_name" example="YouTube">%2$s</xliff:g></string>
     <!-- Content description when the stack of bubbles is focused. [CHAR LIMIT=NONE] -->
@@ -2593,12 +2592,18 @@
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
     <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=20] -->
     <string name="bubble_dismiss_text">Dismiss</string>
+    <!-- Button text to stop a conversation from bubbling [CHAR LIMIT=60]-->
+    <string name="bubbles_dont_bubble_conversation">Don\u2019t bubble conversation</string>
     <!-- Title text for the bubbles feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=60]-->
-    <string name="bubbles_user_education_title">Keep chats up front</string>
+    <string name="bubbles_user_education_title">Chat using bubbles</string>
     <!-- Descriptive text for the bubble feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=NONE] -->
-    <string name="bubbles_user_education_description">New chats from <xliff:g id="app_name" example="YouTube">%1$s</xliff:g> will appear as bubbles. Tap a bubble to open it. Drag to move it.\n\nTap the bubble</string>
-    <!-- Text for the bubble "manage" button feature education cling shown when a bubble is on screen for the first time. [CHAR LIMIT=80]-->
+    <string name="bubbles_user_education_description">New conversations appear as floating icons, or bubbles. Tap to open bubble. Drag to move it.</string>
+    <!-- Title text for the bubble "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=60]-->
+    <string name="bubbles_user_education_manage_title">Control bubbles anytime</string>
+    <!-- Descriptive text for the bubble "manage" button tool tip highlighting where users can go to control bubble settings. [CHAR LIMIT=80]-->
     <string name="bubbles_user_education_manage">Tap Manage to turn off bubbles from this app</string>
+    <!-- Button text for dismissing the bubble "manage" button tool tip  [CHAR LIMIT=20]-->
+    <string name="bubbles_user_education_got_it">Got it</string>
 
     <!-- Notification content text when the system navigation mode changes as a result of changing the default launcher [CHAR LIMIT=NONE] -->
     <string name="notification_content_system_nav_changed">System navigation updated. To make changes, go to Settings.</string>

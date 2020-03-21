@@ -30,6 +30,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -37,6 +38,7 @@ import android.os.IStatsCompanionService;
 import android.os.IStatsd;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.StatsFrameworkInitializer;
 import android.os.SystemClock;
@@ -46,8 +48,6 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
-
-import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -100,9 +100,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static IStatsd sStatsd;
     private static final Object sStatsdLock = new Object();
 
-    private final OnAlarmListener mAnomalyAlarmListener = new AnomalyAlarmListener();
-    private final OnAlarmListener mPullingAlarmListener = new PullingAlarmListener();
-    private final OnAlarmListener mPeriodicAlarmListener = new PeriodicAlarmListener();
+    private final OnAlarmListener mAnomalyAlarmListener;
+    private final OnAlarmListener mPullingAlarmListener;
+    private final OnAlarmListener mPeriodicAlarmListener;
 
     private StatsManagerService mStatsManagerService;
 
@@ -121,6 +121,9 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         handlerThread.start();
         mHandler = new CompanionHandler(handlerThread.getLooper());
 
+        mAnomalyAlarmListener = new AnomalyAlarmListener(context);
+        mPullingAlarmListener = new PullingAlarmListener(context);
+        mPeriodicAlarmListener = new PeriodicAlarmListener(context);
     }
 
     private final static int[] toIntArray(List<Integer> list) {
@@ -226,11 +229,36 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     Log.d(TAG, "Sent data for " + numRecords + " apps");
                 }
             } finally {
-                IoUtils.closeQuietly(fout);
+                FileUtils.closeQuietly(fout);
                 backgroundThread.quit();
                 backgroundThread.interrupt();
             }
         });
+    }
+
+    private static class WakelockThread extends Thread {
+        private final PowerManager.WakeLock mWl;
+        private final Runnable mRunnable;
+
+        WakelockThread(Context context, String wakelockName, Runnable runnable) {
+            PowerManager powerManager = (PowerManager)
+                    context.getSystemService(Context.POWER_SERVICE);
+            mWl = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakelockName);
+            mRunnable = runnable;
+        }
+        @Override
+        public void run() {
+            try {
+                mRunnable.run();
+            } finally {
+                mWl.release();
+            }
+        }
+        @Override
+        public void start() {
+            mWl.acquire();
+            super.start();
+        }
     }
 
     private final static class AppUpdateReceiver extends BroadcastReceiver {
@@ -308,6 +336,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     public static final class AnomalyAlarmListener implements OnAlarmListener {
+        private final Context mContext;
+
+        AnomalyAlarmListener(Context context) {
+            mContext = context;
+        }
+
         @Override
         public void onAlarm() {
             if (DEBUG) {
@@ -319,17 +353,30 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 Log.w(TAG, "Could not access statsd to inform it of anomaly alarm firing");
                 return;
             }
-            try {
-                // Two-way call to statsd to retain AlarmManager wakelock
-                statsd.informAnomalyAlarmFired();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to inform statsd of anomaly alarm firing", e);
-            }
-            // AlarmManager releases its own wakelock here.
+
+            // Wakelock needs to be retained while calling statsd.
+            Thread thread = new WakelockThread(mContext,
+                    AnomalyAlarmListener.class.getCanonicalName(), new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                statsd.informAnomalyAlarmFired();
+                            } catch (RemoteException e) {
+                                Log.w(TAG, "Failed to inform statsd of anomaly alarm firing", e);
+                            }
+                        }
+                    });
+            thread.start();
         }
     }
 
     public final static class PullingAlarmListener implements OnAlarmListener {
+        private final Context mContext;
+
+        PullingAlarmListener(Context context) {
+            mContext = context;
+        }
+
         @Override
         public void onAlarm() {
             if (DEBUG) {
@@ -340,16 +387,30 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 Log.w(TAG, "Could not access statsd to inform it of pulling alarm firing.");
                 return;
             }
-            try {
-                // Two-way call to statsd to retain AlarmManager wakelock
-                statsd.informPollAlarmFired();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to inform statsd of pulling alarm firing.", e);
-            }
+
+            // Wakelock needs to be retained while calling statsd.
+            Thread thread = new WakelockThread(mContext,
+                    PullingAlarmListener.class.getCanonicalName(), new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                statsd.informPollAlarmFired();
+                            } catch (RemoteException e) {
+                                Log.w(TAG, "Failed to inform statsd of pulling alarm firing.", e);
+                            }
+                        }
+                    });
+            thread.start();
         }
     }
 
     public final static class PeriodicAlarmListener implements OnAlarmListener {
+        private final Context mContext;
+
+        PeriodicAlarmListener(Context context) {
+            mContext = context;
+        }
+
         @Override
         public void onAlarm() {
             if (DEBUG) {
@@ -360,13 +421,20 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 Log.w(TAG, "Could not access statsd to inform it of periodic alarm firing.");
                 return;
             }
-            try {
-                // Two-way call to statsd to retain AlarmManager wakelock
-                statsd.informAlarmForSubscriberTriggeringFired();
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to inform statsd of periodic alarm firing.", e);
-            }
-            // AlarmManager releases its own wakelock here.
+
+            // Wakelock needs to be retained while calling statsd.
+            Thread thread = new WakelockThread(mContext,
+                    PeriodicAlarmListener.class.getCanonicalName(), new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                statsd.informAlarmForSubscriberTriggeringFired();
+                            } catch (RemoteException e) {
+                                Log.w(TAG, "Failed to inform statsd of periodic alarm firing.", e);
+                            }
+                        }
+                    });
+            thread.start();
         }
     }
 

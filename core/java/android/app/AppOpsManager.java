@@ -776,151 +776,157 @@ public class AppOpsManager {
 
     /** @hide No operation specified. */
     @UnsupportedAppUsage
-    public static final int OP_NONE = -1;
+    public static final int OP_NONE = AppProtoEnums.APP_OP_NONE;
     /** @hide Access to coarse location information. */
     @UnsupportedAppUsage
     @TestApi
-    public static final int OP_COARSE_LOCATION = 0;
+    public static final int OP_COARSE_LOCATION = AppProtoEnums.APP_OP_COARSE_LOCATION;
     /** @hide Access to fine location information. */
     @UnsupportedAppUsage
-    public static final int OP_FINE_LOCATION = 1;
+    public static final int OP_FINE_LOCATION = AppProtoEnums.APP_OP_FINE_LOCATION;
     /** @hide Causing GPS to run. */
     @UnsupportedAppUsage
-    public static final int OP_GPS = 2;
+    public static final int OP_GPS = AppProtoEnums.APP_OP_GPS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_VIBRATE = 3;
+    public static final int OP_VIBRATE = AppProtoEnums.APP_OP_VIBRATE;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_READ_CONTACTS = 4;
+    public static final int OP_READ_CONTACTS = AppProtoEnums.APP_OP_READ_CONTACTS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_CONTACTS = 5;
+    public static final int OP_WRITE_CONTACTS = AppProtoEnums.APP_OP_WRITE_CONTACTS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_READ_CALL_LOG = 6;
+    public static final int OP_READ_CALL_LOG = AppProtoEnums.APP_OP_READ_CALL_LOG;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_CALL_LOG = 7;
+    public static final int OP_WRITE_CALL_LOG = AppProtoEnums.APP_OP_WRITE_CALL_LOG;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_READ_CALENDAR = 8;
+    public static final int OP_READ_CALENDAR = AppProtoEnums.APP_OP_READ_CALENDAR;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_CALENDAR = 9;
+    public static final int OP_WRITE_CALENDAR = AppProtoEnums.APP_OP_WRITE_CALENDAR;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WIFI_SCAN = 10;
+    public static final int OP_WIFI_SCAN = AppProtoEnums.APP_OP_WIFI_SCAN;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_POST_NOTIFICATION = 11;
+    public static final int OP_POST_NOTIFICATION = AppProtoEnums.APP_OP_POST_NOTIFICATION;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_NEIGHBORING_CELLS = 12;
+    public static final int OP_NEIGHBORING_CELLS = AppProtoEnums.APP_OP_NEIGHBORING_CELLS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_CALL_PHONE = 13;
+    public static final int OP_CALL_PHONE = AppProtoEnums.APP_OP_CALL_PHONE;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_READ_SMS = 14;
+    public static final int OP_READ_SMS = AppProtoEnums.APP_OP_READ_SMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_SMS = 15;
+    public static final int OP_WRITE_SMS = AppProtoEnums.APP_OP_WRITE_SMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_RECEIVE_SMS = 16;
+    public static final int OP_RECEIVE_SMS = AppProtoEnums.APP_OP_RECEIVE_SMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_RECEIVE_EMERGECY_SMS = 17;
+    public static final int OP_RECEIVE_EMERGECY_SMS =
+            AppProtoEnums.APP_OP_RECEIVE_EMERGENCY_SMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_RECEIVE_MMS = 18;
+    public static final int OP_RECEIVE_MMS = AppProtoEnums.APP_OP_RECEIVE_MMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_RECEIVE_WAP_PUSH = 19;
+    public static final int OP_RECEIVE_WAP_PUSH = AppProtoEnums.APP_OP_RECEIVE_WAP_PUSH;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_SEND_SMS = 20;
+    public static final int OP_SEND_SMS = AppProtoEnums.APP_OP_SEND_SMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_READ_ICC_SMS = 21;
+    public static final int OP_READ_ICC_SMS = AppProtoEnums.APP_OP_READ_ICC_SMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_ICC_SMS = 22;
+    public static final int OP_WRITE_ICC_SMS = AppProtoEnums.APP_OP_WRITE_ICC_SMS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_SETTINGS = 23;
+    public static final int OP_WRITE_SETTINGS = AppProtoEnums.APP_OP_WRITE_SETTINGS;
     /** @hide Required to draw on top of other apps. */
     @UnsupportedAppUsage
     @TestApi
-    public static final int OP_SYSTEM_ALERT_WINDOW = 24;
+    public static final int OP_SYSTEM_ALERT_WINDOW = AppProtoEnums.APP_OP_SYSTEM_ALERT_WINDOW;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_ACCESS_NOTIFICATIONS = 25;
+    public static final int OP_ACCESS_NOTIFICATIONS =
+            AppProtoEnums.APP_OP_ACCESS_NOTIFICATIONS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_CAMERA = 26;
+    public static final int OP_CAMERA = AppProtoEnums.APP_OP_CAMERA;
     /** @hide */
     @UnsupportedAppUsage
     @TestApi
-    public static final int OP_RECORD_AUDIO = 27;
+    public static final int OP_RECORD_AUDIO = AppProtoEnums.APP_OP_RECORD_AUDIO;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_PLAY_AUDIO = 28;
+    public static final int OP_PLAY_AUDIO = AppProtoEnums.APP_OP_PLAY_AUDIO;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_READ_CLIPBOARD = 29;
+    public static final int OP_READ_CLIPBOARD = AppProtoEnums.APP_OP_READ_CLIPBOARD;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_CLIPBOARD = 30;
+    public static final int OP_WRITE_CLIPBOARD = AppProtoEnums.APP_OP_WRITE_CLIPBOARD;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_TAKE_MEDIA_BUTTONS = 31;
+    public static final int OP_TAKE_MEDIA_BUTTONS = AppProtoEnums.APP_OP_TAKE_MEDIA_BUTTONS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_TAKE_AUDIO_FOCUS = 32;
+    public static final int OP_TAKE_AUDIO_FOCUS = AppProtoEnums.APP_OP_TAKE_AUDIO_FOCUS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_MASTER_VOLUME = 33;
+    public static final int OP_AUDIO_MASTER_VOLUME = AppProtoEnums.APP_OP_AUDIO_MASTER_VOLUME;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_VOICE_VOLUME = 34;
+    public static final int OP_AUDIO_VOICE_VOLUME = AppProtoEnums.APP_OP_AUDIO_VOICE_VOLUME;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_RING_VOLUME = 35;
+    public static final int OP_AUDIO_RING_VOLUME = AppProtoEnums.APP_OP_AUDIO_RING_VOLUME;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_MEDIA_VOLUME = 36;
+    public static final int OP_AUDIO_MEDIA_VOLUME = AppProtoEnums.APP_OP_AUDIO_MEDIA_VOLUME;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_ALARM_VOLUME = 37;
+    public static final int OP_AUDIO_ALARM_VOLUME = AppProtoEnums.APP_OP_AUDIO_ALARM_VOLUME;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_NOTIFICATION_VOLUME = 38;
+    public static final int OP_AUDIO_NOTIFICATION_VOLUME =
+            AppProtoEnums.APP_OP_AUDIO_NOTIFICATION_VOLUME;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_BLUETOOTH_VOLUME = 39;
+    public static final int OP_AUDIO_BLUETOOTH_VOLUME =
+            AppProtoEnums.APP_OP_AUDIO_BLUETOOTH_VOLUME;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_WAKE_LOCK = 40;
+    public static final int OP_WAKE_LOCK = AppProtoEnums.APP_OP_WAKE_LOCK;
     /** @hide Continually monitoring location data. */
     @UnsupportedAppUsage
-    public static final int OP_MONITOR_LOCATION = 41;
+    public static final int OP_MONITOR_LOCATION =
+            AppProtoEnums.APP_OP_MONITOR_LOCATION;
     /** @hide Continually monitoring location data with a relatively high power request. */
     @UnsupportedAppUsage
-    public static final int OP_MONITOR_HIGH_POWER_LOCATION = 42;
+    public static final int OP_MONITOR_HIGH_POWER_LOCATION =
+            AppProtoEnums.APP_OP_MONITOR_HIGH_POWER_LOCATION;
     /** @hide Retrieve current usage stats via {@link UsageStatsManager}. */
     @UnsupportedAppUsage
-    public static final int OP_GET_USAGE_STATS = 43;
+    public static final int OP_GET_USAGE_STATS = AppProtoEnums.APP_OP_GET_USAGE_STATS;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_MUTE_MICROPHONE = 44;
+    public static final int OP_MUTE_MICROPHONE = AppProtoEnums.APP_OP_MUTE_MICROPHONE;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_TOAST_WINDOW = 45;
+    public static final int OP_TOAST_WINDOW = AppProtoEnums.APP_OP_TOAST_WINDOW;
     /** @hide Capture the device's display contents and/or audio */
     @UnsupportedAppUsage
-    public static final int OP_PROJECT_MEDIA = 46;
+    public static final int OP_PROJECT_MEDIA = AppProtoEnums.APP_OP_PROJECT_MEDIA;
     /**
      * Start (without additional user intervention) a VPN connection, as used by {@link
      * android.net.VpnService} along with as Platform VPN connections, as used by {@link
@@ -933,130 +939,142 @@ public class AppOpsManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public static final int OP_ACTIVATE_VPN = 47;
+    public static final int OP_ACTIVATE_VPN = AppProtoEnums.APP_OP_ACTIVATE_VPN;
     /** @hide Access the WallpaperManagerAPI to write wallpapers. */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_WALLPAPER = 48;
+    public static final int OP_WRITE_WALLPAPER = AppProtoEnums.APP_OP_WRITE_WALLPAPER;
     /** @hide Received the assist structure from an app. */
     @UnsupportedAppUsage
-    public static final int OP_ASSIST_STRUCTURE = 49;
+    public static final int OP_ASSIST_STRUCTURE = AppProtoEnums.APP_OP_ASSIST_STRUCTURE;
     /** @hide Received a screenshot from assist. */
     @UnsupportedAppUsage
-    public static final int OP_ASSIST_SCREENSHOT = 50;
+    public static final int OP_ASSIST_SCREENSHOT = AppProtoEnums.APP_OP_ASSIST_SCREENSHOT;
     /** @hide Read the phone state. */
     @UnsupportedAppUsage
-    public static final int OP_READ_PHONE_STATE = 51;
+    public static final int OP_READ_PHONE_STATE = AppProtoEnums.APP_OP_READ_PHONE_STATE;
     /** @hide Add voicemail messages to the voicemail content provider. */
     @UnsupportedAppUsage
-    public static final int OP_ADD_VOICEMAIL = 52;
+    public static final int OP_ADD_VOICEMAIL = AppProtoEnums.APP_OP_ADD_VOICEMAIL;
     /** @hide Access APIs for SIP calling over VOIP or WiFi. */
     @UnsupportedAppUsage
-    public static final int OP_USE_SIP = 53;
+    public static final int OP_USE_SIP = AppProtoEnums.APP_OP_USE_SIP;
     /** @hide Intercept outgoing calls. */
     @UnsupportedAppUsage
-    public static final int OP_PROCESS_OUTGOING_CALLS = 54;
+    public static final int OP_PROCESS_OUTGOING_CALLS =
+            AppProtoEnums.APP_OP_PROCESS_OUTGOING_CALLS;
     /** @hide User the fingerprint API. */
     @UnsupportedAppUsage
-    public static final int OP_USE_FINGERPRINT = 55;
+    public static final int OP_USE_FINGERPRINT = AppProtoEnums.APP_OP_USE_FINGERPRINT;
     /** @hide Access to body sensors such as heart rate, etc. */
     @UnsupportedAppUsage
-    public static final int OP_BODY_SENSORS = 56;
+    public static final int OP_BODY_SENSORS = AppProtoEnums.APP_OP_BODY_SENSORS;
     /** @hide Read previously received cell broadcast messages. */
     @UnsupportedAppUsage
-    public static final int OP_READ_CELL_BROADCASTS = 57;
+    public static final int OP_READ_CELL_BROADCASTS = AppProtoEnums.APP_OP_READ_CELL_BROADCASTS;
     /** @hide Inject mock location into the system. */
     @UnsupportedAppUsage
-    public static final int OP_MOCK_LOCATION = 58;
+    public static final int OP_MOCK_LOCATION = AppProtoEnums.APP_OP_MOCK_LOCATION;
     /** @hide Read external storage. */
     @UnsupportedAppUsage
-    public static final int OP_READ_EXTERNAL_STORAGE = 59;
+    public static final int OP_READ_EXTERNAL_STORAGE = AppProtoEnums.APP_OP_READ_EXTERNAL_STORAGE;
     /** @hide Write external storage. */
     @UnsupportedAppUsage
-    public static final int OP_WRITE_EXTERNAL_STORAGE = 60;
+    public static final int OP_WRITE_EXTERNAL_STORAGE =
+            AppProtoEnums.APP_OP_WRITE_EXTERNAL_STORAGE;
     /** @hide Turned on the screen. */
     @UnsupportedAppUsage
-    public static final int OP_TURN_SCREEN_ON = 61;
+    public static final int OP_TURN_SCREEN_ON = AppProtoEnums.APP_OP_TURN_SCREEN_ON;
     /** @hide Get device accounts. */
     @UnsupportedAppUsage
-    public static final int OP_GET_ACCOUNTS = 62;
+    public static final int OP_GET_ACCOUNTS = AppProtoEnums.APP_OP_GET_ACCOUNTS;
     /** @hide Control whether an application is allowed to run in the background. */
     @UnsupportedAppUsage
-    public static final int OP_RUN_IN_BACKGROUND = 63;
+    public static final int OP_RUN_IN_BACKGROUND =
+            AppProtoEnums.APP_OP_RUN_ANY_IN_BACKGROUND;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_AUDIO_ACCESSIBILITY_VOLUME = 64;
+    public static final int OP_AUDIO_ACCESSIBILITY_VOLUME =
+            AppProtoEnums.APP_OP_AUDIO_ACCESSIBILITY_VOLUME;
     /** @hide Read the phone number. */
     @UnsupportedAppUsage
-    public static final int OP_READ_PHONE_NUMBERS = 65;
+    public static final int OP_READ_PHONE_NUMBERS = AppProtoEnums.APP_OP_READ_PHONE_NUMBERS;
     /** @hide Request package installs through package installer */
     @UnsupportedAppUsage
-    public static final int OP_REQUEST_INSTALL_PACKAGES = 66;
+    public static final int OP_REQUEST_INSTALL_PACKAGES =
+            AppProtoEnums.APP_OP_REQUEST_INSTALL_PACKAGES;
     /** @hide Enter picture-in-picture. */
     @UnsupportedAppUsage
-    public static final int OP_PICTURE_IN_PICTURE = 67;
+    public static final int OP_PICTURE_IN_PICTURE = AppProtoEnums.APP_OP_PICTURE_IN_PICTURE;
     /** @hide Instant app start foreground service. */
     @UnsupportedAppUsage
-    public static final int OP_INSTANT_APP_START_FOREGROUND = 68;
+    public static final int OP_INSTANT_APP_START_FOREGROUND =
+            AppProtoEnums.APP_OP_INSTANT_APP_START_FOREGROUND;
     /** @hide Answer incoming phone calls */
     @UnsupportedAppUsage
-    public static final int OP_ANSWER_PHONE_CALLS = 69;
+    public static final int OP_ANSWER_PHONE_CALLS = AppProtoEnums.APP_OP_ANSWER_PHONE_CALLS;
     /** @hide Run jobs when in background */
     @UnsupportedAppUsage
-    public static final int OP_RUN_ANY_IN_BACKGROUND = 70;
+    public static final int OP_RUN_ANY_IN_BACKGROUND = AppProtoEnums.APP_OP_RUN_ANY_IN_BACKGROUND;
     /** @hide Change Wi-Fi connectivity state */
     @UnsupportedAppUsage
-    public static final int OP_CHANGE_WIFI_STATE = 71;
+    public static final int OP_CHANGE_WIFI_STATE = AppProtoEnums.APP_OP_CHANGE_WIFI_STATE;
     /** @hide Request package deletion through package installer */
     @UnsupportedAppUsage
-    public static final int OP_REQUEST_DELETE_PACKAGES = 72;
+    public static final int OP_REQUEST_DELETE_PACKAGES =
+            AppProtoEnums.APP_OP_REQUEST_DELETE_PACKAGES;
     /** @hide Bind an accessibility service. */
     @UnsupportedAppUsage
-    public static final int OP_BIND_ACCESSIBILITY_SERVICE = 73;
+    public static final int OP_BIND_ACCESSIBILITY_SERVICE =
+            AppProtoEnums.APP_OP_BIND_ACCESSIBILITY_SERVICE;
     /** @hide Continue handover of a call from another app */
     @UnsupportedAppUsage
-    public static final int OP_ACCEPT_HANDOVER = 74;
+    public static final int OP_ACCEPT_HANDOVER = AppProtoEnums.APP_OP_ACCEPT_HANDOVER;
     /** @hide Create and Manage IPsec Tunnels */
     @UnsupportedAppUsage
-    public static final int OP_MANAGE_IPSEC_TUNNELS = 75;
+    public static final int OP_MANAGE_IPSEC_TUNNELS = AppProtoEnums.APP_OP_MANAGE_IPSEC_TUNNELS;
     /** @hide Any app start foreground service. */
     @UnsupportedAppUsage
     @TestApi
-    public static final int OP_START_FOREGROUND = 76;
+    public static final int OP_START_FOREGROUND = AppProtoEnums.APP_OP_START_FOREGROUND;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int OP_BLUETOOTH_SCAN = 77;
+    public static final int OP_BLUETOOTH_SCAN = AppProtoEnums.APP_OP_BLUETOOTH_SCAN;
     /** @hide Use the BiometricPrompt/BiometricManager APIs. */
-    public static final int OP_USE_BIOMETRIC = 78;
+    public static final int OP_USE_BIOMETRIC = AppProtoEnums.APP_OP_USE_BIOMETRIC;
     /** @hide Physical activity recognition. */
-    public static final int OP_ACTIVITY_RECOGNITION = 79;
+    public static final int OP_ACTIVITY_RECOGNITION = AppProtoEnums.APP_OP_ACTIVITY_RECOGNITION;
     /** @hide Financial app sms read. */
-    public static final int OP_SMS_FINANCIAL_TRANSACTIONS = 80;
+    public static final int OP_SMS_FINANCIAL_TRANSACTIONS =
+            AppProtoEnums.APP_OP_SMS_FINANCIAL_TRANSACTIONS;
     /** @hide Read media of audio type. */
-    public static final int OP_READ_MEDIA_AUDIO = 81;
+    public static final int OP_READ_MEDIA_AUDIO = AppProtoEnums.APP_OP_READ_MEDIA_AUDIO;
     /** @hide Write media of audio type. */
-    public static final int OP_WRITE_MEDIA_AUDIO = 82;
+    public static final int OP_WRITE_MEDIA_AUDIO = AppProtoEnums.APP_OP_WRITE_MEDIA_AUDIO;
     /** @hide Read media of video type. */
-    public static final int OP_READ_MEDIA_VIDEO = 83;
+    public static final int OP_READ_MEDIA_VIDEO = AppProtoEnums.APP_OP_READ_MEDIA_VIDEO;
     /** @hide Write media of video type. */
-    public static final int OP_WRITE_MEDIA_VIDEO = 84;
+    public static final int OP_WRITE_MEDIA_VIDEO = AppProtoEnums.APP_OP_WRITE_MEDIA_VIDEO;
     /** @hide Read media of image type. */
-    public static final int OP_READ_MEDIA_IMAGES = 85;
+    public static final int OP_READ_MEDIA_IMAGES = AppProtoEnums.APP_OP_READ_MEDIA_IMAGES;
     /** @hide Write media of image type. */
-    public static final int OP_WRITE_MEDIA_IMAGES = 86;
+    public static final int OP_WRITE_MEDIA_IMAGES = AppProtoEnums.APP_OP_WRITE_MEDIA_IMAGES;
     /** @hide Has a legacy (non-isolated) view of storage. */
-    public static final int OP_LEGACY_STORAGE = 87;
+    public static final int OP_LEGACY_STORAGE = AppProtoEnums.APP_OP_LEGACY_STORAGE;
     /** @hide Accessing accessibility features */
-    public static final int OP_ACCESS_ACCESSIBILITY = 88;
+    public static final int OP_ACCESS_ACCESSIBILITY = AppProtoEnums.APP_OP_ACCESS_ACCESSIBILITY;
     /** @hide Read the device identifiers (IMEI / MEID, IMSI, SIM / Build serial) */
-    public static final int OP_READ_DEVICE_IDENTIFIERS = 89;
+    public static final int OP_READ_DEVICE_IDENTIFIERS =
+            AppProtoEnums.APP_OP_READ_DEVICE_IDENTIFIERS;
     /** @hide Read location metadata from media */
-    public static final int OP_ACCESS_MEDIA_LOCATION = 90;
+    public static final int OP_ACCESS_MEDIA_LOCATION = AppProtoEnums.APP_OP_ACCESS_MEDIA_LOCATION;
     /** @hide Query all apps on device, regardless of declarations in the calling app manifest */
-    public static final int OP_QUERY_ALL_PACKAGES = 91;
+    public static final int OP_QUERY_ALL_PACKAGES = AppProtoEnums.APP_OP_QUERY_ALL_PACKAGES;
     /** @hide Access all external storage */
-    public static final int OP_MANAGE_EXTERNAL_STORAGE = 92;
+    public static final int OP_MANAGE_EXTERNAL_STORAGE =
+            AppProtoEnums.APP_OP_MANAGE_EXTERNAL_STORAGE;
     /** @hide Communicate cross-profile within the same profile group. */
-    public static final int OP_INTERACT_ACROSS_PROFILES = 93;
+    public static final int OP_INTERACT_ACROSS_PROFILES =
+            AppProtoEnums.APP_OP_INTERACT_ACROSS_PROFILES;
     /**
      * Start (without additional user intervention) a Platform VPN connection, as used by {@link
      * android.net.VpnManager}
@@ -1067,14 +1085,15 @@ public class AppOpsManager {
      *
      * @hide
      */
-    public static final int OP_ACTIVATE_PLATFORM_VPN = 94;
+    public static final int OP_ACTIVATE_PLATFORM_VPN = AppProtoEnums.APP_OP_ACTIVATE_PLATFORM_VPN;
     /** @hide */
-    public static final int OP_LOADER_USAGE_STATS = 95;
+    public static final int OP_LOADER_USAGE_STATS = AppProtoEnums.APP_OP_LOADER_USAGE_STATS;
     /** @hide Access telephony call audio */
-    public static final int OP_ACCESS_CALL_AUDIO = 96;
+    public static final int OP_ACCESS_CALL_AUDIO = AppProtoEnums.APP_OP_ACCESS_CALL_AUDIO;
 
     /** @hide Auto-revoke app permissions if app is unused for an extended period */
-    public static final int OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED = 97;
+    public static final int OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED =
+            AppProtoEnums.APP_OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED;
 
     /**
      * Whether {@link #OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED} is allowed to be changed by
@@ -1082,7 +1101,8 @@ public class AppOpsManager {
      *
      * @hide
      */
-    public static final int OP_AUTO_REVOKE_MANAGED_BY_INSTALLER = 98;
+    public static final int OP_AUTO_REVOKE_MANAGED_BY_INSTALLER =
+            AppProtoEnums.APP_OP_AUTO_REVOKE_MANAGED_BY_INSTALLER;
 
     /** @hide */
     @UnsupportedAppUsage
@@ -2339,114 +2359,6 @@ public class AppOpsManager {
     };
 
     /**
-     * This maps each operation to its statsd logging code.
-     */
-    private static int[] sOpToLoggingId = new int[]{
-            AppProtoEnums.APP_OP_COARSE_LOCATION, // OP_COARSE_LOCATION
-            AppProtoEnums.APP_OP_FINE_LOCATION, // OP_FINE_LOCATION
-            AppProtoEnums.APP_OP_GPS, // OP_ID__GPS
-            AppProtoEnums.APP_OP_VIBRATE, // OP_VIBRATE
-            AppProtoEnums.APP_OP_READ_CONTACTS, // OP_READ_CONTACTS
-            AppProtoEnums.APP_OP_WRITE_CONTACTS, // OP_WRITE_CONTACTS
-            AppProtoEnums.APP_OP_READ_CALL_LOG, // OP_READ_CALL_LOG
-            AppProtoEnums.APP_OP_WRITE_CALL_LOG, // OP_WRITE_CALL_LOG
-            AppProtoEnums.APP_OP_READ_CALENDAR, // OP_READ_CALENDAR
-            AppProtoEnums.APP_OP_WRITE_CALENDAR, // OP_WRITE_CALENDAR
-            AppProtoEnums.APP_OP_WIFI_SCAN, // OP_WIFI_SCAN
-            AppProtoEnums.APP_OP_POST_NOTIFICATION, // OP_POST_NOTIFICATION
-            AppProtoEnums.APP_OP_NEIGHBORING_CELLS, // OP_NEIGHBORING_CELLS
-            AppProtoEnums.APP_OP_CALL_PHONE, // OP_CALL_PHONE
-            AppProtoEnums.APP_OP_READ_SMS, // OP_READ_SMS
-            AppProtoEnums.APP_OP_WRITE_SMS, // OP_WRITE_SMS
-            AppProtoEnums.APP_OP_RECEIVE_SMS, // OP_RECEIVE_SMS
-            AppProtoEnums.APP_OP_RECEIVE_EMERGENCY_SMS, // OP_RECEIVE_EMERGENCY_SMS
-            AppProtoEnums.APP_OP_RECEIVE_MMS, // OP_RECEIVE_MMS
-            AppProtoEnums.APP_OP_RECEIVE_WAP_PUSH, // OP_RECEIVE_WAP_PUSH
-            AppProtoEnums.APP_OP_SEND_SMS, // OP_SEND_SMS
-            AppProtoEnums.APP_OP_READ_ICC_SMS, // OP_READ_ICC_SMS
-            AppProtoEnums.APP_OP_WRITE_ICC_SMS, // OP_WRITE_ICC_SMS
-            AppProtoEnums.APP_OP_WRITE_SETTINGS, // OP_WRITE_SETTINGS
-            AppProtoEnums.APP_OP_SYSTEM_ALERT_WINDOW, // OP_SYSTEM_ALERT_WINDOW
-            AppProtoEnums.APP_OP_ACCESS_NOTIFICATIONS, // OP_ACCESS_NOTIFICATIONS
-            AppProtoEnums.APP_OP_CAMERA, // OP_CAMERA
-            AppProtoEnums.APP_OP_RECORD_AUDIO, // OP_RECORD_AUDIO
-            AppProtoEnums.APP_OP_PLAY_AUDIO, // OP_PLAY_AUDIO
-            AppProtoEnums.APP_OP_READ_CLIPBOARD, // OP_READ_CLIPBOARD
-            AppProtoEnums.APP_OP_WRITE_CLIPBOARD, // OP_WRITE_CLIPBOARD
-            AppProtoEnums.APP_OP_TAKE_MEDIA_BUTTONS, // OP_TAKE_MEDIA_BUTTONS
-            AppProtoEnums.APP_OP_TAKE_AUDIO_FOCUS, // OP_TAKE_AUDIO_FOCUS
-            AppProtoEnums.APP_OP_AUDIO_MASTER_VOLUME, // OP_AUDIO_MASTER_VOLUME
-            AppProtoEnums.APP_OP_AUDIO_VOICE_VOLUME, // OP_AUDIO_VOICE_VOLUME
-            AppProtoEnums.APP_OP_AUDIO_RING_VOLUME, // OP_AUDIO_RING_VOLUME
-            AppProtoEnums.APP_OP_AUDIO_MEDIA_VOLUME, // OP_AUDIO_MEDIA_VOLUME
-            AppProtoEnums.APP_OP_AUDIO_ALARM_VOLUME, // OP_AUDIO_ALARM_VOLUME
-            AppProtoEnums.APP_OP_AUDIO_NOTIFICATION_VOLUME, // OP_AUDIO_NOTIFICATION_VOLUME
-            AppProtoEnums.APP_OP_AUDIO_BLUETOOTH_VOLUME, // OP_AUDIO_BLUETOOTH_VOLUME
-            AppProtoEnums.APP_OP_WAKE_LOCK, // OP_WAKE_LOCK
-            AppProtoEnums.APP_OP_MONITOR_LOCATION, // OP_MONITOR_LOCATION
-            AppProtoEnums.APP_OP_MONITOR_HIGH_POWER_LOCATION, // OP_MONITOR_HIGH_POWER_LOCATION
-            AppProtoEnums.APP_OP_GET_USAGE_STATS, // OP_GET_USAGE_STATS
-            AppProtoEnums.APP_OP_MUTE_MICROPHONE, //OP_MUTE_MICROPHONE
-            AppProtoEnums.APP_OP_TOAST_WINDOW, // OP_TOAST_WINDOW
-            AppProtoEnums.APP_OP_PROJECT_MEDIA, // OP_PROJECT_MEDIA
-            AppProtoEnums.APP_OP_ACTIVATE_VPN, // OP_ACTIVATE_VPN
-            AppProtoEnums.APP_OP_WRITE_WALLPAPER, // OP_WRITE_WALLPAPER
-            AppProtoEnums.APP_OP_ASSIST_STRUCTURE, // OP_ASSIST_STRUCTURE
-            AppProtoEnums.APP_OP_ASSIST_SCREENSHOT, // OP_ASSIST_SCREENSHOT
-            AppProtoEnums.APP_OP_READ_PHONE_STATE, // OP_READ_PHONE_STATE
-            AppProtoEnums.APP_OP_ADD_VOICEMAIL, // OP_ADD_VOICEMAIL
-            AppProtoEnums.APP_OP_USE_SIP, // OP_USE_SIP
-            AppProtoEnums.APP_OP_PROCESS_OUTGOING_CALLS, // OP_PROCESS_OUTGOING_CALLS
-            AppProtoEnums.APP_OP_USE_FINGERPRINT, // OP_USE_FINGERPRINT
-            AppProtoEnums.APP_OP_BODY_SENSORS, // OP_BODY_SENSORS
-            AppProtoEnums.APP_OP_READ_CELL_BROADCASTS, // OP_READ_CELL_BROADCASTS
-            AppProtoEnums.APP_OP_MOCK_LOCATION, // OP_MOCK_LOCATION
-            AppProtoEnums.APP_OP_READ_EXTERNAL_STORAGE, // OP_READ_EXTERNAL_STORAGE
-            AppProtoEnums.APP_OP_WRITE_EXTERNAL_STORAGE, // OP_WRITE_EXTERNAL_STORAGE
-            AppProtoEnums.APP_OP_TURN_SCREEN_ON, // OP_TURN_SCREEN_ON
-            AppProtoEnums.APP_OP_GET_ACCOUNTS, // OP_GET_ACCOUNTS
-            AppProtoEnums.APP_OP_RUN_IN_BACKGROUND, // OP_RUN_IN_BACKGROUND
-            AppProtoEnums.APP_OP_AUDIO_ACCESSIBILITY_VOLUME, // OP_AUDIO_ACCESSIBILITY_VOLUME
-            AppProtoEnums.APP_OP_READ_PHONE_NUMBERS, // OP_READ_PHONE_NUMBERS
-            AppProtoEnums.APP_OP_REQUEST_INSTALL_PACKAGES, // OP_REQUEST_INSTALL_PACKAGES
-            AppProtoEnums.APP_OP_PICTURE_IN_PICTURE, // OP_PICTURE_IN_PICTURE
-            AppProtoEnums.APP_OP_INSTANT_APP_START_FOREGROUND, // OP_INSTANT_APP_START_FOREGROUND
-            AppProtoEnums.APP_OP_ANSWER_PHONE_CALLS, // OP_ANSWER_PHONE_CALLS
-            AppProtoEnums.APP_OP_RUN_ANY_IN_BACKGROUND, // OP_RUN_ANY_IN_BACKGROUND
-            AppProtoEnums.APP_OP_CHANGE_WIFI_STATE, // OP_CHANGE_WIFI_STATE
-            AppProtoEnums.APP_OP_REQUEST_DELETE_PACKAGES, // OP_REQUEST_DELETE_PACKAGES
-            AppProtoEnums.APP_OP_BIND_ACCESSIBILITY_SERVICE, // OP_BIND_ACCESSIBILITY_SERVICE
-            AppProtoEnums.APP_OP_ACCEPT_HANDOVER, // OP_ACCEPT_HANDOVER
-            AppProtoEnums.APP_OP_MANAGE_IPSEC_TUNNELS, // OP_MANAGE_IPSEC_TUNNELS
-            AppProtoEnums.APP_OP_START_FOREGROUND, // OP_START_FOREGROUND
-            AppProtoEnums.APP_OP_BLUETOOTH_SCAN, // OP_BLUETOOTH_SCAN
-            AppProtoEnums.APP_OP_USE_BIOMETRIC, // OP_USE_BIOMETRIC
-            AppProtoEnums.APP_OP_ACTIVITY_RECOGNITION, // OP_ACTIVITY_RECOGNITION
-            AppProtoEnums.APP_OP_SMS_FINANCIAL_TRANSACTIONS, // OP_SMS_FINANCIAL_TRANSACTIONS
-            AppProtoEnums.APP_OP_READ_MEDIA_AUDIO, // OP_READ_MEDIA_AUDIO
-            AppProtoEnums.APP_OP_WRITE_MEDIA_AUDIO, // OP_WRITE_MEDIA_AUDIO
-            AppProtoEnums.APP_OP_READ_MEDIA_VIDEO, // OP_READ_MEDIA_VIDEO
-            AppProtoEnums.APP_OP_WRITE_MEDIA_VIDEO, // OP_WRITE_MEDIA_VIDEO
-            AppProtoEnums.APP_OP_READ_MEDIA_IMAGES, // OP_READ_MEDIA_IMAGES
-            AppProtoEnums.APP_OP_WRITE_MEDIA_IMAGES, // OP_WRITE_MEDIA_IMAGES
-            AppProtoEnums.APP_OP_LEGACY_STORAGE, // OP_LEGACY_STORAGE
-            AppProtoEnums.APP_OP_ACCESS_ACCESSIBILITY, // OP_ACCESS_ACCESSIBILITY
-            AppProtoEnums.APP_OP_READ_DEVICE_IDENTIFIERS, // OP_READ_DEVICE_IDENTIFIERS
-            AppProtoEnums.APP_OP_ACCESS_MEDIA_LOCATION, // OP_ACCESS_MEDIA_LOCATION
-            AppProtoEnums.APP_OP_QUERY_ALL_PACKAGES, // OP_QUERY_ALL_PACKAGES
-            AppProtoEnums.APP_OP_MANAGE_EXTERNAL_STORAGE, // OP_MANAGE_EXTERNAL_STORAGE
-            AppProtoEnums.APP_OP_INTERACT_ACROSS_PROFILES, // OP_INTERACT_ACROSS_PROFILES
-            AppProtoEnums.APP_OP_ACTIVATE_PLATFORM_VPN, // OP_ACTIVATE_PLATFORM_VPN
-            AppProtoEnums.APP_OP_LOADER_USAGE_STATS, // OP_LOADER_USAGE_STATS
-            AppProtoEnums.APP_OP_ACCESS_CALL_AUDIO, // OP_ACCESS_CALL_AUDIO
-            AppProtoEnums.APP_OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
-            // OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
-            AppProtoEnums.APP_OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
-            // OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
-    };
-
-
-    /**
      * Mapping from an app op name to the app op code.
      */
     private static HashMap<String, Integer> sOpStrToOp = new HashMap<>();
@@ -2485,10 +2397,6 @@ public class AppOpsManager {
         }
         if (sOpToString.length != _NUM_OP) {
             throw new IllegalStateException("sOpToString length " + sOpToString.length
-                    + " should be " + _NUM_OP);
-        }
-        if (sOpToLoggingId.length != _NUM_OP) {
-            throw new IllegalStateException("sOpToLoggingId length " + sOpToLoggingId.length
                     + " should be " + _NUM_OP);
         }
         if (sOpNames.length != _NUM_OP) {
@@ -2572,15 +2480,6 @@ public class AppOpsManager {
      */
     public static @NonNull String opToPublicName(int op) {
         return sOpToString[op];
-    }
-
-    /**
-     * Retrieve a logging id for the operation.
-     *
-     * @hide
-     */
-    public static int opToLoggingId(int op) {
-        return sOpToLoggingId[op];
     }
 
     /**
@@ -6035,11 +5934,6 @@ public class AppOpsManager {
         /** @hide */
         public int getOpCode() {
             return mOp;
-        }
-
-        /** @hide */
-        public int getLoggingOpCode() {
-            return AppOpsManager.opToLoggingId(mOp);
         }
 
         /**

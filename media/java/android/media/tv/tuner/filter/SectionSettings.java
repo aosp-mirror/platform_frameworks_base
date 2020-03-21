@@ -64,14 +64,14 @@ public abstract class SectionSettings extends Settings {
      *
      * @param <T> The subclass to be built.
      */
-    public abstract static class Builder<T extends Builder<T>>
-            extends Settings.Builder<Builder<T>> {
+    public abstract static class Builder<T extends Builder<T>> {
+        final int mMainType;
         boolean mCrcEnabled;
         boolean mIsRepeat;
         boolean mIsRaw;
 
         Builder(int mainType) {
-            super(mainType);
+            mMainType = mainType;
         }
 
         /**

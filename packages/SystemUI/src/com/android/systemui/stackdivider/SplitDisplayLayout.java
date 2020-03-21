@@ -191,13 +191,24 @@ public class SplitDisplayLayout {
         final int currDividerWidth =
                 (int) (dividerWidthInactive * shownFraction + dividerWidth * (1.f - shownFraction));
 
+        // Calculate the highest we can move the bottom of the top stack to keep 30% visible.
         final int minTopStackBottom = displayStableRect.top
                 + (int) ((mPrimary.bottom - displayStableRect.top) * ADJUSTED_STACK_FRACTION_MIN);
-        final int minImeTop = minTopStackBottom + currDividerWidth;
-
-        // Calculate an offset which shifts the stacks up by the height of the IME, but still
-        // leaves at least 30% of the top stack visible.
-        final int yOffset = Math.max(0, dl.height() - Math.max(currImeTop, minImeTop));
+        // Based on that, calculate the maximum amount we'll allow the ime to shift things.
+        final int maxOffset = mPrimary.bottom - minTopStackBottom;
+        // Calculate how much we would shift things without limits (basically the height of ime).
+        final int desiredOffset = hiddenTop - shownTop;
+        // Calculate an "adjustedTop" which is the currImeTop but restricted by our constraints.
+        // We want an effect where the adjustment only occurs during the "highest" portion of the
+        // ime animation. This is done by shifting the adjustment values by the difference in
+        // offsets (effectively playing the whole adjustment animation some fixed amount of pixels
+        // below the ime top).
+        final int topCorrection = Math.max(0, desiredOffset - maxOffset);
+        final int adjustedTop = currImeTop + topCorrection;
+        // The actual yOffset is the distance between adjustedTop and the bottom of the display.
+        // Since our adjustedTop values are playing "below" the ime, we clamp at 0 so we only
+        // see adjustment upward.
+        final int yOffset = Math.max(0, dl.height() - adjustedTop);
 
         // TOP
         // Reduce the offset by an additional small amount to squish the divider bar.

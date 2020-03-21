@@ -222,6 +222,7 @@ public class Tuner implements AutoCloseable  {
 
     private Integer mDemuxHandle;
     private Integer mDescramblerHandle;
+    private Descrambler mDescrambler;
 
     private final TunerResourceManager.ResourcesReclaimListener mResourceListener =
             new TunerResourceManager.ResourcesReclaimListener() {
@@ -245,7 +246,11 @@ public class Tuner implements AutoCloseable  {
         mContext = context;
         mTunerResourceManager = (TunerResourceManager)
                 context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
+        if (mHandler == null) {
+            mHandler = createEventHandler();
+        }
 
+        mHandler = createEventHandler();
         int[] clientId = new int[1];
         ResourceClientProfile profile = new ResourceClientProfile(tvInputSessionId, useCase);
         mTunerResourceManager.registerClientProfile(
@@ -283,7 +288,7 @@ public class Tuner implements AutoCloseable  {
     public void shareFrontendFromTuner(@NonNull Tuner tuner) {
         mTunerResourceManager.shareFrontend(mClientId, tuner.mClientId);
         mFrontendHandle = tuner.mFrontendHandle;
-        nativeOpenFrontendByHandle(mFrontendHandle);
+        mFrontend = nativeOpenFrontendByHandle(mFrontendHandle);
     }
 
     /**
@@ -316,6 +321,7 @@ public class Tuner implements AutoCloseable  {
             mTunerResourceManager.releaseLnb(mLnbHandle);
             mLnb = null;
         }
+        nativeClose();
     }
 
     /**
@@ -356,12 +362,15 @@ public class Tuner implements AutoCloseable  {
     private native Lnb nativeOpenLnbByHandle(int handle);
     private native Lnb nativeOpenLnbByName(String name);
 
-    private native Descrambler nativeOpenDescrambler();
+    private native Descrambler nativeOpenDescramblerByHandle(int handle);
+    private native Descrambler nativeOpenDemuxByhandle(int handle);
 
     private native DvrRecorder nativeOpenDvrRecorder(long bufferSize);
     private native DvrPlayback nativeOpenDvrPlayback(long bufferSize);
 
     private static native DemuxCapabilities nativeGetDemuxCapabilities();
+
+    private native int nativeClose();
 
 
     /**
@@ -450,7 +459,6 @@ public class Tuner implements AutoCloseable  {
      * @see #setOnTuneEventListener(Executor, OnTuneEventListener)
      */
     public void clearOnTuneEventListener() {
-        TunerUtils.checkTunerPermission(mContext);
         mOnTuneEventListener = null;
         mOnTunerEventExecutor = null;
 
@@ -497,7 +505,6 @@ public class Tuner implements AutoCloseable  {
      */
     @Result
     public int cancelTuning() {
-        TunerUtils.checkTunerPermission(mContext);
         return nativeStopTune();
     }
 
@@ -553,6 +560,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestFrontend(request, feHandle);
         if (granted) {
             mFrontendHandle = feHandle[0];
+            mFrontend = nativeOpenFrontendByHandle(mFrontendHandle);
         }
         return granted;
     }
@@ -706,67 +714,70 @@ public class Tuner implements AutoCloseable  {
 
     private void onFrequenciesReport(int[] frequency) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReport(frequency));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onFrequenciesReported(frequency));
         }
     }
 
     private void onSymbolRates(int[] rate) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRates(rate));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSymbolRatesReported(rate));
         }
     }
 
     private void onHierarchy(int hierarchy) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchy(hierarchy));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onHierarchyReported(hierarchy));
         }
     }
 
     private void onSignalType(int signalType) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalType(signalType));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onSignalTypeReported(signalType));
         }
     }
 
     private void onPlpIds(int[] plpIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIds(plpIds));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onPlpIdsReported(plpIds));
         }
     }
 
     private void onGroupIds(int[] groupIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIds(groupIds));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onGroupIdsReported(groupIds));
         }
     }
 
     private void onInputStreamIds(int[] inputStreamIds) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onInputStreamIds(inputStreamIds));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onInputStreamIdsReported(inputStreamIds));
         }
     }
 
     private void onDvbsStandard(int dvbsStandandard) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbsStandard(dvbsStandandard));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onDvbsStandardReported(dvbsStandandard));
         }
     }
 
     private void onDvbtStandard(int dvbtStandard) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandard(dvbtStandard));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onDvbtStandardReported(dvbtStandard));
         }
     }
 
     private void onAnalogSifStandard(int sif) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandard(sif));
+            mScanCallbackExecutor.execute(() -> mScanCallback.onAnalogSifStandardReported(sif));
         }
     }
 
     private void onAtsc3PlpInfos(Atsc3PlpInfo[] atsc3PlpInfos) {
         if (mScanCallbackExecutor != null && mScanCallback != null) {
-            mScanCallbackExecutor.execute(() -> mScanCallback.onAtsc3PlpInfos(atsc3PlpInfos));
+            mScanCallbackExecutor.execute(
+                    () -> mScanCallback.onAtsc3PlpInfosReported(atsc3PlpInfos));
         }
     }
 
@@ -815,7 +826,7 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
-        return nativeOpenLnbByHandle(mLnbHandle);
+        return mLnb;
     }
 
     /**
@@ -833,7 +844,6 @@ public class Tuner implements AutoCloseable  {
         Objects.requireNonNull(name, "LNB name must not be null");
         Objects.requireNonNull(executor, "executor must not be null");
         Objects.requireNonNull(cb, "LnbCallback must not be null");
-        checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_LNB);
         return nativeOpenLnbByName(name);
     }
 
@@ -843,6 +853,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestLnb(request, lnbHandle);
         if (granted) {
             mLnbHandle = lnbHandle[0];
+            mLnb = nativeOpenLnbByHandle(mLnbHandle);
         }
         return granted;
     }
@@ -873,7 +884,7 @@ public class Tuner implements AutoCloseable  {
     @Nullable
     public Descrambler openDescrambler() {
         checkResource(TunerResourceManager.TUNER_RESOURCE_TYPE_DESCRAMBLER);
-        return nativeOpenDescrambler();
+        return mDescrambler;
     }
 
     /**
@@ -926,6 +937,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestDemux(request, demuxHandle);
         if (granted) {
             mDemuxHandle = demuxHandle[0];
+            nativeOpenDemuxByhandle(mDemuxHandle);
         }
         return granted;
     }
@@ -936,6 +948,7 @@ public class Tuner implements AutoCloseable  {
         boolean granted = mTunerResourceManager.requestDescrambler(request, descramblerHandle);
         if (granted) {
             mDescramblerHandle = descramblerHandle[0];
+            nativeOpenDescramblerByHandle(mDescramblerHandle);
         }
         return granted;
     }

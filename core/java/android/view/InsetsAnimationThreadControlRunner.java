@@ -88,11 +88,11 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             InsetsState state, WindowInsetsAnimationControlListener listener,
             @InsetsType int types,
             InsetsAnimationControlCallbacks controller, long durationMs, Interpolator interpolator,
-            boolean fade, @AnimationType int animationType, Handler mainThreadHandler) {
+            @AnimationType int animationType, Handler mainThreadHandler) {
         mMainThreadHandler = mainThreadHandler;
         mOuterCallbacks = controller;
         mControl = new InsetsAnimationControlImpl(copyControls(controls), frame, state, listener,
-                types, mCallbacks, durationMs, interpolator, fade, animationType);
+                types, mCallbacks, durationMs, interpolator, animationType);
         InsetsAnimationThread.getHandler().post(() -> listener.onReady(mControl, types));
     }
 

@@ -18,11 +18,8 @@ package android.media.tv.tuner.filter;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
 import android.annotation.Size;
 import android.annotation.SystemApi;
-import android.content.Context;
-import android.media.tv.tuner.TunerUtils;
 
 /**
  * Filter configuration for a IP filter.
@@ -92,13 +89,9 @@ public final class IpFilterConfiguration extends FilterConfiguration {
 
     /**
      * Creates a builder for {@link IpFilterConfiguration}.
-     *
-     * @param context the context of the caller.
      */
-    @RequiresPermission(android.Manifest.permission.ACCESS_TV_TUNER)
     @NonNull
-    public static Builder builder(@NonNull Context context) {
-        TunerUtils.checkTunerPermission(context);
+    public static Builder builder() {
         return new Builder();
     }
 
