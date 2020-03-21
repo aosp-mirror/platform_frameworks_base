@@ -52,28 +52,22 @@ class NotificationConversationTemplateViewWrapper constructor(
     private lateinit var imageMessageContainer: ViewGroup
     private lateinit var messagingLinearLayout: MessagingLinearLayout
     private lateinit var importanceRing: View
+    private lateinit var appName: View
 
     private fun resolveViews() {
         messagingLinearLayout = conversationLayout.messagingLinearLayout
         imageMessageContainer = conversationLayout.imageMessageContainer
-        conversationIcon = conversationLayout.requireViewById(
-                com.android.internal.R.id.conversation_icon
-        )
-        conversationBadge = conversationLayout.requireViewById(
-                com.android.internal.R.id.conversation_icon_badge
-        )
-        conversationBadgeBg = conversationLayout.requireViewById(
-                com.android.internal.R.id.conversation_icon_badge_bg
-        )
-        expandButton = conversationLayout.requireViewById(
-                com.android.internal.R.id.expand_button
-        )
-        expandButtonContainer = conversationLayout.requireViewById(
-                com.android.internal.R.id.expand_button_container
-        )
-        importanceRing = conversationLayout.requireViewById(
-                com.android.internal.R.id.conversation_icon_badge_ring
-        )
+        with(conversationLayout) {
+            conversationIcon = requireViewById(com.android.internal.R.id.conversation_icon)
+            conversationBadge = requireViewById(com.android.internal.R.id.conversation_icon_badge)
+            conversationBadgeBg =
+                    requireViewById(com.android.internal.R.id.conversation_icon_badge_bg)
+            expandButton = requireViewById(com.android.internal.R.id.expand_button)
+            expandButtonContainer =
+                    requireViewById(com.android.internal.R.id.expand_button_container)
+            importanceRing = requireViewById(com.android.internal.R.id.conversation_icon_badge_ring)
+            appName = requireViewById(com.android.internal.R.id.app_name_text)
+        }
     }
 
     override fun onContentUpdated(row: ExpandableNotificationRow) {
@@ -87,7 +81,7 @@ class NotificationConversationTemplateViewWrapper constructor(
         // This also clears the existing types
         super.updateTransformedTypes()
 
-        addTransformedViews(messagingLinearLayout)
+        addTransformedViews(messagingLinearLayout, appName)
 
         // Let's ignore the image message container since that is transforming as part of the
         // messages already
