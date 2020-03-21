@@ -105,7 +105,7 @@
                 android:id="@+id/done"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:text="Done"
+                android:text="@string/save"
                 style="@*android:style/Widget.DeviceDefault.Button.Colored"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
