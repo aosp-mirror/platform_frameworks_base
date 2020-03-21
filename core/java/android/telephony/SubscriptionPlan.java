@@ -372,5 +372,15 @@ public final class SubscriptionPlan implements Parcelable {
             plan.networkTypes = Arrays.copyOf(networkTypes, networkTypes.length);
             return this;
         }
+
+        /**
+         * Reset any network types that were set with {@link #setNetworkTypes(int[])}.
+         * This will make the SubscriptionPlan apply to all network types.
+         */
+        public @NonNull Builder resetNetworkTypes() {
+            plan.networkTypes = Arrays.copyOf(TelephonyManager.getAllNetworkTypes(),
+                    TelephonyManager.getAllNetworkTypes().length);
+            return this;
+        }
     }
 }
