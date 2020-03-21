@@ -204,7 +204,7 @@ public class MediaRouter2ManagerTest {
         addRouterCallback(new MediaRouter2.RouteCallback() {});
         addTransferCallback(new MediaRouter2.TransferCallback() {
             @Override
-            public void onTransferred(MediaRouter2.RoutingController oldController,
+            public void onTransfer(MediaRouter2.RoutingController oldController,
                     MediaRouter2.RoutingController newController) {
                 if (newController == null) {
                     return;
