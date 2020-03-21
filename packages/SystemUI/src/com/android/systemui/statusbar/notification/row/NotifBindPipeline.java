@@ -31,6 +31,8 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.Co
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -75,6 +77,7 @@ import javax.inject.Singleton;
 public final class NotifBindPipeline {
     private final Map<NotificationEntry, BindEntry> mBindEntries = new ArrayMap<>();
     private final NotifBindPipelineLogger mLogger;
+    private final List<BindCallback> mScratchCallbacksList = new ArrayList<>();
     private BindStage mStage;
 
     @Inject
@@ -162,10 +165,15 @@ public final class NotifBindPipeline {
         mLogger.logFinishedPipeline(entry.getKey(), callbacks.size());
 
         bindEntry.invalidated = false;
-        for (BindCallback cb : callbacks) {
-            cb.onBindFinished(entry);
-        }
+        // Move all callbacks to separate list as callbacks may themselves add/remove callbacks.
+        // TODO: Throw an exception for this re-entrant behavior once we deprecate
+        // NotificationGroupAlertTransferHelper
+        mScratchCallbacksList.addAll(callbacks);
         callbacks.clear();
+        for (int i = 0; i < mScratchCallbacksList.size(); i++) {
+            mScratchCallbacksList.get(i).onBindFinished(entry);
+        }
+        mScratchCallbacksList.clear();
     }
 
     private final NotifCollectionListener mCollectionListener = new NotifCollectionListener() {
