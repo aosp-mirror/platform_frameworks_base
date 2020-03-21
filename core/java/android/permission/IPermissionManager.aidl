@@ -54,6 +54,8 @@ interface IPermissionManager {
 
     int checkUidPermission(String permName, int uid);
 
+    int checkDeviceIdentifierAccess(String packageName, String callingFeatureId, String message, int pid, int uid);
+
     void addOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
 
     void removeOnPermissionsChangeListener(in IOnPermissionsChangeListener listener);
