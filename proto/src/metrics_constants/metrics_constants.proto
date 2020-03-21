@@ -7433,5 +7433,7 @@ message MetricsEvent {
     // CustomSettings constant
     CUSTOM_SETTINGS = 1999;
 
+    // ATOM
+    ATOM = 2000;
   }
 }
