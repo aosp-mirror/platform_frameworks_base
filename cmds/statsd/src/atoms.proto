@@ -3020,7 +3020,7 @@ message AppCrashOccurred {
     optional string process_name = 3;
 
     // The pid if available. -1 means not available.
-    optional sint32 pid = 4;
+    optional int32 pid = 4;
 
     optional string package_name = 5;
 
@@ -3056,7 +3056,7 @@ message WTFOccurred {
     optional string process_name = 3;
 
     // The pid if available. -1 means not available.
-    optional sint32 pid = 4;
+    optional int32 pid = 4;
 
     optional android.server.ErrorSource error_source = 5;
 }
