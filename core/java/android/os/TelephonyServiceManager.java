@@ -17,7 +17,6 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.Context;
 
 /**
@@ -28,7 +27,6 @@ import android.content.Context;
  *
  * @hide
  */
-@SystemApi
 public class TelephonyServiceManager {
     /**
      * @hide
@@ -97,7 +95,6 @@ public class TelephonyServiceManager {
      *
      * @hide
      */
-    @SystemApi
     public static class ServiceNotFoundException extends ServiceManager.ServiceNotFoundException {
         /**
          * Constructor.
