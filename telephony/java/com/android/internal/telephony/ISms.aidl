@@ -86,9 +86,9 @@ interface ISms {
      *  raw pdu of the status report is in the extended data ("pdu").
      * @param subId the subId id.
      */
-    void sendDataForSubscriber(int subId, String callingPkg, in String destAddr,
-            in String scAddr, in int destPort, in byte[] data, in PendingIntent sentIntent,
-            in PendingIntent deliveryIntent);
+    void sendDataForSubscriber(int subId, String callingPkg, String callingattributionTag,
+            in String destAddr, in String scAddr, in int destPort,in byte[] data,
+            in PendingIntent sentIntent, in PendingIntent deliveryIntent);
 
     /**
      * Send an SMS.
@@ -118,8 +118,8 @@ interface ISms {
      *   by a non-default SMS app. Currently only the carrier app can set this
      *   parameter to false to skip auto message persistence.
      */
-    void sendTextForSubscriber(in int subId, String callingPkg, in String destAddr,
-            in String scAddr, in String text, in PendingIntent sentIntent,
+    void sendTextForSubscriber(in int subId, String callingPkg, String callingAttributionTag,
+            in String destAddr, in String scAddr, in String text, in PendingIntent sentIntent,
             in PendingIntent deliveryIntent, in boolean persistMessageForNonDefaultSmsApp);
 
     /**
@@ -217,7 +217,7 @@ interface ISms {
      *   parameter to false to skip auto message persistence.
      */
     void sendMultipartTextForSubscriber(in int subId, String callingPkg,
-            in String destinationAddress, in String scAddress,
+            String callingAttributionTag, in String destinationAddress, in String scAddress,
             in List<String> parts, in List<PendingIntent> sentIntents,
             in List<PendingIntent> deliveryIntents, in boolean persistMessageForNonDefaultSmsApp);
 
@@ -266,10 +266,10 @@ interface ISms {
      *  Any Other values included Negative considered as Invalid Validity Period of the message.
      */
     void sendMultipartTextForSubscriberWithOptions(in int subId, String callingPkg,
-            in String destinationAddress, in String scAddress, in List<String> parts,
-            in List<PendingIntent> sentIntents, in List<PendingIntent> deliveryIntents,
-            in boolean persistMessageForNonDefaultSmsApp, in int priority, in boolean expectMore,
-            in int validityPeriod);
+            String callingAttributionTag, in String destinationAddress, in String scAddress,
+            in List<String> parts, in List<PendingIntent> sentIntents,
+            in List<PendingIntent> deliveryIntents, in boolean persistMessageForNonDefaultSmsApp,
+            in int priority, in boolean expectMore, in int validityPeriod);
 
     /**
      * Enable reception of cell broadcast (SMS-CB) messages with the given
@@ -427,6 +427,7 @@ interface ISms {
      *
      * @param subId the SIM id.
      * @param callingPkg the package name of the calling app
+     * @param callingAttributionTag the attribution tag of calling context
      * @param messageUri the URI of the stored message
      * @param scAddress is the service center address or null to use the current default SMSC
      * @param sentIntent if not NULL this <code>PendingIntent</code> is
@@ -446,8 +447,9 @@ interface ISms {
      *  broadcast when the message is delivered to the recipient.  The
      *  raw pdu of the status report is in the extended data ("pdu").
      */
-    void sendStoredText(int subId, String callingPkg, in Uri messageUri, String scAddress,
-            in PendingIntent sentIntent, in PendingIntent deliveryIntent);
+    void sendStoredText(int subId, String callingPkg, String callingAttributionTag,
+            in Uri messageUri, String scAddress, in PendingIntent sentIntent,
+            in PendingIntent deliveryIntent);
 
     /**
      * Send a system stored multi-part text message.
@@ -459,6 +461,7 @@ interface ISms {
      *
      * @param subId the SIM id.
      * @param callingPkg the package name of the calling app
+     * @param callingAttributeTag the attribute tag of the calling context
      * @param messageUri the URI of the stored message
      * @param scAddress is the service center address or null to use
      *   the current default SMSC
@@ -482,8 +485,8 @@ interface ISms {
      *   to the recipient.  The raw pdu of the status report is in the
      *   extended data ("pdu").
      */
-    void sendStoredMultipartText(int subId, String callingPkg, in Uri messageUri,
-                String scAddress, in List<PendingIntent> sentIntents,
+    void sendStoredMultipartText(int subId, String callingPkg, String callingAttributeTag,
+                in Uri messageUri, String scAddress, in List<PendingIntent> sentIntents,
                 in List<PendingIntent> deliveryIntents);
 
     /**
