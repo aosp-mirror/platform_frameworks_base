@@ -137,6 +137,16 @@ public class WindowOrganizer {
             getController().setLaunchRoot(displayId, root);
         }
 
+        /**
+         * Requests that the given task organizer is notified when back is pressed on the root
+         * activity of one of its controlled tasks.
+         */
+        @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+        public static void setInterceptBackPressedOnTaskRoot(ITaskOrganizer organizer,
+                boolean interceptBackPressed) throws RemoteException {
+            getController().setInterceptBackPressedOnTaskRoot(organizer, interceptBackPressed);
+        }
+
         private static ITaskOrganizerController getController() {
             return ITaskOrganizerControllerSingleton.get();
         }

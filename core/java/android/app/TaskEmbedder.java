@@ -16,11 +16,9 @@
 
 package android.app;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.view.Display.INVALID_DISPLAY;
 
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -33,28 +31,15 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.hardware.display.DisplayManager;
-import android.hardware.display.VirtualDisplay;
-import android.hardware.input.InputManager;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.IWindow;
 import android.view.IWindowManager;
-import android.view.IWindowSession;
-import android.view.InputDevice;
-import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.SurfaceControl;
-import android.view.WindowManagerGlobal;
-import android.view.inputmethod.InputMethodManager;
 
 import dalvik.system.CloseGuard;
-
-import java.util.List;
 
 /**
  * A component which handles embedded display of tasks within another window. The embedded task can
@@ -62,9 +47,8 @@ import java.util.List;
  *
  * @hide
  */
-public class TaskEmbedder {
+public abstract class TaskEmbedder {
     private static final String TAG = "TaskEmbedder";
-    private static final String DISPLAY_NAME = "TaskVirtualDisplay";
 
     /**
      * A component which will host the task.
@@ -82,6 +66,9 @@ public class TaskEmbedder {
         /** @return the x/y offset from the origin of the window to the surface */
         Point getPositionInWindow();
 
+        /** @return the screen bounds of the host */
+        Rect getScreenBounds();
+
         /** @return whether this surface is able to receive pointer events */
         boolean canReceivePointerEvents();
 
@@ -96,6 +83,11 @@ public class TaskEmbedder {
          * fill unpainted areas if necessary.
          */
         void onTaskBackgroundColorChanged(TaskEmbedder ts, int bgColor);
+
+        /**
+         * Posts a runnable to be run on the host's handler.
+         */
+        boolean post(Runnable r);
     }
 
     /**
@@ -111,27 +103,29 @@ public class TaskEmbedder {
         /** Called when a task is created inside the container. */
         default void onTaskCreated(int taskId, ComponentName name) {}
 
+        /** Called when a task visibility changes. */
+        default void onTaskVisibilityChanged(int taskId, boolean visible) {}
+
         /** Called when a task is moved to the front of the stack inside the container. */
         default void onTaskMovedToFront(int taskId) {}
 
         /** Called when a task is about to be removed from the stack inside the container. */
         default void onTaskRemovalStarted(int taskId) {}
+
+        /** Called when a task is created inside the container. */
+        default void onBackPressedOnTaskRoot(int taskId) {}
     }
 
-    private IActivityTaskManager mActivityTaskManager = ActivityTaskManager.getService();
+    protected IActivityTaskManager mActivityTaskManager = ActivityTaskManager.getService();
 
-    private final Context mContext;
-    private TaskEmbedder.Host mHost;
-    private int mDisplayDensityDpi;
-    private final boolean mSingleTaskInstance;
-    private SurfaceControl.Transaction mTransaction;
-    private SurfaceControl mSurfaceControl;
-    private VirtualDisplay mVirtualDisplay;
-    private Insets mForwardedInsets;
-    private TaskStackListener mTaskStackListener;
-    private Listener mListener;
-    private boolean mOpened; // Protected by mGuard.
-    private DisplayMetrics mTmpDisplayMetrics;
+    protected final Context mContext;
+    protected TaskEmbedder.Host mHost;
+
+    protected SurfaceControl.Transaction mTransaction;
+    protected SurfaceControl mSurfaceControl;
+    protected TaskStackListener mTaskStackListener;
+    protected Listener mListener;
+    protected boolean mOpened; // Protected by mGuard.
 
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -141,51 +135,25 @@ public class TaskEmbedder {
      *
      * @param context the context
      * @param host the host for this embedded task
-     * @param singleTaskInstance whether to apply a single-task constraint to this container
      */
-    public TaskEmbedder(Context context, TaskEmbedder.Host host, boolean singleTaskInstance) {
+    public TaskEmbedder(Context context, TaskEmbedder.Host host) {
         mContext = context;
         mHost = host;
-        mSingleTaskInstance = singleTaskInstance;
     }
 
     /**
-     * Whether this container has been initialized.
-     *
-     * @return true if initialized
-     */
-    public boolean isInitialized() {
-        return mVirtualDisplay != null;
-    }
-
-    /**
-     * Initialize this container.
+     * Initialize this container when the ActivityView's SurfaceView is first created.
      *
      * @param parent the surface control for the parent surface
      * @return true if initialized successfully
      */
     public boolean initialize(SurfaceControl parent) {
-        if (mVirtualDisplay != null) {
+        if (isInitialized()) {
             throw new IllegalStateException("Trying to initialize for the second time.");
         }
 
         mTransaction = new SurfaceControl.Transaction();
-
-        final DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
-        mDisplayDensityDpi = getBaseDisplayDensity();
-
-        mVirtualDisplay = displayManager.createVirtualDisplay(
-                DISPLAY_NAME + "@" + System.identityHashCode(this), mHost.getWidth(),
-                mHost.getHeight(), mDisplayDensityDpi, null,
-                VIRTUAL_DISPLAY_FLAG_PUBLIC | VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
-                        | VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL);
-
-        if (mVirtualDisplay == null) {
-            Log.e(TAG, "Failed to initialize TaskEmbedder");
-            return false;
-        }
-
-        // Create a container surface to which the DisplayContent will be reparented
+        // Create a container surface to which the task content will be reparented
         final String name = "TaskEmbedder - " + Integer.toHexString(System.identityHashCode(this));
         mSurfaceControl = new SurfaceControl.Builder()
                 .setContainerLayer()
@@ -193,37 +161,93 @@ public class TaskEmbedder {
                 .setName(name)
                 .build();
 
-        final int displayId = getDisplayId();
-
-        final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-        try {
-            // TODO: Find a way to consolidate these calls to the server.
-            WindowManagerGlobal.getWindowSession().reparentDisplayContent(
-                    mHost.getWindow(), mSurfaceControl, displayId);
-            wm.dontOverrideDisplayInfo(displayId);
-            if (mSingleTaskInstance) {
-                mContext.getSystemService(ActivityTaskManager.class)
-                        .setDisplayToSingleTaskInstance(displayId);
-            }
-            setForwardedInsets(mForwardedInsets);
-            if (mHost.getWindow() != null) {
-                updateLocationAndTapExcludeRegion();
-            }
-            mTaskStackListener = new TaskStackListenerImpl();
-            try {
-                mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed to register task stack listener", e);
-            }
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
+        if (!onInitialize()) {
+            return false;
         }
-        if (mListener != null && mVirtualDisplay != null) {
+
+        mTaskStackListener = createTaskStackListener();
+        try {
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to register task stack listener", e);
+        }
+        if (mListener != null && isInitialized()) {
             mListener.onInitialized();
         }
         mOpened = true;
         mGuard.open("release");
+        mTransaction.show(getSurfaceControl()).apply();
         return true;
+    }
+
+    /**
+     * @return the task stack listener for this embedder
+     */
+    public abstract TaskStackListener createTaskStackListener();
+
+    /**
+     * Whether this container has been initialized.
+     *
+     * @return true if initialized
+     */
+    public abstract boolean isInitialized();
+
+    /**
+     * Called when the task embedder should be initialized.
+     * @return whether to report whether the embedder was initialized.
+     */
+    public abstract boolean onInitialize();
+
+    /**
+     * Called when the task embedder should be released.
+     * @return whether to report whether the embedder was released.
+     */
+    protected abstract boolean onRelease();
+
+    /**
+     * Starts presentation of tasks in this container.
+     */
+    public abstract void start();
+
+    /**
+     * Stops presentation of tasks in this container.
+     */
+    public abstract void stop();
+
+    /**
+     * This should be called whenever the position or size of the surface changes
+     * or if touchable areas above the surface are added or removed.
+     */
+    public abstract void notifyBoundsChanged();
+
+    /**
+     * Called to update the dimensions whenever the host size changes.
+     *
+     * @param width the new width of the surface
+     * @param height the new height of the surface
+     */
+    public void resizeTask(int width, int height) {
+        // Do nothing
+    }
+
+    /**
+     * Injects a pair of down/up key events with keycode {@link KeyEvent#KEYCODE_BACK} to the
+     * virtual display.
+     */
+    public abstract void performBackPress();
+
+    /**
+     * An opaque unique identifier for this task surface among others being managed by the app.
+     */
+    public abstract int getId();
+
+    /**
+     * Calculates and updates the {@param region} with the transparent region for this task
+     * embedder.
+     */
+    public boolean gatherTransparentRegion(Region region) {
+        // Do nothing
+        return false;
     }
 
     /**
@@ -236,34 +260,17 @@ public class TaskEmbedder {
         return mSurfaceControl;
     }
 
+    public int getDisplayId() {
+        return INVALID_DISPLAY;
+    }
+
     /**
-     * Set forwarded insets on the virtual display.
+     * Set forwarded insets on the task content.
      *
      * @see IWindowManager#setForwardedInsets
      */
     public void setForwardedInsets(Insets insets) {
-        mForwardedInsets = insets;
-        if (mVirtualDisplay == null) {
-            return;
-        }
-        try {
-            final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
-            wm.setForwardedInsets(getDisplayId(), mForwardedInsets);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
-    }
-
-    /** An opaque unique identifier for this task surface among others being managed by the app. */
-    public int getId() {
-        return getDisplayId();
-    }
-
-    int getDisplayId() {
-        if (mVirtualDisplay != null) {
-            return mVirtualDisplay.getDisplay().getDisplayId();
-        }
-        return Display.INVALID_DISPLAY;
+        // Do nothing
     }
 
     /**
@@ -372,163 +379,16 @@ public class TaskEmbedder {
      * Check if container is ready to launch and modify {@param options} to target the virtual
      * display, creating them if necessary.
      */
-    private ActivityOptions prepareActivityOptions(ActivityOptions options) {
-        if (mVirtualDisplay == null) {
+    @CallSuper
+    protected ActivityOptions prepareActivityOptions(ActivityOptions options) {
+        if (!isInitialized()) {
             throw new IllegalStateException(
                     "Trying to start activity before ActivityView is ready.");
         }
         if (options == null) {
             options = ActivityOptions.makeBasic();
         }
-        options.setLaunchDisplayId(getDisplayId());
-        options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        options.setTaskAlwaysOnTop(true);
         return options;
-    }
-
-    /**
-     * Stops presentation of tasks in this container.
-     */
-    public void stop() {
-        if (mVirtualDisplay != null) {
-            mVirtualDisplay.setDisplayState(false);
-            clearActivityViewGeometryForIme();
-            clearTapExcludeRegion();
-        }
-    }
-
-    /**
-     * Starts presentation of tasks in this container.
-     */
-    public void start() {
-        if (mVirtualDisplay != null) {
-            mVirtualDisplay.setDisplayState(true);
-            updateLocationAndTapExcludeRegion();
-        }
-    }
-
-    /**
-     * This should be called whenever the position or size of the surface changes
-     * or if touchable areas above the surface are added or removed.
-     */
-    public void notifyBoundsChanged() {
-        updateLocationAndTapExcludeRegion();
-    }
-
-    /**
-     * Updates position and bounds information needed by WM and IME to manage window
-     * focus and touch events properly.
-     * <p>
-     * This should be called whenever the position or size of the surface changes
-     * or if touchable areas above the surface are added or removed.
-     */
-    private void updateLocationAndTapExcludeRegion() {
-        if (mVirtualDisplay == null || mHost.getWindow() == null) {
-            return;
-        }
-        reportLocation(mHost.getScreenToTaskMatrix(), mHost.getPositionInWindow());
-        applyTapExcludeRegion(mHost.getWindow(), mHost.getTapExcludeRegion());
-    }
-
-    /**
-     * Call to update the position and transform matrix for the embedded surface.
-     * <p>
-     * This should not normally be called directly, but through
-     * {@link #updateLocationAndTapExcludeRegion()}. This method
-     * is provided as an optimization when managing multiple TaskSurfaces within a view.
-     *
-     * @param screenToViewMatrix the matrix/transform from screen space to view space
-     * @param positionInWindow the window-relative position of the surface
-     *
-     * @see InputMethodManager#reportActivityView(int, Matrix)
-     */
-    private void reportLocation(Matrix screenToViewMatrix, Point positionInWindow) {
-        try {
-            final int displayId = getDisplayId();
-            mContext.getSystemService(InputMethodManager.class)
-                    .reportActivityView(displayId, screenToViewMatrix);
-            IWindowSession session = WindowManagerGlobal.getWindowSession();
-            session.updateDisplayContentLocation(mHost.getWindow(), positionInWindow.x,
-                    positionInWindow.y, displayId);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
-    }
-
-    /**
-     * Call to update the tap exclude region for the window.
-     * <p>
-     * This should not normally be called directly, but through
-     * {@link #updateLocationAndTapExcludeRegion()}. This method
-     * is provided as an optimization when managing multiple TaskSurfaces within a view.
-     *
-     * @see IWindowSession#updateTapExcludeRegion(IWindow, Region)
-     */
-    private void applyTapExcludeRegion(IWindow window, @Nullable Region tapExcludeRegion) {
-        try {
-            IWindowSession session = WindowManagerGlobal.getWindowSession();
-            session.updateTapExcludeRegion(window, tapExcludeRegion);
-        } catch (RemoteException e) {
-            e.rethrowAsRuntimeException();
-        }
-    }
-
-    /**
-     * @see InputMethodManager#reportActivityView(int, Matrix)
-     */
-    private void clearActivityViewGeometryForIme() {
-        final int displayId = getDisplayId();
-        mContext.getSystemService(InputMethodManager.class).reportActivityView(displayId, null);
-    }
-
-    /**
-     * Removes the tap exclude region set by {@link #updateLocationAndTapExcludeRegion()}.
-     */
-    private void clearTapExcludeRegion() {
-        if (mHost.getWindow() == null) {
-            Log.w(TAG, "clearTapExcludeRegion: not attached to window!");
-            return;
-        }
-        applyTapExcludeRegion(mHost.getWindow(), null);
-    }
-
-    /**
-     * Called to update the dimensions whenever the host size changes.
-     *
-     * @param width the new width of the surface
-     * @param height the new height of the surface
-     */
-    public void resizeTask(int width, int height) {
-        mDisplayDensityDpi = getBaseDisplayDensity();
-        if (mVirtualDisplay != null) {
-            mVirtualDisplay.resize(width, height, mDisplayDensityDpi);
-        }
-    }
-
-    /**
-     * Injects a pair of down/up key events with keycode {@link KeyEvent#KEYCODE_BACK} to the
-     * virtual display.
-     */
-    public void performBackPress() {
-        if (mVirtualDisplay == null) {
-            return;
-        }
-        final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
-        final InputManager im = InputManager.getInstance();
-        im.injectInputEvent(createKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK, displayId),
-                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-        im.injectInputEvent(createKeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK, displayId),
-                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-    }
-
-    private static KeyEvent createKeyEvent(int action, int code, int displayId) {
-        long when = SystemClock.uptimeMillis();
-        final KeyEvent ev = new KeyEvent(when, when, action, code, 0 /* repeat */,
-                0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
-                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
-                InputDevice.SOURCE_KEYBOARD);
-        ev.setDisplayId(displayId);
-        return ev;
     }
 
     /**
@@ -539,9 +399,8 @@ public class TaskEmbedder {
      * triggered and before {@link Listener#onReleased()}.
      */
     public void release() {
-        if (mVirtualDisplay == null) {
-            throw new IllegalStateException(
-                    "Trying to release container that is not initialized.");
+        if (!isInitialized()) {
+            throw new IllegalStateException("Trying to release container that is not initialized.");
         }
         performRelease();
     }
@@ -550,14 +409,11 @@ public class TaskEmbedder {
         if (!mOpened) {
             return false;
         }
+
         mTransaction.reparent(mSurfaceControl, null).apply();
         mSurfaceControl.release();
 
-        // Clear activity view geometry for IME on this display
-        clearActivityViewGeometryForIme();
-
-        // Clear tap-exclude region (if any) for this window.
-        clearTapExcludeRegion();
+        boolean reportReleased = onRelease();
 
         if (mTaskStackListener != null) {
             try {
@@ -566,14 +422,6 @@ public class TaskEmbedder {
                 Log.e(TAG, "Failed to unregister task stack listener", e);
             }
             mTaskStackListener = null;
-        }
-
-        boolean reportReleased = false;
-        if (mVirtualDisplay != null) {
-            mVirtualDisplay.release();
-            mVirtualDisplay = null;
-            reportReleased = true;
-
         }
 
         if (mListener != null && reportReleased) {
@@ -593,100 +441,6 @@ public class TaskEmbedder {
             }
         } finally {
             super.finalize();
-        }
-    }
-
-    /** Get density of the hosting display. */
-    private int getBaseDisplayDensity() {
-        if (mTmpDisplayMetrics == null) {
-            mTmpDisplayMetrics = new DisplayMetrics();
-        }
-        mContext.getDisplayNoVerify().getRealMetrics(mTmpDisplayMetrics);
-        return mTmpDisplayMetrics.densityDpi;
-    }
-
-    /**
-     * A task change listener that detects background color change of the topmost stack on our
-     * virtual display and updates the background of the surface view. This background will be shown
-     * when surface view is resized, but the app hasn't drawn its content in new size yet.
-     * It also calls StateCallback.onTaskMovedToFront to notify interested parties that the stack
-     * associated with the {@link ActivityView} has had a Task moved to the front. This is useful
-     * when needing to also bring the host Activity to the foreground at the same time.
-     */
-    private class TaskStackListenerImpl extends TaskStackListener {
-
-        @Override
-        public void onTaskDescriptionChanged(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
-            if (!isInitialized()
-                    || taskInfo.displayId != getDisplayId()) {
-                return;
-            }
-
-            ActivityManager.StackInfo stackInfo = getTopMostStackInfo();
-            if (stackInfo == null) {
-                return;
-            }
-            // Found the topmost stack on target display. Now check if the topmost task's
-            // description changed.
-            if (taskInfo.taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                mHost.onTaskBackgroundColorChanged(TaskEmbedder.this,
-                        taskInfo.taskDescription.getBackgroundColor());
-            }
-        }
-
-        @Override
-        public void onTaskMovedToFront(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
-            if (!isInitialized() || mListener == null
-                    || taskInfo.displayId != getDisplayId()) {
-                return;
-            }
-
-            ActivityManager.StackInfo stackInfo = getTopMostStackInfo();
-            // if StackInfo was null or unrelated to the "move to front" then there's no use
-            // notifying the callback
-            if (stackInfo != null
-                    && taskInfo.taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                mListener.onTaskMovedToFront(taskInfo.taskId);
-            }
-        }
-
-        @Override
-        public void onTaskCreated(int taskId, ComponentName componentName) throws RemoteException {
-            if (mListener == null || !isInitialized()) {
-                return;
-            }
-
-            ActivityManager.StackInfo stackInfo = getTopMostStackInfo();
-            // if StackInfo was null or unrelated to the task creation then there's no use
-            // notifying the callback
-            if (stackInfo != null
-                    && taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
-                mListener.onTaskCreated(taskId, componentName);
-            }
-        }
-
-        @Override
-        public void onTaskRemovalStarted(ActivityManager.RunningTaskInfo taskInfo)
-                throws RemoteException {
-            if (mListener == null || !isInitialized()
-                    || taskInfo.displayId != getDisplayId()) {
-                return;
-            }
-            mListener.onTaskRemovalStarted(taskInfo.taskId);
-        }
-
-        private ActivityManager.StackInfo getTopMostStackInfo() throws RemoteException {
-            // Find the topmost task on our virtual display - it will define the background
-            // color of the surface view during resizing.
-            final int displayId = getDisplayId();
-            final List<ActivityManager.StackInfo> stackInfoList =
-                    mActivityTaskManager.getAllStackInfosOnDisplay(displayId);
-            if (stackInfoList.isEmpty()) {
-                return null;
-            }
-            return stackInfoList.get(0);
         }
     }
 }

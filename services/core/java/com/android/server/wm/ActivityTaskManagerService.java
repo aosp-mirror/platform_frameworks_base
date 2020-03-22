@@ -2420,7 +2420,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return;
             }
             ActivityStack stack = r.getRootTask();
-            if (stack != null && stack.isSingleTaskInstance()) {
+            final TaskOrganizerController taskOrgController =
+                    mWindowOrganizerController.mTaskOrganizerController;
+            if (taskOrgController.handleInterceptBackPressedOnTaskRoot(stack)) {
+                // This task is handled by a task organizer that has requested the back pressed
+                // callback
+            } else if (stack != null && (stack.isSingleTaskInstance())) {
                 // Single-task stacks are used for activities which are presented in floating
                 // windows above full screen activities. Instead of directly finishing the
                 // task, a task change listener is used to notify SystemUI so the action can be

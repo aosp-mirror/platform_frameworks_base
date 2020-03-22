@@ -318,6 +318,11 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                 null /* updateBoundsCallback */);
     }
 
+    @Override
+    public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
+        // Do nothing
+    }
+
     /**
      * @return {@code true} if the aspect ratio is changed since no other parameters within
      * {@link PictureInPictureParams} would affect the bounds.

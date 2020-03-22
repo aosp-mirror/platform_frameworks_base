@@ -4131,6 +4131,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return true;
             }
 
+            if (task.isOrganized()) {
+                return true;
+            }
+
             // We need to use the task's dim bounds (which is derived from the visible bounds of
             // its apps windows) for any touch-related tests. Can't use the task's original
             // bounds because it might be adjusted to fit the content frame. One example is when

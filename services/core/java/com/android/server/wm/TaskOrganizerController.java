@@ -32,7 +32,6 @@ import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.window.ITaskOrganizer;
@@ -46,7 +45,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -88,6 +86,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         private final DeathRecipient mDeathRecipient;
         private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
         private final int mUid;
+        private boolean mInterceptBackPressedOnTaskRoot;
 
         TaskOrganizerState(ITaskOrganizer organizer, int uid) {
             mOrganizer = organizer;
@@ -98,6 +97,10 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mUid = uid;
+        }
+
+        void setInterceptBackPressedOnTaskRoot(boolean interceptBackPressed) {
+            mInterceptBackPressedOnTaskRoot = interceptBackPressed;
         }
 
         void addTask(Task t) {
@@ -471,6 +474,41 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    @Override
+    public void setInterceptBackPressedOnTaskRoot(ITaskOrganizer organizer,
+            boolean interceptBackPressed) {
+        enforceStackPermission("setInterceptBackPressedOnTaskRoot()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
+                if (state != null) {
+                    state.setInterceptBackPressedOnTaskRoot(interceptBackPressed);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    public boolean handleInterceptBackPressedOnTaskRoot(Task task) {
+        if (task == null || !task.isOrganized()) {
+            return false;
+        }
+
+        final TaskOrganizerState state = mTaskOrganizerStates.get(task.mTaskOrganizer.asBinder());
+        if (!state.mInterceptBackPressedOnTaskRoot) {
+            return false;
+        }
+
+        try {
+            state.mOrganizer.onBackPressedOnTaskRoot(task.getTaskInfo());
+        } catch (Exception e) {
+            Slog.e(TAG, "Exception sending interceptBackPressedOnTaskRoot callback" + e);
+        }
+        return true;
     }
 
     public void dump(PrintWriter pw, String prefix) {

@@ -69,6 +69,7 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
     // For Host
     private final Point mWindowPosition = new Point();
     private final int[] mTmpArray = new int[2];
+    private final Rect mTmpRect = new Rect();
     private final Matrix mScreenSurfaceMatrix = new Matrix();
     private final Region mTapExcludeRegion = new Region();
 
@@ -84,10 +85,14 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
         this(context, attrs, defStyle, false /*singleTaskInstance*/);
     }
 
-    public ActivityView(
-            Context context, AttributeSet attrs, int defStyle, boolean singleTaskInstance) {
+    public ActivityView(Context context, AttributeSet attrs, int defStyle,
+            boolean singleTaskInstance) {
         super(context, attrs, defStyle);
-        mTaskEmbedder = new TaskEmbedder(getContext(), this, singleTaskInstance);
+        if (useTaskOrganizer()) {
+            mTaskEmbedder = new TaskOrganizerTaskEmbedder(context, this);
+        } else {
+            mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, singleTaskInstance);
+        }
         mSurfaceView = new SurfaceView(context);
         // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha
         // as master to synchronize surface view's alpha value.
@@ -129,6 +134,12 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
         public void onTaskCreated(int taskId, ComponentName componentName) { }
 
         /**
+         * Called when a task visibility changes.
+         * @hide
+         */
+        public void onTaskVisibilityChanged(int taskId, boolean visible) { }
+
+        /**
          * Called when a task is moved to the front of the stack inside the container.
          * This is a filtered version of {@link TaskStackListener}
          */
@@ -139,6 +150,12 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
          * This is a filtered version of {@link TaskStackListener}
          */
         public void onTaskRemovalStarted(int taskId) { }
+
+        /**
+         * Called when back is pressed on the root activity of the task.
+         * @hide
+         */
+        public void onBackPressedOnTaskRoot(int taskId) { }
     }
 
     /**
@@ -370,10 +387,8 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
 
     @Override
     public boolean gatherTransparentRegion(Region region) {
-        // The tap exclude region may be affected by any view on top of it, so we detect the
-        // possible change by monitoring this function.
-        mTaskEmbedder.notifyBoundsChanged();
-        return super.gatherTransparentRegion(region);
+        return mTaskEmbedder.gatherTransparentRegion(region)
+                || super.gatherTransparentRegion(region);
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
@@ -432,7 +447,6 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
             Log.e(TAG, "Failed to initialize ActivityView");
             return false;
         }
-        mTmpTransaction.show(mTaskEmbedder.getSurfaceControl()).apply();
         return true;
     }
 
@@ -520,6 +534,13 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
 
     /** @hide */
     @Override
+    public Rect getScreenBounds() {
+        getBoundsOnScreen(mTmpRect);
+        return mTmpRect;
+    }
+
+    /** @hide */
+    @Override
     public IWindow getWindow() {
         return super.getWindow();
     }
@@ -528,6 +549,15 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
     @Override
     public boolean canReceivePointerEvents() {
         return super.canReceivePointerEvents();
+    }
+
+    /**
+     * Overridden by instances that require the use of the task organizer implementation instead of
+     * the virtual display implementation.  Not for general use.
+     * @hide
+     */
+    protected boolean useTaskOrganizer() {
+        return false;
     }
 
     private final class StateCallbackAdapter implements TaskEmbedder.Listener {
@@ -553,6 +583,11 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
         }
 
         @Override
+        public void onTaskVisibilityChanged(int taskId, boolean visible) {
+            mCallback.onTaskVisibilityChanged(taskId, visible);
+        }
+
+        @Override
         public void onTaskMovedToFront(int taskId) {
             mCallback.onTaskMovedToFront(taskId);
         }
@@ -560,6 +595,11 @@ public class ActivityView extends ViewGroup implements TaskEmbedder.Host {
         @Override
         public void onTaskRemovalStarted(int taskId) {
             mCallback.onTaskRemovalStarted(taskId);
+        }
+
+        @Override
+        public void onBackPressedOnTaskRoot(int taskId) {
+            mCallback.onBackPressedOnTaskRoot(taskId);
         }
     }
 }
