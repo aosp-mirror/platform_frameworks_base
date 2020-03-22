@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
@@ -79,8 +79,14 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.location.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
-import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
+import com.android.server.location.AbstractLocationProvider;
+import com.android.server.location.AppForegroundHelper;
+import com.android.server.location.AppOpsHelper;
+import com.android.server.location.LocationUsageLogger;
+import com.android.server.location.SettingsHelper;
+import com.android.server.location.UserInfoHelper;
+import com.android.server.location.gnss.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
+import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -244,7 +250,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         private int mMaxCn0;
         private final Bundle mBundle;
 
-        public LocationExtras() {
+        LocationExtras() {
             mBundle = new Bundle();
         }
 
@@ -405,15 +411,15 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final GpsNetInitiatedHandler mNIHandler;
 
     // Wakelocks
-    private final static String WAKELOCK_KEY = "GnssLocationProvider";
+    private static final String WAKELOCK_KEY = "GnssLocationProvider";
     private final PowerManager.WakeLock mWakeLock;
     private static final String DOWNLOAD_EXTRA_WAKELOCK_KEY = "GnssLocationProviderPsdsDownload";
     @GuardedBy("mLock")
     private final PowerManager.WakeLock mDownloadPsdsWakeLock;
 
     // Alarms
-    private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
-    private final static String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
+    private static final String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
+    private static final String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
 
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
@@ -589,6 +595,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         sStaticTestOverride = override;
     }
 
+    /**
+     * Indicates if GNSS location is supported.
+     */
     public static boolean isSupported() {
         if (sStaticTestOverride) {
             return true;
@@ -807,14 +816,14 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (DEBUG) {
             Log.d(TAG, "injectBestLocation: " + location);
         }
-        int gnssLocationFlags = LOCATION_HAS_LAT_LONG |
-                (location.hasAltitude() ? LOCATION_HAS_ALTITUDE : 0) |
-                (location.hasSpeed() ? LOCATION_HAS_SPEED : 0) |
-                (location.hasBearing() ? LOCATION_HAS_BEARING : 0) |
-                (location.hasAccuracy() ? LOCATION_HAS_HORIZONTAL_ACCURACY : 0) |
-                (location.hasVerticalAccuracy() ? LOCATION_HAS_VERTICAL_ACCURACY : 0) |
-                (location.hasSpeedAccuracy() ? LOCATION_HAS_SPEED_ACCURACY : 0) |
-                (location.hasBearingAccuracy() ? LOCATION_HAS_BEARING_ACCURACY : 0);
+        int gnssLocationFlags = LOCATION_HAS_LAT_LONG
+                | (location.hasAltitude() ? LOCATION_HAS_ALTITUDE : 0)
+                | (location.hasSpeed() ? LOCATION_HAS_SPEED : 0)
+                | (location.hasBearing() ? LOCATION_HAS_BEARING : 0)
+                | (location.hasAccuracy() ? LOCATION_HAS_HORIZONTAL_ACCURACY : 0)
+                | (location.hasVerticalAccuracy() ? LOCATION_HAS_VERTICAL_ACCURACY : 0)
+                | (location.hasSpeedAccuracy() ? LOCATION_HAS_SPEED_ACCURACY : 0)
+                | (location.hasBearingAccuracy() ? LOCATION_HAS_BEARING_ACCURACY : 0);
 
         double latitudeDegrees = location.getLatitude();
         double longitudeDegrees = location.getLongitude();
@@ -1227,8 +1236,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // Notify about suppressed output, if speed limit was previously exceeded.
             // Elsewhere, we check again with every speed output reported.
             if (mItarSpeedLimitExceeded) {
-                Log.i(TAG, "startNavigating with ITAR limit in place. Output limited  " +
-                        "until slow enough speed reported.");
+                Log.i(TAG, "startNavigating with ITAR limit in place. Output limited  "
+                        + "until slow enough speed reported.");
             }
 
             boolean agpsEnabled =
@@ -1329,8 +1338,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         if (mItarSpeedLimitExceeded) {
-            Log.i(TAG, "Hal reported a speed in excess of ITAR limit." +
-                    "  GPS/GNSS Navigation output blocked.");
+            Log.i(TAG, "Hal reported a speed in excess of ITAR limit."
+                    + "  GPS/GNSS Navigation output blocked.");
             if (mStarted) {
                 mGnssMetrics.logReceivedLocationStatus(false);
             }
@@ -1394,8 +1403,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             }
         }
 
-        if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted &&
-                mFixInterval > GPS_POLLING_THRESHOLD_INTERVAL) {
+        if (!hasCapability(GPS_CAPABILITY_SCHEDULING) && mStarted
+                && mFixInterval > GPS_POLLING_THRESHOLD_INTERVAL) {
             if (DEBUG) Log.d(TAG, "got fix, hibernating");
             hibernate();
         }
@@ -1604,6 +1613,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         });
     }
 
+    /**
+     * Interface for GnssSystemInfo methods.
+     */
     public interface GnssSystemInfoProvider {
         /**
          * Returns the year of underlying GPS hardware.
@@ -1640,6 +1652,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return mGnssBatchingProvider;
     }
 
+    /**
+     * Interface for GnssMetrics methods.
+     */
     public interface GnssMetricsProvider {
         /**
          * Returns GNSS metrics as proto string
@@ -1784,8 +1799,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             // TODO Add Permission check
 
             if (DEBUG) {
-                Log.d(TAG, "sendNiResponse, notifId: " + notificationId +
-                        ", response: " + userResponse);
+                Log.d(TAG, "sendNiResponse, notifId: " + notificationId
+                        + ", response: " + userResponse);
             }
             native_send_ni_response(notificationId, userResponse);
 
@@ -1828,16 +1843,16 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             int textEncoding
     ) {
         Log.i(TAG, "reportNiNotification: entered");
-        Log.i(TAG, "notificationId: " + notificationId +
-                ", niType: " + niType +
-                ", notifyFlags: " + notifyFlags +
-                ", timeout: " + timeout +
-                ", defaultResponse: " + defaultResponse);
+        Log.i(TAG, "notificationId: " + notificationId
+                + ", niType: " + niType
+                + ", notifyFlags: " + notifyFlags
+                + ", timeout: " + timeout
+                + ", defaultResponse: " + defaultResponse);
 
-        Log.i(TAG, "requestorId: " + requestorId +
-                ", text: " + text +
-                ", requestorIdEncoding: " + requestorIdEncoding +
-                ", textEncoding: " + textEncoding);
+        Log.i(TAG, "requestorId: " + requestorId
+                + ", text: " + text
+                + ", requestorIdEncoding: " + requestorIdEncoding
+                + ", textEncoding: " + textEncoding);
 
         GpsNiNotification notification = new GpsNiNotification();
 
@@ -1987,7 +2002,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     }
 
     private final class ProviderHandler extends Handler {
-        public ProviderHandler(Looper looper) {
+        ProviderHandler(Looper looper) {
             super(looper, null, true /*async*/);
         }
 
@@ -2205,8 +2220,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private native void native_cleanup();
 
-    private native boolean native_set_position_mode(int mode, int recurrence, int min_interval,
-            int preferred_accuracy, int preferred_time, boolean lowPowerMode);
+    private native boolean native_set_position_mode(int mode, int recurrence, int minInterval,
+            int preferredAccuracy, int preferredTime, boolean lowPowerMode);
 
     private native boolean native_start();
 

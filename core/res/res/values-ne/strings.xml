@@ -236,6 +236,10 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"फोन विकल्पहरू"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"स्क्रिन बन्द"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"बन्द गर्नुहोस्"</string>
+    <!-- no translation found for global_action_power_options (1185286119330160073) -->
+    <skip />
+    <!-- no translation found for global_action_restart (4678451019561687074) -->
+    <skip />
     <string name="global_action_emergency" msgid="1387617624177105088">"आपतकालीन"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"बग रिपोर्ट"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"सत्रको अन्त्य गर्नुहोस्"</string>
@@ -435,10 +439,10 @@
     <string name="permlab_camera" msgid="6320282492904119413">"तस्बिरहरू र भिडियोहरू लिनुहोस्।"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"यस अनुप्रयोगले जुनसुकै समय क्यामेराको प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"अनुप्रयोग वा सेवालाई तस्बिर र भिडियो खिच्न प्रणालीका क्यामेराहरूमाथि पहुँच राख्न दिनुहोस्"</string>
-    <string name="permdesc_systemCamera" msgid="544730545441964482">"यस विशेषाधिकार प्राप्त अनुप्रयोगले जुनसुकै समय प्रणालीको क्यामेरा प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ। अनुप्रयोगसँग पनि android.permission.CAMERA सम्बन्धी अनुमति हुनु पर्छ"</string>
-    <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
+    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"कुनै अनुप्रयोग वा सेवालाई खोलिँदै वा बन्द गरिँदै गरेका क्यामेरा यन्त्रहरूका बारेमा कलब्याक प्राप्त गर्ने अनुमति दिनुहोस्।"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
     <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"कम्पन नियन्त्रण गर्नुहोस्"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अनुप्रयोगलाई भाइब्रेटर नियन्त्रण गर्न अनुमति दिन्छ।"</string>
@@ -453,10 +457,8 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"कल गर्दाको अनुभवलाई सुधार्न यस अनुप्रयोगलाई प्रणाली मार्फत कलहरू गर्न अनुमति दिन्छ।"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"प्रणालीमार्फत कलहरू हेर्नुका साथै तिनीहरूलाई नियन्त्रण गर्नुहोस्‌।"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"अनुप्रयोगलाई यन्त्रमा जारी रहेका कलहरू हेर्नुका साथै तिनीहरूलाई गर्ने अनुमति दिनुहोस्‌। यसमा गरिएका कलहरूको सङ्ख्या र कलहरूको अवस्था जस्ता जानकारी समावेश हुन्छन्‌।"</string>
-    <!-- no translation found for permlab_exemptFromAudioRecordRestrictions (1164725468350759486) -->
-    <skip />
-    <!-- no translation found for permdesc_exemptFromAudioRecordRestrictions (2425117015896871976) -->
-    <skip />
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"अडियो रेकर्ड गर्ने कार्यमा लगाइएका प्रतिबन्धहरूबाट छुट दिनुहोस्"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"यो अनुप्रयोगलाई अडियो रेकर्ड गर्ने कार्यमा लगाइएका प्रतिबन्धहरूबाट छुट दिनुहोस्।"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्नुहोस्"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"यस अनुप्रयोगलाई अर्को अनुप्रयोगमा सुरु गरिएको कल जारी राख्ने अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"फोन नम्बरहरू पढ्ने"</string>
@@ -1108,28 +1110,6 @@
     <string name="deleteText" msgid="4200807474529938112">"मेट्नुहोस्"</string>
     <string name="inputMethod" msgid="1784759500516314751">"निवेश विधि"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"पाठ कार्यहरू"</string>
-    <string name="email" msgid="2503484245190492693">"इमेल गर्नुहोस्"</string>
-    <string name="email_desc" msgid="8291893932252173537">"चयन गरिएको ठेगानामा इमेल पठाउनुहोस्"</string>
-    <string name="dial" msgid="4954567785798679706">"कल गर्नुहोस्"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"चयन गरिएको फोन नम्बरमा कल गर्नुहोस्"</string>
-    <string name="map" msgid="6865483125449986339">"नक्सा अनुप्रयोग खोल्नुहोस्"</string>
-    <string name="map_desc" msgid="1068169741300922557">"चयन गरिएको ठेगाना पत्ता लगाउनुहोस्"</string>
-    <string name="browse" msgid="8692753594669717779">"खोल्नुहोस्"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"चयन गरिएको URL खोल्नुहोस्"</string>
-    <string name="sms" msgid="3976991545867187342">"सन्देश पठाउनुहोस्"</string>
-    <string name="sms_desc" msgid="997349906607675955">"चयन गरिएको फोन नम्बरमा सन्देश पठाउनुहोस्‌"</string>
-    <string name="add_contact" msgid="7404694650594333573">"थप्नुहोस्"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"सम्पर्क सूचीमा थप्नुहोस्"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"हेर्नुहोस्"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"पात्रोमा चयन गरिएको समय हेर्नुहोस्"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"समयतालिका बनाउनुहोस्"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"चयन गरिएको समयका लागि कार्यक्रमको समयतालिका बनाउनुहोस्‌"</string>
-    <string name="view_flight" msgid="2042802613849690108">"ट्र्याक गर्नुहोस्"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"चयन गरिएको उडान ट्रयाक गर्नुहोस्"</string>
-    <string name="translate" msgid="1416909787202727524">"अनुवाद गर्नुहोस्"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"चयन गरिएको पाठको अनुवाद गर्नुहोस्"</string>
-    <string name="define" msgid="5214255850068764195">"परिभाषा दिनुहोस्"</string>
-    <string name="define_desc" msgid="6916651934713282645">"चयन गरिएको पाठको परिभाषा दिनुहोस्"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"भण्डारण ठाउँ सकिँदै छ"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"सायद केही प्रणाली कार्यक्रमहरूले काम गर्दैनन्"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"प्रणालीको लागि पर्याप्त भण्डारण छैन। तपाईँसँग २५० मेगा बाइट ठाउँ खाली भएको निश्चित गर्नुहोस् र फेरि सुरु गर्नुहोस्।"</string>
@@ -1645,10 +1625,26 @@
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"यो सर्टकट सक्रिय हुँदा, ३ सेकेन्डसम्म दुवै भोल्युम बटन थिच्नुले पहुँचसम्बन्धी कुनै सुविधा सुरु गर्ने छ।"</string>
-    <!-- no translation found for accessibility_enable_service_title (3931558336268541484) -->
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
     <skip />
-    <!-- no translation found for accessibility_enable_service_encryption_warning (8603532708618236909) -->
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
     <skip />
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
+    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> लाई तपाईंको यन्त्र पूर्ण रूपमा नियन्त्रण गर्न दिने हो?"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"तपाईंले <xliff:g id="SERVICE">%1$s</xliff:g> सक्रिय गर्नुभयो भने तपाईंको यन्त्रले डेटा इन्क्रिप्ट गर्ने सुविधाको स्तरोन्नति गर्न तपाईंको स्क्रिन लक सुविधाको प्रयोग गर्ने छैन।"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"तपाईंलाई पहुँच राख्न आवश्यक पर्ने कुरामा सहयोग गर्ने अनुप्रयोगहरूमाथि पूर्ण नियन्त्रण गर्नु उपयुक्त हुन्छ तर अधिकांश अनुप्रयोगहरूका हकमा यस्तो नियन्त्रण उपयुक्त हुँदैन।"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रिन हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य अनुप्रयोगहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
@@ -1656,24 +1652,35 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै अनुप्रयोग वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रियाको ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट अनुप्रयोगहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दिनुहोस्"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"इन्कार गर्नु⋯"</string>
-    <!-- no translation found for accessibility_select_shortcut_menu_title (6002726538854613272) -->
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"कुनै सुविधा प्रयोग गर्न थाल्न उक्त सुविधामा ट्याप गर्नुहोस्:"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
     <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (2062625107544922685) -->
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
     <skip />
-    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (2831697927653841895) -->
-    <skip />
-    <!-- no translation found for accessibility_uncheck_legacy_item_warning (8047830891064817447) -->
-    <skip />
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> निष्क्रिय पारिएको छ"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"सर्टकटहरू सम्पादन गर्नुहोस्"</string>
-    <!-- no translation found for done_accessibility_shortcut_menu_button (3668407723770815708) -->
-    <skip />
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"सम्पन्न भयो"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"सर्टकटलाई निष्क्रिय पार्नुहोस्"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ सच्याउने सुविधा"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई सक्रिय पार्‍यो"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"पहुँचको सर्टकटले <xliff:g id="SERVICE_NAME">%1$s</xliff:g> लाई निष्क्रिय पार्‍यो"</string>
+    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
+    <skip />
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
+    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"म्याग्निफिकेसन"</string>
     <string name="user_switched" msgid="7249833311585228097">"अहिलेको प्रयोगकर्ता <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> मा स्विच गर्दै..."</string>
@@ -2044,7 +2051,8 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> फाइलहरू</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> फाइल</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"सीधै आदान प्रदान गर्ने सुविधा उपलब्ध छैन"</string>
+    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
+    <skip />
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"अनुप्रयोगहरूको सूची"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"यो अनुप्रयोगलाई रेकर्ड गर्ने अनुमति प्रदान गरिएको छैन तर यसले यो USB यन्त्रमार्फत अडियो क्याप्चर गर्न सक्छ।"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"गृहपृष्ठ"</string>
@@ -2059,27 +2067,256 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"पहुँचसम्बन्धी मेनु"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> को क्याप्सन बार।"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> लाई प्रतिबन्धित बाल्टीमा राखियो"</string>
-    <!-- no translation found for conversation_single_line_name_display (8958948312915255999) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_one_to_one (1980753619726908614) -->
-    <skip />
-    <!-- no translation found for conversation_title_fallback_group_chat (456073374993104303) -->
-    <skip />
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"वार्तालाप"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"सामूहिक वार्तालाप"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"व्यक्तिगत"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"काम"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"व्यक्तिगत दृश्य"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"कार्य दृश्य"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="7539495559434146897">"कामसम्बन्धी अनुप्रयोगहरूसँग आदान प्रदान गर्न सकिँदैन"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="8020581735267157241">"व्यक्तिगत अनुप्रयोगहरूसँग आदान प्रदान गर्न सकिँदैन"</string>
-    <string name="resolver_cant_share_cross_profile_explanation" msgid="5556640604460901386">"तपाईंका IT प्रशासकले व्यक्तिगत र कामसम्बन्धी कार्य प्रोफाइलहरूबिच आदान प्रदान गर्ने सुविधामाथि रोक लगाउनुभयो"</string>
-    <string name="resolver_cant_access_work_apps" msgid="375634344111233790">"कामसम्बन्धी अनुप्रयोगहरूमाथि पहुँच राख्न सकिएन"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3958762224516867388">"तपाईंका IT प्रशासकले तपाईंलाई कामसम्बन्धी अनुप्रयोगहरूमा व्यक्तिगत सामग्री हेर्ने अनुमति दिनुभएको छैन"</string>
-    <string name="resolver_cant_access_personal_apps" msgid="1953215925406474177">"व्यक्तिगत अनुप्रयोगहरूमाथि पहुँच राख्न सकिएन"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="1725572276741281136">"तपाईंका IT प्रशासकले तपाईंलाई व्यक्तिगत अनुप्रयोगहरूमा कामसम्बन्धी सामग्री हेर्ने अनुमति दिनुभएको छैन"</string>
-    <string name="resolver_turn_on_work_apps_share" msgid="619263911204978175">"सामग्री आदान प्रदान गर्न कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
-    <string name="resolver_turn_on_work_apps_view" msgid="3073389230905543680">"सामग्री हेर्न कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
-    <string name="resolver_no_apps_available" msgid="7710339903040989654">"कुनै पनि अनुप्रयोग उपलब्ध छैन"</string>
+    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
+    <skip />
+    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
+    <skip />
+    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
+    <skip />
+    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
+    <skip />
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"सक्रिय गर्नुहोस्"</string>
+    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
+    <skip />
+    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
+    <skip />
+    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
+    <skip />
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"टेलिफोन कल गर्दै गर्दा अडियो रेकर्ड गर्नुहोस् वा प्ले गर्नुहोस्"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"यस अनुप्रयोगलाई पूर्वनिर्धारित डायलर अनुप्रयोग निर्धारण गर्दा टेलिफोन कलको अडियो रेकर्ड गर्ने र प्ले गर्ने अनुमति दिन्छ।"</string>
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
+    <skip />
 </resources>

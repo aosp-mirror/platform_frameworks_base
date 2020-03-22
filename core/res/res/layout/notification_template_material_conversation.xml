@@ -31,6 +31,7 @@
         android:clipChildren="false"
         android:clipToPadding="false"
         android:paddingTop="12dp"
+        android:paddingBottom="12dp"
     >
 
         <FrameLayout
@@ -57,17 +58,30 @@
 
             <FrameLayout
                 android:id="@+id/conversation_icon_badge"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="@dimen/conversation_icon_size_badged"
+                android:layout_height="@dimen/conversation_icon_size_badged"
                 android:layout_marginLeft="@dimen/conversation_badge_side_margin"
                 android:layout_marginTop="@dimen/conversation_badge_side_margin"
-                android:background="@drawable/conversation_badge_background" >
-                <!-- Badge: 20x20, 48dp padding left + top -->
+            >
+                <ImageView
+                    android:id="@+id/conversation_icon_badge_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/conversation_badge_background"
+                />
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/icon"
-                    android:layout_width="@dimen/conversation_icon_size_badged"
-                    android:layout_height="@dimen/conversation_icon_size_badged"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="4dp"
                     android:layout_gravity="center"
+                />
+                <ImageView
+                    android:id="@+id/conversation_icon_badge_ring"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/conversation_badge_ring"
+                    android:visibility="gone"
                 />
             </FrameLayout>
         </FrameLayout>
@@ -107,6 +121,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:paddingTop="16dp"
+                    android:layout_marginBottom="2dp"
                     android:paddingStart="@dimen/conversation_content_start"
                 >
                     <TextView
@@ -159,12 +174,22 @@
                     />
                 </LinearLayout>
 
+                <!-- App Name -->
+                <TextView
+                    android:id="@+id/app_name_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/conversation_content_start"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp"
+                    android:textAppearance="@style/TextAppearance.DeviceDefault.Notification"
+                />
+
                 <!-- Messages -->
                 <com.android.internal.widget.MessagingLinearLayout
                     android:id="@+id/notification_messaging"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
                     android:spacing="@dimen/notification_messaging_spacing"
                     android:clipToPadding="false"
                     android:clipChildren="false"
@@ -186,13 +211,29 @@
     </com.android.internal.widget.RemeasuringLinearLayout>
 
     <!--This is dynamically placed between here and at the end of the layout-->
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/expand_button_container"
         android:layout_width="wrap_content"
-        android:layout_height="@dimen/conversation_expand_button_expanded_size"
+        android:layout_height="@dimen/conversation_expand_button_size"
         android:layout_gravity="end|top"
         android:paddingStart="16dp"
-        android:paddingEnd="@dimen/notification_content_margin_end">
+        android:orientation="horizontal"
+        android:paddingEnd="@dimen/notification_content_margin_end"
+        android:clipToPadding="false"
+        android:clipChildren="false"
+        >
+        <!-- Images -->
+        <com.android.internal.widget.MessagingLinearLayout
+            android:id="@+id/conversation_image_message_container"
+            android:forceHasOverlappingRendering="false"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="11dp"
+            android:spacing="0dp"
+            android:layout_gravity="center"
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            />
         <com.android.internal.widget.NotificationExpandButton
             android:id="@+id/expand_button"
             android:layout_width="@dimen/notification_header_expand_icon_size"
@@ -202,5 +243,5 @@
             android:clickable="false"
             android:importantForAccessibility="no"
             />
-    </FrameLayout>
+    </LinearLayout>
 </com.android.internal.widget.ConversationLayout>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location;
+package com.android.server.location.gnss;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -613,7 +613,7 @@ class GnssNetworkConnectivityHandler {
         if (TelephonyManager.NETWORK_TYPE_UNKNOWN == phone.getNetworkType()
                 && AGPS_TYPE_EIMS == mAGpsType) {
             selection = String.format(
-                "type like '%%emergency%%' and apn = '%s' and carrier_enabled = 1", apn);
+                    "type like '%%emergency%%' and apn = '%s' and carrier_enabled = 1", apn);
         } else {
             selection = String.format("current = 1 and apn = '%s' and carrier_enabled = 1", apn);
         }

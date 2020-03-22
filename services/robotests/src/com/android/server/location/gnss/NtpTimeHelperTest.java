@@ -1,4 +1,20 @@
-package com.android.server.location;
+/*
+ * Copyright (C) 2020 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.server.location.gnss;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -10,7 +26,7 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.NtpTrustedTime;
 
-import com.android.server.location.NtpTimeHelper.InjectNtpTimeCallback;
+import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +53,9 @@ public class NtpTimeHelperTest {
     private NtpTimeHelper mNtpTimeHelper;
     private CountDownLatch mCountDownLatch;
 
+    /**
+     * Initialize mocks and setup NtpTimeHelper with a callback and CountDownLatch.
+     */
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -51,6 +70,9 @@ public class NtpTimeHelperTest {
                 callback, mMockNtpTrustedTime);
     }
 
+    /**
+     * Verify that cached time is returned if cached age is low.
+     */
     @Test
     public void handleInjectNtpTime_cachedAgeLow_injectTime() throws InterruptedException {
         NtpTrustedTime.TimeResult result = mock(NtpTrustedTime.TimeResult.class);
@@ -64,6 +86,9 @@ public class NtpTimeHelperTest {
         assertThat(mCountDownLatch.await(2, TimeUnit.SECONDS)).isTrue();
     }
 
+    /**
+     * Verify that failed inject time and delayed inject time are handled properly.
+     */
     @Test
     public void handleInjectNtpTime_injectTimeFailed_injectTimeDelayed()
             throws InterruptedException {

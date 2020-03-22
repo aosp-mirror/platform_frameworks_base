@@ -1125,42 +1125,43 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<android.util.Range<Integer>>("android.control.postRawSensitivityBoostRange", new TypeReference<android.util.Range<Integer>>() {{ }});
 
     /**
-     * <p>The list of bokeh modes for {@link CaptureRequest#CONTROL_BOKEH_MODE android.control.bokehMode} that are supported by this camera
-     * device, and each bokeh mode's maximum streaming (non-stall) size with bokeh effect.</p>
-     * <p>For OFF mode, the camera behaves normally with no bokeh effect.</p>
-     * <p>For STILL_CAPTURE mode, the maximum streaming dimension specifies the limit under which
-     * bokeh is effective when capture intent is PREVIEW. Note that when capture intent is
-     * PREVIEW, the bokeh effect may not be as high quality compared to STILL_CAPTURE intent
-     * in order to maintain reasonable frame rate. The maximum streaming dimension must be one
-     * of the YUV_420_888 or PRIVATE resolutions in availableStreamConfigurations, or (0, 0)
-     * if preview bokeh is not supported. If the application configures a stream larger than
-     * the maximum streaming dimension, bokeh effect may not be applied for this stream for
-     * PREVIEW intent.</p>
-     * <p>For CONTINUOUS mode, the maximum streaming dimension specifies the limit under which
-     * bokeh is effective. This dimension must be one of the YUV_420_888 or PRIVATE resolutions
-     * in availableStreamConfigurations, and if the sensor maximum resolution is larger than or
-     * equal to 1080p, the maximum streaming dimension must be at least 1080p. If the
-     * application configures a stream with larger dimension, the stream may not have bokeh
-     * effect applied.</p>
+     * <p>The list of extended scene modes for {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode} that are supported
+     * by this camera device, and each extended scene mode's maximum streaming (non-stall) size
+     * with  effect.</p>
+     * <p>For DISABLED mode, the camera behaves normally with no extended scene mode enabled.</p>
+     * <p>For BOKEH_STILL_CAPTURE mode, the maximum streaming dimension specifies the limit
+     * under which bokeh is effective when capture intent is PREVIEW. Note that when capture
+     * intent is PREVIEW, the bokeh effect may not be as high in quality compared to
+     * STILL_CAPTURE intent in order to maintain reasonable frame rate. The maximum streaming
+     * dimension must be one of the YUV_420_888 or PRIVATE resolutions in
+     * availableStreamConfigurations, or (0, 0) if preview bokeh is not supported. If the
+     * application configures a stream larger than the maximum streaming dimension, bokeh
+     * effect may not be applied for this stream for PREVIEW intent.</p>
+     * <p>For BOKEH_CONTINUOUS mode, the maximum streaming dimension specifies the limit under
+     * which bokeh is effective. This dimension must be one of the YUV_420_888 or PRIVATE
+     * resolutions in availableStreamConfigurations, and if the sensor maximum resolution is
+     * larger than or equal to 1080p, the maximum streaming dimension must be at least 1080p.
+     * If the application configures a stream with larger dimension, the stream may not have
+     * bokeh effect applied.</p>
      * <p><b>Units</b>: (mode, width, height)</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * <p><b>Limited capability</b> -
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
-     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    public static final Key<int[]> CONTROL_AVAILABLE_BOKEH_MAX_SIZES =
-            new Key<int[]>("android.control.availableBokehMaxSizes", int[].class);
+    public static final Key<int[]> CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_MAX_SIZES =
+            new Key<int[]>("android.control.availableExtendedSceneModeMaxSizes", int[].class);
 
     /**
-     * <p>The ranges of supported zoom ratio for non-OFF {@link CaptureRequest#CONTROL_BOKEH_MODE android.control.bokehMode}.</p>
-     * <p>When bokeh mode is enabled, the camera device may have limited range of zoom ratios
-     * compared to when bokeh mode is disabled. This tag lists the zoom ratio ranges for all
-     * supported non-OFF bokeh modes, in the same order as in
-     * {@link CameraCharacteristics#CONTROL_AVAILABLE_BOKEH_CAPABILITIES android.control.availableBokehCapabilities}.</p>
+     * <p>The ranges of supported zoom ratio for non-DISABLED {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode}.</p>
+     * <p>When extended scene mode is set, the camera device may have limited range of zoom ratios
+     * compared to when extended scene mode is DISABLED. This tag lists the zoom ratio ranges
+     * for all supported non-DISABLED extended scene modes, in the same order as in
+     * android.control.availableExtended.</p>
      * <p>Range [1.0, 1.0] means that no zoom (optical or digital) is supported.</p>
      * <p><b>Units</b>: (minZoom, maxZoom)</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
@@ -1168,46 +1169,45 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
      * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
      *
-     * @see CameraCharacteristics#CONTROL_AVAILABLE_BOKEH_CAPABILITIES
-     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @hide
      */
-    public static final Key<float[]> CONTROL_AVAILABLE_BOKEH_ZOOM_RATIO_RANGES =
-            new Key<float[]>("android.control.availableBokehZoomRatioRanges", float[].class);
+    public static final Key<float[]> CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_ZOOM_RATIO_RANGES =
+            new Key<float[]>("android.control.availableExtendedSceneModeZoomRatioRanges", float[].class);
 
     /**
-     * <p>The list of bokeh modes for {@link CaptureRequest#CONTROL_BOKEH_MODE android.control.bokehMode} that are supported by
-     * this camera device, and each bokeh mode's capabilities such as maximum streaming size
-     * with bokeh effect, and supported zoom ratio ranges.</p>
-     * <p>For OFF mode, the camera behaves normally with no bokeh effect.</p>
-     * <p>For STILL_CAPTURE mode, the maximum streaming dimension specifies the limit under which
-     * bokeh is effective when capture intent is PREVIEW. Note that when capture intent is
-     * PREVIEW, the bokeh effect may not be as high quality compared to STILL_CAPTURE intent
-     * in order to maintain reasonable frame rate. The maximum streaming dimension must be one
-     * of the YUV_420_888 or PRIVATE resolutions in availableStreamConfigurations, or (0, 0)
-     * if preview bokeh is not supported. If the application configures a stream larger than
-     * the maximum streaming dimension, bokeh effect may not be applied for this stream for
-     * PREVIEW intent.</p>
-     * <p>For CONTINUOUS mode, the maximum streaming dimension specifies the limit under which
-     * bokeh is effective. This dimension must be one of the YUV_420_888 or PRIVATE resolutions
-     * in availableStreamConfigurations, and if the sensor maximum resolution is larger than or
-     * equal to 1080p, the maximum streaming dimension must be at least 1080p. If the
-     * application configures a stream with larger dimension, the stream may not have bokeh
-     * effect applied.</p>
-     * <p>When bokeh mode is enabled, the camera device may have limited range of zoom ratios
-     * compared to when bokeh mode is disabled. availableBokehCapabilities lists the zoom
-     * ranges for all supported bokeh modes. A range of (1.0, 1.0) means that no zoom
+     * <p>The list of extended scene modes for {@link CaptureRequest#CONTROL_EXTENDED_SCENE_MODE android.control.extendedSceneMode} that
+     * are supported by this camera device, and each extended scene mode's capabilities such
+     * as maximum streaming size, and supported zoom ratio ranges.</p>
+     * <p>For DISABLED mode, the camera behaves normally with no extended scene mdoe enabled.</p>
+     * <p>For BOKEH_STILL_CAPTURE mode, the maximum streaming dimension specifies the limit
+     * under which bokeh is effective when capture intent is PREVIEW. Note that when capture
+     * intent is PREVIEW, the bokeh effect may not be as high quality compared to STILL_CAPTURE
+     * intent in order to maintain reasonable frame rate. The maximum streaming dimension must
+     * be one of the YUV_420_888 or PRIVATE resolutions in availableStreamConfigurations, or
+     * (0, 0) if preview bokeh is not supported. If the application configures a stream
+     * larger than the maximum streaming dimension, bokeh effect may not be applied for this
+     * stream for PREVIEW intent.</p>
+     * <p>For BOKEH_CONTINUOUS mode, the maximum streaming dimension specifies the limit under
+     * which bokeh is effective. This dimension must be one of the YUV_420_888 or PRIVATE
+     * resolutions in availableStreamConfigurations, and if the sensor maximum resolution is
+     * larger than or equal to 1080p, the maximum streaming dimension must be at least 1080p.
+     * If the application configures a stream with larger dimension, the stream may not have
+     * bokeh effect applied.</p>
+     * <p>When extended scene mode is set, the camera device may have limited range of zoom ratios
+     * compared to when the mode is DISABLED. availableExtendedSceneModeCapabilities lists the
+     * zoom ranges for all supported extended modes. A range of (1.0, 1.0) means that no zoom
      * (optical or digital) is supported.</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
-     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
      */
     @PublicKey
     @NonNull
     @SyntheticKey
-    public static final Key<android.hardware.camera2.params.Capability[]> CONTROL_AVAILABLE_BOKEH_CAPABILITIES =
-            new Key<android.hardware.camera2.params.Capability[]>("android.control.availableBokehCapabilities", android.hardware.camera2.params.Capability[].class);
+    public static final Key<android.hardware.camera2.params.Capability[]> CONTROL_AVAILABLE_EXTENDED_SCENE_MODE_CAPABILITIES =
+            new Key<android.hardware.camera2.params.Capability[]>("android.control.availableExtendedSceneModeCapabilities", android.hardware.camera2.params.Capability[].class);
 
     /**
      * <p>Minimum and maximum zoom ratios supported by this camera device.</p>

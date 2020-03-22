@@ -572,7 +572,22 @@ public final class BluetoothHeadset implements BluetoothProfile {
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
     public boolean setPriority(BluetoothDevice device, int priority) {
         if (DBG) log("setPriority(" + device + ", " + priority + ")");
-        return setConnectionPolicy(device, BluetoothAdapter.priorityToConnectionPolicy(priority));
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            if (priority != BluetoothProfile.PRIORITY_OFF
+                    && priority != BluetoothProfile.PRIORITY_ON) {
+                return false;
+            }
+            try {
+                return service.setPriority(
+                        device, BluetoothAdapter.priorityToConnectionPolicy(priority));
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return false;
+            }
+        }
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
     }
 
     /**
@@ -588,7 +603,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -624,7 +639,17 @@ public final class BluetoothHeadset implements BluetoothProfile {
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public int getPriority(BluetoothDevice device) {
         if (VDBG) log("getPriority(" + device + ")");
-        return BluetoothAdapter.connectionPolicyToPriority(getConnectionPolicy(device));
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return BluetoothAdapter.connectionPolicyToPriority(service.getPriority(device));
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+                return BluetoothProfile.PRIORITY_OFF;
+            }
+        }
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
+        return BluetoothProfile.PRIORITY_OFF;
     }
 
     /**
@@ -639,7 +664,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
         final IBluetoothHeadset service = mService;
@@ -1126,16 +1151,13 @@ public final class BluetoothHeadset implements BluetoothProfile {
     /**
      * Get the connected device that is active.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
-     * permission.
-     *
      * @return the connected device that is active or null if no device
      * is active.
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     @Nullable
-    @RequiresPermission(android.Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothDevice getActiveDevice() {
         if (VDBG) {
             Log.d(TAG, "getActiveDevice");

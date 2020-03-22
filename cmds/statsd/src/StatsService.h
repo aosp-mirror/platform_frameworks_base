@@ -175,8 +175,9 @@ public:
     /**
      * Binder call to register a callback function for a pulled atom.
      */
-    virtual Status registerNativePullAtomCallback(int32_t atomTag, int64_t coolDownNs,
-            int64_t timeoutNs, const std::vector<int32_t>& additiveFields,
+    virtual Status registerNativePullAtomCallback(
+            int32_t atomTag, int64_t coolDownMillis, int64_t timeoutMillis,
+            const std::vector<int32_t>& additiveFields,
             const shared_ptr<IPullAtomCallback>& pullerCallback) override;
 
     /**

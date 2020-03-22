@@ -28,6 +28,7 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
@@ -250,23 +251,31 @@ final class RemoteAugmentedAutofillService
         final InlineSuggestionsResponse inlineSuggestionsResponse =
                 InlineSuggestionFactory.createAugmentedInlineSuggestionsResponse(
                         request, inlineSuggestionsData, focusedId,
-                        dataset -> {
-                            mCallbacks.logAugmentedAutofillSelected(sessionId,
-                                    dataset.getId());
-                            try {
-                                final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
-                                final int size = fieldIds.size();
-                                final boolean hideHighlight = size == 1
-                                        && fieldIds.get(0).equals(focusedId);
-                                if (dataset.getAuthentication() != null) {
-                                    client.startIntentSender(dataset.getAuthentication(),
-                                            new Intent());
-                                } else {
+                        new InlineSuggestionFactory.InlineSuggestionUiCallback() {
+                            @Override
+                            public void autofill(Dataset dataset) {
+                                mCallbacks.logAugmentedAutofillSelected(sessionId,
+                                        dataset.getId());
+                                try {
+                                    final ArrayList<AutofillId> fieldIds = dataset.getFieldIds();
+                                    final int size = fieldIds.size();
+                                    final boolean hideHighlight = size == 1
+                                            && fieldIds.get(0).equals(focusedId);
                                     client.autofill(sessionId, fieldIds, dataset.getFieldValues(),
                                             hideHighlight);
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Encounter exception autofilling the values");
                                 }
-                            } catch (RemoteException e) {
-                                Slog.w(TAG, "Encounter exception autofilling the values");
+                            }
+
+                            @Override
+                            public void startIntentSender(IntentSender intentSender,
+                                    Intent intent) {
+                                try {
+                                    client.startIntentSender(intentSender, intent);
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "RemoteException starting intent sender");
+                                }
                             }
                         }, onErrorCallback, remoteRenderService);
 

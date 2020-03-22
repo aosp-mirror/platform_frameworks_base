@@ -2190,6 +2190,7 @@ public abstract class CameraMetadata<TKey> {
      * This setting can only be used if scene mode is supported (i.e.
      * {@link CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES android.control.availableSceneModes}
      * contain some modes other than DISABLED).</p>
+     * <p>For extended scene modes such as BOKEH, please use USE_EXTENDED_SCENE_MODE instead.</p>
      *
      * @see CameraCharacteristics#CONTROL_AVAILABLE_SCENE_MODES
      * @see CaptureRequest#CONTROL_MODE
@@ -2208,6 +2209,19 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_MODE
      */
     public static final int CONTROL_MODE_OFF_KEEP_STATE = 3;
+
+    /**
+     * <p>Use a specific extended scene mode.</p>
+     * <p>When extended scene mode is on, the camera device may override certain control
+     * parameters, such as targetFpsRange, AE, AWB, and AF modes, to achieve best power and
+     * quality tradeoffs. Only the mandatory stream combinations of LIMITED hardware level
+     * are guaranteed.</p>
+     * <p>This setting can only be used if extended scene mode is supported (i.e.
+     * android.control.availableExtendedSceneModes
+     * contains some modes other than DISABLED).</p>
+     * @see CaptureRequest#CONTROL_MODE
+     */
+    public static final int CONTROL_MODE_USE_EXTENDED_SCENE_MODE = 4;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_SCENE_MODE
@@ -2540,32 +2554,39 @@ public abstract class CameraMetadata<TKey> {
     public static final int CONTROL_VIDEO_STABILIZATION_MODE_ON = 1;
 
     //
-    // Enumeration values for CaptureRequest#CONTROL_BOKEH_MODE
+    // Enumeration values for CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
     //
 
     /**
-     * <p>Bokeh mode is disabled.</p>
-     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     * <p>Extended scene mode is disabled.</p>
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
      */
-    public static final int CONTROL_BOKEH_MODE_OFF = 0;
+    public static final int CONTROL_EXTENDED_SCENE_MODE_DISABLED = 0;
 
     /**
      * <p>High quality bokeh mode is enabled for all non-raw streams (including YUV,
      * JPEG, and IMPLEMENTATION_DEFINED) when capture intent is STILL_CAPTURE. Due to the
      * extra image processing, this mode may introduce additional stall to non-raw streams.
      * This mode should be used in high quality still capture use case.</p>
-     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
      */
-    public static final int CONTROL_BOKEH_MODE_STILL_CAPTURE = 1;
+    public static final int CONTROL_EXTENDED_SCENE_MODE_BOKEH_STILL_CAPTURE = 1;
 
     /**
      * <p>Bokeh effect must not slow down capture rate relative to sensor raw output,
      * and the effect is applied to all processed streams no larger than the maximum
      * streaming dimension. This mode should be used if performance and power are a
      * priority, such as video recording.</p>
-     * @see CaptureRequest#CONTROL_BOKEH_MODE
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
      */
-    public static final int CONTROL_BOKEH_MODE_CONTINUOUS = 2;
+    public static final int CONTROL_EXTENDED_SCENE_MODE_BOKEH_CONTINUOUS = 2;
+
+    /**
+     * <p>Vendor defined extended scene modes. These depend on vendor implementation.</p>
+     * @see CaptureRequest#CONTROL_EXTENDED_SCENE_MODE
+     * @hide
+     */
+    public static final int CONTROL_EXTENDED_SCENE_MODE_VENDOR_START = 0x40;
 
     //
     // Enumeration values for CaptureRequest#EDGE_MODE

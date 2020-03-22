@@ -41,7 +41,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.hardware.soundtrigger.IRecognitionStatusCallback;
-import android.hardware.soundtrigger.KeyphraseEnrollmentInfo;
 import android.hardware.soundtrigger.KeyphraseMetadata;
 import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
@@ -100,7 +99,7 @@ import java.util.concurrent.Executor;
  * SystemService that publishes an IVoiceInteractionManagerService.
  */
 public class VoiceInteractionManagerService extends SystemService {
-    static final String TAG = "VoiceInteractionManagerService";
+    static final String TAG = "VoiceInteractionManager";
     static final boolean DEBUG = false;
 
     final Context mContext;
@@ -172,17 +171,17 @@ public class VoiceInteractionManagerService extends SystemService {
     }
 
     @Override
-    public void onStartUser(@NonNull UserInfo userInfo) {
-        if (DEBUG_USER) Slog.d(TAG, "onStartUser(" + userInfo + ")");
+    public void onUserStarting(@NonNull TargetUser user) {
+        if (DEBUG_USER) Slog.d(TAG, "onUserStarting(" + user + ")");
 
-        mServiceStub.initForUser(userInfo.id);
+        mServiceStub.initForUser(user.getUserIdentifier());
     }
 
     @Override
-    public void onUnlockUser(@NonNull UserInfo userInfo) {
-        if (DEBUG_USER) Slog.d(TAG, "onUnlockUser(" + userInfo + ")");
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        if (DEBUG_USER) Slog.d(TAG, "onUserUnlocking(" + user + ")");
 
-        mServiceStub.initForUser(userInfo.id);
+        mServiceStub.initForUser(user.getUserIdentifier());
         mServiceStub.switchImplementationIfNeeded(false);
     }
 
@@ -224,7 +223,6 @@ public class VoiceInteractionManagerService extends SystemService {
     class VoiceInteractionManagerServiceStub extends IVoiceInteractionManagerService.Stub {
 
         VoiceInteractionManagerServiceImpl mImpl;
-        KeyphraseEnrollmentInfo mEnrollmentApplicationInfo;
 
         private boolean mSafeMode;
         private int mCurUser;
@@ -446,15 +444,6 @@ public class VoiceInteractionManagerService extends SystemService {
             synchronized (this) {
                 setCurrentUserLocked(ActivityManager.getCurrentUser());
                 switchImplementationIfNeededLocked(false);
-            }
-        }
-
-        private void getOrCreateEnrollmentApplicationInfo() {
-            synchronized (this) {
-                if (mEnrollmentApplicationInfo == null) {
-                    mEnrollmentApplicationInfo = new KeyphraseEnrollmentInfo(
-                            mContext.getPackageManager());
-                }
             }
         }
 
@@ -1391,11 +1380,6 @@ public class VoiceInteractionManagerService extends SystemService {
                 pw.println("  mCurUserUnlocked: " + mCurUserUnlocked);
                 pw.println("  mCurUserSupported: " + mCurUserSupported);
                 dumpSupportedUsers(pw, "  ");
-                if (mEnrollmentApplicationInfo == null) {
-                    pw.println("  (No enrollment application info)");
-                } else {
-                    pw.println("  " + mEnrollmentApplicationInfo.toString());
-                }
                 mDbHelper.dump(pw);
                 if (mImpl == null) {
                     pw.println("  (No active implementation)");
@@ -1425,9 +1409,13 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        private boolean isCallerHoldingPermission(String permission) {
+            return mContext.checkCallingOrSelfPermission(permission)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+
         private void enforceCallingPermission(String permission) {
-            if (mContext.checkCallingOrSelfPermission(permission)
-                    != PackageManager.PERMISSION_GRANTED) {
+            if (!isCallerHoldingPermission(permission)) {
                 throw new SecurityException("Caller does not hold the permission " + permission);
             }
         }
@@ -1440,23 +1428,17 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         private void enforceCallerAllowedToEnrollVoiceModel() {
-            enforceCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES);
-            if (!isCallerCurrentVoiceInteractionService()
-                    && !isCallerTrustedEnrollmentApplication()) {
-                throw new SecurityException("Caller is required to be the current voice interaction"
-                        + " service or a system enrollment application to enroll voice models");
+            if (isCallerHoldingPermission(Manifest.permission.KEYPHRASE_ENROLLMENT_APPLICATION)) {
+                return;
             }
+
+            enforceCallingPermission(Manifest.permission.MANAGE_VOICE_KEYPHRASES);
+            enforceIsCurrentVoiceInteractionService();
         }
 
         private boolean isCallerCurrentVoiceInteractionService() {
             return mImpl != null
                     && mImpl.mInfo.getServiceInfo().applicationInfo.uid == Binder.getCallingUid();
-        }
-
-        private boolean isCallerTrustedEnrollmentApplication() {
-            getOrCreateEnrollmentApplicationInfo();
-            return mEnrollmentApplicationInfo.isUidSupportedEnrollmentApplication(
-                            Binder.getCallingUid());
         }
 
         private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {

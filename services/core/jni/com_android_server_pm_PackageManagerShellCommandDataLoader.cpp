@@ -51,7 +51,8 @@ using BlockSize = int16_t;
 using FileIdx = int16_t;
 using BlockIdx = int32_t;
 using NumBlocks = int32_t;
-using CompressionType = int16_t;
+using BlockType = int8_t;
+using CompressionType = int8_t;
 using RequestType = int16_t;
 using MagicType = uint32_t;
 
@@ -59,7 +60,7 @@ static constexpr int BUFFER_SIZE = 256 * 1024;
 static constexpr int BLOCKS_COUNT = BUFFER_SIZE / INCFS_DATA_FILE_BLOCK_SIZE;
 
 static constexpr int COMMAND_SIZE = 4 + 2 + 2 + 4; // bytes
-static constexpr int HEADER_SIZE = 2 + 2 + 4 + 2;  // bytes
+static constexpr int HEADER_SIZE = 2 + 1 + 1 + 4 + 2; // bytes
 static constexpr std::string_view OKAY = "OKAY"sv;
 static constexpr MagicType INCR = 0x52434e49; // BE INCR
 
@@ -110,6 +111,7 @@ const JniIds& jniIds(JNIEnv* env) {
 
 struct BlockHeader {
     FileIdx fileIdx = -1;
+    BlockType blockType = -1;
     CompressionType compressionType = -1;
     BlockIdx blockIdx = -1;
     BlockSize blockSize = -1;
@@ -649,8 +651,8 @@ private:
             auto remainingData = std::span(data);
             while (!remainingData.empty()) {
                 auto header = readHeader(remainingData);
-                if (header.fileIdx == -1 && header.compressionType == 0 && header.blockIdx == 0 &&
-                    header.blockSize == 0) {
+                if (header.fileIdx == -1 && header.blockType == 0 && header.compressionType == 0 &&
+                    header.blockIdx == 0 && header.blockSize == 0) {
                     ALOGI("Stop signal received. Sending exit command (remaining bytes: %d).",
                           int(remainingData.size()));
 
@@ -658,8 +660,8 @@ private:
                     mStopReceiving = true;
                     break;
                 }
-                if (header.fileIdx < 0 || header.blockSize <= 0 || header.compressionType < 0 ||
-                    header.blockIdx < 0) {
+                if (header.fileIdx < 0 || header.blockSize <= 0 || header.blockType < 0 ||
+                    header.compressionType < 0 || header.blockIdx < 0) {
                     ALOGE("invalid header received. Abort.");
                     mStopReceiving = true;
                     break;
@@ -687,7 +689,7 @@ private:
                         .fileFd = writeFd,
                         .pageIndex = static_cast<IncFsBlockIndex>(header.blockIdx),
                         .compression = static_cast<IncFsCompressionKind>(header.compressionType),
-                        .kind = INCFS_BLOCK_KIND_DATA,
+                        .kind = static_cast<IncFsBlockKind>(header.blockType),
                         .dataSize = static_cast<uint16_t>(header.blockSize),
                         .data = (const char*)remainingData.data(),
                 };
@@ -761,8 +763,8 @@ BlockHeader readHeader(std::span<uint8_t>& data) {
     }
 
     header.fileIdx = static_cast<FileIdx>(be16toh(*reinterpret_cast<const uint16_t*>(&data[0])));
-    header.compressionType =
-            static_cast<CompressionType>(be16toh(*reinterpret_cast<const uint16_t*>(&data[2])));
+    header.blockType = static_cast<BlockType>(data[2]);
+    header.compressionType = static_cast<CompressionType>(data[3]);
     header.blockIdx = static_cast<BlockIdx>(be32toh(*reinterpret_cast<const uint32_t*>(&data[4])));
     header.blockSize =
             static_cast<BlockSize>(be16toh(*reinterpret_cast<const uint16_t*>(&data[8])));

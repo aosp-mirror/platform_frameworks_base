@@ -7583,7 +7583,10 @@ public class Notification implements Parcelable
                 isOneToOne = !isGroupConversation();
             }
             boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
-            Icon largeIcon = isConversationLayout ? mShortcutIcon : mBuilder.mN.mLargeIcon;
+            boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
+            Icon largeIcon = isConversationLayout && mShortcutIcon != null
+                    ? mShortcutIcon
+                    : mBuilder.mN.mLargeIcon;
             TemplateBindResult bindResult = new TemplateBindResult();
             StandardTemplateParams p = mBuilder.mParams.reset()
                     .hasProgress(false)
@@ -7625,6 +7628,10 @@ public class Notification implements Parcelable
                     isOneToOne);
             contentView.setCharSequence(R.id.status_bar_latest_event_content,
                     "setConversationTitle", conversationTitle);
+            if (isConversationLayout) {
+                contentView.setBoolean(R.id.status_bar_latest_event_content,
+                        "setIsImportantConversation", isImportantConversation);
+            }
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
                     largeIcon);
             contentView.setBundle(R.id.status_bar_latest_event_content, "setData",

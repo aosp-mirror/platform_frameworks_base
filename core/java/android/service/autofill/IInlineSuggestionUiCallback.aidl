@@ -16,6 +16,7 @@
 
 package android.service.autofill;
 
+import android.content.IntentSender;
 import android.os.IBinder;
 import android.view.SurfaceControlViewHost;
 
@@ -30,4 +31,5 @@ oneway interface IInlineSuggestionUiCallback {
     void onContent(in SurfaceControlViewHost.SurfacePackage surface);
     void onError();
     void onTransferTouchFocusToImeWindow(in IBinder sourceInputToken, int displayId);
+    void onStartIntentSender(in IntentSender intentSender);
 }
