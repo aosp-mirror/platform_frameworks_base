@@ -250,6 +250,28 @@ public class ResourcesManager {
         return dm;
     }
 
+    private static void applyNonDefaultDisplayMetricsToConfiguration(
+            @NonNull DisplayMetrics dm, @NonNull Configuration config) {
+        config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
+        config.densityDpi = dm.densityDpi;
+        config.screenWidthDp = (int) (dm.widthPixels / dm.density);
+        config.screenHeightDp = (int) (dm.heightPixels / dm.density);
+        int sl = Configuration.resetScreenLayout(config.screenLayout);
+        if (dm.widthPixels > dm.heightPixels) {
+            config.orientation = Configuration.ORIENTATION_LANDSCAPE;
+            config.screenLayout = Configuration.reduceScreenLayout(sl,
+                    config.screenWidthDp, config.screenHeightDp);
+        } else {
+            config.orientation = Configuration.ORIENTATION_PORTRAIT;
+            config.screenLayout = Configuration.reduceScreenLayout(sl,
+                    config.screenHeightDp, config.screenWidthDp);
+        }
+        config.smallestScreenWidthDp = Math.min(config.screenWidthDp, config.screenHeightDp);
+        config.compatScreenWidthDp = config.screenWidthDp;
+        config.compatScreenHeightDp = config.screenHeightDp;
+        config.compatSmallestScreenWidthDp = config.smallestScreenWidthDp;
+    }
+
     public boolean applyCompatConfigurationLocked(int displayDensity,
             @NonNull Configuration compatConfiguration) {
         if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
@@ -497,11 +519,17 @@ public class ResourcesManager {
 
     private Configuration generateConfig(@NonNull ResourcesKey key, @NonNull DisplayMetrics dm) {
         Configuration config;
+        final boolean isDefaultDisplay = (key.mDisplayId == Display.DEFAULT_DISPLAY);
         final boolean hasOverrideConfig = key.hasOverrideConfiguration();
-        if (hasOverrideConfig) {
+        if (!isDefaultDisplay || hasOverrideConfig) {
             config = new Configuration(getConfiguration());
-            config.updateFrom(key.mOverrideConfiguration);
-            if (DEBUG) Slog.v(TAG, "Applied overrideConfig=" + key.mOverrideConfiguration);
+            if (!isDefaultDisplay) {
+                applyNonDefaultDisplayMetricsToConfiguration(dm, config);
+            }
+            if (hasOverrideConfig) {
+                config.updateFrom(key.mOverrideConfiguration);
+                if (DEBUG) Slog.v(TAG, "Applied overrideConfig=" + key.mOverrideConfiguration);
+            }
         } else {
             config = getConfiguration();
         }
@@ -1082,6 +1110,8 @@ public class ResourcesManager {
                     + resourcesImpl + " config to: " + config);
         }
         int displayId = key.mDisplayId;
+        final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
+        tmpConfig.setTo(config);
 
         // Get new DisplayMetrics based on the DisplayAdjustments given to the ResourcesImpl. Update
         // a copy if the CompatibilityInfo changed, because the ResourcesImpl object will handle the
@@ -1091,12 +1121,15 @@ public class ResourcesManager {
             daj = new DisplayAdjustments(daj);
             daj.setCompatibilityInfo(compat);
         }
-        tmpConfig.setTo(config);
-        if (key.hasOverrideConfiguration()) {
+        daj.setConfiguration(config);
+        DisplayMetrics dm = getDisplayMetrics(displayId, daj);
+        if (displayId != Display.DEFAULT_DISPLAY) {
+            applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
+        }
+
+        if (hasOverrideConfiguration) {
             tmpConfig.updateFrom(key.mOverrideConfiguration);
         }
-        daj.setConfiguration(tmpConfig);
-        DisplayMetrics dm = getDisplayMetrics(displayId, daj);
         resourcesImpl.updateConfiguration(tmpConfig, dm, compat);
     }
 
