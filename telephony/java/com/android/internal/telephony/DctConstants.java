@@ -74,7 +74,6 @@ public class DctConstants {
     public static final int BASE = Protocol.BASE_DATA_CONNECTION_TRACKER;
     public static final int EVENT_DATA_SETUP_COMPLETE = BASE + 0;
     public static final int EVENT_RADIO_AVAILABLE = BASE + 1;
-    public static final int EVENT_RECORDS_LOADED = BASE + 2;
     public static final int EVENT_TRY_SETUP_DATA = BASE + 3;
     public static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = BASE + 6;
     public static final int EVENT_VOICE_CALL_STARTED = BASE + 7;
@@ -94,7 +93,6 @@ public class DctConstants {
     public static final int EVENT_CLEAN_UP_CONNECTION = BASE + 24;
     public static final int EVENT_RESTART_RADIO = BASE + 26;
     public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = BASE + 29;
-    public static final int EVENT_ICC_CHANGED = BASE + 33;
     public static final int EVENT_DATA_SETUP_COMPLETE_ERROR = BASE + 35;
     public static final int CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA = BASE + 36;
     public static final int CMD_ENABLE_MOBILE_PROVISIONING = BASE + 37;
@@ -114,7 +112,7 @@ public class DctConstants {
     public static final int EVENT_SERVICE_STATE_CHANGED = BASE + 52;
     public static final int EVENT_5G_TIMER_HYSTERESIS = BASE + 53;
     public static final int EVENT_5G_TIMER_WATCHDOG = BASE + 54;
-    public static final int EVENT_UPDATE_CARRIER_CONFIGS = BASE + 55;
+    public static final int EVENT_CARRIER_CONFIG_CHANGED = BASE + 55;
 
     /***** Constants *****/
 
