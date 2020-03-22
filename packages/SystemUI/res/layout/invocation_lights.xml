@@ -15,7 +15,7 @@
   ~ limitations under the License
   -->
 
-<com.android.systemui.assist.ui.InvocationLightsView
+<com.google.android.systemui.AssistantInvocationLightsView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
