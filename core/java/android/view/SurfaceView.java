@@ -176,6 +176,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     boolean mUseAlpha = false;
     float mSurfaceAlpha = 1f;
     boolean mClipSurfaceToBounds;
+    int mBackgroundColor = Color.BLACK;
 
     @UnsupportedAppUsage
     boolean mHaveFrame = false;
@@ -828,6 +829,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         }
     }
 
+    private Transaction updateBackgroundColor(Transaction t) {
+        final float[] colorComponents = new float[] { Color.red(mBackgroundColor) / 255.f,
+                Color.green(mBackgroundColor) / 255.f, Color.blue(mBackgroundColor) / 255.f };
+        t.setColor(mBackgroundControl, colorComponents);
+        return t;
+    }
 
     private void releaseSurfaces() {
         mSurfaceAlpha = 1f;
@@ -1000,6 +1007,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     }
 
                     updateBackgroundVisibility(mTmpTransaction);
+                    updateBackgroundColor(mTmpTransaction);
                     if (mUseAlpha) {
                         mTmpTransaction.setAlpha(mSurfaceControl, alpha);
                         mSurfaceAlpha = alpha;
@@ -1399,10 +1407,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             return;
         }
 
-        final float[] colorComponents = new float[] { Color.red(bgColor) / 255.f,
-                Color.green(bgColor) / 255.f, Color.blue(bgColor) / 255.f };
-
-        mTmpTransaction.setColor(mBackgroundControl, colorComponents).apply();
+        mBackgroundColor = bgColor;
+        updateBackgroundColor(mTmpTransaction).apply();
     }
 
     @UnsupportedAppUsage
