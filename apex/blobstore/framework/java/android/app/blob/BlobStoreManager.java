@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.os.LimitExceededException;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.RemoteCallback;
@@ -167,6 +168,12 @@ public class BlobStoreManager {
      * finalized (either committed or abandoned) within a reasonable period of
      * time, typically about a week.
      *
+     * <p> If an app is planning to acquire a lease on this data (using
+     * {@link #acquireLease(BlobHandle, int)} or one of it's other variants) after committing
+     * this data (using {@link Session#commit(Executor, Consumer)}), it is recommended that
+     * the app checks the remaining quota for acquiring a lease first using
+     * {@link #getRemainingLeaseQuotaBytes()} and can skip contributing this data if needed.
+     *
      * @param blobHandle the {@link BlobHandle} identifier for which a new session
      *                   needs to be created.
      * @return positive, non-zero unique id that represents the created session.
@@ -294,8 +301,11 @@ public class BlobStoreManager {
      * @throws IllegalArgumentException when {@code blobHandle} is invalid or
      *                                  if the {@code leaseExpiryTimeMillis} is greater than the
      *                                  {@link BlobHandle#getExpiryTimeMillis()}.
-     * @throws IllegalStateException when a lease could not be acquired, such as when the
-     *                               caller is trying to acquire too many leases.
+     * @throws LimitExceededException when a lease could not be acquired, such as when the
+     *                                caller is trying to acquire leases on too much data. Apps
+     *                                can avoid this by checking the remaining quota using
+     *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
+     *                                acquire a lease.
      *
      * @see {@link #acquireLease(BlobHandle, int)}
      * @see {@link #acquireLease(BlobHandle, CharSequence)}
@@ -307,6 +317,7 @@ public class BlobStoreManager {
                     mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
+            e.maybeRethrow(LimitExceededException.class);
             throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -350,8 +361,11 @@ public class BlobStoreManager {
      * @throws IllegalArgumentException when {@code blobHandle} is invalid or
      *                                  if the {@code leaseExpiryTimeMillis} is greater than the
      *                                  {@link BlobHandle#getExpiryTimeMillis()}.
-     * @throws IllegalStateException when a lease could not be acquired, such as when the
-     *                               caller is trying to acquire too many leases.
+     * @throws LimitExceededException when a lease could not be acquired, such as when the
+     *                                caller is trying to acquire leases on too much data. Apps
+     *                                can avoid this by checking the remaining quota using
+     *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
+     *                                acquire a lease.
      *
      * @see {@link #acquireLease(BlobHandle, int, long)}
      * @see {@link #acquireLease(BlobHandle, CharSequence)}
@@ -363,6 +377,7 @@ public class BlobStoreManager {
                     mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
+            e.maybeRethrow(LimitExceededException.class);
             throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -399,8 +414,11 @@ public class BlobStoreManager {
      * @throws SecurityException when the blob represented by the {@code blobHandle} does not
      *                           exist or the caller does not have access to it.
      * @throws IllegalArgumentException when {@code blobHandle} is invalid.
-     * @throws IllegalStateException when a lease could not be acquired, such as when the
-     *                               caller is trying to acquire too many leases.
+     * @throws LimitExceededException when a lease could not be acquired, such as when the
+     *                                caller is trying to acquire leases on too much data. Apps
+     *                                can avoid this by checking the remaining quota using
+     *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
+     *                                acquire a lease.
      *
      * @see {@link #acquireLease(BlobHandle, int, long)}
      * @see {@link #acquireLease(BlobHandle, CharSequence, long)}
@@ -443,8 +461,11 @@ public class BlobStoreManager {
      * @throws SecurityException when the blob represented by the {@code blobHandle} does not
      *                           exist or the caller does not have access to it.
      * @throws IllegalArgumentException when {@code blobHandle} is invalid.
-     * @throws IllegalStateException when a lease could not be acquired, such as when the
-     *                               caller is trying to acquire too many leases.
+     * @throws LimitExceededException when a lease could not be acquired, such as when the
+     *                                caller is trying to acquire leases on too much data. Apps
+     *                                can avoid this by checking the remaining quota using
+     *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
+     *                                acquire a lease.
      *
      * @see {@link #acquireLease(BlobHandle, int)}
      * @see {@link #acquireLease(BlobHandle, CharSequence, long)}
@@ -472,6 +493,24 @@ public class BlobStoreManager {
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
             throw new RuntimeException(e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the remaining quota size for acquiring a lease (in bytes) which indicates the
+     * remaining amount of data that an app can acquire a lease on before the System starts
+     * rejecting lease requests.
+     *
+     * If an app wants to acquire a lease on a blob but the remaining quota size is not sufficient,
+     * then it can try releasing leases on any older blobs which are not needed anymore.
+     *
+     * @return the remaining quota size for acquiring a lease.
+     */
+    public @IntRange(from = 0) long getRemainingLeaseQuotaBytes() {
+        try {
+            return mService.getRemainingLeaseQuotaBytes(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
