@@ -16,9 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -82,9 +79,8 @@ public class RunningTasksTest extends ActivityTestsBase {
         // collected from all tasks across all the stacks
         final int numFetchTasks = 5;
         ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
-        mRunningTasks.getTasks(5, tasks, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED,
-                mRootWindowContainer, -1 /* callingUid */, true /* allowed */,
-                true /*crossUser */, PROFILE_IDS);
+        mRunningTasks.getTasks(5, tasks, false /* filterOnlyVisibleRecents */, mRootWindowContainer,
+                -1 /* callingUid */, true /* allowed */, true /*crossUser */, PROFILE_IDS);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < numFetchTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);
@@ -93,9 +89,9 @@ public class RunningTasksTest extends ActivityTestsBase {
         // Ensure that requesting more than the total number of tasks only returns the subset
         // and does not crash
         tasks.clear();
-        mRunningTasks.getTasks(100, tasks, ACTIVITY_TYPE_UNDEFINED, WINDOWING_MODE_UNDEFINED,
-                mRootWindowContainer, -1 /* callingUid */, true /* allowed */,
-                true /* crossUser */, PROFILE_IDS);
+        mRunningTasks.getTasks(100, tasks, false /* filterOnlyVisibleRecents */,
+                mRootWindowContainer, -1 /* callingUid */, true /* allowed */, true /* crossUser */,
+                PROFILE_IDS);
         assertThat(tasks).hasSize(numTasks);
         for (int i = 0; i < numTasks; i++) {
             assertEquals(numTasks - i - 1, tasks.get(i).id);
@@ -119,9 +115,9 @@ public class RunningTasksTest extends ActivityTestsBase {
 
         final int numFetchTasks = 5;
         final ArrayList<RunningTaskInfo> tasks = new ArrayList<>();
-        mRunningTasks.getTasks(numFetchTasks, tasks, ACTIVITY_TYPE_UNDEFINED,
-                WINDOWING_MODE_UNDEFINED, mRootWindowContainer, -1 /* callingUid */,
-                true /* allowed */, true /*crossUser */, PROFILE_IDS);
+        mRunningTasks.getTasks(numFetchTasks, tasks, false /* filterOnlyVisibleRecents */,
+                mRootWindowContainer, -1 /* callingUid */, true /* allowed */, true /*crossUser */,
+                PROFILE_IDS);
         assertThat(tasks).hasSize(numFetchTasks);
         for (int i = 0; i < tasks.size(); i++) {
             final Bundle extras = tasks.get(i).baseIntent.getExtras();

@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -28,6 +29,7 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.TYPE_VIRTUAL;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -54,6 +56,7 @@ import static java.lang.Integer.MAX_VALUE;
 
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
 import android.content.ComponentName;
@@ -681,24 +684,19 @@ public class RecentTasksTest extends ActivityTestsBase {
      * Tests that tasks on singleTaskDisplay are not visible and not trimmed/removed.
      */
     @Test
-    public void testVisibleTasks_singleTaskDisplay() {
+    public void testVisibleTasks_alwaysOnTop() {
         mRecentTasks.setOnlyTestVisibleRange();
         mRecentTasks.setParameters(-1 /* min */, 3 /* max */, -1 /* ms */);
 
-        final DisplayContent singleTaskDisplay =
-                addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        singleTaskDisplay.setDisplayToSingleTaskInstance();
-        ActivityStack singleTaskStack = singleTaskDisplay.createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final DisplayContent display = mRootWindowContainer.getDefaultDisplay();
+        final Task alwaysOnTopTask = display.createStack(WINDOWING_MODE_MULTI_WINDOW,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        alwaysOnTopTask.setAlwaysOnTop(true);
 
-        Task excludedTask1 = createTaskBuilder(".ExcludedTask1")
-                .setStack(singleTaskStack)
-                .build();
+        assertFalse("Always on top tasks should not be visible recents",
+                mRecentTasks.isVisibleRecentTask(alwaysOnTopTask));
 
-        assertFalse("Tasks on singleTaskDisplay should not be visible recents",
-                mRecentTasks.isVisibleRecentTask(excludedTask1));
-
-        mRecentTasks.add(excludedTask1);
+        mRecentTasks.add(alwaysOnTopTask);
 
         // Add N+1 visible tasks.
         mRecentTasks.add(mTasks.get(0));
@@ -1366,12 +1364,12 @@ public class RecentTasksTest extends ActivityTestsBase {
         public boolean mLastAllowed;
 
         @Override
-        void getTasks(int maxNum, List<RunningTaskInfo> list, int ignoreActivityType,
-                int ignoreWindowingMode, RootWindowContainer root,
-                int callingUid, boolean allowed, boolean crossUser, ArraySet<Integer> profileIds) {
+        void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
+                RootWindowContainer root, int callingUid, boolean allowed, boolean crossUser,
+                ArraySet<Integer> profileIds) {
             mLastAllowed = allowed;
-            super.getTasks(maxNum, list, ignoreActivityType, ignoreWindowingMode, root,
-                    callingUid, allowed, crossUser, profileIds);
+            super.getTasks(maxNum, list, filterOnlyVisibleRecents, root, callingUid, allowed,
+                    crossUser, profileIds);
         }
     }
 }
