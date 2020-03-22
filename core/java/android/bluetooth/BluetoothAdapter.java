@@ -1214,7 +1214,7 @@ public final class BluetoothAdapter {
      * @return true to indicate that the config file was successfully cleared
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean factoryReset() {
         try {
@@ -1507,8 +1507,9 @@ public final class BluetoothAdapter {
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage(publicAlternatives = "Use {@link #ACTION_REQUEST_DISCOVERABLE}, which "
+            + "shows UI that confirms the user wants to go into discoverable mode.")
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean setScanMode(@ScanMode int mode, long durationMillis) {
         if (getState() != STATE_ON) {
             return false;
@@ -1556,8 +1557,8 @@ public final class BluetoothAdapter {
      * @return true if the scan mode was set, false otherwise
      * @hide
      */
-    @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    @UnsupportedAppUsage
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
     public boolean setScanMode(@ScanMode int mode) {
         if (getState() != STATE_ON) {
             return false;
@@ -1621,7 +1622,7 @@ public final class BluetoothAdapter {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public long getDiscoveryEndMillis() {
         try {
             mServiceLock.readLock().lock();
@@ -1873,7 +1874,6 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean connectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {
@@ -1902,7 +1902,6 @@ public final class BluetoothAdapter {
      *
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean disconnectAllEnabledProfiles(@NonNull BluetoothDevice device) {
         try {
