@@ -77,12 +77,6 @@ framework-doc-stubs: $(SDK_METADATA)
 # Run this for checkbuild
 checkbuild: doc-comment-check-docs
 
-# ==== hiddenapi lists =======================================
-ifneq ($(UNSAFE_DISABLE_HIDDENAPI_FLAGS),true)
-$(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_FLAGS))
-$(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_GREYLIST_METADATA))
-endif  # UNSAFE_DISABLE_HIDDENAPI_FLAGS
-
 # Include subdirectory makefiles
 # ============================================================
 
