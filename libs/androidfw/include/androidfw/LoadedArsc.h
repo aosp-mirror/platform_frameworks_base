@@ -69,12 +69,24 @@ struct TypeSpec {
   }
 };
 
+// Flags that change the behavior of loaded packages.
+// Keep in sync with f/b/android/content/res/ApkAssets.java
 using package_property_t = uint32_t;
 enum : package_property_t {
-  PROPERTY_DYNAMIC = 1,
-  PROPERTY_LOADER = 2,
-  PROPERTY_OVERLAY = 4,
-  PROPERTY_SYSTEM = 8,
+  // The package contains framework resource values specified by the system.
+  // This allows some functions to filter out this package when computing
+  // what configurations/resources are available.
+  PROPERTY_SYSTEM = 1U << 0U,
+
+  // The package is a shared library or has a package id of 7f and is loaded as a shared library by
+  // force.
+  PROPERTY_DYNAMIC = 1U << 1U,
+
+  // The package has been loaded dynamically using a ResourcesProvider.
+  PROPERTY_LOADER = 1U << 2U,
+
+  // The package is a RRO.
+  PROPERTY_OVERLAY = 1U << 3U,
 };
 
 // TypeSpecPtr points to a block of memory that holds a TypeSpec struct, followed by an array of

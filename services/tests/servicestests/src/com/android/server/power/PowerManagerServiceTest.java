@@ -83,6 +83,7 @@ import com.android.server.power.PowerManagerService.NativeWrapper;
 import com.android.server.power.PowerManagerService.UserSwitchedReceiver;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
+import com.android.server.power.batterysaver.BatterySaverStateMachine;
 import com.android.server.power.batterysaver.BatterySavingStats;
 
 import org.junit.After;
@@ -109,6 +110,7 @@ public class PowerManagerServiceTest {
 
     @Mock private BatterySaverController mBatterySaverControllerMock;
     @Mock private BatterySaverPolicy mBatterySaverPolicyMock;
+    @Mock private BatterySaverStateMachine mBatterySaverStateMachineMock;
     @Mock private LightsManager mLightsManagerMock;
     @Mock private DisplayManagerInternal mDisplayManagerInternalMock;
     @Mock private BatteryManagerInternal mBatteryManagerInternalMock;
@@ -156,6 +158,7 @@ public class PowerManagerServiceTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        FakeSettingsProvider.clearSettingsProvider();
 
         mPowerSaveState = new PowerSaveState.Builder()
                 .setBatterySaverEnabled(BATTERY_SAVER_ENABLED)
@@ -216,6 +219,12 @@ public class PowerManagerServiceTest {
             }
 
             @Override
+            BatterySaverStateMachine createBatterySaverStateMachine(Object lock, Context context,
+                    BatterySaverController batterySaverController) {
+                return mBatterySaverStateMachineMock;
+            }
+
+            @Override
             NativeWrapper createNativeWrapper() {
                 return mNativeWrapperMock;
             }
@@ -255,6 +264,7 @@ public class PowerManagerServiceTest {
         LocalServices.removeServiceForTest(DisplayManagerInternal.class);
         LocalServices.removeServiceForTest(BatteryManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     /**

@@ -74,8 +74,8 @@ public class BubbleTest extends SysuiTestCase {
         mBubble = new Bubble(mEntry, mSuppressionListener);
 
         Intent target = new Intent(mContext, BubblesTestActivity.class);
-        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder()
-                .createIntentBubble(PendingIntent.getActivity(mContext, 0, target, 0),
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                PendingIntent.getActivity(mContext, 0, target, 0),
                         Icon.createWithResource(mContext, R.drawable.android))
                 .build();
         mEntry.setBubbleMetadata(metadata);

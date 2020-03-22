@@ -18,6 +18,7 @@ package android.media;
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.StringDef;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -56,6 +57,8 @@ import com.google.android.exoplayer2.video.ColorInfo;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.HashMap;
@@ -440,7 +443,71 @@ public final class MediaParser {
         }
     }
 
-    // Public constants.
+    // Parser implementation names.
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(
+            prefix = {"PARSER_NAME_"},
+            value = {
+                PARSER_NAME_MATROSKA,
+                PARSER_NAME_FMP4,
+                PARSER_NAME_MP4,
+                PARSER_NAME_MP3,
+                PARSER_NAME_ADTS,
+                PARSER_NAME_AC3,
+                PARSER_NAME_TS,
+                PARSER_NAME_FLV,
+                PARSER_NAME_OGG,
+                PARSER_NAME_PS,
+                PARSER_NAME_WAV,
+                PARSER_NAME_AMR,
+                PARSER_NAME_AC4,
+                PARSER_NAME_FLAC
+            })
+    public @interface ParserName {}
+
+    public static final String PARSER_NAME_MATROSKA = "android.media.mediaparser.MatroskaParser";
+    public static final String PARSER_NAME_FMP4 = "android.media.mediaparser.FragmentedMp4Parser";
+    public static final String PARSER_NAME_MP4 = "android.media.mediaparser.Mp4Parser";
+    public static final String PARSER_NAME_MP3 = "android.media.mediaparser.Mp3Parser";
+    public static final String PARSER_NAME_ADTS = "android.media.mediaparser.AdtsParser";
+    public static final String PARSER_NAME_AC3 = "android.media.mediaparser.Ac3Parser";
+    public static final String PARSER_NAME_TS = "android.media.mediaparser.TsParser";
+    public static final String PARSER_NAME_FLV = "android.media.mediaparser.FlvParser";
+    public static final String PARSER_NAME_OGG = "android.media.mediaparser.OggParser";
+    public static final String PARSER_NAME_PS = "android.media.mediaparser.PsParser";
+    public static final String PARSER_NAME_WAV = "android.media.mediaparser.WavParser";
+    public static final String PARSER_NAME_AMR = "android.media.mediaparser.AmrParser";
+    public static final String PARSER_NAME_AC4 = "android.media.mediaparser.Ac4Parser";
+    public static final String PARSER_NAME_FLAC = "android.media.mediaparser.FlacParser";
+
+    // MediaParser parameters.
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(
+            prefix = {"PARAMETER_"},
+            value = {
+                PARAMETER_ADTS_ENABLE_CBR_SEEKING,
+                PARAMETER_AMR_ENABLE_CBR_SEEKING,
+                PARAMETER_FLAC_DISABLE_ID3,
+                PARAMETER_MP4_IGNORE_EDIT_LISTS,
+                PARAMETER_MP4_IGNORE_TFDT_BOX,
+                PARAMETER_MP4_TREAT_VIDEO_FRAMES_AS_KEYFRAMES,
+                PARAMETER_MATROSKA_DISABLE_CUES_SEEKING,
+                PARAMETER_MP3_DISABLE_ID3,
+                PARAMETER_MP3_ENABLE_CBR_SEEKING,
+                PARAMETER_MP3_ENABLE_INDEX_SEEKING,
+                PARAMETER_TS_MODE,
+                PARAMETER_TS_ALLOW_NON_IDR_AVC_KEYFRAMES,
+                PARAMETER_TS_IGNORE_AAC_STREAM,
+                PARAMETER_TS_IGNORE_AVC_STREAM,
+                PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM,
+                PARAMETER_TS_DETECT_ACCESS_UNITS,
+                PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS
+            })
+    public @interface ParameterName {}
 
     /**
      * Sets whether constant bitrate seeking should be enabled for ADTS parsing. {@code boolean}
@@ -589,7 +656,7 @@ public final class MediaParser {
      */
     @NonNull
     public static MediaParser createByName(
-            @NonNull String name, @NonNull OutputConsumer outputConsumer) {
+            @NonNull @ParserName String name, @NonNull OutputConsumer outputConsumer) {
         String[] nameAsArray = new String[] {name};
         assertValidNames(nameAsArray);
         return new MediaParser(outputConsumer, /* sniff= */ false, name);
@@ -607,7 +674,7 @@ public final class MediaParser {
      */
     @NonNull
     public static MediaParser create(
-            @NonNull OutputConsumer outputConsumer, @NonNull String... parserNames) {
+            @NonNull OutputConsumer outputConsumer, @NonNull @ParserName String... parserNames) {
         assertValidNames(parserNames);
         if (parserNames.length == 0) {
             parserNames = EXTRACTOR_FACTORIES_BY_NAME.keySet().toArray(new String[0]);
@@ -624,6 +691,7 @@ public final class MediaParser {
      * <p>TODO: List which properties are taken into account. E.g. MimeType.
      */
     @NonNull
+    @ParserName
     public static List<String> getParserNames(@NonNull MediaFormat mediaFormat) {
         throw new UnsupportedOperationException();
     }
@@ -658,7 +726,8 @@ public final class MediaParser {
      * @throws IllegalStateException If called after calling {@link #advance} on the same instance.
      */
     @NonNull
-    public MediaParser setParameter(@NonNull String parameterName, @NonNull Object value) {
+    public MediaParser setParameter(
+            @NonNull @ParameterName String parameterName, @NonNull Object value) {
         if (mExtractor != null) {
             throw new IllegalStateException(
                     "setParameters() must be called before the first advance() call.");
@@ -686,7 +755,7 @@ public final class MediaParser {
      *     constants.
      * @return Whether the given {@code parameterName} is supported.
      */
-    public boolean supportsParameter(@NonNull String parameterName) {
+    public boolean supportsParameter(@NonNull @ParameterName String parameterName) {
         return EXPECTED_TYPE_BY_PARAMETER_NAME.containsKey(parameterName);
     }
 
@@ -702,6 +771,7 @@ public final class MediaParser {
      *     implementation has not yet been selected.
      */
     @Nullable
+    @ParserName
     public String getParserName() {
         return mExtractorName;
     }
@@ -1165,20 +1235,20 @@ public final class MediaParser {
         LinkedHashMap<String, ExtractorFactory> extractorFactoriesByName = new LinkedHashMap<>();
         // Parsers are ordered to match ExoPlayer's DefaultExtractorsFactory extractor ordering,
         // which in turn aims to minimize the chances of incorrect extractor selections.
-        extractorFactoriesByName.put("exo.MatroskaParser", MatroskaExtractor::new);
-        extractorFactoriesByName.put("exo.FragmentedMp4Parser", FragmentedMp4Extractor::new);
-        extractorFactoriesByName.put("exo.Mp4Parser", Mp4Extractor::new);
-        extractorFactoriesByName.put("exo.Mp3Parser", Mp3Extractor::new);
-        extractorFactoriesByName.put("exo.AdtsParser", AdtsExtractor::new);
-        extractorFactoriesByName.put("exo.Ac3Parser", Ac3Extractor::new);
-        extractorFactoriesByName.put("exo.TsParser", TsExtractor::new);
-        extractorFactoriesByName.put("exo.FlvParser", FlvExtractor::new);
-        extractorFactoriesByName.put("exo.OggParser", OggExtractor::new);
-        extractorFactoriesByName.put("exo.PsParser", PsExtractor::new);
-        extractorFactoriesByName.put("exo.WavParser", WavExtractor::new);
-        extractorFactoriesByName.put("exo.AmrParser", AmrExtractor::new);
-        extractorFactoriesByName.put("exo.Ac4Parser", Ac4Extractor::new);
-        extractorFactoriesByName.put("exo.FlacParser", FlacExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_MATROSKA, MatroskaExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_FMP4, FragmentedMp4Extractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_MP4, Mp4Extractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_MP3, Mp3Extractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_ADTS, AdtsExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_AC3, Ac3Extractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_TS, TsExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_FLV, FlvExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_OGG, OggExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_PS, PsExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_WAV, WavExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_AMR, AmrExtractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_AC4, Ac4Extractor::new);
+        extractorFactoriesByName.put(PARSER_NAME_FLAC, FlacExtractor::new);
         EXTRACTOR_FACTORIES_BY_NAME = Collections.unmodifiableMap(extractorFactoriesByName);
 
         HashMap<String, Class> expectedTypeByParameterName = new HashMap<>();

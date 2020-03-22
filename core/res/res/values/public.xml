@@ -3019,6 +3019,7 @@
       <public name="preserveLegacyExternalStorage" />
       <public name="mimeGroup" />
       <public name="gwpAsanMode" />
+      <public name="actor" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b5">
@@ -3066,11 +3067,6 @@
       <public name="accessibilitySystemActionLockScreen" />
       <public name="accessibilitySystemActionTakeScreenshot" />
       <public name="accessibilityActionImeEnter" />
-    </public-group>
-
-    <public-group type="array" first-id="0x01070006">
-      <!-- @hide @SystemApi -->
-      <public name="simColors" />
     </public-group>
 
     <public-group type="string" first-id="0x0104002c">

@@ -533,26 +533,28 @@
     <!-- Title of the Global Actions Dialog -->
     <string name="global_actions" product="default">Phone options</string>
 
-    <!-- label for item that locks the phone in the phone options dialog -->
+    <!-- label for item that locks the phone in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_lock">Screen lock</string>
 
-    <!-- label for item that turns off power in phone options dialog -->
+    <!-- label for item that turns off power in phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_power_off">Power off</string>
 
-    <!-- label for item that restarts phone in phone options dialog -->
-    <!-- TODO: promote to separate string-->
-    <string name="global_action_restart" translatable="false">@string/sim_restart_button</string>
+    <!-- label for item that shows options to power off and restart the phone [CHAR LIMIT=24]-->
+    <string name="global_action_power_options">Power</string>
 
-    <!-- label for item that starts emergency call -->
+    <!-- label for item that restarts phone in phone options dialog [CHAR LIMIT=24]-->
+    <string name="global_action_restart">Restart</string>
+
+    <!-- label for item that opens emergency features in the phone options dialog [CHAR LIMIT=24]-->
     <string name="global_action_emergency">Emergency</string>
 
-    <!-- label for item that generates a bug report in the phone options dialog -->
+    <!-- label for item that generates a bug report in the phone options dialog [CHAR LIMIT=24] -->
     <string name="global_action_bug_report">Bug report</string>
 
-    <!-- label for item that logouts the current user -->
+    <!-- label for item that logouts the current user [CHAR LIMIT=24]-->
     <string name="global_action_logout">End session</string>
 
-    <!-- label for screenshot item in power menu -->
+    <!-- label for screenshot item in power menu [CHAR LIMIT=24]-->
     <string name="global_action_screenshot">Screenshot</string>
 
     <!-- Take bug report menu title [CHAR LIMIT=30] -->
@@ -617,7 +619,7 @@
     <!-- label for item that launches voice assist in phone options dialog [CHAR LIMIT=15]-->
     <string name="global_action_voice_assist">Voice Assist</string>
 
-    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=15] -->
+    <!-- label for item that locks the phone and enforces that it can't be unlocked without strong authentication. [CHAR LIMIT=24] -->
     <string name="global_action_lockdown">Lockdown</string>
 
     <!-- Text to use when the number in a notification info is too large
@@ -1164,7 +1166,7 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permlab_systemCamera">Allow an application or service access to system cameras to take pictures and videos</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
-    <string name="permdesc_systemCamera">This privileged | system app can take pictures and record videos using a system camera at any time. Requires the android.permission.CAMERA permission to be held by the app as well</string>
+    <string name="permdesc_systemCamera">This privileged or system app can take pictures and record videos using a system camera at any time. Requires the android.permission.CAMERA permission to be held by the app as well</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
     <string name="permlab_cameraOpenCloseListener">Allow an application or service to receive callbacks about camera devices being opened or closed.</string>
@@ -4348,6 +4350,35 @@
         accessibility feature.
     </string>
 
+    <!-- Dialog title for dialog shown when the multiple accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning_title">Turn on accessibility features?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the multiple accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_warning">Holding down both volume keys for a few seconds turns on accessibility features. This may change how your device works.\n\nCurrent features:\n<xliff:g id="service" example="TalkBack">%1$s</xliff:g>\nYou can change selected features in Settings > Accessibility.</string>
+
+    <!-- Used in multiple service warning to list current features. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_multiple_service_list">\t• <xliff:g id="service" example="TalkBack">%1$s</xliff:g>\n</string>
+
+    <!-- Dialog title for dialog shown when the TalkBack shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_talkback_warning_title">Turn on TalkBack?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling the TalkBack via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_talkback_warning">Holding down both volume keys for a few seconds turns on TalkBack, a screen reader that is helpful for people who are blind or have low vision. TalkBack completely changes how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
+
+    <!-- Dialog title for dialog shown when this accessibility shortcut is activated, and we want to confirm that the user understands what's going to happen. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning_title">Turn on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>?</string>
+
+    <!-- Message shown in dialog when user is in the process of enabling this accessibility service via the volume buttons shortcut for the first time. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_single_service_warning">Holding down both volume keys for a few seconds turns on <xliff:g id="service" example="TalkBack">%1$s</xliff:g>, an accessibility feature. This may change how your device works.\n\nYou can change this shortcut to another feature in Settings > Accessibility.</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none]-->
+    <string name="accessibility_shortcut_on">Turn on</string>
+
+    <!-- Text in button that closes the warning dialog about the accessibility shortcut, leaving the
+    shortcut enabled. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_off">Don’t turn on</string>
+
     <!-- Title for a warning about security implications of enabling an accessibility
     service. [CHAR LIMIT=NONE] -->
     <string name="accessibility_enable_service_title">Allow
@@ -4393,13 +4424,13 @@
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
     from accessibility button. [CHAR LIMIT=100] -->
-    <string name="accessibility_edit_shortcut_menu_button_title">Choose apps to use with the
+    <string name="accessibility_edit_shortcut_menu_button_title">Choose features to use with the
         accessibility button
     </string>
 
     <!-- Title for accessibility edit shortcut selection menu dialog, and dialog is triggered
     from volume key shortcut. [CHAR LIMIT=100] -->
-    <string name="accessibility_edit_shortcut_menu_volume_title">Choose apps to use with the
+    <string name="accessibility_edit_shortcut_menu_volume_title">Choose features to use with the
         volume key shortcut
     </string>
 
@@ -4430,33 +4461,29 @@
      shown in the warning dialog about the accessibility shortcut. -->
     <string name="color_correction_feature_name">Color Correction</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility
-    service.-->
-    <string name="accessibility_shortcut_enabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> on</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
 
-    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility
-    service.-->
-    <string name="accessibility_shortcut_disabling_service">Accessibility Shortcut turned
-        <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> off</string>
+    <!-- Text in toast to alert the user that the accessibility shortcut turned off an accessibility service. [CHAR LIMIT=none] -->
+    <string name="accessibility_shortcut_disabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned off.</string>
 
     <!-- Text spoken when accessibility shortcut warning dialog is shown. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_spoken_feedback">Press and hold both volume keys for three seconds to use
         <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g></string>
 
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_prompt_text">Choose a app to use when you tap the accessibility button:</string>
+    <string name="accessibility_button_prompt_text">Choose a feature to use when you tap the accessibility button:</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_prompt_text">Choose a app to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
+    <string name="accessibility_gesture_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):</string>
     <!-- Text appearing in a prompt at the top of UI allowing the user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_prompt_text">Choose a app to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
+    <string name="accessibility_gesture_3finger_prompt_text">Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):</string>
 
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button in the navigation bar. [CHAR LIMIT=none]-->
-    <string name="accessibility_button_instructional_text">To switch between apps, touch &amp; hold the accessibility button.</string>
+    <string name="accessibility_button_instructional_text">To switch between features, touch &amp; hold the accessibility button.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_instructional_text">To switch between apps, swipe up with two fingers and hold.</string>
+    <string name="accessibility_gesture_instructional_text">To switch between features, swipe up with two fingers and hold.</string>
     <!-- Text describing how to display UI allowing a user to select a target service or feature to be assigned to the Accessibility button when gesture navigation and TalkBack is enabled. [CHAR LIMIT=none] -->
-    <string name="accessibility_gesture_3finger_instructional_text">To switch between apps, swipe up with three fingers and hold.</string>
+    <string name="accessibility_gesture_3finger_instructional_text">To switch between features, swipe up with three fingers and hold.</string>
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
@@ -5352,7 +5379,7 @@
     </plurals>
 
     <!-- ChooserActivity - No direct share targets are available. [CHAR LIMIT=NONE] -->
-    <string name="chooser_no_direct_share_targets">Direct share not available</string>
+    <string name="chooser_no_direct_share_targets">No recommended people to share with</string>
 
     <!-- ChooserActivity - Alphabetically sorted apps list label. [CHAR LIMIT=NONE] -->
     <string name="chooser_all_apps_button_label">Apps list</string>
@@ -5403,6 +5430,11 @@
     <!-- Label of a tab on a screen. A user can tap this tab to switch to the 'Work' view (that shows their work content) if they have a work profile on their device. [CHAR LIMIT=NONE] -->
     <string name="resolver_work_tab">Work</string>
 
+    <!-- Accessibility label for the personal tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_personal_tab_accessibility">Personal view</string>
+    <!-- Accessibility label for the work tab button. [CHAR LIMIT=NONE] -->
+    <string name="resolver_work_tab_accessibility">Work view</string>
+
     <!-- Title of a screen. This text lets the user know that their IT admin doesn't allow them to share this specific content with work apps. [CHAR LIMIT=NONE] -->
     <string name="resolver_cant_share_with_work_apps">Can\u2019t share this with work apps</string>
     <!-- Error message. This text is explaining that the user's IT admin doesn't allow this specific content to be shared with apps in the work profile. [CHAR LIMIT=NONE] -->
@@ -5442,4 +5474,237 @@
     <string name="permlab_accessCallAudio">Record or play audio in telephony calls</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permdesc_accessCallAudio">Allows this app, when assigned as default dialer application, to record or play audio in telephony calls.</string>
+
+    <!-- Icc depersonalization related strings -->
+    <!-- Label text for PIN entry widget on SIM Network Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY">SIM network unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM Network Subset Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY">SIM network subset unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM Corporate Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ENTRY">SIM corporate unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM Service Provider Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY">SIM service provider unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM SIM Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_ENTRY">SIM unlock PIN</string>
+    <!-- Label text for PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for Subset PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for Corporate PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for SIM service provider PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for SIM PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for PIN entry widget on RUIM Network1 Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ENTRY">RUIM network1 unlock PIN</string>
+    <!-- Label text for PIN entry widget on RUIM Network2 Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ENTRY">RUIM network2 unlock PIN</string>
+    <!-- Label text for PIN entry widget on RUIM Hrpd Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ENTRY">RUIM hrpd unlock PIN</string>
+    <!-- Label text for PIN entry widget on RUIM Corporate Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ENTRY">RUIM corporate unlock PIN</string>
+    <!-- Label text for PIN entry widget on RUIM Service Provider Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY">RUIM service provider unlock PIN</string>
+    <!-- Label text for PIN entry widget on RUIM RUIM Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ENTRY">RUIM unlock PIN</string>
+    <!-- Label text for PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY">Enter PUK</string>
+    <!-- Label text for PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY">Enter PUK</string>
+
+    <!-- Label text for PIN entry widget on SIM SPN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SPN_ENTRY">SPN unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM SP EHPLMN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY">SP Equivalent Home PLMN unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM ICCID Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_ICCID_ENTRY">ICCID unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM IMPI Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_IMPI_ENTRY">IMPI unlock PIN</string>
+    <!-- Label text for PIN entry widget on SIM NS_SP Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ENTRY">Network subset service provider unlock PIN</string>
+
+    <!-- Status message displayed on SIM Network Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS">Requesting SIM network unlock\u2026</string>
+    <!-- Status message displayed on SIM Network Subset Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS">Requesting SIM network subset unlock
+\u2026</string>
+    <!-- Status message displayed on SIM Service Provider Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS">Requesting SIM service provider un
+lock\u2026</string>
+    <!-- Status message displayed on SIM Corporate Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS">Requesting SIM corporate unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on Corporate PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on SIM Service provider PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on SIM PUK entry widget on Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on SIM SIM Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_IN_PROGRESS">Requesting SIM unlock\u2026</string>
+    <!-- Status message displayed on RUIM Network1 Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS">Requesting RUIM network1 unlock\u2026</string>
+    <!-- Status message displayed on RUIM Network2 Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS">Requesting RUIM network2 unlock\u2026</string>
+    <!-- Status message displayed on RUIM Hrpd Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS">Requesting RUIM hrpd unlock\u2026</string>
+    <!-- Status message displayed on RUIM Service Provider Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS">Requesting RUIM service provider
+unlock\u2026</string>
+    <!-- Status message displayed on RUIM Corporate Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS">Requesting RUIM corporate unlock\u2026</string>
+
+    <!-- Status message displayed on SIM SPN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SPN_IN_PROGRESS">Requesting SPN unlock\u2026</string>
+    <!-- Status message displayed on SIM SP EHPLMN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS">Requesting SP Equivalent Home PLMN unlock\u2026</string>
+    <!-- Status message displayed on SIM ICCID Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS">Requesting ICCID unlock\u2026</string>
+    <!-- Status message displayed on SIM IMPI Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS">Requesting IMPI unlock\u2026</string>
+    <!-- Status message displayed on SIM NS_SP Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS">Requesting Network subset service provider unlock\u2026</string>
+
+    <!-- Status message displayed on RUIM RUIM Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS">Requesting RUIM unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Status message displayed on PUK Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS">Requesting PUK unlock\u2026</string>
+    <!-- Error message displayed on SIM Network Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_ERROR">SIM Network unlock request unsuccessful.</string>
+    <!-- Error message displayed on SIM Network Subset Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR">SIM Network Subset unlock request unsucces
+sful.</string>
+    <!-- Error message displayed on SIM Service Provider Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR">SIM Service Provider unlock request unsu
+ccessful.</string>
+    <!-- Error message displayed on SIM Corporate Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_ERROR">SIM Corporate unlock request unsuccessful.</string>
+    <!-- Error message displayed on SIM SIM Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_ERROR">SIM unlock request unsuccessful.</string>
+    <!-- Error message displayed on RUIM Network1 Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_ERROR">RUIM Network1 unlock request unsuccessful.</string>
+    <!-- Error message displayed on RUIM Network2 Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_ERROR">RUIM Network2 unlock request unsuccessful.</string>
+    <!-- Error message displayed on RUIM Hrpd Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_ERROR">RUIM Hrpd unlock request unsuccessful.</string>
+    <!-- Error message displayed on RUIM Corporate Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_ERROR">RUIM Corporate unlock request unsuccessful.</string>
+    <!-- Error message displayed on RUIM Service Provider Depersonalization panel  [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR">RUIM Service Provider unlock request un
+successful.</string>
+    <!-- Error message displayed on RUIM RUIM Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_ERROR">RUIM unlock request unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR">PUK unlock unsuccessful.</string>
+    <!-- Error message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR">PUK unlock unsuccessful.</string>
+
+    <!--  Error message displayed on SIM SPN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SPN_ERROR">SPN unlock request unsuccessful.</string>
+    <!--  Error message displayed on SIM SP EHPLMN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR">SP Equivalent Home PLMN unlock request unsuccessful.</string>
+    <!--  Error message displayed on SIM ICCID Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_ICCID_ERROR">ICCID unlock request unsuccessful.</string>
+    <!--  Error message displayed on SIM IMPI Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_IMPI_ERROR">IMPI unlock request unsuccessful.</string>
+    <!--  Error message displayed on SIM NS_SP Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NS_SP_ERROR">Network subset service provider unlock request unsuccessful.</string>
+
+    <!-- Success message displayed on SIM Network Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUCCESS">SIM Network unlock successful.</string>
+    <!-- Success message displayed on SIM Network Subset Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS">SIM Network Subset unlock successful.</string>
+    <!-- Success message displayed on SIM Service Provider Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS">SIM Service Provider unlock successful
+.</string>
+    <!-- Success message displayed on SIM Corporate Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_SUCCESS">SIM Corporate unlock successful.</string>
+    <!-- Success message displayed on SIM SIM Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_SUCCESS">SIM unlock successful.</string>
+    <!-- Success message displayed on RUIM Network1 Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS">RUIM Network1 unlock successful.</string>
+    <!-- Success message displayed on RUIM Network2 Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS">RUIM Network2 unlock successful.</string>
+    <!-- Success message displayed on RUIM Hrpd Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_SUCCESS">RUIM Hrpd unlock successful.</string>
+    <!-- Success message displayed on RUIM Service Provider Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS">RUIM Service Provider unlock successf
+ul.</string>
+    <!-- Success message displayed on RUIM Corporate Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS">RUIM Corporate unlock successful.</string>
+    <!-- Success message displayed on RUIM RUIM Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_SUCCESS">RUIM unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS">PUK unlock successful.</string>
+    <!-- Success message displayed on PUK Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS">PUK unlock successful.</string>
+
+    <!-- Success message displayed on SIM SPN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SPN_SUCCESS">SPN unlock successful.</string>
+    <!-- Success message displayed on SIM SP EHPLMN Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS">SP Equivalent Home PLMN unlock successful.</string>
+    <!-- Success message displayed on SIM ICCID Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_ICCID_SUCCESS">ICCID unlock successful.</string>
+    <!-- Success message displayed on SIM IMPI Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_IMPI_SUCCESS">IMPI unlock successful.</string>
+    <!-- Success message displayed on SIM NS_SP Depersonalization panel [CHAR LIMIT=none] -->
+    <string name="PERSOSUBSTATE_SIM_NS_SP_SUCCESS">Network subset service provider unlock successful.</string>
 </resources>

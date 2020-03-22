@@ -28,6 +28,8 @@ import java.util.Objects;
 /**
  * Define capability of a modem group. That is, the capabilities
  * are shared between those modems defined by list of modem IDs.
+ *
+ * @hide
  */
 public final class PhoneCapability implements Parcelable {
     // Hardcoded default DSDS capability.

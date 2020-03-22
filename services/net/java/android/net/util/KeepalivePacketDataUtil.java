@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.net.NattKeepalivePacketData;
 import android.net.NattKeepalivePacketDataParcelable;
 
+import java.net.InetAddress;
+
 /** @hide */
 public final class KeepalivePacketDataUtil {
      /**
@@ -29,11 +31,12 @@ public final class KeepalivePacketDataUtil {
     public static NattKeepalivePacketDataParcelable toStableParcelable(
             NattKeepalivePacketData pkt) {
         final NattKeepalivePacketDataParcelable parcel = new NattKeepalivePacketDataParcelable();
-
-        parcel.srcAddress = pkt.srcAddress.getAddress();
-        parcel.srcPort = pkt.srcPort;
-        parcel.dstAddress = pkt.dstAddress.getAddress();
-        parcel.dstPort = pkt.dstPort;
+        final InetAddress srcAddress = pkt.getSrcAddress();
+        final InetAddress dstAddress = pkt.getDstAddress();
+        parcel.srcAddress = srcAddress.getAddress();
+        parcel.srcPort = pkt.getSrcPort();
+        parcel.dstAddress = dstAddress.getAddress();
+        parcel.dstPort = pkt.getDstPort();
         return parcel;
     }
 }

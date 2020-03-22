@@ -974,6 +974,7 @@ package android.content.pm {
     field public static final String FEATURE_FILE_BASED_ENCRYPTION = "android.software.file_based_encryption";
     field public static final int FLAG_PERMISSION_APPLY_RESTRICTION = 16384; // 0x4000
     field public static final int FLAG_PERMISSION_GRANTED_BY_ROLE = 32768; // 0x8000
+    field public static final int FLAG_PERMISSION_ONE_TIME = 65536; // 0x10000
     field public static final int FLAG_PERMISSION_POLICY_FIXED = 4; // 0x4
     field public static final int FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT = 2048; // 0x800
     field public static final int FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT = 4096; // 0x1000
@@ -1820,14 +1821,37 @@ package android.net {
 
   public class Network implements android.os.Parcelable {
     ctor public Network(@NonNull android.net.Network);
+    method public int getNetId();
     method @NonNull public android.net.Network getPrivateDnsBypassingCopy();
   }
 
   public final class NetworkCapabilities implements android.os.Parcelable {
+    method @NonNull public int[] getAdministratorUids();
     method public int[] getCapabilities();
+    method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
     field public static final int TRANSPORT_TEST = 7; // 0x7
+  }
+
+  public static class NetworkCapabilities.Builder {
+    ctor public NetworkCapabilities.Builder();
+    ctor public NetworkCapabilities.Builder(@NonNull android.net.NetworkCapabilities);
+    method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder addTransportType(int);
+    method @NonNull public android.net.NetworkCapabilities build();
+    method @NonNull public android.net.NetworkCapabilities.Builder removeCapability(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder removeTransportType(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setAdministratorUids(@NonNull int[]);
+    method @NonNull public android.net.NetworkCapabilities.Builder setLinkDownstreamBandwidthKbps(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder setLinkUpstreamBandwidthKbps(int);
+    method @NonNull public android.net.NetworkCapabilities.Builder setNetworkSpecifier(@Nullable android.net.NetworkSpecifier);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setOwnerUid(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setRequestorPackageName(@Nullable String);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setRequestorUid(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_SIGNAL_STRENGTH_WAKEUP") public android.net.NetworkCapabilities.Builder setSignalStrength(int);
+    method @NonNull @RequiresPermission("android.permission.NETWORK_FACTORY") public android.net.NetworkCapabilities.Builder setSsid(@Nullable String);
+    method @NonNull public android.net.NetworkCapabilities.Builder setTransportInfo(@Nullable android.net.TransportInfo);
   }
 
   public class NetworkStack {
@@ -2997,6 +3021,7 @@ package android.provider {
     field public static final String DOZE_ALWAYS_ON = "doze_always_on";
     field @Deprecated public static final String ENABLED_NOTIFICATION_POLICY_ACCESS_PACKAGES = "enabled_notification_policy_access_packages";
     field public static final String ENABLED_VR_LISTENERS = "enabled_vr_listeners";
+    field public static final String IMMERSIVE_MODE_CONFIRMATIONS = "immersive_mode_confirmations";
     field public static final String LOCATION_ACCESS_CHECK_DELAY_MILLIS = "location_access_check_delay_millis";
     field public static final String LOCATION_ACCESS_CHECK_INTERVAL_MILLIS = "location_access_check_interval_millis";
     field public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS = "lock_screen_allow_private_notifications";
@@ -3169,6 +3194,7 @@ package android.service.autofill {
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
     method @Nullable public android.os.Bundle onGetInlineSuggestionsRendererInfo();
     method @Nullable public android.view.View onRenderSuggestion(@NonNull android.service.autofill.InlinePresentation, int, int);
+    method public final void startIntentSender(@NonNull android.content.IntentSender);
     field public static final String SERVICE_INTERFACE = "android.service.autofill.InlineSuggestionRenderService";
   }
 
@@ -3774,43 +3800,6 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
     field public static final int INVALID_EMERGENCY_NUMBER_DB_VERSION = -1; // 0xffffffff
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
-  }
-
-  public class TelephonyRegistryManager {
-    method public void addOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
-    method public void addOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener, @NonNull java.util.concurrent.Executor);
-    method public void listenForSubscriber(int, @NonNull String, @NonNull String, @NonNull android.telephony.PhoneStateListener, int, boolean);
-    method public void notifyActiveDataSubIdChanged(int);
-    method public void notifyBarringInfoChanged(int, int, @NonNull android.telephony.BarringInfo);
-    method public void notifyCallForwardingChanged(int, boolean);
-    method public void notifyCallQualityChanged(int, int, @NonNull android.telephony.CallQuality, int);
-    method public void notifyCallStateChanged(int, int, int, @Nullable String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void notifyCallStateChangedForAllSubscriptions(int, @Nullable String);
-    method public void notifyCarrierNetworkChange(boolean);
-    method public void notifyCellInfoChanged(int, @NonNull java.util.List<android.telephony.CellInfo>);
-    method public void notifyCellLocation(int, @NonNull android.telephony.CellIdentity);
-    method public void notifyDataActivationStateChanged(int, int, int);
-    method public void notifyDataActivityChanged(int, int);
-    method public void notifyDataConnectionForSubscriber(int, int, int, @Nullable android.telephony.PreciseDataConnectionState);
-    method public void notifyDisconnectCause(int, int, int, int);
-    method public void notifyDisplayInfoChanged(int, int, @NonNull android.telephony.TelephonyDisplayInfo);
-    method public void notifyEmergencyNumberList(int, int);
-    method public void notifyImsDisconnectCause(int, @NonNull android.telephony.ims.ImsReasonInfo);
-    method public void notifyMessageWaitingChanged(int, int, boolean);
-    method public void notifyOutgoingEmergencyCall(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
-    method public void notifyOutgoingEmergencySms(int, int, @NonNull android.telephony.emergency.EmergencyNumber);
-    method public void notifyPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
-    method public void notifyPreciseCallState(int, int, int, int, int);
-    method public void notifyPreciseDataConnectionFailed(int, int, int, @Nullable String, int);
-    method public void notifyRadioPowerStateChanged(int, int, int);
-    method public void notifyRegistrationFailed(int, int, @NonNull android.telephony.CellIdentity, @NonNull String, int, int, int);
-    method public void notifyServiceStateChanged(int, int, @NonNull android.telephony.ServiceState);
-    method public void notifySignalStrengthChanged(int, int, @NonNull android.telephony.SignalStrength);
-    method public void notifySrvccStateChanged(int, int);
-    method public void notifyUserMobileDataStateChanged(int, int, boolean);
-    method public void notifyVoiceActivationStateChanged(int, int, int);
-    method public void removeOnOpportunisticSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnOpportunisticSubscriptionsChangedListener);
-    method public void removeOnSubscriptionsChangedListener(@NonNull android.telephony.SubscriptionManager.OnSubscriptionsChangedListener);
   }
 
 }

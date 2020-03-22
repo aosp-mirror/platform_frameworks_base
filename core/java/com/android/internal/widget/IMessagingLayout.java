@@ -39,4 +39,9 @@ public interface IMessagingLayout {
      * @return the list of messaging groups
      */
     ArrayList<MessagingGroup> getMessagingGroups();
+
+    /**
+     * Disable the clipping of the messaging container.
+     */
+    void setMessagingClippingDisabled(boolean clippingDisabled);
 }

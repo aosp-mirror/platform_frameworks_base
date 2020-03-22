@@ -76,6 +76,10 @@ final class ViewState {
     public static final int STATE_TRIGGERED_AUGMENTED_AUTOFILL = 0x1000;
     /** Inline suggestions were shown for this View. */
     public static final int STATE_INLINE_SHOWN = 0x2000;
+    /** A character was removed from the View value (not by the service). */
+    public static final int STATE_CHAR_REMOVED = 0x4000;
+    /** Showing inline suggestions is not allowed for this View. */
+    public static final int STATE_INLINE_DISABLED = 0x8000;
 
     public final AutofillId id;
 

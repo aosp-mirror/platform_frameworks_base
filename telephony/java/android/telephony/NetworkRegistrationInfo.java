@@ -690,7 +690,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
      */
     public void updateNrState() {
         mNrState = NR_STATE_NONE;
-        if (mDataSpecificInfo.isEnDcAvailable) {
+        if (mDataSpecificInfo != null && mDataSpecificInfo.isEnDcAvailable) {
             if (!mDataSpecificInfo.isDcNrRestricted && mDataSpecificInfo.isNrAvailable) {
                 mNrState = NR_STATE_NOT_RESTRICTED;
             } else {

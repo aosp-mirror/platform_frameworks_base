@@ -255,7 +255,7 @@ interface IDevicePolicyManager {
     String[] getAccountTypesWithManagementDisabledAsUser(int userId, in boolean parent);
 
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
-    boolean isSecondaryLockscreenEnabled(int userId);
+    boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
 
     void setLockTaskPackages(in ComponentName who, in String[] packages);
     String[] getLockTaskPackages(in ComponentName who);

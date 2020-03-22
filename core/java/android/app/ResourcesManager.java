@@ -346,10 +346,9 @@ public class ResourcesManager {
 
         // We must load this from disk.
         if (overlay) {
-            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(path),
-                    false /*system*/);
+            apkAssets = ApkAssets.loadOverlayFromPath(overlayPathToIdmapPath(path), 0 /*flags*/);
         } else {
-            apkAssets = ApkAssets.loadFromPath(path, false /*system*/, sharedLib);
+            apkAssets = ApkAssets.loadFromPath(path, sharedLib ? ApkAssets.PROPERTY_DYNAMIC : 0);
         }
 
         if (mLoadedApkAssets != null) {
@@ -1256,7 +1255,8 @@ public class ResourcesManager {
          * instance uses.
          */
         @Override
-        public void onLoadersChanged(Resources resources, List<ResourcesLoader> newLoader) {
+        public void onLoadersChanged(@NonNull Resources resources,
+                @NonNull List<ResourcesLoader> newLoader) {
             synchronized (ResourcesManager.this) {
                 final ResourcesKey oldKey = findKeyForResourceImplLocked(resources.getImpl());
                 if (oldKey == null) {
@@ -1284,7 +1284,7 @@ public class ResourcesManager {
          * {@code loader} to apply any changes of the set of {@link ApkAssets}.
          **/
         @Override
-        public void onLoaderUpdated(ResourcesLoader loader) {
+        public void onLoaderUpdated(@NonNull ResourcesLoader loader) {
             synchronized (ResourcesManager.this) {
                 final ArrayMap<ResourcesImpl, ResourcesKey> updatedResourceImplKeys =
                         new ArrayMap<>();

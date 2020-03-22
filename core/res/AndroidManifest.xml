@@ -734,7 +734,7 @@
     <!-- ====================================================================== -->
     <eat-comment />
 
-    <!-- @SystemApi Allows accessing the messages on ICC
+    <!-- Allows accessing the messages on ICC
          @hide Used internally. -->
     <permission android:name="android.permission.ACCESS_MESSAGES_ON_ICC"
         android:protectionLevel="signature" />
@@ -3447,10 +3447,23 @@
     <permission android:name="android.permission.BIND_AUGMENTED_AUTOFILL_SERVICE"
                 android:protectionLevel="signature" />
 
-    <!-- Must be required by hotword enrollment application,
-         to ensure that only the system can interact with it.
-         @hide <p>Not for use by third-party applications.</p> -->
+    <!-- Must be required by a {@link android.service.voice.VoiceInteractionService} implementation
+         to enroll its own sound models. This is a more restrictive permission than the higher-level
+         permission KEYPHRASE_ENROLLMENT_APPLICATION. For the caller to enroll sound models with
+         this permission, it must hold the permission and be the active VoiceInteractionService in
+         the system.
+         {@see Settings.Secure.VOICE_INTERACTION_SERVICE}
+         @hide -->
     <permission android:name="android.permission.MANAGE_VOICE_KEYPHRASES"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Must be required by a keyphrase enrollment application, to enroll sound models. This is
+         treated as a higher-level permission to MANAGE_VOICE_KEYPHRASES as a caller can enroll
+         sound models at any time. This permission should be reserved for system enrollment
+         applications detected by {@link android.hardware.soundtrigger.KeyphraseEnrollmentInfo}
+         only.
+         @hide <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.KEYPHRASE_ENROLLMENT_APPLICATION"
         android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by a {@link com.android.media.remotedisplay.RemoteDisplayProvider},

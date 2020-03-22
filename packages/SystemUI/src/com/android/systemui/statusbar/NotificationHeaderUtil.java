@@ -28,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.widget.ConversationLayout;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationContentView;
 
@@ -42,6 +43,7 @@ public class NotificationHeaderUtil {
 
     private static final TextViewComparator sTextViewComparator = new TextViewComparator();
     private static final VisibilityApplicator sVisibilityApplicator = new VisibilityApplicator();
+    private static final VisibilityApplicator sAppNameApplicator = new AppNameApplicator();
     private static  final DataExtractor sIconExtractor = new DataExtractor() {
         @Override
         public Object extractData(ExpandableNotificationRow row) {
@@ -64,7 +66,7 @@ public class NotificationHeaderUtil {
     };
     private final static ResultApplicator mGreyApplicator = new ResultApplicator() {
         @Override
-        public void apply(View view, boolean apply) {
+        public void apply(View parent, View view, boolean apply, boolean reset) {
             NotificationHeaderView header = (NotificationHeaderView) view;
             ImageView icon = (ImageView) view.findViewById(
                     com.android.internal.R.id.icon);
@@ -132,8 +134,12 @@ public class NotificationHeaderUtil {
                     }
                 },
                 sVisibilityApplicator));
-        mComparators.add(HeaderProcessor.forTextView(mRow,
-                com.android.internal.R.id.app_name_text));
+        mComparators.add(new HeaderProcessor(
+                mRow,
+                com.android.internal.R.id.app_name_text,
+                null,
+                sTextViewComparator,
+                sAppNameApplicator));
         mComparators.add(HeaderProcessor.forTextView(mRow,
                 com.android.internal.R.id.header_text));
         mDividers.add(com.android.internal.R.id.header_text_divider);
@@ -299,19 +305,19 @@ public class NotificationHeaderUtil {
         public void apply(ExpandableNotificationRow row, boolean reset) {
             boolean apply = mApply && !reset;
             if (row.isSummaryWithChildren()) {
-                applyToView(apply, row.getNotificationHeader());
+                applyToView(apply, reset, row.getNotificationHeader());
                 return;
             }
-            applyToView(apply, row.getPrivateLayout().getContractedChild());
-            applyToView(apply, row.getPrivateLayout().getHeadsUpChild());
-            applyToView(apply, row.getPrivateLayout().getExpandedChild());
+            applyToView(apply, reset, row.getPrivateLayout().getContractedChild());
+            applyToView(apply, reset, row.getPrivateLayout().getHeadsUpChild());
+            applyToView(apply, reset, row.getPrivateLayout().getExpandedChild());
         }
 
-        private void applyToView(boolean apply, View parent) {
+        private void applyToView(boolean apply, boolean reset, View parent) {
             if (parent != null) {
                 View view = parent.findViewById(mId);
                 if (view != null && !mComparator.isEmpty(view)) {
-                    mApplicator.apply(view, apply);
+                    mApplicator.apply(parent, view, apply, reset);
                 }
             }
         }
@@ -375,14 +381,26 @@ public class NotificationHeaderUtil {
     }
 
     private interface ResultApplicator {
-        void apply(View view, boolean apply);
+        void apply(View parent, View view, boolean apply, boolean reset);
     }
 
     private static class VisibilityApplicator implements ResultApplicator {
 
         @Override
-        public void apply(View view, boolean apply) {
+        public void apply(View parent, View view, boolean apply, boolean reset) {
             view.setVisibility(apply ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    private static class AppNameApplicator extends VisibilityApplicator {
+
+        @Override
+        public void apply(View parent, View view, boolean apply, boolean reset) {
+            if (reset && parent instanceof ConversationLayout) {
+                ConversationLayout layout = (ConversationLayout) parent;
+                apply = layout.shouldHideAppName();
+            }
+            super.apply(parent, view, apply, reset);
         }
     }
 }

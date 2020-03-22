@@ -7071,7 +7071,6 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    @SystemApi
     public boolean hasDeviceIdentifierAccess(@NonNull String packageName, int pid, int uid) {
         throwIfParentInstance("hasDeviceIdentifierAccess");
         if (packageName == null) {
@@ -8658,11 +8657,11 @@ public class DevicePolicyManager {
      * @hide
      */
     @SystemApi
-    public boolean isSecondaryLockscreenEnabled(int userId) {
+    public boolean isSecondaryLockscreenEnabled(@NonNull UserHandle userHandle) {
         throwIfParentInstance("isSecondaryLockscreenEnabled");
         if (mService != null) {
             try {
-                return mService.isSecondaryLockscreenEnabled(userId);
+                return mService.isSecondaryLockscreenEnabled(userHandle);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -9388,9 +9387,9 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by device owner or profile owner of secondary users  that is affiliated with the
-     * device to disable the status bar. Disabling the status bar blocks notifications, quick
-     * settings and other screen overlays that allow escaping from a single use device.
+     * Called by device owner or profile owner of secondary users that is affiliated with the
+     * device to disable the status bar. Disabling the status bar blocks notifications and quick
+     * settings.
      * <p>
      * <strong>Note:</strong> This method has no effect for LockTask mode. The behavior of the
      * status bar in LockTask mode can be configured with
@@ -11496,7 +11495,11 @@ public class DevicePolicyManager {
 
     /**
      * Deprecated. Use {@code markProfileOwnerOnOrganizationOwnedDevice} instead.
-     * Throws UnsupportedOperationException when called.
+     * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#Q} or
+     * below, will behave the same as {@link #markProfileOwnerOnOrganizationOwnedDevice}.
+     *
+     * When called by an app targeting SDK level {@link android.os.Build.VERSION_CODES#R}
+     * or above, will throw an UnsupportedOperationException when called.
      *
      * @deprecated Use {@link #markProfileOwnerOnOrganizationOwnedDevice} instead.
      *
@@ -11507,9 +11510,14 @@ public class DevicePolicyManager {
     @RequiresPermission(value = android.Manifest.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS,
             conditional = true)
     public void setProfileOwnerCanAccessDeviceIds(@NonNull ComponentName who) {
-        throw new UnsupportedOperationException(
-                "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice instead"
-                        + ".");
+        ApplicationInfo ai = mContext.getApplicationInfo();
+        if (ai.targetSdkVersion > Build.VERSION_CODES.Q) {
+            throw new UnsupportedOperationException(
+                    "This method is deprecated. use markProfileOwnerOnOrganizationOwnedDevice"
+                    + " instead.");
+        } else {
+            markProfileOwnerOnOrganizationOwnedDevice(who);
+        }
     }
 
     /**

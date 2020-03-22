@@ -16,6 +16,7 @@
 
 package android.app.admin;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Service;
 import android.content.Intent;
@@ -27,7 +28,7 @@ import android.view.SurfaceControlViewHost;
 /**
  * Client interface for providing the SystemUI with secondary lockscreen information.
  *
- * <p>An implementation must be provided by the device admin app when
+ * <p>An implementation must be provided by the Profile Owner when
  * {@link DevicePolicyManager#setSecondaryLockscreenEnabled} is set to true and the service must be
  * declared in the manifest as handling the action
  * {@link DevicePolicyManager#ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE}, otherwise the keyguard
@@ -41,10 +42,11 @@ public class DevicePolicyKeyguardService extends Service {
 
     private final IKeyguardClient mClient = new IKeyguardClient.Stub() {
         @Override
-        public void onSurfaceReady(@Nullable IBinder hostInputToken, IKeyguardCallback callback) {
+        public void onCreateKeyguardSurface(@Nullable IBinder hostInputToken,
+                IKeyguardCallback callback) {
             mCallback = callback;
             SurfaceControlViewHost.SurfacePackage surfacePackage =
-                    DevicePolicyKeyguardService.this.onSurfaceReady(hostInputToken);
+                    DevicePolicyKeyguardService.this.onCreateKeyguardSurface(hostInputToken);
 
             if (mCallback != null) {
                 try {
@@ -63,13 +65,27 @@ public class DevicePolicyKeyguardService extends Service {
     }
 
     /**
-     * Called by keyguard once the host surface for the secondary lockscreen is ready to display
-     * remote content.
+     * Called by keyguard once the host surface for the secondary lockscreen is created and ready to
+     * display remote content.
+     *
+     * <p>Implementations are expected to create a Surface hierarchy with view elements for the
+     * admin's desired secondary lockscreen UI, and optionally, interactive elements
+     * that will allow the user to dismiss the secondary lockscreen, subject to the implementation's
+     * requirements. The view hierarchy is expected to be embedded via the
+     * {@link SurfaceControlViewHost} APIs, and returned as a SurfacePackage via
+     * {@link SurfaceControlViewHost#getSurfacePackage}for the keyguard to reparent into its
+     * prepared SurfaceView.
+     *
+     * @param hostInputToken Token of the SurfaceView which will hosting the embedded hierarchy,
+     *                       primarily required by {@link SurfaceControlViewHost} for ANR reporting.
+     *                       It will be provided by the keyguard via
+     *                       {@link android.view.SurfaceView#getHostToken}.
      * @return the {@link SurfaceControlViewHost.SurfacePackage} for the Surface the
      *      secondary lockscreen content is attached to.
      */
     @Nullable
-    public SurfaceControlViewHost.SurfacePackage onSurfaceReady(@Nullable IBinder hostInputToken) {
+    public SurfaceControlViewHost.SurfacePackage onCreateKeyguardSurface(
+            @NonNull IBinder hostInputToken) {
         return null;
     }
 

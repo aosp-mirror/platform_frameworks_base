@@ -23,8 +23,10 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
@@ -37,7 +39,8 @@ import com.android.wifitrackerlib.WifiEntry;
 /**
  * Preference to display a WifiEntry in a wifi picker.
  */
-public class WifiEntryPreference extends Preference implements WifiEntry.WifiEntryCallback {
+public class WifiEntryPreference extends Preference implements WifiEntry.WifiEntryCallback,
+        View.OnClickListener {
 
     private static final int[] STATE_SECURED = {
             R.attr.state_encrypted
@@ -62,6 +65,7 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
     private WifiEntry mWifiEntry;
     private int mLevel = -1;
     private CharSequence mContentDescription;
+    private OnButtonClickListener mOnButtonClickListener;
 
     public WifiEntryPreference(@NonNull Context context, @NonNull WifiEntry wifiEntry) {
         this(context, wifiEntry, new IconInjector(context));
@@ -95,11 +99,36 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
 
         view.itemView.setContentDescription(mContentDescription);
 
-        final ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
-        bindFrictionImage(frictionImageView);
-
         // Turn off divider
         view.findViewById(R.id.two_target_divider).setVisibility(View.INVISIBLE);
+
+        // Enable the icon button when this Entry is a canManageSubscription entry.
+        final ImageButton imageButton = (ImageButton) view.findViewById(R.id.icon_button);
+        final ImageView frictionImageView = (ImageView) view.findViewById(
+                R.id.friction_icon);
+        if (mWifiEntry.canManageSubscription() && !mWifiEntry.isSaved()
+                && !mWifiEntry.isSubscription()
+                && mWifiEntry.getConnectedState() == WifiEntry.CONNECTED_STATE_DISCONNECTED) {
+            final Drawable drawablehelp = getDrawable(R.drawable.ic_help);
+            drawablehelp.setTintList(
+                    Utils.getColorAttr(getContext(), android.R.attr.colorControlNormal));
+            ((ImageView) imageButton).setImageDrawable(drawablehelp);
+            imageButton.setVisibility(View.VISIBLE);
+            imageButton.setOnClickListener(this);
+            imageButton.setContentDescription(
+                    getContext().getText(R.string.help_label));
+
+            if (frictionImageView != null) {
+                frictionImageView.setVisibility(View.GONE);
+            }
+        } else {
+            imageButton.setVisibility(View.GONE);
+
+            if (frictionImageView != null) {
+                frictionImageView.setVisibility(View.VISIBLE);
+                bindFrictionImage(frictionImageView);
+            }
+        }
     }
 
     /**
@@ -236,4 +265,44 @@ public class WifiEntryPreference extends Preference implements WifiEntry.WifiEnt
             return mContext.getDrawable(Utils.getWifiIconResource(level));
         }
     }
+
+    /**
+     * Set listeners, who want to listen the button client event.
+     */
+    public void setOnButtonClickListener(OnButtonClickListener listener) {
+        mOnButtonClickListener = listener;
+        notifyChanged();
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.icon_button) {
+            if (mOnButtonClickListener != null) {
+                mOnButtonClickListener.onButtonClick(this);
+            }
+        }
+    }
+
+    /**
+     * Callback to inform the caller that the icon button is clicked.
+     */
+    public interface OnButtonClickListener {
+
+        /**
+         * Register to listen the button click event.
+         */
+        void onButtonClick(WifiEntryPreference preference);
+    }
+
+    private Drawable getDrawable(@DrawableRes int iconResId) {
+        Drawable buttonIcon = null;
+
+        try {
+            buttonIcon = getContext().getDrawable(iconResId);
+        } catch (Resources.NotFoundException exception) {
+            // Do nothing
+        }
+        return buttonIcon;
+    }
+
 }

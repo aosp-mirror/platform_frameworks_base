@@ -3399,6 +3399,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static final int FLAG_PERMISSION_ONE_TIME = 1 << 16;
 
     /**
@@ -7894,10 +7895,14 @@ public abstract class PackageManager {
     }
 
     /**
-     * Sets MIME group's MIME types
+     * Sets MIME group's MIME types.
      *
-     * @param mimeGroup MIME group to modify
-     * @param mimeTypes new MIME types contained by MIME group
+     * Libraries should use a reverse-DNS prefix followed by a ':' character and library-specific
+     * group name to avoid namespace collisions, e.g. "com.example:myFeature".
+     *
+     * @param mimeGroup MIME group to modify.
+     * @param mimeTypes new MIME types contained by MIME group.
+     * @throws IllegalArgumentException if the MIME group was not declared in the manifest.
      */
     public void setMimeGroup(@NonNull String mimeGroup, @NonNull Set<String> mimeTypes) {
         throw new UnsupportedOperationException(
@@ -7905,22 +7910,16 @@ public abstract class PackageManager {
     }
 
     /**
-     * Clears MIME group by removing all MIME types from it
+     * Gets all MIME types contained by MIME group.
      *
-     * @param mimeGroup MIME group to clear
-     */
-    public void clearMimeGroup(@NonNull String mimeGroup) {
-        throw new UnsupportedOperationException(
-                "clearMimeGroup not implemented in subclass");
-    }
-
-    /**
-     * Gets all MIME types that MIME group contains
+     * Libraries should use a reverse-DNS prefix followed by a ':' character and library-specific
+     * group name to avoid namespace collisions, e.g. "com.example:myFeature".
      *
-     * @return MIME types contained by the MIME group,
-     *         or null if the MIME group was not declared in the manifest.
+     * @param mimeGroup MIME group to retrieve.
+     * @return MIME types contained by the MIME group.
+     * @throws IllegalArgumentException if the MIME group was not declared in the manifest.
      */
-    @Nullable
+    @NonNull
     public Set<String> getMimeGroup(@NonNull String mimeGroup) {
         throw new UnsupportedOperationException(
                 "getMimeGroup not implemented in subclass");

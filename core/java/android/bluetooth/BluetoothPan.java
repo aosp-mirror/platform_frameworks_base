@@ -19,7 +19,6 @@ package android.bluetooth;
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -30,7 +29,6 @@ import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.CloseGuard;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -51,11 +49,10 @@ import java.util.List;
  * @hide
  */
 @SystemApi
-public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
+public final class BluetoothPan implements BluetoothProfile {
     private static final String TAG = "BluetoothPan";
     private static final boolean DBG = true;
     private static final boolean VDBG = false;
-    private CloseGuard mCloseGuard;
 
     /**
      * Intent used to broadcast the change in connection state of the Pan
@@ -168,15 +165,13 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
         mAdapter = BluetoothAdapter.getDefaultAdapter();
         mContext = context;
         mProfileConnector.connect(context, listener);
-        mCloseGuard = new CloseGuard();
-        mCloseGuard.open("close");
     }
 
     /**
      * Closes the connection to the service and unregisters callbacks
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public void close() {
+    @UnsupportedAppUsage
+    void close() {
         if (VDBG) log("close()");
         mProfileConnector.disconnect();
     }
@@ -185,11 +180,8 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
         return mProfileConnector.getService();
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    /** @hide */
     protected void finalize() {
-        if (mCloseGuard != null) {
-            mCloseGuard.warnIfOpen();
-        }
         close();
     }
 
@@ -202,9 +194,6 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
      * connection state intent for the profile will be broadcasted with
      * the state. Users can get the connection state of the profile
      * from this intent.
-     *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission.
      *
      * @param device Remote Bluetooth Device
      * @return false on immediate error, true otherwise
@@ -244,9 +233,6 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
      * {@link #STATE_DISCONNECTING} can be used to distinguish between the
      * two scenarios.
      *
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
-     * permission.
-     *
      * @param device Remote Bluetooth Device
      * @return false on immediate error, true otherwise
      * @hide
@@ -280,7 +266,7 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
      * @hide
      */
     @SystemApi
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
@@ -304,8 +290,11 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
 
     /**
      * {@inheritDoc}
+     * @hide
      */
+    @SystemApi
     @Override
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @NonNull List<BluetoothDevice> getConnectedDevices() {
         if (VDBG) log("getConnectedDevices()");
         final IBluetoothPan service = getService();
@@ -344,10 +333,12 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
 
     /**
      * {@inheritDoc}
+     * @hide
      */
+    @SystemApi
     @Override
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
-    public int getConnectionState(@Nullable BluetoothDevice device) {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public int getConnectionState(@NonNull BluetoothDevice device) {
         if (VDBG) log("getState(" + device + ")");
         final IBluetoothPan service = getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
@@ -366,8 +357,10 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
      * Turns on/off bluetooth tethering
      *
      * @param value is whether to enable or disable bluetooth tethering
+     * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public void setBluetoothTethering(boolean value) {
         String pkgName = mContext.getOpPackageName();
         if (DBG) log("setBluetoothTethering(" + value + "), calling package:" + pkgName);
@@ -385,8 +378,10 @@ public final class BluetoothPan implements BluetoothProfile, AutoCloseable {
      * Determines whether tethering is enabled
      *
      * @return true if tethering is on, false if not or some error occurred
+     * @hide
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean isTetheringOn() {
         if (VDBG) log("isTetheringOn()");
         final IBluetoothPan service = getService();

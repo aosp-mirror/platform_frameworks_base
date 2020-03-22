@@ -3007,7 +3007,7 @@ public class CarrierConfigManager {
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
      * @hide
      */
-    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_long";
+    public static final String KEY_5G_WATCHDOG_TIME_MS_LONG = "5g_watchdog_time_ms_long";
 
     /**
      * Whether NR (non-standalone) should be unmetered for all frequencies.

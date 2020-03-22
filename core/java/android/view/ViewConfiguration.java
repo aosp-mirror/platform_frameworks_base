@@ -23,7 +23,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.os.Build;
 import android.os.RemoteException;
 import android.provider.Settings;
@@ -66,8 +65,9 @@ public class ViewConfiguration {
     /**
      * Defines the default duration in milliseconds before a press turns into
      * a long press
+     * @hide
      */
-    private static final int DEFAULT_LONG_PRESS_TIMEOUT = 500;
+    public static final int DEFAULT_LONG_PRESS_TIMEOUT = 400;
 
     /**
      * Defines the default duration in milliseconds between the first tap's up event and the second
