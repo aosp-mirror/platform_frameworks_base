@@ -31,6 +31,7 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import com.android.server.twilight.TwilightManager;
@@ -54,6 +55,7 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -113,6 +115,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mPowerManager.isInteractive()).thenReturn(true);
+        when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
         when(mTwilightManager.getLastTwilightState()).thenReturn(mTwilightState);
         when(mTwilightState.isNight()).thenReturn(true);
         when(mContext.registerReceiver(notNull(), notNull())).then(inv -> {
@@ -135,14 +138,24 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mCustomListener = () -> {};
             return null;
         }).when(mAlarmManager).cancel(eq(mCustomListener));
-
-        mUiManagerService = new UiModeManagerService(mContext,
-                mWindowManager, mAlarmManager, mPowerManager,
-                mWakeLock, mTwilightManager, mLocalPowerManager, true);
+        when(mContext.getSystemService(eq(Context.POWER_SERVICE)))
+                .thenReturn(mPowerManager);
+        when(mContext.getSystemService(eq(Context.ALARM_SERVICE)))
+                .thenReturn(mAlarmManager);
+        addLocalService(WindowManagerInternal.class, mWindowManager);
+        addLocalService(PowerManagerInternal.class, mLocalPowerManager);
+        addLocalService(TwilightManager.class, mTwilightManager);
+        
+        mUiManagerService = new UiModeManagerService(mContext, true);
         try {
             mUiManagerService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         } catch (SecurityException e) {/* ignore for permission denial */}
         mService = mUiManagerService.getService();
+    }
+
+    private <T> void addLocalService(Class<T> clazz, T service) {
+        LocalServices.removeServiceForTest(clazz);
+        LocalServices.addService(clazz, service);
     }
 
     @Test
@@ -151,7 +164,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mService.setNightMode(MODE_NIGHT_NO);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
         mService.setNightMode(MODE_NIGHT_AUTO);
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class), any());
+        verify(mContext, atLeastOnce()).registerReceiver(any(BroadcastReceiver.class), any());
     }
 
     @Test
