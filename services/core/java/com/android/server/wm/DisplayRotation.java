@@ -531,8 +531,7 @@ public class DisplayRotation {
             try {
                 mDisplayContent.sendNewConfiguration();
                 if (t != null) {
-                    mService.mAtmService.mTaskOrganizerController.applyContainerTransaction(t,
-                            null /* organizer */);
+                    mService.mAtmService.mWindowOrganizerController.applyTransaction(t);
                 }
             } finally {
                 mService.mAtmService.continueWindowLayout();

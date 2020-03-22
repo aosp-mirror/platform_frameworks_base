@@ -42,6 +42,7 @@ import android.window.ITaskOrganizer;
 import android.window.IWindowContainer;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
+import android.window.WindowOrganizer;
 
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.R;
@@ -75,7 +76,6 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
 
     private final Handler mMainHandler;
     private final Handler mUpdateHandler;
-    private final ITaskOrganizerController mTaskOrganizerController;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipAnimationController mPipAnimationController;
     private final List<PipTransitionCallback> mPipTransitionCallbacks = new ArrayList<>();
@@ -181,7 +181,6 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
-        mTaskOrganizerController = ActivityTaskManager.getTaskOrganizerController();
         mPipBoundsHandler = boundsHandler;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
@@ -255,10 +254,6 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         scheduleAnimateResizePip(mLastReportedBounds, boundsToRestore,
                 TRANSITION_DIRECTION_TO_FULLSCREEN, mEnterExitAnimationDuration, null);
         mInPip = false;
-    }
-
-    @Override
-    public void transactionReady(int id, SurfaceControl.Transaction t) {
     }
 
     @Override
@@ -415,7 +410,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                 wct.setBounds(mToken, taskBounds);
             }
             wct.setBoundsChangeTransaction(mToken, tx);
-            mTaskOrganizerController.applyContainerTransaction(wct, null /* ITaskOrganizer */);
+            WindowOrganizer.applyTransaction(wct);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to apply container transaction", e);
         }
