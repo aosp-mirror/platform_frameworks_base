@@ -18,7 +18,6 @@ package android.telephony;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -33,7 +32,6 @@ import java.util.List;
  * Reports modem activity information.
  * @hide
  */
-@SystemApi
 public final class ModemActivityInfo implements Parcelable {
     /**
      * Tx(transmit) power level. see power index below
