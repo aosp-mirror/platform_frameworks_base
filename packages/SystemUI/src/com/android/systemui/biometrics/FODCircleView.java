@@ -19,7 +19,6 @@ package com.android.systemui.biometrics;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -28,11 +27,8 @@ import android.graphics.Point;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.provider.Settings;
-import android.net.Uri;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,8 +40,8 @@ import android.widget.ImageView;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
@@ -57,7 +53,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class FODCircleView extends ImageView implements ConfigurationListener {
-
     private final int mPositionX;
     private final int mPositionY;
     private final int mSize;
@@ -76,16 +71,12 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
     private int mColor;
     private int mColorBackground;
 
-    private int mCurrentBrightness;
     private boolean mIsBouncer;
     private boolean mIsDreaming;
     private boolean mIsShowing;
     private boolean mIsCircleShowing;
 
     private Handler mHandler;
-
-    private PowerManager mPowerManager;
-    private PowerManager.WakeLock mWakeLock;
 
     private Timer mBurnInProtectionTimer;
 
@@ -151,44 +142,8 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
         }
     };
 
-    private class BrightnessObserver extends ContentObserver {
-        Context mContext;
-
-        BrightnessObserver(Context context, Handler handler) {
-            super(handler);
-            mContext = context;
-        }
-
-        void registerBrightnessListener() {
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS),
-                    false, this, UserHandle.USER_ALL);
-            updateCurrentBrightnessValue();
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            super.onChange(selfChange, uri);
-            if (uri.equals(Settings.System.getUriFor(
-                    Settings.System.SCREEN_BRIGHTNESS))) {
-                updateCurrentBrightnessValue();
-            }
-        }
-
-        public void updateCurrentBrightnessValue() {
-            int currentBrightness = Settings.System.getIntForUser(mContext.getContentResolver(),
-                    Settings.System.SCREEN_BRIGHTNESS, 0,
-                    UserHandle.USER_CURRENT);
-            mCurrentBrightness = currentBrightness;
-            updateDim();
-        }
-    }
-
     private boolean mCutoutMasked;
     private int mStatusbarHeight;
-
-    private BrightnessObserver mBrightnessObserver;
 
     public FODCircleView(Context context) {
         super(context);
@@ -227,10 +182,6 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
 
         mHandler = new Handler(Looper.getMainLooper());
 
-        mPowerManager = context.getSystemService(PowerManager.class);
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                FODCircleView.class.getSimpleName());
-
         mParams.height = mSize;
         mParams.width = mSize;
         mParams.format = PixelFormat.TRANSLUCENT;
@@ -251,8 +202,6 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
         mUpdateMonitor = KeyguardUpdateMonitor.getInstance(context);
         mUpdateMonitor.registerCallback(mMonitorCallback);
 
-        mBrightnessObserver = new BrightnessObserver(context, mHandler);
-        mBrightnessObserver.registerBrightnessListener();
 
         updateCutoutFlags();
 
@@ -351,12 +300,7 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
 
         setKeepScreenOn(true);
 
-        if (mIsDreaming) {
-            mWakeLock.acquire(700);
-        }
-
-        updateDim();
-        updateBoost();
+        setDim(true);
         updateAlpha();
         dispatchPress();
 
@@ -376,8 +320,7 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
 
         dispatchRelease();
 
-        updateBoost();
-        updateDim();
+        setDim(false);
         updateAlpha();
 
         setKeepScreenOn(false);
@@ -455,35 +398,30 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
         mWindowManager.updateViewLayout(this, mParams);
     }
 
-    private void updateDim() {
-        if (mIsCircleShowing) {
+    private void setDim(boolean dim) {
+        if (dim) {
+            int curBrightness = Settings.System.getInt(getContext().getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS, 100);
             int dimAmount = 0;
 
             IFingerprintInscreen daemon = getFingerprintInScreenDaemon();
             try {
-                dimAmount = daemon.getDimAmount(mCurrentBrightness);
+                dimAmount = daemon.getDimAmount(curBrightness);
             } catch (RemoteException e) {
-                return;
+                // do nothing
+            }
+
+            if (mShouldBoostBrightness) {
+                mParams.screenBrightness = 1.0f;
             }
 
             mParams.dimAmount = dimAmount / 255.0f;
         } else {
+            mParams.screenBrightness = 0.0f;
             mParams.dimAmount = 0.0f;
         }
 
         mWindowManager.updateViewLayout(this, mParams);
-    }
-
-    private void updateBoost() {
-        if (mShouldBoostBrightness) {
-            if (mIsCircleShowing) {
-                mParams.screenBrightness = 1.0f;
-            } else {
-                mParams.screenBrightness = 0.0f;
-            }
-
-            mWindowManager.updateViewLayout(this, mParams);
-        }
     }
 
     private class BurnInProtectionTask extends TimerTask {
