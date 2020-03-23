@@ -2347,9 +2347,18 @@ public final class ViewRootImpl implements ViewParent,
                 mDisplay.getRealSize(size);
                 desiredWindowWidth = size.x;
                 desiredWindowHeight = size.y;
+            } else if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
+                    || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+                // For wrap content, we have to remeasure later on anyways. Use size consistent with
+                // below so we get best use of the measure cache.
+                desiredWindowWidth = dipToPx(config.screenWidthDp);
+                desiredWindowHeight = dipToPx(config.screenHeightDp);
             } else {
-                desiredWindowWidth = mWinFrame.width();
-                desiredWindowHeight = mWinFrame.height();
+                // After addToDisplay, the frame contains the frameHint from window manager, which
+                // for most windows is going to be the same size as the result of relayoutWindow.
+                // Using this here allows us to avoid remeasuring after relayoutWindow
+                desiredWindowWidth = frame.width();
+                desiredWindowHeight = frame.height();
             }
 
             // We used to use the following condition to choose 32 bits drawing caches:
