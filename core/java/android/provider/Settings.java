@@ -10338,6 +10338,14 @@ public final class Settings {
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
 
         /**
+         * Value to specify if wifi settings migration is complete or not.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String WIFI_MIGRATION_COMPLETED = "wifi_migration_completed";
+
+        /**
          * Value to specify whether network quality scores and badging should be shown in the UI.
          *
          * Type: int (0 for false, 1 for true)
