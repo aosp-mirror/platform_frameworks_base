@@ -32,7 +32,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.TypedValue;
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DockedDividerUtils;

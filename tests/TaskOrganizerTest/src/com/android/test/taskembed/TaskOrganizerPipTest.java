@@ -24,11 +24,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.IBinder;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 import android.view.ViewGroup;
-import android.view.WindowContainerTransaction;
+import android.window.ITaskOrganizer;
+import android.window.WindowContainerTransaction;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
