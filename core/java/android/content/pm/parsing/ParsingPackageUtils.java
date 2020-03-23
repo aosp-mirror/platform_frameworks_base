@@ -1829,8 +1829,7 @@ public class ParsingPackageUtils {
                 .setUseEmbeddedDex(bool(false, R.styleable.AndroidManifestApplication_useEmbeddedDex, sa))
                 .setUsesNonSdkApi(bool(false, R.styleable.AndroidManifestApplication_usesNonSdkApi, sa))
                 .setVmSafeMode(bool(false, R.styleable.AndroidManifestApplication_vmSafeMode, sa))
-                .setDontAutoRevokePermissions(bool(false, R.styleable.AndroidManifestApplication_requestAutoRevokePermissionsExemption, sa))
-                .setAllowDontAutoRevokePermissions(bool(false, R.styleable.AndroidManifestApplication_allowAutoRevokePermissionsExemption, sa))
+                .setAutoRevokePermissions(anInt(R.styleable.AndroidManifestApplication_autoRevokePermissions, sa))
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(bool(targetSdk >= Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture, sa))
                 .setBaseHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))

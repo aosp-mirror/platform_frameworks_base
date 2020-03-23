@@ -30,7 +30,6 @@ import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageParser;
-import android.content.pm.ProcessInfo;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedAttribution;
 import android.content.pm.parsing.component.ParsedComponent;
@@ -405,8 +404,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private boolean hasFragileUserData;
     private boolean cantSaveState;
     private boolean allowNativeHeapPointerTagging;
-    private boolean dontAutoRevokePermissions;
-    private boolean allowDontAutoRevokePermissions;
+    private int autoRevokePermissions;
     private boolean preserveLegacyExternalStorage;
 
     protected int gwpAsanMode;
@@ -1089,8 +1087,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeBoolean(this.hasFragileUserData);
         dest.writeBoolean(this.cantSaveState);
         dest.writeBoolean(this.allowNativeHeapPointerTagging);
-        dest.writeBoolean(this.dontAutoRevokePermissions);
-        dest.writeBoolean(this.allowDontAutoRevokePermissions);
+        dest.writeInt(this.autoRevokePermissions);
         dest.writeBoolean(this.preserveLegacyExternalStorage);
         dest.writeArraySet(this.mimeGroups);
         dest.writeInt(this.gwpAsanMode);
@@ -1249,8 +1246,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.hasFragileUserData = in.readBoolean();
         this.cantSaveState = in.readBoolean();
         this.allowNativeHeapPointerTagging = in.readBoolean();
-        this.dontAutoRevokePermissions = in.readBoolean();
-        this.allowDontAutoRevokePermissions = in.readBoolean();
+        this.autoRevokePermissions = in.readInt();
         this.preserveLegacyExternalStorage = in.readBoolean();
         this.mimeGroups = (ArraySet<String>) in.readArraySet(boot);
         this.gwpAsanMode = in.readInt();
@@ -2026,13 +2022,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public boolean isDontAutoRevokePermmissions() {
-        return dontAutoRevokePermissions;
-    }
-
-    @Override
-    public boolean isAllowDontAutoRevokePermmissions() {
-        return allowDontAutoRevokePermissions;
+    public int getAutoRevokePermissions() {
+        return autoRevokePermissions;
     }
 
     @Override
@@ -2506,14 +2497,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
-    public ParsingPackageImpl setDontAutoRevokePermissions(boolean value) {
-        dontAutoRevokePermissions = value;
-        return this;
-    }
-
-    @Override
-    public ParsingPackageImpl setAllowDontAutoRevokePermissions(boolean value) {
-        allowDontAutoRevokePermissions = value;
+    public ParsingPackageImpl setAutoRevokePermissions(int value) {
+        autoRevokePermissions = value;
         return this;
     }
 
