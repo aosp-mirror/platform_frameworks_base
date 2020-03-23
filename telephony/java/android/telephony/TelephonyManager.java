@@ -9808,32 +9808,12 @@ public class TelephonyManager {
     }
 
     /**
-     * Get baseband version for the default phone using the legacy approach.
-     * This change was added in P, to ensure backward compatiblity.
-     *
-     * @return baseband version.
-     * @hide
-     */
-    private String getBasebandVersionLegacy(int phoneId) {
-        if (SubscriptionManager.isValidPhoneId(phoneId)) {
-            String prop = "gsm.version.baseband"
-                    + ((phoneId == 0) ? "" : Integer.toString(phoneId));
-            return SystemProperties.get(prop);
-        }
-        return null;
-    }
-
-    /**
      * Get baseband version by phone id.
      *
      * @return baseband version.
      * @hide
      */
     public String getBasebandVersionForPhone(int phoneId) {
-        String version = getBasebandVersionLegacy(phoneId);
-        if (version != null && !version.isEmpty()) {
-            setBasebandVersionForPhone(phoneId, version);
-        }
         return getTelephonyProperty(phoneId, TelephonyProperties.baseband_version(), "");
     }
 
