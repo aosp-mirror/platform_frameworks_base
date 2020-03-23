@@ -120,16 +120,16 @@ package android.net {
   }
 
   public static class TetheringManager.TetheringRequest {
-  }
-
-  public static class TetheringManager.TetheringRequest.Builder {
-    ctor public TetheringManager.TetheringRequest.Builder(int);
-    method @NonNull public android.net.TetheringManager.TetheringRequest build();
     method @Nullable public android.net.LinkAddress getClientStaticIpv4Address();
     method @Nullable public android.net.LinkAddress getLocalIpv4Address();
     method public boolean getShouldShowEntitlementUi();
     method public int getTetheringType();
     method public boolean isExemptFromEntitlementCheck();
+  }
+
+  public static class TetheringManager.TetheringRequest.Builder {
+    ctor public TetheringManager.TetheringRequest.Builder(int);
+    method @NonNull public android.net.TetheringManager.TetheringRequest build();
     method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setExemptFromEntitlementCheck(boolean);
     method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setShouldShowEntitlementUi(boolean);
     method @NonNull @RequiresPermission("android.permission.TETHER_PRIVILEGED") public android.net.TetheringManager.TetheringRequest.Builder setStaticIpv4Addresses(@NonNull android.net.LinkAddress, @NonNull android.net.LinkAddress);
