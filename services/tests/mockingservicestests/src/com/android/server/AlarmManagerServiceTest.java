@@ -496,7 +496,7 @@ public class AlarmManagerServiceTest {
         // This one should get deferred on set
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
                 getNewMockPendingIntent());
-        final long expectedNextTrigger = firstTrigger + 1 + mAppStandbyWindow;
+        final long expectedNextTrigger = firstTrigger + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
@@ -516,7 +516,7 @@ public class AlarmManagerServiceTest {
             mNowElapsedTest = mTestTimer.getElapsed();
             mTestTimer.expire();
         }
-        final long expectedNextTrigger = firstTrigger + 1 + mAppStandbyWindow;
+        final long expectedNextTrigger = firstTrigger + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
@@ -676,7 +676,7 @@ public class AlarmManagerServiceTest {
         final int rareQuota = mService.getQuotaForBucketLocked(STANDBY_BUCKET_RARE);
         // The last alarm should now be deferred.
         final long expectedNextTrigger = (firstTrigger + workingQuota - 1 - rareQuota)
-                + mAppStandbyWindow + 1;
+                + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
@@ -695,7 +695,7 @@ public class AlarmManagerServiceTest {
             }
         }
         // The last alarm should be deferred due to exceeding the quota
-        final long deferredTrigger = firstTrigger + 1 + mAppStandbyWindow;
+        final long deferredTrigger = firstTrigger + mAppStandbyWindow;
         assertEquals(deferredTrigger, mTestTimer.getElapsed());
 
         // Upgrading the bucket now
@@ -730,7 +730,7 @@ public class AlarmManagerServiceTest {
             mTestTimer.expire();
         }
         // Any subsequent alarms in queue should all be deferred
-        assertEquals(firstTrigger + mAppStandbyWindow + 1, mTestTimer.getElapsed());
+        assertEquals(firstTrigger + mAppStandbyWindow, mTestTimer.getElapsed());
         // Paroling now
         assertAndHandleParoleChanged(true);
 
@@ -744,7 +744,7 @@ public class AlarmManagerServiceTest {
         assertAndHandleParoleChanged(false);
 
         // Subsequent alarms should again get deferred
-        final long expectedNextTrigger = (firstTrigger + 5) + 1 + mAppStandbyWindow;
+        final long expectedNextTrigger = (firstTrigger + 5) + mAppStandbyWindow;
         assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
