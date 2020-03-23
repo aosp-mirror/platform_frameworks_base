@@ -43,12 +43,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.graphics.GraphicBuffer;
 import android.graphics.ParcelableColorSpace;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.display.DisplayManagerInternal;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -66,7 +64,6 @@ import android.util.SparseArray;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
-import android.view.SurfaceControl;
 import android.view.SurfaceControl.ScreenshotGraphicBuffer;
 import android.view.View;
 import android.view.WindowInfo;
@@ -1010,57 +1007,56 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return;
         }
 
-        final Display display = DisplayManagerGlobal.getInstance()
-                .getRealDisplay(displayId);
-        if (display == null) {
-            sendScreenshotFailure(AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
-                    callback);
+        // Private virtual displays are created by the ap and is not allowed to access by other
+        // aps.  We assume the contents on this display should not be captured.
+        final DisplayManager displayManager =
+                (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+        final Display display = displayManager.getDisplay(displayId);
+        if ((display == null) || (display.getType() == Display.TYPE_VIRTUAL
+                && (display.getFlags() & Display.FLAG_PRIVATE) != 0)) {
+            sendScreenshotFailure(
+                    AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY, callback);
             return;
         }
 
-        sendScreenshotSuccess(display, callback);
-    }
-
-    private ScreenshotGraphicBuffer takeScreenshotBuffer(Display display) {
-        final Point displaySize = new Point();
-        // TODO (b/145893483): calling new API with the display as a parameter
-        // when surface control supported.
-        final IBinder token = SurfaceControl.getInternalDisplayToken();
-        final Rect crop = new Rect(0, 0, displaySize.x, displaySize.y);
-        final int rotation = display.getRotation();
-        display.getRealSize(displaySize);
-
-        return SurfaceControl.screenshotToBuffer(token, crop, displaySize.x, displaySize.y,
-                false, rotation);
-    }
-
-    private void sendScreenshotSuccess(Display display, RemoteCallback callback) {
         final long identity = Binder.clearCallingIdentity();
         try {
             mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
-                final ScreenshotGraphicBuffer screenshotBuffer = takeScreenshotBuffer(display);
-                final GraphicBuffer graphicBuffer = screenshotBuffer.getGraphicBuffer();
-                try (HardwareBuffer hardwareBuffer =
-                             HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
-                    final ParcelableColorSpace colorSpace =
-                            new ParcelableColorSpace(screenshotBuffer.getColorSpace());
-
-                    final Bundle payload = new Bundle();
-                    payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
-                            AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
-                    payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
-                            hardwareBuffer);
-                    payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
-                    payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
-                            SystemClock.uptimeMillis());
-
-                    // Send back the result.
-                    callback.sendResult(payload);
-                    hardwareBuffer.close();
+                final ScreenshotGraphicBuffer screenshotBuffer = LocalServices
+                        .getService(DisplayManagerInternal.class)
+                        .screenshotWithoutSecureLayer(displayId);
+                if (screenshotBuffer != null) {
+                    sendScreenshotSuccess(screenshotBuffer, callback);
+                } else {
+                    sendScreenshotFailure(
+                            AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY, callback);
                 }
             }, null).recycleOnUse());
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void sendScreenshotSuccess(ScreenshotGraphicBuffer screenshotBuffer,
+            RemoteCallback callback) {
+        final GraphicBuffer graphicBuffer = screenshotBuffer.getGraphicBuffer();
+        try (HardwareBuffer hardwareBuffer =
+                     HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
+            final ParcelableColorSpace colorSpace =
+                    new ParcelableColorSpace(screenshotBuffer.getColorSpace());
+
+            final Bundle payload = new Bundle();
+            payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
+                    AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
+            payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
+                    hardwareBuffer);
+            payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
+            payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
+                    SystemClock.uptimeMillis());
+
+            // Send back the result.
+            callback.sendResult(payload);
+            hardwareBuffer.close();
         }
     }
 
