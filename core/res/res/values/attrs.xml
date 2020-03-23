@@ -8356,10 +8356,15 @@
     <declare-styleable name="QuickAccessWalletService">
         <!-- Fully qualified class name of an activity that allows the user to modify
              the settings for this service. -->
-        <attr name="settingsActivity"/>
+        <attr name="settingsActivity" format="string"/>
         <!-- Fully qualified class name of an activity that allows the user to view
              their entire wallet -->
-        <attr name="targetActivity"/>
+        <attr name="targetActivity" format="string"/>
+        <!-- Text shown on the empty state button if no cards are provided -->
+        <attr name="shortcutLongLabel"/>
+        <!-- Text shown on the button that takes users to the wallet application -->
+        <attr name="shortcutShortLabel"/>
+
     </declare-styleable>
 
     <!-- Use <code>recognition-service</code> as the root tag of the XML resource that

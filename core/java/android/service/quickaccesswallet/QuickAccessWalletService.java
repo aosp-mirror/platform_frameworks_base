@@ -113,6 +113,7 @@ import android.util.Log;
  *     android:name=".MyQuickAccessWalletService"
  *     android:label="@string/my_default_tile_label"
  *     android:icon="@drawable/my_default_icon_label"
+ *     android:logo="@drawable/my_wallet_logo"
  *     android:permission="android.permission.BIND_QUICK_ACCESS_WALLET_SERVICE">
  *     <intent-filter>
  *         <action android:name="android.service.quickaccesswallet.QuickAccessWalletService" />
@@ -133,6 +134,8 @@ import android.util.Log;
  * <quickaccesswallet-service
  *   xmlns:android="http://schemas.android.com/apk/res/android"
  *   android:settingsActivity="com.example.android.SettingsActivity"
+ *   android:shortcutLongLabel="@string/my_wallet_empty_state_text"
+ *   android:shortcutShortLabel="@string/my_wallet_button_text"
  *   android:targetActivity="com.example.android.WalletActivity"/>
  * }
  * </pre>
@@ -140,9 +143,16 @@ import android.util.Log;
  * <p>The entry for {@code settingsActivity} should contain the fully qualified class name of an
  * activity that allows the user to modify the settings for this service. The {@code targetActivity}
  * entry should contain the fully qualified class name of an activity that allows the user to view
- * their entire wallet. If specified, the wallet activity will be started with the Intent action
- * {@link #ACTION_VIEW_WALLET} and the settings activity will be started with the Intent action
- * {@link #ACTION_VIEW_WALLET_SETTINGS}.
+ * their entire wallet. The {@code targetActivity} will be started with the Intent action
+ * {@link #ACTION_VIEW_WALLET} and the {@code settingsActivity} will be started with the Intent
+ * action {@link #ACTION_VIEW_WALLET_SETTINGS}.
+ *
+ * <p>The {@code shortcutShortLabel} and {@code shortcutLongLabel} are used by the QuickAccessWallet
+ * in the buttons that navigate to the wallet app. The {@code shortcutShortLabel} is displayed next
+ * to the cards that are returned by the service and should be no more than 20 characters. The
+ * {@code shortcutLongLabel} is displayed when no cards are returned. This 'empty state' view also
+ * displays the service logo, specified by the {@code android:logo} manifest entry. If the logo is
+ * not specified, the empty state view will show the app icon instead.
  */
 public abstract class QuickAccessWalletService extends Service {
 
