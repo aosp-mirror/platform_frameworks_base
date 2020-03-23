@@ -2068,33 +2068,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"အလုပ်"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"ပုဂ္ဂိုလ်ရေးဆိုင်ရာ မြင်ကွင်း"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"အလုပ် မြင်ကွင်း"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"၎င်းကို အလုပ်သုံးအက်ပ်များအား မျှဝေ၍ မရပါ"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"ဤအကြောင်းအရာကို သင့်အလုပ်ပရိုဖိုင်ရှိ အက်ပ်များအား မျှဝေရန် သင်၏ IT စီမံခန့်ခွဲသူက ခွင့်မပြုပါ"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"၎င်းကို အလုပ်သုံးအက်ပ်များဖြင့် ဖွင့်၍မရပါ"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"ဤအကြောင်းအရာကို သင့်အလုပ်ပရိုဖိုင်ရှိ အက်ပ်များဖြင့် ဖွင့်ရန် သင်၏ IT စီမံခန့်ခွဲသူက ခွင့်မပြုပါ"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"၎င်းကို ကိုယ်ပိုင်အက်ပ်များအား မျှဝေ၍ မရပါ"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"ဤအကြောင်းအရာကို သင့်ကိုယ်ပိုင်ပရိုဖိုင်ရှိ အက်ပ်များအား မျှဝေရန် သင်၏ IT စီမံခန့်ခွဲသူက ခွင့်မပြုပါ"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"၎င်းကို ကိုယ်ပိုင်အက်ပ်များဖြင့် ဖွင့်၍မရပါ"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"ဤအကြောင်းအရာကို သင့်ကိုယ်ပိုင်ပရိုဖိုင်ရှိ အက်ပ်များဖြင့် ဖွင့်ရန် သင်၏ IT စီမံခန့်ခွဲသူက ခွင့်မပြုပါ"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"အလုပ်ပရိုဖိုင် ခဏရပ်ထားသည်"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"ဖွင့်ရန်"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"ဤအကြောင်းအရာကို အလုပ်သုံးအက်ပ်များက မပံ့ပိုးနိုင်ပါ"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"ဤအကြောင်းအရာကို အလုပ်သုံးအက်ပ်များက ဖွင့်၍မရပါ"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များက မပံ့ပိုးနိုင်ပါ"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များက ဖွင့်၍မရပါ"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"ဤအက်ပ်အား မူလ dialer အပလီကေးရှင်းအဖြစ် သတ်မှတ်ထားစဉ် ဖုန်းခေါ်ဆိုမှုများအတွင်း အသံဖမ်းခြင်း သို့မဟုတ် ဖွင့်ခြင်း ပြုလုပ်ရန် ခွင့်ပြုပါ။"</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

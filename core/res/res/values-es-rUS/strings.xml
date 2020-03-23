@@ -442,8 +442,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permite que una aplicación o un servicio reciba devoluciones de llamada cuando se abren o cierran dispositivos de cámara."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta app puede recibir devoluciones de llamada cuando se cierra o se abre cualquier dispositivo de cámara (y qué aplicación lo hace)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la app acceda al estado del modo de vibración."</string>

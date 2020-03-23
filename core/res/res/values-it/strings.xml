@@ -2068,33 +2068,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Lavoro"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Visualizzazione personale"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visualizzazione di lavoro"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Impossibile condividere questi contenuti con app di lavoro"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"L\'amministratore IT non ti consente di condividere questi contenuti con app nel tuo profilo di lavoro"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Impossibile aprire questi contenuti con app di lavoro"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"L\'amministratore IT non ti consente di aprire questi contenuti con app nel tuo profilo di lavoro"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Impossibile condividere questi contenuti con app personali"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"L\'amministratore IT non ti consente di condividere questi contenuti con app nel tuo profilo personale"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Impossibile aprire questi contenuti con app personali"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"L\'amministratore IT non ti consente di aprire questi contenuti con app nel tuo profilo personale"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profilo di lavoro sospeso"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Attiva"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Nessuna app di lavoro supporta questi contenuti"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Nessuna app di lavoro può aprire questi contenuti"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Nessuna app personale supporta questi contenuti"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Nessuna app personale può aprire questi contenuti"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Registrazione o riproduzione dell\'audio delle telefonate"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Consente a questa app, se assegnata come applicazione telefono predefinita, di registrare o riprodurre l\'audio delle telefonate."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

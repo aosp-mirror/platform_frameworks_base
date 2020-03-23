@@ -2068,33 +2068,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabaho"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Personal na view"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"View ng trabaho"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Hindi ito puwedeng ibahagi sa mga app para sa trabaho"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Hindi ka pinapayagan ng iyong IT admin na ibahagi ang content na ito sa pamamagitan ng mga app sa iyong profile sa trabaho"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Hindi ito mabubuksan sa pamamagitan ng mga app para sa trabaho"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Hindi ka pinapayagan ng iyong IT admin na buksan ang content na ito sa pamamagitan ng mga app sa iyong profile sa trabaho"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Hindi ito puwedeng ibahagi sa mga personal na app"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Hindi ka pinapayagan ng iyong IT admin na ibahagi ang content na ito sa pamamagitan ng mga app sa iyong personal na profile"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Hindi ito mabubuksan sa pamamagitan ng mga personal na app"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Hindi ka pinapayagan ng iyong IT admin na buksan ang content na ito sa pamamagitan ng mga app sa iyong personal na profile"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Naka-pause ang profile sa trabaho"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"I-on"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Hindi masusuportahan ng mga app para sa trabaho ang content na ito"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Hindi mabubuksan ng mga app para sa trabaho ang content na ito"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Hindi masusuportahan ng mga personal na app ang content na ito"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Hindi mabubuksan ng mga personal na app ang content na ito"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Mag-record o mag-play ng audio sa mga tawag sa telephony"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Papayagan ang app na ito na mag-record o mag-play ng audio sa mga tawag sa telephony kapag naitalaga bilang default na dialer application."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

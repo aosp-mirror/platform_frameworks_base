@@ -442,8 +442,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"કૅમેરા ડિવાઇસ ચાલુ કે બંધ થવા વિશે કૉલબૅક પ્રાપ્ત કરવાની ઍપ્લિકેશન કે સેવાને મંજૂરી આપો."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"જ્યારે કોઈ કૅમેરા ડિવાઇસ (કયા ઍપ્લિકેશન વડે) ખોલવા કે બંધ કરવામાં આવે, ત્યારે આ વિશેષ ઍપ કૉલબૅક પ્રાપ્ત કરી શકે છે."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"વાઇબ્રેશન નિયંત્રિત કરો"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"એપ્લિકેશનને વાઇબ્રેટરને નિયંત્રિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ઍપને વાઇબ્રેટર સ્થિતિને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>

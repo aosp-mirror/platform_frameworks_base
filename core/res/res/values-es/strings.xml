@@ -1808,8 +1808,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado por el administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, Ahorro de batería:\nActiva el tema oscuro\nDesactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, Ahorro de batería:\nActiva el tema oscuro\nDesactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se mostrarán hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>

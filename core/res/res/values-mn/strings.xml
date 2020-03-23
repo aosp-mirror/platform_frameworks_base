@@ -442,8 +442,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Аппликэйшн эсвэл үйлчилгээнд камерын төхөөрөмжүүдийг нээж эсвэл хааж байгаа тухай залгасан дуудлага хүлээн авахыг зөвшөөрөх."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Энэ апп нь дурын камерын төхөөрөмжийг нээх (ямар аппликэйшнээр болох) эсвэл хаах үед буцааж залгасан дуудлага хүлээн авах боломжтой."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"чичиргээг удирдах"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Апп нь чичиргээг удирдах боломжтой."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Аппыг чичиргээний төлөвт хандахыг зөвшөөрдөг."</string>
