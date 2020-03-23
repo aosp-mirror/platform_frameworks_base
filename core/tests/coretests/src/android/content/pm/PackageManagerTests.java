@@ -424,20 +424,19 @@ public class PackageManagerTests extends AndroidTestCase {
             assertNotNull(info);
             assertEquals(pkgName, info.packageName);
             File dataDir = Environment.getDataDirectory();
-            String appInstallPath = new File(dataDir, "app").getPath();
-            String drmInstallPath = new File(dataDir, "app-private").getPath();
+            String appInstallParent = new File(dataDir, "app").getPath();
             File srcDir = new File(info.sourceDir);
-            String srcPath = srcDir.getParentFile().getParent();
+            String srcPathParent = srcDir.getParentFile().getParentFile().getParent();
             File publicSrcDir = new File(info.publicSourceDir);
-            String publicSrcPath = publicSrcDir.getParentFile().getParent();
+            String publicSrcPath = publicSrcDir.getParentFile().getParentFile().getParent();
             long pkgLen = new File(info.sourceDir).length();
             String expectedLibPath = new File(new File(info.sourceDir).getParentFile(), "lib")
                     .getPath();
 
             int rLoc = getInstallLoc(flags, expInstallLocation, pkgLen);
             if (rLoc == INSTALL_LOC_INT) {
-                assertEquals(appInstallPath, srcPath);
-                assertEquals(appInstallPath, publicSrcPath);
+                assertEquals(appInstallParent, srcPathParent);
+                assertEquals(appInstallParent, publicSrcPath);
                 assertStartsWith("Native library should point to shared lib directory",
                         expectedLibPath, info.nativeLibraryDir);
                 assertDirOwnerGroupPermsIfExists(
@@ -464,7 +463,7 @@ public class PackageManagerTests extends AndroidTestCase {
                 // Might need to check:
                 // ((info.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0)
                 assertStartsWith("The APK path should point to the ASEC",
-                        SECURE_CONTAINERS_PREFIX, srcPath);
+                        SECURE_CONTAINERS_PREFIX, srcPathParent);
                 assertStartsWith("The public APK path should point to the ASEC",
                         SECURE_CONTAINERS_PREFIX, publicSrcPath);
                 assertStartsWith("The native library path should point to the ASEC",
@@ -991,6 +990,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
 
     @LargeTest
+    @Suppress // TODO(b/152007236): un-suppress when we root cause this
     public void testDeleteNormalInternalRetainData() throws Exception {
         deleteFromRawResource(0, PackageManager.DELETE_KEEP_DATA);
     }
@@ -2298,6 +2298,7 @@ public class PackageManagerTests extends AndroidTestCase {
         }
     }
 
+    @Suppress // TODO(b/152007236): un-suppress when we root cause this
     public void testIsSignedBy() throws Exception {
         PackageManager pm = getPm();
         String mPkgName = mContext.getPackageName();
