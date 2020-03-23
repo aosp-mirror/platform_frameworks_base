@@ -686,16 +686,107 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
      * SurfaceView is in will be visible on top of its surface.
      *
      * <p>Note that this must be set before the surface view's containing
-     * window is attached to the window manager.
+     * window is attached to the window manager. If you target {@link Build.VERSION_CODES#R}
+     * the Z ordering can be changed dynamically if the backing surface is
+     * created, otherwise it would be applied at surface construction time.
      *
      * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
+     *
+     * @param onTop Whether to show the surface on top of this view's window.
      */
     public void setZOrderOnTop(boolean onTop) {
+        // In R and above we allow dynamic layer changes.
+        final boolean allowDynamicChange = getContext().getApplicationInfo().targetSdkVersion
+                > Build.VERSION_CODES.Q;
+        setZOrderedOnTop(onTop, allowDynamicChange);
+    }
+
+    /**
+     * @return Whether the surface backing this view appears on top of its parent.
+     *
+     * @hide
+     */
+    public boolean isZOrderedOnTop() {
+        return mSubLayer > 0;
+    }
+
+    /**
+     * Controls whether the surface view's surface is placed on top of its
+     * window. Normally it is placed behind the window, to allow it to
+     * (for the most part) appear to composite with the views in the
+     * hierarchy. By setting this, you cause it to be placed above the
+     * window. This means that none of the contents of the window this
+     * SurfaceView is in will be visible on top of its surface.
+     *
+     * <p>Calling this overrides any previous call to {@link #setZOrderMediaOverlay}.
+     *
+     * @param onTop Whether to show the surface on top of this view's window.
+     * @param allowDynamicChange Whether this can happen after the surface is created.
+     * @return Whether the Z ordering changed.
+     *
+     * @hide
+     */
+    public boolean setZOrderedOnTop(boolean onTop, boolean allowDynamicChange) {
+        final int subLayer;
         if (onTop) {
-            mSubLayer = APPLICATION_PANEL_SUBLAYER;
+            subLayer = APPLICATION_PANEL_SUBLAYER;
         } else {
-            mSubLayer = APPLICATION_MEDIA_SUBLAYER;
+            subLayer = APPLICATION_MEDIA_SUBLAYER;
         }
+        if (mSubLayer == subLayer) {
+            return false;
+        }
+        mSubLayer = subLayer;
+
+        if (!allowDynamicChange) {
+            return false;
+        }
+        if (mSurfaceControl == null) {
+            return true;
+        }
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) {
+            return true;
+        }
+        final Surface parent = viewRoot.mSurface;
+        if (parent == null || !parent.isValid()) {
+            return true;
+        }
+
+        /*
+         * Schedule a callback that reflects an alpha value onto the underlying surfaces.
+         * This gets called on a RenderThread worker thread, so members accessed here must
+         * be protected by a lock.
+         */
+        final boolean useBLAST = viewRoot.useBLAST();
+        viewRoot.registerRtFrameCallback(frame -> {
+            try {
+                final SurfaceControl.Transaction t = useBLAST
+                        ? viewRoot.getBLASTSyncTransaction()
+                        : new SurfaceControl.Transaction();
+                synchronized (mSurfaceControlLock) {
+                    if (!parent.isValid() || mSurfaceControl == null) {
+                        return;
+                    }
+                    updateRelativeZ(t);
+                    if (!useBLAST) {
+                        t.deferTransactionUntil(mSurfaceControl,
+                                viewRoot.getRenderSurfaceControl(), frame);
+                    }
+                }
+                // It's possible that mSurfaceControl is released in the UI thread before
+                // the transaction completes. If that happens, an exception is thrown, which
+                // must be caught immediately.
+                t.apply();
+             } catch (Exception e) {
+                Log.e(TAG, System.identityHashCode(this)
+                        + "setZOrderOnTop RT: Exception during surface transaction", e);
+            }
+        });
+
+        invalidate();
+
+        return true;
     }
 
     /**
