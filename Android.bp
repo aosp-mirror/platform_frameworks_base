@@ -1021,16 +1021,6 @@ aidl_mapping {
     output: "framework-aidl-mappings.txt",
 }
 
-genrule {
-    name: "framework-annotation-proc-index",
-    srcs: [":framework-annotation-proc"],
-    cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
-    out: ["unsupportedappusage_index.csv"],
-    dist: {
-        targets: ["droidcore"],
-    },
-}
-
 filegroup {
     name: "framework-cellbroadcast-shared-srcs",
     srcs: [
