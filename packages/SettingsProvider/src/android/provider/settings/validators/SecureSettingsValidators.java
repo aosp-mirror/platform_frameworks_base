@@ -25,10 +25,10 @@ import static android.provider.settings.validators.SettingsValidators.COMMA_SEPA
 import static android.provider.settings.validators.SettingsValidators.COMPONENT_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.JSON_OBJECT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.LOCALE_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.PACKAGE_NAME_VALIDATOR;
-import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.TILE_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.TTS_LIST_VALIDATOR;
 
@@ -144,6 +144,7 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.SYSTEM_NAVIGATION_KEYS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.QS_TILES, TILE_LIST_VALIDATOR);
+        VALIDATORS.put(Secure.CONTROLS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_ALWAYS_ON, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.DOZE_PICK_UP_GESTURE, BOOLEAN_VALIDATOR);

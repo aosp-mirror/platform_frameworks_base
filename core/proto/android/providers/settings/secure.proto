@@ -180,6 +180,14 @@ message SecureSettingsProto {
     optional SettingProto cmas_additional_broadcast_pkg = 14 [ (android.privacy).dest = DEST_AUTOMATIC ];
     repeated SettingProto completed_categories = 15;
     optional SettingProto connectivity_release_pending_intent_delay_ms = 16 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
+    message Controls {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        optional SettingProto enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional Controls controls = 79;
+
     optional SettingProto device_paired = 17 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto dialer_default_application = 18 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto display_density_forced = 19 [ (android.privacy).dest = DEST_AUTOMATIC ];
@@ -580,5 +588,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 79;
+    // Next tag = 80;
 }
