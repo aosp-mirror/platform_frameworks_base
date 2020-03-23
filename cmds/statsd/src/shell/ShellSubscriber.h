@@ -108,7 +108,7 @@ private:
 
     std::shared_ptr<SubscriptionInfo> mSubscriptionInfo = nullptr;
 
-    int mToken;
+    int mToken = 0;
 };
 
 }  // namespace statsd
