@@ -7677,12 +7677,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         win.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
-        if (isFixedRotationTransforming()) {
-            // This activity has been rotated but the display is still in old rotation. Because the
-            // animation applies in display space coordinates, the rotated animation frames need to
-            // be unrotated to avoid being cropped.
-            unrotateAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
-        }
     }
 
     void setPictureInPictureParams(PictureInPictureParams p) {
