@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static org.junit.Assert.assertEquals;
@@ -154,5 +155,28 @@ public class WindowTokenTests extends WindowTestsBase {
                 true /* roundedCornerOverlay */, true /* fromClientToken */);
         assertTrue(token.mRoundedCornerOverlay);
         assertTrue(token.mFromClientToken);
+    }
+
+    /**
+     * Test that {@link android.view.SurfaceControl} should not be created for the
+     * {@link WindowToken} which was created for {@link android.app.WindowContext} initially, the
+     * surface should be create after addWindow for this token.
+     */
+    @Test
+    public void testSurfaceCreatedForWindowToken() {
+        final WindowToken fromClientToken = new WindowToken(mDisplayContent.mWmService,
+                mock(IBinder.class), TYPE_APPLICATION_OVERLAY, true /* persistOnEmpty */,
+                mDisplayContent, true /* ownerCanManageAppTokens */,
+                true /* roundedCornerOverlay */, true /* fromClientToken */);
+        assertNull(fromClientToken.mSurfaceControl);
+
+        createWindow(null, TYPE_APPLICATION_OVERLAY, fromClientToken, "window");
+        assertNotNull(fromClientToken.mSurfaceControl);
+
+        final WindowToken nonClientToken = new WindowToken(mDisplayContent.mWmService,
+                mock(IBinder.class), TYPE_TOAST, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, true /* roundedCornerOverlay */,
+                false /* fromClientToken */);
+        assertNotNull(nonClientToken.mSurfaceControl);
     }
 }
