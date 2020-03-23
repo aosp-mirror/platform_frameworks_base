@@ -659,6 +659,13 @@
 
     <style name="Control" />
 
+    <style name="Control.MenuItem">
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
+        <item name="android:textSize">@dimen/control_text_size</item>
+        <item name="android:textColor">@color/control_primary_text</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
     <style name="Control.Spinner">
         <item name="android:textSize">@dimen/control_header_text_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamilyMedium</item>
@@ -696,7 +703,7 @@
         <item name="android:overlapAnchor">true</item>
 
         <!-- used to override dark/light theming -->
-        <item name="*android:colorPopupBackground">@color/control_list_popup_background</item>
+        <item name="*android:colorPopupBackground">@color/GM2_grey_900</item>
     </style>
 
     <style name="TextAppearance.ControlSetup">
