@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.window;
 
 parcelable WindowContainerTransaction;

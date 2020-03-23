@@ -29,7 +29,6 @@ import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ITaskOrganizerController;
 import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -39,10 +38,11 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
-import android.view.WindowContainerTransaction;
+import android.window.ITaskOrganizerController;
+import android.window.ITaskOrganizer;
+import android.window.IWindowContainer;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
