@@ -66,6 +66,7 @@ public class PipResizeGestureHandler {
     private final Point mMaxSize = new Point();
     private final Point mMinSize = new Point();
     private final Rect mLastResizeBounds = new Rect();
+    private final Rect mLastDownBounds = new Rect();
     private final Rect mTmpBounds = new Rect();
     private final int mDelta;
 
@@ -192,6 +193,7 @@ public class PipResizeGestureHandler {
             mAllowGesture = isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
                 mDownPoint.set(ev.getX(), ev.getY());
+                mLastDownBounds.set(mMotionHelper.getBounds());
             }
 
         } else if (mAllowGesture) {
@@ -208,7 +210,8 @@ public class PipResizeGestureHandler {
                             mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
                             mMinSize.y, mMaxSize, true, true));
                     mPipBoundsHandler.transformBoundsToAspectRatio(mLastResizeBounds);
-                    mPipTaskOrganizer.scheduleResizePip(mLastResizeBounds, null);
+                    mPipTaskOrganizer.scheduleUserResizePip(mLastDownBounds, mLastResizeBounds,
+                            null);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
