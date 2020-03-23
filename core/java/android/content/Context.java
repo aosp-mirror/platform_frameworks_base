@@ -3987,10 +3987,10 @@ public abstract class Context {
     public static final String NETWORK_STACK_SERVICE = "network_stack";
 
     /**
-     * Use with {@link android.os.ServiceManager.getService()} to retrieve a
-     * {@link ITetheringConnector} IBinder for communicating with the tethering service
+     * Use with {@link #getSystemService(String)} to retrieve a {@link android.net.TetheringManager}
+     * for managing tethering functions.
      * @hide
-     * @see TetheringClient
+     * @see android.net.TetheringManager
      */
     @SystemApi
     public static final String TETHERING_SERVICE = "tethering";
