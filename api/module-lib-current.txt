@@ -9,6 +9,14 @@ package android.annotation {
 
 }
 
+package android.content.rollback {
+
+  public class RollbackManagerFrameworkInitializer {
+    method public static void initialize();
+  }
+
+}
+
 package android.net {
 
   public final class TetheredClient implements android.os.Parcelable {

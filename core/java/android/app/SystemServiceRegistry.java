@@ -68,8 +68,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
-import android.content.rollback.IRollbackManager;
-import android.content.rollback.RollbackManager;
+import android.content.rollback.RollbackManagerFrameworkInitializer;
 import android.debug.AdbManager;
 import android.debug.IAdbManager;
 import android.hardware.ConsumerIrManager;
@@ -1245,16 +1244,6 @@ public final class SystemServiceRegistry {
                         return new RoleControllerManager(ctx.getOuterContext());
                     }});
 
-        registerService(Context.ROLLBACK_SERVICE, RollbackManager.class,
-                new CachedServiceFetcher<RollbackManager>() {
-                    @Override
-                    public RollbackManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        IBinder b = ServiceManager.getServiceOrThrow(Context.ROLLBACK_SERVICE);
-                        return new RollbackManager(ctx.getOuterContext(),
-                                IRollbackManager.Stub.asInterface(b));
-                    }});
-
         registerService(Context.DYNAMIC_SYSTEM_SERVICE, DynamicSystemManager.class,
                 new CachedServiceFetcher<DynamicSystemManager>() {
                     @Override
@@ -1341,6 +1330,7 @@ public final class SystemServiceRegistry {
             AppSearchManagerFrameworkInitializer.initialize();
             WifiFrameworkInitializer.registerServiceWrappers();
             StatsFrameworkInitializer.registerServiceWrappers();
+            RollbackManagerFrameworkInitializer.initialize();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...
