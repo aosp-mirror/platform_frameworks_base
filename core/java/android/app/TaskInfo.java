@@ -28,7 +28,7 @@ import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
-import android.view.IWindowContainer;
+import android.window.IWindowContainer;
 
 /**
  * Stores information about a particular Task.
