@@ -3094,17 +3094,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             return;
         }
 
-        long applicableNetworkTypes = 0;
+        final ArraySet<Integer> applicableNetworkTypes = new ArraySet<Integer>();
         boolean allNetworks = false;
         for (SubscriptionPlan plan : plans) {
             if (plan.getNetworkTypes() == null) {
                 allNetworks = true;
             } else {
-                if ((applicableNetworkTypes & plan.getNetworkTypesBitMask()) != 0) {
+                final int[] networkTypes = plan.getNetworkTypes();
+                if (!addAll(applicableNetworkTypes, networkTypes)) {
                     throw new IllegalArgumentException(
                             "Multiple subscription plans defined for a single network type.");
-                } else {
-                    applicableNetworkTypes |= plan.getNetworkTypesBitMask();
                 }
             }
         }
@@ -3114,6 +3113,19 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             throw new IllegalArgumentException(
                     "No generic subscription plan that applies to all network types.");
         }
+    }
+
+    /**
+     * Adds all of the {@code elements} to the {@code set}.
+     *
+     * @return {@code false} if any element is not added because the set already have the value.
+     */
+    private static boolean addAll(@NonNull Set<Integer> set, @NonNull int... elements) {
+        boolean result = true;
+        for (int element : elements) {
+            result &= set.add(element);
+        }
+        return result;
     }
 
     @Override
