@@ -27,6 +27,8 @@ import com.android.internal.os.RuntimeInit;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.LineBreakBufferedWriter;
 
+import dalvik.annotation.optimization.FastNative;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -228,6 +230,7 @@ public final class Log {
      *         for Nougat (7.0) releases (API <= 23) and prior, there is no
      *         tag limit of concern after this API level.
      */
+    @FastNative
     public static native boolean isLoggable(@Nullable String tag, @Level int level);
 
     /**
