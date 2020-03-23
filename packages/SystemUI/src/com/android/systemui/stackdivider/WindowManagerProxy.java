@@ -28,8 +28,8 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
-import android.view.IWindowContainer;
-import android.view.WindowContainerTransaction;
+import android.window.IWindowContainer;
+import android.window.WindowContainerTransaction;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;

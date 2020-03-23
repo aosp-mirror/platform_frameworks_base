@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.window;
 
 import android.view.SurfaceControl;
 

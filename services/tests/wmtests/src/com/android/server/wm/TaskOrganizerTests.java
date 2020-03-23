@@ -60,10 +60,9 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.Rational;
 import android.view.Display;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
-import android.view.WindowContainerTransaction;
+import android.window.ITaskOrganizer;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
@@ -74,7 +73,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test class for {@link ITaskOrganizer} and {@link android.app.ITaskOrganizerController}.
+ * Test class for {@link ITaskOrganizer} and {@link android.window.ITaskOrganizerController}.
  *
  * Build/Install/Run:
  *  atest WmTests:TaskOrganizerTests

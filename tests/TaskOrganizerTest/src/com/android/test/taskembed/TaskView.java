@@ -18,11 +18,11 @@ package com.android.test.taskembed;
 
 import android.app.ActivityTaskManager;
 import android.content.Context;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
+import android.window.IWindowContainer;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.window.ITaskOrganizer;
 
 /**
  * Simple SurfaceView wrapper which registers a TaskOrganizer

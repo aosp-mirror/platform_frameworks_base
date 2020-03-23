@@ -32,12 +32,12 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Slog;
-import android.view.IWindowContainer;
+import android.window.IWindowContainer;
 import android.view.LayoutInflater;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 
 import androidx.annotation.Nullable;
 
