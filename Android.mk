@@ -39,11 +39,6 @@ INTERNAL_SDK_SOURCE_DIRS := $(addprefix $(LOCAL_PATH)/,$(dirs_to_document))
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE))
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE):apistubs/android/public/api/android.txt)
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE):apistubs/android/system/api/android.txt)
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_TEST_API_FILE):apistubs/android/test/api/android.txt)
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_MODULE_LIB_API_FILE):apistubs/android/module-lib/api/android.txt)
-$(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_SERVER_API_FILE):apistubs/android/system-server/api/android.txt)
 
 # sdk.atree needs to copy the whole dir: $(OUT_DOCS)/offline-sdk to the final zip.
 # So keep offline-sdk-timestamp target here, and unzip offline-sdk-docs.zip to
