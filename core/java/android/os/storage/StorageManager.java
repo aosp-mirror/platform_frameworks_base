@@ -2470,6 +2470,36 @@ public class StorageManager {
         }
     }
 
+    /**
+     * Asks StorageManager to fixup the permissions of an application-private directory.
+     *
+     * On devices without sdcardfs, filesystem permissions aren't magically fixed up. This
+     * is problematic mostly in application-private directories, which are owned by the
+     * application itself; if another process with elevated permissions creates a file
+     * in these directories, the UID will be wrong, and the owning package won't be able
+     * to access the files.
+     *
+     * This API can be used to recursively fix up the permissions on the passed in path.
+     * The default platform user of this API is the DownloadProvider, which can download
+     * things in application-private directories on their behalf.
+     *
+     * This API doesn't require any special permissions, because it merely changes the
+     * permissions of a directory to what they should anyway be.
+     *
+     * @param path the path for which we should fix up the permissions
+     *
+     * @hide
+     */
+    public void fixupAppDir(@NonNull File path) {
+        try {
+            mStorageManager.fixupAppDir(path.getCanonicalPath());
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to get canonical path for " + path.getPath(), e);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** {@hide} */
     private static void setCacheBehavior(File path, String name, boolean enabled)
             throws IOException {
