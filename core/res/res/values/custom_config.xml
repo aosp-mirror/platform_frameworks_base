@@ -269,6 +269,7 @@
     <!-- Whether device supports variable refresh rate -->
     <bool name="config_hasVariableRefreshRate">false</bool>
 
+<<<<<<< HEAD
     <!-- Timeout in MS for how long you have to long-press the back key to
          kill the foreground app. -->
     <integer name="config_backKillTimeout">2000</integer>
@@ -310,5 +311,11 @@
 
     <!-- Should we filter any display modes which are unampped? -->
     <bool name="config_filterDisplayModes">false</bool>
+
+    <!-- Library path of screen off fod handler -->
+    <string name="config_fodScreenOffHandlerLib" translatable="false"></string>
+
+    <!-- Class name of screen off fod handler -->
+    <string name="config_fodScreenOffHandlerClass" translatable="false"></string>
 
 </resources>
