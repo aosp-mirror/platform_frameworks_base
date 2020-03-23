@@ -154,7 +154,10 @@ class WindowToken extends WindowContainer<WindowState> {
         void resetTransform() {
             for (int i = mRotatedContainers.size() - 1; i >= 0; i--) {
                 final WindowContainer<?> c = mRotatedContainers.get(i);
-                mRotator.finish(c.getPendingTransaction(), c);
+                // If the window is detached (no parent), its surface may have been released.
+                if (c.getParent() != null) {
+                    mRotator.finish(c.getPendingTransaction(), c);
+                }
             }
         }
     }
@@ -507,19 +510,6 @@ class WindowToken extends WindowContainer<WindowState> {
             // rotated, so here transforms its surface to fit in the real display.
             mFixedRotationTransformState.transform(this);
         }
-    }
-
-    /**
-     * Converts the rotated animation frames and insets back to display space for local animation.
-     * It should only be called when {@link #hasFixedRotationTransform} is true.
-     */
-    void unrotateAnimationFrames(Rect outFrame, Rect outInsets, Rect outStableInsets,
-            Rect outSurfaceInsets) {
-        final SeamlessRotator rotator = mFixedRotationTransformState.mRotator;
-        rotator.unrotateFrame(outFrame);
-        rotator.unrotateInsets(outInsets);
-        rotator.unrotateInsets(outStableInsets);
-        rotator.unrotateInsets(outSurfaceInsets);
     }
 
     /**
