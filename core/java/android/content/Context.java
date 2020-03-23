@@ -3864,8 +3864,6 @@ public abstract class Context {
      * @hide
      * @see NetworkStackClient
      */
-    @SystemApi
-    @TestApi
     public static final String NETWORK_STACK_SERVICE = "network_stack";
 
     /**
