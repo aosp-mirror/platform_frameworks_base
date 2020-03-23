@@ -37,8 +37,8 @@ import android.util.TypedValue;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IWindowManager;
-import android.view.WindowContainerTransaction;
 import android.view.WindowManagerGlobal;
+import android.window.WindowContainerTransaction;
 
 import java.io.PrintWriter;
 
