@@ -71,7 +71,7 @@ import com.android.server.biometrics.Constants;
 import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.RemovalClient;
 
-import com.android.internal.util.custom.FodUtils;
+import com.android.internal.util.custom.fod.FodUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

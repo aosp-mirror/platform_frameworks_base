@@ -24,7 +24,7 @@ import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 
-import com.android.internal.util.custom.FodUtils;
+import com.android.internal.util.custom.fod.FodUtils;
 
 public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "FODCircleViewImpl";

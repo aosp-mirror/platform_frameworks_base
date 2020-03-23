@@ -24,7 +24,7 @@ import android.view.View;
 
 import com.android.systemui.R;
 
-import com.android.internal.util.custom.FodUtils;
+import com.android.internal.util.custom.fod.FodUtils;
 
 /**
  * This class loads the view for the system-provided dialog. The view consists of:
