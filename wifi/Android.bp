@@ -118,6 +118,11 @@ java_library {
         "com.android.wifi",
         "test_com.android.wifi",
     ],
+    permitted_packages: [
+        "android.hardware.wifi",
+        "android.net.wifi",
+        "android.x.net.wifi",
+    ],
 }
 
 stubs_defaults {
