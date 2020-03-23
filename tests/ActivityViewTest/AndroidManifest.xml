@@ -15,7 +15,7 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.google.android.test.activityview">
+     package="com.google.android.test.activityview">
     <uses-permission android:name="android.permission.INJECT_EVENTS"/>
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"/>
     <uses-permission android:name="android.permission.ACTIVITY_EMBEDDING"/>
@@ -24,8 +24,9 @@
     <uses-sdk android:targetSdkVersion="27"/>
     <application android:label="ActivityViewTest">
         <activity android:name=".ActivityViewMainActivity"
-                  android:label="AV Main"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
+             android:label="AV Main"
+             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -34,33 +35,33 @@
         </activity>
 
         <activity android:name=".ActivityViewActivity"
-                  android:label="AV"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
-                  android:windowSoftInputMode="stateHidden|adjustResize">
+             android:label="AV"
+             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
+             android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
 
         <activity android:name=".ActivityViewResizeActivity"
-                  android:label="AV Resize"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
-                  android:windowSoftInputMode="stateHidden|adjustResize">
+             android:label="AV Resize"
+             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
+             android:windowSoftInputMode="stateHidden|adjustResize">
         </activity>
 
         <activity android:name=".ActivityViewScrollActivity"
-                  android:label="AV Scroll"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
-                  android:windowSoftInputMode="stateHidden">
+             android:label="AV Scroll"
+             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density"
+             android:windowSoftInputMode="stateHidden">
         </activity>
 
         <activity android:name=".ActivityViewTestActivity"
-                  android:resizeableActivity="true"
-                  android:theme="@*android:style/Theme.NoTitleBar"
-                  android:exported="true"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
+             android:resizeableActivity="true"
+             android:theme="@*android:style/Theme.NoTitleBar"
+             android:exported="true"
+             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
         </activity>
 
         <activity android:name=".ActivityViewVisibilityActivity"
-                  android:label="AV Visibility"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
+             android:label="AV Visibility"
+             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|colorMode|density">
         </activity>
     </application>
 </manifest>

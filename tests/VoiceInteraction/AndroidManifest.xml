@@ -1,74 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.test.voiceinteraction">
+     package="com.android.test.voiceinteraction">
 
-    <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="25" />
+    <uses-sdk android:minSdkVersion="23"
+         android:targetSdkVersion="25"/>
 
-    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
 
     <application>
-        <activity android:name="VoiceInteractionMain" android:label="Voice Interaction"
-                android:theme="@android:style/Theme.Material">
+        <activity android:name="VoiceInteractionMain"
+             android:label="Voice Interaction"
+             android:theme="@android:style/Theme.Material"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="AssistProxyActivity"
-                android:label="Test Assist Proxy"
-                android:theme="@android:style/Theme.NoDisplay"
-                android:excludeFromRecents="true"
-                android:noHistory="true"
-                android:taskAffinity="">
+             android:label="Test Assist Proxy"
+             android:theme="@android:style/Theme.NoDisplay"
+             android:excludeFromRecents="true"
+             android:noHistory="true"
+             android:taskAffinity=""
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.ASSIST" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.ASSIST"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
         <activity android:name="SettingsActivity"
-                android:label="Voice Interaction Settings">
+             android:label="Voice Interaction Settings"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </activity>
         <service android:name="MainInteractionService"
-                android:label="Test Voice Interaction Service"
-                android:permission="android.permission.BIND_VOICE_INTERACTION"
-                android:process=":interactor">
+             android:label="Test Voice Interaction Service"
+             android:permission="android.permission.BIND_VOICE_INTERACTION"
+             android:process=":interactor"
+             android:exported="true">
             <meta-data android:name="android.voice_interaction"
-                       android:resource="@xml/interaction_service" />
+                 android:resource="@xml/interaction_service"/>
             <intent-filter>
-                <action android:name="android.service.voice.VoiceInteractionService" />
+                <action android:name="android.service.voice.VoiceInteractionService"/>
             </intent-filter>
         </service>
         <service android:name="MainInteractionSessionService"
-                android:permission="android.permission.BIND_VOICE_INTERACTION"
-                android:process=":session">
+             android:permission="android.permission.BIND_VOICE_INTERACTION"
+             android:process=":session">
         </service>
         <service android:name="MainRecognitionService"
-                android:label="Test Voice Interaction Service">
+             android:label="Test Voice Interaction Service"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.speech.RecognitionService" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.speech.RecognitionService"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
-            <meta-data android:name="android.speech" android:resource="@xml/recognition_service" />
+            <meta-data android:name="android.speech"
+                 android:resource="@xml/recognition_service"/>
         </service>
-        <activity android:name="TestInteractionActivity" android:label="Voice Interaction Target"
-                  android:theme="@android:style/Theme.Material.Light">
+        <activity android:name="TestInteractionActivity"
+             android:label="Voice Interaction Target"
+             android:theme="@android:style/Theme.Material.Light"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.VOICE" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.VOICE"/>
             </intent-filter>
         </activity>
-        <activity android:name="StartVoiceInteractionActivity" android:label="In-Activity Voice"
-                  android:theme="@android:style/Theme.Material.Light">
+        <activity android:name="StartVoiceInteractionActivity"
+             android:label="In-Activity Voice"
+             android:theme="@android:style/Theme.Material.Light"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>

@@ -13,30 +13,32 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
 <!-- Declare the contents of this Android application.  The namespace
      attribute brings in the Android platform namespace, and the package
      supplies a unique name for the application.  When writing your
      own application, the package name must be changed from "com.example.*"
      to come from a domain that you own or have control over. -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.hugebackup"
-    android:versionCode="1"
-    android:versionName="1.0">
+     package="com.android.hugebackup"
+     android:versionCode="1"
+     android:versionName="1.0">
 
     <!-- The backup/restore mechanism was introduced in API version 8 -->
-    <uses-sdk android:minSdkVersion="8" android:targetSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="8"
+         android:targetSdkVersion="8"/>
 
     <application android:label="Huge Backup"
-        android:backupAgent="HugeAgent">
+         android:backupAgent="HugeAgent">
 
         <meta-data android:name="com.google.android.backup.api_key"
-            android:value="AEdPqrEAAAAINyoagzQOEEpIH3yw7LYCFN7CRX4FMd6TGIGVaA" />
+             android:value="AEdPqrEAAAAINyoagzQOEEpIH3yw7LYCFN7CRX4FMd6TGIGVaA"/>
 
-        <activity android:name="HugeBackupActivity">
+        <activity android:name="HugeBackupActivity"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 

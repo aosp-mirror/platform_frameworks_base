@@ -15,26 +15,27 @@
 -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.accessorydisplay.source" >
+     package="com.android.accessorydisplay.source">
 
     <uses-feature android:name="android.hardware.usb.accessory"/>
-    <uses-sdk android:minSdkVersion="18" />
+    <uses-sdk android:minSdkVersion="18"/>
 
     <application android:label="@string/app_name"
-            android:icon="@drawable/ic_app"
-            android:hardwareAccelerated="true">
+         android:icon="@drawable/ic_app"
+         android:hardwareAccelerated="true">
 
         <activity android:name=".SourceActivity"
-                android:label="@string/app_name"
-                android:theme="@android:style/Theme.Holo">
+             android:label="@string/app_name"
+             android:theme="@android:style/Theme.Holo"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"/>
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
             <meta-data android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
-                    android:resource="@xml/usb_accessory_filter"/>
+                 android:resource="@xml/usb_accessory_filter"/>
         </activity>
 
     </application>
