@@ -232,6 +232,8 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"‏IP پتہ اور پورٹ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"‏QR کوڈ اسکین کریں"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"‏QR کوڈ اسکین کر کے Wi-Fi پر آلہ کا جوڑا بنائیں"</string>
+    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
+    <skip />
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"‏adb، ڈیبگ، dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"بگ رپورٹ کا شارٹ کٹ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"بگ رپورٹ لینے کیلئے پاور مینو میں ایک بٹن دکھائیں"</string>
@@ -255,6 +257,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"بغیر نام والے بلوٹوتھ آلات دکھائیں"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"مطلق والیوم کو غیر فعال کریں"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"‏Gabeldorsche فعال کریں"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"بہتر کردہ کنیکٹوٹی"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"‏بلوٹوتھ AVRCP ورژن"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"‏بلوٹوتھ AVRCP ورژن منتخب کریں"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"‏بلوٹوتھ MAP ورژن"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏بغیر نام والے بلوٹوتھ آلات (صرف MAC پتے) ڈسپلے کئے جائیں گے"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"ریموٹ آلات کے ساتھ والیوم کے مسائل مثلاً نا قابل قبول حد تک بلند والیوم یا کنٹرول نہ ہونے کی صورت میں بلو ٹوتھ مطلق والیوم والی خصوصیت کو غیر فعال کریں۔"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏بلوٹوتھ Gabeldorsche خصوصیت کے انبار کو فعال کرتا ہے۔"</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"بہتر کردہ کنیکٹوٹی کی خصوصیات کو فعال کرتا ہے۔"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏HDCP چیکنگ"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پروفائل HWUI رینڈرنگ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏GPU ڈیبگ پرتیں فعال کریں"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏ڈیبگ ایپس کیلئے GPU ڈیبگ پرتوں کو لوڈ کرنے دیں"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"وربوس وینڈر لاگنگ فعال کریں"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"اضافی آلہ کے مخصوص وینڈر لاگز کو بگ رپورٹس میں شامل کریں، جن میں نجی معلومات، بیٹری کا زیادہ استعمال اور/یا اسٹوریج کا زیادہ استعمال شامل ہوسکتے ہیں۔"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ونڈو اینیمیشن اسکیل"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ٹرانزیشن اینیمیشن اسکیل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"اینیمیٹر دورانیے کا اسکیل"</string>
@@ -412,7 +418,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"‏Protanomaly (سرخ سبز)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"‏Tritanomaly (نیلا پیلا)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"رنگ کی اصلاح"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"رنگ کی درستگی رنگ نہ دکھائی دینے والے لوگوں کی رنگوں کو مزید درست طریقے سے دیکھنے میں مدد کرتی ہے"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> کے ذریعہ منسوخ کردیا گیا"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"تقریباً <xliff:g id="TIME_REMAINING">%1$s</xliff:g> باقی ہے"</string>
@@ -426,7 +433,8 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"<xliff:g id="TIME">%1$s</xliff:g> کے بعد بیٹری لائف بڑھائیں"</string>
+    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -501,6 +509,29 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ہر بار پوچھیں"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"یہاں تک کہ آپ آف کر دیں"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ابھی ابھی"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"یہ آلہ"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"فون اسپیکر"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"منسلک کرنے میں مسئلہ پیش آ گیا۔ آلہ کو آف اور بیک آن کریں"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"وائرڈ آڈیو آلہ"</string>
+    <!-- no translation found for help_label (3528360748637781274) -->
+    <skip />
+    <!-- no translation found for storage_category (2287342585424631813) -->
+    <skip />
+    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <skip />
+    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <skip />
+    <!-- no translation found for blob_id_text (8680078988996308061) -->
+    <skip />
+    <!-- no translation found for blob_expires_text (7882727111491739331) -->
+    <skip />
+    <!-- no translation found for accessor_info_title (8289823651512477787) -->
+    <skip />
+    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
+    <skip />
+    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
+    <skip />
+    <!-- no translation found for delete_blob_text (2819192607255625697) -->
+    <skip />
+    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
+    <skip />
 </resources>

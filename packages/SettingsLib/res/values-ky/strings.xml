@@ -26,7 +26,7 @@
     <string name="wifi_disconnected" msgid="7054450256284661757">"Ажыратылды"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Өчүрүлгөн"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP конфигурациясы бузулду"</string>
-    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Тармактын сапаты начар болгондуктан туташкан жок"</string>
+    <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Тармактын сапаты начар болгондуктан, туташкан жок"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi туташуусу бузулду"</string>
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Аутентификация маселеси бар"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Туташпай жатат"</string>
@@ -117,7 +117,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Жок"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Жупташканда байланыштарыңыз менен чалуу таржымалыңызды пайдалана аласыз."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен жупташуу мүмкүн эмес."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN же код туура эмес болгондуктан <xliff:g id="DEVICE_NAME">%1$s</xliff:g> туташуу мүмкүн эмес."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN же код туура эмес болгондуктан, <xliff:g id="DEVICE_NAME">%1$s</xliff:g> туташуу мүмкүн эмес."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> менен байланышуу мүмкүн эмес."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Жупташтырууну <xliff:g id="DEVICE_NAME">%1$s</xliff:g> четке какты."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Компьютер"</string>
@@ -232,6 +232,8 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP дареги жана Оюкча"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR кодун скандоо"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
+    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
+    <skip />
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, мүчүлүштүктөрдү оңдоо, иштеп чыгуу"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Ката жөнүндө кабарлоо"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Менюда ката жөнүндө кабарлоо баскычы көрүнүп турат"</string>
@@ -255,6 +257,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Аталышсыз Bluetooth түзмөктөрү көрсөтүлсүн"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Үндүн абсолюттук деңгээли өчүрүлсүн"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche функциясын иштетүү"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"Жакшыртылган туташуу"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP версиясы"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP версиясын тандоо"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP версиясы"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Аталышсыз Bluetooth түзмөктөрү (MAC даректери менен гана) көрсөтүлөт"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Алыскы түзмөктөр өтө катуу добуш чыгарып же көзөмөлдөнбөй жатса Bluetooth \"Үндүн абсолюттук деңгээли\" функциясын өчүрөт."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche функциясынын топтомун иштетет."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Жакшыртылган туташуу функциясын иштетет."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Жергиликтүү терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Жергиликтүү буйрук кабыгын сунуштаган терминалга уруксат берүү"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP текшерүү"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUI профили түзүлүүдө"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU мүчүлүштүктөрдү оңдоо катмарларын иштетүү"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"GPU мүчүлүштүктөрдү оңдоо катмарларын иштетет"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Кызмат көрсөтүүчүнү оозеки киргизүүнү иштетет"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Түзмөккө байланыштуу кызмат көрсөтүүчүнүн кирүүлөрү боюнча мүчүлүштүк тууралуу кабар берүү камтылсын. Анда купуя маалымат көрсөтүлүп, батарея тезирээк отуруп жана/же сактагычтан көбүрөөк орун ээлениши мүмкүн."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Терезелердин анимациясы"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Өткөрүү анимацснн шкаласы"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Анимациянын узактыгы"</string>
@@ -412,7 +418,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалия (кызыл-жашыл)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалия (көк-сары)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Түсүн тууралоо"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"Түстү тууралоо жөндөөсү түстөрдү айырмалап көрбөгөн адамдарга түстөрдү тагыраак билүүгө жардам берет"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> менен алмаштырылган"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Болжол менен <xliff:g id="TIME_REMAINING">%1$s</xliff:g> калды"</string>
@@ -426,7 +433,8 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Болжол менен <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) кийин өчөт"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Болжол менен <xliff:g id="TIME">%1$s</xliff:g> кийин өчөт"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> чейин"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Батареянын кубатынын мөөнөтүн узартуудан <xliff:g id="TIME">%1$s</xliff:g> өттү"</string>
+    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> жетпеген убакыт калды"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> жетпеген убакыт калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ашыгыраак убакыт калды (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -501,6 +509,29 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Ар дайым суралсын"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Бул функция өчүрүлгөнгө чейин"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Азыр эле"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"Ушул түзмөк"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Телефондун динамиги"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Туташууда маселе келип чыкты. Түзмөктү өчүрүп, кайра күйгүзүп көрүңүз"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Зымдуу аудио түзмөк"</string>
+    <!-- no translation found for help_label (3528360748637781274) -->
+    <skip />
+    <!-- no translation found for storage_category (2287342585424631813) -->
+    <skip />
+    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <skip />
+    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <skip />
+    <!-- no translation found for blob_id_text (8680078988996308061) -->
+    <skip />
+    <!-- no translation found for blob_expires_text (7882727111491739331) -->
+    <skip />
+    <!-- no translation found for accessor_info_title (8289823651512477787) -->
+    <skip />
+    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
+    <skip />
+    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
+    <skip />
+    <!-- no translation found for delete_blob_text (2819192607255625697) -->
+    <skip />
+    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
+    <skip />
 </resources>
