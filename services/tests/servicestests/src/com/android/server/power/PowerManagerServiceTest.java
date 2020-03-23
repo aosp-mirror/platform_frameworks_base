@@ -63,7 +63,6 @@ import android.os.PowerManager;
 import android.os.PowerSaveState;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.platform.test.annotations.FlakyTest;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
@@ -692,7 +691,10 @@ public class PowerManagerServiceTest {
 
     @Test
     public void testInattentiveSleep_hideWarningIfStayOnIsEnabledAndPluggedIn() throws Exception {
-        setAttentiveTimeout(15000);
+        setMinimumScreenOffTimeoutConfig(5);
+        setAttentiveWarningDuration(120);
+        setAttentiveTimeout(100);
+
         Settings.Global.putInt(mContextSpy.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, BatteryManager.BATTERY_PLUGGED_AC);
 
@@ -708,10 +710,10 @@ public class PowerManagerServiceTest {
     }
 
     @Test
-    public void testInattentive_userActivityDismissesWarning() throws Exception {
+    public void testInattentiveSleep_userActivityDismissesWarning() throws Exception {
         setMinimumScreenOffTimeoutConfig(5);
-        setAttentiveWarningDuration(30);
-        setAttentiveTimeout(100);
+        setAttentiveWarningDuration(1900);
+        setAttentiveTimeout(2000);
 
         createService();
         startSystem();
@@ -720,7 +722,7 @@ public class PowerManagerServiceTest {
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
         verify(mInattentiveSleepWarningControllerMock, never()).show();
 
-        SystemClock.sleep(70);
+        SystemClock.sleep(150);
         verify(mInattentiveSleepWarningControllerMock, times(1)).show();
         verify(mInattentiveSleepWarningControllerMock, never()).dismiss(anyBoolean());
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
@@ -733,16 +735,18 @@ public class PowerManagerServiceTest {
     @Test
     public void testInattentiveSleep_warningHiddenAfterWakingUp() throws Exception {
         setMinimumScreenOffTimeoutConfig(5);
-        setAttentiveWarningDuration(20);
-        setAttentiveTimeout(30);
+        setAttentiveWarningDuration(70);
+        setAttentiveTimeout(100);
 
         createService();
         startSystem();
-        SystemClock.sleep(10);
+        SystemClock.sleep(50);
         verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).show();
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
-        SystemClock.sleep(30);
+        SystemClock.sleep(70);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         forceAwake();
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
         verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).dismiss(false);
     }
 
@@ -764,7 +768,6 @@ public class PowerManagerServiceTest {
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
-    @FlakyTest
     @Test
     public void testInattentiveSleep_goesToSleepWithWakeLock() throws Exception {
         final String pkg = mContextSpy.getOpPackageName();
@@ -772,7 +775,7 @@ public class PowerManagerServiceTest {
         final String tag = "sleep_testWithWakeLock";
 
         setMinimumScreenOffTimeoutConfig(5);
-        setAttentiveTimeout(10);
+        setAttentiveTimeout(30);
         createService();
         startSystem();
 
@@ -780,7 +783,7 @@ public class PowerManagerServiceTest {
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK, tag, pkg,
                 null /* workSource */, null /* historyTag */);
 
-        SystemClock.sleep(11);
+        SystemClock.sleep(60);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
