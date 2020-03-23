@@ -184,7 +184,7 @@ public class ResourcesManagerTest extends TestCase {
     @SmallTest
     public void testThemesGetUpdatedWithNewImpl() {
         Binder activity1 = new Binder();
-        Resources resources1 = mResourcesManager.createBaseActivityResources(
+        Resources resources1 = mResourcesManager.createBaseTokenResources(
                 activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, null,
                 CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
@@ -217,7 +217,7 @@ public class ResourcesManagerTest extends TestCase {
         // Create a Resources for the Activity.
         Configuration config1 = new Configuration();
         config1.densityDpi = 280;
-        Resources resources1 = mResourcesManager.createBaseActivityResources(
+        Resources resources1 = mResourcesManager.createBaseTokenResources(
                 activity1, APP_ONE_RES_DIR, null, null, null, Display.DEFAULT_DISPLAY, config1,
                 CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null, null);
         assertNotNull(resources1);
