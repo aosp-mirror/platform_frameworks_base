@@ -448,8 +448,7 @@
     <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
     <skip />
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Povoliť aplikácii alebo službe prijímať spätné volanie, keď sú zariadenia s kamerou otvorené alebo zatvorené."</string>
-    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
-    <skip />
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Táto aplikácia môže prijímať spätné volanie, keď je ľubovoľné zariadenie s kamerou otvorené (aplikáciou, ktorú určíte) alebo zatvorené."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"ovládať vibrovanie"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Povoľuje aplikácii prístup k stavu vibrátora."</string>
@@ -2136,33 +2135,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Práca"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Osobné zobrazenie"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Pracovné zobrazenie"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Nedá sa zdieľať s pracovnými aplikáciami"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Správca IT vám zakázal zdieľať tento obsah pomocou aplikácií v pracovnom profile"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Nedá sa otvoriť pomocou pracovných aplikácií"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Správca IT vám zakázal otvoriť tento obsah pomocou aplikácií v pracovnom profile"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Nedá sa zdieľať pomocou osobných aplikácií"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Správca IT vám zakázal zdieľať tento obsah pomocou aplikácií v osobnom profile"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Nedá sa otvoriť pomocou osobných aplikácií"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Správca IT vám zakázal otvoriť tento obsah pomocou aplikácií v osobnom profile"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Pracovný profil je pozastavený"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Zapnúť"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Tento obsah nepodporujú žiadne pracovné aplikácie"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"Tento obsah neotvoria žiadne pracovné aplikácie"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"Tento obsah nepodporujú žiadne osobné aplikácie"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"Tento obsah neotvoria žiadne osobné aplikácie"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"Nahrávanie alebo prehrávanie zvuku počas telefonických hovorov"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"Povoľuje tejto aplikácii, keď je priradená ako predvolená aplikácia na vytáčanie, nahrávať alebo prehrávať zvuk počas telefonických hovorov."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
