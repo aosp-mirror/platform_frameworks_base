@@ -560,8 +560,24 @@ void MetricsManager::writeActiveConfigToProtoOutputStream(
     }
 }
 
-
-
+bool MetricsManager::writeMetadataToProto(int64_t currentWallClockTimeNs,
+                                          int64_t systemElapsedTimeNs,
+                                          metadata::StatsMetadata* statsMetadata) {
+    bool metadataWritten = false;
+    metadata::ConfigKey* configKey = statsMetadata->mutable_config_key();
+    configKey->set_config_id(mConfigKey.GetId());
+    configKey->set_uid(mConfigKey.GetUid());
+    for (const auto& anomalyTracker : mAllAnomalyTrackers) {
+        metadata::AlertMetadata* alertMetadata = statsMetadata->add_alert_metadata();
+        bool alertWritten = anomalyTracker->writeAlertMetadataToProto(currentWallClockTimeNs,
+                systemElapsedTimeNs, alertMetadata);
+        if (!alertWritten) {
+            statsMetadata->mutable_alert_metadata()->RemoveLast();
+        }
+        metadataWritten |= alertWritten;
+    }
+    return metadataWritten;
+}
 
 }  // namespace statsd
 }  // namespace os

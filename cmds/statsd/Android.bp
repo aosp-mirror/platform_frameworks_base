@@ -78,6 +78,7 @@ cc_defaults {
         "src/matchers/EventMatcherWizard.cpp",
         "src/matchers/matcher_util.cpp",
         "src/matchers/SimpleLogMatchingTracker.cpp",
+        "src/metadata_util.cpp",
         "src/metrics/CountMetricProducer.cpp",
         "src/metrics/duration_helper/MaxDurationTracker.cpp",
         "src/metrics/duration_helper/OringDurationTracker.cpp",

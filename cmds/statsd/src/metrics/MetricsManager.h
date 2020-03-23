@@ -23,6 +23,7 @@
 #include "config/ConfigKey.h"
 #include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
+#include "frameworks/base/cmds/statsd/src/statsd_metadata.pb.h"
 #include "logd/LogEvent.h"
 #include "matchers/LogMatchingTracker.h"
 #include "metrics/MetricProducer.h"
@@ -139,6 +140,10 @@ public:
     void writeActiveConfigToProtoOutputStream(
             int64_t currentTimeNs, const DumpReportReason reason, ProtoOutputStream* proto);
 
+    // Returns true if at least one piece of metadata is written.
+    bool writeMetadataToProto(int64_t currentWallClockTimeNs,
+                              int64_t systemElapsedTimeNs,
+                              metadata::StatsMetadata* statsMetadata);
 private:
     // For test only.
     inline int64_t getTtlEndNs() const { return mTtlEndNs; }
@@ -263,6 +268,8 @@ private:
 
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk_no_data_written);
+    FRIEND_TEST(AnomalyDetectionE2eTest, TestCountMetric_save_refractory_to_disk);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_multiple_buckets);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestDurationMetric_SUM_long_refractory_period);

@@ -45,11 +45,15 @@ message MetricDimensionKey {
   repeated FieldValue state_values_key = 2;
 }
 
+message AlertDimensionKeyedData {
+  // The earliest time the alert can be fired again in wall clock time.
+  optional int32 last_refractory_ends_sec = 1;
+  optional MetricDimensionKey dimension_key = 2;
+}
+
 message AlertMetadata {
   optional int64 alert_id = 1;
-  // The earliest time the alert can be fired again in wall clock time.
-  optional int32 last_refractory_ends_sec = 2;
-  optional MetricDimensionKey dimension_key = 3;
+  repeated AlertDimensionKeyedData alert_dim_keyed_data = 2;
 }
 
 // All metadata for a config in statsd
