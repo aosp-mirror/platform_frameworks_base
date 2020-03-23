@@ -16,6 +16,7 @@
 package android.graphics;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
 import android.os.Build;
@@ -125,6 +126,7 @@ public final class BitmapRegionDecoder {
      * @param is The input stream that holds the raw data to be decoded into a
      *           BitmapRegionDecoder.
      * @param isShareable This field has always been ignored.
+     * @return A new BitmapRegionDecoder, or {@code null} if {@code is} is {@code null}.
      * @throws IOException if the image format is not supported or can not be decoded.
      * @deprecated In favor of {@link #newInstance(InputStream)}
      *
@@ -134,7 +136,7 @@ public final class BitmapRegionDecoder {
      * {@link Build.VERSION_CODES#KITKAT}, this is no longer the case.</p>
      */
     @Deprecated
-    @NonNull
+    @Nullable
     public static BitmapRegionDecoder newInstance(@NonNull InputStream is,
             boolean isShareable) throws IOException {
         return newInstance(is);
@@ -148,9 +150,10 @@ public final class BitmapRegionDecoder {
      *
      * @param is The input stream that holds the raw data to be decoded into a
      *           BitmapRegionDecoder.
+     * @return A new BitmapRegionDecoder, or {@code null} if {@code is} is {@code null}.
      * @throws IOException if the image format is not supported or can not be decoded.
      */
-    @NonNull
+    @Nullable
     public static BitmapRegionDecoder newInstance(@NonNull InputStream is) throws IOException {
         if (is instanceof AssetManager.AssetInputStream) {
             return nativeNewInstance(
