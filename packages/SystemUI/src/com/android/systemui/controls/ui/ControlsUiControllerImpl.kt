@@ -29,6 +29,7 @@ import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.AdapterView
@@ -210,6 +211,63 @@ class ControlsUiControllerImpl @Inject constructor (
 
         createListView()
         createDropDown(items)
+        createMenu()
+    }
+
+    private fun createPopup(): ListPopupWindow {
+        return ListPopupWindow(
+            ContextThemeWrapper(context, R.style.Control_ListPopupWindow)).apply {
+            setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+            setModal(true)
+        }
+    }
+
+    private fun createMenu() {
+        val items = arrayOf(
+            context.resources.getString(R.string.controls_menu_add)
+        )
+        var adapter = ArrayAdapter<String>(context, R.layout.controls_more_item, items)
+
+        val anchor = parent.requireViewById<ImageView>(R.id.controls_more)
+        anchor.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View) {
+                popup = createPopup().apply {
+                    setAnchorView(anchor)
+                    setAdapter(adapter)
+                    setOnItemClickListener(object : AdapterView.OnItemClickListener {
+                        override fun onItemClick(
+                            parent: AdapterView<*>,
+                            view: View,
+                            pos: Int,
+                            id: Long
+                        ) {
+                            when (pos) {
+                                // 0: Add Control
+                                0 -> launchSelectorActivityListener(view.context)(parent)
+                                else -> Log.w(ControlsUiController.TAG,
+                                    "Unsupported index ($pos) on 'more' menu selection")
+                            }
+                            dismiss()
+                        }
+                    })
+                    // need to call show() first in order to construct the listView
+                    show()
+                    var width = 0
+                    getListView()?.apply {
+                        // width should be between [.5, .9] of screen
+                        val parentWidth = this@ControlsUiControllerImpl.parent.getWidth()
+                        val widthSpec = MeasureSpec.makeMeasureSpec(
+                            (parentWidth * 0.9).toInt(), MeasureSpec.AT_MOST)
+                        val child = adapter.getView(0, null, this)
+                        child.measure(widthSpec, MeasureSpec.UNSPECIFIED)
+                        width = Math.max(child.getMeasuredWidth(), (parentWidth * 0.5).toInt())
+                    }
+                    setWidth(width)
+                    setHorizontalOffset(-width + anchor.getWidth())
+                    show()
+                }
+            }
+        })
     }
 
     private fun createDropDown(items: List<SelectionItem>) {
@@ -224,7 +282,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
 
         var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
-            addAll(itemsWithStructure + addControlsItem)
+            addAll(itemsWithStructure)
         }
 
         /*
@@ -232,7 +290,7 @@ class ControlsUiControllerImpl @Inject constructor (
          * for this dialog. Use a textView with the ListPopupWindow to achieve
          * a similar effect
          */
-        parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
+        val spinner = parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
             setText(selectionItem.getTitle())
             // override the default color on the dropdown drawable
             (getBackground() as LayerDrawable).getDrawable(1)
@@ -242,16 +300,18 @@ class ControlsUiControllerImpl @Inject constructor (
             setContentDescription(selectionItem.getTitle())
             setImageDrawable(selectionItem.icon)
         }
+
+        if (itemsWithStructure.size == 1) {
+            spinner.setBackground(null)
+            return
+        }
+
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = ListPopupWindow(
-                    ContextThemeWrapper(context, R.style.Control_ListPopupWindow))
-                popup?.apply {
-                    setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
+                popup = createPopup().apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
-                    setModal(true)
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
                         override fun onItemClick(
                             parent: AdapterView<*>,
@@ -329,19 +389,15 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun switchAppOrStructure(item: SelectionItem) {
-        if (item == addControlsItem) {
-            launchSelectorActivityListener(context)(parent)
-        } else {
-            val newSelection = allStructures.first {
-                it.structure == item.structure && it.componentName == item.componentName
-            }
+        val newSelection = allStructures.first {
+            it.structure == item.structure && it.componentName == item.componentName
+        }
 
-            if (newSelection != selectedStructure) {
-                selectedStructure = newSelection
-                updatePreferences(selectedStructure)
-                controlsListingController.get().removeCallback(listingCallback)
-                reload(parent)
-            }
+        if (newSelection != selectedStructure) {
+            selectedStructure = newSelection
+            updatePreferences(selectedStructure)
+            controlsListingController.get().removeCallback(listingCallback)
+            reload(parent)
         }
     }
 
