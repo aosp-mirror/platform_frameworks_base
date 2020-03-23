@@ -232,6 +232,8 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ලිපිනය &amp; තොට"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR කේතය ස්කෑන් කරන්න"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR කේතය ස්කෑන් කිරීමෙන් Wi‑Fi හරහා උපාංගය යුගල කරන්න"</string>
+    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
+    <skip />
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, දෝෂාවෙක්ෂණ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"දෝෂය වාර්තා කිරීමේ කෙටිමඟ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"දෝෂ වාර්තාවක් ගැනීම සඳහා බල මෙනුව තුළ බොත්තම පෙන්වන"</string>
@@ -255,6 +257,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"නම් නොමැති බ්ලූටූත් උපාංග පෙන්වන්න"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche සබල කරන්න"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"වැඩිදියුණු කළ සබැඳුම් හැකියාව"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"බ්ලූටූත් AVRCP අනුවාදය"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"බ්ලූටූත් AVRCP අනුවාදය තෝරන්න"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP අනුවාදය"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"නම් නොමැති බ්ලූටූත් උපාංග (MAC ලිපින පමණි) සංදර්ශනය කරනු ඇත"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"පිළිගත නොහැකි ලෙස වැඩි හඩ පරිමාව හෝ පාලනය නොමැති වීම යනාදී දුරස්ථ උපාංග සමගින් වන හඬ පරිමා ගැටලුවලදී බ්ලූටූත් නිරපේක්ෂ හඬ පරිමා විශේෂාංගය අබල කරයි."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche විශේෂාංග අට්ටිය සබල කරයි."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"වැඩිදියුණු කළ සබැඳුම් හැකියා විශේෂාංගය සබල කරයි."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"අභ්‍යන්තර අන්තය"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"දේශීය ෂෙල් ප්‍රවේශනය පිරිනමන ටර්මිනල් යෙදුම සබල කරන්න"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP පරික්ෂාව"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"පැතිකඩ HWUI විදහමින්"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU නිදොසීමේ ස්තර සබල කර."</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"නිදොසීමේ යෙදුම්වලට GPU නිදොසීමේ ස්තර පූරණයට ඉඩ දෙ."</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"verbose vendor පිරීම සබල කරන්න"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"පුද්ගලික තොරතුරු අන්තර්ගත විය හැකි, වැඩි බැටරි බලයක් භාවිත කිරීමට සහ/හෝ වැඩි ගබඩා ඉඩක් භාවිත කිරීමට හැකි අමතර උපාංග නිශ්චිත විකුණුම්කරු ලොග, දෝෂ වාර්තාවල අඩංගු වේ."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"කවුළු සජීවිකරණ පරිමාණය"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"සංක්‍රමණ සජීවන පරිමාණය"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"සජීවක කාල පරාස පරිමාණය"</string>
@@ -412,7 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"වර්ණ දුර්වලතාවය (රතු-කොළ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"වර්ණ අන්ධතාවය (නිල්-කහ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"වර්ණ නිවැරදි කිරීම"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"වර්ණ අන්ධතාවෙන් පෙළෙන පුද්ගලයන්ට වඩාත් නිරවද්‍ය වර්ණ බැලීමට වර්ණ නිවැරදි කිරීම සහාය වේ"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"වර්ණ නිවැරදි කිරීම ඔබට ඔබේ උපාංගයෙහි වර්ණ සංදර්ශනය වන ආකාරය සීරුමාරු කිරීමට ඉඩ දේ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> මගින් ඉක්මවන ලදී"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ක් පමණ ඉතිරියි"</string>
@@ -426,7 +432,8 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"<xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>) පමණ වන තෙක් තිබිය යුතුය"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"<xliff:g id="TIME">%1$s</xliff:g> පමණ වන තෙක් තිබිය යුතුය"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> දක්වා"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"බැටරි ආයු කාලය <xliff:g id="TIME">%1$s</xliff:g> ට වඩා දීර්ඝ කරන්න"</string>
+    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ට වඩා අඩුවෙන් ඉතිරිව ඇත"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g>ට වඩා අඩුවෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>ට වඩා වැඩියෙන් ඉතිරිය (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -501,6 +508,29 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"සෑම විටම ඉල්ලන්න"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"ඔබ ක්‍රියාවිරහිත කරන තුරු"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"මේ දැන්"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"මෙම උපාංගය"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"දුරකථන ස්පීකරය"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"සම්බන්ධ කිරීමේ ගැටලුවකි උපාංගය ක්‍රියාවිරහිත කර &amp; ආපසු ක්‍රියාත්මක කරන්න"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"රැහැන්ගත කළ ඕඩියෝ උපාංගය"</string>
+    <!-- no translation found for help_label (3528360748637781274) -->
+    <skip />
+    <!-- no translation found for storage_category (2287342585424631813) -->
+    <skip />
+    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <skip />
+    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <skip />
+    <!-- no translation found for blob_id_text (8680078988996308061) -->
+    <skip />
+    <!-- no translation found for blob_expires_text (7882727111491739331) -->
+    <skip />
+    <!-- no translation found for accessor_info_title (8289823651512477787) -->
+    <skip />
+    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
+    <skip />
+    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
+    <skip />
+    <!-- no translation found for delete_blob_text (2819192607255625697) -->
+    <skip />
+    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
+    <skip />
 </resources>
