@@ -20,7 +20,6 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,7 +31,7 @@ import android.os.IBinder;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
@@ -43,7 +42,6 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,18 +54,21 @@ public class PersonalAppsSuspensionHelper {
     private final Context mContext;
     private final PackageManager mPackageManager;
 
-    public PersonalAppsSuspensionHelper(Context context, PackageManager packageManager) {
+    /**
+     * @param context Context for the user whose apps should to be suspended.
+     */
+    public PersonalAppsSuspensionHelper(Context context) {
         mContext = context;
-        mPackageManager = packageManager;
+        mPackageManager = context.getPackageManager();
     }
 
     /**
      * @return List of packages that should be suspended to limit personal use.
      */
-    String[] getPersonalAppsForSuspension(@UserIdInt int userId) {
+    String[] getPersonalAppsForSuspension() {
         final List<PackageInfo> installedPackageInfos =
-                mPackageManager.getInstalledPackagesAsUser(0 /* flags */, userId);
-        final Set<String> result = new HashSet<>();
+                mPackageManager.getInstalledPackages(0 /* flags */);
+        final Set<String> result = new ArraySet<>();
         for (final PackageInfo packageInfo : installedPackageInfos) {
             final ApplicationInfo info = packageInfo.applicationInfo;
             if ((!info.isSystemApp() && !info.isUpdatedSystemApp())
@@ -77,11 +78,15 @@ public class PersonalAppsSuspensionHelper {
         }
         result.removeAll(getCriticalPackages());
         result.removeAll(getSystemLauncherPackages());
-        result.removeAll(getAccessibilityServices(userId));
-        result.removeAll(getInputMethodPackages(userId));
-        result.remove(getActiveLauncherPackages(userId));
-        result.remove(getDialerPackage(userId));
-        result.remove(getSettingsPackageName(userId));
+        result.removeAll(getAccessibilityServices());
+        result.removeAll(getInputMethodPackages());
+        result.remove(getSettingsPackageName());
+
+        final String[] unsuspendablePackages =
+                mPackageManager.getUnsuspendablePackages(result.toArray(new String[0]));
+        for (final String pkg : unsuspendablePackages) {
+            result.remove(pkg);
+        }
 
         Slog.i(LOG_TAG, "Packages subject to suspension: " + String.join(",", result));
         return result.toArray(new String[0]);
@@ -104,7 +109,6 @@ public class PersonalAppsSuspensionHelper {
                 final ApplicationInfo applicationInfo =
                         mPackageManager.getApplicationInfo(packageName, 0);
                 if (applicationInfo.isSystemApp() || applicationInfo.isUpdatedSystemApp()) {
-                    Log.d(LOG_TAG, "Not suspending system launcher package: " + packageName);
                     result.add(packageName);
                 }
             } catch (PackageManager.NameNotFoundException e) {
@@ -114,81 +118,53 @@ public class PersonalAppsSuspensionHelper {
         return result;
     }
 
-    private List<String> getAccessibilityServices(int userId) {
+    private List<String> getAccessibilityServices() {
         final List<AccessibilityServiceInfo> accessibilityServiceInfos =
-                getAccessibilityManagerForUser(userId)
+                getAccessibilityManagerForUser(mContext.getUserId())
                         .getEnabledAccessibilityServiceList(FEEDBACK_ALL_MASK);
         final List<String> result = new ArrayList<>();
         for (final AccessibilityServiceInfo serviceInfo : accessibilityServiceInfos) {
             final ComponentName componentName =
                     ComponentName.unflattenFromString(serviceInfo.getId());
             if (componentName != null) {
-                final String packageName = componentName.getPackageName();
-                Slog.d(LOG_TAG, "Not suspending a11y service: " + packageName);
-                result.add(packageName);
+                result.add(componentName.getPackageName());
             }
         }
         return result;
     }
 
-    private List<String> getInputMethodPackages(int userId) {
-        final List<InputMethodInfo> enabledImes =
-                InputMethodManagerInternal.get().getEnabledInputMethodListAsUser(userId);
+    private List<String> getInputMethodPackages() {
+        final List<InputMethodInfo> enabledImes = InputMethodManagerInternal.get()
+                .getEnabledInputMethodListAsUser(mContext.getUserId());
         final List<String> result = new ArrayList<>();
         for (final InputMethodInfo info : enabledImes) {
-            Slog.d(LOG_TAG, "Not suspending IME: " + info.getPackageName());
             result.add(info.getPackageName());
         }
         return result;
     }
 
     @Nullable
-    private String getActiveLauncherPackages(int userId) {
-        final Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        return getPackageNameForIntent("active launcher", intent, userId);
-    }
-
-    @Nullable
-    private String getSettingsPackageName(int userId) {
+    private String getSettingsPackageName() {
         final Intent intent = new Intent(Settings.ACTION_SETTINGS);
         intent.addCategory(Intent.CATEGORY_DEFAULT);
-        return getPackageNameForIntent("settings", intent, userId);
-    }
-
-    @Nullable
-    private String getDialerPackage(int userId) {
-        final Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        return getPackageNameForIntent("dialer", intent, userId);
-    }
-
-    @Nullable
-    private String getPackageNameForIntent(String name, Intent intent, int userId) {
-        final ResolveInfo resolveInfo =
-                mPackageManager.resolveActivityAsUser(intent, /* flags= */ 0, userId);
+        final ResolveInfo resolveInfo = mPackageManager.resolveActivity(intent, /* flags= */ 0);
         if (resolveInfo != null) {
-            final String packageName = resolveInfo.activityInfo.packageName;
-            Slog.d(LOG_TAG, "Not suspending " + name + " package: " + packageName);
-            return packageName;
+            return resolveInfo.activityInfo.packageName;
         }
         return null;
     }
 
     private List<String> getCriticalPackages() {
-        final List<String> result = Arrays.asList(mContext.getResources()
+        return Arrays.asList(mContext.getResources()
                 .getStringArray(R.array.config_packagesExemptFromSuspension));
-        Slog.d(LOG_TAG, "Not suspending critical packages: " + String.join(",", result));
-        return result;
     }
 
     private boolean hasLauncherIntent(String packageName) {
         final Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
         intentToResolve.addCategory(Intent.CATEGORY_LAUNCHER);
         intentToResolve.setPackage(packageName);
-        final List<ResolveInfo> resolveInfos = mPackageManager.queryIntentActivities(
-                intentToResolve, PackageManager.GET_UNINSTALLED_PACKAGES);
+        final List<ResolveInfo> resolveInfos =
+                mPackageManager.queryIntentActivities(intentToResolve, /* flags= */ 0);
         return resolveInfos != null && !resolveInfos.isEmpty();
     }
 
