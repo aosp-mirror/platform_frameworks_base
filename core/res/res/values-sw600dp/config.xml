@@ -45,5 +45,8 @@
     <!-- Controls whether the nav bar can move from the bottom to the side in landscape.
          Only applies if the device display is not square. -->
     <bool name="config_navBarCanMove">false</bool>
+
+    <!-- Set to true to enable the user switcher on the keyguard. -->
+    <bool name="config_keyguardUserSwitcher">true</bool>
 </resources>
 
