@@ -60,7 +60,8 @@ public class KeyguardUserSwitcher {
             KeyguardStatusBarView statusBarView,
             NotificationPanelViewController panelViewController) {
         boolean keyguardUserSwitcherEnabled =
-                context.getResources().getBoolean(R.bool.config_keyguardUserSwitcher) || ALWAYS_ON;
+                context.getResources().getBoolean(
+                        com.android.internal.R.bool.config_keyguardUserSwitcher) || ALWAYS_ON;
         UserSwitcherController userSwitcherController = Dependency.get(UserSwitcherController.class);
         if (userSwitcherController != null && keyguardUserSwitcherEnabled) {
             mUserSwitcherContainer = (Container) userSwitcher.inflate();
