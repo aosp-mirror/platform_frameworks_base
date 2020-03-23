@@ -94,13 +94,13 @@ public:
      */
     virtual Status getData(int64_t key,
                            const int32_t callingUid,
-                           vector<int8_t>* output) override;
+                           vector<uint8_t>* output) override;
 
 
     /**
      * Binder call for clients to get metadata across all configs in statsd.
      */
-    virtual Status getMetadata(vector<int8_t>* output) override;
+    virtual Status getMetadata(vector<uint8_t>* output) override;
 
 
     /**
@@ -108,7 +108,7 @@ public:
      * should requestData for this configuration.
      */
     virtual Status addConfiguration(int64_t key,
-                                    const vector<int8_t>& config,
+                                    const vector<uint8_t>& config,
                                     const int32_t callingUid) override;
 
     /**
@@ -318,7 +318,7 @@ private:
     /**
      * Adds a configuration after checking permissions and obtaining UID from binder call.
      */
-    bool addConfigurationChecked(int uid, int64_t key, const vector<int8_t>& config);
+    bool addConfigurationChecked(int uid, int64_t key, const vector<uint8_t>& config);
 
     /**
      * Update a configuration.

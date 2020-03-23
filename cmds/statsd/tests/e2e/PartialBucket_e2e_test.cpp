@@ -39,7 +39,7 @@ const int kCallingUid = 0; // Randomly chosen
 void SendConfig(shared_ptr<StatsService>& service, const StatsdConfig& config) {
     string str;
     config.SerializeToString(&str);
-    std::vector<int8_t> configAsVec(str.begin(), str.end());
+    std::vector<uint8_t> configAsVec(str.begin(), str.end());
     service->addConfiguration(kConfigKey, configAsVec, kCallingUid);
 }
 
