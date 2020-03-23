@@ -21,7 +21,6 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
 import android.annotation.SuppressLint;
@@ -125,7 +124,7 @@ public class ImsMmTelManager implements RegistrationManager {
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
         @Override
-        public void onUnregistered(@Nullable ImsReasonInfo info) {
+        public void onUnregistered(@NonNull ImsReasonInfo info) {
         }
 
         /**
@@ -137,7 +136,7 @@ public class ImsMmTelManager implements RegistrationManager {
         @Override
         public void onTechnologyChangeFailed(
                 @AccessNetworkConstants.TransportType int imsTransportType,
-                @Nullable ImsReasonInfo info) {
+                @NonNull ImsReasonInfo info) {
         }
     }
 
