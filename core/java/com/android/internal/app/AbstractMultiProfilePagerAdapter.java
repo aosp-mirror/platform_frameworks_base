@@ -422,8 +422,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
     private void showSpinner(View emptyStateView) {
         emptyStateView.findViewById(R.id.resolver_empty_state_icon).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_title).setVisibility(View.INVISIBLE);
-        emptyStateView.findViewById(R.id.resolver_empty_state_subtitle)
-                .setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_button).setVisibility(View.INVISIBLE);
         emptyStateView.findViewById(R.id.resolver_empty_state_progress).setVisibility(View.VISIBLE);
         emptyStateView.findViewById(R.id.empty).setVisibility(View.GONE);
