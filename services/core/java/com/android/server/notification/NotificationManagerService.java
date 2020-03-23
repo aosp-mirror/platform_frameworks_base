@@ -27,6 +27,8 @@ import static android.app.Notification.FLAG_ONLY_ALERT_ONCE;
 import static android.app.NotificationChannel.CONVERSATION_CHANNEL_ID_FORMAT;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED;
+import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED;
+import static android.app.NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_POLICY_ACCESS_GRANTED_CHANGED;
@@ -241,6 +243,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
@@ -1911,30 +1914,37 @@ public class NotificationManagerService extends SystemService {
 
             @Override
             void onZenModeChanged() {
-                sendRegisteredOnlyBroadcast(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED);
-                getContext().sendBroadcastAsUser(
-                        new Intent(NotificationManager.ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL)
-                                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT),
-                        UserHandle.ALL, android.Manifest.permission.MANAGE_NOTIFICATIONS);
-                synchronized (mNotificationLock) {
-                    updateInterruptionFilterLocked();
-                }
-                mRankingHandler.requestSort();
+                Binder.withCleanCallingIdentity(() -> {
+                    sendRegisteredOnlyBroadcast(ACTION_INTERRUPTION_FILTER_CHANGED);
+                    getContext().sendBroadcastAsUser(
+                            new Intent(ACTION_INTERRUPTION_FILTER_CHANGED_INTERNAL)
+                                    .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT),
+                            UserHandle.ALL, permission.MANAGE_NOTIFICATIONS);
+                    synchronized (mNotificationLock) {
+                        updateInterruptionFilterLocked();
+                    }
+                    mRankingHandler.requestSort();
+                });
             }
 
             @Override
             void onPolicyChanged() {
-                sendRegisteredOnlyBroadcast(NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
-                mRankingHandler.requestSort();
+                Binder.withCleanCallingIdentity(() -> {
+                    sendRegisteredOnlyBroadcast(
+                            NotificationManager.ACTION_NOTIFICATION_POLICY_CHANGED);
+                    mRankingHandler.requestSort();
+                });
             }
 
             @Override
             void onAutomaticRuleStatusChanged(int userId, String pkg, String id, int status) {
-                Intent intent = new Intent(ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED);
-                intent.setPackage(pkg);
-                intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, id);
-                intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_STATUS, status);
-                getContext().sendBroadcastAsUser(intent, UserHandle.of(userId));
+                Binder.withCleanCallingIdentity(() -> {
+                    Intent intent = new Intent(ACTION_AUTOMATIC_ZEN_RULE_STATUS_CHANGED);
+                    intent.setPackage(pkg);
+                    intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_ID, id);
+                    intent.putExtra(EXTRA_AUTOMATIC_ZEN_RULE_STATUS, status);
+                    getContext().sendBroadcastAsUser(intent, UserHandle.of(userId));
+                });
             }
         });
         mPreferencesHelper = new PreferencesHelper(getContext(),
