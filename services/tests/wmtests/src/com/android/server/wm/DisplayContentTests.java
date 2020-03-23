@@ -1016,6 +1016,15 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));
+
+        final Rect outFrame = new Rect();
+        final Rect outInsets = new Rect();
+        final Rect outStableInsets = new Rect();
+        final Rect outSurfaceInsets = new Rect();
+        mAppWindow.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
+        // The animation frames should not be rotated because display hasn't rotated.
+        assertEquals(mDisplayContent.getBounds(), outFrame);
+
         // The display should keep current orientation and the rotated configuration should apply
         // to the activity.
         assertEquals(config.orientation, mDisplayContent.getConfiguration().orientation);
