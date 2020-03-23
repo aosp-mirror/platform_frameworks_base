@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"bëj fotografi dhe video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ky aplikacion mund të nxjerrë fotografi dhe të regjistrojë video me kamerën tënde në çdo kohë."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Lejo që një aplikacion ose shërbim të marrë telefonata mbrapsht për pajisjet e kamerës që hapen ose mbyllen."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Ky aplikacion i nënshkrimit mund të marrë telefonata mbrapsht kur hapet ose mbyllet një pajisje e kamerës (nga një paketë e aplikacionit)."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Ky aplikacion mund të marrë telefonata mbrapsht kur hapet ose mbyllet një pajisje e kamerës (nga një aplikacion)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrollo dridhjen"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lejon aplikacionin të kontrollojë dridhësin."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefono drejtpërdrejt numrat e telefonit"</string>
@@ -1247,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Nuk mund të lidhet me <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Trokit për të ndryshuar cilësimet e privatësisë dhe provo përsëri"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Do ta ndryshosh cilësimin e privatësisë?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> mund të dëshirojë të lidhet duke përdorur adresën MAC të pajisjes sate, një identifikues unik. Kjo mund të lejojë monitorimin e vendndodhjes së pajisjes sate nga pajisjet në afërsi. \n\nNëse vazhdon, <xliff:g id="SSID_1">%1$s</xliff:g> do të ndryshojë cilësimin tënd të privatësisë dhe do të provojë të lidhet përsëri."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Për t\'u lidhur, <xliff:g id="SSID">%1$s</xliff:g> ka nevojë të përdorë adresën MAC të pajisjes sate, një identifikues unik. Aktualisht, cilësimi yt i privatësisë për këtë rrjet përdor një identifikues të rastësishëm. \n\nKy ndryshim mund të lejojë monitorimin e vendndodhjes së pajisjes sate nga pajisjet në afërsi."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Ndrysho cilësimin"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Cilësimi u përditësua. Provo të lidhesh përsëri."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Cilësimi i privatësisë nuk mund të ndryshohet"</string>

@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"tomar fotografías y grabar videos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta app puede tomar fotos y grabar videos con la cámara en cualquier momento."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permite que una aplicación o un servicio reciba devoluciones de llamada cuando se abren o cierran dispositivos de cámara."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Esta app de firma puede recibir devoluciones de llamada cuando se cierra o se abre cualquier dispositivo de cámara (y qué paquete de aplicación lo hace)."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Esta app puede recibir devoluciones de llamada cuando se cierra o se abre cualquier dispositivo de cámara (y qué aplicación lo hace)."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
@@ -1247,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"No se puede establecer conexión con <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Presiona para cambiar la configuración de privacidad y volver a intentarlo"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"¿Quieres cambiar la configuración de privacidad?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Es posible que <xliff:g id="SSID_0">%1$s</xliff:g> quiera conectarse mediante la dirección MAC (un identificador único) de tu dispositivo. Eso podría permitir que dispositivos cercanos registren la ubicación de tu dispositivo. \n\nSi continúas, <xliff:g id="SSID_1">%1$s</xliff:g> cambiará la configuración de privacidad e intentará volver a establecer conexión."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Para conectarse, <xliff:g id="SSID">%1$s</xliff:g> necesita usar la dirección MAC (identificador único) de tu dispositivo. Actualmente, tu configuración de privacidad para esta red usa un identificador aleatorio. \n\nEste cambio podría permitir que dispositivos cercanos registren la ubicación del tuyo."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Cambiar configuración"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Se actualizó la configuración. Intenta conectarte de nuevo."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"No se puede cambiar la configuración de privacidad"</string>

@@ -435,7 +435,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ಚಿತ್ರಗಳು ಮತ್ತು ವೀಡಿಯೊಗಳನ್ನು ಸೆರೆಹಿಡಿಯಿರಿ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಯಾವ ಸಮಯದಲ್ಲಾದರೂ ಕ್ಯಾಮರಾ ಬಳಸಿಕೊಂಡು ಚಿತ್ರಗಳು ಮತ್ತು ವಿಡಿಯೋಗಳನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಬಹುದು."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ಕ್ಯಾಮರಾ ಸಾಧನಗಳನ್ನು ತೆರೆಯುತ್ತಿರುವ ಅಥವಾ ಮುಚ್ಚುತ್ತಿರುವ ಕುರಿತು ಕಾಲ್‌ಬ್ಯಾಕ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಆ್ಯಪ್‌ ಅಥವಾ ಸೇವೆಗೆ ಅನುಮತಿಸಿ."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ಈ ಸಹಿ ಆ್ಯಪ್, ಯಾವುದೇ ಕ್ಯಾಮರಾ ಸಾಧನವನ್ನು ತೆರೆಯುತ್ತಿರುವಾಗ ಅಥವಾ ಮುಚ್ಚುತ್ತಿರುವಾಗ (ಯಾವ ಆ್ಯಪ್‌ ಪ್ಯಾಕೇಜ್‌ನಿಂದ ಎಂಬ ಮಾಹಿತಿಯ ಮೂಲಕ) ಕಾಲ್‌ಬ್ಯಾಕ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಬಹುದು."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ವೈಬ್ರೇಷನ್‌‌ ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ವೈಬ್ರೇಟರ್‌ ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ನೇರವಾಗಿ ಕರೆ ಮಾಡಿ"</string>
@@ -1247,7 +1248,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> ಗೆ ಕನೆಕ್ಟ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ ಮತ್ತು ಮರುಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸಬೇಕೆ?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ನಿಮ್ಮ ಸಾಧನದ MAC ವಿಳಾಸವನ್ನು ಬಳಸಿಕೊಂಡು ಕನೆಕ್ಟ್ ಮಾಡಲು ಬಯಸಬಹುದು, ಅದು ಅನನ್ಯ ಗುರುತಿಸುವಿಕೆಯಾಗಿದೆ. ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಹತ್ತಿರದ ಸಾಧನವನ್ನು ಇದು ಅನುಮತಿಸಬಹುದು. \n\nನೀವು ಮುಂದುವರಿಸಿದರೆ, <xliff:g id="SSID_1">%1$s</xliff:g> ನಿಮ್ಮ ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ ಮತ್ತು ಪುನಃ ಕನೆಕ್ಟ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸುತ್ತದೆ."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"ಕನೆಕ್ಟ್ ಮಾಡಲು, <xliff:g id="SSID">%1$s</xliff:g> ಗೆ ನಿಮ್ಮ ಸಾಧನದ ಅನನ್ಯ ಗುರುತು MAC ವಿಳಾಸವನ್ನು ಬಳಸುವ ಅಗತ್ಯವಿದೆ. ಪ್ರಸ್ತುತವಾಗಿ, ಈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಬಂಧಿಸಿದ ಗೌಪ್ಯತೆಯ ಸೆಟ್ಟಿಂಗ್ \'ಯಾದೃಚ್ಛಿಕ\' ಗುರುತಿಸುವಿಕೆಯನ್ನು ಬಳಸುತ್ತದೆ. \n\nಈ ಬದಲಾವಣೆಯು, ನಿಮ್ಮ ಸಾಧನದ ಸ್ಥಳವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಲು, ಸಮೀಪದಲ್ಲಿನ ಸಾಧನಗಳಿಗೆ ಅನುಮತಿಸಬಹುದು."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ಸೆಟ್ಟಿಂಗ್‌‌ ಬದಲಾಯಿಸಿ"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ. ಪುನಃ ಕನೆಕ್ಟ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"ಗೌಪ್ಯತೆ ಸೆಟ್ಟಿಂಗ್‌ ಅನ್ನು ಬದಲಾಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>

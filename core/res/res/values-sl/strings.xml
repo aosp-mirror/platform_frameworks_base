@@ -441,7 +441,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Ta aplikacija lahko poljubno uporablja fotoaparat za snemanje fotografij ali videoposnetkov."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Aplikaciji ali storitvi dovoli prejemanje povratnih klicev o odpiranju ali zapiranju naprav s fotoaparati."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Ta aplikacija za podpise lahko prejema povratne klice, ko se odpira (s katerim paketom aplikacij) ali zapira katera koli naprava s fotoaparatom."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"nadzor vibriranja"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Aplikaciji omogoča nadzor vibriranja."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"neposredno klicanje telefonskih številk"</string>
@@ -1287,7 +1288,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Povezava z omrežjem <xliff:g id="SSID">%1$s</xliff:g> ni mogoča"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Dotaknite se za spremembo nastavitev zasebnosti in poskusite znova"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Želite spremeniti nastavitev zasebnosti?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Omrežje <xliff:g id="SSID_0">%1$s</xliff:g> bo za vzpostavitev povezave morda želelo uporabiti naslov MAC naprave, ki je enolični identifikator. To lahko napravam v bližini omogoči spremljanje lokacije vaše naprave. \n\nČe nadaljujete, bo omrežje <xliff:g id="SSID_1">%1$s</xliff:g> spremenilo nastavitev zasebnosti in se poskusilo znova povezati."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Za vzpostavitev povezave mora omrežje <xliff:g id="SSID">%1$s</xliff:g> uporabiti naslov MAC naprave, ki je enolični identifikator. Glede na nastavitev zasebnosti za to omrežje se trenutno uporablja naključno določen identifikator. \n\nTa sprememba lahko napravam v bližini omogoči spremljanje lokacije vaše naprave."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Spremeni nastavitev"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Nastavitev je posodobljena. Poskusite znova vzpostaviti povezavo."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Nastavitve zasebnosti ni mogoče spremeniti"</string>

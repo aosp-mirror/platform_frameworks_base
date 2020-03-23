@@ -303,7 +303,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"మీ భౌతిక కార్యకలాపాన్ని యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"కెమెరా"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"చిత్రాలను తీయడానికి మరియు వీడియోను రికార్డ్ చేయడానికి"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"చిత్రాలు తీయడానికి మరియు వీడియో రికార్డ్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
+    <string name="permgrouprequest_camera" msgid="2697305443703328372">"ఫోటోలు తీయడానికి, వీడియో రికార్డ్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను అనుమతించాలా?"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"కాల్ లాగ్‌లు"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"ఫోన్ కాల్ లాగ్‌ని చదవండి మరియు రాయండి"</string>
     <string name="permgrouprequest_calllog" msgid="7565344038959817408">"మీ ఫోన్ కాల్ లాగ్‌లను యాక్సెస్ చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని అనుమతించాలా?"</string>
@@ -435,7 +435,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"చిత్రాలు మరియు వీడియోలు తీయడం"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ఈ యాప్‌ కెమెరాను ఉపయోగించి ఎప్పుడైనా చిత్రాలను తీయగలదు మరియు వీడియోలను రికార్డ్ చేయగలదు."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"కెమెరా పరికరాలు తెరుచుకుంటున్నప్పుడు లేదా మూసుకుంటున్నప్పుడు కాల్‌బ్యాక్‌లను స్వీకరించడానికి యాప్‌ను లేదా సర్వీస్‌ను అనుమతించండి."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ఏదైనా కెమెరా పరికరం తెరుచుకుంటున్నప్పుడు (ఏదైనా యాప్ ప్యాకేజీ ద్వారా) లేదా మూసుకుంటున్నప్పుడు ఈ సిగ్నేచర్ యాప్ కాల్‌బ్యాక్‌లను అందుకోగలదు."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"వైబ్రేషన్‌ను నియంత్రించడం"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"వైబ్రేటర్‌ను నియంత్రించడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"నేరుగా కాల్ చేసే ఫోన్ నంబర్‌లు"</string>
@@ -1247,7 +1248,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g>కు కనెక్ట్ చేయడం సాధ్యం కాదు"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"మీ గోప్యతా సెట్టింగ్‌లను మార్చడానికి నొక్కి, మళ్లీ ప్రయత్నించండి"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"గోప్యతా సెట్టింగ్‌ను మార్చాలా?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> అనేది ప్రత్యేకమైన ఐడెంటిఫయర్ అయిన మీ పరికరం MAC చిరునామాను ఉపయోగించి కనెక్ట్ చేయాల్సి రావచ్చు. అలా చేయడం వలన మీ లొకేషన్‌ను ట్రాక్ చేయడానికి సమీప పరికరాలకు అనుమతి లభించవచ్చు. \n\nఒకవేళ మీరు కొనసాగితే, మీ గోప్యతా సెట్టింగ్‌ను <xliff:g id="SSID_1">%1$s</xliff:g> మారుస్తుంది, అప్పుడు తిరిగి కనెక్ట్ చేయడానికి ప్రయత్నిస్తుంది."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"కనెక్ట్ చేయడానికి, <xliff:g id="SSID">%1$s</xliff:g> అనేది ప్రత్యేకమైన ఐడెంటిఫయర్ అయిన మీ పరికరం యొక్క MAC చిరునామాను ఉపయోగించాల్సి ఉంటుంది. ప్రస్తుతం, ఈ నెట్‌వర్క్ కోసం మీ గోప్యతా సెట్టింగ్ అనేది యాదృచ్ఛిక ఐడెంటిఫయర్‌ను ఉపయోగిస్తుంది. \n\nఈ మార్పు వలన మీ పరికరం యొక్క లొకేషన్‌ను ట్రాక్ చేయడానికి సమీప పరికరాలకు అనుమతి లభించవచ్చు."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"సెట్టింగ్‌ను మార్చండి"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"సెట్టింగ్ అప్‌డేట్ చేయబడింది. మళ్లీ కనెక్ట్ చేయడానికి ప్రయత్నించండి."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"గోప్యతా సెట్టింగ్‌లను మార్చడం సాధ్యం కాదు"</string>
