@@ -232,6 +232,8 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP 地址和端口"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"扫描二维码"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"扫描二维码即可通过 WLAN 配对设备"</string>
+    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
+    <skip />
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, 调试, debug, 开发, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"错误报告快捷方式"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在电源菜单中显示用于提交错误报告的按钮"</string>
@@ -255,6 +257,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"显示没有名称的蓝牙设备"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"停用绝对音量功能"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"启用“Gabeldorsche”"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"增强连接性"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"蓝牙 AVRCP 版本"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"选择蓝牙 AVRCP 版本"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"蓝牙 MAP 版本"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"系统将显示没有名称（只有 MAC 地址）的蓝牙设备"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"停用蓝牙绝对音量功能，即可避免在连接到远程设备时出现音量问题（例如音量高得让人无法接受或无法控制音量等）。"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"启用“蓝牙 Gabeldorsche”功能堆栈。"</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"启用增强连接性功能。"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"本地终端"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"启用终端应用，以便在本地访问 Shell"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 检查"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUI 呈现模式分析"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"启用 GPU 调试层"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"允许为调试应用加载 GPU 调试层"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"启用详细供应商日志记录"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"在错误报告中包含其他设备特定的供应商日志，这些日志可能会含有隐私信息、消耗更多电量和/或使用更多存储空间。"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"窗口动画缩放"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"过渡动画缩放"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 时长缩放"</string>
@@ -412,7 +418,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"红色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"蓝色弱视（蓝黄不分）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"颜色校正功能有助于色盲用户看到更准确的颜色"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"大约还可使用 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -426,7 +433,8 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"目前电量为 <xliff:g id="LEVEL">%2$s</xliff:g>，估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"直到<xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"在<xliff:g id="TIME">%1$s</xliff:g> 之后延长电池续航时间"</string>
+    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"电量剩余使用时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"电量剩余使用时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -501,6 +509,29 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"每次都询问"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"直到您将其关闭"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"刚刚"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"此设备"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"手机扬声器"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"连接时遇到问题。请关闭并重新开启设备"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有线音频设备"</string>
+    <!-- no translation found for help_label (3528360748637781274) -->
+    <skip />
+    <!-- no translation found for storage_category (2287342585424631813) -->
+    <skip />
+    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <skip />
+    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <skip />
+    <!-- no translation found for blob_id_text (8680078988996308061) -->
+    <skip />
+    <!-- no translation found for blob_expires_text (7882727111491739331) -->
+    <skip />
+    <!-- no translation found for accessor_info_title (8289823651512477787) -->
+    <skip />
+    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
+    <skip />
+    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
+    <skip />
+    <!-- no translation found for delete_blob_text (2819192607255625697) -->
+    <skip />
+    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
+    <skip />
 </resources>

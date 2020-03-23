@@ -232,6 +232,8 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP ઍડ્રેસ &amp; પોર્ટ"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR કોડ સ્કૅન કરો"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"QR કોડને સ્કૅન કરીને વાઇ-ફાઇ પર ડિવાઇસનું જોડાણ બનાવો"</string>
+    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
+    <skip />
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ડિબગ, ડેવ"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"બગ રિપોર્ટ શોર્ટકટ"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"બગ રિપોર્ટ લેવા માટે પાવર મેનૂમાં એક બટન બતાવો"</string>
@@ -255,6 +257,7 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"નામ વિનાના બ્લૂટૂથ ઉપકરણો બતાવો"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ચોક્કસ વૉલ્યૂમને અક્ષમ કરો"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ચાલુ કરો"</string>
+    <string name="enhanced_connectivity" msgid="7201127377781666804">"વિસ્તૃત કનેક્ટિવિટી"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"બ્લૂટૂથ AVRCP સંસ્કરણ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"બ્લૂટૂથ AVRCP સંસ્કરણ પસંદ કરો"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"બ્લૂટૂથ MAP વર્ઝન"</string>
@@ -308,6 +311,7 @@
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"નામ વગરના (ફક્ત MAC ઍડ્રેસવાળા) બ્લૂટૂથ ઉપકરણો બતાવવામાં આવશે"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"રિમોટ ઉપકરણોમાં વધુ પડતું ઊંચું વૉલ્યૂમ અથવા નિયંત્રણની કમી જેવી વૉલ્યૂમની સમસ્યાઓની સ્થિતિમાં બ્લૂટૂથ ચોક્કસ વૉલ્યૂમ સુવિધાને અક્ષમ કરે છે."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"બ્લૂટૂથ Gabeldorsche સુવિધાનું સ્ટૅક ચાલુ કરે છે."</string>
+    <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"કનેક્ટિવિટીની વિસ્તૃત સુવિધા ચાલુ કરે છે."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"સ્થાનિક ટર્મિનલ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"સ્થાનિક શેલ અ‍ૅક્સેસની ઑફર કરતી ટર્મિનલ એપ્લિકેશનને સક્ષમ કરો"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP તપાસણી"</string>
@@ -354,6 +358,8 @@
     <string name="track_frame_time" msgid="522674651937771106">"HWUIની પ્રોફાઇલ રેંડરીંગ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU ડિબગ સ્તરોને સક્ષમ કરો"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"ડિબગ ઍપ માટે GPU ડિબગ સ્તરો લોડ કરવાની મંજૂરી આપો"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"વર્બોઝ વેન્ડર લૉગિંગ ચાલુ કરો"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"ખામીની જાણકારીમાં ડિવાઇસથી જોડાયેલા ચોક્કસ વેન્ડર લૉગ શામેલ કરો, જેમાં ખાનગી માહિતી શામેલ હોઈ શકે છે, તે વધુ બૅટરીનો ઉપયોગ કરી શકે છે અને/અથવા વધુ સ્ટોરેજનો ઉપયોગ કરી શકે છે."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"વિંડો એનિમેશન સ્કેલ"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"સંક્રમણ એનિમેશન સ્કેલ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"એનિમેટર અવધિ સ્કેલ"</string>
@@ -412,7 +418,8 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"પ્રોટેનોમલી (લાલ-લીલો)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ટ્રાઇટેનોમલી(વાદળી-પીળો)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"રંગ સુધારણા"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="6178138727195403796">"રંગ સુધારણા રંગ અંધત્વવાળા લોકોને વધુ સચોટ રંગો જોવામાં સહાય કરે છે"</string>
+    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
+    <skip />
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> દ્વારા ઓવરરાઇડ થયું"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"લગભગ <xliff:g id="TIME_REMAINING">%1$s</xliff:g> બાકી છે"</string>
@@ -426,7 +433,8 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"લગભગ <xliff:g id="TIME">%1$s</xliff:g> સુધી ચાલવી જોઈએ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"લગભગ <xliff:g id="TIME">%1$s</xliff:g> સુધી ચાલવી જોઈએ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> સુધી"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"બૅટરીની આવરદા <xliff:g id="TIME">%1$s</xliff:g> થી વધારો"</string>
+    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"<xliff:g id="THRESHOLD">%1$s</xliff:g> કરતાં ઓછો સમય બાકી છે"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"<xliff:g id="THRESHOLD">%1$s</xliff:g> કરતાં ઓછો સમય બાકી છે (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> કરતાં વધુ સમય બાકી છે (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -501,6 +509,29 @@
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"દર વખતે પૂછો"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"તમે બંધ ન કરો ત્યાં સુધી"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"હમણાં જ"</string>
-    <string name="media_transfer_this_device_name" msgid="2858384945459339073">"આ ડિવાઇસ"</string>
+    <string name="media_transfer_this_device_name" msgid="2716555073132169240">"ફોન સ્પીકર"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
+    <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
+    <!-- no translation found for help_label (3528360748637781274) -->
+    <skip />
+    <!-- no translation found for storage_category (2287342585424631813) -->
+    <skip />
+    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <skip />
+    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <skip />
+    <!-- no translation found for blob_id_text (8680078988996308061) -->
+    <skip />
+    <!-- no translation found for blob_expires_text (7882727111491739331) -->
+    <skip />
+    <!-- no translation found for accessor_info_title (8289823651512477787) -->
+    <skip />
+    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
+    <skip />
+    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
+    <skip />
+    <!-- no translation found for delete_blob_text (2819192607255625697) -->
+    <skip />
+    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
+    <skip />
 </resources>
