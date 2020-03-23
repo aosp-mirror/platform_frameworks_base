@@ -740,13 +740,7 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         }
     }
 
-    public int updateBleAppCount(IBinder token, boolean enable, String packageName) {
-        // Check if packageName belongs to callingUid
-        final int callingUid = Binder.getCallingUid();
-        final boolean isCallerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
-        if (!isCallerSystem) {
-            checkPackage(callingUid, packageName);
-        }
+    private int updateBleAppCount(IBinder token, boolean enable, String packageName) {
         ClientDeathRecipient r = mBleApps.get(token);
         if (r == null && enable) {
             ClientDeathRecipient deathRec = new ClientDeathRecipient(packageName);
@@ -771,13 +765,94 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
         if (DBG) {
             Slog.d(TAG, appCount + " registered Ble Apps");
         }
-        if (appCount == 0 && mEnable) {
-            disableBleScanMode();
-        }
-        if (appCount == 0 && !mEnableExternal) {
-            sendBrEdrDownCallback();
-        }
         return appCount;
+    }
+
+    private boolean checkBluetoothPermissions(String packageName, boolean requireForeground) {
+        if (isBluetoothDisallowed()) {
+            if (DBG) {
+                Slog.d(TAG, "checkBluetoothPermissions: bluetooth disallowed");
+            }
+            return false;
+        }
+        // Check if packageName belongs to callingUid
+        final int callingUid = Binder.getCallingUid();
+        final boolean isCallerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
+        if (!isCallerSystem) {
+            checkPackage(callingUid, packageName);
+
+            if (requireForeground && !checkIfCallerIsForegroundUser()) {
+                Slog.w(TAG, "Not allowed for non-active and non system user");
+                return false;
+            }
+
+            mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                    "Need BLUETOOTH ADMIN permission");
+        }
+        return true;
+    }
+
+    public boolean enableBle(String packageName, IBinder token) throws RemoteException {
+        if (!checkBluetoothPermissions(packageName, false)) {
+            if (DBG) {
+                Slog.d(TAG, "enableBle(): bluetooth disallowed");
+            }
+            return false;
+        }
+
+        if (DBG) {
+            Slog.d(TAG, "enableBle(" + packageName + "):  mBluetooth =" + mBluetooth
+                    + " mBinding = " + mBinding + " mState = "
+                    + BluetoothAdapter.nameForState(mState));
+        }
+        updateBleAppCount(token, true, packageName);
+
+        if (mState == BluetoothAdapter.STATE_ON
+                || mState == BluetoothAdapter.STATE_BLE_ON
+                || mState == BluetoothAdapter.STATE_TURNING_ON
+                || mState == BluetoothAdapter.STATE_TURNING_OFF) {
+            Log.d(TAG, "enableBLE(): Bluetooth already enabled");
+            return true;
+        }
+        synchronized (mReceiver) {
+            // waive WRITE_SECURE_SETTINGS permission check
+            sendEnableMsg(false,
+                    BluetoothProtoEnums.ENABLE_DISABLE_REASON_APPLICATION_REQUEST, packageName);
+        }
+        return true;
+    }
+
+    public boolean disableBle(String packageName, IBinder token) throws RemoteException {
+        if (!checkBluetoothPermissions(packageName, false)) {
+            if (DBG) {
+                Slog.d(TAG, "disableBLE(): bluetooth disallowed");
+            }
+            return false;
+        }
+
+        if (DBG) {
+            Slog.d(TAG, "disableBle(" + packageName + "):  mBluetooth =" + mBluetooth
+                    + " mBinding = " + mBinding + " mState = "
+                    + BluetoothAdapter.nameForState(mState));
+        }
+
+        if (mState == BluetoothAdapter.STATE_OFF) {
+            Slog.d(TAG, "disableBLE(): Already disabled");
+            return false;
+        }
+        updateBleAppCount(token, false, packageName);
+
+        if (mState == BluetoothAdapter.STATE_BLE_ON && !isBleAppPresent()) {
+            if (mEnable) {
+                disableBleScanMode();
+            }
+            if (!mEnableExternal) {
+                addActiveLog(BluetoothProtoEnums.ENABLE_DISABLE_REASON_APPLICATION_REQUEST,
+                        packageName, false);
+                sendBrEdrDownCallback();
+            }
+        }
+        return true;
     }
 
     // Clear all apps using BLE scan only mode.
@@ -855,29 +930,19 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public boolean enableNoAutoConnect(String packageName) {
-        if (isBluetoothDisallowed()) {
+        if (!checkBluetoothPermissions(packageName, false)) {
             if (DBG) {
                 Slog.d(TAG, "enableNoAutoConnect(): not enabling - bluetooth disallowed");
             }
             return false;
         }
 
-        // Check if packageName belongs to callingUid
-        final int callingUid = Binder.getCallingUid();
-        final boolean isCallerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
-        if (!isCallerSystem) {
-            checkPackage(callingUid, packageName);
-        }
-
-        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                "Need BLUETOOTH ADMIN permission");
-
         if (DBG) {
             Slog.d(TAG, "enableNoAutoConnect():  mBluetooth =" + mBluetooth + " mBinding = "
                     + mBinding);
         }
-        int callingAppId = UserHandle.getAppId(callingUid);
 
+        int callingAppId = UserHandle.getAppId(Binder.getCallingUid());
         if (callingAppId != Process.NFC_UID) {
             throw new SecurityException("no permission to enable Bluetooth quietly");
         }
@@ -892,32 +957,19 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public boolean enable(String packageName) throws RemoteException {
-        final int callingUid = Binder.getCallingUid();
-        final boolean callerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
-
-        if (isBluetoothDisallowed()) {
+        if (!checkBluetoothPermissions(packageName, true)) {
             if (DBG) {
                 Slog.d(TAG, "enable(): not enabling - bluetooth disallowed");
             }
             return false;
         }
 
-        if (!callerSystem) {
-            // Check if packageName belongs to callingUid
-            checkPackage(callingUid, packageName);
-
-            if (!checkIfCallerIsForegroundUser()) {
-                Slog.w(TAG, "enable(): not allowed for non-active and non system user");
-                return false;
-            }
-
-            mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                    "Need BLUETOOTH ADMIN permission");
-
-            if (!isEnabled() && mWirelessConsentRequired && startConsentUiIfNeeded(packageName,
-                    callingUid, BluetoothAdapter.ACTION_REQUEST_ENABLE)) {
-                return false;
-            }
+        final int callingUid = Binder.getCallingUid();
+        final boolean callerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
+        if (!callerSystem && !isEnabled() && mWirelessConsentRequired
+                && startConsentUiIfNeeded(packageName,
+                callingUid, BluetoothAdapter.ACTION_REQUEST_ENABLE)) {
+            return false;
         }
 
         if (DBG) {
@@ -939,25 +991,19 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     public boolean disable(String packageName, boolean persist) throws RemoteException {
+        if (!checkBluetoothPermissions(packageName, true)) {
+            if (DBG) {
+                Slog.d(TAG, "disable(): not disabling - bluetooth disallowed");
+            }
+            return false;
+        }
+
         final int callingUid = Binder.getCallingUid();
         final boolean callerSystem = UserHandle.getAppId(callingUid) == Process.SYSTEM_UID;
-
-        if (!callerSystem) {
-            // Check if packageName belongs to callingUid
-            checkPackage(callingUid, packageName);
-
-            if (!checkIfCallerIsForegroundUser()) {
-                Slog.w(TAG, "disable(): not allowed for non-active and non system user");
-                return false;
-            }
-
-            mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
-                    "Need BLUETOOTH ADMIN permission");
-
-            if (isEnabled() && mWirelessConsentRequired && startConsentUiIfNeeded(packageName,
-                    callingUid, BluetoothAdapter.ACTION_REQUEST_DISABLE)) {
-                return false;
-            }
+        if (!callerSystem && isEnabled() && mWirelessConsentRequired
+                && startConsentUiIfNeeded(packageName,
+                callingUid, BluetoothAdapter.ACTION_REQUEST_DISABLE)) {
+            return false;
         }
 
         if (DBG) {
