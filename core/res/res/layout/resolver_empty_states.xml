@@ -67,8 +67,10 @@
         style="@style/Widget.Material.Light.ProgressBar"
         android:visibility="gone"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:indeterminate="true"
+        android:layout_alignTop="@+id/resolver_empty_state_icon"
+        android:layout_alignBottom="@+id/resolver_empty_state_button"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/resolver_empty_state_subtitle"
         android:indeterminateTint="?attr/colorAccent"/>
