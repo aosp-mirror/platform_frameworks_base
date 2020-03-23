@@ -620,33 +620,40 @@ public class TetheringManager {
             public TetheringRequest build() {
                 return new TetheringRequest(mBuilderParcel);
             }
+        }
 
-            @Nullable
-            public LinkAddress getLocalIpv4Address() {
-                return mBuilderParcel.localIPv4Address;
-            }
+        /**
+         * Get the local IPv4 address, if one was configured with
+         * {@link Builder#setStaticIpv4Addresses}.
+         */
+        @Nullable
+        public LinkAddress getLocalIpv4Address() {
+            return mRequestParcel.localIPv4Address;
+        }
 
-            /** Get static client address. */
-            @Nullable
-            public LinkAddress getClientStaticIpv4Address() {
-                return mBuilderParcel.staticClientAddress;
-            }
+        /**
+         * Get the static IPv4 address of the client, if one was configured with
+         * {@link Builder#setStaticIpv4Addresses}.
+         */
+        @Nullable
+        public LinkAddress getClientStaticIpv4Address() {
+            return mRequestParcel.staticClientAddress;
+        }
 
-            /** Get tethering type. */
-            @TetheringType
-            public int getTetheringType() {
-                return mBuilderParcel.tetheringType;
-            }
+        /** Get tethering type. */
+        @TetheringType
+        public int getTetheringType() {
+            return mRequestParcel.tetheringType;
+        }
 
-            /** Check if exempt from entitlement check. */
-            public boolean isExemptFromEntitlementCheck() {
-                return mBuilderParcel.exemptFromEntitlementCheck;
-            }
+        /** Check if exempt from entitlement check. */
+        public boolean isExemptFromEntitlementCheck() {
+            return mRequestParcel.exemptFromEntitlementCheck;
+        }
 
-            /** Check if show entitlement ui.  */
-            public boolean getShouldShowEntitlementUi() {
-                return mBuilderParcel.showProvisioningUi;
-            }
+        /** Check if show entitlement ui.  */
+        public boolean getShouldShowEntitlementUi() {
+            return mRequestParcel.showProvisioningUi;
         }
 
         /**
