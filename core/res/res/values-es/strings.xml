@@ -435,7 +435,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"realizar fotografías y vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Esta aplicación puede hacer fotografías y grabar vídeos con la cámara en cualquier momento."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permitir que una aplicación o servicio reciba retrollamadas cada vez que se abra o cierre una cámara."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Esta aplicación especial puede recibir retrollamadas cada vez que se abre o se cierra una cámara mediante cualquier paquete de aplicaciones."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibración"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la función de vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
@@ -1247,7 +1248,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"No se ha podido conectar a <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toca para cambiar los ajustes de privacidad y vuelve a intentarlo"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"¿Quieres cambiar el ajuste de privacidad?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Puede que <xliff:g id="SSID_0">%1$s</xliff:g> vaya conectarse mediante la dirección MAC de tu dispositivo, un identificador único. De esta forma, es posible que se permita que dispositivos cercanos registren la ubicación de tu dispositivo. \n\nSi continúas, <xliff:g id="SSID_1">%1$s</xliff:g> cambiará tu ajuste de privacidad e intentará conectarse de nuevo."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Para conectarse, <xliff:g id="SSID">%1$s</xliff:g> necesita la dirección MAC de tu dispositivo, que es un identificador único; no obstante, el ajuste de privacidad de esta red utiliza un identificador aleatorio. \n\nEs posible que este cambio permita que los dispositivos cercanos conozcan la ubicación de tu dispositivo."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Cambiar ajuste"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Se ha cambiado el ajuste. Prueba a conectarte de nuevo."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"No se ha podido cambiar el ajuste de privacidad"</string>
@@ -1821,8 +1822,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Actualizado por el administrador"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminado por el administrador"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Aceptar"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, Ahorro de batería:\nActiva el tema oscuro\nDesactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, Ahorro de batería:\nActiva el tema oscuro\nDesactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\"\n\n"<annotation id="url">"Más información"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"Para que la batería dure más, Ahorro de batería:\n· Activa el tema oscuro\n· Desactiva o restringe actividad en segundo plano, algunos efectos visuales y otras funciones como \"Ok Google\""</string>
     <string name="data_saver_description" msgid="4995164271550590517">"El ahorro de datos evita que algunas aplicaciones envíen o reciban datos en segundo plano, lo que permite reducir el uso de datos. Una aplicación activa podrá acceder a los datos, aunque con menos frecuencia. Esto significa que, por ejemplo, algunas imágenes no se mostrarán hasta que las toques."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"¿Activar ahorro de datos?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Activar"</string>

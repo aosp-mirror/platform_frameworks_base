@@ -435,7 +435,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"tage billeder og optage video"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Med denne app kan du tage billeder og optage video med kameraet når som helst."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Tillad, at en app eller tjeneste modtager tilbagekald om kameraenheder, der åbnes eller lukkes."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Denne signaturapp kan modtage tilbagekald, når en kameraenhed åbnes (efter app-pakke) eller lukkes."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"administrere vibration"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tillader, at appen kan administrere vibratoren."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringe direkte op til telefonnumre"</string>
@@ -1247,7 +1248,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Der kan ikke oprettes forbindelse til <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Tryk for at ændre privatlivsindstillingerne, og prøv igen"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vil du ændre privatlivsindstillingen?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> vil muligvis gerne oprette forbindelse via din enheds MAC-adresse, som er et unikt id. Dette kan give enheder i nærheden tilladelse til at spore din enheds placering. \n\nHvis du fortsætter, ændrer <xliff:g id="SSID_1">%1$s</xliff:g> din privatlivsindstilling, og den prøver at oprette forbindelse igen."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"<xliff:g id="SSID">%1$s</xliff:g> skal bruge din enheds MAC-adresse (som er et unikt id) for at oprette forbindelse. I øjeblikket bruges et tilfældigt id i henhold til dine privatlivsindstillinger for dette netværk. \n\nDenne ændring kan gøre det muligt for enheder i nærheden at spore din enheds placering."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Skift indstilling"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Indstillingen er opdateret. Prøv at oprette forbindelse igen."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Privatlivsindstillingen kan ikke ændres"</string>

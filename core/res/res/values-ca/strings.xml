@@ -435,7 +435,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"fer fotos i vídeos"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aquesta aplicació pot fer fotos i gravar vídeos amb la càmera en qualsevol moment."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Permet que una aplicació o un servei pugui rebre crides de retorn sobre els dispositius de càmera que s\'obren o es tanquen."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Aquesta aplicació de signatures pot rebre crides de retorn quan s’obre o es tanca un dispositiu de càmera (segons el paquet d’aplicació)."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"controlar la vibració"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"trucar directament a números de telèfon"</string>
@@ -1247,7 +1248,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"No es pot connectar a <xliff:g id="SSID">%1$s</xliff:g>"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Toca per canviar la configuració de privadesa i torna-ho a provar"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Vols canviar l\'opció de configuració de privadesa?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"És possible que <xliff:g id="SSID_0">%1$s</xliff:g> vulgui connectar-se utilitzant l\'adreça MAC del teu dispositiu, un identificador únic. Això pot permetre que altres dispositius propers facin un seguiment de la ubicació del teu dispositiu. \n\nSi continues, <xliff:g id="SSID_1">%1$s</xliff:g> canviarà l\'opció de configuració de privadesa i tornarà a provar de connectar-se."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"Per connectar-se, <xliff:g id="SSID">%1$s</xliff:g> necessita utilitzar l\'adreça MAC del teu dispositiu, un identificador únic. Actualment, la configuració de privadesa d\'aquesta xarxa utilitza un identificador aleatori. \n\nAquest canvi pot permetre que altres dispositius propers facin un seguiment de la ubicació del teu dispositiu."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Canvia l\'opció de configuració"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"S\'ha actualitzat la configuració. Torna a provar de connectar-te."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"No es pot canviar l\'opció de configuració de privadesa"</string>

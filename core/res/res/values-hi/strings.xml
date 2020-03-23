@@ -436,7 +436,7 @@
     <string name="permdesc_camera" msgid="1354600178048761499">"यह ऐप्लिकेशन किसी भी समय कैमरे का उपयोग करके चित्र ले सकता है और वीडियो रिकॉर्ड कर सकता है."</string>
     <!-- no translation found for permlab_cameraOpenCloseListener (5548732769068109315) -->
     <skip />
-    <!-- no translation found for permdesc_cameraOpenCloseListener (5860322671003213710) -->
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
     <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ऐप्स को कंपनकर्ता नियंत्रित करने देता है."</string>
@@ -1249,7 +1249,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g> से कनेक्ट नहीं किया जा सकता"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"निजता सेटिंग बदलने और फिर से कोशिश करने के लिए टैप करें"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"निजता सेटिंग बदलना चाहते हैं?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> आपके डिवाइस के मैक पते (एक खास पहचानकर्ता) का इस्तेमाल करके आपके डिवाइस से कनेक्ट कर सकता है. इससे आस-पास के डिवाइस आपके डिवाइस की जगह की जानकारी को ट्रैक कर सकते हैं. \n\nअगर आप इसे जारी रखते हैं, तो <xliff:g id="SSID_1">%1$s</xliff:g> आपकी निजता सेटिंग बदल देगा और फिर से कनेक्ट करने की कोशिश करेगा."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"कनेक्ट करने के लिए, <xliff:g id="SSID">%1$s</xliff:g> को आपके डिवाइस के मैक पते (एक खास पहचानकर्ता) का इस्तेमाल करने की ज़रूरत पड़ेगी. फ़िलहाल, इस नेटवर्क के लिए आपकी निजता सेटिंग, किसी भी क्रम में लगाए गए पहचानकर्ता का इस्तेमाल करती है. \n\nइस बदलाव से, आपके डिवाइस की जगह की जानकारी को आस-पास के डिवाइस ट्रैक कर सकते हैं."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"सेटिंग बदलें"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"सेटिंग अपडेट की गई है. फिर से कनेक्ट करने की कोशिश करें."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"निजता सेटिंग नहीं बदली जा सकती"</string>

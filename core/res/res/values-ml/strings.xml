@@ -435,7 +435,7 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ചിത്രങ്ങളും വീഡിയോകളും എടുക്കുക"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ഏതുസമയത്തും ക്യാമറ ഉപയോഗിച്ചുകൊണ്ട് ചിത്രങ്ങൾ എടുക്കാനും വീഡിയോകൾ റെക്കോർഡുചെയ്യാനും ഈ ആപ്പിന് കഴിയും."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"ക്യാമറയുള്ള ഉപകരണങ്ങൾ ഓണാക്കുന്നതിനെയോ അടയ്ക്കുന്നതിനെയോ കുറിച്ചുള്ള കോൾബാക്കുകൾ സ്വീകരിക്കാൻ ആപ്പിനെയോ സേവനത്തെയോ അനുവദിക്കുക."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ക്യാമറയുള്ള ഏതെങ്കിലും ഉപകരണം ഓണാക്കുമ്പോഴോ (ആപ്പ് പാക്കേജ് മുഖേന) അടയ്ക്കുമ്പോഴോ ഈ സിഗ്‌നേച്ചർ ആപ്പിന് കോൾബാക്കുകൾ സ്വീകരിക്കാനാവും."</string>
+    <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"ക്യാമറയുള്ള ഏതെങ്കിലും ഉപകരണം ഓണാക്കുമ്പോഴോ (ആപ്പ് മുഖേന) അടയ്ക്കുമ്പോഴോ ഈ ആപ്പിന് കോൾബാക്കുകൾ സ്വീകരിക്കാനാവും."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"വൈബ്രേറ്റുചെയ്യൽ നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"വൈബ്രേറ്റർ നിയന്ത്രിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ഫോൺ നമ്പറുകളിലേക്ക് നേരിട്ട് വിളിക്കുക"</string>
@@ -1247,7 +1247,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"<xliff:g id="SSID">%1$s</xliff:g>-ലേക്ക് കണക്‌റ്റ് ചെയ്യാനാവുന്നില്ല"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"സ്വകാര്യതാ ക്രമീകരണം മാറ്റാൻ ടാപ്പ് ചെയ്യുക, വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"സ്വകാര്യതാ ക്രമീകരണം മാറ്റണോ?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"ഒരു തനത് ഐഡന്റിഫയറായ നിങ്ങളുടെ ഉപകരണ MAC വിലാസം ഉപയോഗിച്ച് കണക്റ്റ് ചെയ്യാൻ <xliff:g id="SSID_0">%1$s</xliff:g> താൽപ്പര്യപ്പെട്ടേക്കാം. നിങ്ങളുടെ ഉപകരണത്തിന്റെ സ്ഥാനം ട്രാക്ക് ചെയ്യാൻ സമീപത്തുള്ള ഉപകരണങ്ങളെ ഇത് അനുവദിച്ചേക്കാം. \n\nനിങ്ങൾ തുടരുന്നെങ്കിൽ, <xliff:g id="SSID_1">%1$s</xliff:g> നിങ്ങളുടെ സ്വകാര്യതാ ക്രമീകരണം മാറ്റി വീണ്ടും ബന്ധിപ്പിക്കാൻ ശ്രമിക്കും."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"കണക്‌റ്റ് ചെയ്യാൻ, തനത് ഐഡന്റിഫയറായ MAC വിലാസം <xliff:g id="SSID">%1$s</xliff:g> ഉപയോഗിക്കിക്കേണ്ടതുണ്ട്. നിലവിൽ, ക്രമരഹിതമാക്കിയ ഐഡന്റിഫയർ ആണ് ഈ നെറ്റ്‌വർക്കിന്റെ സ്വകാര്യതാ ക്രമീകരണം ഉപയോഗിക്കുന്നത്. \n\nനിങ്ങളുടെ ഉപകരണത്തിന്റെ ലൊക്കേഷൻ ട്രാക്ക് ചെയ്യാൻ സമീപത്തുള്ള ഉപകരണങ്ങളെ ഈ മാറ്റം അനുവദിച്ചേക്കാം."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ക്രമീകരണം മാറ്റുക"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ക്രമീകരണം അപ്‌ഡേറ്റ് ചെയ്തു. വീണ്ടും കണക്‌റ്റ് ചെയ്യാൻ ശ്രമിക്കുക."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"സ്വകാര്യതാ ക്രമീകരണം മാറ്റാനാവില്ല"</string>
