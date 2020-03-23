@@ -144,7 +144,7 @@ import android.app.IApplicationThread;
 import android.app.IAssistDataReceiver;
 import android.app.INotificationManager;
 import android.app.IRequestFinishCallback;
-import android.app.ITaskOrganizerController;
+import android.window.ITaskOrganizerController;
 import android.app.ITaskStackListener;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -230,7 +230,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 import android.view.WindowManager;
 
 import com.android.internal.R;

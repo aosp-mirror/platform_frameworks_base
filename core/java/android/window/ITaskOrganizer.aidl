@@ -15,11 +15,11 @@
 ** limitations under the License.
 */
 
-package android.view;
+package android.window;
 
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
 import android.app.ActivityManager;
+import android.window.IWindowContainer;
 
 /**
  * Interface for ActivityTaskManager/WindowManager to delegate control of tasks.
