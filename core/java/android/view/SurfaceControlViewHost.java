@@ -192,6 +192,7 @@ public class SurfaceControlViewHost {
         final WindowManager.LayoutParams lp =
                 new WindowManager.LayoutParams(width, height,
                         WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.TRANSPARENT);
+        lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
         setView(view, lp);
     }
 
