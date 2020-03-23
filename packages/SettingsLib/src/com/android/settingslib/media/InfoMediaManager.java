@@ -181,9 +181,13 @@ public class InfoMediaManager extends MediaManager {
             return false;
         }
 
-        final RoutingSessionInfo info = getRoutingSessionInfo();
-        if (info != null) {
-            mRouterManager.getControllerForSession(info).release();
+
+        final List<RoutingSessionInfo> sessionInfos =
+                mRouterManager.getRoutingSessions(mPackageName);
+        final RoutingSessionInfo sessionInfo = sessionInfos.get(sessionInfos.size() - 1);
+
+        if (sessionInfo != null) {
+            mRouterManager.releaseSession(sessionInfo);
             return true;
         }
 
