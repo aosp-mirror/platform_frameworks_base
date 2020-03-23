@@ -123,7 +123,6 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 
-import dalvik.annotation.compat.VersionCodes;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
@@ -344,7 +343,7 @@ public final class ProcessList {
      * Pointers</a>
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = VersionCodes.Q)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
 
     /**
@@ -360,7 +359,7 @@ public final class ProcessList {
      * app has made them world-readable.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = VersionCodes.Q)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long APP_DATA_DIRECTORY_ISOLATION = 143937733; // See b/143937733
 
     ActivityManagerService mService = null;
