@@ -58,7 +58,7 @@ open class NotificationRankingManager @Inject constructor(
     private val headsUpManager: HeadsUpManager,
     private val notifFilter: NotificationFilter,
     private val logger: NotificationEntryManagerLogger,
-    sectionsFeatureManager: NotificationSectionsFeatureManager,
+    private val sectionsFeatureManager: NotificationSectionsFeatureManager,
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
     private val highPriorityProvider: HighPriorityProvider
 ) {
@@ -68,7 +68,8 @@ open class NotificationRankingManager @Inject constructor(
     private val mediaManager by lazy {
         mediaManagerLazy.get()
     }
-    private val usePeopleFiltering: Boolean = sectionsFeatureManager.isFilteringEnabled()
+    private val usePeopleFiltering: Boolean
+        get() = sectionsFeatureManager.isFilteringEnabled()
     private val rankingComparator: Comparator<NotificationEntry> = Comparator { a, b ->
         val na = a.sbn
         val nb = b.sbn
@@ -123,36 +124,31 @@ open class NotificationRankingManager @Inject constructor(
         entries: Collection<NotificationEntry>,
         reason: String
     ): List<NotificationEntry> {
-        val eSeq = entries.asSequence()
-
         // TODO: may not be ideal to guard on null here, but this code is implementing exactly what
         // NotificationData used to do
         if (newRankingMap != null) {
             rankingMap = newRankingMap
-            updateRankingForEntries(eSeq)
+            updateRankingForEntries(entries)
         }
-
-        val filtered: Sequence<NotificationEntry>
-        synchronized(this) {
-            filtered = filterAndSortLocked(eSeq, reason)
+        return synchronized(this) {
+            filterAndSortLocked(entries, reason)
         }
-
-        return filtered.toList()
     }
 
     /** Uses the [rankingComparator] to sort notifications which aren't filtered */
     private fun filterAndSortLocked(
-        entries: Sequence<NotificationEntry>,
+        entries: Collection<NotificationEntry>,
         reason: String
-    ): Sequence<NotificationEntry> {
+    ): List<NotificationEntry> {
         logger.logFilterAndSort(reason)
-
-        return entries.filter { !notifFilter.shouldFilterOut(it) }
+        val filtered = entries.asSequence()
+                .filterNot(notifFilter::shouldFilterOut)
                 .sortedWith(rankingComparator)
-                .map {
-                    assignBucketForEntry(it)
-                    it
-                }
+                .toList()
+        for (entry in filtered) {
+            assignBucketForEntry(entry)
+        }
+        return filtered
     }
 
     private fun assignBucketForEntry(entry: NotificationEntry) {
@@ -179,13 +175,13 @@ open class NotificationRankingManager @Inject constructor(
         }
     }
 
-    private fun updateRankingForEntries(entries: Sequence<NotificationEntry>) {
+    private fun updateRankingForEntries(entries: Iterable<NotificationEntry>) {
         rankingMap?.let { rankingMap ->
             synchronized(entries) {
-                entries.forEach { entry ->
+                for (entry in entries) {
                     val newRanking = Ranking()
                     if (!rankingMap.getRanking(entry.key, newRanking)) {
-                        return@forEach
+                        continue
                     }
                     entry.ranking = newRanking
 
