@@ -13,31 +13,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<LinearLayout
+<TextView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Control.MenuItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:padding="24dp"
+    android:layout_gravity="start" />
 
-  <LinearLayout
-      android:orientation="horizontal"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:gravity="center">
-
-    <ImageView
-        android:id="@+id/app_icon"
-        android:layout_gravity="center"
-        android:layout_width="@dimen/controls_header_app_icon_size"
-        android:layout_height="@dimen/controls_header_app_icon_size"
-        android:layout_marginEnd="10dp" />
-
-    <TextView
-        style="@style/Control.Spinner.Item"
-        android:id="@+id/controls_spinner_item"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
-  </LinearLayout>
-
-</LinearLayout>
