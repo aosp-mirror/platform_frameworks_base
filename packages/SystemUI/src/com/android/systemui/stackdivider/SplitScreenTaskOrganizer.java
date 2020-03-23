@@ -24,12 +24,12 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.app.ITaskOrganizerController;
+import android.window.ITaskOrganizerController;
 import android.app.WindowConfiguration;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
-import android.view.ITaskOrganizer;
+import android.window.ITaskOrganizer;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
