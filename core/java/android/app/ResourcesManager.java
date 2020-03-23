@@ -1120,7 +1120,9 @@ public class ResourcesManager {
             daj = new DisplayAdjustments(daj);
             daj.setCompatibilityInfo(compat);
         }
-        daj.setConfiguration(config);
+        if (displayId == Display.DEFAULT_DISPLAY) {
+            daj.setConfiguration(config);
+        }
         DisplayMetrics dm = getDisplayMetrics(displayId, daj);
         if (displayId != Display.DEFAULT_DISPLAY) {
             applyNonDefaultDisplayMetricsToConfiguration(dm, tmpConfig);
