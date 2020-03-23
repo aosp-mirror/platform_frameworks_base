@@ -175,9 +175,6 @@
          be 'platform' or 'noisy' (i.e. for noisy touch screens). -->
     <string name="velocity_tracker_impl" translatable="false">platform</string>
 
-    <!-- Set to true to enable the user switcher on the keyguard. -->
-    <bool name="config_keyguardUserSwitcher">false</bool>
-
     <!-- Doze: does this device support STATE_DOZE?  -->
     <bool name="doze_display_state_supported">false</bool>
 
