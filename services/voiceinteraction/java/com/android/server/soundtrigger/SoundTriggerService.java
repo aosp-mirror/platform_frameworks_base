@@ -207,7 +207,13 @@ public class SoundTriggerService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
-        if (PHASE_SYSTEM_SERVICES_READY == phase) {
+        Slog.d(TAG, "onBootPhase: " + phase + " : " + isSafeMode());
+        if (PHASE_DEVICE_SPECIFIC_SERVICES_READY == phase) {
+            if (isSafeMode()) {
+                Slog.w(TAG, "not enabling SoundTriggerService in safe mode");
+                return;
+            }
+
             initSoundTriggerHelper();
             mLocalSoundTriggerService.setSoundTriggerHelper(mSoundTriggerHelper);
         } else if (PHASE_THIRD_PARTY_APPS_CAN_START == phase) {
