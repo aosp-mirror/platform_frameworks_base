@@ -21,6 +21,7 @@ import android.content.Context;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubbleData;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -62,7 +63,8 @@ public interface BubbleModule {
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
             DumpManager dumpManager,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            SysUiState sysUiState) {
         return new BubbleController(
                 context,
                 notificationShadeWindowController,
@@ -79,6 +81,7 @@ public interface BubbleModule {
                 notifPipeline,
                 featureFlags,
                 dumpManager,
-                floatingContentCoordinator);
+                floatingContentCoordinator,
+                sysUiState);
     }
 }
