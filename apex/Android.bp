@@ -148,6 +148,10 @@ stubs_defaults {
             removed_api_file: "api/removed.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/public/api",
+    },
 }
 
 stubs_defaults {
@@ -166,6 +170,10 @@ stubs_defaults {
             api_file: "api/system-current.txt",
             removed_api_file: "api/system-removed.txt",
         },
+    },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system/api",
     },
 }
 
@@ -228,6 +236,10 @@ stubs_defaults {
             removed_api_file: "api/module-lib-removed.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/module-lib/api",
+    },
 }
 
 stubs_defaults {
@@ -257,6 +269,10 @@ stubs_defaults {
             api_file: "api/current.txt",
             removed_api_file: "api/removed.txt",
         },
+    },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system-server/api",
     },
 }
 
