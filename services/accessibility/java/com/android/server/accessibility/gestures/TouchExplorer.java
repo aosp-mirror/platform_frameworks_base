@@ -274,23 +274,38 @@ public class TouchExplorer extends BaseEventStreamTransformation
     public void onAccessibilityEvent(AccessibilityEvent event) {
         final int eventType = event.getEventType();
 
+        if (eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
+            sendsPendingA11yEventsIfNeed();
+        }
+        super.onAccessibilityEvent(event);
+    }
+
+    /*
+     * Sends pending {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END} or {@{@link
+     * AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END}} after receiving last hover exit
+     * event.
+     */
+    private void sendsPendingA11yEventsIfNeed() {
+        // The last hover exit A11y event should be sent by view after receiving hover exit motion
+        // event. In some view hierarchy, the ViewGroup transforms hover move motion event to hover
+        // exit motion event and than dispatch to itself. It causes unexpected A11y exit events.
+        if (mSendHoverExitDelayed.isPending()) {
+            return;
+        }
         // The event for gesture end should be strictly after the
         // last hover exit event.
-        if (mSendTouchExplorationEndDelayed.isPending()
-                && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
-                    mSendTouchExplorationEndDelayed.cancel();
+        if (mSendTouchExplorationEndDelayed.isPending()) {
+            mSendTouchExplorationEndDelayed.cancel();
             mDispatcher.sendAccessibilityEvent(
                     AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END);
         }
 
         // The event for touch interaction end should be strictly after the
         // last hover exit and the touch exploration gesture end events.
-        if (mSendTouchInteractionEndDelayed.isPending()
-                && eventType == AccessibilityEvent.TYPE_VIEW_HOVER_EXIT) {
+        if (mSendTouchInteractionEndDelayed.isPending()) {
             mSendTouchInteractionEndDelayed.cancel();
             mDispatcher.sendAccessibilityEvent(AccessibilityEvent.TYPE_TOUCH_INTERACTION_END);
         }
-        super.onAccessibilityEvent(event);
     }
 
     @Override
