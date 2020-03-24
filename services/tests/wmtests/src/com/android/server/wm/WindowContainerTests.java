@@ -35,6 +35,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -420,6 +421,23 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(child12.isAnimating(TRANSITION | CHILDREN));
         assertFalse(child2.isAnimating(TRANSITION | CHILDREN));
         assertFalse(child21.isAnimating(TRANSITION | CHILDREN));
+    }
+
+    @Test
+    public void testIsAnimating_typesToCheck() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
+        final TestWindowContainer window = builder.setIsAnimating(true).setLayer(0).build();
+
+        assertTrue(window.isAnimating());
+        assertFalse(window.isAnimating(0, ANIMATION_TYPE_SCREEN_ROTATION));
+        assertTrue(window.isAnimating(0, ANIMATION_TYPE_APP_TRANSITION));
+        assertFalse(window.isAnimatingExcluding(0, ANIMATION_TYPE_APP_TRANSITION));
+
+        final TestWindowContainer child = window.addChildWindow();
+        assertFalse(child.isAnimating());
+        assertTrue(child.isAnimating(PARENTS));
+        assertTrue(child.isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
+        assertFalse(child.isAnimating(PARENTS, ANIMATION_TYPE_SCREEN_ROTATION));
     }
 
     @Test
@@ -895,6 +913,7 @@ public class WindowContainerTests extends WindowTestsBase {
             mWaitForTransitStart = waitTransitStart;
             spyOn(mSurfaceAnimator);
             doReturn(mIsAnimating).when(mSurfaceAnimator).isAnimating();
+            doReturn(ANIMATION_TYPE_APP_TRANSITION).when(mSurfaceAnimator).getAnimationType();
         }
 
         TestWindowContainer getParentWindow() {
