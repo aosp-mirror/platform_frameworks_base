@@ -14,22 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<!-- Fullscreen views in sysui should be listed here in increasing Z order. -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@android:color/transparent"
+    android:id="@+id/notification_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <ViewStub android:id="@+id/notification_panel_stub"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout="@layout/notification_panel_container"/>
-
-    <ViewStub android:id="@+id/fullscreen_user_switcher_stub"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layout="@layout/car_fullscreen_user_switcher"/>
-
-</FrameLayout>
+    android:layout_height="match_parent"/>

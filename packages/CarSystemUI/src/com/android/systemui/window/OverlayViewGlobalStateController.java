@@ -71,12 +71,10 @@ public class OverlayViewGlobalStateController {
     public void showView(OverlayViewController viewController, Runnable show) {
         if (mShownSet.isEmpty()) {
             mCarNavigationBarController.hideBars();
-            mSystemUIOverlayWindowController.setWindowExpanded(true);
+            setWindowVisible(true);
         }
 
-        if (!viewController.isInflated()) {
-            viewController.inflate(mSystemUIOverlayWindowController.getBaseLayout());
-        }
+        inflateView(viewController);
 
         show.run();
         mShownSet.add(viewController.getClass().getName());
@@ -104,9 +102,36 @@ public class OverlayViewGlobalStateController {
 
         if (mShownSet.isEmpty()) {
             mCarNavigationBarController.showBars();
-            mSystemUIOverlayWindowController.setWindowExpanded(false);
+            setWindowVisible(false);
         }
 
         Log.d(TAG, "Content hidden: " + viewController.getClass().getName());
+    }
+
+    /** Sets the window visibility state. */
+    public void setWindowVisible(boolean expanded) {
+        mSystemUIOverlayWindowController.setWindowVisible(expanded);
+    }
+
+    /** Returns {@code true} is the window is visible. */
+    public boolean isWindowVisible() {
+        return mSystemUIOverlayWindowController.isWindowVisible();
+    }
+
+    /** Sets the focusable flag of the sysui overlawy window. */
+    public void setWindowFocusable(boolean focusable) {
+        mSystemUIOverlayWindowController.setWindowFocusable(focusable);
+    }
+
+    /** Returns {@code true} if the window is focusable. */
+    public boolean isWindowFocusable() {
+        return mSystemUIOverlayWindowController.isWindowFocusable();
+    }
+
+    /** Inflates the view controlled by the given view controller. */
+    public void inflateView(OverlayViewController viewController) {
+        if (!viewController.isInflated()) {
+            viewController.inflate(mSystemUIOverlayWindowController.getBaseLayout());
+        }
     }
 }

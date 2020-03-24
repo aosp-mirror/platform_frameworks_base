@@ -16,6 +16,7 @@
 
 package com.android.systemui.window;
 
+import com.android.systemui.car.notification.NotificationPanelViewMediator;
 import com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator;
 
 import dagger.Binds;
@@ -28,10 +29,17 @@ import dagger.multibindings.IntoMap;
  */
 @Module
 public abstract class OverlayWindowModule {
-    /** Inject into FullscreenUserSwitcherViewsMediator. */
+    /** Injects FullscreenUserSwitcherViewsMediator. */
     @Binds
     @IntoMap
     @ClassKey(FullscreenUserSwitcherViewMediator.class)
     public abstract OverlayViewMediator bindFullscreenUserSwitcherViewsMediator(
             FullscreenUserSwitcherViewMediator overlayViewsMediator);
+
+    /** Injects NotificationPanelViewMediator. */
+    @Binds
+    @IntoMap
+    @ClassKey(NotificationPanelViewMediator.class)
+    public abstract OverlayViewMediator bindNotificationPanelViewMediator(
+            NotificationPanelViewMediator notificationPanelViewMediator);
 }

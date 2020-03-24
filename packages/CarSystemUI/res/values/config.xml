@@ -61,6 +61,7 @@
     <!-- Car System UI's OverlayViewsMediator-->
     <string-array name="config_carSystemUIOverlayViewsMediators" translatable="false">
         <item>com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator</item>
+        <item>com.android.systemui.car.notification.NotificationPanelViewMediator</item>
     </string-array>
 
     <!-- SystemUI Services: The classes of the stuff to start. -->

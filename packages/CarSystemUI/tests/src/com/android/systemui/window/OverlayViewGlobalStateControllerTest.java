@@ -97,7 +97,7 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
     public void showView_nothingAlreadyShown_windowIsExpanded() {
         mOverlayViewGlobalStateController.showView(mOverlayViewController, mRunnable);
 
-        verify(mSystemUIOverlayWindowController).setWindowExpanded(true);
+        verify(mSystemUIOverlayWindowController).setWindowVisible(true);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.showView(mOverlayViewController, mRunnable);
 
-        verify(mSystemUIOverlayWindowController, never()).setWindowExpanded(true);
+        verify(mSystemUIOverlayWindowController, never()).setWindowVisible(true);
     }
 
     @Test
@@ -223,7 +223,7 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.hideView(mOverlayViewController, mRunnable);
 
-        verify(mSystemUIOverlayWindowController, never()).setWindowExpanded(false);
+        verify(mSystemUIOverlayWindowController, never()).setWindowVisible(false);
     }
 
     @Test
@@ -245,6 +245,24 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.hideView(mOverlayViewController, mRunnable);
 
-        verify(mSystemUIOverlayWindowController).setWindowExpanded(false);
+        verify(mSystemUIOverlayWindowController).setWindowVisible(false);
+    }
+
+    @Test
+    public void inflateView_notInflated_inflates() {
+        when(mOverlayViewController.isInflated()).thenReturn(false);
+
+        mOverlayViewGlobalStateController.inflateView(mOverlayViewController);
+
+        verify(mOverlayViewController).inflate(mBaseLayout);
+    }
+
+    @Test
+    public void inflateView_alreadyInflated_doesNotInflate() {
+        when(mOverlayViewController.isInflated()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.inflateView(mOverlayViewController);
+
+        verify(mOverlayViewController, never()).inflate(mBaseLayout);
     }
 }
