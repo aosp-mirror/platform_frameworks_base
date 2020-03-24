@@ -4820,6 +4820,11 @@ package android.view {
     method public abstract String asyncImpl() default "";
   }
 
+  public final class SurfaceControl implements android.os.Parcelable {
+    method public static long acquireFrameRateFlexibilityToken();
+    method public static void releaseFrameRateFlexibilityToken(long);
+  }
+
   public class SurfaceControlViewHost {
     method public void relayout(android.view.WindowManager.LayoutParams);
     method public void setView(@NonNull android.view.View, @NonNull android.view.WindowManager.LayoutParams);
