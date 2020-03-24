@@ -2429,7 +2429,7 @@ public class DevicePolicyManager {
             PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface PersonalAppSuspensionReason {}
+    public @interface PersonalAppsSuspensionReason {}
 
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
@@ -11961,7 +11961,7 @@ public class DevicePolicyManager {
      *     {@link #PERSONAL_APPS_NOT_SUSPENDED} if apps are not suspended.
      * @see #setPersonalAppsSuspended
      */
-    public @PersonalAppSuspensionReason int getPersonalAppsSuspendedReasons(
+    public @PersonalAppsSuspensionReason int getPersonalAppsSuspendedReasons(
             @NonNull ComponentName admin) {
         throwIfParentInstance("getPersonalAppsSuspendedReasons");
         if (mService != null) {
