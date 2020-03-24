@@ -679,6 +679,7 @@ public final class AccessibilityInteractionController {
             mViewRootImpl.mAttachInfo.mAccessibilityFetchFlags = flags;
             final View target = findViewByAccessibilityId(accessibilityViewId);
             if (target != null && isShown(target)) {
+                mA11yManager.notifyPerformingAction(action);
                 if (action == R.id.accessibilityActionClickOnClickableSpan) {
                     // Handle this hidden action separately
                     succeeded = handleClickableSpanActionUiThread(
@@ -692,6 +693,7 @@ public final class AccessibilityInteractionController {
                         succeeded = target.performAccessibilityAction(action, arguments);
                     }
                 }
+                mA11yManager.notifyPerformingAction(0);
             }
         } finally {
             try {

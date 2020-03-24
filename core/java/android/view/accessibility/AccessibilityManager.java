@@ -240,6 +240,8 @@ public final class AccessibilityManager {
 
     AccessibilityPolicy mAccessibilityPolicy;
 
+    private int mPerformingAction = 0;
+
     @UnsupportedAppUsage
     private final ArrayMap<AccessibilityStateChangeListener, Handler>
             mAccessibilityStateChangeListeners = new ArrayMap<>();
@@ -573,6 +575,9 @@ public final class AccessibilityManager {
                 return;
             }
             event.setEventTime(SystemClock.uptimeMillis());
+            if (event.getAction() == 0) {
+                event.setAction(mPerformingAction);
+            }
             if (mAccessibilityPolicy != null) {
                 dispatchedEvent = mAccessibilityPolicy.onAccessibilityEvent(event,
                         mIsEnabled, mRelevantEventTypes);
@@ -970,6 +975,16 @@ public final class AccessibilityManager {
             return null;
         }
         return mRequestPreparerLists.get(id);
+    }
+
+    /**
+     * Set the currently performing accessibility action in views.
+     *
+     * @param actionId the action id of {@link AccessibilityNodeInfo.AccessibilityAction}.
+     * @hide
+     */
+    public void notifyPerformingAction(int actionId) {
+        mPerformingAction = actionId;
     }
 
     /**
