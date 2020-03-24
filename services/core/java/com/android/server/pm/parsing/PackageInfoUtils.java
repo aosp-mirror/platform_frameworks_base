@@ -230,6 +230,10 @@ public class PackageInfoUtils {
             info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
         }
 
+        info.seInfo = AndroidPackageUtils.getSeInfo(pkg, pkgSetting);
+        info.primaryCpuAbi = AndroidPackageUtils.getPrimaryCpuAbi(pkg, pkgSetting);
+        info.secondaryCpuAbi = AndroidPackageUtils.getSecondaryCpuAbi(pkg, pkgSetting);
+
         info.flags |= appInfoFlags(pkg, pkgSetting);
         info.privateFlags |= appInfoPrivateFlags(pkg, pkgSetting);
         return info;
