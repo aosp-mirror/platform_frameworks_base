@@ -111,7 +111,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         void addTask(Task t) {
             mOrganizedTasks.add(t);
             try {
-                mOrganizer.taskAppeared(t.getTaskInfo());
+                mOrganizer.onTaskAppeared(t.getTaskInfo());
             } catch (Exception e) {
                 Slog.e(TAG, "Exception sending taskAppeared callback" + e);
             }
@@ -119,7 +119,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
         void removeTask(Task t) {
             try {
-                mOrganizer.taskVanished(t.getTaskInfo());
+                mOrganizer.onTaskVanished(t.getTaskInfo());
             } catch (Exception e) {
                 Slog.e(TAG, "Exception sending taskVanished callback" + e);
             }

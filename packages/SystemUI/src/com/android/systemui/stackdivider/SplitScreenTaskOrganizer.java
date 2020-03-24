@@ -82,11 +82,11 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     @Override
-    public void taskAppeared(RunningTaskInfo taskInfo) {
+    public void onTaskAppeared(RunningTaskInfo taskInfo) {
     }
 
     @Override
-    public void taskVanished(RunningTaskInfo taskInfo) {
+    public void onTaskVanished(RunningTaskInfo taskInfo) {
     }
 
     @Override

@@ -21,6 +21,9 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
+import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_ROOT;
+import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_UNDEFINED;
+import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_WINDOW_TOKENS;
 
 import static com.android.internal.util.Preconditions.checkState;
 import static com.android.server.wm.DisplayAreaProto.NAME;
@@ -28,13 +31,16 @@ import static com.android.server.wm.DisplayAreaProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowContainerChildProto.DISPLAY_AREA;
 
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.window.IDisplayAreaOrganizer;
 
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 
 import java.util.Comparator;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -57,13 +63,24 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     protected final Type mType;
     private final String mName;
+    final int mFeatureId;
+    private final DisplayAreaOrganizerController mOrganizerController;
+    IDisplayAreaOrganizer mOrganizer;
 
     DisplayArea(WindowManagerService wms, Type type, String name) {
+        this(wms, type, name, FEATURE_UNDEFINED);
+    }
+
+    DisplayArea(WindowManagerService wms, Type type, String name, int featureId) {
         super(wms);
         // TODO(display-area): move this up to ConfigurationContainer
         mOrientation = SCREEN_ORIENTATION_UNSET;
         mType = type;
         mName = name;
+        mFeatureId = featureId;
+        mRemoteToken = new RemoteToken(this);
+        mOrganizerController =
+                wms.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController;
     }
 
     @Override
@@ -116,6 +133,33 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         return DISPLAY_AREA;
     }
 
+    void forAllDisplayAreas(Consumer<DisplayArea> callback) {
+        super.forAllDisplayAreas(callback);
+        callback.accept(this);
+    }
+
+    void setOrganizer(IDisplayAreaOrganizer organizer) {
+        if (mOrganizer == organizer) return;
+        sendDisplayAreaVanished();
+        mOrganizer = organizer;
+        sendDisplayAreaAppeared();
+    }
+
+    void sendDisplayAreaAppeared() {
+        if (mOrganizer == null) return;
+        mOrganizerController.onDisplayAreaAppeared(mOrganizer, this);
+    }
+
+    void sendDisplayAreaVanished() {
+        if (mOrganizer == null) return;
+        mOrganizerController.onDisplayAreaVanished(mOrganizer, this);
+    }
+
+    @Override
+    boolean isOrganized() {
+        return mOrganizer != null;
+    }
+
     /**
      * DisplayArea that contains WindowTokens, and orders them according to their type.
      */
@@ -152,7 +196,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         };
 
         Tokens(WindowManagerService wms, Type type, String name) {
-            super(wms, type, name);
+            super(wms, type, name, FEATURE_WINDOW_TOKENS);
         }
 
         void addChild(WindowToken token) {
@@ -191,7 +235,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
         private final Rect mTmpDimBoundsRect = new Rect();
 
         Root(WindowManagerService wms) {
-            super(wms, Type.ANY, "DisplayArea.Root");
+            super(wms, Type.ANY, "DisplayArea.Root", FEATURE_ROOT);
         }
 
         @Override
