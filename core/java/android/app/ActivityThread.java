@@ -201,6 +201,7 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7413,8 +7414,10 @@ public final class ActivityThread extends ClientTransactionHandler {
                 if (e.errno == OsConstants.EXDEV && oldPath.startsWith("/storage/")) {
                     Log.v(TAG, "Recovering failed rename " + oldPath + " to " + newPath);
                     try {
-                        Files.move(new File(oldPath).toPath(), new File(newPath).toPath());
+                        Files.move(new File(oldPath).toPath(), new File(newPath).toPath(),
+                                StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e2) {
+                        Log.e(TAG, "Rename recovery failed ", e);
                         throw e;
                     }
                 } else {
