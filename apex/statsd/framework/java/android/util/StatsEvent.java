@@ -188,6 +188,12 @@ public final class StatsEvent {
     @VisibleForTesting
     public static final int ERROR_ATTRIBUTION_UIDS_TAGS_SIZES_NOT_EQUAL = 0x1000;
 
+    /**
+     * @hide
+     **/
+    @VisibleForTesting
+    public static final int ERROR_ATOM_ID_INVALID_POSITION = 0x2000;
+
     // Size limits.
 
     /**
@@ -350,19 +356,32 @@ public final class StatsEvent {
             mPos = 0;
             writeTypeId(TYPE_OBJECT);
 
-            // Set mPos to after atom id's location in the buffer.
-            // First 2 elements in the buffer are event timestamp followed by the atom id.
-            mPos = POS_ATOM_ID + Byte.BYTES + Integer.BYTES;
-            mPosLastField = 0;
-            mLastType = 0;
+            // Write timestamp.
+            mPos = POS_TIMESTAMP_NS;
+            writeLong(mTimestampNs);
         }
 
         /**
          * Sets the atom id for this StatsEvent.
+         *
+         * This should be called immediately after StatsEvent.newBuilder()
+         * and should only be called once.
+         * Not calling setAtomId will result in ERROR_NO_ATOM_ID.
+         * Calling setAtomId out of order will result in ERROR_ATOM_ID_INVALID_POSITION.
          **/
         @NonNull
         public Builder setAtomId(final int atomId) {
-            mAtomId = atomId;
+            if (0 == mAtomId) {
+                mAtomId = atomId;
+
+                if (1 == mNumElements) { // Only timestamp is written so far.
+                    writeInt(atomId);
+                } else {
+                    // setAtomId called out of order.
+                    mErrorMask |= ERROR_ATOM_ID_INVALID_POSITION;
+                }
+            }
+
             return this;
         }
 
@@ -557,7 +576,7 @@ public final class StatsEvent {
         public Builder addBooleanAnnotation(
                 final byte annotationId, final boolean value) {
             // Ensure there's a field written to annotate.
-            if (0 == mPosLastField) {
+            if (mNumElements < 2) {
                 mErrorMask |= ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD;
             } else if (mCurrentAnnotationCount >= MAX_ANNOTATION_COUNT) {
                 mErrorMask |= ERROR_TOO_MANY_ANNOTATIONS;
@@ -568,6 +587,7 @@ public final class StatsEvent {
                 mCurrentAnnotationCount++;
                 writeAnnotationCount();
             }
+
             return this;
         }
 
@@ -576,7 +596,7 @@ public final class StatsEvent {
          **/
         @NonNull
         public Builder addIntAnnotation(final byte annotationId, final int value) {
-            if (0 == mPosLastField) {
+            if (mNumElements < 2) {
                 mErrorMask |= ERROR_ANNOTATION_DOES_NOT_FOLLOW_FIELD;
             } else if (mCurrentAnnotationCount >= MAX_ANNOTATION_COUNT) {
                 mErrorMask |= ERROR_TOO_MANY_ANNOTATIONS;
@@ -587,6 +607,7 @@ public final class StatsEvent {
                 mCurrentAnnotationCount++;
                 writeAnnotationCount();
             }
+
             return this;
         }
 
@@ -619,18 +640,19 @@ public final class StatsEvent {
                 mErrorMask |= ERROR_TOO_MANY_FIELDS;
             }
 
-            int size = mPos;
-            mPos = POS_TIMESTAMP_NS;
-            writeLong(mTimestampNs);
-            writeInt(mAtomId);
             if (0 == mErrorMask) {
                 mBuffer.putByte(POS_NUM_ELEMENTS, (byte) mNumElements);
             } else {
+                // Write atom id and error mask. Overwrite any annotations for atom Id.
+                mPos = POS_ATOM_ID;
+                mPos += mBuffer.putByte(mPos, TYPE_INT);
+                mPos += mBuffer.putInt(mPos, mAtomId);
                 mPos += mBuffer.putByte(mPos, TYPE_ERRORS);
                 mPos += mBuffer.putInt(mPos, mErrorMask);
                 mBuffer.putByte(POS_NUM_ELEMENTS, (byte) 3);
-                size = mPos;
             }
+
+            final int size = mPos;
 
             if (mUsePooledBuffer) {
                 return new StatsEvent(mAtomId, mBuffer, mBuffer.getBytes(), size);
