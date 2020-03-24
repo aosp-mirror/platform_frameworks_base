@@ -52,7 +52,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_horizontal|fill_vertical"
+        android:gravity="center"
         android:padding="16dp"
     >
         <ImageView
@@ -67,7 +67,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="0dp"
-            android:layout_height="@dimen/qs_media_album_size"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
         >
             <LinearLayout
