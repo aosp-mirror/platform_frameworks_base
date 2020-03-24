@@ -74,7 +74,7 @@ public class ImeInsetsSourceConsumerTest {
                     false,
                     new DisplayCutout(
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
-                    rect, rect, SOFT_INPUT_ADJUST_RESIZE, 0);
+                    SOFT_INPUT_ADJUST_RESIZE, 0);
             mImeConsumer = new ImeInsetsSourceConsumer(
                     new InsetsState(), Transaction::new, mController);
         });
