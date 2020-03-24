@@ -162,7 +162,7 @@ public class InsetsControllerTest {
                     false,
                     new DisplayCutout(
                             Insets.of(10, 10, 10, 10), rect, rect, rect, rect),
-                    rect, rect, SOFT_INPUT_ADJUST_RESIZE, 0);
+                    SOFT_INPUT_ADJUST_RESIZE, 0);
             mController.onFrameChanged(new Rect(0, 0, 100, 100));
         });
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
