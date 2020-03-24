@@ -51,6 +51,18 @@
           android:layout_gravity="center" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/controls_more"
+        android:src="@drawable/ic_more_vert"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="12dp"
+        android:layout_marginEnd="@dimen/controls_list_side_margin"
+        android:tint="@color/control_more_vert"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
   </androidx.constraintlayout.widget.ConstraintLayout>
 
   <LinearLayout

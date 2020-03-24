@@ -15662,17 +15662,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (!userData.mAppsSuspended) {
                 return PERSONAL_APPS_NOT_SUSPENDED;
             } else {
-                int reasons = PERSONAL_APPS_NOT_SUSPENDED;
-                if (admin.mSuspendPersonalApps) {
-                    reasons |= PERSONAL_APPS_SUSPENDED_EXPLICITLY;
-                }
                 final long deadline = admin.mProfileOffDeadline;
-                if (deadline != 0 && System.currentTimeMillis() > deadline) {
-                    reasons |= PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT;
-                }
-                return reasons;
+                return makeSuspensionReasons(admin.mSuspendPersonalApps,
+                        deadline != 0 && System.currentTimeMillis() > deadline);
             }
         }
+    }
+
+    private @PersonalAppSuspensionReason int makeSuspensionReasons(
+            boolean explicit, boolean timeout) {
+        int result = PERSONAL_APPS_NOT_SUSPENDED;
+        if (explicit) {
+            result |= PERSONAL_APPS_SUSPENDED_EXPLICITLY;
+        }
+        if (timeout) {
+            result |= PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT;
+        }
+        return result;
     }
 
     @Override
@@ -15700,7 +15706,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         mInjector.binderWithCleanCallingIdentity(
-                () -> applyPersonalAppsSuspension(callingUserId, suspended));
+                () -> applyPersonalAppsSuspension(
+                        callingUserId, PERSONAL_APPS_SUSPENDED_EXPLICITLY));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PERSONAL_APPS_SUSPENDED)
@@ -15715,22 +15722,22 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @param running whether the profile is currently considered running.
      */
     private void updatePersonalAppSuspension(int profileUserId, boolean running) {
-        final boolean shouldSuspend;
+        final int suspensionState;
         synchronized (getLockObject()) {
             final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(profileUserId);
             if (profileOwner != null) {
                 final boolean deadlineReached =
                         updateProfileOffDeadlineLocked(profileUserId, profileOwner, running);
-                shouldSuspend = deadlineReached || profileOwner.mSuspendPersonalApps;
-                Slog.d(LOG_TAG, String.format(
-                        "Should personal use be suspended: %b; explicit: %b; timeout: %b",
-                        shouldSuspend, profileOwner.mSuspendPersonalApps, deadlineReached));
+                suspensionState = makeSuspensionReasons(
+                        profileOwner.mSuspendPersonalApps, deadlineReached);
+                Slog.d(LOG_TAG,
+                        String.format("New personal apps suspension state: %d", suspensionState));
             } else {
-                shouldSuspend = false;
+                suspensionState = PERSONAL_APPS_NOT_SUSPENDED;
             }
         }
 
-        applyPersonalAppsSuspension(profileUserId, shouldSuspend);
+        applyPersonalAppsSuspension(profileUserId, suspensionState);
     }
 
     /**
@@ -15785,13 +15792,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void applyPersonalAppsSuspension(int profileUserId, boolean shouldSuspend) {
+    private void applyPersonalAppsSuspension(
+            int profileUserId, @PersonalAppSuspensionReason int suspensionState) {
         final boolean suspended = getUserData(UserHandle.USER_SYSTEM).mAppsSuspended;
+        final boolean shouldSuspend = suspensionState != PERSONAL_APPS_NOT_SUSPENDED;
         if (suspended != shouldSuspend) {
             suspendPersonalAppsInternal(shouldSuspend, UserHandle.USER_SYSTEM);
         }
 
-        if (shouldSuspend) {
+        if (suspensionState == PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT) {
             sendPersonalAppsSuspendedNotification(profileUserId);
         } else {
             clearPersonalAppsSuspendedNotification();
@@ -15832,8 +15841,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void sendPersonalAppsSuspendedNotification(int userId) {
         final String profileOwnerPackageName;
+        final long maxTimeOffDays;
         synchronized (getLockObject()) {
             profileOwnerPackageName = mOwners.getProfileOwnerComponent(userId).getPackageName();
+            final ActiveAdmin poAdmin = getProfileOwnerAdminLocked(userId);
+            maxTimeOffDays = TimeUnit.MILLISECONDS.toDays(poAdmin.mProfileMaximumTimeOffMillis);
         }
 
         final Intent intent = new Intent(DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE);
@@ -15849,9 +15861,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         .setOngoing(true)
                         .setContentTitle(
                                 mContext.getString(
-                                        R.string.personal_apps_suspended_notification_title))
+                                        R.string.personal_apps_suspended_title))
                         .setContentText(mContext.getString(
-                                R.string.personal_apps_suspended_notification_text))
+                                R.string.personal_apps_suspended_text, maxTimeOffDays))
                         .setColor(mContext.getColor(R.color.system_notification_accent_color))
                         .setContentIntent(pendingIntent)
                         .build();

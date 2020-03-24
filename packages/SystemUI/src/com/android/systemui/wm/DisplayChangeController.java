@@ -21,7 +21,7 @@ import android.os.RemoteException;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.IWindowManager;
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 
 import java.util.ArrayList;
 

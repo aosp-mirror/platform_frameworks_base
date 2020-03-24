@@ -34,7 +34,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;

@@ -73,7 +73,7 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Singleton;
 import android.util.Size;
-import android.view.IWindowContainer;
+import android.window.IWindowContainer;
 import android.view.Surface;
 
 import com.android.internal.app.LocalePicker;

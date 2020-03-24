@@ -82,9 +82,9 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.Gravity;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
+import android.window.IWindowContainer;
 import android.view.SurfaceControl;
+import android.window.ITaskOrganizer;
 
 import androidx.test.filters.SmallTest;
 
