@@ -287,11 +287,6 @@ public class StorageNotification extends SystemUI {
     }
 
     private void onPublicVolumeStateChangedInternal(VolumeInfo vol) {
-        // Do not notify for volumes on non-removable disks
-        if (vol.disk.isNonRemovable()) {
-            return;
-        }
-
         Log.d(TAG, "Notifying about public volume: " + vol.toString());
 
         final Notification notif;
