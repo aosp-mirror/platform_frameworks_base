@@ -646,6 +646,8 @@
     <string name="wifi_verbose_logging">Enable Wi\u2011Fi Verbose Logging</string>
     <!-- Setting Checkbox title whether to disable WiFi Scan Throttling. [CHAR LIMIT=40] -->
     <string name="wifi_scan_throttling">Wi\u2011Fi scan throttling</string>
+    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=40] -->
+    <string name="wifi_enhanced_mac_randomization">Wi\u2011Fi\u2011enhanced MAC randomization</string>
     <!-- Setting Checkbox title whether to always keep mobile data active. [CHAR LIMIT=80] -->
     <string name="mobile_data_always_on">Mobile data always active</string>
     <!-- Setting Checkbox title whether to enable hardware acceleration for tethering. [CHAR LIMIT=80] -->
@@ -716,6 +718,8 @@
     <string name="wifi_verbose_logging_summary">Increase Wi\u2011Fi logging level, show per SSID RSSI in Wi\u2011Fi Picker</string>
     <!-- Setting Checkbox summary whether to disable Wifi scan throttling [CHAR LIMIT=NONE] -->
     <string name="wifi_scan_throttling_summary">Reduces battery drain &amp; improves network performance</string>
+    <!-- Setting Checkbox title whether to enable WiFi enhanced mac randomization. [CHAR LIMIT=NONE] -->
+    <string name="wifi_enhanced_mac_randomization_summary">This toggle affects MAC randomization behavior for client mode only.\nWhen this mode is activated, any networks that have MAC randomization enabled may have their MAC addresses re\u2011randomized during association, depending on when the client last disconnected from the network. Re\u2011randomization does not occur if the device reconnects in 4 hours or less.</string>
     <!-- Label indicating network has been manually marked as metered -->
     <string name="wifi_metered_label">Metered</string>
     <!-- Label indicating network has been manually marked as unmetered -->
