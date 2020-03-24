@@ -36,7 +36,6 @@ import androidx.test.filters.LargeTest;
 import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -65,12 +64,12 @@ public class ResizeSplitScreenTest extends NonRotationTestBase {
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
-    @Before
-    public void runTransition() {
+    @Override
+    TransitionRunner getTransitionToRun() {
         ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        run(resizeSplitScreen(mTestApp, bottomApp, mUiDevice, mBeginRotation,
+        return resizeSplitScreen(mTestApp, bottomApp, mUiDevice, mBeginRotation,
                 new Rational(1, 3), new Rational(2, 3))
-                .includeJankyRuns().build());
+                .includeJankyRuns().build();
     }
 
     @Test
