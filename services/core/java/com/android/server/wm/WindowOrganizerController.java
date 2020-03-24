@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.view.SurfaceControl;
+import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.IWindowOrganizerController;
@@ -76,11 +77,13 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             mTransactionCallbacksByPendingSyncId = new HashMap();
 
     final TaskOrganizerController mTaskOrganizerController;
+    final DisplayAreaOrganizerController mDisplayAreaOrganizerController;
 
     WindowOrganizerController(ActivityTaskManagerService atm) {
         mService = atm;
         mGlobalLock = atm.mGlobalLock;
         mTaskOrganizerController = new TaskOrganizerController(mService);
+        mDisplayAreaOrganizerController = new DisplayAreaOrganizerController(mService);
     }
 
     @Override
@@ -316,6 +319,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     public ITaskOrganizerController getTaskOrganizerController() {
         enforceStackPermission("getTaskOrganizerController()");
         return mTaskOrganizerController;
+    }
+
+    @Override
+    public IDisplayAreaOrganizerController getDisplayAreaOrganizerController() {
+        enforceStackPermission("getDisplayAreaOrganizerController()");
+        return mDisplayAreaOrganizerController;
     }
 
     int startSyncWithOrganizer(IWindowContainerTransactionCallback callback) {

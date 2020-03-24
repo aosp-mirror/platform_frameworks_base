@@ -301,7 +301,7 @@ final class InputMonitor {
          * we may have some issues with modal-windows, but I guess we can
          * cross that bridge when we come to implementing full-screen TaskOrg
          */
-        if (child.getTask() != null && child.getTask().isControlledByTaskOrganizer()) {
+        if (child.getTask() != null && child.getTask().isOrganized()) {
             inputWindowHandle.replaceTouchableRegionWithCrop(null /* Use this surfaces crop */);
         }
 
