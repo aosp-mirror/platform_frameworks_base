@@ -16,7 +16,6 @@
 
 package com.android.systemui.assist;
 
-import android.app.Service;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -34,11 +33,8 @@ import java.util.Map;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
-import dagger.multibindings.ClassKey;
-import dagger.multibindings.IntoMap;
 
 /** Module for dagger injections related to the Assistant. */
 @Module
@@ -91,9 +87,4 @@ public abstract class AssistModule {
     static Clock provideSystemClock() {
         return SystemClock::uptimeMillis;
     }
-
-    @Binds
-    @IntoMap
-    @ClassKey(AssistHandleService.class)
-    abstract Service bindAssistHandleService(AssistHandleService assistHandleService);
 }
