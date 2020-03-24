@@ -600,32 +600,51 @@ std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(uint64_t timestampN
     return logEvent;
 }
 
-//std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
-//        const std::vector<AttributionNodeInternal>& attributions, const string& jobName,
-//        const ScheduledJobStateChanged::State state, uint64_t timestampNs) {
-//    auto event = std::make_unique<LogEvent>(util::SCHEDULED_JOB_STATE_CHANGED, timestampNs);
-//    event->write(attributions);
-//    event->write(jobName);
-//    event->write(state);
-//    event->init();
-//    return event;
-//}
-//
-//std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(
-//    const std::vector<AttributionNodeInternal>& attributions,
-//    const string& name, uint64_t timestampNs) {
-//    return CreateScheduledJobStateChangedEvent(
-//            attributions, name, ScheduledJobStateChanged::STARTED, timestampNs);
-//}
-//
-//// Create log event when scheduled job finishes.
-//std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(
-//    const std::vector<AttributionNodeInternal>& attributions,
-//    const string& name, uint64_t timestampNs) {
-//    return CreateScheduledJobStateChangedEvent(
-//            attributions, name, ScheduledJobStateChanged::FINISHED, timestampNs);
-//}
-//
+std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
+        const vector<int>& attributionUids, const vector<string>& attributionTags,
+        const string& jobName, const ScheduledJobStateChanged::State state, uint64_t timestampNs) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, util::SCHEDULED_JOB_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+    AStatsEvent_writeString(statsEvent, jobName.c_str());
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(uint64_t timestampNs,
+                                                       const vector<int>& attributionUids,
+                                                       const vector<string>& attributionTags,
+                                                       const string& jobName) {
+    return CreateScheduledJobStateChangedEvent(attributionUids, attributionTags, jobName,
+                                               ScheduledJobStateChanged::STARTED, timestampNs);
+}
+
+// Create log event when scheduled job finishes.
+std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(uint64_t timestampNs,
+                                                        const vector<int>& attributionUids,
+                                                        const vector<string>& attributionTags,
+                                                        const string& jobName) {
+    return CreateScheduledJobStateChangedEvent(attributionUids, attributionTags, jobName,
+                                               ScheduledJobStateChanged::FINISHED, timestampNs);
+}
+
 std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(uint64_t timestampNs,
                                                           const vector<int>& attributionUids,
                                                           const vector<string>& attributionTags,
@@ -821,6 +840,62 @@ std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
     AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
     AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateBleScanStateChangedEvent(uint64_t timestampNs,
+                                                         const vector<int>& attributionUids,
+                                                         const vector<string>& attributionTags,
+                                                         const BleScanStateChanged::State state,
+                                                         const bool filtered, const bool firstMatch,
+                                                         const bool opportunistic) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, util::BLE_SCAN_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_writeInt32(statsEvent, filtered);       // filtered
+    AStatsEvent_writeInt32(statsEvent, firstMatch);     // first match
+    AStatsEvent_writeInt32(statsEvent, opportunistic);  // opportunistic
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
+}
+
+std::unique_ptr<LogEvent> CreateOverlayStateChangedEvent(int64_t timestampNs, const int32_t uid,
+                                                         const string& packageName,
+                                                         const bool usingAlertWindow,
+                                                         const OverlayStateChanged::State state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, util::OVERLAY_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeInt32(statsEvent, uid);
+    AStatsEvent_writeString(statsEvent, packageName.c_str());
+    AStatsEvent_writeInt32(statsEvent, usingAlertWindow);
     AStatsEvent_writeInt32(statsEvent, state);
     AStatsEvent_build(statsEvent);
 

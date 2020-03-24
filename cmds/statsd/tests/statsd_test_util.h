@@ -195,14 +195,16 @@ std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
 std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(uint64_t timestampNs, int level);
 
 // Create log event when scheduled job starts.
-std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(
-    const std::vector<AttributionNodeInternal>& attributions,
-    const string& name, uint64_t timestampNs);
+std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(uint64_t timestampNs,
+                                                       const vector<int>& attributionUids,
+                                                       const vector<string>& attributionTags,
+                                                       const string& jobName);
 
 // Create log event when scheduled job finishes.
-std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(
-    const std::vector<AttributionNodeInternal>& attributions,
-    const string& name, uint64_t timestampNs);
+std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(uint64_t timestampNs,
+                                                        const vector<int>& attributionUids,
+                                                        const vector<string>& attributionTags,
+                                                        const string& jobName);
 
 // Create log event when battery saver starts.
 std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs);
@@ -246,6 +248,18 @@ std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(uint64_t timestampNs, in
 // Create log event for uid process state change.
 std::unique_ptr<LogEvent> CreateUidProcessStateChangedEvent(
         uint64_t timestampNs, int uid, const android::app::ProcessStateEnum state);
+
+std::unique_ptr<LogEvent> CreateBleScanStateChangedEvent(uint64_t timestampNs,
+                                                         const vector<int>& attributionUids,
+                                                         const vector<string>& attributionTags,
+                                                         const BleScanStateChanged::State state,
+                                                         const bool filtered, const bool firstMatch,
+                                                         const bool opportunistic);
+
+std::unique_ptr<LogEvent> CreateOverlayStateChangedEvent(int64_t timestampNs, const int32_t uid,
+                                                         const string& packageName,
+                                                         const bool usingAlertWindow,
+                                                         const OverlayStateChanged::State state);
 
 // Helper function to create an AttributionNodeInternal proto.
 AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
