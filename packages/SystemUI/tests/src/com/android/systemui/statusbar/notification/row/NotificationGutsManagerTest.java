@@ -361,7 +361,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationInfo.OnAppSettingsClickListener.class),
                 eq(false),
                 eq(false),
-                eq(true) /* wasShownHighPriority */);
+                eq(true), /* wasShownHighPriority */
+                eq(false) /* showAutomaticSetting */);
     }
 
     @Test
@@ -393,7 +394,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationInfo.OnAppSettingsClickListener.class),
                 eq(true),
                 eq(false),
-                eq(false) /* wasShownHighPriority */);
+                eq(false), /* wasShownHighPriority */
+                eq(false) /* showAutomaticSetting */);
     }
 
     @Test
@@ -423,7 +425,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 any(NotificationInfo.OnAppSettingsClickListener.class),
                 eq(false),
                 eq(false),
-                eq(false) /* wasShownHighPriority */);
+                eq(false), /* wasShownHighPriority */
+                eq(false) /* showAutomaticSetting */);
     }
 
     @Test

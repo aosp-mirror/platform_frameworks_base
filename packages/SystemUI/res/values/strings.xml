@@ -1838,6 +1838,9 @@
     <!-- [CHAR LIMIT=100] Notification Importance title -->
     <string name="notification_bubble_title">Bubble</string>
 
+    <!-- [CHAR LIMIT=100] Notification Importance title -->
+    <string name="notification_automatic_title">Automatic</string>
+
     <!-- [CHAR LIMIT=150] Notification Importance title: low importance level summary -->
     <string name="notification_channel_summary_low">No sound or vibration</string>
 
@@ -1852,6 +1855,9 @@
 
     <!-- [CHAR LIMIT=150] Notification Importance title: bubble level summary -->
     <string name="notification_channel_summary_bubble">Keeps your attention with a floating shortcut to this content.</string>
+
+    <!-- [CHAR LIMIT=150] Notification Importance title: automatic importance level summary -->
+    <string name="notification_channel_summary_automatic">Have the system determine if this notification should make sound or vibration</string>
 
     <!-- [CHAR LIMIT=150] Notification Importance title: important conversation level summary -->
     <string name="notification_channel_summary_priority">Shows at top of conversation section, appears as floating bubble, displays profile picture on lock screen</string>
