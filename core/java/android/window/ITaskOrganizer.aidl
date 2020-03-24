@@ -25,8 +25,8 @@ import android.window.IWindowContainer;
  * {@hide}
  */
 oneway interface ITaskOrganizer {
-    void taskAppeared(in ActivityManager.RunningTaskInfo taskInfo);
-    void taskVanished(in ActivityManager.RunningTaskInfo taskInfo);
+    void onTaskAppeared(in ActivityManager.RunningTaskInfo taskInfo);
+    void onTaskVanished(in ActivityManager.RunningTaskInfo taskInfo);
 
     /**
      * Will fire when core attributes of a Task's info change. Relevant properties include the

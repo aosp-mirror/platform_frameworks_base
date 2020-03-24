@@ -16,6 +16,7 @@
 
 package android.window;
 
+import android.window.IDisplayAreaOrganizerController;
 import android.window.ITaskOrganizerController;
 import android.window.IWindowContainerTransactionCallback;
 import android.window.WindowContainerTransaction;
@@ -43,4 +44,7 @@ interface IWindowOrganizerController {
 
     /** @return An interface enabling the management of task organizers. */
     ITaskOrganizerController getTaskOrganizerController();
+
+    /** @return An interface enabling the management of display area organizers. */
+    IDisplayAreaOrganizerController getDisplayAreaOrganizerController();
 }
