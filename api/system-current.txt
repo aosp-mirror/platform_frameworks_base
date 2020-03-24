@@ -6289,8 +6289,8 @@ package android.net {
     ctor public NetworkProvider(@NonNull android.content.Context, @NonNull android.os.Looper, @NonNull String);
     method @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY) public void declareNetworkRequestUnfulfillable(@NonNull android.net.NetworkRequest);
     method public int getProviderId();
-    method public void onNetworkRequested(@NonNull android.net.NetworkRequest, int, int);
-    method public void onRequestWithdrawn(@NonNull android.net.NetworkRequest);
+    method public void onNetworkRequestWithdrawn(@NonNull android.net.NetworkRequest);
+    method public void onNetworkRequested(@NonNull android.net.NetworkRequest, @IntRange(from=0, to=99) int, int);
     field public static final int ID_NONE = -1; // 0xffffffff
   }
 
