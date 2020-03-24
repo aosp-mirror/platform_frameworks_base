@@ -878,7 +878,7 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     private void notifyImeHidden() {
-        doHideWindow();
+        requestHideSelf(0);
     }
 
     private void removeImeSurface() {
