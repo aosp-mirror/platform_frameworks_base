@@ -170,24 +170,23 @@ droidstubs {
 java_library {
     name: "framework-wifi-stubs-publicapi",
     srcs: [":framework-wifi-stubs-srcs-publicapi"],
+    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
+    // TODO(b/151134996): remove this
     sdk_version: "current",
-    installable: false,
 }
 
 java_library {
     name: "framework-wifi-stubs-systemapi",
     srcs: [":framework-wifi-stubs-srcs-systemapi"],
-    sdk_version: "system_current",
     libs: ["framework-annotations-lib"],
-    installable: false,
+    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
 }
 
 java_library {
     name: "framework-wifi-stubs-module_libs_api",
     srcs: [":framework-wifi-stubs-srcs-module_libs_api"],
-    sdk_version: "module_current",
     libs: ["framework-annotations-lib"],
-    installable: false,
+    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
 }
 
 // defaults for tests that need to build against framework-wifi's @hide APIs
