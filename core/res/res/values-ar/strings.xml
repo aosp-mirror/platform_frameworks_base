@@ -315,7 +315,7 @@
     <string name="permgrouprequest_activityRecognition" msgid="693328554262727556">"‏هل تريد السماح للتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى بيانات نشاطك البدني؟"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"الكاميرا"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"التقاط صور وتسجيل فيديو"</string>
-    <string name="permgrouprequest_camera" msgid="2697305443703328372">"‏هل تريد السماح لخدمة &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
+    <string name="permgrouprequest_camera" msgid="2697305443703328372">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط صور وتسجيل فيديو؟"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"سجلّ المكالمات"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"قراءة سجلّ المكالمات الهاتفية والكتابة إليه"</string>
     <string name="permgrouprequest_calllog" msgid="7565344038959817408">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالوصول إلى سجلّ مكالماتك الهاتفية؟"</string>
@@ -447,7 +447,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"التقاط صور وفيديوهات"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا في أي وقت."</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"يسمح الإذن لتطبيق أو خدمة بتلقّي استدعاءات عما إذا كانت أجهزة الكاميرات مفتوحة أو مغلقة."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"يمكن أن يتلقّى تطبيق التوقيع هذا استدعاءات عندما يكون جهاز أي كاميرا مفتوحًا (بحزمة تطبيق) أو مغلقًا."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"التحكم في الاهتزاز"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"اتصال مباشر بأرقام الهواتف"</string>
@@ -1327,7 +1328,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"لا يمكن الاتصال بـ <xliff:g id="SSID">%1$s</xliff:g>."</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"انقر لتغيير إعدادات الخصوصية وإعادة المحاولة."</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"هل تريد تغيير إعداد الخصوصية؟"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"‏قد يحتاج <xliff:g id="SSID_0">%1$s</xliff:g> إلى الاتصال باستخدام عنوان MAC الخاص بجهازك ومعرّف فريد. وقد يسمح هذا الإجراء للأجهزة القريبة بتتبع الموقع الجغرافي لجهازك. \n\nفي حال مواصلة تنفيذ هذا الإجراء، سيغيّر <xliff:g id="SSID_1">%1$s</xliff:g> إعداد الخصوصية ويحاول إعادة الاتصال."</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"‏للاتصال، تحتاج خدمة <xliff:g id="SSID">%1$s</xliff:g> إلى استخدام عنوان MAC الخاص بجهازك وهو معرّف فريد. يستخدم إعداد الخصوصية لهذه الشبكة حاليًا معرّفًا عشوائيًا. \n\nقد يسمح هذا التغيير للأجهزة القريبة بتتبع الموقع الجغرافي لجهازك."</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"تغيير الإعداد"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"تم تعديل الإعداد. حاوِل إعادة الاتصال."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"لا يمكن تغيير إعداد الخصوصية."</string>

@@ -375,7 +375,7 @@
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="2616944406357387366">"Beren zati batzuk memorian modu iraunkorrean aktibo uztea baimentzen die aplikazioei. Horrela, beste aplikazioek memoria gutxiago izan lezakete erabilgarri eta telebistak motelago funtziona lezake."</string>
     <string name="permdesc_persistentActivity" product="default" msgid="1914841924366562051">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta telefonoa motel daiteke."</string>
-    <string name="permlab_foregroundService" msgid="1768855976818467491">"Abiarazi zerbitzuak aurreko planoan"</string>
+    <string name="permlab_foregroundService" msgid="1768855976818467491">"abiarazi zerbitzuak aurreko planoan"</string>
     <string name="permdesc_foregroundService" msgid="8720071450020922795">"Aurreko planoko zerbitzuak erabiltzea baimentzen dio aplikazioari."</string>
     <string name="permlab_getPackageSize" msgid="375391550792886641">"neurtu aplikazioen biltegiratzeko tokia"</string>
     <string name="permdesc_getPackageSize" msgid="742743530909966782">"Bere kodea, datuak eta cache-tamainak eskuratzeko baimena ematen die aplikazioei."</string>
@@ -422,7 +422,7 @@
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1912601926375190585">"Aplikazioa aurreko planoan dagoenean, zure kokapenaren berri izan dezake sareen iturburuak erabilita; adibidez, telefonia mugikorreko dorreak eta Wi-Fi sareak. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu telebistan, aplikazioak erabil ditzan."</string>
     <string name="permdesc_accessCoarseLocation" product="automotive" msgid="2154996109427085674">"Aplikazioak aurreko planoan funtzionatzen duenean bakarrik lor dezake zure gutxi gorabeherako kokapena. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu autoan, aplikazioak erabil ditzan."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="8962998102400124341">"Aplikazioa aurreko planoan dagoenean, zure kokapenaren berri izan dezake sareen iturburuak erabilita; adibidez, telefonia mugikorreko dorreak eta Wi-Fi sareak. Kokapen-zerbitzu horiek aktibatuta eta erabilgarri izan behar dituzu telefonoan, aplikazioak erabil ditzan."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"Atzitu kokapena atzeko planoan"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"atzitu kokapena atzeko planoan"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="6904788108073882096">"Baimen hau ematen bada kokapen zehatz edo gutxi gorabeherakorako sarbideaz gain, atzeko planoan abian den bitartean atzitu ahalko du aplikazioak kokapena."</string>
     <string name="permlab_modifyAudioSettings" msgid="6129039778010031815">"aldatu audio-ezarpenak"</string>
     <string name="permdesc_modifyAudioSettings" msgid="8687227609663124921">"Audio-ezarpen orokorrak aldatzeko baimena ematen dio; besteak beste, bolumena eta irteerarako zer bozgorailu erabiltzen den."</string>
@@ -434,8 +434,9 @@
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Aplikazioak ariketa fisikoa hauteman dezake."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"atera argazkiak eta grabatu bideoak"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"Aplikazioak edonoiz erabil dezake kamera argazkiak ateratzeko eta bideoak grabatzeko."</string>
-    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Eman baimena aplikazioari edo zerbitzuari jakinarazpenak jasotzeko kamerak ireki edo ixten direnean."</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"Kamera ireki edo itxi dela (eta zer aplikazio-paketerekin) dioten jakinarazpenak jaso ditzake sinatzeko aplikazio honek."</string>
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"eman jakinarazpenak jasotzeko baimena aplikazioari edo zerbitzuari kamerak ireki edo ixten direnean."</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"kontrolatu dardara"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko aukera ematen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"deitu zuzenean telefono-zenbakietara"</string>
@@ -448,7 +449,7 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"Deiak sistemaren bidez bideratzea baimentzen die aplikazioei, deien zerbitzua ahal bezain ona izan dadin."</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"ikusi eta kontrolatu deiak sistemaren bidez."</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"Gailuan abian diren deiak eta deion informazioa ikusi eta kontrolatzeko baimena ematen dio aplikazioari; besteak beste, deien zenbakiak eta deien egoera."</string>
-    <string name="permlab_acceptHandover" msgid="2925523073573116523">"Jarraitu beste aplikazio batean hasitako deia"</string>
+    <string name="permlab_acceptHandover" msgid="2925523073573116523">"jarraitu beste aplikazio batean hasitako deia"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"Beste aplikazio batean hasitako dei bat jarraitzea baimentzen dio aplikazioari."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"irakurri telefono-zenbakiak"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"Gailuaren telefono-zenbakiak atzitzeko baimena ematen die aplikazioei."</string>
@@ -484,9 +485,9 @@
     <string name="permdesc_changeNetworkState" msgid="649341947816898736">"Sarearen konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_changeTetherState" msgid="9079611809931863861">"aldatu telefono bidezko konektagarritasuna"</string>
     <string name="permdesc_changeTetherState" msgid="3025129606422533085">"Partekatutako Interneterako konexioaren egoera aldatzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi Wi-Fi konexioak"</string>
+    <string name="permlab_accessWifiState" msgid="5552488500317911052">"ikusi wifi bidezko konexioak"</string>
     <string name="permdesc_accessWifiState" msgid="6913641669259483363">"Wi-Fi sareei buruzko informazioa ikusteko baimena ematen die aplikazioei, adibidez, Wi-Fi konexioa aktibatuta dagoen eta konektatutako Wi-Fi gailuen izenak zein diren."</string>
-    <string name="permlab_changeWifiState" msgid="7947824109713181554">"konektatu Wi-Fira edo deskonektatu bertatik"</string>
+    <string name="permlab_changeWifiState" msgid="7947824109713181554">"konektatu wifira edo deskonektatu bertatik"</string>
     <string name="permdesc_changeWifiState" msgid="7170350070554505384">"Wi-Fi sarbide-puntuetara konektatzeko edo haietatik deskonektatzeko baimena ematen die aplikazioei, baita Wi-Fi sareen gailu-konfigurazioari aldaketak egitekoa ere."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"onartu Wi-Fi Multicast harrera"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"Wi-Fi sarearen bidez gailu guztiei bidalitako paketeak jasotzeko baimena ematen die aplikazioei multidifusio-helbideak erabilita, ez tableta soilik. Multidifusiokoa ez den moduak baino bateria gehiago erabiltzen du."</string>
@@ -510,9 +511,9 @@
     <string name="permdesc_nfc" msgid="8352737680695296741">"Near Field Communication (NFC) etiketekin, txartelekin eta irakurgailuekin komunikatzea baimentzen die aplikazioei."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desgaitu pantailaren blokeoa"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Teklen blokeoa eta erlazionatutako pasahitz-segurtasuna desgaitzeko baimena ematen die aplikazioei. Adibidez, telefonoak teklen blokeoa desgaitzen du telefono-deiak jasotzen dituenean, eta berriro gaitzen du deiak amaitzean."</string>
-    <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Eskatu pantailaren blokeoa konplexua izatea"</string>
+    <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"eskatu pantailaren blokeoa konplexua izatea"</string>
     <string name="permdesc_requestPasswordComplexity" msgid="1130556896836258567">"Pantailaren blokeoaren konplexutasun-maila (handia, ertaina, txikia edo bat ere ez) jakiteko aukera ematen dio aplikazioari. Informazio horrekin, pantailaren blokeoaren luzera-barruti edo mota posiblea ondoriozta liteke. Halaber, pantailaren blokeoa maila jakin batera igotzeko iradoki diezaieke aplikazioak erabiltzaileei, baina horri ez ikusi egin eta aplikazioa erabiltzen jarraitzeko aukera dute erabiltzaileek. Kontuan izan pantailaren blokeoa ez dela gordetzen testu arrunt gisa; beraz, aplikazioak ez du jakingo pasahitz zehatza zein den."</string>
-    <string name="permlab_useBiometric" msgid="6314741124749633786">"Erabili hardware biometrikoa"</string>
+    <string name="permlab_useBiometric" msgid="6314741124749633786">"erabili hardware biometrikoa"</string>
     <string name="permdesc_useBiometric" msgid="7502858732677143410">"Autentifikatzeko hardware biometrikoa erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_manageFingerprint" msgid="7432667156322821178">"kudeatu hatz-marken hardwarea"</string>
     <string name="permdesc_manageFingerprint" msgid="2025616816437339865">"Erreferentzia-gako digitalen txantiloiak gehitzeko eta ezabatzeko metodoei dei egitea baimentzen die aplikazioei."</string>
@@ -607,7 +608,7 @@
     <string name="permdesc_readSyncStats" msgid="3867809926567379434">"Kontu baten sinkronizazio-estatistikak irakurtzeko baimena ematen dio; besteak beste, sinkronizazio-gertaeren historia eta sinkronizatutako datu kopurua."</string>
     <string name="permlab_sdcardRead" msgid="5791467020950064920">"Irakurri biltegiratze partekatuko edukia"</string>
     <string name="permdesc_sdcardRead" msgid="6872973242228240382">"Biltegiratze partekatuko edukia irakurtzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"Aldatu edo ezabatu biltegiratze partekatuko edukia"</string>
+    <string name="permlab_sdcardWrite" msgid="4863021819671416668">"aldatu edo ezabatu biltegiratze partekatuko edukia"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"Biltegiratze partekatuko edukian idazteko baimena ematen die aplikazioei."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"egin/jaso SIP deiak"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP deiak egitea eta jasotzeko baimena ematen die aplikazioei."</string>
@@ -1247,7 +1248,8 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"Ezin da konektatu <xliff:g id="SSID">%1$s</xliff:g> sarera"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"Sakatu hau pribatutasun-ezarpenak aldatzeko, eta saiatu berriro"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"Pribatutasun-ezarpena aldatu nahi duzu?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"Baliteke <xliff:g id="SSID_0">%1$s</xliff:g> sareak gailuaren MAC helbidea erabilita konektatu nahi izatea; izan ere, identifikatzaile esklusibo bat da hori. Hori eginez gero, bailiteke inguruko gailuek zure gailuaren kokapenaren jarraipena egitea. \n\nAurrera egiten baduzu, <xliff:g id="SSID_1">%1$s</xliff:g> sareak zure pribatutasun-ezarpena aldatuko du eta berriro saiatuko da konektatzen."</string>
+    <!-- no translation found for wifi_disable_mac_randomization_dialog_message (7074701420311731349) -->
+    <skip />
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"Aldatu ezarpena"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"Eguneratu da ezarpena. Saiatu berriro konektatzen."</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"Ezin da aldatu pribatutasun-ezarpena"</string>

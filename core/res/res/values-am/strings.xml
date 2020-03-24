@@ -435,7 +435,8 @@
     <string name="permlab_camera" msgid="6320282492904119413">"ፎቶዎች እና ቪዲዮዎች ያንሱ"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"ይህ መተግበሪያ በማናቸውም ጊዜ ካሜራውን በመጠቀም ፎቶ ሊያነሳ እና ቪዲዮዎችን ሊቀርጽ ይችላል።"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"አንድ መተግበሪያ ወይም አገልግሎት እየተከፈቱ ወይም እየተዘጉ ስላሉ የካሜራ መሣሪያዎች መልሶ ጥሪዎችን እንዲቀበል ይፍቀዱ።"</string>
-    <string name="permdesc_cameraOpenCloseListener" msgid="5860322671003213710">"ማንኛውም የካሜራ መሣሪያ እየተከፈተ (በምን የመተግበሪያ ጥቅል) ወይም እየተዘጋ ሲሆን ይህ የፊርማ መተግበሪያ መልሶ ጥሪዎችን መቀበል ይችላል።"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"ነዛሪ ተቆጣጠር"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"በቀጥታ ስልክ ቁጥሮች ደውል"</string>
@@ -1247,7 +1248,7 @@
     <string name="wifi_cannot_connect_with_randomized_mac_title" msgid="3638054829636549621">"ከ<xliff:g id="SSID">%1$s</xliff:g> ጋር መገናኘት አልተቻለም"</string>
     <string name="wifi_cannot_connect_with_randomized_mac_message" msgid="1660164954255520914">"የግላዊነት ቅንብሮችን ለመቀየር መታ ያድርጉ እና ዳግም ይሞክሩ"</string>
     <string name="wifi_disable_mac_randomization_dialog_title" msgid="2850303108790975442">"የግላዊነት ቅንብር ይቀየር?"</string>
-    <string name="wifi_disable_mac_randomization_dialog_message" msgid="2434334967976496565">"<xliff:g id="SSID_0">%1$s</xliff:g> ልዩ ለዪ ከሆነው የመሣሪያዎ ማክ አድራሻ ጋር መገናኘት ሊፈልግ ይችላል። ይህ የመሣሪያዎ አካባቢ አቅራቢያ ባሉ መሣሪያዎች ክትትል እንዲደረግበት ሊያደርገው ይችላል። \n\nከቀጠሉ <xliff:g id="SSID_1">%1$s</xliff:g> የግላዊነት ቅንብርዎን ይቀይረውና እንደገና ለመገናኘት ሊሞክር ይችላል።"</string>
+    <string name="wifi_disable_mac_randomization_dialog_message" msgid="7074701420311731349">"ለማገናኘት <xliff:g id="SSID">%1$s</xliff:g> ልዩ ለዪ የሆነው የመሣሪያዎን ማክ አድራሻ መጠቀም አለበት። በአሁኑ ጊዜ የዚህ አውታረ መረብ የግላዊነት ቅንብርዎ የዘፈቀደ ለዪን ነው የሚጠቀመው። \n\nይህ የመሣሪያዎ አካባቢ አቅራቢያ ባሉ መሣሪያዎች ክትትል እንዲደረግበት ሊያደርገው ይችላል።"</string>
     <string name="wifi_disable_mac_randomization_dialog_confirm_text" msgid="8206498512998282366">"ቅንብሮችን ለውጥ"</string>
     <string name="wifi_disable_mac_randomization_dialog_success" msgid="6654175395681450625">"ቅንብር ተዘምኗል። እንደገና ለማገናኘት ይሞክሩ።"</string>
     <string name="wifi_disable_mac_randomization_dialog_failure" msgid="7028090406806909137">"የግላዊነት ቅንብርን መለወጥ አይቻልም"</string>
