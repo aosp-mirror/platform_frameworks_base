@@ -19,9 +19,6 @@
 #include "incidentd_util.h"
 #include "PrivacyFilter.h"
 #include "proto_util.h"
-
-#include "incidentd_util.h"
-#include "proto_util.h"
 #include "Section.h"
 
 #include <android-base/file.h>
@@ -129,6 +126,8 @@ public:
     FieldStripper(const Privacy* restrictions, const sp<ProtoReader>& data,
             uint8_t bufferLevel);
 
+    ~FieldStripper();
+
     /**
      * Take the data that we have, and filter it down so that no fields
      * are more sensitive than the given privacy policy.
@@ -167,6 +166,7 @@ private:
      */
     uint8_t mCurrentLevel;
 
+    sp<EncodedBuffer> mEncodedBuffer;
 };
 
 FieldStripper::FieldStripper(const Privacy* restrictions, const sp<ProtoReader>& data,
@@ -174,11 +174,16 @@ FieldStripper::FieldStripper(const Privacy* restrictions, const sp<ProtoReader>&
         :mRestrictions(restrictions),
          mData(data),
          mSize(data->size()),
-         mCurrentLevel(bufferLevel) {
+         mCurrentLevel(bufferLevel),
+         mEncodedBuffer(get_buffer_from_pool()) {
     if (mSize < 0) {
         ALOGW("FieldStripper constructed with a ProtoReader that doesn't support size."
                 " Data will be missing.");
     }
+}
+
+FieldStripper::~FieldStripper() {
+    return_buffer_to_pool(mEncodedBuffer);
 }
 
 status_t FieldStripper::strip(const uint8_t privacyPolicy) {
@@ -186,7 +191,8 @@ status_t FieldStripper::strip(const uint8_t privacyPolicy) {
     // buffer, then we can skip it.
     if (mCurrentLevel < privacyPolicy) {
         PrivacySpec spec(privacyPolicy);
-        ProtoOutputStream proto;
+        mEncodedBuffer->clear();
+        ProtoOutputStream proto(mEncodedBuffer);
 
         // Optimization when no strip happens.
         if (mRestrictions == NULL || spec.RequireAll()) {
@@ -267,7 +273,7 @@ status_t PrivacyFilter::writeData(const FdBuffer& buffer, uint8_t bufferLevel,
     // Order the writes by privacy filter, with increasing levels of filtration,k
     // so we can do the filter once, and then write many times.
     sort(mOutputs.begin(), mOutputs.end(),
-        [](const sp<FilterFd>& a, const sp<FilterFd>& b) -> bool { 
+        [](const sp<FilterFd>& a, const sp<FilterFd>& b) -> bool {
             return a->getPrivacyPolicy() < b->getPrivacyPolicy();
         });
 
@@ -370,7 +376,7 @@ status_t filter_and_write_report(int to, int from, uint8_t bufferLevel,
             write_field_or_skip(NULL, reader, fieldTag, true);
         }
     }
-
+    clear_buffer_pool();
     err = reader->getError();
     if (err != NO_ERROR) {
         ALOGW("filter_and_write_report reader had an error: %s", strerror(-err));
