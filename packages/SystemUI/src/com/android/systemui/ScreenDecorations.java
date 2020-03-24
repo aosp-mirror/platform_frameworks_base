@@ -33,6 +33,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Dimension;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -122,7 +123,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     protected int mRoundedDefaultBottom;
     @VisibleForTesting
     protected View[] mOverlays;
-    private DisplayCutoutView[] mCutoutViews = new DisplayCutoutView[BOUNDS_POSITION_LENGTH];
+    @Nullable
+    private DisplayCutoutView[] mCutoutViews;
     private float mDensity;
     private WindowManager mWindowManager;
     private int mRotation;
@@ -135,18 +137,32 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             new CameraAvailabilityListener.CameraTransitionCallback() {
         @Override
         public void onApplyCameraProtection(@NonNull Path protectionPath, @NonNull Rect bounds) {
+            if (mCutoutViews == null) {
+                Log.w(TAG, "DisplayCutoutView do not initialized");
+                return;
+            }
             // Show the extra protection around the front facing camera if necessary
             for (DisplayCutoutView dcv : mCutoutViews) {
-                dcv.setProtection(protectionPath, bounds);
-                dcv.setShowProtection(true);
+                // Check Null since not all mCutoutViews[pos] be inflated at the meanwhile
+                if (dcv != null) {
+                    dcv.setProtection(protectionPath, bounds);
+                    dcv.setShowProtection(true);
+                }
             }
         }
 
         @Override
         public void onHideCameraProtection() {
+            if (mCutoutViews == null) {
+                Log.w(TAG, "DisplayCutoutView do not initialized");
+                return;
+            }
             // Go back to the regular anti-aliasing
             for (DisplayCutoutView dcv : mCutoutViews) {
-                dcv.setShowProtection(false);
+                // Check Null since not all mCutoutViews[pos] be inflated at the meanwhile
+                if (dcv != null) {
+                    dcv.setShowProtection(false);
+                }
             }
         }
     };
