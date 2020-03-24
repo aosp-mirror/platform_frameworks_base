@@ -25,7 +25,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -49,10 +48,10 @@ public class OpenAppColdTest extends NonRotationTestBase {
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
-    @Before
-    public void runTransition() {
-        run(openAppCold(mTestApp, mUiDevice, mBeginRotation)
-                .includeJankyRuns().build());
+    @Override
+    TransitionRunner getTransitionToRun() {
+        return openAppCold(mTestApp, mUiDevice, mBeginRotation)
+                .includeJankyRuns().build();
     }
 
     @Test

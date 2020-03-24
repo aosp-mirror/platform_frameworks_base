@@ -22,7 +22,6 @@ import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.PipAppHelper;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,10 +41,10 @@ public class PipToHomeTest extends PipTestBase {
         super(beginRotationName, beginRotation);
     }
 
-    @Before
-    public void runTransition() {
-        run(exitPipModeToHome((PipAppHelper) mTestApp, mUiDevice, mBeginRotation)
-                .includeJankyRuns().build());
+    @Override
+    TransitionRunner getTransitionToRun() {
+        return exitPipModeToHome((PipAppHelper) mTestApp, mUiDevice, mBeginRotation)
+                .includeJankyRuns().build();
     }
 
     @Ignore

@@ -29,7 +29,6 @@ import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -52,9 +51,10 @@ public class SplitScreenToLauncherTest extends FlickerTestBase {
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
-    @Before
-    public void runTransition() {
-        super.runTransition(splitScreenToLauncher(mTestApp, mUiDevice).includeJankyRuns().build());
+    @Override
+    TransitionRunner getTransitionToRun() {
+        return splitScreenToLauncher(mTestApp, mUiDevice)
+                .includeJankyRuns().build();
     }
 
     @Test

@@ -23,7 +23,6 @@ import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -48,10 +47,10 @@ public class CloseImeWindowToHomeTest extends NonRotationTestBase {
         mTestApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
     }
 
-    @Before
-    public void runTransition() {
-        run(editTextLoseFocusToHome((ImeAppHelper) mTestApp, mUiDevice, mBeginRotation)
-                .includeJankyRuns().build());
+    @Override
+    TransitionRunner getTransitionToRun() {
+        return editTextLoseFocusToHome((ImeAppHelper) mTestApp, mUiDevice, mBeginRotation)
+                .includeJankyRuns().build();
     }
 
     @Test
