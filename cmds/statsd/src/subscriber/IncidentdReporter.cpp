@@ -130,15 +130,15 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
         return false;
     }
 
-    android::os::IncidentReportRequest incidentReport;
+    AIncidentReportArgs* args = AIncidentReportArgs_init();
 
     vector<uint8_t> protoData;
     getProtoData(rule_id, metricId, dimensionKey, metricValue, configKey,
                  config.alert_description(), &protoData);
-    incidentReport.addHeader(protoData);
+    AIncidentReportArgs_addHeader(args, protoData.data(), protoData.size());
 
     for (int i = 0; i < config.section_size(); i++) {
-        incidentReport.addSection(config.section(i));
+        AIncidentReportArgs_addSection(args, config.section(i));
     }
 
     uint8_t dest;
@@ -152,13 +152,16 @@ bool GenerateIncidentReport(const IncidentdDetails& config, int64_t rule_id, int
         default:
             dest = INCIDENT_REPORT_PRIVACY_POLICY_AUTOMATIC;
     }
-    incidentReport.setPrivacyPolicy(dest);
+    AIncidentReportArgs_setPrivacyPolicy(args, dest);
 
-    incidentReport.setReceiverPackage(config.receiver_pkg());
+    AIncidentReportArgs_setReceiverPackage(args, config.receiver_pkg().c_str());
 
-    incidentReport.setReceiverClass(config.receiver_cls());
+    AIncidentReportArgs_setReceiverClass(args, config.receiver_cls().c_str());
 
-    return incidentReport.takeReport() == NO_ERROR;
+    int err = AIncidentReportArgs_takeReport(args);
+    AIncidentReportArgs_delete(args);
+
+    return err == NO_ERROR;
 }
 
 }  // namespace statsd
