@@ -27,7 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
-import android.app.ITaskOrganizerController;
+import android.window.ITaskOrganizerController;
 import android.app.PictureInPictureParams;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -38,10 +38,10 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
+import android.window.ITaskOrganizer;
+import android.window.IWindowContainer;
 import android.view.SurfaceControl;
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.R;
@@ -72,6 +72,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     private static final int MSG_RESIZE_ANIMATE = 2;
     private static final int MSG_OFFSET_ANIMATE = 3;
     private static final int MSG_FINISH_RESIZE = 4;
+    private static final int MSG_RESIZE_USER = 5;
 
     private final Handler mMainHandler;
     private final Handler mUpdateHandler;
@@ -162,6 +163,12 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
                 if (updateBoundsCallback != null) {
                     updateBoundsCallback.accept(toBounds);
                 }
+                break;
+            }
+            case MSG_RESIZE_USER: {
+                Rect startBounds = (Rect) args.arg2;
+                Rect toBounds = (Rect) args.arg3;
+                userResizePip(startBounds, toBounds);
                 break;
             }
         }
@@ -324,6 +331,19 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     /**
+     * Directly perform a scaled matrix transformation on the leash. This will not perform any
+     * {@link WindowContainerTransaction} until {@link #scheduleFinishResizePip} is called.
+     */
+    public void scheduleUserResizePip(Rect startBounds, Rect toBounds,
+            Consumer<Rect> updateBoundsCallback) {
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = updateBoundsCallback;
+        args.arg2 = startBounds;
+        args.arg3 = toBounds;
+        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESIZE_USER, args));
+    }
+
+    /**
      * Finish an intermediate resize operation. This is expected to be called after
      * {@link #scheduleResizePip}.
      */
@@ -392,6 +412,21 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mInPip);
+        tx.apply();
+    }
+
+    private void userResizePip(Rect startBounds, Rect destinationBounds) {
+        if (Looper.myLooper() != mUpdateHandler.getLooper()) {
+            throw new RuntimeException("Callers should call scheduleUserResizePip() instead of "
+                    + "this directly");
+        }
+        // Could happen when dismissPip
+        if (mToken == null || mLeash == null) {
+            Log.w(TAG, "Abort animation, invalid leash");
+            return;
+        }
+        final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
+        mSurfaceTransactionHelper.scale(tx, mLeash, startBounds, destinationBounds);
         tx.apply();
     }
 

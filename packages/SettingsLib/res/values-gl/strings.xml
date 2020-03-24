@@ -232,6 +232,8 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Enderezo IP e porto"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Escanear o código QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Vincula o dispositivo a través da wifi escaneando un código QR"</string>
+    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
+    <skip />
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depuración, programador"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Atallo do informe de erros"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostra un botón no menú de acendido para crear un informe de erros"</string>
@@ -431,7 +433,8 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Debería durar aproximadamente ata a seguinte hora: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar aproximadamente ata a seguinte hora: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Ata: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_extend_battery" msgid="5233928707465237447">"Amplía a duración da batería a partir desta hora: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
+    <skip />
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Tempo restante inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Tempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Tempo restante: máis de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -509,4 +512,26 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altofalante do teléfono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Produciuse un problema coa conexión. Apaga e acende o dispositivo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>
+    <!-- no translation found for help_label (3528360748637781274) -->
+    <skip />
+    <!-- no translation found for storage_category (2287342585424631813) -->
+    <skip />
+    <!-- no translation found for shared_data_title (1017034836800864953) -->
+    <skip />
+    <!-- no translation found for shared_data_summary (5516326713822885652) -->
+    <skip />
+    <!-- no translation found for blob_id_text (8680078988996308061) -->
+    <skip />
+    <!-- no translation found for blob_expires_text (7882727111491739331) -->
+    <skip />
+    <!-- no translation found for accessor_info_title (8289823651512477787) -->
+    <skip />
+    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
+    <skip />
+    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
+    <skip />
+    <!-- no translation found for delete_blob_text (2819192607255625697) -->
+    <skip />
+    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
+    <skip />
 </resources>

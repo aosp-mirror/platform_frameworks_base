@@ -58,7 +58,7 @@ public final class StatsDimensionsValue implements Parcelable {
     private static final String TAG = "StatsDimensionsValue";
 
     // Values of the value type correspond to stats_log.proto's DimensionValue fields.
-    // Keep constants in sync with services/include/android/os/StatsDimensionsValue.h.
+    // Keep constants in sync with frameworks/base/cmds/statsd/src/HashableDimensionKey.cpp.
     /** Indicates that this holds a String. */
     public static final int STRING_VALUE_TYPE = 2;
     /** Indicates that this holds an int. */
@@ -72,17 +72,7 @@ public final class StatsDimensionsValue implements Parcelable {
     /** Indicates that this holds a List of StatsDimensionsValues. */
     public static final int TUPLE_VALUE_TYPE = 7;
 
-    /** Value of a stats_log.proto DimensionsValue.field. */
-    private final int mField;
-
-    /** Type of stats_log.proto DimensionsValue.value, according to the VALUE_TYPEs above. */
-    private final int mValueType;
-
-    /**
-     * Value of a stats_log.proto DimensionsValue.value.
-     * String, Integer, Long, Boolean, Float, or StatsDimensionsValue[].
-     */
-    private final Object mValue; // immutable or array of immutables
+    private final StatsDimensionsValueParcel mInner;
 
     /**
      * Creates a {@code StatsDimensionValue} from a parcel.
@@ -90,51 +80,17 @@ public final class StatsDimensionsValue implements Parcelable {
      * @hide
      */
     public StatsDimensionsValue(Parcel in) {
-        mField = in.readInt();
-        mValueType = in.readInt();
-        mValue = readValueFromParcel(mValueType, in);
+        mInner = StatsDimensionsValueParcel.CREATOR.createFromParcel(in);
     }
 
     /**
      * Creates a {@code StatsDimensionsValue} from a StatsDimensionsValueParcel
-     * TODO(b/149103391): Make StatsDimensionsValue a wrapper on top of
-     * StatsDimensionsValueParcel.
      *
      * @hide
      */
     public StatsDimensionsValue(StatsDimensionsValueParcel parcel) {
-        mField = parcel.field;
-        mValueType = parcel.valueType;
-        switch (mValueType) {
-            case STRING_VALUE_TYPE:
-                mValue = parcel.stringValue;
-                break;
-            case INT_VALUE_TYPE:
-                mValue = parcel.intValue;
-                break;
-            case LONG_VALUE_TYPE:
-                mValue = parcel.longValue;
-                break;
-            case BOOLEAN_VALUE_TYPE:
-                mValue = parcel.boolValue;
-                break;
-            case FLOAT_VALUE_TYPE:
-                mValue = parcel.floatValue;
-                break;
-            case TUPLE_VALUE_TYPE:
-                StatsDimensionsValue[] values = new StatsDimensionsValue[parcel.tupleValue.length];
-                for (int i = 0; i < parcel.tupleValue.length; i++) {
-                    values[i] = new StatsDimensionsValue(parcel.tupleValue[i]);
-                }
-                mValue = values;
-                break;
-            default:
-                Log.w(TAG, "StatsDimensionsValueParcel contains bad valueType: " + mValueType);
-                mValue = null;
-                break;
-        }
+        mInner = parcel;
     }
-
 
     /**
      * Return the field, i.e. the tag of a statsd atom.
@@ -142,7 +98,7 @@ public final class StatsDimensionsValue implements Parcelable {
      * @return the field
      */
     public int getField() {
-        return mField;
+        return mInner.field;
     }
 
     /**
@@ -152,12 +108,12 @@ public final class StatsDimensionsValue implements Parcelable {
      *         null otherwise
      */
     public String getStringValue() {
-        try {
-            if (mValueType == STRING_VALUE_TYPE) return (String) mValue;
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Failed to successfully get value", e);
+        if (mInner.valueType == STRING_VALUE_TYPE) {
+            return mInner.stringValue;
+        } else {
+            Log.w(TAG, "Value type is " + getValueTypeAsString() + ", not string.");
+            return null;
         }
-        return null;
     }
 
     /**
@@ -166,12 +122,12 @@ public final class StatsDimensionsValue implements Parcelable {
      * @return the int held if {@link #getValueType()} == {@link #INT_VALUE_TYPE}, 0 otherwise
      */
     public int getIntValue() {
-        try {
-            if (mValueType == INT_VALUE_TYPE) return (Integer) mValue;
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Failed to successfully get value", e);
+        if (mInner.valueType == INT_VALUE_TYPE) {
+            return mInner.intValue;
+        } else {
+            Log.w(TAG, "Value type is " + getValueTypeAsString() + ", not int.");
+            return 0;
         }
-        return 0;
     }
 
     /**
@@ -180,12 +136,12 @@ public final class StatsDimensionsValue implements Parcelable {
      * @return the long held if {@link #getValueType()} == {@link #LONG_VALUE_TYPE}, 0 otherwise
      */
     public long getLongValue() {
-        try {
-            if (mValueType == LONG_VALUE_TYPE) return (Long) mValue;
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Failed to successfully get value", e);
+        if (mInner.valueType == LONG_VALUE_TYPE) {
+            return mInner.longValue;
+        } else {
+            Log.w(TAG, "Value type is " + getValueTypeAsString() + ", not long.");
+            return 0;
         }
-        return 0;
     }
 
     /**
@@ -195,12 +151,12 @@ public final class StatsDimensionsValue implements Parcelable {
      *         false otherwise
      */
     public boolean getBooleanValue() {
-        try {
-            if (mValueType == BOOLEAN_VALUE_TYPE) return (Boolean) mValue;
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Failed to successfully get value", e);
+        if (mInner.valueType == BOOLEAN_VALUE_TYPE) {
+            return mInner.boolValue;
+        } else {
+            Log.w(TAG, "Value type is " + getValueTypeAsString() + ", not boolean.");
+            return false;
         }
-        return false;
     }
 
     /**
@@ -209,12 +165,12 @@ public final class StatsDimensionsValue implements Parcelable {
      * @return the float held if {@link #getValueType()} == {@link #FLOAT_VALUE_TYPE}, 0 otherwise
      */
     public float getFloatValue() {
-        try {
-            if (mValueType == FLOAT_VALUE_TYPE) return (Float) mValue;
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Failed to successfully get value", e);
+        if (mInner.valueType == FLOAT_VALUE_TYPE) {
+            return mInner.floatValue;
+        } else {
+            Log.w(TAG, "Value type is " + getValueTypeAsString() + ", not float.");
+            return 0;
         }
-        return 0;
     }
 
     /**
@@ -226,19 +182,15 @@ public final class StatsDimensionsValue implements Parcelable {
      *         null otherwise
      */
     public List<StatsDimensionsValue> getTupleValueList() {
-        if (mValueType != TUPLE_VALUE_TYPE) {
-            return null;
-        }
-        try {
-            StatsDimensionsValue[] orig = (StatsDimensionsValue[]) mValue;
-            List<StatsDimensionsValue> copy = new ArrayList<>(orig.length);
-            // Shallow copy since StatsDimensionsValue is immutable anyway
-            for (int i = 0; i < orig.length; i++) {
-                copy.add(orig[i]);
+        if (mInner.valueType == TUPLE_VALUE_TYPE) {
+            int length = (mInner.tupleValue == null) ? 0 : mInner.tupleValue.length;
+            List<StatsDimensionsValue> tupleValues = new ArrayList<>(length);
+            for (int i = 0; i < length; i++) {
+                tupleValues.add(new StatsDimensionsValue(mInner.tupleValue[i]));
             }
-            return copy;
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Failed to successfully get value", e);
+            return tupleValues;
+        } else {
+            Log.w(TAG, "Value type is " + getValueTypeAsString() + ", not tuple.");
             return null;
         }
     }
@@ -257,7 +209,7 @@ public final class StatsDimensionsValue implements Parcelable {
      * @return the constant representing the type of value stored
      */
     public int getValueType() {
-        return mValueType;
+        return mInner.valueType;
     }
 
     /**
@@ -267,7 +219,7 @@ public final class StatsDimensionsValue implements Parcelable {
      * @return true if {@link #getValueType()} is equal to {@code valueType}.
      */
     public boolean isValueType(int valueType) {
-        return mValueType == valueType;
+        return mInner.valueType == valueType;
     }
 
     /**
@@ -280,26 +232,40 @@ public final class StatsDimensionsValue implements Parcelable {
      */
     // Follows the format of statsd's dimension.h toString.
     public String toString() {
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(mField);
-            sb.append(":");
-            if (mValueType == TUPLE_VALUE_TYPE) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(mInner.field);
+        sb.append(":");
+        switch (mInner.valueType) {
+            case STRING_VALUE_TYPE:
+                sb.append(mInner.stringValue);
+                break;
+            case INT_VALUE_TYPE:
+                sb.append(String.valueOf(mInner.intValue));
+                break;
+            case LONG_VALUE_TYPE:
+                sb.append(String.valueOf(mInner.longValue));
+                break;
+            case BOOLEAN_VALUE_TYPE:
+                sb.append(String.valueOf(mInner.boolValue));
+                break;
+            case FLOAT_VALUE_TYPE:
+                sb.append(String.valueOf(mInner.floatValue));
+                break;
+            case TUPLE_VALUE_TYPE:
                 sb.append("{");
-                StatsDimensionsValue[] sbvs = (StatsDimensionsValue[]) mValue;
-                for (int i = 0; i < sbvs.length; i++) {
-                    sb.append(sbvs[i].toString());
+                int length = (mInner.tupleValue == null) ? 0 : mInner.tupleValue.length;
+                for (int i = 0; i < length; i++) {
+                    StatsDimensionsValue child = new StatsDimensionsValue(mInner.tupleValue[i]);
+                    sb.append(child.toString());
                     sb.append("|");
                 }
                 sb.append("}");
-            } else {
-                sb.append(mValue.toString());
-            }
-            return sb.toString();
-        } catch (ClassCastException e) {
-            Log.w(TAG, "Failed to successfully get value", e);
+                break;
+            default:
+                Log.w(TAG, "Incorrect value type");
+                break;
         }
-        return "";
+        return sb.toString();
     }
 
     /**
@@ -324,72 +290,28 @@ public final class StatsDimensionsValue implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(mField);
-        out.writeInt(mValueType);
-        writeValueToParcel(mValueType, mValue, out, flags);
+        mInner.writeToParcel(out, flags);
     }
 
-    /** Writes mValue to a parcel. Returns true if succeeds. */
-    private static boolean writeValueToParcel(int valueType, Object value, Parcel out, int flags) {
-        try {
-            switch (valueType) {
-                case STRING_VALUE_TYPE:
-                    out.writeString((String) value);
-                    return true;
-                case INT_VALUE_TYPE:
-                    out.writeInt((Integer) value);
-                    return true;
-                case LONG_VALUE_TYPE:
-                    out.writeLong((Long) value);
-                    return true;
-                case BOOLEAN_VALUE_TYPE:
-                    out.writeBoolean((Boolean) value);
-                    return true;
-                case FLOAT_VALUE_TYPE:
-                    out.writeFloat((Float) value);
-                    return true;
-                case TUPLE_VALUE_TYPE: {
-                    StatsDimensionsValue[] values = (StatsDimensionsValue[]) value;
-                    out.writeInt(values.length);
-                    for (int i = 0; i < values.length; i++) {
-                        values[i].writeToParcel(out, flags);
-                    }
-                    return true;
-                }
-                default:
-                    Log.w(TAG, "readValue of an impossible type " + valueType);
-                    return false;
-            }
-        } catch (ClassCastException e) {
-            Log.w(TAG, "writeValue cast failed", e);
-            return false;
-        }
-    }
-
-    /** Reads mValue from a parcel. */
-    private static Object readValueFromParcel(int valueType, Parcel parcel) {
-        switch (valueType) {
+    /**
+     * Returns a string representation of the type of value stored.
+     */
+    private String getValueTypeAsString() {
+        switch (mInner.valueType) {
             case STRING_VALUE_TYPE:
-                return parcel.readString();
+                return "string";
             case INT_VALUE_TYPE:
-                return parcel.readInt();
+                return "int";
             case LONG_VALUE_TYPE:
-                return parcel.readLong();
+                return "long";
             case BOOLEAN_VALUE_TYPE:
-                return parcel.readBoolean();
+                return "boolean";
             case FLOAT_VALUE_TYPE:
-                return parcel.readFloat();
-            case TUPLE_VALUE_TYPE: {
-                final int sz = parcel.readInt();
-                StatsDimensionsValue[] values = new StatsDimensionsValue[sz];
-                for (int i = 0; i < sz; i++) {
-                    values[i] = new StatsDimensionsValue(parcel);
-                }
-                return values;
-            }
+                return "float";
+            case TUPLE_VALUE_TYPE:
+                return "tuple";
             default:
-                Log.w(TAG, "readValue of an impossible type " + valueType);
-                return null;
+                return "unknown";
         }
     }
 }
