@@ -25,6 +25,7 @@
     >
 
     <FrameLayout
+        android:id="@+id/conversation_icon_container"
         android:layout_width="@dimen/conversation_content_start"
         android:layout_height="wrap_content"
         android:gravity="start|top"
@@ -175,7 +176,7 @@
                 </LinearLayout>
 
                 <!-- App Name -->
-                <TextView
+                <com.android.internal.widget.ObservableTextView
                     android:id="@+id/app_name_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
