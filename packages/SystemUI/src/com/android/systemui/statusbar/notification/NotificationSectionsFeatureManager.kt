@@ -23,9 +23,11 @@ import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS_USE_PEOPLE_FILTERING
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_ALERTING
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_HEADS_UP
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_MEDIA_CONTROLS
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_PEOPLE
 import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager.BUCKET_SILENT
 import com.android.systemui.util.DeviceConfigProxy
+import com.android.systemui.util.Utils
 
 import javax.inject.Inject
 
@@ -43,9 +45,18 @@ class NotificationSectionsFeatureManager @Inject constructor(
         return usePeopleFiltering(proxy)
     }
 
+    fun isMediaControlsEnabled(): Boolean {
+        return Utils.useQsMediaPlayer(context)
+    }
+
     fun getNotificationBuckets(): IntArray {
         return when {
-            isFilteringEnabled() ->
+            isFilteringEnabled() && isMediaControlsEnabled() ->
+                intArrayOf(BUCKET_HEADS_UP, BUCKET_MEDIA_CONTROLS, BUCKET_PEOPLE, BUCKET_ALERTING,
+                    BUCKET_SILENT)
+            !isFilteringEnabled() && isMediaControlsEnabled() ->
+                intArrayOf(BUCKET_HEADS_UP, BUCKET_MEDIA_CONTROLS, BUCKET_ALERTING, BUCKET_SILENT)
+            isFilteringEnabled() && !isMediaControlsEnabled() ->
                 intArrayOf(BUCKET_HEADS_UP, BUCKET_PEOPLE, BUCKET_ALERTING, BUCKET_SILENT)
             NotificationUtils.useNewInterruptionModel(context) ->
                 intArrayOf(BUCKET_ALERTING, BUCKET_SILENT)

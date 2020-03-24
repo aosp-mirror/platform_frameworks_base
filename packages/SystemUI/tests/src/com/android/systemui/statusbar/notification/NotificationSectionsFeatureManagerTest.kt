@@ -27,6 +27,7 @@ import com.android.internal.config.sysui.SystemUiDeviceConfigFlags.NOTIFICATIONS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.DeviceConfigProxyFake
 
+import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -38,6 +39,7 @@ import org.junit.runner.RunWith
 class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
     var manager: NotificationSectionsFeatureManager? = null
     val proxyFake = DeviceConfigProxyFake()
+    var originalQsMediaPlayer: Int = 0
 
     @Before
     public fun setup() {
@@ -45,6 +47,15 @@ class NotificationSectionsFeatureManagerTest : SysuiTestCase() {
         NOTIFICATION_NEW_INTERRUPTION_MODEL, 1)
         manager = NotificationSectionsFeatureManager(proxyFake, mContext)
         manager!!.clearCache()
+        originalQsMediaPlayer = Settings.System.getInt(context.getContentResolver(),
+                "qs_media_player", 1)
+        Settings.System.putInt(context.getContentResolver(), "qs_media_player", 0)
+    }
+
+    @After
+    public fun teardown() {
+        Settings.System.putInt(context.getContentResolver(), "qs_media_player",
+                originalQsMediaPlayer)
     }
 
     @Test
