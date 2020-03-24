@@ -1876,7 +1876,7 @@ class AlarmManagerService extends SystemService {
                     // package was t(q) then the next delivery must be after t(q) + <window_size>
                     final long t = mAppWakeupHistory.getNthLastWakeupForPackage(
                             sourcePackage, sourceUserId, quotaForBucket);
-                    minElapsed = t + 1 + mConstants.APP_STANDBY_WINDOW;
+                    minElapsed = t + mConstants.APP_STANDBY_WINDOW;
                 }
                 if (alarm.expectedWhenElapsed < minElapsed) {
                     alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
