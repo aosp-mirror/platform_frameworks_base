@@ -1870,6 +1870,24 @@ public final class Settings {
     public static final String EXTRA_APP_UID = "app_uid";
 
     /**
+     * Activity Action: Show power menu settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_POWER_MENU_SETTINGS =
+            "android.settings.ACTION_POWER_MENU_SETTINGS";
+
+    /**
+     * Activity Action: Show controls settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_DEVICE_CONTROLS_SETTINGS =
+            "android.settings.ACTION_DEVICE_CONTROLS_SETTINGS";
+
+    /**
      * Activity Action: Show a dialog with disabled by policy message.
      * <p> If an user action is disabled by policy, this dialog can be triggered to let
      * the user know about this.
