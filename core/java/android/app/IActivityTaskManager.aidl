@@ -29,7 +29,6 @@ import android.app.IProcessObserver;
 import android.app.IRequestFinishCallback;
 import android.app.IServiceConnection;
 import android.app.IStopUserCallback;
-import android.app.ITaskOrganizerController;
 import android.app.ITaskStackListener;
 import android.app.IUiAutomationConnection;
 import android.app.IUidObserver;
@@ -69,9 +68,9 @@ import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.IRecentsAnimationRunner;
-import android.view.ITaskOrganizer;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationAdapter;
+import android.window.IWindowOrganizerController;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -340,10 +339,8 @@ interface IActivityTaskManager {
             in Rect tempDockedTaskInsetBounds,
             in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
 
-    /**
-     * Returns an interface enabling the management of task organizers.
-     */
-    ITaskOrganizerController getTaskOrganizerController();
+    /** Returns an interface enabling the management of window organizers. */
+    IWindowOrganizerController getWindowOrganizerController();
 
     /**
      * Sets whether we are currently in an interactive split screen resize operation where we

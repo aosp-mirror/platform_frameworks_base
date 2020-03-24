@@ -16,7 +16,7 @@
 
 package android.view;
 
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 
 /**
  * Interface to be invoked by the controller when it has finished preparing for a display rotation.

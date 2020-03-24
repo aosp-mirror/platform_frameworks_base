@@ -193,11 +193,21 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"このデバイスは組織によって管理され、ネットワーク トラフィックが監視される場合があります。詳しくはタップしてください。"</string>
     <string name="location_changed_notification_title" msgid="4119726617105166830">"位置情報の設定が管理者によって変更されました"</string>
     <string name="location_changed_notification_text" msgid="198907268219396399">"タップすると位置情報の設定が表示されます。"</string>
+    <string name="country_detector" msgid="7023275114706088854">"国の検出"</string>
+    <string name="location_service" msgid="2439187616018455546">"位置情報サービス"</string>
+    <string name="sensor_notification_service" msgid="7474531979178682676">"センサー通知サービス"</string>
+    <string name="twilight_service" msgid="8964898045693187224">"トワイライト サービス"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"デバイスのデータが消去されます"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"管理アプリを使用できません。デバイスのデータはこれから消去されます。\n\nご不明な点がある場合は、組織の管理者にお問い合わせください。"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
-    <string name="personal_apps_suspended_notification_title" msgid="6551578720258229430">"個人用アプリは管理者によって停止されています"</string>
-    <string name="personal_apps_suspended_notification_text" msgid="8321053338614244297">"ポリシー コンプライアンスを確認するにはここをタップしてください。"</string>
+    <!-- no translation found for personal_apps_suspended_title (4543693107104417750) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_tomorrow_title (6414440257969874914) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_text (8954038765131038226) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (4278188538997940785) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"タブレットオプション"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV のオプション"</string>
@@ -231,6 +241,10 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"携帯電話オプション"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"画面ロック"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"電源を切る"</string>
+    <!-- no translation found for global_action_power_options (1185286119330160073) -->
+    <skip />
+    <!-- no translation found for global_action_restart (4678451019561687074) -->
+    <skip />
     <string name="global_action_emergency" msgid="1387617624177105088">"緊急通報"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"バグレポート"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"セッションを終了"</string>
@@ -245,6 +259,8 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%d</xliff:g> 秒後にバグレポートのスクリーンショットが作成されます。</item>
     </plurals>
+    <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"バグレポートのスクリーンショットを取得しました"</string>
+    <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"バグレポートのスクリーンショットを取得できませんでした"</string>
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"マナーモード"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"サウンドOFF"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"サウンドON"</string>
@@ -428,10 +444,14 @@
     <string name="permlab_camera" msgid="6320282492904119413">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="1354600178048761499">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"写真と動画を撮影するには、システムカメラへのアクセスをアプリまたはサービスに許可してください"</string>
-    <string name="permdesc_systemCamera" msgid="544730545441964482">"権限を付与されたこのシステムアプリは、いつでもシステムカメラを使用して写真と動画を撮影できます。アプリには android.permission.CAMERA 権限も必要です"</string>
+    <!-- no translation found for permdesc_systemCamera (5938360914419175986) -->
+    <skip />
+    <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"カメラデバイスが起動または終了したときにコールバックを受け取ることを、アプリまたはサービスに許可してください。"</string>
+    <!-- no translation found for permdesc_cameraOpenCloseListener (2002636131008772908) -->
+    <skip />
     <string name="permlab_vibrate" msgid="8596800035791962017">"バイブレーションの制御"</string>
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
-    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションの状態へのアクセスをアプリに許可します。"</string>
+    <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"電話番号発信"</string>
     <string name="permdesc_callPhone" msgid="5439809516131609109">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS通話サービスへのアクセス"</string>
@@ -442,13 +462,17 @@
     <string name="permdesc_manageOwnCalls" msgid="4431178362202142574">"通話環境の改善のために、システム経由での通話転送をアプリに許可します。"</string>
     <string name="permlab_callCompanionApp" msgid="3654373653014126884">"システム経由の通話の表示と操作。"</string>
     <string name="permdesc_callCompanionApp" msgid="8474168926184156261">"デバイスで進行中の通話の表示と操作をアプリに許可します。通話の電話番号や状態などの情報も含まれます。"</string>
+    <string name="permlab_exemptFromAudioRecordRestrictions" msgid="1164725468350759486">"録音制限からの除外"</string>
+    <string name="permdesc_exemptFromAudioRecordRestrictions" msgid="2425117015896871976">"このアプリを録音制限から除外します。"</string>
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"別のアプリでの通話の続行"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"別のアプリで通話を続行することをこのアプリに許可します。"</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"電話番号の読み取り"</string>
     <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"デバイスの電話番号へのアクセスをアプリに許可します。"</string>
+    <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"車の画面を常にオンにする"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"タブレットのスリープを無効化"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"Android TV デバイスのスリープの無効化"</string>
     <string name="permlab_wakeLock" product="default" msgid="569409726861695115">"デバイスのスリープを無効にする"</string>
+    <string name="permdesc_wakeLock" product="automotive" msgid="5995045369683254571">"車の画面を常にオンにすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="tablet" msgid="2441742939101526277">"タブレットのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="tv" msgid="2329298966735118796">"Android TV デバイスのスリープを無効にすることをアプリに許可します。"</string>
     <string name="permdesc_wakeLock" product="default" msgid="3689523792074007163">"モバイル デバイスのスリープを無効にすることをアプリに許可します。"</string>
@@ -546,8 +570,7 @@
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"もう一度お試しください。"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"指紋が登録されていません。"</string>
     <string name="fingerprint_error_hw_not_present" msgid="578914350967423382">"このデバイスには指紋認証センサーがありません。"</string>
-    <!-- no translation found for fingerprint_error_security_update_required (7750187320640856433) -->
-    <skip />
+    <string name="fingerprint_error_security_update_required" msgid="7750187320640856433">"センサーが一時的に無効になっています。"</string>
     <string name="fingerprint_name_template" msgid="8941662088160289778">"指紋 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -591,8 +614,7 @@
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"顔を確認できません。もう一度お試しください。"</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"顔認証を設定していません。"</string>
     <string name="face_error_hw_not_present" msgid="1070600921591729944">"このデバイスでは、顔認証はご利用いただけません。"</string>
-    <!-- no translation found for face_error_security_update_required (5076017208528750161) -->
-    <skip />
+    <string name="face_error_security_update_required" msgid="5076017208528750161">"センサーが一時的に無効になっています。"</string>
     <string name="face_name_template" msgid="3877037340223318119">"顔 <xliff:g id="FACEID">%d</xliff:g>"</string>
   <string-array name="face_error_vendor">
   </string-array>
@@ -1093,28 +1115,6 @@
     <string name="deleteText" msgid="4200807474529938112">"削除"</string>
     <string name="inputMethod" msgid="1784759500516314751">"入力方法"</string>
     <string name="editTextMenuTitle" msgid="857666911134482176">"テキスト操作"</string>
-    <string name="email" msgid="2503484245190492693">"メール"</string>
-    <string name="email_desc" msgid="8291893932252173537">"選択したメールアドレスにメールを送信します"</string>
-    <string name="dial" msgid="4954567785798679706">"電話"</string>
-    <string name="dial_desc" msgid="3072967472129276617">"選択した電話番号に電話をかけます"</string>
-    <string name="map" msgid="6865483125449986339">"地図"</string>
-    <string name="map_desc" msgid="1068169741300922557">"選択した住所を探します"</string>
-    <string name="browse" msgid="8692753594669717779">"開く"</string>
-    <string name="browse_desc" msgid="5328523986921597700">"選択した URL を開きます"</string>
-    <string name="sms" msgid="3976991545867187342">"メッセージ"</string>
-    <string name="sms_desc" msgid="997349906607675955">"選択した電話番号に SMS を送信します"</string>
-    <string name="add_contact" msgid="7404694650594333573">"追加"</string>
-    <string name="add_contact_desc" msgid="6419581556288775911">"連絡先に追加します"</string>
-    <string name="view_calendar" msgid="4274396845124626977">"表示"</string>
-    <string name="view_calendar_desc" msgid="1739770773927245564">"カレンダーで選択した日時を表示します"</string>
-    <string name="add_calendar_event" msgid="5564364269553091740">"予定を作成"</string>
-    <string name="add_calendar_event_desc" msgid="5827530672900331107">"選択した日時に予定を設定します"</string>
-    <string name="view_flight" msgid="2042802613849690108">"フライト"</string>
-    <string name="view_flight_desc" msgid="2802812586218764790">"選択したフライトをチェックします"</string>
-    <string name="translate" msgid="1416909787202727524">"翻訳"</string>
-    <string name="translate_desc" msgid="4096225388385338322">"選択したテキストを翻訳します"</string>
-    <string name="define" msgid="5214255850068764195">"辞書で調べる"</string>
-    <string name="define_desc" msgid="6916651934713282645">"選択したテキストを辞書で調べます"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"空き容量わずか"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"一部のシステム機能が動作しない可能性があります"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"システムに十分な容量がありません。250MBの空き容量を確保して再起動してください。"</string>
@@ -1253,7 +1253,6 @@
     <string name="mobile_no_internet" msgid="4014455157529909781">"モバイル ネットワークがインターネットに接続されていません"</string>
     <string name="other_networks_no_internet" msgid="6698711684200067033">"ネットワークがインターネットに接続されていません"</string>
     <string name="private_dns_broken_detailed" msgid="3709388271074611847">"プライベート DNS サーバーにアクセスできません"</string>
-    <string name="captive_portal_logged_in_detailed" msgid="3897392681039344376">"接続しました"</string>
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> の接続が制限されています"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"接続するにはタップしてください"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"「<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>」に切り替えました"</string>
@@ -1318,6 +1317,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"USBデバッグが接続されました"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB デバッグを無効にするにはここをタップしてください"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USBデバッグを無効にする場合に選択します。"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ワイヤレス デバッグが接続されました"</string>
+    <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ワイヤレス デバッグをUSB デバッグを無効にするにはここをタップしてください"</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"ワイヤレス デバッグを無効にする場合に選択します。"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"テストハーネス モード有効"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"出荷時設定にリセットしてテストハーネス モードを無効にしてください。"</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"シリアル コンソールは有効です"</string>
@@ -1621,17 +1623,63 @@
     <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"今後の R ビルドでは、<xliff:g id="PACKAGENAME">%1$s</xliff:g> からバックグラウンドで開始されるフォアグラウンド サービスに「使用中のみ許可」の権限がありません。go/r-bg-fgs-restriction を確認し、バグレポートを提出してください。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ユーザー補助機能のショートカットの使用"</string>
-    <!-- no translation found for accessibility_shortcut_toogle_warning (4161716521310929544) -->
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ショートカットが ON の場合、両方の音量ボタンを 3 秒ほど長押しするとユーザー補助機能が起動します。"</string>
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning_title (8417489297036013065) -->
     <skip />
+    <!-- no translation found for accessibility_shortcut_multiple_service_warning (3740723309483706911) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_multiple_service_list (6935581470716541531) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_talkback_warning_title (3410100187167382427) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_talkback_warning (8412954203626349109) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_single_service_warning_title (2819109500943271385) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_single_service_warning (6363127705112844257) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_on (5463618449556111344) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_off (3651336255403648739) -->
+    <skip />
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"<xliff:g id="SERVICE">%1$s</xliff:g> にデバイスのフル コントロールを許可しますか？"</string>
+    <string name="accessibility_enable_service_encryption_warning" msgid="8603532708618236909">"<xliff:g id="SERVICE">%1$s</xliff:g> をオンにすると、デバイスデータの暗号化の強化に画面ロックは使用されなくなります。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"フル コントロールは、ユーザー補助機能を必要とするユーザーをサポートするアプリには適していますが、ほとんどのアプリには適していません。"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"画面の表示と操作"</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"画面上のすべてのコンテンツを読み取り、他のアプリでコンテンツを表示することができます。"</string>
+    <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"操作の表示と実行"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"アプリやハードウェア センサーの操作を記録したり、自動的にアプリを操作したりできます。"</string>
+    <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"許可"</string>
+    <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"許可しない"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"使用を開始する機能をタップ:"</string>
+    <!-- no translation found for accessibility_edit_shortcut_menu_button_title (239446795930436325) -->
+    <skip />
+    <!-- no translation found for accessibility_edit_shortcut_menu_volume_title (1077294237378645981) -->
+    <skip />
+    <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> はオフになっています"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"ショートカットの編集"</string>
-    <string name="cancel_accessibility_shortcut_menu_button" msgid="1817413122335452474">"キャンセル"</string>
+    <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ショートカットを OFF にする"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"色反転"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色補正"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="6141620395915529473">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は ON になっています"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="1287340429965172651">"ユーザー補助機能のショートカットにより <xliff:g id="SERVICE_NAME">%1$s</xliff:g> は OFF になっています"</string>
+    <!-- no translation found for accessibility_shortcut_enabling_service (5473495203759847687) -->
+    <skip />
+    <!-- no translation found for accessibility_shortcut_disabling_service (8675244165062700619) -->
+    <skip />
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
+    <!-- no translation found for accessibility_button_prompt_text (8343213623338605305) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_prompt_text (8742535972130563952) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_prompt_text (5211827854510660203) -->
+    <skip />
+    <!-- no translation found for accessibility_button_instructional_text (8853928358872550500) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_instructional_text (9196230728837090497) -->
+    <skip />
+    <!-- no translation found for accessibility_gesture_3finger_instructional_text (3425123684990193765) -->
+    <skip />
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"拡大"</string>
     <string name="user_switched" msgid="7249833311585228097">"現在のユーザーは<xliff:g id="NAME">%1$s</xliff:g>です。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>に切り替えています…"</string>
@@ -1765,8 +1813,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"管理者により更新されています"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"管理者により削除されています"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
-    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマをオンにする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能をオフにする、または制限する"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="1817385558636532621">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する\n\n"<annotation id="url">"詳細"</annotation></string>
+    <string name="battery_saver_description" msgid="7618492104632328184">"電池を長持ちさせるためにバッテリー セーバーが行う操作:\n·ダークテーマを ON にする\n·バックグラウンド アクティビティ、一部の視覚効果や、「OK Google」などの機能を OFF にする、または制限する"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"データセーバーは、一部のアプリによるバックグラウンドでのデータ送受信を停止することでデータ使用量を抑制します。使用中のアプリからデータにアクセスすることはできますが、その頻度は低くなる場合があります。この影響として、たとえば画像はタップしないと表示されないようになります。"</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"データセーバーを ON にしますか？"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ON にする"</string>
@@ -1845,6 +1893,7 @@
     <string name="default_notification_channel_label" msgid="3697928973567217330">"カテゴリなし"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"このような通知の重要度を設定します。"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"関係するユーザーのため、この設定は重要です。"</string>
+    <string name="notification_history_title_placeholder" msgid="7748630986182249599">"カスタムアプリ通知"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？（このアカウントのユーザーはすでに存在します）"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g> が <xliff:g id="ACCOUNT">%2$s</xliff:g> で新しいユーザーを作成できるようにしますか？"</string>
     <string name="language_selection_title" msgid="52674936078683285">"言語を追加"</string>
@@ -2001,7 +2050,8 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g>、他 <xliff:g id="COUNT_3">%d</xliff:g> ファイル</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g>、他 <xliff:g id="COUNT_1">%d</xliff:g> ファイル</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="492542066060841139">"ダイレクト シェアは利用できません"</string>
+    <!-- no translation found for chooser_no_direct_share_targets (1511722103987329028) -->
+    <skip />
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"アプリのリスト"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"このアプリに録音権限は付与されていませんが、この USB デバイスから音声を収集できるようになります。"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ホーム"</string>
@@ -2016,22 +2066,243 @@
     <string name="accessibility_system_action_accessibility_menu_label" msgid="8436484650391125184">"ユーザー補助機能メニュー"</string>
     <string name="accessibility_freeform_caption" msgid="8377519323496290122">"<xliff:g id="APP_NAME">%1$s</xliff:g> のキャプション バーです。"</string>
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> は RESTRICTED バケットに移動しました。"</string>
+    <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"会話"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"グループの会話"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"個人用"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"仕事用"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (7539495559434146897) -->
+    <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"個人用ビュー"</string>
+    <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"仕事用ビュー"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"仕事用アプリでこのコンテンツを共有することはできません"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT 管理者は、仕事用プロファイルのアプリでこのコンテンツを共有することを許可していません"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"仕事用アプリでこのコンテンツを開くことはできません"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT 管理者は、仕事用プロファイルのアプリでこのコンテンツを開くことを許可していません"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"個人用アプリでこのコンテンツを共有することはできません"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT 管理者は、個人用プロファイルのアプリでこのコンテンツを共有することを許可していません"</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"個人用アプリでこのコンテンツを開くことはできません"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT 管理者は、個人用プロファイルのアプリでこのコンテンツを開くことを許可していません"</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
+    <string name="resolver_switch_on_work" msgid="2873009160846966379">"オンにする"</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"このコンテンツに対応する仕事用アプリはありません"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"このコンテンツを開くことができる仕事用アプリはありません"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"このコンテンツに対応する個人用アプリはありません"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"このコンテンツを開くことができる個人用アプリはありません"</string>
+    <string name="permlab_accessCallAudio" msgid="1682957511874097664">"通話中に録音または音声の再生を行う"</string>
+    <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"デフォルトの電話アプリケーションとして割り当てられている場合、このアプリに通話中の録音または音声の再生を許可します。"</string>
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->
     <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (8020581735267157241) -->
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ENTRY (7164399703751688214) -->
     <skip />
-    <!-- no translation found for resolver_cant_share_cross_profile_explanation (3536237105241882679) -->
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ENTRY (4447629474818217364) -->
     <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (8987359079870455469) -->
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ENTRY (973059024670737358) -->
     <skip />
-    <!-- no translation found for resolver_turn_on_work_apps_explanation (6322467455509618928) -->
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ENTRY (4487435301206073787) -->
     <skip />
-    <!-- no translation found for resolver_no_apps_available (7710339903040989654) -->
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ENTRY (768060297218652809) -->
     <skip />
-    <!-- no translation found for resolver_no_apps_available_explanation (4662694431121196560) -->
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ENTRY (7129527319490548930) -->
     <skip />
-    <!-- no translation found for resolver_switch_on_work (8294542702883688533) -->
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ENTRY (2876126640607573252) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ENTRY (8952595089930109282) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ENTRY (3013902515773728996) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ENTRY (2974411408893410289) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ENTRY (687618528751880721) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ENTRY (6810596579655575381) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ENTRY (2715929642540980259) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ENTRY (8557791623303951590) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ENTRY (7382468767274580323) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ENTRY (6730880791104286987) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ENTRY (6432126539782267026) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ENTRY (1730510161529488920) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ENTRY (3369885925003346830) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ENTRY (9129139686191167829) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ENTRY (2869929685874615358) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ENTRY (1238663472392741771) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ENTRY (3988705848553894358) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ENTRY (6186770686690993200) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ENTRY (7043865376145617024) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ENTRY (6144227308185112176) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_IN_PROGRESS (4233355366318061180) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_IN_PROGRESS (6742563947637715645) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_IN_PROGRESS (2033399698172403560) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_IN_PROGRESS (4795977251920732254) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_IN_PROGRESS (1090425878157254446) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_IN_PROGRESS (6476898876518094438) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_IN_PROGRESS (6006806734293747731) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (6546680489620881893) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_IN_PROGRESS (3506845511000727015) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_IN_PROGRESS (6709169861932992750) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_IN_PROGRESS (4013870911606478520) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_IN_PROGRESS (9032651188219523434) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_IN_PROGRESS (6584576506344491207) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_IN_PROGRESS (830981927724888114) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_IN_PROGRESS (7851790973098894802) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_IN_PROGRESS (1149560739586960121) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_IN_PROGRESS (5708964693522116025) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_IN_PROGRESS (7288103122966483455) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_IN_PROGRESS (4036752174056147753) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_IN_PROGRESS (5089536274515338566) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_IN_PROGRESS (6737197986936251958) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_IN_PROGRESS (5658767775619998623) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_IN_PROGRESS (665978313257653727) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_IN_PROGRESS (3857142652251836850) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_IN_PROGRESS (2695664012344346788) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_IN_PROGRESS (2695678959963807782) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_IN_PROGRESS (1230605365926493599) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ERROR (1924844017037151535) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_ERROR (3372797822292089708) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_ERROR (1878443146720411381) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_ERROR (7664778312218023192) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_ERROR (2472944311643350302) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_ERROR (828089694480999120) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_ERROR (17619001007092511) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_ERROR (807214229604353614) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_ERROR (8644184447744175747) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_ERROR (3801002648649640407) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_ERROR (707397021218680753) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_ERROR (894358680773257820) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_ERROR (352466878146726991) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_ERROR (7353389721907138671) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_ERROR (2655263155490857920) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_ERROR (6903740900892931310) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_ERROR (5165901670447518687) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_ERROR (2856763216589267623) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_ERROR (817542684437829139) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_ERROR (5178635064113393143) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_ERROR (5391587926974531008) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_ERROR (4895494864493315868) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_ERROR (9017576601595353649) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_ERROR (1116993930995545742) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_ERROR (7559167306794441462) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_ERROR (2782926139511136588) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_ERROR (1890493954453456758) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUCCESS (4886243367747126325) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_SUCCESS (4053809277733513987) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_SUCCESS (8249342930499801740) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_SUCCESS (2339794542560381270) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_SUCCESS (6975608174152828954) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_SUCCESS (2846699261330463192) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_SUCCESS (5335414726057102801) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_SUCCESS (8868100318474971969) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_SUCCESS (6020936629725666932) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_SUCCESS (6944873647584595489) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_SUCCESS (2526483514124121988) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_PUK_SUCCESS (7662200333621664621) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_SUBSET_PUK_SUCCESS (2861223407953766632) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_CORPORATE_PUK_SUCCESS (5345648571175243272) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SERVICE_PROVIDER_PUK_SUCCESS (3725278343103422466) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SIM_PUK_SUCCESS (6998502547560297983) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK1_PUK_SUCCESS (8555433771162560361) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_NETWORK2_PUK_SUCCESS (3555767296933606232) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_HRPD_PUK_SUCCESS (6778051818199974237) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_CORPORATE_PUK_SUCCESS (4080108758498911429) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_SERVICE_PROVIDER_PUK_SUCCESS (7873675303000794343) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_RUIM_RUIM_PUK_SUCCESS (1763198215069819523) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SPN_SUCCESS (2053891977727320532) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_SP_EHPLMN_SUCCESS (8146602361895007345) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_ICCID_SUCCESS (8058678548991999545) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_IMPI_SUCCESS (2545608067978550571) -->
+    <skip />
+    <!-- no translation found for PERSOSUBSTATE_SIM_NS_SP_SUCCESS (4352382949744625007) -->
     <skip />
 </resources>

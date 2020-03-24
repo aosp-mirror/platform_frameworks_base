@@ -68,7 +68,9 @@ public class InlineSuggestionRoot extends FrameLayout {
             case MotionEvent.ACTION_MOVE: {
                 final float distance = MathUtils.dist(mDownX, mDownY,
                         event.getX(), event.getY());
-                if (distance > mTouchSlop) {
+                final boolean isSecure = (event.getFlags()
+                        & MotionEvent.FLAG_WINDOW_IS_PARTIALLY_OBSCURED) == 0;
+                if (!isSecure || distance > mTouchSlop) {
                     try {
                         mCallback.onTransferTouchFocusToImeWindow(getViewRootImpl().getInputToken(),
                                 getContext().getDisplayId());

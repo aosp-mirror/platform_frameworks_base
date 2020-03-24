@@ -54,7 +54,7 @@ import android.util.SparseArray;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IWindowManager;
 import android.view.Surface;
-import android.view.WindowContainerTransaction;
+import android.window.WindowContainerTransaction;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
@@ -531,8 +531,7 @@ public class DisplayRotation {
             try {
                 mDisplayContent.sendNewConfiguration();
                 if (t != null) {
-                    mService.mAtmService.mTaskOrganizerController.applyContainerTransaction(t,
-                            null /* organizer */);
+                    mService.mAtmService.mWindowOrganizerController.applyTransaction(t);
                 }
             } finally {
                 mService.mAtmService.continueWindowLayout();

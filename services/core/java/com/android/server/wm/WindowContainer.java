@@ -68,7 +68,7 @@ import android.util.Pools;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.IWindowContainer;
+import android.window.IWindowContainer;
 import android.view.MagnificationSpec;
 import android.view.RemoteAnimationDefinition;
 import android.view.RemoteAnimationTarget;
@@ -378,10 +378,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mSurfaceControl == null) {
             // If we don't yet have a surface, but we now have a parent, we should
             // build a surface.
-            setSurfaceControl(makeSurface().build());
-            getPendingTransaction().show(mSurfaceControl);
-            onSurfaceShown(getPendingTransaction());
-            updateSurfacePosition();
+            createSurfaceControl(false /*force*/);
         } else {
             // If we have a surface but a new parent, we just need to perform a reparent. Go through
             // surface animator such that hierarchy is preserved when animating, i.e.
@@ -397,6 +394,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Either way we need to ask the parent to assign us a Z-order.
         mParent.assignChildLayers();
         scheduleAnimation();
+    }
+
+    void createSurfaceControl(boolean force) {
+        setSurfaceControl(makeSurface().build());
+        getPendingTransaction().show(mSurfaceControl);
+        onSurfaceShown(getPendingTransaction());
+        updateSurfacePosition();
     }
 
     /**

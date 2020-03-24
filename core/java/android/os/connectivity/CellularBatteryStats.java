@@ -315,6 +315,8 @@ public final class CellularBatteryStats implements Parcelable {
      * <li> index 3 = 15dBm < tx_power < 20dBm. </li>
      * <li> index 4 = tx_power > 20dBm. </li>
      * </ul>
+     *
+     * @hide
      */
     @NonNull
     public long getTxTimeMillis(

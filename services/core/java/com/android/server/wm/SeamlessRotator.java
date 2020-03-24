@@ -20,7 +20,6 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import android.graphics.Matrix;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.DisplayInfo;
 import android.view.Surface.Rotation;
@@ -28,7 +27,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 
 import com.android.server.wm.utils.CoordinateTransforms;
-import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -47,22 +45,18 @@ public class SeamlessRotator {
     private final float[] mFloat9 = new float[9];
     private final int mOldRotation;
     private final int mNewRotation;
-    private final int mRotationDelta;
-    private final int mW;
-    private final int mH;
 
     public SeamlessRotator(@Rotation int oldRotation, @Rotation int newRotation, DisplayInfo info) {
         mOldRotation = oldRotation;
         mNewRotation = newRotation;
-        mRotationDelta = DisplayContent.deltaRotation(oldRotation, newRotation);
 
         final boolean flipped = info.rotation == ROTATION_90 || info.rotation == ROTATION_270;
-        mH = flipped ? info.logicalWidth : info.logicalHeight;
-        mW = flipped ? info.logicalHeight : info.logicalWidth;
-
+        final int pH = flipped ? info.logicalWidth : info.logicalHeight;
+        final int pW = flipped ? info.logicalHeight : info.logicalWidth;
+        // Initialize transform matrix by physical size.
         final Matrix tmp = new Matrix();
-        CoordinateTransforms.transformLogicalToPhysicalCoordinates(oldRotation, mW, mH, mTransform);
-        CoordinateTransforms.transformPhysicalToLogicalCoordinates(newRotation, mW, mH, tmp);
+        CoordinateTransforms.transformLogicalToPhysicalCoordinates(oldRotation, pW, pH, mTransform);
+        CoordinateTransforms.transformPhysicalToLogicalCoordinates(newRotation, pW, pH, tmp);
         mTransform.postConcat(tmp);
     }
 
@@ -76,20 +70,6 @@ public class SeamlessRotator {
         final float[] winSurfacePos = {win.mLastSurfacePosition.x, win.mLastSurfacePosition.y};
         mTransform.mapPoints(winSurfacePos);
         transaction.setPosition(win.getSurfaceControl(), winSurfacePos[0], winSurfacePos[1]);
-    }
-
-    /** Rotates the frame from {@link #mNewRotation} to {@link #mOldRotation}. */
-    void unrotateFrame(Rect inOut) {
-        if (mRotationDelta == ROTATION_90) {
-            inOut.set(inOut.top, mH - inOut.right, inOut.bottom, mH - inOut.left);
-        } else if (mRotationDelta == ROTATION_270) {
-            inOut.set(mW - inOut.bottom, inOut.left, mW - inOut.top, inOut.right);
-        }
-    }
-
-    /** Rotates the insets from {@link #mNewRotation} to {@link #mOldRotation}. */
-    void unrotateInsets(Rect inOut) {
-        InsetUtils.rotateInsets(inOut, mRotationDelta);
     }
 
     /**

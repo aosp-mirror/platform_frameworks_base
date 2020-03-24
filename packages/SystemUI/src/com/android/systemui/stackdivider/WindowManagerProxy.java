@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -28,9 +29,10 @@ import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
-import android.view.IWindowContainer;
-import android.view.WindowContainerTransaction;
+import android.window.IWindowContainer;
+import android.window.WindowContainerTransaction;
 import android.view.WindowManagerGlobal;
+import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -111,8 +113,7 @@ public class WindowManagerProxy {
         WindowContainerTransaction t = new WindowContainerTransaction();
         splitLayout.resizeSplits(position, t);
         try {
-            ActivityTaskManager.getTaskOrganizerController().applyContainerTransaction(t,
-                    null /* organizer */);
+            WindowOrganizer.applyTransaction(t);
         } catch (RemoteException e) {
         }
     }
@@ -122,10 +123,8 @@ public class WindowManagerProxy {
         boolean resizable = false;
         try {
             List<ActivityManager.RunningTaskInfo> rootTasks = parent == null
-                    ? ActivityTaskManager.getTaskOrganizerController().getRootTasks(
-                            Display.DEFAULT_DISPLAY, HOME_AND_RECENTS)
-                    : ActivityTaskManager.getTaskOrganizerController().getChildTasks(parent,
-                            HOME_AND_RECENTS);
+                    ? TaskOrganizer.getRootTasks(Display.DEFAULT_DISPLAY, HOME_AND_RECENTS)
+                    : TaskOrganizer.getChildTasks(parent, HOME_AND_RECENTS);
             for (int i = 0, n = rootTasks.size(); i < n; ++i) {
                 final ActivityManager.RunningTaskInfo ti = rootTasks.get(i);
                 out.add(ti.token);
@@ -174,11 +173,9 @@ public class WindowManagerProxy {
             // Set launchtile first so that any stack created after
             // getAllStackInfos and before reparent (even if unlikely) are placed
             // correctly.
-            ActivityTaskManager.getTaskOrganizerController().setLaunchRoot(
-                    DEFAULT_DISPLAY, tiles.mSecondary.token);
+            TaskOrganizer.setLaunchRoot(DEFAULT_DISPLAY, tiles.mSecondary.token);
             List<ActivityManager.RunningTaskInfo> rootTasks =
-                    ActivityTaskManager.getTaskOrganizerController().getRootTasks(DEFAULT_DISPLAY,
-                            null /* activityTypes */);
+                    TaskOrganizer.getRootTasks(DEFAULT_DISPLAY, null /* activityTypes */);
             WindowContainerTransaction wct = new WindowContainerTransaction();
             if (rootTasks.isEmpty()) {
                 return false;
@@ -192,8 +189,7 @@ public class WindowManagerProxy {
                         true /* onTop */);
             }
             boolean isHomeResizable = applyHomeTasksMinimized(layout, null /* parent */, wct);
-            ActivityTaskManager.getTaskOrganizerController()
-                    .applyContainerTransaction(wct, null /* organizer */);
+            WindowOrganizer.applyTransaction(wct);
             return isHomeResizable;
         } catch (RemoteException e) {
             Log.w(TAG, "Error moving fullscreen tasks to secondary split: " + e);
@@ -216,22 +212,18 @@ public class WindowManagerProxy {
         try {
             // Set launch root first so that any task created after getChildContainers and
             // before reparent (pretty unlikely) are put into fullscreen.
-            ActivityTaskManager.getTaskOrganizerController().setLaunchRoot(Display.DEFAULT_DISPLAY,
-                    null);
+            TaskOrganizer.setLaunchRoot(Display.DEFAULT_DISPLAY, null);
             // TODO(task-org): Once task-org is more complete, consider using Appeared/Vanished
             //                 plus specific APIs to clean this up.
             List<ActivityManager.RunningTaskInfo> primaryChildren =
-                    ActivityTaskManager.getTaskOrganizerController().getChildTasks(
-                            tiles.mPrimary.token, null /* activityTypes */);
+                    TaskOrganizer.getChildTasks(tiles.mPrimary.token, null /* activityTypes */);
             List<ActivityManager.RunningTaskInfo> secondaryChildren =
-                    ActivityTaskManager.getTaskOrganizerController().getChildTasks(
-                            tiles.mSecondary.token, null /* activityTypes */);
+                    TaskOrganizer.getChildTasks(tiles.mSecondary.token, null /* activityTypes */);
             // In some cases (eg. non-resizable is launched), system-server will leave split-screen.
             // as a result, the above will not capture any tasks; yet, we need to clean-up the
             // home task bounds.
             List<ActivityManager.RunningTaskInfo> freeHomeAndRecents =
-                    ActivityTaskManager.getTaskOrganizerController().getRootTasks(
-                            Display.DEFAULT_DISPLAY, HOME_AND_RECENTS);
+                    TaskOrganizer.getRootTasks(Display.DEFAULT_DISPLAY, HOME_AND_RECENTS);
             if (primaryChildren.isEmpty() && secondaryChildren.isEmpty()
                     && freeHomeAndRecents.isEmpty()) {
                 return;
@@ -281,8 +273,7 @@ public class WindowManagerProxy {
             }
             // Reset focusable to true
             wct.setFocusable(tiles.mPrimary.token, true /* focusable */);
-            ActivityTaskManager.getTaskOrganizerController().applyContainerTransaction(wct,
-                    null /* organizer */);
+            WindowOrganizer.applyTransaction(wct);
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to remove stack: " + e);
         }
@@ -290,8 +281,7 @@ public class WindowManagerProxy {
 
     static void applyContainerTransaction(WindowContainerTransaction wct) {
         try {
-            ActivityTaskManager.getTaskOrganizerController().applyContainerTransaction(wct,
-                    null /* organizer */);
+            WindowOrganizer.applyTransaction(wct);
         } catch (RemoteException e) {
             Log.w(TAG, "Error setting focusability: " + e);
         }

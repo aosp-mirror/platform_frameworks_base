@@ -60,10 +60,9 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.Rational;
 import android.view.Display;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
 import android.view.SurfaceControl;
-import android.view.WindowContainerTransaction;
+import android.window.ITaskOrganizer;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
@@ -74,7 +73,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Test class for {@link ITaskOrganizer} and {@link android.app.ITaskOrganizerController}.
+ * Test class for {@link ITaskOrganizer} and {@link android.window.ITaskOrganizerController}.
  *
  * Build/Install/Run:
  *  atest WmTests:TaskOrganizerTests
@@ -232,7 +231,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction t = new WindowContainerTransaction();
         Rect newBounds = new Rect(10, 10, 100, 100);
         t.setBounds(task.mRemoteToken, new Rect(10, 10, 100, 100));
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertEquals(newBounds, task.getBounds());
     }
 
@@ -247,7 +246,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         assertEquals(stack.mRemoteToken, info.stackToken);
         Rect newBounds = new Rect(10, 10, 100, 100);
         t.setBounds(info.stackToken, new Rect(10, 10, 100, 100));
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertEquals(newBounds, stack.getBounds());
     }
 
@@ -258,7 +257,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final WindowContainerTransaction t = new WindowContainerTransaction();
 
         t.setWindowingMode(stack.mRemoteToken, WINDOWING_MODE_FULLSCREEN);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, stack.getWindowingMode());
     }
@@ -271,7 +270,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
         t.setWindowingMode(stack.mRemoteToken, WINDOWING_MODE_PINNED);
         t.setActivityWindowingMode(stack.mRemoteToken, WINDOWING_MODE_FULLSCREEN);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
 
         assertEquals(WINDOWING_MODE_FULLSCREEN, record.getWindowingMode());
         assertEquals(WINDOWING_MODE_PINNED, stack.getWindowingMode());
@@ -286,10 +285,10 @@ public class TaskOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction t = new WindowContainerTransaction();
         assertTrue(task.isFocusable());
         t.setFocusable(stack.mRemoteToken, false);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertFalse(task.isFocusable());
         t.setFocusable(stack.mRemoteToken, true);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertTrue(task.isFocusable());
     }
 
@@ -301,10 +300,10 @@ public class TaskOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction t = new WindowContainerTransaction();
         assertTrue(stack.shouldBeVisible(null));
         t.setHidden(stack.mRemoteToken, true);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertFalse(stack.shouldBeVisible(null));
         t.setHidden(stack.mRemoteToken, false);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertTrue(stack.shouldBeVisible(null));
     }
 
@@ -316,19 +315,19 @@ public class TaskOrganizerTests extends WindowTestsBase {
         final Task task = stack.getTopMostTask();
         WindowContainerTransaction t = new WindowContainerTransaction();
         t.setBounds(task.mRemoteToken, new Rect(10, 10, 100, 100));
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         final int origScreenWDp = task.getConfiguration().screenHeightDp;
         final int origScreenHDp = task.getConfiguration().screenHeightDp;
         t = new WindowContainerTransaction();
         // verify that setting config overrides on parent restricts children.
         t.setScreenSizeDp(stack.mRemoteToken, origScreenWDp, origScreenHDp);
         t.setBounds(task.mRemoteToken, new Rect(10, 10, 150, 200));
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
         t = new WindowContainerTransaction();
         t.setScreenSizeDp(stack.mRemoteToken, Configuration.SCREEN_WIDTH_DP_UNDEFINED,
                 Configuration.SCREEN_HEIGHT_DP_UNDEFINED);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(t, null);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(t);
         assertNotEquals(origScreenHDp, task.getConfiguration().screenHeightDp);
     }
 
@@ -403,9 +402,6 @@ public class TaskOrganizerTests extends WindowTestsBase {
             public void taskVanished(RunningTaskInfo container) { }
 
             @Override
-            public void transactionReady(int id, SurfaceControl.Transaction t) { }
-
-            @Override
             public void onTaskInfoChanged(RunningTaskInfo info) throws RemoteException {
                 lastReportedTiles.add(info);
                 called[0] = true;
@@ -457,9 +453,6 @@ public class TaskOrganizerTests extends WindowTestsBase {
             public void taskVanished(RunningTaskInfo container) { }
 
             @Override
-            public void transactionReady(int id, SurfaceControl.Transaction t) { }
-
-            @Override
             public void onTaskInfoChanged(RunningTaskInfo info) {
                 lastReportedTiles.put(info.token.asBinder(), info);
             }
@@ -488,8 +481,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(stack.mRemoteToken, info1.token, true /* onTop */);
         wct.reparent(stack2.mRemoteToken, info2.token, true /* onTop */);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
-                null /* organizer */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         assertFalse(lastReportedTiles.isEmpty());
         assertEquals(ACTIVITY_TYPE_STANDARD,
                 lastReportedTiles.get(info1.token.asBinder()).topActivityType);
@@ -499,8 +491,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         lastReportedTiles.clear();
         wct = new WindowContainerTransaction();
         wct.reparent(stack2.mRemoteToken, info1.token, false /* onTop */);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
-                null /* organizer */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         assertFalse(lastReportedTiles.isEmpty());
         // Standard should still be on top of tile 1, so no change there
         assertFalse(lastReportedTiles.containsKey(info1.token.asBinder()));
@@ -525,8 +516,7 @@ public class TaskOrganizerTests extends WindowTestsBase {
         lastReportedTiles.clear();
         wct = new WindowContainerTransaction();
         wct.reorder(stack2.mRemoteToken, true /* onTop */);
-        mWm.mAtmService.mTaskOrganizerController.applyContainerTransaction(wct,
-                null /* organizer */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         // Home should now be on top. No change occurs in second tile, so not reported
         assertEquals(1, lastReportedTiles.size());
         assertEquals(ACTIVITY_TYPE_HOME,
@@ -682,9 +672,6 @@ public class TaskOrganizerTests extends WindowTestsBase {
         }
         @Override
         public void taskVanished(RunningTaskInfo info) {
-        }
-        @Override
-        public void transactionReady(int id, SurfaceControl.Transaction t) {
         }
         @Override
         public void onTaskInfoChanged(RunningTaskInfo info) {

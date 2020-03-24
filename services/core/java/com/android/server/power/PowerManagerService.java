@@ -2439,7 +2439,7 @@ public final class PowerManagerService extends SystemService
 
     private boolean isAttentiveTimeoutExpired(long now) {
         long attentiveTimeout = getAttentiveTimeoutLocked();
-        return attentiveTimeout >= 0 && now > mLastUserActivityTime + attentiveTimeout;
+        return attentiveTimeout >= 0 && now >= mLastUserActivityTime + attentiveTimeout;
     }
 
     /**

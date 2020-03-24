@@ -16,6 +16,7 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.WallpaperManager.COMMAND_REAPPLY;
 import static android.app.WallpaperManager.FLAG_LOCK;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
@@ -1070,7 +1071,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         /**
          * Collect needed info for a display.
          */
-        private final class DisplayConnector {
+        @VisibleForTesting
+        final class DisplayConnector {
             final int mDisplayId;
             final Binder mToken = new Binder();
             IWallpaperEngine mEngine;
@@ -1213,7 +1215,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
         }
 
-        private boolean isUsableDisplay(Display display) {
+        @VisibleForTesting
+        boolean isUsableDisplay(Display display) {
             if (display == null || !display.hasAccess(mClientUid)) {
                 return false;
             }
@@ -2583,6 +2586,19 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (bindWallpaperComponentLocked(name, false, true, wallpaper, null)) {
                     if (!same) {
                         wallpaper.primaryColors = null;
+                    } else {
+                        if (wallpaper.connection != null) {
+                            wallpaper.connection.forEachDisplayConnector(displayConnector -> {
+                                try {
+                                    if (displayConnector.mEngine != null) {
+                                        displayConnector.mEngine.dispatchWallpaperCommand(
+                                                COMMAND_REAPPLY, 0, 0, 0, null);
+                                    }
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG, "Error sending apply message to wallpaper", e);
+                                }
+                            });
+                        }
                     }
                     wallpaper.wallpaperId = makeWallpaperIdLocked();
                     notifyCallbacksLocked(wallpaper);

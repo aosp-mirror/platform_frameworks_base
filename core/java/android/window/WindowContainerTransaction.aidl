@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.window;
 
-import android.view.SurfaceControl;
-
-/**
- * Interface for a window container to communicate with the window manager. This also acts as a
- * token.
- * @hide
- */
-interface IWindowContainer {
-
-    /**
-     * Gets a persistent leash for this container or {@code null}.
-     */
-    SurfaceControl getLeash();
-}
+parcelable WindowContainerTransaction;
