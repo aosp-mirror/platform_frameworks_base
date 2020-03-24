@@ -6372,13 +6372,41 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         ShortcutInfo si = mock(ShortcutInfo.class);
         when(si.getShortLabel()).thenReturn("Hello");
+        when(si.isLongLived()).thenReturn(true);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));
 
         List<ConversationChannelWrapper> conversations =
                 mBinderService.getConversationsForPackage(PKG_P, mUid).getList();
         assertEquals(si, conversations.get(0).getShortcutInfo());
         assertEquals(si, conversations.get(1).getShortcutInfo());
+    }
 
+    @Test
+    public void testGetConversationsForPackage_shortcut_notLongLived() throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        ArrayList<ConversationChannelWrapper> convos = new ArrayList<>();
+        ConversationChannelWrapper convo1 = new ConversationChannelWrapper();
+        NotificationChannel channel1 = new NotificationChannel("a", "a", 1);
+        channel1.setConversationId("parent1", "convo 1");
+        convo1.setNotificationChannel(channel1);
+        convos.add(convo1);
+
+        ConversationChannelWrapper convo2 = new ConversationChannelWrapper();
+        NotificationChannel channel2 = new NotificationChannel("b", "b", 1);
+        channel2.setConversationId("parent1", "convo 2");
+        convo2.setNotificationChannel(channel2);
+        convos.add(convo2);
+        when(mPreferencesHelper.getConversations(anyString(), anyInt())).thenReturn(convos);
+
+        ShortcutInfo si = mock(ShortcutInfo.class);
+        when(si.getShortLabel()).thenReturn("Hello");
+        when(si.isLongLived()).thenReturn(false);
+        when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));
+
+        List<ConversationChannelWrapper> conversations =
+                mBinderService.getConversationsForPackage(PKG_P, mUid).getList();
+        assertNull(conversations.get(0).getShortcutInfo());
+        assertNull(conversations.get(1).getShortcutInfo());
     }
 
     @Test
