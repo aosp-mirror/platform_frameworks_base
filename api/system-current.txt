@@ -9161,7 +9161,8 @@ package android.provider {
   }
 
   public final class Settings {
-    method public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, boolean);
+    method @Deprecated public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, boolean);
+    method public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, @Nullable String, boolean);
     field public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String ACTION_BUGREPORT_HANDLER_SETTINGS = "android.settings.BUGREPORT_HANDLER_SETTINGS";
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";

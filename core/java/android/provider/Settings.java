@@ -14949,8 +14949,23 @@ public final class Settings {
     public static boolean isCallingPackageAllowedToWriteSettings(Context context, int uid,
             String callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
-                callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
-                PM_WRITE_SETTINGS, false);
+                callingPackage, null /*attribution not needed when not making note */,
+                throwException, AppOpsManager.OP_WRITE_SETTINGS, PM_WRITE_SETTINGS,
+                false);
+    }
+
+    /**
+     * @deprecated Use {@link #checkAndNoteWriteSettingsOperation(Context, int, String, String,
+     * boolean)} instead.
+     *
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    public static boolean checkAndNoteWriteSettingsOperation(@NonNull Context context, int uid,
+            @NonNull String callingPackage, boolean throwException) {
+        return checkAndNoteWriteSettingsOperation(context, uid, callingPackage, null,
+                throwException);
     }
 
     /**
@@ -14966,10 +14981,11 @@ public final class Settings {
      */
     @SystemApi
     public static boolean checkAndNoteWriteSettingsOperation(@NonNull Context context, int uid,
-            @NonNull String callingPackage, boolean throwException) {
+            @NonNull String callingPackage, @Nullable String callingAttributionTag,
+            boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
-                callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
-                PM_WRITE_SETTINGS, true);
+                callingPackage, callingAttributionTag, throwException,
+                AppOpsManager.OP_WRITE_SETTINGS, PM_WRITE_SETTINGS, true);
     }
 
     /**
@@ -14986,14 +15002,14 @@ public final class Settings {
      * @hide
      */
     public static boolean checkAndNoteChangeNetworkStateOperation(Context context, int uid,
-            String callingPackage, boolean throwException) {
+            String callingPackage, String callingAttributionTag, boolean throwException) {
         if (context.checkCallingOrSelfPermission(android.Manifest.permission.CHANGE_NETWORK_STATE)
                 == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
-                callingPackage, throwException, AppOpsManager.OP_WRITE_SETTINGS,
-                PM_CHANGE_NETWORK_STATE, true);
+                callingPackage, callingAttributionTag, throwException,
+                AppOpsManager.OP_WRITE_SETTINGS, PM_CHANGE_NETWORK_STATE, true);
     }
 
     /**
@@ -15007,8 +15023,9 @@ public final class Settings {
     public static boolean isCallingPackageAllowedToDrawOverlays(Context context, int uid,
             String callingPackage, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
-                callingPackage, throwException, AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                PM_SYSTEM_ALERT_WINDOW, false);
+                callingPackage, null /*attribution not needed when not making note */,
+                throwException, AppOpsManager.OP_SYSTEM_ALERT_WINDOW, PM_SYSTEM_ALERT_WINDOW,
+                false);
     }
 
     /**
@@ -15021,11 +15038,26 @@ public final class Settings {
      * current time.
      * @hide
      */
-    public static boolean checkAndNoteDrawOverlaysOperation(Context context, int uid, String
-            callingPackage, boolean throwException) {
+    public static boolean checkAndNoteDrawOverlaysOperation(Context context, int uid,
+            String callingPackage, String callingAttributionTag, boolean throwException) {
         return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
-                callingPackage, throwException, AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
-                PM_SYSTEM_ALERT_WINDOW, true);
+                callingPackage, callingAttributionTag, throwException,
+                AppOpsManager.OP_SYSTEM_ALERT_WINDOW, PM_SYSTEM_ALERT_WINDOW, true);
+    }
+
+    /**
+     * @deprecated Use {@link #isCallingPackageAllowedToPerformAppOpsProtectedOperation(Context,
+     * int, String, String, boolean, int, String[], boolean)} instead.
+     *
+     * @hide
+     */
+    @Deprecated
+    @UnsupportedAppUsage
+    public static boolean isCallingPackageAllowedToPerformAppOpsProtectedOperation(Context context,
+            int uid, String callingPackage, boolean throwException, int appOpsOpCode,
+            String[] permissions, boolean makeNote) {
+        return isCallingPackageAllowedToPerformAppOpsProtectedOperation(context, uid,
+                callingPackage, null, throwException, appOpsOpCode, permissions, makeNote);
     }
 
     /**
@@ -15034,10 +15066,9 @@ public final class Settings {
      * OP_WRITE_SETTINGS
      * @hide
      */
-    @UnsupportedAppUsage
     public static boolean isCallingPackageAllowedToPerformAppOpsProtectedOperation(Context context,
-            int uid, String callingPackage, boolean throwException, int appOpsOpCode, String[]
-            permissions, boolean makeNote) {
+            int uid, String callingPackage, String callingAttributionTag, boolean throwException,
+            int appOpsOpCode, String[] permissions, boolean makeNote) {
         if (callingPackage == null) {
             return false;
         }
@@ -15045,7 +15076,8 @@ public final class Settings {
         AppOpsManager appOpsMgr = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
         int mode = AppOpsManager.MODE_DEFAULT;
         if (makeNote) {
-            mode = appOpsMgr.noteOpNoThrow(appOpsOpCode, uid, callingPackage);
+            mode = appOpsMgr.noteOpNoThrow(appOpsOpCode, uid, callingPackage, callingAttributionTag,
+                    null);
         } else {
             mode = appOpsMgr.checkOpNoThrow(appOpsOpCode, uid, callingPackage);
         }
