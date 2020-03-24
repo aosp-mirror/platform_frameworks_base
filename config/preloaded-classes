@@ -7438,6 +7438,7 @@ sun.nio.fs.LinuxFileSystemProvider
 sun.nio.fs.NativeBuffer$Deallocator
 sun.nio.fs.NativeBuffer
 sun.nio.fs.NativeBuffers
+sun.nio.fs.UnixChannelFactory
 sun.nio.fs.UnixChannelFactory$Flags
 sun.nio.fs.UnixConstants
 sun.nio.fs.UnixException
