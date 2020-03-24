@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.app;
+package android.window;
 
 import android.app.ActivityManager;
-import android.view.ITaskOrganizer;
-import android.view.IWindowContainer;
-import android.view.WindowContainerTransaction;
+import android.window.ITaskOrganizer;
+import android.window.IWindowContainer;
+import android.window.WindowContainerTransaction;
 
 /** @hide */
 interface ITaskOrganizerController {

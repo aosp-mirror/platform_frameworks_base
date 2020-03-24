@@ -110,6 +110,7 @@ import libcore.util.EmptyArray;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -942,13 +943,89 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /**
+     * Wrap the cached value in a class that does deep compares on string
+     * arrays.  The comparison is needed only for the verification mode of
+     * PropertyInvalidatedCache; this mode is only enabled for debugging.
+     * The return result is an array of strings but the order in the array
+     * is not important.  To properly compare two arrays, the arrays are
+     * sorted before the comparison.
+     */
+    private static class GetPackagesForUidResult {
+        private final String [] mValue;
+        GetPackagesForUidResult(String []s) {
+            mValue = s;
+        }
+        public String[] value() {
+            return mValue;
+        }
+        @Override
+        public String toString() {
+            return Arrays.toString(mValue);
+        }
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(mValue);
+        }
+        /**
+         * Arrays.sort() throws an NPE if passed a null pointer, so nulls
+         * are handled first.
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof GetPackagesForUidResult) {
+                String [] r = ((GetPackagesForUidResult) o).mValue;
+                String [] l = mValue;
+                if ((r == null) != (l == null)) {
+                    return false;
+                } else if (r == null) {
+                    return true;
+                }
+                // Both arrays are non-null.  Sort before comparing.
+                Arrays.sort(r);
+                Arrays.sort(l);
+                return Arrays.equals(l, r);
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private static final String CACHE_KEY_PACKAGES_FOR_UID_PROPERTY =
+            "cache_key.get_packages_for_uid";
+    private static final PropertyInvalidatedCache<Integer, GetPackagesForUidResult>
+            mGetPackagesForUidCache =
+            new PropertyInvalidatedCache<Integer, GetPackagesForUidResult>(
+                32, CACHE_KEY_PACKAGES_FOR_UID_PROPERTY) {
+                @Override
+                protected GetPackagesForUidResult recompute(Integer uid) {
+                    try {
+                        return new GetPackagesForUidResult(
+                            ActivityThread.currentActivityThread().
+                            getPackageManager().getPackagesForUid(uid));
+                    } catch (RemoteException e) {
+                        throw e.rethrowFromSystemServer();
+                    }
+                }
+                @Override
+                public String queryToString(Integer uid) {
+                    return String.format("uid=%d", uid.intValue());
+                }
+            };
+
     @Override
     public String[] getPackagesForUid(int uid) {
-        try {
-            return mPM.getPackagesForUid(uid);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return mGetPackagesForUidCache.query(uid).value();
+    }
+
+    /** @hide */
+    public static void disableGetPackagesForUidCache() {
+        mGetPackagesForUidCache.disableLocal();
+    }
+
+    /** @hide */
+    public static void invalidateGetPackagesForUidCache() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_PACKAGES_FOR_UID_PROPERTY);
     }
 
     @Override

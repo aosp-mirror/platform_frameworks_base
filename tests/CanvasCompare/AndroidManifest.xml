@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,37 +13,36 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.test.hwuicompare" >
 
-    <uses-permission android:name="android.permission.INTERNET" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+     package="com.android.test.hwuicompare">
+
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
-    <application
-        android:label="@string/app_name"
-        android:theme="@android:style/Theme.Holo.Light.NoActionBar">
-        <activity
-            android:name="AutomaticActivity"
-            android:label="CanvasAutoCompare" >
+    <application android:label="@string/app_name"
+         android:theme="@android:style/Theme.Holo.Light.NoActionBar">
+        <activity android:name="AutomaticActivity"
+             android:label="CanvasAutoCompare"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name="ManualActivity"
-            android:label="CanvasManualCompare" >
+        <activity android:name="ManualActivity"
+             android:label="CanvasManualCompare"
+             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <uses-library android:name="android.test.runner" />
+        <uses-library android:name="android.test.runner"/>
     </application>
-    <instrumentation
-        android:name="android.test.InstrumentationTestRunner"
-        android:targetPackage="com.android.test.hwuicompare"
-        android:label="HW/SW Canvas comparison tool."/>
+    <instrumentation android:name="android.test.InstrumentationTestRunner"
+         android:targetPackage="com.android.test.hwuicompare"
+         android:label="HW/SW Canvas comparison tool."/>
 
 </manifest>

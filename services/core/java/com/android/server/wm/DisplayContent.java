@@ -199,7 +199,7 @@ import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
 import android.view.ISystemGestureExclusionListener;
-import android.view.ITaskOrganizer;
+import android.window.ITaskOrganizer;
 import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.InputDevice;
@@ -6822,6 +6822,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     Context getDisplayUiContext() {
         return mDisplayPolicy.getSystemUiContext();
+    }
+
+    Point getDisplayPosition() {
+        return mWmService.mDisplayManagerInternal.getDisplayPosition(getDisplayId());
     }
 
     class RemoteInsetsControlTarget implements InsetsControlTarget {

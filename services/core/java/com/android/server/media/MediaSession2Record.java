@@ -32,7 +32,7 @@ import com.android.internal.annotations.GuardedBy;
 import java.io.PrintWriter;
 
 /**
- * Keeps the record of {@link Session2Token} helps to send command to the corresponding session.
+ * Keeps the record of {@link Session2Token} to help send command to the corresponding session.
  */
 // TODO(jaewan): Do not call service method directly -- introduce listener instead.
 public class MediaSession2Record implements MediaSessionRecordImpl {
@@ -87,7 +87,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
 
     @Override
     public boolean isSystemPriority() {
-        // System priority session is currently only allowed for telephony, and it's OK to stick to
+        // System priority session is currently only allowed for telephony, so it's OK to stick to
         // the media1 API at this moment.
         return false;
     }
@@ -122,7 +122,7 @@ public class MediaSession2Record implements MediaSessionRecordImpl {
     public void close() {
         synchronized (mLock) {
             mIsClosed = true;
-            // Call close regardless of the mIsAvailable. This may be called when it's not yet
+            // Call close regardless of the mIsConnected. This may be called when it's not yet
             // connected.
             mController.close();
         }

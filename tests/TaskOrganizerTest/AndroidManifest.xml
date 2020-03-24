@@ -10,16 +10,19 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.test.taskembed">
-    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
-    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS" />
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+     package="com.android.test.taskembed">
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION"/>
+    <uses-permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
     <application>
       <service android:name=".TaskOrganizerPipTest"
-               android:exported="true">
+           android:exported="true">
       </service>
-      <activity android:name="TaskOrganizerMultiWindowTest" android:label="TaskOrganizer MW Test">
+      <activity android:name="TaskOrganizerMultiWindowTest"
+           android:label="TaskOrganizer MW Test"
+           android:exported="true">
         <intent-filter>
           <action android:name="android.intent.action.MAIN"/>
           <category android:name="android.intent.category.LAUNCHER"/>

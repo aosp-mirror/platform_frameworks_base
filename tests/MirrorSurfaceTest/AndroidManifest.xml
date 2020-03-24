@@ -16,14 +16,15 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.google.android.test.mirrorsurface">
+     package="com.google.android.test.mirrorsurface">
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
 
     <application android:label="MirrorSurfaceTest">
         <activity android:name=".MirrorSurfaceActivity"
-                  android:label="Mirror Surface"
-                  android:configChanges="orientation|screenSize">
+             android:label="Mirror Surface"
+             android:configChanges="orientation|screenSize"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

@@ -443,11 +443,23 @@
     <!-- A toast message displayed when printing is attempted but disabled by policy. -->
     <string name="printing_disabled_by">Printing disabled by <xliff:g id="owner_app">%s</xliff:g>.</string>
 
-    <!-- Content title for a notification that personal apps are suspended [CHAR LIMIT=NONE] -->
-    <string name="personal_apps_suspended_notification_title">Personal apps have been suspended by an admin</string>
-
-    <!-- Message for a notification about personal apps suspension when work profile is off. [CHAR LIMIT=NONE] -->
-    <string name="personal_apps_suspended_notification_text">Tap here to check policy compliance.</string>
+    <!-- Notification title. This notification lets a user know that their personal apps are
+        blocked due to a work policy from their IT admin, and tells them what they need to do
+        to unblock their apps.[CHAR LIMIT=29] -->
+    <string name="personal_apps_suspended_title">Unblock your personal apps</string>
+    <!-- Notification title. This notification lets a user know that their apps will be blocked
+        tomorrow due to a work policy from their IT admin, and tells them what they need to do to
+        prevent the apps from being blocked. [CHAR LIMIT=29] -->
+    <string name="personal_apps_suspended_tomorrow_title">Apps will be blocked tomorrow</string>
+    <!-- Notification text. This notification lets a user know that they need to turn on their
+        work profile due to a work policy from their IT admin. The number of days is at least 3.
+        [CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspended_text">Your IT admin doesn\u2019t allow your
+        work profile to be paused for more than <xliff:g id="days" example="3">%1$d</xliff:g>
+        days</string>
+    <!-- Title for the button that turns work profile on. To be used in a notification
+        [CHAR LIMIT=NONE] -->
+    <string name="personal_apps_suspended_turn_profile_on">Turn on work profile</string>
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>

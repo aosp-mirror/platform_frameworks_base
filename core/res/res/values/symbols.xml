@@ -1194,8 +1194,9 @@
   <java-symbol type="string" name="network_logging_notification_text" />
   <java-symbol type="string" name="location_changed_notification_title" />
   <java-symbol type="string" name="location_changed_notification_text" />
-  <java-symbol type="string" name="personal_apps_suspended_notification_title" />
-  <java-symbol type="string" name="personal_apps_suspended_notification_text" />
+  <java-symbol type="string" name="personal_apps_suspended_title" />
+  <java-symbol type="string" name="personal_apps_suspended_tomorrow_title" />
+  <java-symbol type="string" name="personal_apps_suspended_text" />
   <java-symbol type="string" name="factory_reset_warning" />
   <java-symbol type="string" name="factory_reset_message" />
   <java-symbol type="string" name="lockscreen_transport_play_description" />
@@ -3940,4 +3941,7 @@
   <java-symbol type="string" name="config_customSessionPolicyProvider" />
   <!-- The max scale for the wallpaper when it's zoomed in -->
   <java-symbol type="dimen" name="config_wallpaperMaxScale"/>
+
+  <!-- Set to true to enable the user switcher on the keyguard. -->
+  <java-symbol type="bool" name="config_keyguardUserSwitcher" />
 </resources>

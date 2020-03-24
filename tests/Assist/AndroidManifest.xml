@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright (C) 2015 The Android Open Source Project
   ~
@@ -15,35 +16,34 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.test.assist">
+     package="com.android.test.assist">
 
     <application>
         <service android:name="AssistInteractionService"
-                android:label="Test Assist Interaction Service"
-                android:permission="android.permission.BIND_VOICE_INTERACTION"
-                android:process=":interactor">
+             android:label="Test Assist Interaction Service"
+             android:permission="android.permission.BIND_VOICE_INTERACTION"
+             android:process=":interactor"
+             android:exported="true">
             <meta-data android:name="android.voice_interaction"
-                       android:resource="@xml/interaction_service" />
+                 android:resource="@xml/interaction_service"/>
             <intent-filter>
-                <action android:name="android.service.voice.VoiceInteractionService" />
+                <action android:name="android.service.voice.VoiceInteractionService"/>
             </intent-filter>
-            <meta-data
-                android:name="com.android.systemui.action_assist_icon"
-                android:resource="@drawable/assistant" />
-            <meta-data
-                android:name="com.android.keyguard.layout"
-                android:resource="@layout/keyguard_preview" />
+            <meta-data android:name="com.android.systemui.action_assist_icon"
+                 android:resource="@drawable/assistant"/>
+            <meta-data android:name="com.android.keyguard.layout"
+                 android:resource="@layout/keyguard_preview"/>
         </service>
         <service android:name="AssistInteractionSessionService"
-                android:permission="android.permission.BIND_VOICE_INTERACTION"
-                android:process=":session">
+             android:permission="android.permission.BIND_VOICE_INTERACTION"
+             android:process=":session">
         </service>
         <activity android:name=".AboveKeyguardActivity"
-                  android:label="Test Above Keyguard Activity"
-                  android:theme="@android:style/Theme.NoTitleBar"
-                  android:excludeFromRecents="true"
-                  android:launchMode="singleTask"
-                  android:exported="false" >
+             android:label="Test Above Keyguard Activity"
+             android:theme="@android:style/Theme.NoTitleBar"
+             android:excludeFromRecents="true"
+             android:launchMode="singleTask"
+             android:exported="false">
         </activity>
     </application>
 </manifest>

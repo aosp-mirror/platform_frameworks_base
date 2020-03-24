@@ -2068,33 +2068,20 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"직장"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"개인 뷰"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"직장 뷰"</string>
-    <!-- no translation found for resolver_cant_share_with_work_apps (637686613606502219) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_work_apps_explanation (3332302070341130545) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps (2455757966397563223) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_work_apps_explanation (3626983885525445790) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps (3079139799233316203) -->
-    <skip />
-    <!-- no translation found for resolver_cant_share_with_personal_apps_explanation (2959282422751315171) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps (648291604475669395) -->
-    <skip />
-    <!-- no translation found for resolver_cant_access_personal_apps_explanation (2298773629302296519) -->
-    <skip />
-    <!-- no translation found for resolver_turn_on_work_apps (884910835250037247) -->
-    <skip />
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"직장 앱과 공유할 수 없는 콘텐츠"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"IT 관리자가 직장 프로필의 앱에서 이 콘텐츠를 공유하도록 허용하지 않습니다."</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"직장 앱으로 열 수 없는 콘텐츠"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"IT 관리자가 직장 프로필의 앱에서 이 콘텐츠를 열도록 허용하지 않습니다."</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"개인 앱과 공유할 수 없는 콘텐츠"</string>
+    <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"IT 관리자가 개인 프로필의 앱에서 이 콘텐츠를 공유하도록 허용하지 않습니다."</string>
+    <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"개인 앱으로 열 수 없는 콘텐츠"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"IT 관리자가 개인 프로필의 앱에서 이 콘텐츠를 열도록 허용하지 않습니다."</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"사용 설정"</string>
-    <!-- no translation found for resolver_no_work_apps_available_share (7933949011797699505) -->
-    <skip />
-    <!-- no translation found for resolver_no_work_apps_available_resolve (1244844292366099399) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_share (5639102815174748732) -->
-    <skip />
-    <!-- no translation found for resolver_no_personal_apps_available_resolve (5120671970531446978) -->
-    <skip />
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"이 콘텐츠를 지원하는 직장 앱이 없음"</string>
+    <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"이 콘텐츠를 열 수 있는 직장 앱이 없음"</string>
+    <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"이 콘텐츠를 지원하는 개인 앱이 없음"</string>
+    <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"이 콘텐츠를 열 수 있는 개인 앱이 없음"</string>
     <string name="permlab_accessCallAudio" msgid="1682957511874097664">"전화 통화 중에 오디오 녹음 또는 재생"</string>
     <string name="permdesc_accessCallAudio" msgid="8448360894684277823">"이 앱이 기본 다이얼러 애플리케이션으로 지정되었을 때 전화 통화 중에 오디오를 녹음하거나 재생하도록 허용합니다."</string>
     <!-- no translation found for PERSOSUBSTATE_SIM_NETWORK_ENTRY (8050953231914637819) -->

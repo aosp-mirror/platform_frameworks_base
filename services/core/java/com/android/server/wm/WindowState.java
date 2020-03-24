@@ -5659,7 +5659,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // the status bar). In that case we need to use the final frame.
         if (inFreeformWindowingMode()) {
             outFrame.set(getFrameLw());
-        } else if (isLetterboxedAppWindow()) {
+        } else if (isLetterboxedAppWindow() || mToken.isFixedRotationTransforming()) {
+            // 1. The letterbox surfaces should be animated with the owner activity, so use task
+            //    bounds to include them.
+            // 2. If the activity has fixed rotation transform, its windows are rotated in activity
+            //    level. Because the animation runs before display is rotated, task bounds should
+            //    represent the frames in display space coordinates.
             outFrame.set(getTask().getBounds());
         } else if (isDockedResizing()) {
             // If we are animating while docked resizing, then use the stack bounds as the

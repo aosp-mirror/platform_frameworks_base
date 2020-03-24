@@ -41,7 +41,7 @@ void ShellSubscriber::startNewSubscription(int in, int out, int timeoutSec) {
 
     // critical-section
     std::unique_lock<std::mutex> lock(mMutex);
-    if (myToken < mToken) {
+    if (myToken != mToken) {
         // Some other subscription has already come in. Stop.
         return;
     }
