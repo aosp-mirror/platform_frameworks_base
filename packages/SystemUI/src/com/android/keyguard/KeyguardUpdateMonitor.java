@@ -966,17 +966,20 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         boolean changed = false;
 
         if (enabled && (oldIntent == null)) {
-            Intent intent = new Intent(
-                    DevicePolicyManager.ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE);
-            ComponentName profileOwnerComponent =
-                    mDevicePolicyManager.getProfileOwnerAsUser(userId);
-            intent.setComponent(profileOwnerComponent);
-            ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent, 0);
-            if (resolveInfo != null) {
-                Intent newIntent = new Intent();
-                newIntent.setComponent(profileOwnerComponent);
-                mSecondaryLockscreenRequirement.put(userId, newIntent);
-                changed = true;
+            ComponentName poComponent = mDevicePolicyManager.getProfileOwnerAsUser(userId);
+            if (poComponent == null) {
+                Log.e(TAG, "No profile owner found for User " + userId);
+            } else {
+                Intent intent =
+                        new Intent(DevicePolicyManager.ACTION_BIND_SECONDARY_LOCKSCREEN_SERVICE)
+                                .setPackage(poComponent.getPackageName());
+                ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent, 0);
+                if (resolveInfo != null && resolveInfo.serviceInfo != null) {
+                    Intent launchIntent =
+                            new Intent().setComponent(resolveInfo.serviceInfo.getComponentName());
+                    mSecondaryLockscreenRequirement.put(userId, launchIntent);
+                    changed = true;
+                }
             }
         } else if (!enabled && (oldIntent != null)) {
             mSecondaryLockscreenRequirement.put(userId, null);
