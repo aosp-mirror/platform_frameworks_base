@@ -10339,6 +10339,7 @@ public final class Settings {
 
         /**
          * Value to specify if wifi settings migration is complete or not.
+         * Note: This should only be used from within {@link android.net.wifi.WifiMigration} class.
          *
          * Type: int (0 for false, 1 for true)
          * @hide
