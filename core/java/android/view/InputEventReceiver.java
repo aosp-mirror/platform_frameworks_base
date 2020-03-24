@@ -147,8 +147,9 @@ public abstract class InputEventReceiver {
      * samples until the recipient calls {@link #consumeBatchedInputEvents} or
      * an event is received that ends the batch and causes it to be consumed
      * immediately (such as a pointer up event).
+     * @param source The source of the batched event.
      */
-    public void onBatchedInputEventPending() {
+    public void onBatchedInputEventPending(int source) {
         consumeBatchedInputEvents(-1);
     }
 
@@ -217,13 +218,6 @@ public abstract class InputEventReceiver {
     private void dispatchInputEvent(int seq, InputEvent event) {
         mSeqMap.put(event.getSequenceNumber(), seq);
         onInputEvent(event);
-    }
-
-    // Called from native code.
-    @SuppressWarnings("unused")
-    @UnsupportedAppUsage
-    private void dispatchBatchedInputEventPending() {
-        onBatchedInputEventPending();
     }
 
     /**
