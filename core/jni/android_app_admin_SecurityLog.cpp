@@ -41,7 +41,7 @@ static void android_app_admin_SecurityLog_readEvents(JNIEnv* env, jobject /* cla
         jniThrowNullPointerException(env, NULL);
         return;
     }
-    SLog::readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, 0, out);
+    SLog::readEvents(env, ANDROID_LOG_NONBLOCK, 0, out);
 }
 
 static void android_app_admin_SecurityLog_readEventsSince(JNIEnv* env, jobject /* clazz */,
@@ -52,7 +52,7 @@ static void android_app_admin_SecurityLog_readEventsSince(JNIEnv* env, jobject /
         jniThrowNullPointerException(env, NULL);
         return;
     }
-    SLog::readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK, timestamp, out);
+    SLog::readEvents(env, ANDROID_LOG_NONBLOCK, timestamp, out);
 }
 
 static void android_app_admin_SecurityLog_readPreviousEvents(JNIEnv* env, jobject /* clazz */,
@@ -62,7 +62,7 @@ static void android_app_admin_SecurityLog_readPreviousEvents(JNIEnv* env, jobjec
         jniThrowNullPointerException(env, NULL);
         return;
     }
-    SLog::readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK | ANDROID_LOG_PSTORE, 0, out);
+    SLog::readEvents(env, ANDROID_LOG_NONBLOCK | ANDROID_LOG_PSTORE, 0, out);
 }
 
 static void android_app_admin_SecurityLog_readEventsOnWrapping(JNIEnv* env, jobject /* clazz */,
@@ -72,8 +72,7 @@ static void android_app_admin_SecurityLog_readEventsOnWrapping(JNIEnv* env, jobj
         jniThrowNullPointerException(env, NULL);
         return;
     }
-    SLog::readEvents(env, ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK | ANDROID_LOG_WRAP, timestamp,
-            out);
+    SLog::readEvents(env, ANDROID_LOG_NONBLOCK | ANDROID_LOG_WRAP, timestamp, out);
 }
 
 /*

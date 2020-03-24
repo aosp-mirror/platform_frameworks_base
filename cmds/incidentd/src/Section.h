@@ -164,8 +164,8 @@ class LogSection : public WorkerThreadSection {
     // global last log retrieved timestamp for each log_id_t.
     static map<log_id_t, log_time> gLastLogsRetrieved;
 
-    // log mode: read only & non blocking.
-    const static int logModeBase = ANDROID_LOG_RDONLY | ANDROID_LOG_NONBLOCK;
+    // log mode: non blocking.
+    const static int logModeBase = ANDROID_LOG_NONBLOCK;
 
 public:
     LogSection(int id, const char* logID, ...);
