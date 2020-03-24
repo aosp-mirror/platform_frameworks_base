@@ -2694,7 +2694,7 @@
     <string name="controls_structure_tooltip">Swipe to see more</string>
 
     <!-- Message to tell the user to wait while systemui attempts to load a set of
-         recommended controls [CHAR_LIMIT=30] -->
+         recommended controls [CHAR_LIMIT=60] -->
     <string name="controls_seeding_in_progress">Loading recommendations</string>
 
     <!-- Close the controls associated with a specific media session [CHAR_LIMIT=NONE] -->
