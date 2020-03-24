@@ -99,11 +99,12 @@ public class StatusBarWindowView extends FrameLayout {
         }
 
         // padding needed for corner cutout.
-        int leftCornerCutoutPadding = 0;
-        int rightCornerCutoutPadding = 0;
+        int leftCornerCutoutPadding = cutout.getSafeInsetLeft();
+        int rightCornerCutoutPadding = cutout.getSafeInsetRight();
         if (cornerCutoutPadding != null) {
-            leftCornerCutoutPadding = cornerCutoutPadding.first;
-            rightCornerCutoutPadding = cornerCutoutPadding.second;
+            leftCornerCutoutPadding = Math.max(leftCornerCutoutPadding, cornerCutoutPadding.first);
+            rightCornerCutoutPadding = Math.max(rightCornerCutoutPadding,
+                    cornerCutoutPadding.second);
         }
 
         return new Pair<>(
