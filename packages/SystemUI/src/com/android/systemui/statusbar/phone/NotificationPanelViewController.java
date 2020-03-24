@@ -1021,7 +1021,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     trackMovement(event);
                     return true;
                 }
-                if (Math.abs(h) > mTouchSlop && Math.abs(h) > Math.abs(x - mInitialTouchX)
+                if (Math.abs(h) > getTouchSlop(event)
+                        && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, h)) {
                     mQsTracking = true;
                     onQsExpansionStarted();
