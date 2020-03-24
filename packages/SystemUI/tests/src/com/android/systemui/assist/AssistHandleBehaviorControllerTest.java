@@ -33,6 +33,7 @@ import android.content.ComponentName;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -40,14 +41,13 @@ import com.android.internal.app.AssistUtils;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.phone.NavigationModeController;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -73,15 +73,16 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
     @Mock private AssistHandleBehaviorController.BehaviorController mMockTestBehavior;
     @Mock private NavigationModeController mMockNavigationModeController;
     @Mock private AssistHandleViewController mMockAssistHandleViewController;
+    @Mock private AccessibilityManager mMockA11yManager;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mDependency.injectMockDependency(StatusBarStateController.class);
-        mDependency.injectMockDependency(OverviewProxyService.class);
         doAnswer(answerVoid(Runnable::run)).when(mMockHandler).post(any(Runnable.class));
         doAnswer(answerVoid(Runnable::run)).when(mMockHandler)
                 .postDelayed(any(Runnable.class), anyLong());
+        doAnswer(invocation -> invocation.getArgument(0)).when(mMockA11yManager)
+                .getRecommendedTimeoutMillis(anyInt(), anyInt());
 
         Map<AssistHandleBehavior, AssistHandleBehaviorController.BehaviorController> behaviorMap =
                 new EnumMap<>(AssistHandleBehavior.class);
@@ -99,6 +100,7 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
                         mMockDeviceConfigHelper,
                         behaviorMap,
                         mMockNavigationModeController,
+                        () -> mMockA11yManager,
                         mock(DumpManager.class));
     }
 
@@ -240,6 +242,28 @@ public class AssistHandleBehaviorControllerTest extends SysuiTestCase {
 
         // Assert
         verifyNoMoreInteractions(mMockAssistHandleViewController);
+    }
+
+    @Test
+    public void showAndGo_usesA11yTimeout() {
+        // Arrange
+        when(mMockAssistUtils.getAssistComponentForUser(anyInt())).thenReturn(COMPONENT_NAME);
+        when(mMockDeviceConfigHelper.getLong(
+                eq(SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS), anyLong()))
+                .thenReturn(12345L);
+        mAssistHandleBehaviorController.hide();
+        reset(mMockAssistHandleViewController, mMockA11yManager);
+        when(mMockA11yManager.getRecommendedTimeoutMillis(anyInt(), anyInt())).thenReturn(54321);
+        ArgumentCaptor<Long> delay = ArgumentCaptor.forClass(Long.class);
+
+        // Act
+        mAssistHandleBehaviorController.showAndGo();
+
+        // Assert
+        verify(mMockA11yManager).getRecommendedTimeoutMillis(
+                eq(12345), eq(AccessibilityManager.FLAG_CONTENT_ICONS));
+        verify(mMockHandler).postDelayed(any(Runnable.class), delay.capture());
+        assert delay.getValue() == 54321L;
     }
 
     @Test
