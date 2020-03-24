@@ -114,6 +114,7 @@ public class ConversationLayout extends FrameLayout
     private int mExpandedGroupMessagePaddingNoAppName;
     private TextView mConversationText;
     private View mConversationIconBadge;
+    private ImageView mConversationIconBadgeBg;
     private Icon mLargeIcon;
     private View mExpandButtonContainer;
     private ViewGroup mExpandButtonAndContentContainer;
@@ -183,6 +184,7 @@ public class ConversationLayout extends FrameLayout
         mIcon = findViewById(R.id.icon);
         mImportanceRingView = findViewById(R.id.conversation_icon_badge_ring);
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
+        mConversationIconBadgeBg = findViewById(R.id.conversation_icon_badge_bg);
         mIcon.setOnVisibilityChangedListener((visibility) -> {
             // Always keep the badge visibility in sync with the icon. This is necessary in cases
             // Where the icon is being hidden externally like in group children.
@@ -454,7 +456,7 @@ public class ConversationLayout extends FrameLayout
 
     private void bindFacePile() {
         // Let's bind the face pile
-        View bottomBackground = mConversationFacePile.findViewById(
+        ImageView bottomBackground = mConversationFacePile.findViewById(
                 R.id.conversation_face_pile_bottom_background);
         applyNotificationBackgroundColor(bottomBackground);
         ImageView bottomView = mConversationFacePile.findViewById(
@@ -770,11 +772,11 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setNotificationBackgroundColor(int color) {
         mNotificationBackgroundColor = color;
-        applyNotificationBackgroundColor(mConversationIconBadge);
+        applyNotificationBackgroundColor(mConversationIconBadgeBg);
     }
 
-    private void applyNotificationBackgroundColor(View view) {
-        view.setBackgroundTintList(ColorStateList.valueOf(mNotificationBackgroundColor));
+    private void applyNotificationBackgroundColor(ImageView view) {
+        view.setImageTintList(ColorStateList.valueOf(mNotificationBackgroundColor));
     }
 
     @RemotableViewMethod
