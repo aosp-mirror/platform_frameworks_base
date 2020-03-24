@@ -19,6 +19,7 @@ package com.android.systemui.pip.tv;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
@@ -44,6 +45,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
+import android.window.WindowOrganizer;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -293,8 +295,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
         try {
             WindowManagerWrapper.getInstance().addPinnedStackListener(mPinnedStackListener);
-            ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(
-                    mPipTaskOrganizer, WINDOWING_MODE_PINNED);
+            TaskOrganizer.registerOrganizer(mPipTaskOrganizer, WINDOWING_MODE_PINNED);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to register pinned stack listener", e);
         }
