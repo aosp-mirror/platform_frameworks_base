@@ -235,6 +235,13 @@ public final class ContentCaptureManager {
     public static final int RESULT_CODE_SECURITY_EXCEPTION = -1;
 
     /**
+     * ID used to indicate that a session does not exist
+     * @hide
+     */
+    @SystemApi
+    public static final int NO_SESSION_ID = 0;
+
+    /**
      * Timeout for calls to system_server.
      */
     private static final int SYNC_CALLS_TIMEOUT_MS = 5000;
