@@ -145,7 +145,7 @@ public class ApkSignatureSchemeV4Verifier {
                     "Public key mismatch between certificate and signature record");
         }
 
-        return new VerifiedSigner(new Certificate[]{certificate}, signingInfo.v3Digest);
+        return new VerifiedSigner(new Certificate[]{certificate}, signingInfo.apkDigest);
     }
 
     /**
@@ -155,11 +155,11 @@ public class ApkSignatureSchemeV4Verifier {
      */
     public static class VerifiedSigner {
         public final Certificate[] certs;
-        public byte[] v3Digest;
+        public byte[] apkDigest;
 
-        public VerifiedSigner(Certificate[] certs, byte[] v3Digest) {
+        public VerifiedSigner(Certificate[] certs, byte[] apkDigest) {
             this.certs = certs;
-            this.v3Digest = v3Digest;
+            this.apkDigest = apkDigest;
         }
 
     }
