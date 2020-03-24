@@ -23,21 +23,25 @@
     >
     <ImageView
         android:id="@+id/conversation_face_pile_top"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="@dimen/messaging_avatar_size"
+        android:layout_height="@dimen/messaging_avatar_size"
         android:scaleType="centerCrop"
         android:layout_gravity="end|top"
         />
     <FrameLayout
-        android:id="@+id/conversation_face_pile_bottom_background"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="start|bottom"
-        android:background="@drawable/conversation_badge_background">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start|bottom">
+        <ImageView
+            android:id="@+id/conversation_face_pile_bottom_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/conversation_badge_background"
+            />
         <ImageView
             android:id="@+id/conversation_face_pile_bottom"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/messaging_avatar_size"
+            android:layout_height="@dimen/messaging_avatar_size"
             android:scaleType="centerCrop"
             android:layout_gravity="center"
             />
