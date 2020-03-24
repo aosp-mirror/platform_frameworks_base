@@ -419,6 +419,38 @@ public class CrossProfileAppsServiceImplRoboTest {
                 .isTrue();
     }
 
+    @Test
+    public void canUserAttemptToConfigureInteractAcrossProfiles_packageNotInstalledInProfile_returnsTrue() {
+        mockUninstallCrossProfileAppFromWorkProfile();
+        assertThat(mCrossProfileAppsServiceImpl
+                .canUserAttemptToConfigureInteractAcrossProfiles(CROSS_PROFILE_APP_PACKAGE_NAME))
+                .isTrue();
+    }
+
+    @Test
+    public void canUserAttemptToConfigureInteractAcrossProfiles_packageDoesNotRequestInteractAcrossProfiles_returnsFalse()
+            throws Exception {
+        mockCrossProfileAppDoesNotRequestInteractAcrossProfiles();
+        assertThat(mCrossProfileAppsServiceImpl
+                .canUserAttemptToConfigureInteractAcrossProfiles(CROSS_PROFILE_APP_PACKAGE_NAME))
+                .isFalse();
+    }
+
+    @Test
+    public void canUserAttemptToConfigureInteractAcrossProfiles_packageNotWhitelisted_returnsTrue() {
+        mockCrossProfileAppNotWhitelisted();
+        assertThat(mCrossProfileAppsServiceImpl
+                .canUserAttemptToConfigureInteractAcrossProfiles(CROSS_PROFILE_APP_PACKAGE_NAME))
+                .isTrue();
+    }
+
+    @Test
+    public void canUserAttemptToConfigureInteractAcrossProfiles_returnsTrue() {
+        assertThat(mCrossProfileAppsServiceImpl
+                .canUserAttemptToConfigureInteractAcrossProfiles(CROSS_PROFILE_APP_PACKAGE_NAME))
+                .isTrue();
+    }
+
     private void explicitlySetInteractAcrossProfilesAppOp(@Mode int mode) {
         explicitlySetInteractAcrossProfilesAppOp(PERSONAL_PROFILE_UID, mode);
     }
