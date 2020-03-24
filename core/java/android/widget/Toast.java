@@ -755,8 +755,9 @@ public class Toast {
     /**
      * Callback object to be called when the toast is shown or hidden.
      *
-     * Callback methods will be called on the looper thread provided on construction.
+     * <p>Callback methods will be called on the looper thread used for the {@link Toast} object.
      *
+     * @see #makeText(Context, Looper, CharSequence, int)
      * @see #addCallback(Callback)
      */
     public abstract static class Callback {
