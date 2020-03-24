@@ -161,6 +161,7 @@ import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
+import android.content.pm.IPackageChangeObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDeleteObserver2;
@@ -178,6 +179,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
 import android.content.pm.ModuleInfo;
+import android.content.pm.PackageChangeEvent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageInstaller;
@@ -811,6 +813,10 @@ public class PackageManagerService extends IPackageManager.Stub
     private final List<ScanPartition> mDirsToScanAsSystem;
 
     private final OverlayConfig mOverlayConfig;
+
+    @GuardedBy("itself")
+    final private ArrayList<IPackageChangeObserver> mPackageChangeObservers =
+        new ArrayList<>();
 
     /**
      * Unit tests will instantiate, extend and/or mock to mock dependencies / behaviors.
@@ -16473,7 +16479,54 @@ public class PackageManagerService extends IPackageManager.Stub
             // BackgroundDexOptService will remove it from its blacklist.
             // TODO: Layering violation
             BackgroundDexOptService.notifyPackageChanged(packageName);
+
+            notifyPackageChangeObserversOnUpdate(reconciledPkg);
         }
+    }
+
+    private void notifyPackageChangeObserversOnUpdate(ReconciledPackage reconciledPkg) {
+      final PackageSetting pkgSetting = reconciledPkg.pkgSetting;
+      final PackageInstalledInfo pkgInstalledInfo = reconciledPkg.installResult;
+      final PackageRemovedInfo pkgRemovedInfo = pkgInstalledInfo.removedInfo;
+
+      PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
+      pkgChangeEvent.packageName = pkgSetting.pkg.getPackageName();
+      pkgChangeEvent.version = pkgSetting.versionCode;
+      pkgChangeEvent.lastUpdateTimeMillis = pkgSetting.lastUpdateTime;
+      pkgChangeEvent.newInstalled = (pkgRemovedInfo == null || !pkgRemovedInfo.isUpdate);
+      pkgChangeEvent.dataRemoved = (pkgRemovedInfo != null && pkgRemovedInfo.dataRemoved);
+      pkgChangeEvent.isDeleted = false;
+
+      notifyPackageChangeObservers(pkgChangeEvent);
+    }
+
+    private void notifyPackageChangeObserversOnDelete(String packageName, long version) {
+      PackageChangeEvent pkgChangeEvent = new PackageChangeEvent();
+      pkgChangeEvent.packageName = packageName;
+      pkgChangeEvent.version = version;
+      pkgChangeEvent.lastUpdateTimeMillis = 0L;
+      pkgChangeEvent.newInstalled = false;
+      pkgChangeEvent.dataRemoved = false;
+      pkgChangeEvent.isDeleted = true;
+
+      notifyPackageChangeObservers(pkgChangeEvent);
+    }
+
+    private void notifyPackageChangeObservers(PackageChangeEvent event) {
+      try {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "notifyPackageChangeObservers");
+        synchronized (mPackageChangeObservers) {
+          for(IPackageChangeObserver observer : mPackageChangeObservers) {
+            try {
+              observer.onPackageChanged(event);
+            } catch(RemoteException e) {
+              Log.wtf(TAG, e);
+            }
+          }
+        }
+      } finally {
+        Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+      }
     }
 
     /**
@@ -17517,6 +17570,7 @@ public class PackageManagerService extends IPackageManager.Stub
             } catch (RemoteException e) {
                 Log.i(TAG, "Observer no longer exists.");
             } //end catch
+            notifyPackageChangeObserversOnDelete(packageName, versionCode);
         });
     }
 
@@ -22977,7 +23031,48 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    private final class PackageChangeObserverDeathRecipient implements IBinder.DeathRecipient {
+        private final IPackageChangeObserver mObserver;
+
+        PackageChangeObserverDeathRecipient(IPackageChangeObserver observer) {
+            mObserver = observer;
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mPackageChangeObservers) {
+                mPackageChangeObservers.remove(mObserver);
+                Log.d(TAG, "Size of mPackageChangeObservers after removing dead observer is "
+                    + mPackageChangeObservers.size());
+            }
+        }
+    }
+
     private class PackageManagerNative extends IPackageManagerNative.Stub {
+        @Override
+        public void registerPackageChangeObserver(@NonNull IPackageChangeObserver observer) {
+          synchronized (mPackageChangeObservers) {
+            try {
+                observer.asBinder().linkToDeath(
+                    new PackageChangeObserverDeathRecipient(observer), 0);
+            } catch (RemoteException e) {
+              Log.e(TAG, e.getMessage());
+            }
+            mPackageChangeObservers.add(observer);
+            Log.d(TAG, "Size of mPackageChangeObservers after registry is "
+                + mPackageChangeObservers.size());
+          }
+        }
+
+        @Override
+        public void unregisterPackageChangeObserver(@NonNull IPackageChangeObserver observer) {
+          synchronized (mPackageChangeObservers) {
+            mPackageChangeObservers.remove(observer);
+            Log.d(TAG, "Size of mPackageChangeObservers after unregistry is "
+                + mPackageChangeObservers.size());
+          }
+        }
+
         @Override
         public String[] getAllPackages() {
             return PackageManagerService.this.getAllPackages().toArray(new String[0]);
