@@ -377,7 +377,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             mCallback = callback;
             mHandle = handle;
             try {
-                mCallback.asBinder().linkToDeath(null, 0);
+                mCallback.asBinder().linkToDeath(this, 0);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
             }
@@ -680,7 +680,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             try {
                 mDelegate.detach();
                 mDelegate = null;
-                mCallback.asBinder().unlinkToDeath(null, 0);
+                mCallback.asBinder().unlinkToDeath(this, 0);
                 mModules.get(mHandle).remove(this);
             } catch (RemoteException e) {
                 throw e.rethrowAsRuntimeException();
