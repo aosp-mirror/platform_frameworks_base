@@ -30,8 +30,6 @@ public abstract class PanelView extends FrameLayout {
     protected StatusBar mStatusBar;
     protected HeadsUpManagerPhone mHeadsUpManager;
 
-    protected int mTouchSlop;
-
     protected KeyguardBottomAreaView mKeyguardBottomArea;
     private OnConfigurationChangedListener mOnConfigurationChangedListener;
 
