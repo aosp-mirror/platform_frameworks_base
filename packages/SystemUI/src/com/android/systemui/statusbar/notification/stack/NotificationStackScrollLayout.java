@@ -222,6 +222,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean mIsScrollerBoundSet;
     private Runnable mFinishScrollingCallback;
     private int mTouchSlop;
+    private float mSlopMultiplier;
     private int mMinimumVelocity;
     private int mMaximumVelocity;
     private int mOverflingDistance;
@@ -1022,6 +1023,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         setClipChildren(false);
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
+        mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         mMinimumVelocity = configuration.getScaledMinimumFlingVelocity();
         mMaximumVelocity = configuration.getScaledMaximumFlingVelocity();
         mOverflingDistance = configuration.getScaledOverflingDistance();
@@ -3744,6 +3746,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mLongPressListener = listener;
     }
 
+    private float getTouchSlop(MotionEvent event) {
+        // Adjust the touch slop if another gesture may be being performed.
+        return event.getClassification() == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
+                ? mTouchSlop * mSlopMultiplier
+                : mTouchSlop;
+    }
+
     @Override
     @ShadeViewRefactor(RefactorComponent.INPUT)
     public boolean onTouchEvent(MotionEvent ev) {
@@ -3891,12 +3900,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 int deltaY = mLastMotionY - y;
                 final int xDiff = Math.abs(x - mDownX);
                 final int yDiff = Math.abs(deltaY);
-                if (!mIsBeingDragged && yDiff > mTouchSlop && yDiff > xDiff) {
+                final float touchSlop = getTouchSlop(ev);
+                if (!mIsBeingDragged && yDiff > touchSlop && yDiff > xDiff) {
                     setIsBeingDragged(true);
                     if (deltaY > 0) {
-                        deltaY -= mTouchSlop;
+                        deltaY -= touchSlop;
                     } else {
-                        deltaY += mTouchSlop;
+                        deltaY += touchSlop;
                     }
                 }
                 if (mIsBeingDragged) {
@@ -4083,8 +4093,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private void handleEmptySpaceClick(MotionEvent ev) {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_MOVE:
-                if (mTouchIsClick && (Math.abs(ev.getY() - mInitialTouchY) > mTouchSlop
-                        || Math.abs(ev.getX() - mInitialTouchX) > mTouchSlop)) {
+                final float touchSlop = getTouchSlop(ev);
+                if (mTouchIsClick && (Math.abs(ev.getY() - mInitialTouchY) > touchSlop
+                        || Math.abs(ev.getX() - mInitialTouchX) > touchSlop)) {
                     mTouchIsClick = false;
                 }
                 break;
@@ -4168,7 +4179,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 final int x = (int) ev.getX(pointerIndex);
                 final int yDiff = Math.abs(y - mLastMotionY);
                 final int xDiff = Math.abs(x - mDownX);
-                if (yDiff > mTouchSlop && yDiff > xDiff) {
+                if (yDiff > getTouchSlop(ev) && yDiff > xDiff) {
                     setIsBeingDragged(true);
                     mLastMotionY = y;
                     mDownX = x;
