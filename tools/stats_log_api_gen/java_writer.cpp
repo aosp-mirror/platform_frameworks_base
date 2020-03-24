@@ -50,6 +50,8 @@ static void write_annotations(FILE* out, int argIndex,
     for (const shared_ptr<AtomDecl>& atomDecl : atomDeclSet) {
         fprintf(out, "        if (code == %d) {\n", atomDecl->code);
         const AnnotationSet& annotations = atomDecl->fieldNumberToAnnotations.at(argIndex);
+        int resetState = -1;
+        int defaultState = -1;
         for (const shared_ptr<Annotation>& annotation : annotations) {
             // TODO(b/151786433): Write atom constant name instead of atom id literal.
             switch (annotation->type) {
@@ -58,8 +60,14 @@ static void write_annotations(FILE* out, int argIndex,
                 case ANNOTATION_TYPE_INT:
                     // TODO(b/151786433): Write annotation constant name instead of
                     // annotation id literal.
-                    fprintf(out, "            builder.addIntAnnotation((byte) %d, %d);\n",
-                            annotation->annotationId, annotation->value.intValue);
+                    if (ANNOTATION_ID_RESET_STATE == annotation->annotationId) {
+                        resetState = annotation->value.intValue;
+                    } else if (ANNOTATION_ID_DEFAULT_STATE == annotation->annotationId) {
+                        defaultState = annotation->value.intValue;
+                    } else {
+                        fprintf(out, "            builder.addIntAnnotation((byte) %d, %d);\n",
+                                annotation->annotationId, annotation->value.intValue);
+                    }
                     break;
                 case ANNOTATION_TYPE_BOOL:
                     // TODO(b/151786433): Write annotation constant name instead of
@@ -71,6 +79,12 @@ static void write_annotations(FILE* out, int argIndex,
                 default:
                     break;
             }
+        }
+        if (defaultState != -1 && resetState != -1) {
+            fprintf(out, "            if (arg%d == %d) {\n", argIndex, resetState);
+            fprintf(out, "                builder.addIntAnnotation((byte) %d, %d);\n",
+                    ANNOTATION_ID_RESET_STATE, defaultState);
+            fprintf(out, "            }\n");
         }
         fprintf(out, "        }\n");
     }
