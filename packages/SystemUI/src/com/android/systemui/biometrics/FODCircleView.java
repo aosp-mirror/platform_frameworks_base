@@ -162,6 +162,7 @@ public class FODCircleView extends ImageView implements ConfigurationListener {
         public void onBiometricHelp(int msgId, String helpString,
                 BiometricSourceType biometricSourceType) {
             if (msgId == -1){ // Auth error
+                hideCircle();
                 mHandler.post(() -> mFODAnimation.hideFODanimation());
             }
         }
