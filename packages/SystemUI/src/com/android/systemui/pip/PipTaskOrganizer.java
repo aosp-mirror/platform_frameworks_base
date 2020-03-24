@@ -346,6 +346,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
+                .resetScale(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mInPip);
         scheduleFinishResizePip(tx, destinationBounds, TRANSITION_DIRECTION_NONE, null);
     }
