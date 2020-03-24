@@ -155,13 +155,18 @@ class MediaRouter2ServiceImpl {
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
-        final boolean trusted = mContext.checkCallingOrSelfPermission(
+        final boolean hasConfigureWifiDisplayPermission = mContext.checkCallingOrSelfPermission(
                 android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
                 == PackageManager.PERMISSION_GRANTED;
+        final boolean hasModifyAudioRoutingPermission = mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_AUDIO_ROUTING)
+                == PackageManager.PERMISSION_GRANTED;
+
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                registerRouter2Locked(router, uid, pid, packageName, userId, trusted);
+                registerRouter2Locked(router, uid, pid, packageName, userId,
+                        hasConfigureWifiDisplayPermission, hasModifyAudioRoutingPermission);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -341,8 +346,6 @@ class MediaRouter2ServiceImpl {
             throw new IllegalArgumentException("packageName must not be empty");
         }
 
-        final boolean trusted = true;
-
         final int uid = Binder.getCallingUid();
         final int pid = Binder.getCallingPid();
         final int userId = UserHandle.getUserHandleForUid(uid).getIdentifier();
@@ -350,7 +353,7 @@ class MediaRouter2ServiceImpl {
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
-                registerManagerLocked(manager, uid, pid, packageName, userId, trusted);
+                registerManagerLocked(manager, uid, pid, packageName, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -532,7 +535,8 @@ class MediaRouter2ServiceImpl {
     ////////////////////////////////////////////////////////////////
 
     private void registerRouter2Locked(@NonNull IMediaRouter2 router, int uid, int pid,
-            @NonNull String packageName, int userId, boolean trusted) {
+            @NonNull String packageName, int userId, boolean hasConfigureWifiDisplayPermission,
+            boolean hasModifyAudioRoutingPermission) {
         final IBinder binder = router.asBinder();
         if (mAllRouterRecords.get(binder) != null) {
             Slog.w(TAG, "Same router already exists. packageName=" + packageName);
@@ -540,8 +544,8 @@ class MediaRouter2ServiceImpl {
         }
 
         UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-        RouterRecord routerRecord = new RouterRecord(
-                userRecord, router, uid, pid, packageName, trusted);
+        RouterRecord routerRecord = new RouterRecord(userRecord, router, uid, pid, packageName,
+                hasConfigureWifiDisplayPermission, hasModifyAudioRoutingPermission);
         try {
             binder.linkToDeath(routerRecord, 0);
         } catch (RemoteException ex) {
@@ -711,7 +715,7 @@ class MediaRouter2ServiceImpl {
     }
 
     private void registerManagerLocked(@NonNull IMediaRouter2Manager manager,
-            int uid, int pid, @NonNull String packageName, int userId, boolean trusted) {
+            int uid, int pid, @NonNull String packageName, int userId) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -721,7 +725,7 @@ class MediaRouter2ServiceImpl {
         }
 
         UserRecord userRecord = getOrCreateUserRecordLocked(userId);
-        managerRecord = new ManagerRecord(userRecord, manager, uid, pid, packageName, trusted);
+        managerRecord = new ManagerRecord(userRecord, manager, uid, pid, packageName);
         try {
             binder.linkToDeath(managerRecord, 0);
         } catch (RemoteException ex) {
@@ -778,7 +782,7 @@ class MediaRouter2ServiceImpl {
             @NonNull IMediaRouter2Manager manager,
             @NonNull String packageName, @NonNull MediaRoute2Info route) {
         ManagerRecord managerRecord = mAllManagerRecords.get(manager.asBinder());
-        if (managerRecord == null || !managerRecord.mTrusted) {
+        if (managerRecord == null) {
             return;
         }
 
@@ -976,14 +980,16 @@ class MediaRouter2ServiceImpl {
         public final IMediaRouter2 mRouter;
         public final int mUid;
         public final int mPid;
-        public final boolean mTrusted;
+        public final boolean mHasConfigureWifiDisplayPermission;
+        public final boolean mHasModifyAudioRoutingPermission;
         public final int mRouterId;
 
         public RouteDiscoveryPreference mDiscoveryPreference;
         public MediaRoute2Info mSelectedRoute;
 
-        RouterRecord(UserRecord userRecord, IMediaRouter2 router,
-                int uid, int pid, String packageName, boolean trusted) {
+        RouterRecord(UserRecord userRecord, IMediaRouter2 router, int uid, int pid,
+                String packageName, boolean hasConfigureWifiDisplayPermission,
+                boolean hasModifyAudioRoutingPermission) {
             mUserRecord = userRecord;
             mPackageName = packageName;
             mSelectRouteSequenceNumbers = new ArrayList<>();
@@ -991,7 +997,8 @@ class MediaRouter2ServiceImpl {
             mRouter = router;
             mUid = uid;
             mPid = pid;
-            mTrusted = trusted;
+            mHasConfigureWifiDisplayPermission = hasConfigureWifiDisplayPermission;
+            mHasModifyAudioRoutingPermission = hasModifyAudioRoutingPermission;
             mRouterId = mNextRouterOrManagerId.getAndIncrement();
         }
 
@@ -1011,17 +1018,15 @@ class MediaRouter2ServiceImpl {
         public final int mUid;
         public final int mPid;
         public final String mPackageName;
-        public final boolean mTrusted;
         public final int mManagerId;
 
         ManagerRecord(UserRecord userRecord, IMediaRouter2Manager manager,
-                int uid, int pid, String packageName, boolean trusted) {
+                int uid, int pid, String packageName) {
             mUserRecord = userRecord;
             mManager = manager;
             mUid = uid;
             mPid = pid;
             mPackageName = packageName;
-            mTrusted = trusted;
             mManagerId = mNextRouterOrManagerId.getAndIncrement();
         }
 
@@ -1036,9 +1041,6 @@ class MediaRouter2ServiceImpl {
 
         public void dump(PrintWriter pw, String prefix) {
             pw.println(prefix + this);
-
-            final String indent = prefix + "  ";
-            pw.println(indent + "mTrusted=" + mTrusted);
         }
 
         @Override
