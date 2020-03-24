@@ -78,11 +78,11 @@ public class DisplayAreaPolicyBuilderTest {
         final Feature bar;
 
         DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
-                .addFeature(foo = new Feature.Builder(mPolicy, "Foo")
+                .addFeature(foo = new Feature.Builder(mPolicy, "Foo", 0)
                         .upTo(TYPE_STATUS_BAR)
                         .and(TYPE_NAVIGATION_BAR)
                         .build())
-                .addFeature(bar = new Feature.Builder(mPolicy, "Bar")
+                .addFeature(bar = new Feature.Builder(mPolicy, "Bar", 1)
                         .all()
                         .except(TYPE_STATUS_BAR)
                         .build())
