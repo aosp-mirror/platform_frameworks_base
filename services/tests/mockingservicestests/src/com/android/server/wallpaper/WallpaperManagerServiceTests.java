@@ -16,7 +16,9 @@
 
 package com.android.server.wallpaper;
 
+import static android.app.WallpaperManager.COMMAND_REAPPLY;
 import static android.app.WallpaperManager.FLAG_SYSTEM;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -34,6 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -49,6 +52,7 @@ import android.hardware.display.DisplayManager;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.service.wallpaper.IWallpaperConnection;
+import android.service.wallpaper.IWallpaperEngine;
 import android.service.wallpaper.WallpaperService;
 import android.testing.TestableContext;
 import android.util.Log;
@@ -110,6 +114,7 @@ public class WallpaperManagerServiceTests {
     public final TemporaryFolder mFolder = new TemporaryFolder();
     private final SparseArray<File> mTempDirs = new SparseArray<>();
     private WallpaperManagerService mService;
+    private static IWallpaperConnection.Stub sWallpaperService;
 
     @BeforeClass
     public static void setUpClass() {
@@ -134,7 +139,7 @@ public class WallpaperManagerServiceTests {
         doNothing().when(sContext).sendBroadcastAsUser(any(), any());
 
         //Wallpaper components
-        final IWallpaperConnection.Stub wallpaperService = mock(IWallpaperConnection.Stub.class);
+        sWallpaperService = mock(IWallpaperConnection.Stub.class);
         sImageWallpaperComponentName = ComponentName.unflattenFromString(
                 sContext.getResources().getString(R.string.image_wallpaper_component));
         // Mock default wallpaper as image wallpaper if there is no pre-defined default wallpaper.
@@ -145,10 +150,10 @@ public class WallpaperManagerServiceTests {
             doReturn(sImageWallpaperComponentName).when(() ->
                     WallpaperManager.getDefaultWallpaperComponent(any()));
         } else {
-            sContext.addMockService(sDefaultWallpaperComponent, wallpaperService);
+            sContext.addMockService(sDefaultWallpaperComponent, sWallpaperService);
         }
 
-        sContext.addMockService(sImageWallpaperComponentName, wallpaperService);
+        sContext.addMockService(sImageWallpaperComponentName, sWallpaperService);
     }
 
     @AfterClass
@@ -261,6 +266,30 @@ public class WallpaperManagerServiceTests {
         mService.clearWallpaper(null, FLAG_SYSTEM, testUserId);
         verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
         verifyCurrentSystemData(testUserId);
+    }
+
+    /**
+     * Tests that when setWallpaperComponent is called with the currently set component, a command
+     * is issued to the wallpaper.
+     */
+    @Test
+    public void testSetCurrentComponent() throws Exception {
+        final int testUserId = UserHandle.USER_SYSTEM;
+        mService.switchUser(testUserId, null);
+        verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
+        verifyCurrentSystemData(testUserId);
+
+        spyOn(mService.mLastWallpaper.connection);
+        doReturn(true).when(mService.mLastWallpaper.connection).isUsableDisplay(any());
+        mService.mLastWallpaper.connection.attachEngine(mock(IWallpaperEngine.class),
+                DEFAULT_DISPLAY);
+
+        WallpaperManagerService.WallpaperConnection.DisplayConnector connector =
+                mService.mLastWallpaper.connection.getDisplayConnectorOrCreate(DEFAULT_DISPLAY);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent);
+
+        verify(connector.mEngine).dispatchWallpaperCommand(
+                eq(COMMAND_REAPPLY), anyInt(), anyInt(), anyInt(), any());
     }
 
     /**
