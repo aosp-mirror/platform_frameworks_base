@@ -48,6 +48,8 @@ public class TestLooper {
     private static final Method MESSAGE_MARK_IN_USE_METHOD;
     private static final String TAG = "TestLooper";
 
+    private final Clock mClock;
+
     private AutoDispatchThread mAutoDispatchThread;
 
     static {
@@ -69,8 +71,25 @@ public class TestLooper {
         }
     }
 
-
+    /**
+     * Creates a TestLooper and installs it as the looper for the current thread.
+     */
     public TestLooper() {
+        this(SystemClock::uptimeMillis);
+    }
+
+    /**
+     * Creates a TestLooper with a custom clock and installs it as the looper for the current
+     * thread.
+     *
+     * Messages are dispatched when their {@link Message#when} is before or at {@link
+     * Clock#uptimeMillis()}.
+     * Use a custom clock with care. When using an offsettable clock like {@link
+     * com.android.server.testutils.OffsettableClock} be sure not to double offset messages by
+     * offsetting the clock and calling {@link #moveTimeForward(long)}. Instead, offset the clock
+     * and call {@link #dispatchAll()}.
+     */
+    public TestLooper(Clock clock) {
         try {
             mLooper = LOOPER_CONSTRUCTOR.newInstance(false);
 
@@ -80,6 +99,8 @@ public class TestLooper {
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException e) {
             throw new RuntimeException("Reflection error constructing or accessing looper", e);
         }
+
+        mClock = clock;
     }
 
     public Looper getLooper() {
@@ -116,9 +137,13 @@ public class TestLooper {
         }
     }
 
+    private long currentTime() {
+        return mClock.uptimeMillis();
+    }
+
     private Message messageQueueNext() {
         try {
-            long now = SystemClock.uptimeMillis();
+            long now = currentTime();
 
             Message prevMsg = null;
             Message msg = getMessageLinkedList();
@@ -157,7 +182,7 @@ public class TestLooper {
     public synchronized boolean isIdle() {
         Message messageList = getMessageLinkedList();
 
-        return messageList != null && SystemClock.uptimeMillis() >= messageList.getWhen();
+        return messageList != null && currentTime() >= messageList.getWhen();
     }
 
     /**
@@ -187,6 +212,7 @@ public class TestLooper {
     /**
      * Dispatch all messages currently in the queue
      * Will not fail if there are no messages pending
+     *
      * @return the number of messages dispatched
      */
     public synchronized int dispatchAll() {
@@ -196,6 +222,10 @@ public class TestLooper {
             ++count;
         }
         return count;
+    }
+
+    public interface Clock {
+        long uptimeMillis();
     }
 
     /**
