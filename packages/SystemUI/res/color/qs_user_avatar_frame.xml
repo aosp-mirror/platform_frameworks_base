@@ -18,5 +18,5 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_activated="true" android:color="?android:attr/colorAccent" />
-    <item android:color="@android:color/transparent" />
+    <item android:color="@color/qs_user_switcher_avatar_background" />
 </selector>

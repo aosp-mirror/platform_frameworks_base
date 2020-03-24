@@ -18,6 +18,8 @@ package com.android.systemui.qs.tiles;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +31,7 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.R;
 import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+
 /**
  * Quick settings detail view for user switching.
  */
@@ -99,6 +102,19 @@ public class UserDetailView extends PseudoGridView {
             }
             v.setTag(item);
             return v;
+        }
+
+        private static Drawable getDrawable(Context context,
+                UserSwitcherController.UserRecord item) {
+            Drawable icon = getIconDrawable(context, item);
+            int iconColorRes = item.isCurrent ? R.color.qs_user_switcher_selected_avatar_icon_color
+                    : R.color.qs_user_switcher_avatar_icon_color;
+            icon.setTint(context.getResources().getColor(iconColorRes, context.getTheme()));
+
+            int bgRes = item.isCurrent ? R.drawable.bg_avatar_selected : R.drawable.qs_bg_avatar;
+            Drawable bg = context.getDrawable(bgRes);
+            LayerDrawable drawable = new LayerDrawable(new Drawable[]{bg, icon});
+            return drawable;
         }
 
         @Override
