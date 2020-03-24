@@ -131,7 +131,6 @@ TEST_F(Idmap2BinaryTests, Dump) {
   ASSERT_NE(result->stdout.find("0x7f02000c -> 0x7f020000 string/str1"), std::string::npos);
   ASSERT_NE(result->stdout.find("0x7f02000e -> 0x7f020001 string/str3"), std::string::npos);
   ASSERT_NE(result->stdout.find("0x7f02000f -> 0x7f020002 string/str4"), std::string::npos);
-  ASSERT_EQ(result->stdout.find("00000210:     007f  target package id"), std::string::npos);
 
   // clang-format off
   result = ExecuteBinary({"idmap2",
