@@ -115,7 +115,6 @@ import static com.android.server.policy.WindowManagerPolicy.TRANSIT_HIDE;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_SHOW;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
-import static com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT;
@@ -178,7 +177,6 @@ import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -333,9 +331,6 @@ public class DisplayPolicy {
                 }
             };
 
-    @GuardedBy("mHandler")
-    private SleepToken mDreamingSleepToken;
-
     // The windows we were told about in focusChanged.
     private WindowState mFocusedWindow;
     private WindowState mLastFocusedWindow;
@@ -394,7 +389,6 @@ public class DisplayPolicy {
     private boolean mShowingDream;
     private boolean mLastShowingDream;
     private boolean mDreamingLockscreen;
-    private boolean mDreamingSleepTokenNeeded;
     private boolean mAllowLockscreenWhenOn;
 
     private InputConsumer mInputConsumer = null;
@@ -414,7 +408,6 @@ public class DisplayPolicy {
     private RefreshRatePolicy mRefreshRatePolicy;
 
     // -------- PolicyHandler --------
-    private static final int MSG_UPDATE_DREAMING_SLEEP_TOKEN = 1;
     private static final int MSG_REQUEST_TRANSIENT_BARS = 2;
     private static final int MSG_DISPOSE_INPUT_CONSUMER = 3;
     private static final int MSG_ENABLE_POINTER_LOCATION = 4;
@@ -434,9 +427,6 @@ public class DisplayPolicy {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_UPDATE_DREAMING_SLEEP_TOKEN:
-                    updateDreamingSleepToken(msg.arg1 != 0);
-                    break;
                 case MSG_REQUEST_TRANSIENT_BARS:
                     synchronized (mLock) {
                         WindowState targetBar = (msg.arg1 == MSG_REQUEST_TRANSIENT_BARS_ARG_STATUS)
@@ -2638,15 +2628,6 @@ public class DisplayPolicy {
         // while the dream is showing.
         if (!mShowingDream) {
             mDreamingLockscreen = mService.mPolicy.isKeyguardShowingAndNotOccluded();
-            if (mDreamingSleepTokenNeeded) {
-                mDreamingSleepTokenNeeded = false;
-                mHandler.obtainMessage(MSG_UPDATE_DREAMING_SLEEP_TOKEN, 0, 1).sendToTarget();
-            }
-        } else {
-            if (!mDreamingSleepTokenNeeded) {
-                mDreamingSleepTokenNeeded = true;
-                mHandler.obtainMessage(MSG_UPDATE_DREAMING_SLEEP_TOKEN, 1, 1).sendToTarget();
-            }
         }
 
         if (mStatusBar != null) {
@@ -3158,21 +3139,6 @@ public class DisplayPolicy {
      */
     public boolean allowAppAnimationsLw() {
         return !mShowingDream;
-    }
-
-    private void updateDreamingSleepToken(boolean acquire) {
-        if (acquire) {
-            final int displayId = getDisplayId();
-            if (mDreamingSleepToken == null) {
-                mDreamingSleepToken = mService.mAtmInternal.acquireSleepToken(
-                        "DreamOnDisplay" + displayId, displayId);
-            }
-        } else {
-            if (mDreamingSleepToken != null) {
-                mDreamingSleepToken.release();
-                mDreamingSleepToken = null;
-            }
-        }
     }
 
     private void requestTransientBars(WindowState swipeTarget) {
@@ -3854,7 +3820,6 @@ public class DisplayPolicy {
         }
         pw.print(prefix); pw.print("mShowingDream="); pw.print(mShowingDream);
         pw.print(" mDreamingLockscreen="); pw.print(mDreamingLockscreen);
-        pw.print(" mDreamingSleepToken="); pw.println(mDreamingSleepToken);
         if (mStatusBar != null) {
             pw.print(prefix); pw.print("mStatusBar="); pw.print(mStatusBar);
         }
