@@ -36,20 +36,6 @@ interface ITaskOrganizerController {
      */
     void unregisterTaskOrganizer(ITaskOrganizer organizer);
 
-    /**
-     * Apply multiple WindowContainer operations at once.
-     * @param organizer If non-null this transaction will use the synchronization
-     *        scheme described in BLASTSyncEngine.java. The SurfaceControl transaction
-     *        containing the effects of this WindowContainer transaction will be passed
-     *        to the organizers Transaction ready callback. If null the transaction
-     *        will apply with non particular synchronization constraints (other than
-     *        it will all apply at once).
-     * @return If organizer was non-null returns an ID for the sync operation which will
-     *         later be passed to transactionReady. This lets TaskOrganizer implementations
-     *         differentiate overlapping sync operations.
-     */
-    int applyContainerTransaction(in WindowContainerTransaction t, ITaskOrganizer organizer);
-
     /** Creates a persistent root task in WM for a particular windowing-mode. */
     ActivityManager.RunningTaskInfo createRootTask(int displayId, int windowingMode);
 

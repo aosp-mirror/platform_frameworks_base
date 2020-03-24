@@ -30,7 +30,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Singleton;
-import android.window.ITaskOrganizerController;
 
 import java.util.List;
 
@@ -156,24 +155,6 @@ public class ActivityTaskManager {
                 protected IActivityTaskManager create() {
                     final IBinder b = ServiceManager.getService(Context.ACTIVITY_TASK_SERVICE);
                     return IActivityTaskManager.Stub.asInterface(b);
-                }
-            };
-
-    /** @hide */
-    @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
-    public static ITaskOrganizerController getTaskOrganizerController() {
-        return ITaskOrganizerControllerSingleton.get();
-    }
-
-    private static final Singleton<ITaskOrganizerController> ITaskOrganizerControllerSingleton =
-            new Singleton<ITaskOrganizerController>() {
-                @Override
-                protected ITaskOrganizerController create() {
-                    try {
-                        return getService().getTaskOrganizerController();
-                    } catch (RemoteException e) {
-                        return null;
-                    }
                 }
             };
 
