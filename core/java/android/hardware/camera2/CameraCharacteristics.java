@@ -1214,7 +1214,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If the camera device supports zoom-out from 1x zoom, minZoom will be less than 1.0, and
      * setting {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} to values less than 1.0 increases the camera's field
      * of view.</p>
-     * <p><b>Units</b>: A pair of zoom ratio in floating points: (minZoom, maxZoom)</p>
+     * <p><b>Units</b>: A pair of zoom ratio in floating-points: (minZoom, maxZoom)</p>
      * <p><b>Range of valid values:</b><br></p>
      * <p>maxZoom &gt;= 1.0 &gt;= minZoom</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
