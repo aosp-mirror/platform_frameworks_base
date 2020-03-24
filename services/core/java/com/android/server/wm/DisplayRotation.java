@@ -484,11 +484,8 @@ public class DisplayRotation {
             prepareNormalRotationAnimation();
         }
 
-        // TODO(b/147469351): Remove the restriction.
-        if (mDisplayContent.mFixedRotationLaunchingApp == null) {
-            // Give a remote handler (system ui) some time to reposition things.
-            startRemoteRotation(oldRotation, mRotation);
-        }
+        // Give a remote handler (system ui) some time to reposition things.
+        startRemoteRotation(oldRotation, mRotation);
 
         return true;
     }

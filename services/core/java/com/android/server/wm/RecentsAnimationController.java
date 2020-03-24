@@ -667,7 +667,7 @@ public class RecentsAnimationController implements DeathRecipient {
                         mTargetActivityRecord.token);
             }
             if (mTargetActivityRecord.hasFixedRotationTransform()) {
-                mTargetActivityRecord.clearFixedRotationTransform();
+                mTargetActivityRecord.finishFixedRotationTransform();
             }
         }
 
