@@ -227,7 +227,7 @@ public class ResolverDrawerLayout extends ViewGroup {
         }
 
         final int oldCollapsibleHeight = mCollapsibleHeight;
-        mCollapsibleHeight = Math.max(mCollapsibleHeight, getMaxCollapsedHeight());
+        mCollapsibleHeight = Math.min(mCollapsibleHeight, getMaxCollapsedHeight());
 
         if (updateCollapseOffset(oldCollapsibleHeight, !isDragging())) {
             return;
