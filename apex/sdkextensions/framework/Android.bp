@@ -86,7 +86,7 @@ droidstubs {
 java_library {
     name: "framework-sdkextensions-stubs-publicapi",
     srcs: [":framework-sdkextensions-stubs-srcs-publicapi"],
-    sdk_version: "current",
+    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
@@ -96,7 +96,7 @@ java_library {
 java_library {
     name: "framework-sdkextensions-stubs-systemapi",
     srcs: [":framework-sdkextensions-stubs-srcs-systemapi"],
-    sdk_version: "system_current",
+    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
@@ -106,7 +106,7 @@ java_library {
 java_library {
     name: "framework-sdkextensions-stubs-module_libs_api",
     srcs: [":framework-sdkextensions-stubs-srcs-module_libs_api"],
-    sdk_version: "system_current",
+    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/sdkextensions", // sdkextensions SDK
