@@ -236,7 +236,6 @@ import java.util.SortedSet;
 import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 /**
  * @hide
@@ -5982,12 +5981,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * @return true if routes changed between oldLp and newLp
      */
     private boolean updateRoutes(LinkProperties newLp, LinkProperties oldLp, int netId) {
-        Function<RouteInfo, IpPrefix> getDestination = (r) -> r.getDestination();
         // compare the route diff to determine which routes have been updated
-        CompareOrUpdateResult<IpPrefix, RouteInfo> routeDiff = new CompareOrUpdateResult<>(
-                oldLp != null ? oldLp.getAllRoutes() : null,
-                newLp != null ? newLp.getAllRoutes() : null,
-                getDestination);
+        final CompareOrUpdateResult<RouteInfo.RouteKey, RouteInfo> routeDiff =
+                new CompareOrUpdateResult<>(
+                        oldLp != null ? oldLp.getAllRoutes() : null,
+                        newLp != null ? newLp.getAllRoutes() : null,
+                        (r) -> r.getRouteKey());
 
         // add routes before removing old in case it helps with continuous connectivity
 
