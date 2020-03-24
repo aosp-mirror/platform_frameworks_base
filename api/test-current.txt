@@ -598,7 +598,6 @@ package android.app.blob {
 
   public class BlobStoreManager {
     method @Nullable public android.app.blob.LeaseInfo getLeaseInfo(@NonNull android.app.blob.BlobHandle) throws java.io.IOException;
-    method @NonNull public java.util.List<android.app.blob.BlobHandle> getLeasedBlobs() throws java.io.IOException;
     method public void waitForIdle(long) throws java.lang.InterruptedException, java.util.concurrent.TimeoutException;
   }
 

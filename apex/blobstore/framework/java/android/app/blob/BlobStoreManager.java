@@ -563,12 +563,10 @@ public class BlobStoreManager {
 
     /**
      * Return the {@link BlobHandle BlobHandles} corresponding to the data blobs that
-     * the calling app has acquired a lease on using {@link #acquireLease(BlobHandle, int)} or
-     * one of it's other variants.
+     * the calling app currently has a lease on.
      *
-     * @hide
+     * @return a list of {@link BlobHandle BlobHandles} that the caller has a lease on.
      */
-    @TestApi
     @NonNull
     public List<BlobHandle> getLeasedBlobs() throws IOException {
         try {
