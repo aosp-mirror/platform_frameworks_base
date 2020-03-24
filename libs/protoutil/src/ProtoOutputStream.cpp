@@ -26,8 +26,12 @@
 namespace android {
 namespace util {
 
-ProtoOutputStream::ProtoOutputStream()
-        :mBuffer(new EncodedBuffer()),
+ProtoOutputStream::ProtoOutputStream(): ProtoOutputStream(new EncodedBuffer())
+{
+}
+
+ProtoOutputStream::ProtoOutputStream(sp<EncodedBuffer> buffer)
+        :mBuffer(buffer),
          mCopyBegin(0),
          mCompact(false),
          mDepth(0),

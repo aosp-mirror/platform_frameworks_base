@@ -19,23 +19,45 @@
 #define INCIDENTD_UTIL_H
 
 #include <stdarg.h>
-#include <unistd.h>
-
-#include <android-base/unique_fd.h>
 #include <utils/Errors.h>
 
 #include "Privacy.h"
 
 namespace android {
+
+namespace util {
+class EncodedBuffer;
+}
+
 namespace os {
 namespace incidentd {
 
-using namespace android::base;
+using android::base::unique_fd;
+using android::util::EncodedBuffer;
 
 /**
  * Looks up Privacy of a section in the auto-gen PRIVACY_POLICY_LIST;
  */
 const Privacy* get_privacy_of_section(int id);
+
+/**
+ * Get an EncodedBuffer from an internal pool, or create and return a new one if the pool is empty.
+ * The EncodedBuffer should be returned after use.
+ * Thread safe.
+ */
+sp<EncodedBuffer> get_buffer_from_pool();
+
+/**
+ * Return the EncodedBuffer back to the pool for reuse.
+ * Thread safe.
+ */
+void return_buffer_to_pool(sp<EncodedBuffer> buffer);
+
+/**
+ * Clear the buffer pool to free memory, after taking an incident report.
+ * Thread safe.
+ */
+void clear_buffer_pool();
 
 /**
  * This class wraps android::base::Pipe.
