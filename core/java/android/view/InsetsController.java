@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
@@ -26,8 +27,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONT
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -38,11 +37,9 @@ import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.renderscript.Sampler.Value;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Property;
 import android.util.SparseArray;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
@@ -467,7 +464,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (!localStateChanged && mLastDispachedState.equals(state)) {
             return false;
         }
-        mState.set(state);
+        updateState(state);
         mLastDispachedState.set(state, true /* copySources */);
         applyLocalVisibilityOverride();
         if (localStateChanged) {
@@ -477,6 +474,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             sendStateToWindowManager();
         }
         return true;
+    }
+
+    private void updateState(InsetsState newState) {
+        mState.setDisplayFrame(newState.getDisplayFrame());
+        for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
+            InsetsSource source = newState.sourceAt(i);
+            getSourceConsumer(source.getType()).updateSource(source);
+        }
+        for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
+            InsetsSource source = mState.sourceAt(i);
+            if (newState.peekSource(source.getType()) == null) {
+                mState.removeSource(source.getType());
+            }
+        }
     }
 
     /**
@@ -858,8 +869,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             control.cancel();
         }
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
-            if (mRunningAnimations.get(i).runner == control) {
+            RunningAnimation runningAnimation = mRunningAnimations.get(i);
+            if (runningAnimation.runner == control) {
                 mRunningAnimations.remove(i);
+                ArraySet<Integer> types = toInternalType(control.getTypes());
+                for (int j = types.size() - 1; j >= 0; j--) {
+                    if (getSourceConsumer(types.valueAt(j)).notifyAnimationFinished()) {
+                        mViewRoot.notifyInsetsChanged();
+                    }
+                }
                 break;
             }
         }
