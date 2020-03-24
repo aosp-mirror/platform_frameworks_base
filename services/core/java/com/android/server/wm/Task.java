@@ -509,22 +509,6 @@ class Task extends WindowContainer<WindowContainer> {
                 _voiceSession, _voiceInteractor, stack);
     }
 
-    class TaskToken extends RemoteToken {
-        TaskToken(WindowContainer container) {
-            super(container);
-        }
-
-        @Override
-        public SurfaceControl getLeash() {
-            // We need to copy the SurfaceControl instead of returning the original
-            // because the Parcel FLAGS PARCELABLE_WRITE_RETURN_VALUE cause SurfaceControls
-            // to release themselves.
-            SurfaceControl sc = new SurfaceControl();
-            sc.copyFrom(getSurfaceControl());
-            return sc;
-        }
-    }
-
     /** Don't use constructor directly. This is only used by XML parser. */
     Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, String _rootAffinity, ComponentName _realActivity,
@@ -550,7 +534,7 @@ class Task extends WindowContainer<WindowContainer> {
         mTaskDescription = _lastTaskDescription;
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
         setOrientation(SCREEN_ORIENTATION_UNSET);
-        mRemoteToken = new TaskToken(this);
+        mRemoteToken = new RemoteToken(this);
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
@@ -3110,7 +3094,7 @@ class Task extends WindowContainer<WindowContainer> {
         /**
          * Animations are handled by the TaskOrganizer implementation.
          */
-        if (isControlledByTaskOrganizer()) {
+        if (isOrganized()) {
             return false;
         }
         // Don't animate while the task runs recents animation but only if we are in the mode
@@ -4014,7 +3998,8 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    boolean isControlledByTaskOrganizer() {
+    @Override
+    boolean isOrganized() {
         final Task rootTask = getRootTask();
         // if the rootTask is a "child" of a tile, then don't consider it a root task.
         // TODO: remove this along with removing tile.
@@ -4030,7 +4015,7 @@ class Task extends WindowContainer<WindowContainer> {
          * Avoid yanking back control from the TaskOrganizer, which has presumably reparented the
          * Surface in to its own hierarchy.
          */
-        if (isControlledByTaskOrganizer()) {
+        if (isOrganized()) {
             return;
         }
         super.reparentSurfaceControl(t, newParent);
@@ -4115,27 +4100,6 @@ class Task extends WindowContainer<WindowContainer> {
         // If the TaskOrganizer was set before we created the SurfaceControl, we need to
         // emit the callbacks now.
         sendTaskAppeared();
-    }
-
-    @Override
-    public void updateSurfacePosition() {
-        // Avoid fighting with the TaskOrganizer over Surface position.
-        if (isControlledByTaskOrganizer()) {
-            return;
-        } else {
-            super.updateSurfacePosition();
-        }
-    }
-
-    @Override
-    void getRelativeDisplayedPosition(Point outPos) {
-        // In addition to updateSurfacePosition, we keep other code that sets
-        // position from fighting with the TaskOrganizer
-        if (isControlledByTaskOrganizer()) {
-            outPos.set(0, 0);
-            return;
-        }
-        super.getRelativeDisplayedPosition(outPos);
     }
 
     /**

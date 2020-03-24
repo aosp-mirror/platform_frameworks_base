@@ -79,6 +79,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.window.WindowOrganizer.DisplayAreaOrganizer.FEATURE_TASK_CONTAINER;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
@@ -4294,7 +4295,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         private ActivityStack mRootSplitScreenPrimaryTask = null;
 
         TaskContainers(WindowManagerService service) {
-            super(service, Type.ANY, "TaskContainers");
+            super(service, Type.ANY, "TaskContainers", FEATURE_TASK_CONTAINER);
         }
 
         /**

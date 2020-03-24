@@ -152,6 +152,50 @@ public class WindowOrganizer {
                         }
                     }
                 };
+    }
+
+    /** Class for organizing display areas. */
+    public static class DisplayAreaOrganizer {
+
+        public static final int FEATURE_UNDEFINED = -1;
+        public static final int FEATURE_SYSTEM_FIRST = 0;
+        // The Root display area on a display
+        public static final int FEATURE_ROOT = FEATURE_SYSTEM_FIRST;
+        // Display area hosting the task container.
+        public static final int FEATURE_TASK_CONTAINER = FEATURE_SYSTEM_FIRST + 1;
+        // Display area hosting non-activity window tokens.
+        public static final int FEATURE_WINDOW_TOKENS = FEATURE_SYSTEM_FIRST + 2;
+
+        public static final int FEATURE_SYSTEM_LAST = 10_000;
+
+        // Vendor specific display area definition can start with this value.
+        public static final int FEATURE_VENDOR_FIRST = FEATURE_SYSTEM_LAST + 1;
+
+        /** @hide */
+        @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_STACKS)
+        public static void registerOrganizer(
+                IDisplayAreaOrganizer organizer, int displayAreaFeature) throws RemoteException {
+            getController().registerOrganizer(organizer, displayAreaFeature);
+        }
+
+        /** @hide */
+        private static IDisplayAreaOrganizerController getController() {
+            return IDisplayAreaOrganizerControllerSingleton.get();
+        }
+
+        private static final Singleton<IDisplayAreaOrganizerController>
+                IDisplayAreaOrganizerControllerSingleton =
+                new Singleton<IDisplayAreaOrganizerController>() {
+                    @Override
+                    protected IDisplayAreaOrganizerController create() {
+                        try {
+                            return getWindowOrganizerController()
+                                    .getDisplayAreaOrganizerController();
+                        } catch (RemoteException e) {
+                            return null;
+                        }
+                    }
+                };
 
     }
 }
