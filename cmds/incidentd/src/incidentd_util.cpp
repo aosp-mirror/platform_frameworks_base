@@ -18,6 +18,7 @@
 
 #include "incidentd_util.h"
 
+#include <android/util/EncodedBuffer.h>
 #include <fcntl.h>
 #include <sys/prctl.h>
 #include <wait.h>
@@ -27,8 +28,6 @@
 namespace android {
 namespace os {
 namespace incidentd {
-
-using namespace android::base;
 
 const Privacy* get_privacy_of_section(int id) {
     int l = 0;
@@ -46,6 +45,30 @@ const Privacy* get_privacy_of_section(int id) {
         }
     }
     return NULL;
+}
+
+std::vector<sp<EncodedBuffer>> gBufferPool;
+std::mutex gBufferPoolLock;
+
+sp<EncodedBuffer> get_buffer_from_pool() {
+    std::scoped_lock<std::mutex> lock(gBufferPoolLock);
+    if (gBufferPool.size() == 0) {
+        return new EncodedBuffer();
+    }
+    sp<EncodedBuffer> buffer = gBufferPool.back();
+    gBufferPool.pop_back();
+    return buffer;
+}
+
+void return_buffer_to_pool(sp<EncodedBuffer> buffer) {
+    buffer->clear();
+    std::scoped_lock<std::mutex> lock(gBufferPoolLock);
+    gBufferPool.push_back(buffer);
+}
+
+void clear_buffer_pool() {
+    std::scoped_lock<std::mutex> lock(gBufferPoolLock);
+    gBufferPool.clear();
 }
 
 // ================================================================================
@@ -84,7 +107,7 @@ pid_t fork_execute_cmd(char* const argv[], int in, int out, int* status) {
         status = &dummy_status;
     }
     *status = 0;
-    pid_t pid = fork();
+    pid_t pid = vfork();
     if (pid < 0) {
         *status = -errno;
         return -1;
