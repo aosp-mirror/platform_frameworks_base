@@ -160,7 +160,6 @@ public class InsetsState implements Parcelable {
      */
     public WindowInsets calculateInsets(Rect frame, @Nullable InsetsState ignoringVisibilityState,
             boolean isScreenRound, boolean alwaysConsumeSystemBars, DisplayCutout cutout,
-            @Nullable Rect legacyContentInsets, @Nullable Rect legacyStableInsets,
             int legacySoftInputMode, int legacySystemUiFlags,
             @Nullable @InternalInsetsSide SparseIntArray typeSideMap) {
         Insets[] typeInsetsMap = new Insets[Type.SIZE];
@@ -168,11 +167,6 @@ public class InsetsState implements Parcelable {
         boolean[] typeVisibilityMap = new boolean[SIZE];
         final Rect relativeFrame = new Rect(frame);
         final Rect relativeFrameMax = new Rect(frame);
-        if (ViewRootImpl.sNewInsetsMode != NEW_INSETS_MODE_FULL
-                && legacyContentInsets != null && legacyStableInsets != null) {
-            WindowInsets.assignCompatInsets(typeInsetsMap, legacyContentInsets);
-            WindowInsets.assignCompatInsets(typeMaxInsetsMap, legacyStableInsets);
-        }
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources.get(type);
             if (source == null) {
@@ -217,12 +211,7 @@ public class InsetsState implements Parcelable {
                         && (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }
 
-    public Rect calculateVisibleInsets(Rect frame, Rect legacyVisibleInsets,
-            @SoftInputModeFlags int softInputMode) {
-        if (sNewInsetsMode == NEW_INSETS_MODE_NONE) {
-            return legacyVisibleInsets;
-        }
-
+    public Rect calculateVisibleInsets(Rect frame, @SoftInputModeFlags int softInputMode) {
         Insets insets = Insets.NONE;
         for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
             InsetsSource source = mSources.get(type);
