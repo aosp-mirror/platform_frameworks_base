@@ -26,6 +26,20 @@ mainline_stubs_args =
     "--hide Typo " +
     "--hide UnavailableSymbol "
 
+// TODO: modularize this so not every module has the same whitelist
+framework_packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
 // TODO: remove the hiding when server classes are cleaned up.
 mainline_framework_stubs_args =
     mainline_stubs_args +
@@ -54,6 +68,7 @@ stubs_defaults {
     args: mainline_framework_stubs_args,
     installable: false,
     sdk_version: "current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/current.txt",
@@ -72,6 +87,7 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "system_current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/system-current.txt",
@@ -113,6 +129,7 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    filter_packages: framework_packages_to_document,
     check_api: {
         current: {
             api_file: "api/module-lib-current.txt",
@@ -131,6 +148,7 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    filter_packages: framework_packages_to_document,
 }
 
 stubs_defaults {
