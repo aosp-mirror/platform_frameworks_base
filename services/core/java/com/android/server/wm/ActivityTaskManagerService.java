@@ -230,6 +230,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationDefinition;
+import android.window.IWindowOrganizerController;
 import android.window.WindowContainerTransaction;
 import android.view.WindowManager;
 
@@ -663,10 +664,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private FontScaleSettingObserver mFontScaleSettingObserver;
 
-    /**
-     * Stores the registration and state of TaskOrganizers in use.
-     */
-    TaskOrganizerController mTaskOrganizerController = new TaskOrganizerController(this);
+    WindowOrganizerController mWindowOrganizerController;
+    TaskOrganizerController mTaskOrganizerController;
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
 
@@ -724,6 +723,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mLifecycleManager = new ClientLifecycleManager();
         mInternal = new LocalService();
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
+        mWindowOrganizerController = new WindowOrganizerController(this);
+        mTaskOrganizerController = mWindowOrganizerController.mTaskOrganizerController;
     }
 
     public void onSystemReady() {
@@ -2772,7 +2773,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.reparent(stack.mRemoteToken, tile.mRemoteToken, toTop);
-        mTaskOrganizerController.applyContainerTransaction(wct, null);
+        mWindowOrganizerController.applyTransaction(wct);
     }
 
     /**
@@ -4311,7 +4312,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                 }
                 wct.setBounds(secondary.mRemoteToken, otherRect);
-                mTaskOrganizerController.applyContainerTransaction(wct, null /* organizer */);
+                mWindowOrganizerController.applyTransaction(wct);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -4332,10 +4333,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public ITaskOrganizerController getTaskOrganizerController() {
+    public IWindowOrganizerController getWindowOrganizerController() {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS,
-                "getTaskOrganizerController()");
-        return mTaskOrganizerController;
+                "getWindowOrganizerController()");
+        return mWindowOrganizerController;
     }
 
     /**
