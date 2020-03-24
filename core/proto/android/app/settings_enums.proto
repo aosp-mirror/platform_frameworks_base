@@ -2653,4 +2653,16 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     ADB_WIRELESS_DEVICE_DETAILS = 1836;
+
+    // Open: Settings > Sound > Do Not Disturb > People > Conversations
+    // OS: R
+    DND_CONVERSATIONS = 1837;
+
+    // Open: Settings > Sound > Do Not Disturb > People > Calls
+    // OS: R
+    DND_CALLS = 1838;
+
+    // Open: Settings > Sound > Do Not Disturb > People > Messages
+    // OS: R
+    DND_MESSAGES = 1839;
 }
