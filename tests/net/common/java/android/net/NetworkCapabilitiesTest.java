@@ -442,6 +442,23 @@ public class NetworkCapabilitiesTest {
     }
 
     @Test
+    public void testSetAdministratorUids() {
+        NetworkCapabilities nc =
+                new NetworkCapabilities().setAdministratorUids(new int[] {2, 1, 3});
+
+        assertArrayEquals(new int[] {1, 2, 3}, nc.getAdministratorUids());
+    }
+
+    @Test
+    public void testSetAdministratorUidsWithDuplicates() {
+        try {
+            new NetworkCapabilities().setAdministratorUids(new int[] {1, 1});
+            fail("Expected IllegalArgumentException for duplicate uids");
+        } catch (IllegalArgumentException expected) {
+        }
+    }
+
+    @Test
     public void testCombineCapabilities() {
         NetworkCapabilities nc1 = new NetworkCapabilities();
         NetworkCapabilities nc2 = new NetworkCapabilities();
