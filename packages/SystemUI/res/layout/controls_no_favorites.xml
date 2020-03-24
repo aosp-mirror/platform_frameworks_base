@@ -50,7 +50,6 @@
     <TextView
         style="@style/TextAppearance.ControlSetup.Subtitle"
         android:id="@+id/controls_subtitle"
-        android:visibility="gone"
         android:layout_marginTop="12dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
