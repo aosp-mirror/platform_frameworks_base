@@ -52,6 +52,7 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.ColorInfo;
 
 import java.io.EOFException;
@@ -60,6 +61,7 @@ import java.io.InterruptedIOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -688,12 +690,83 @@ public final class MediaParser {
      * Returns an immutable list with the names of the parsers that are suitable for container
      * formats with the given {@link MediaFormat}.
      *
-     * <p>TODO: List which properties are taken into account. E.g. MimeType.
+     * <p>A parser supports a {@link MediaFormat} if the mime type associated with {@link
+     * MediaFormat#KEY_MIME} corresponds to the supported container format.
+     *
+     * @param mediaFormat The {@link MediaFormat} to check support for.
+     * @return The parser names that support the given {@code mediaFormat}, or the list of all
+     *     parsers available if no container specific format information is provided.
      */
     @NonNull
     @ParserName
     public static List<String> getParserNames(@NonNull MediaFormat mediaFormat) {
-        throw new UnsupportedOperationException();
+        String mimeType = mediaFormat.getString(MediaFormat.KEY_MIME);
+        mimeType = mimeType == null ? null : Util.toLowerInvariant(mimeType.trim());
+        if (TextUtils.isEmpty(mimeType)) {
+            // No MIME type provided. Return all.
+            return Collections.unmodifiableList(
+                    new ArrayList<>(EXTRACTOR_FACTORIES_BY_NAME.keySet()));
+        }
+        ArrayList<String> result = new ArrayList<>();
+        switch (mimeType) {
+            case "video/x-matroska":
+            case "audio/x-matroska":
+            case "video/x-webm":
+            case "audio/x-webm":
+                result.add(PARSER_NAME_MATROSKA);
+                break;
+            case "video/mp4":
+            case "audio/mp4":
+            case "application/mp4":
+                result.add(PARSER_NAME_MP4);
+                result.add(PARSER_NAME_FMP4);
+                break;
+            case "audio/mpeg":
+                result.add(PARSER_NAME_MP3);
+                break;
+            case "audio/aac":
+                result.add(PARSER_NAME_ADTS);
+                break;
+            case "audio/ac3":
+                result.add(PARSER_NAME_AC3);
+                break;
+            case "video/mp2t":
+            case "audio/mp2t":
+                result.add(PARSER_NAME_TS);
+                break;
+            case "video/x-flv":
+                result.add(PARSER_NAME_FLV);
+                break;
+            case "video/ogg":
+            case "audio/ogg":
+            case "application/ogg":
+                result.add(PARSER_NAME_OGG);
+                break;
+            case "video/mp2p":
+            case "video/mp1s":
+                result.add(PARSER_NAME_PS);
+                break;
+            case "audio/vnd.wave":
+            case "audio/wav":
+            case "audio/wave":
+            case "audio/x-wav":
+                result.add(PARSER_NAME_WAV);
+                break;
+            case "audio/amr":
+                result.add(PARSER_NAME_AMR);
+                break;
+            case "audio/ac4":
+                result.add(PARSER_NAME_AC4);
+                break;
+            case "audio/flac":
+            case "audio/x-flac":
+                result.add(PARSER_NAME_FLAC);
+                break;
+            default:
+                // No parsers support the given mime type. Do nothing.
+                break;
+        }
+        return Collections.unmodifiableList(result);
     }
 
     // Private fields.
