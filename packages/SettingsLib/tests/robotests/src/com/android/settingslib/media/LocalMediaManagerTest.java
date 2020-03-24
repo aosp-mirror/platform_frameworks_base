@@ -450,6 +450,12 @@ public class LocalMediaManagerTest {
     }
 
     @Test
+    public void onConnectedDeviceChanged_nullConnectedDevice_noException() {
+        mLocalMediaManager.registerCallback(mCallback);
+        mLocalMediaManager.mMediaDeviceCallback.onConnectedDeviceChanged(TEST_DEVICE_ID_2);
+    }
+
+    @Test
     public void onDeviceAttributesChanged_shouldDispatchDeviceListUpdate() {
         mLocalMediaManager.registerCallback(mCallback);
 
