@@ -1072,11 +1072,9 @@ public final class ImageDecoder implements AutoCloseable {
      *  @param sampleSize Sampling rate of the encoded image.
      *  @return {@link android.util.Size} of the width and height after
      *      sampling.
-     *
-     *  @hide
      */
     @NonNull
-    public Size getSampledSize(int sampleSize) {
+    private Size getSampledSize(int sampleSize) {
         if (sampleSize <= 0) {
             throw new IllegalArgumentException("sampleSize must be positive! "
                     + "provided " + sampleSize);
