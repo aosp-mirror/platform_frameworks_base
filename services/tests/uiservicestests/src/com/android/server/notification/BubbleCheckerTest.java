@@ -25,6 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
@@ -33,6 +34,7 @@ import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ShortcutInfo;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -110,8 +112,10 @@ public class BubbleCheckerTest extends UiServiceTestCase {
 
     void setUpShortcutBubble(boolean isValid) {
         when(mBubbleMetadata.getShortcutId()).thenReturn(SHORTCUT_ID);
-        when(mShortcutHelper.hasValidShortcutInfo(SHORTCUT_ID, PKG, mUserHandle))
-                .thenReturn(isValid);
+        ShortcutInfo info = mock(ShortcutInfo.class);
+        when(info.getId()).thenReturn(SHORTCUT_ID);
+        when(mShortcutHelper.getValidShortcutInfo(SHORTCUT_ID, PKG, mUserHandle))
+                .thenReturn(isValid ? info : null);
         when(mBubbleMetadata.getIntent()).thenReturn(null);
     }
 

@@ -185,7 +185,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
 
             String shortcutId = metadata.getShortcutId();
             boolean shortcutValid = shortcutId != null
-                    && mShortcutHelper.hasValidShortcutInfo(shortcutId, pkg, r.getUser());
+                    && mShortcutHelper.getValidShortcutInfo(shortcutId, pkg, r.getUser()) != null;
             if (metadata.getIntent() == null && !shortcutValid) {
                 // Should have a shortcut if intent is null
                 logBubbleError(r.getKey(),
