@@ -15,6 +15,7 @@
  */
 package com.android.server.blob;
 
+import static android.app.blob.XmlTags.ATTR_COMMIT_TIME_MS;
 import static android.app.blob.XmlTags.ATTR_DESCRIPTION;
 import static android.app.blob.XmlTags.ATTR_DESCRIPTION_RES_NAME;
 import static android.app.blob.XmlTags.ATTR_EXPIRY_TIME;
@@ -30,6 +31,7 @@ import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.O_RDONLY;
 
 import static com.android.server.blob.BlobStoreConfig.TAG;
+import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_COMMIT_TIME;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_DESC_RES_NAME;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_STRING_DESC;
 import static com.android.server.blob.BlobStoreConfig.hasLeaseWaitTimeElapsed;
@@ -54,6 +56,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.blob.BlobStoreManagerService.DumpArgs;
@@ -125,7 +128,7 @@ class BlobMetadata {
         }
     }
 
-    void addCommitters(ArraySet<Committer> committers) {
+    void setCommitters(ArraySet<Committer> committers) {
         synchronized (mMetadataLock) {
             mCommitters.clear();
             mCommitters.addAll(committers);
@@ -153,11 +156,16 @@ class BlobMetadata {
     }
 
     @Nullable
-    Committer getExistingCommitter(@NonNull Committer newCommitter) {
+    Committer getExistingCommitter(@NonNull String packageName, int uid) {
         synchronized (mCommitters) {
-            final int index = mCommitters.indexOf(newCommitter);
-            return index >= 0 ? mCommitters.valueAt(index) : null;
+            for (int i = 0, size = mCommitters.size(); i < size; ++i) {
+                final Committer committer = mCommitters.valueAt(i);
+                if (committer.uid == uid && committer.packageName.equals(packageName)) {
+                    return committer;
+                }
+            }
         }
+        return null;
     }
 
     void addOrReplaceLeasee(String callingPackage, int callingUid, int descriptionResId,
@@ -172,7 +180,7 @@ class BlobMetadata {
         }
     }
 
-    void addLeasees(ArraySet<Leasee> leasees) {
+    void setLeasees(ArraySet<Leasee> leasees) {
         synchronized (mMetadataLock) {
             mLeasees.clear();
             mLeasees.addAll(leasees);
@@ -380,13 +388,23 @@ class BlobMetadata {
         }
 
         // Blobs with no active leases
-        // TODO: Track commit time instead of using last modified time.
-        if ((!respectLeaseWaitTime || hasLeaseWaitTimeElapsed(getBlobFile().lastModified()))
+        if ((!respectLeaseWaitTime || hasLeaseWaitTimeElapsedForAll())
                 && !hasLeases()) {
             return true;
         }
 
         return false;
+    }
+
+    @VisibleForTesting
+    boolean hasLeaseWaitTimeElapsedForAll() {
+        for (int i = 0, size = mCommitters.size(); i < size; ++i) {
+            final Committer committer = mCommitters.valueAt(i);
+            if (!hasLeaseWaitTimeElapsed(committer.getCommitTimeMs())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
@@ -492,20 +510,28 @@ class BlobMetadata {
         }
 
         final BlobMetadata blobMetadata = new BlobMetadata(context, blobId, blobHandle, userId);
-        blobMetadata.addCommitters(committers);
-        blobMetadata.addLeasees(leasees);
+        blobMetadata.setCommitters(committers);
+        blobMetadata.setLeasees(leasees);
         return blobMetadata;
     }
 
     static final class Committer extends Accessor {
         public final BlobAccessMode blobAccessMode;
+        public final long commitTimeMs;
 
-        Committer(String packageName, int uid, BlobAccessMode blobAccessMode) {
+        Committer(String packageName, int uid, BlobAccessMode blobAccessMode, long commitTimeMs) {
             super(packageName, uid);
             this.blobAccessMode = blobAccessMode;
+            this.commitTimeMs = commitTimeMs;
+        }
+
+        long getCommitTimeMs() {
+            return commitTimeMs;
         }
 
         void dump(IndentingPrintWriter fout) {
+            fout.println("commit time: "
+                    + (commitTimeMs == 0 ? "<null>" : BlobStoreUtils.formatTime(commitTimeMs)));
             fout.println("accessMode:");
             fout.increaseIndent();
             blobAccessMode.dump(fout);
@@ -515,6 +541,7 @@ class BlobMetadata {
         void writeToXml(@NonNull XmlSerializer out) throws IOException {
             XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, packageName);
             XmlUtils.writeIntAttribute(out, ATTR_UID, uid);
+            XmlUtils.writeLongAttribute(out, ATTR_COMMIT_TIME_MS, commitTimeMs);
 
             out.startTag(null, TAG_ACCESS_MODE);
             blobAccessMode.writeToXml(out);
@@ -526,6 +553,9 @@ class BlobMetadata {
                 throws XmlPullParserException, IOException {
             final String packageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
             final int uid = XmlUtils.readIntAttribute(in, ATTR_UID);
+            final long commitTimeMs = version >= XML_VERSION_ADD_COMMIT_TIME
+                    ? XmlUtils.readLongAttribute(in, ATTR_COMMIT_TIME_MS)
+                    : 0;
 
             final int depth = in.getDepth();
             BlobAccessMode blobAccessMode = null;
@@ -538,7 +568,7 @@ class BlobMetadata {
                 Slog.wtf(TAG, "blobAccessMode should be available");
                 return null;
             }
-            return new Committer(packageName, uid, blobAccessMode);
+            return new Committer(packageName, uid, blobAccessMode, commitTimeMs);
         }
     }
 

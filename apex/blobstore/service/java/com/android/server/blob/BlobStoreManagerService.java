@@ -31,6 +31,7 @@ import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.SESSION_EXPIRY_TIMEOUT_MILLIS;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_CURRENT;
+import static com.android.server.blob.BlobStoreConfig.getAdjustedCommitTimeMs;
 import static com.android.server.blob.BlobStoreSession.STATE_ABANDONED;
 import static com.android.server.blob.BlobStoreSession.STATE_COMMITTED;
 import static com.android.server.blob.BlobStoreSession.STATE_VERIFIED_INVALID;
@@ -566,13 +567,18 @@ public class BlobStoreManagerService extends SystemService {
                             userId);
                     BlobMetadata blob = userBlobs.get(session.getBlobHandle());
                     if (blob == null) {
-                        blob = new BlobMetadata(mContext,
-                                session.getSessionId(), session.getBlobHandle(), userId);
+                        blob = new BlobMetadata(mContext, session.getSessionId(),
+                                session.getBlobHandle(), userId);
                         addBlobForUserLocked(blob, userBlobs);
                     }
+                    final Committer existingCommitter = blob.getExistingCommitter(
+                            session.getOwnerPackageName(), session.getOwnerUid());
+                    final long existingCommitTimeMs =
+                            (existingCommitter == null) ? 0 : existingCommitter.getCommitTimeMs();
                     final Committer newCommitter = new Committer(session.getOwnerPackageName(),
-                            session.getOwnerUid(), session.getBlobAccessMode());
-                    final Committer existingCommitter = blob.getExistingCommitter(newCommitter);
+                            session.getOwnerUid(), session.getBlobAccessMode(),
+                            getAdjustedCommitTimeMs(existingCommitTimeMs,
+                                    System.currentTimeMillis()));
                     blob.addOrReplaceCommitter(newCommitter);
                     try {
                         writeBlobsInfoLocked();
