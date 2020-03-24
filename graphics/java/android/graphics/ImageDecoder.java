@@ -27,6 +27,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -923,8 +924,12 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      * Provide Resources for density scaling.
      *
+     * This is a SystemApi to enable legacy behavior, so there is no need to
+     * make it public like the version above, which does not have a Resources
+     * parameter.
      * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @AnyThread
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,

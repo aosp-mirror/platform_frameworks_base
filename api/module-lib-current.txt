@@ -17,6 +17,14 @@ package android.content.rollback {
 
 }
 
+package android.graphics {
+
+  public final class ImageDecoder implements java.lang.AutoCloseable {
+    method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(@NonNull android.content.ContentResolver, @NonNull android.net.Uri, @Nullable android.content.res.Resources);
+  }
+
+}
+
 package android.net {
 
   public final class TetheredClient implements android.os.Parcelable {
