@@ -1026,9 +1026,6 @@ public class ActivityStarterTests extends ActivityTestsBase {
         public void taskVanished(ActivityManager.RunningTaskInfo info) {
         }
         @Override
-        public void transactionReady(int id, SurfaceControl.Transaction t) {
-        }
-        @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
             if (mInSplit) {
                 return;
