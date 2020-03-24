@@ -129,11 +129,11 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.window.ITaskOrganizer;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.window.ITaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -578,6 +578,14 @@ class Task extends WindowContainer<WindowContainer> {
         voiceInteractor = _voiceInteractor;
         setIntent(activity, intent, info);
         setMinDimensions(info);
+        // Before we began to reuse a root task (old ActivityStack) as the leaf task, we used to
+        // create a leaf task in this case. Therefore now we won't send out the task created
+        // notification when we decide to reuse it here, so we send out the notification below.
+        // The reason why the created notification sent out when root task is created doesn't work
+        // is that realActivity isn't set until setIntent() method above is called for the first
+        // time. Eventually this notification will be removed when we can populate those information
+        // when root task is created.
+        mAtmService.getTaskChangeNotificationController().notifyTaskCreated(mTaskId, realActivity);
         return this;
     }
 
@@ -586,11 +594,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        // TODO(xutan): Removed type check after stack and task is merged.
-        // Before the real merge of stack and task, we need to avoid saving state of stacks. Once
-        // the merge is finished we can just pass DisplayContent because both windowing mode and
-        // bounds are set in the merged task.
-        if (oldParent instanceof ActivityStack) {
+        if (isLeafTask()) {
             // This task is going away, so save the last state if necessary.
             saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
         }
