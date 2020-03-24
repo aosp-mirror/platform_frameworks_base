@@ -3874,15 +3874,25 @@
   <java-symbol type="id" name="conversation_text" />
   <java-symbol type="id" name="message_icon_container" />
   <java-symbol type="id" name="conversation_image_message_container" />
+  <java-symbol type="id" name="conversation_icon_container" />
   <java-symbol type="dimen" name="conversation_expand_button_top_margin_expanded" />
   <java-symbol type="dimen" name="messaging_group_singleline_sender_padding_end" />
   <java-symbol type="dimen" name="conversation_badge_side_margin" />
-  <java-symbol type="dimen" name="conversation_icon_size_badged" />
-  <java-symbol type="dimen" name="conversation_icon_size_centered" />
-  <java-symbol type="dimen" name="conversation_icon_margin_top_centered" />
+  <java-symbol type="dimen" name="conversation_avatar_size" />
+  <java-symbol type="dimen" name="conversation_avatar_size_group_expanded" />
+  <java-symbol type="dimen" name="conversation_face_pile_avatar_size" />
+  <java-symbol type="dimen" name="conversation_face_pile_avatar_size_group_expanded" />
+  <java-symbol type="dimen" name="conversation_face_pile_protection_width" />
+  <java-symbol type="dimen" name="conversation_face_pile_protection_width_expanded" />
+  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded" />
+  <java-symbol type="dimen" name="conversation_badge_side_margin_group_expanded_face_pile" />
   <java-symbol type="dimen" name="conversation_content_start" />
+  <java-symbol type="dimen" name="expanded_group_conversation_message_padding_without_app_name" />
   <java-symbol type="dimen" name="messaging_layout_margin_end" />
   <java-symbol type="dimen" name="conversation_header_expanded_padding_end" />
+  <java-symbol type="dimen" name="conversation_icon_container_top_padding" />
+  <java-symbol type="dimen" name="conversation_icon_container_top_padding_small_avatar" />
+  <java-symbol type="dimen" name="conversation_icon_container_top_padding_no_app_name" />
   <java-symbol type="layout" name="notification_template_material_conversation" />
   <java-symbol type="layout" name="conversation_face_pile_layout" />
 
