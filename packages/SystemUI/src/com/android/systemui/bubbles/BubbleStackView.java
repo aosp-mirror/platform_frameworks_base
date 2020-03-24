@@ -940,7 +940,6 @@ public class BubbleStackView extends FrameLayout {
         ViewClippingUtil.setClippingDeactivated(bubble.getIconView(), true, mClippingParameters);
         animateInFlyoutForBubble(bubble);
         updatePointerPosition();
-        updateOverflowBtnVisibility( /*apply */ true);
         requestUpdate();
         logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
     }
@@ -951,16 +950,18 @@ public class BubbleStackView extends FrameLayout {
             Log.d(TAG, "removeBubble: " + bubble);
         }
         // Remove it from the views
-        int removedIndex = mBubbleContainer.indexOfChild(bubble.getIconView());
-        if (removedIndex >= 0) {
-            mBubbleContainer.removeViewAt(removedIndex);
-            bubble.cleanupExpandedState();
-            bubble.setInflated(false);
-            logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
-        } else {
-            Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
+        for (int i = 0; i < getBubbleCount(); i++) {
+            View v = mBubbleContainer.getChildAt(i);
+            if (v instanceof BadgedImageView
+                    && ((BadgedImageView) v).getKey().equals(bubble.getKey())) {
+                mBubbleContainer.removeViewAt(i);
+                bubble.cleanupExpandedState();
+                bubble.setInflated(false);
+                logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
+                return;
+            }
         }
-        updateOverflowBtnVisibility(/* apply */ true);
+        Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
     }
 
     private void updateOverflowBtnVisibility(boolean apply) {
