@@ -800,7 +800,7 @@ public class MediaMetadataRetriever implements AutoCloseable {
      */
     public static final int METADATA_KEY_YEAR            = 8;
     /**
-     * The metadata key to retrieve the playback duration of the data source.
+     * The metadata key to retrieve the playback duration (in ms) of the data source.
      */
     public static final int METADATA_KEY_DURATION        = 9;
     /**
