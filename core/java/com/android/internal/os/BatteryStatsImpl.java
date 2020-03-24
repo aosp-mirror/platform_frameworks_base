@@ -5417,7 +5417,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mVideoOnNesting > 0) {
             final long elapsedRealtime = mClocks.elapsedRealtime();
             final long uptime = mClocks.uptimeMillis();
-            mAudioOnNesting = 0;
+            mVideoOnNesting = 0;
             mHistoryCur.states2 &= ~HistoryItem.STATE2_VIDEO_ON_FLAG;
             if (DEBUG_HISTORY) Slog.v(TAG, "Video off to: "
                     + Integer.toHexString(mHistoryCur.states));
