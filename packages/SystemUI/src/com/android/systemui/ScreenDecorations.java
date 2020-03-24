@@ -393,6 +393,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
         // update rounded corner view rotation
         updateRoundedCornerView(pos, R.id.left);
         updateRoundedCornerView(pos, R.id.right);
+        updateRoundedCornerSize(mRoundedDefault, mRoundedDefaultTop, mRoundedDefaultBottom);
 
         // update cutout view rotation
         if (mCutoutViews != null && mCutoutViews[pos] != null) {
@@ -701,26 +702,46 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                     } catch (Exception e) {
                     }
                 }
-
-                if (sizeTop == 0) {
-                    sizeTop = size;
-                }
-                if (sizeBottom == 0) {
-                    sizeBottom = size;
-                }
-
-                for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
-                    if (mOverlays[i] == null) {
-                        continue;
-                    }
-                    setSize(mOverlays[i].findViewById(R.id.left), sizeTop);
-                    setSize(mOverlays[i].findViewById(R.id.right), sizeBottom);
-                }
+                updateRoundedCornerSize(size, sizeTop, sizeBottom);
             }
         });
     }
 
-    private void setSize(View view, int pixelSize) {
+    private void updateRoundedCornerSize(int sizeDefault, int sizeTop, int sizeBottom) {
+        if (mOverlays == null) {
+            return;
+        }
+        if (sizeTop == 0) {
+            sizeTop = sizeDefault;
+        }
+        if (sizeBottom == 0) {
+            sizeBottom = sizeDefault;
+        }
+
+        for (int i = 0; i < BOUNDS_POSITION_LENGTH; i++) {
+            if (mOverlays[i] == null) {
+                continue;
+            }
+            if (i == BOUNDS_POSITION_LEFT || i == BOUNDS_POSITION_RIGHT) {
+                if (mRotation == ROTATION_270) {
+                    setSize(mOverlays[i].findViewById(R.id.left), sizeBottom);
+                    setSize(mOverlays[i].findViewById(R.id.right), sizeTop);
+                } else {
+                    setSize(mOverlays[i].findViewById(R.id.left), sizeTop);
+                    setSize(mOverlays[i].findViewById(R.id.right), sizeBottom);
+                }
+            } else if (i == BOUNDS_POSITION_TOP) {
+                setSize(mOverlays[i].findViewById(R.id.left), sizeTop);
+                setSize(mOverlays[i].findViewById(R.id.right), sizeTop);
+            } else if (i == BOUNDS_POSITION_BOTTOM) {
+                setSize(mOverlays[i].findViewById(R.id.left), sizeBottom);
+                setSize(mOverlays[i].findViewById(R.id.right), sizeBottom);
+            }
+        }
+    }
+
+    @VisibleForTesting
+    protected void setSize(View view, int pixelSize) {
         LayoutParams params = view.getLayoutParams();
         params.width = pixelSize;
         params.height = pixelSize;

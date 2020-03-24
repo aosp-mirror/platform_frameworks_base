@@ -32,6 +32,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,6 +53,7 @@ import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
 
@@ -210,6 +212,78 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         assertThat(mScreenDecorations.mRoundedDefault).isEqualTo(testRadius);
         assertThat(mScreenDecorations.mRoundedDefaultTop).isEqualTo(testRadius);
         assertThat(mScreenDecorations.mRoundedDefaultBottom).isEqualTo(testRadius);
+    }
+
+    @Test
+    public void testRoundingTopBottomRadius_OnTopBottomOverlay() {
+        final int testTopRadius = 1;
+        final int testBottomRadius = 5;
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, testTopRadius);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, testTopRadius);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, testBottomRadius);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_roundedCornerMultipleRadius, false);
+
+        // no cutout
+        doReturn(null).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        View leftRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP].findViewById(R.id.left);
+        View rightRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_TOP].findViewById(R.id.right);
+        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testTopRadius);
+        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testTopRadius);
+        leftRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].findViewById(R.id.left);
+        rightRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_BOTTOM].findViewById(R.id.right);
+        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testBottomRadius);
+        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testBottomRadius);
+    }
+
+    @Test
+    public void testRoundingTopBottomRadius_OnLeftRightOverlay() {
+        final int testTopRadius = 1;
+        final int testBottomRadius = 5;
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius, testTopRadius);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_top, testTopRadius);
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.dimen.rounded_corner_radius_bottom, testBottomRadius);
+        mContext.getOrCreateTestableResources()
+                .addOverride(R.bool.config_roundedCornerMultipleRadius, false);
+
+        // left cutout
+        doReturn(new DisplayCutout(
+                Insets.of(0, 10, 0, 0),
+                new Rect(0, 200, 1, 210),
+                ZERO_RECT,
+                ZERO_RECT,
+                ZERO_RECT,
+                Insets.NONE)).when(mScreenDecorations).getCutout();
+
+        mScreenDecorations.start();
+        View leftRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT].findViewById(R.id.left);
+        View rightRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_LEFT].findViewById(R.id.right);
+        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testTopRadius);
+        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testBottomRadius);
+        leftRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT].findViewById(R.id.left);
+        rightRoundedCorner =
+                mScreenDecorations.mOverlays[BOUNDS_POSITION_RIGHT].findViewById(R.id.right);
+        verify(mScreenDecorations, atLeastOnce()).setSize(leftRoundedCorner, testTopRadius);
+        verify(mScreenDecorations, atLeastOnce()).setSize(rightRoundedCorner, testBottomRadius);
     }
 
     @Test
