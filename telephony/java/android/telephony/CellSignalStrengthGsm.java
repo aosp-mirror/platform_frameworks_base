@@ -145,6 +145,8 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     /**
      * Get the signal strength as dBm.
+     *
+     * @return the RSSI of the measured cell.
      */
     @Override
     public int getDbm() {

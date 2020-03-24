@@ -314,6 +314,8 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
 
     /**
      * Get the signal strength as dBm
+     *
+     * @return min(CDMA RSSI, EVDO RSSI) of the measured cell.
      */
     @Override
     public int getDbm() {
