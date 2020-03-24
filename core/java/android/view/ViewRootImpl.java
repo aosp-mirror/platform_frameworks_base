@@ -504,7 +504,6 @@ public final class ViewRootImpl implements ViewParent,
     int mPendingInputEventCount;
     boolean mProcessInputEventsScheduled;
     boolean mUnbufferedInputDispatch;
-    boolean mUnbufferedInputDispatchBySource;
     @InputSourceClass
     int mUnbufferedInputSource = SOURCE_CLASS_NONE;
 
@@ -1872,9 +1871,6 @@ public final class ViewRootImpl implements ViewParent,
             mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();
             mChoreographer.postCallback(
                     Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);
-            if (!mUnbufferedInputDispatch && !mUnbufferedInputDispatchBySource) {
-                scheduleConsumeBatchedInput();
-            }
             notifyRendererOfFramePending();
             pokeDrawLockIfNeeded();
         }
@@ -8156,7 +8152,6 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         public void onInputEvent(InputEvent event) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "processInputEventForCompatibility");
-            processUnbufferedRequest(event);
             List<InputEvent> processedEvents;
             try {
                 processedEvents =
@@ -8181,12 +8176,18 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void onBatchedInputEventPending() {
-            if (mUnbufferedInputDispatch || mUnbufferedInputDispatchBySource) {
-                super.onBatchedInputEventPending();
-            } else {
-                scheduleConsumeBatchedInput();
+        public void onBatchedInputEventPending(int source) {
+            final boolean unbuffered = mUnbufferedInputDispatch
+                    || (source & mUnbufferedInputSource) != SOURCE_CLASS_NONE;
+            if (unbuffered) {
+                if (mConsumeBatchedInputScheduled) {
+                    unscheduleConsumeBatchedInput();
+                }
+                // Consume event immediately if unbuffered input dispatch has been requested.
+                consumeBatchedInputEvents(-1);
+                return;
             }
+            scheduleConsumeBatchedInput();
         }
 
         @Override
@@ -8198,17 +8199,6 @@ public final class ViewRootImpl implements ViewParent,
         public void dispose() {
             unscheduleConsumeBatchedInput();
             super.dispose();
-        }
-
-        private void processUnbufferedRequest(InputEvent event) {
-            if (!(event instanceof MotionEvent)) {
-                return;
-            }
-            mUnbufferedInputDispatchBySource =
-                    (event.getSource() & mUnbufferedInputSource) != SOURCE_CLASS_NONE;
-            if (mUnbufferedInputDispatchBySource && mConsumeBatchedInputScheduled) {
-                scheduleConsumeBatchedInputImmediately();
-            }
         }
     }
     WindowInputEventReceiver mInputEventReceiver;
