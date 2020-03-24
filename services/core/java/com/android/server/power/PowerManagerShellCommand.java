@@ -18,6 +18,7 @@ package com.android.server.power;
 
 import android.content.Intent;
 import android.os.IPowerManager;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 
@@ -45,6 +46,8 @@ class PowerManagerShellCommand extends ShellCommand {
                     return runSetAdaptiveEnabled();
                 case "set-mode":
                     return runSetMode();
+                case "set-fixed-performance-mode-enabled":
+                    return runSetFixedPerformanceModeEnabled();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -72,6 +75,18 @@ class PowerManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetFixedPerformanceModeEnabled() throws RemoteException {
+        boolean success = mInterface.setPowerModeChecked(
+                PowerManagerInternal.MODE_FIXED_PERFORMANCE,
+                Boolean.parseBoolean(getNextArgRequired()));
+        if (!success) {
+            final PrintWriter ew = getErrPrintWriter();
+            ew.println("Failed to set FIXED_PERFORMANCE mode");
+            ew.println("This is likely because Power HAL AIDL is not implemented on this device");
+        }
+        return success ? 0 : -1;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -84,6 +99,10 @@ class PowerManagerShellCommand extends ShellCommand {
         pw.println("  set-mode MODE");
         pw.println("    sets the power mode of the device to MODE.");
         pw.println("    1 turns low power mode on and 0 turns low power mode off.");
+        pw.println("  set-fixed-performance-mode-enabled [true|false]");
+        pw.println("    enables or disables fixed performance mode");
+        pw.println("    note: this will affect system performance and should only be used");
+        pw.println("          during development");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }

@@ -740,8 +740,8 @@ public final class PowerManagerService extends SystemService
         }
 
         /** Wrapper for PowerManager.nativeSetPowerMode */
-        public void nativeSetPowerMode(int mode, boolean enabled) {
-            PowerManagerService.nativeSetPowerMode(mode, enabled);
+        public boolean nativeSetPowerMode(int mode, boolean enabled) {
+            return PowerManagerService.nativeSetPowerMode(mode, enabled);
         }
 
         /** Wrapper for PowerManager.nativeSetFeature */
@@ -830,7 +830,7 @@ public final class PowerManagerService extends SystemService
     private static native void nativeSetAutoSuspend(boolean enable);
     private static native void nativeSendPowerHint(int hintId, int data);
     private static native void nativeSetPowerBoost(int boost, int durationMs);
-    private static native void nativeSetPowerMode(int mode, boolean enabled);
+    private static native boolean nativeSetPowerMode(int mode, boolean enabled);
     private static native void nativeSetFeature(int featureId, int data);
     private static native boolean nativeForceSuspend();
 
@@ -3631,9 +3631,9 @@ public final class PowerManagerService extends SystemService
         mNativeWrapper.nativeSetPowerBoost(boost, durationMs);
     }
 
-    private void setPowerModeInternal(int mode, boolean enabled) {
+    private boolean setPowerModeInternal(int mode, boolean enabled) {
         // Maybe filter the event.
-        mNativeWrapper.nativeSetPowerMode(mode, enabled);
+        return mNativeWrapper.nativeSetPowerMode(mode, enabled);
     }
 
     @VisibleForTesting
@@ -4708,7 +4708,17 @@ public final class PowerManagerService extends SystemService
                 return;
             }
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
-            setPowerModeInternal(mode, enabled);
+            setPowerModeInternal(mode, enabled); // Intentionally ignore return value
+        }
+
+        @Override // Binder call
+        public boolean setPowerModeChecked(int mode, boolean enabled) {
+            if (!mSystemReady) {
+                // Service not ready yet, so who the heck cares about power hints, bah.
+                return false;
+            }
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DEVICE_POWER, null);
+            return setPowerModeInternal(mode, enabled);
         }
 
         @Override // Binder call

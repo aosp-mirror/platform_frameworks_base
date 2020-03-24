@@ -225,7 +225,7 @@ static void setPowerBoost(Boost boost, int32_t durationMs) {
     setPowerBoostWithHandle(handle, boost, durationMs);
 }
 
-static void setPowerModeWithHandle(sp<IPowerAidl> handle, Mode mode, bool enabled) {
+static bool setPowerModeWithHandle(sp<IPowerAidl> handle, Mode mode, bool enabled) {
     // Android framework only sends mode upto DISPLAY_INACTIVE.
     // Need to increase the array if more mode supported.
     static std::array<std::atomic<HalSupport>, static_cast<int32_t>(Mode::DISPLAY_INACTIVE) + 1>
@@ -235,7 +235,7 @@ static void setPowerModeWithHandle(sp<IPowerAidl> handle, Mode mode, bool enable
     if (mode > Mode::DISPLAY_INACTIVE ||
         modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::OFF) {
         ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
-        return;
+        return false;
     }
 
     if (modeSupportedArray[static_cast<int32_t>(mode)] == HalSupport::UNKNOWN) {
@@ -245,23 +245,24 @@ static void setPowerModeWithHandle(sp<IPowerAidl> handle, Mode mode, bool enable
             isSupported ? HalSupport::ON : HalSupport::OFF;
         if (!isSupported) {
             ALOGV("Skipped setPowerMode %s because HAL doesn't support it", toString(mode).c_str());
-            return;
+            return false;
         }
     }
 
     auto ret = handle->setMode(mode, enabled);
     processPowerHalReturn(ret.isOk(), "setPowerMode");
+    return ret.isOk();
 }
 
-static void setPowerMode(Mode mode, bool enabled) {
+static bool setPowerMode(Mode mode, bool enabled) {
     std::unique_lock<std::mutex> lock(gPowerHalMutex);
     if (connectPowerHalLocked() != HalVersion::AIDL) {
         ALOGV("Power HAL AIDL not available");
-        return;
+        return false;
     }
     sp<IPowerAidl> handle = gPowerHalAidl_;
     lock.unlock();
-    setPowerModeWithHandle(handle, mode, enabled);
+    return setPowerModeWithHandle(handle, mode, enabled);
 }
 
 static void sendPowerHint(PowerHint hintId, uint32_t data) {
@@ -480,8 +481,9 @@ static void nativeSetPowerBoost(JNIEnv* /* env */, jclass /* clazz */, jint boos
     setPowerBoost(static_cast<Boost>(boost), durationMs);
 }
 
-static void nativeSetPowerMode(JNIEnv* /* env */, jclass /* clazz */, jint mode, jboolean enabled) {
-    setPowerMode(static_cast<Mode>(mode), enabled);
+static jboolean nativeSetPowerMode(JNIEnv* /* env */, jclass /* clazz */, jint mode,
+                                   jboolean enabled) {
+    return setPowerMode(static_cast<Mode>(mode), enabled);
 }
 
 static void nativeSetFeature(JNIEnv* /* env */, jclass /* clazz */, jint featureId, jint data) {
@@ -520,27 +522,19 @@ static bool nativeForceSuspend(JNIEnv* /* env */, jclass /* clazz */) {
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gPowerManagerServiceMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeInit", "()V",
-            (void*) nativeInit },
-    { "nativeAcquireSuspendBlocker", "(Ljava/lang/String;)V",
-            (void*) nativeAcquireSuspendBlocker },
-    { "nativeForceSuspend", "()Z",
-            (void*) nativeForceSuspend },
-    { "nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
-            (void*) nativeReleaseSuspendBlocker },
-    { "nativeSetInteractive", "(Z)V",
-            (void*) nativeSetInteractive },
-    { "nativeSetAutoSuspend", "(Z)V",
-            (void*) nativeSetAutoSuspend },
-    { "nativeSendPowerHint", "(II)V",
-            (void*) nativeSendPowerHint },
-    { "nativeSetPowerBoost", "(II)V",
-            (void*) nativeSetPowerBoost },
-    { "nativeSetPowerMode", "(IZ)V",
-            (void*) nativeSetPowerMode },
-    { "nativeSetFeature", "(II)V",
-            (void*) nativeSetFeature },
+        /* name, signature, funcPtr */
+        {"nativeInit", "()V", (void*)nativeInit},
+        {"nativeAcquireSuspendBlocker", "(Ljava/lang/String;)V",
+         (void*)nativeAcquireSuspendBlocker},
+        {"nativeForceSuspend", "()Z", (void*)nativeForceSuspend},
+        {"nativeReleaseSuspendBlocker", "(Ljava/lang/String;)V",
+         (void*)nativeReleaseSuspendBlocker},
+        {"nativeSetInteractive", "(Z)V", (void*)nativeSetInteractive},
+        {"nativeSetAutoSuspend", "(Z)V", (void*)nativeSetAutoSuspend},
+        {"nativeSendPowerHint", "(II)V", (void*)nativeSendPowerHint},
+        {"nativeSetPowerBoost", "(II)V", (void*)nativeSetPowerBoost},
+        {"nativeSetPowerMode", "(IZ)Z", (void*)nativeSetPowerMode},
+        {"nativeSetFeature", "(II)V", (void*)nativeSetFeature},
 };
 
 #define FIND_CLASS(var, className) \
