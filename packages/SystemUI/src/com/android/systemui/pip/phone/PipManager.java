@@ -18,6 +18,7 @@ package com.android.systemui.pip.phone;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -35,6 +36,7 @@ import android.util.Pair;
 import android.view.DisplayInfo;
 import android.view.IPinnedStackController;
 import android.window.WindowContainerTransaction;
+import android.window.WindowOrganizer;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
@@ -248,8 +250,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mPipBoundsHandler.onDisplayInfoChanged(displayInfo);
 
         try {
-            ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(
-                    mPipTaskOrganizer, WINDOWING_MODE_PINNED);
+            TaskOrganizer.registerOrganizer(mPipTaskOrganizer, WINDOWING_MODE_PINNED);
             ActivityManager.StackInfo stackInfo = activityTaskManager.getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
             if (stackInfo != null) {
