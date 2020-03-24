@@ -47,6 +47,7 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteCallback;
@@ -303,7 +304,23 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         @Override
         public void getTypeAsync(Uri uri, RemoteCallback callback) {
             final Bundle result = new Bundle();
-            result.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
+            try {
+                result.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
+            } catch (Exception e) {
+                Parcel parcel = Parcel.obtain();
+                try {
+                    try {
+                        parcel.writeException(e);
+                    } catch (Exception ex) {
+                        // getType threw an unparcelable exception. Wrap the message into
+                        // a parcelable exception type
+                        parcel.writeException(new IllegalStateException(e.getMessage()));
+                    }
+                    result.putByteArray(ContentResolver.REMOTE_CALLBACK_ERROR, parcel.marshall());
+                } finally {
+                    parcel.recycle();
+                }
+            }
             callback.sendResult(result);
         }
 

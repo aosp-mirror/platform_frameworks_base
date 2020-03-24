@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -233,6 +234,16 @@ public class ContentResolverTest {
         long end = SystemClock.uptimeMillis();
         assertThat(type).isNull();
         assertThat(end).isLessThan(start + 5000);
+    }
+
+    @Test
+    public void testGetType_providerException() {
+        try {
+            mResolver.getType(Uri.parse("content://android.content.FakeProviderRemote/error"));
+            fail("Expected IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
     }
 
     @Test
