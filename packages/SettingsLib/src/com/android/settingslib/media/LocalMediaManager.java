@@ -440,8 +440,9 @@ public class LocalMediaManager implements BluetoothCallback {
             MediaDevice connectDevice = getMediaDeviceById(mMediaDevices, id);
             connectDevice = connectDevice != null
                     ? connectDevice : updateCurrentConnectedDevice();
-            connectDevice.setState(MediaDeviceState.STATE_CONNECTED);
-
+            if (connectDevice != null) {
+                connectDevice.setState(MediaDeviceState.STATE_CONNECTED);
+            }
             if (connectDevice == mCurrentConnectedDevice) {
                 Log.d(TAG, "onConnectedDeviceChanged() this device all ready connected!");
                 return;
