@@ -92,7 +92,7 @@ public class DozeScreenState implements DozeMachine.Part {
         final boolean pulseEnding = oldState == DOZE_PULSE_DONE && newState.isAlwaysOn();
         final boolean turningOn = (oldState == DOZE_AOD_PAUSED || oldState == DOZE)
                 && newState.isAlwaysOn();
-        final boolean turningOff = (newState.isAlwaysOn() && newState == DOZE)
+        final boolean turningOff = (oldState.isAlwaysOn() && newState == DOZE)
                 || (oldState == DOZE_AOD_PAUSING && newState == DOZE_AOD_PAUSED);
         final boolean justInitialized = oldState == DozeMachine.State.INITIALIZED;
         if (messagePending || justInitialized || pulseEnding || turningOn) {
