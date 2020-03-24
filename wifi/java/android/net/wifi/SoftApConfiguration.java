@@ -516,9 +516,6 @@ public final class SoftApConfiguration implements Parcelable {
     public WifiConfiguration toWifiConfiguration() {
         WifiConfiguration wifiConfig = new WifiConfiguration();
         wifiConfig.SSID = mSsid;
-        if (mBssid != null) {
-            wifiConfig.BSSID = mBssid.toString();
-        }
         wifiConfig.preSharedKey = mPassphrase;
         wifiConfig.hiddenSSID = mHiddenSsid;
         wifiConfig.apChannel = mChannel;
@@ -661,8 +658,6 @@ public final class SoftApConfiguration implements Parcelable {
 
         /**
          * Specifies a BSSID for the AP.
-         * <p>
-         * Only supported when configuring a local-only hotspot.
          * <p>
          * <li>If not set, defaults to null.</li>
          * @param bssid BSSID, or null to have the BSSID chosen by the framework. The caller is
