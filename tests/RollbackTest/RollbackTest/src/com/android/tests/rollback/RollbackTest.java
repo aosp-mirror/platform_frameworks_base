@@ -75,6 +75,12 @@ public class RollbackTest {
     private static final String PROPERTY_ENABLE_ROLLBACK_TIMEOUT_MILLIS =
             "enable_rollback_timeout";
 
+    private static boolean hasRollbackInclude(List<RollbackInfo> rollbacks, String packageName) {
+        return rollbacks.stream().anyMatch(
+                ri -> ri.getPackages().stream().anyMatch(
+                        pri -> packageName.equals(pri.getPackageName())));
+    }
+
     /**
      * Test basic rollbacks.
      */
@@ -113,18 +119,14 @@ public class RollbackTest {
             // Uninstall TestApp.A
             Uninstall.packages(TestApp.A);
             assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
-            // TODO: There is currently a race condition between when the app is
-            // uninstalled and when rollback manager deletes the rollback. Fix it
-            // so that's not the case!
             for (int i = 0; i < 5; ++i) {
-                RollbackInfo rollback = getUniqueRollbackInfoForPackage(
-                        rm.getRecentlyCommittedRollbacks(), TestApp.A);
-                if (rollback != null) {
+                if (hasRollbackInclude(rm.getRecentlyCommittedRollbacks(), TestApp.A)) {
                     Log.i(TAG, "Sleeping 1 second to wait for uninstall to take effect.");
                     Thread.sleep(1000);
                 }
             }
 
+            assertThat(hasRollbackInclude(rm.getRecentlyCommittedRollbacks(), TestApp.A)).isFalse();
             // The app should not be available for rollback.
             waitForUnavailableRollback(TestApp.A);
 
