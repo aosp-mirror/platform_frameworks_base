@@ -38,7 +38,7 @@ public class TaskOrganizerPipTest extends Service {
     TaskView mTaskView;
 
     class Organizer extends ITaskOrganizer.Stub {
-        public void taskAppeared(ActivityManager.RunningTaskInfo ti) {
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo ti) {
             mTaskView.reparentTask(ti.token);
 
             final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -48,7 +48,7 @@ public class TaskOrganizerPipTest extends Service {
             } catch (Exception e) {
             }
         }
-        public void taskVanished(ActivityManager.RunningTaskInfo ti) {
+        public void onTaskVanished(ActivityManager.RunningTaskInfo ti) {
         }
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         }

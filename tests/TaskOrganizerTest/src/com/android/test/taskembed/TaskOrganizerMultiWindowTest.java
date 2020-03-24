@@ -150,7 +150,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         };
 
         @Override
-        public void taskAppeared(ActivityManager.RunningTaskInfo ti) {
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo ti) {
             if (!gotFirstTask) {
                 mTaskView1.reparentTask(ti.token);
                 gotFirstTask = true;
@@ -158,7 +158,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
                 mTaskView2.reparentTask(ti.token);
             }
         }
-        public void taskVanished(ActivityManager.RunningTaskInfo ti) {
+        public void onTaskVanished(ActivityManager.RunningTaskInfo ti) {
         }
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
