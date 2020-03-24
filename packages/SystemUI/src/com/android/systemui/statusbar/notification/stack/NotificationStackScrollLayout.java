@@ -3756,12 +3756,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.INPUT)
     public boolean onTouchEvent(MotionEvent ev) {
+        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
         boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
                 || ev.getActionMasked() == MotionEvent.ACTION_UP;
         handleEmptySpaceClick(ev);
         boolean expandWantsIt = false;
         boolean swipingInProgress = mSwipingInProgress;
-        if (mIsExpanded && !swipingInProgress && !mOnlyScrollingInThisMotion) {
+        if (mIsExpanded && !swipingInProgress && !mOnlyScrollingInThisMotion && guts == null) {
             if (isCancelOrUp) {
                 mExpandHelper.onlyObserveMovements(false);
             }
@@ -3787,7 +3788,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
 
         // Check if we need to clear any snooze leavebehinds
-        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
         if (guts != null && !NotificationSwipeHelper.isTouchInView(ev, guts)
                 && guts.getGutsContent() instanceof NotificationSnooze) {
             NotificationSnooze ns = (NotificationSnooze) guts.getGutsContent();
@@ -4056,9 +4056,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         initDownStates(ev);
         handleEmptySpaceClick(ev);
+
+        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
         boolean expandWantsIt = false;
         boolean swipingInProgress = mSwipingInProgress;
-        if (!swipingInProgress && !mOnlyScrollingInThisMotion) {
+        if (!swipingInProgress && !mOnlyScrollingInThisMotion && guts == null) {
             expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
         }
         boolean scrollWantsIt = false;
@@ -4075,7 +4077,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         }
         // Check if we need to clear any snooze leavebehinds
         boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
-        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
         if (!NotificationSwipeHelper.isTouchInView(ev, guts) && isUp && !swipeWantsIt &&
                 !expandWantsIt && !scrollWantsIt) {
             mCheckForLeavebehind = false;
