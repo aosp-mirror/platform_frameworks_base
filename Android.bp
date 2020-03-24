@@ -589,9 +589,6 @@ java_library {
     srcs: [
         "core/java/android/annotation/IntDef.java",
     ],
-    static_libs: [
-        "art.module.api.annotations",
-    ],
 
     sdk_version: "core_current",
 }
