@@ -610,11 +610,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        // TODO(xutan): Removed type check after stack and task is merged.
-        // Before the real merge of stack and task, we need to avoid saving state of stacks. Once
-        // the merge is finished we can just pass DisplayContent because both windowing mode and
-        // bounds are set in the merged task.
-        if (oldParent instanceof ActivityStack) {
+        if (isLeafTask()) {
             // This task is going away, so save the last state if necessary.
             saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
         }
