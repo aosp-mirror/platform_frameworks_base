@@ -138,7 +138,8 @@ public class KeyguardSliceProvider extends SliceProvider implements
     protected void addPrimaryAction(ListBuilder builder) {
         // Add simple action because API requires it; Keyguard handles presenting
         // its own slices so this action + icon are actually never used.
-        PendingIntent pi = PendingIntent.getActivity(getContext(), 0, new Intent(), 0);
+        PendingIntent pi = PendingIntent.getActivity(getContext(), 0,
+            new Intent(getContext(), KeyguardSliceProvider.class), 0);
         Icon icon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
         SliceAction action = new SliceAction(pi, icon, mLastText);
 
