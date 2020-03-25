@@ -1833,7 +1833,7 @@ package android.net {
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
-  public static class NetworkCapabilities.Builder {
+  public static final class NetworkCapabilities.Builder {
     ctor public NetworkCapabilities.Builder();
     ctor public NetworkCapabilities.Builder(@NonNull android.net.NetworkCapabilities);
     method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);
