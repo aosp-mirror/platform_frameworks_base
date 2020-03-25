@@ -2276,9 +2276,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        if (PixelFormat.formatHasAlpha(mAttrs.format) && mAttrs.alpha == 0) {
-            // Support legacy use cases where completely transparent windows can still be ime target
-            // with FLAG_NOT_FOCUSABLE and ALT_FOCUSABLE_IM set.
+        if (PixelFormat.formatHasAlpha(mAttrs.format)) {
+            // Support legacy use cases where transparent windows can still be ime target with
+            // FLAG_NOT_FOCUSABLE and ALT_FOCUSABLE_IM set.
             // Certain apps listen for IME insets using transparent windows and ADJUST_NOTHING to
             // manually synchronize app content to IME animation b/144619551.
             // TODO(b/145812508): remove this once new focus management is complete b/141738570
