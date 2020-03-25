@@ -24,7 +24,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.PowerManager;
-import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -49,6 +48,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeastOnce;
 
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -76,6 +76,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         mUiManagerService = new UiModeManagerService(mContext, mWindowManager, mWakeLock,
                 mTwilightManager, mPowerManager, true);
         mScreenOffRecievers = new HashSet<>();
+        when(mPowerManager.isInteractive()).thenReturn(true);
         mService = mUiManagerService.getService();
         when(mContext.checkCallingOrSelfPermission(anyString()))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
@@ -93,7 +94,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mService.setNightMode(MODE_NIGHT_NO);
         } catch (SecurityException e) { /* we should ignore this update config exception*/ }
         mService.setNightMode(MODE_NIGHT_AUTO);
-        verify(mContext).registerReceiver(any(BroadcastReceiver.class), any());
+        verify(mContext, atLeastOnce()).registerReceiver(any(BroadcastReceiver.class), any());
     }
 
     @Test
@@ -105,7 +106,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
             mService.setNightMode(MODE_NIGHT_NO);
         } catch (SecurityException e) { /*we should ignore this update config exception*/ }
         given(mContext.registerReceiver(any(), any())).willThrow(SecurityException.class);
-        verify(mContext).unregisterReceiver(any(BroadcastReceiver.class));
+        verify(mContext, atLeastOnce()).unregisterReceiver(any(BroadcastReceiver.class));
     }
 
     @Test
