@@ -94,7 +94,8 @@ message Atom {
                 10 [(module) = "framework", (module) = "statsdtest"];
         LongPartialWakelockStateChanged long_partial_wakelock_state_changed =
                 11 [(module) = "framework"];
-        MobileRadioPowerStateChanged mobile_radio_power_state_changed = 12 [(module) = "framework"];
+        MobileRadioPowerStateChanged mobile_radio_power_state_changed =
+                12 [(module) = "framework", (truncate_timestamp) = true];
         WifiRadioPowerStateChanged wifi_radio_power_state_changed = 13 [(module) = "framework"];
         ActivityManagerSleepStateChanged activity_manager_sleep_state_changed =
                 14 [(module) = "framework"];
@@ -107,7 +108,8 @@ message Atom {
                 20 [(module) = "framework", (module) = "statsdtest"];
         DeviceIdleModeStateChanged device_idle_mode_state_changed = 21 [(module) = "framework"];
         DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22 [(module) = "framework"];
-        AudioStateChanged audio_state_changed = 23 [(module) = "framework"];
+        AudioStateChanged audio_state_changed =
+                23 [(module) = "framework", (truncate_timestamp) = true];
         MediaCodecStateChanged media_codec_state_changed = 24 [(module) = "framework"];
         CameraStateChanged camera_state_changed = 25 [(module) = "framework"];
         FlashlightStateChanged flashlight_state_changed = 26 [(module) = "framework"];
@@ -128,7 +130,8 @@ message Atom {
         WifiLockStateChanged wifi_lock_state_changed = 37 [(module) = "wifi"];
         WifiSignalStrengthChanged wifi_signal_strength_changed = 38 [(module) = "wifi"];
         WifiScanStateChanged wifi_scan_state_changed = 39 [(module) = "wifi"];
-        PhoneSignalStrengthChanged phone_signal_strength_changed = 40 [(module) = "framework"];
+        PhoneSignalStrengthChanged phone_signal_strength_changed =
+                40 [(module) = "framework", (truncate_timestamp) = true];
         SettingChanged setting_changed = 41 [(module) = "framework"];
         ActivityForegroundStateChanged activity_foreground_state_changed =
                 42 [(module) = "framework", (module) = "statsdtest"];
@@ -154,7 +157,8 @@ message Atom {
                 59 [(module) = "framework", (module) = "statsdtest"];
         ForegroundServiceStateChanged foreground_service_state_changed
                 = 60 [(module) = "framework"];
-        CallStateChanged call_state_changed = 61 [(module) = "telecom"];
+        CallStateChanged call_state_changed =
+                61 [(module) = "telecom", (truncate_timestamp) = true];
         KeyguardStateChanged keyguard_state_changed = 62 [(module) = "sysui"];
         KeyguardBouncerStateChanged keyguard_bouncer_state_changed = 63 [(module) = "sysui"];
         KeyguardBouncerPasswordEntered keyguard_bouncer_password_entered = 64 [(module) = "sysui"];
@@ -420,8 +424,10 @@ message Atom {
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
-        MobileBytesTransfer mobile_bytes_transfer = 10002 [(module) = "framework"];
-        MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 10003 [(module) = "framework"];
+        MobileBytesTransfer mobile_bytes_transfer =
+                10002 [(module) = "framework", (truncate_timestamp) = true];
+        MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg =
+                10003 [(module) = "framework", (truncate_timestamp) = true];
         BluetoothBytesTransfer bluetooth_bytes_transfer = 10006 [(module) = "framework"];
         KernelWakelock kernel_wakelock = 10004 [(module) = "framework"];
         SubsystemSleepState subsystem_sleep_state = 10005 [(module) = "statsdtest"];
