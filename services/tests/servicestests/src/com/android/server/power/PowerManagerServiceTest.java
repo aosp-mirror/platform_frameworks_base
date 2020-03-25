@@ -61,8 +61,8 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerSaveState;
-import android.os.SystemClock;
 import android.os.UserHandle;
+import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.service.dreams.DreamManagerInternal;
 import android.test.mock.MockContentResolver;
@@ -84,6 +84,7 @@ import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
 import com.android.server.power.batterysaver.BatterySavingStats;
+import com.android.server.testutils.OffsettableClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -132,6 +133,8 @@ public class PowerManagerServiceTest {
     private BatteryReceiver mBatteryReceiver;
     private UserSwitchedReceiver mUserSwitchedReceiver;
     private Resources mResourcesSpy;
+    private OffsettableClock mClock;
+    private TestLooper mTestLooper;
 
     private class IntentFilterMatcher implements ArgumentMatcher<IntentFilter> {
         private final IntentFilter mFilter;
@@ -189,6 +192,9 @@ public class PowerManagerServiceTest {
 
         Settings.Global.putInt(mContextSpy.getContentResolver(),
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN, 0);
+
+        mClock = new OffsettableClock.Stopped();
+        mTestLooper = new TestLooper(mClock::now);
     }
 
     private PowerManagerService createService() {
@@ -250,6 +256,16 @@ public class PowerManagerServiceTest {
             }
 
             @Override
+            PowerManagerService.Clock createClock() {
+                return () -> mClock.now();
+            }
+
+            @Override
+            Handler createHandler(Looper looper, Handler.Callback callback) {
+                return new Handler(mTestLooper.getLooper(), callback);
+            }
+
+            @Override
             void invalidateIsInteractiveCaches() {
                 // Avoids an SELinux failure.
             }
@@ -297,21 +313,21 @@ public class PowerManagerServiceTest {
     }
 
     private void forceSleep() {
-        mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
     }
 
     private void forceDream() {
-        mService.getBinderServiceInstance().nap(SystemClock.uptimeMillis());
+        mService.getBinderServiceInstance().nap(mClock.now());
     }
 
     private void forceAwake() {
-        mService.getBinderServiceInstance().wakeUp(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().wakeUp(mClock.now(),
                 PowerManager.WAKE_REASON_UNKNOWN, "testing IPowerManager.wakeUp()", "pkg.name");
     }
 
     private void forceDozing() {
-        mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
     }
 
@@ -339,6 +355,11 @@ public class PowerManagerServiceTest {
         when(mResourcesSpy.getInteger(
                 com.android.internal.R.integer.config_minimumScreenOffTimeout))
                 .thenReturn(minimumScreenOffTimeoutConfigMillis);
+    }
+
+    private void advanceTime(long timeMs) {
+        mClock.fastForward(timeMs);
+        mTestLooper.dispatchAll();
     }
 
     @Test
@@ -403,7 +424,7 @@ public class PowerManagerServiceTest {
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
 
         // Take a nap and verify.
-        mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
@@ -445,7 +466,7 @@ public class PowerManagerServiceTest {
         createService();
         startSystem();
         forceSleep();
-        mService.getBinderServiceInstance().wakeUp(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().wakeUp(mClock.now(),
                 PowerManager.WAKE_REASON_UNKNOWN, "testing IPowerManager.wakeUp()", "pkg.name");
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
     }
@@ -540,7 +561,7 @@ public class PowerManagerServiceTest {
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
 
         // Take a nap and verify.
-        mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
     }
@@ -550,7 +571,7 @@ public class PowerManagerServiceTest {
         int interval = 1000;
         createService();
         mService.onUserActivity();
-        SystemClock.sleep(interval + 1 /* just a little more */);
+        advanceTime(interval + 1 /* just a little more */);
         assertThat(mService.wasDeviceIdleForInternal(interval)).isTrue();
     }
 
@@ -678,7 +699,7 @@ public class PowerManagerServiceTest {
         mService.getBinderServiceInstance().acquireWakeLock(token, flags, tag, packageName,
                 null /* workSource */, null /* historyTag */);
         when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
-        mService.getBinderServiceInstance().goToSleep(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().goToSleep(mClock.now(),
                 PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_DOZING);
         assertFalse(isAcquired[0]);
@@ -718,16 +739,16 @@ public class PowerManagerServiceTest {
         createService();
         startSystem();
 
-        mService.getBinderServiceInstance().userActivity(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().userActivity(mClock.now(),
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
         verify(mInattentiveSleepWarningControllerMock, never()).show();
 
-        SystemClock.sleep(150);
+        advanceTime(150);
         verify(mInattentiveSleepWarningControllerMock, times(1)).show();
         verify(mInattentiveSleepWarningControllerMock, never()).dismiss(anyBoolean());
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
 
-        mService.getBinderServiceInstance().userActivity(SystemClock.uptimeMillis(),
+        mService.getBinderServiceInstance().userActivity(mClock.now(),
                 PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
         verify(mInattentiveSleepWarningControllerMock, times(1)).dismiss(true);
     }
@@ -740,10 +761,10 @@ public class PowerManagerServiceTest {
 
         createService();
         startSystem();
-        SystemClock.sleep(50);
+        advanceTime(50);
         verify(mInattentiveSleepWarningControllerMock, atLeastOnce()).show();
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(true);
-        SystemClock.sleep(70);
+        advanceTime(70);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
         forceAwake();
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
@@ -764,7 +785,7 @@ public class PowerManagerServiceTest {
         setAttentiveTimeout(5);
         createService();
         startSystem();
-        SystemClock.sleep(20);
+        advanceTime(20);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 
@@ -772,7 +793,7 @@ public class PowerManagerServiceTest {
     public void testInattentiveSleep_goesToSleepWithWakeLock() throws Exception {
         final String pkg = mContextSpy.getOpPackageName();
         final Binder token = new Binder();
-        final String tag = "sleep_testWithWakeLock";
+        final String tag = "testInattentiveSleep_goesToSleepWithWakeLock";
 
         setMinimumScreenOffTimeoutConfig(5);
         setAttentiveTimeout(30);
@@ -783,7 +804,7 @@ public class PowerManagerServiceTest {
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK, tag, pkg,
                 null /* workSource */, null /* historyTag */);
 
-        SystemClock.sleep(60);
+        advanceTime(60);
         assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_ASLEEP);
     }
 

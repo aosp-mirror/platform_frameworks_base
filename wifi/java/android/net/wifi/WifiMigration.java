@@ -522,7 +522,12 @@ public final class WifiMigration {
      */
     @NonNull
     public static SettingsMigrationData loadFromSettings(@NonNull Context context) {
-        return new SettingsMigrationData.Builder()
+        if (Settings.Global.getInt(
+                context.getContentResolver(), Settings.Global.WIFI_MIGRATION_COMPLETED, 0) == 1) {
+            // migration already complete, ignore.
+            return null;
+        }
+        SettingsMigrationData data = new SettingsMigrationData.Builder()
                 .setScanAlwaysAvailable(
                         Settings.Global.getInt(context.getContentResolver(),
                                 Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 1)
@@ -545,5 +550,9 @@ public final class WifiMigration {
                         Settings.Global.getInt(context.getContentResolver(),
                                 Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED, 0) == 1)
                 .build();
+        Settings.Global.putInt(
+                context.getContentResolver(), Settings.Global.WIFI_MIGRATION_COMPLETED, 1);
+        return data;
+
     }
 }

@@ -91,7 +91,8 @@ public abstract class PanelViewController {
     protected boolean mTracking;
     private boolean mTouchSlopExceeded;
     private int mTrackingPointer;
-    protected int mTouchSlop;
+    private int mTouchSlop;
+    private float mSlopMultiplier;
     protected boolean mHintAnimationRunning;
     private boolean mOverExpandedBeforeFling;
     private boolean mTouchAboveFalsingThreshold;
@@ -260,9 +261,17 @@ public abstract class PanelViewController {
     protected void loadDimens() {
         final ViewConfiguration configuration = ViewConfiguration.get(mView.getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
+        mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
         mHintDistance = mResources.getDimension(R.dimen.hint_move_distance);
         mUnlockFalsingThreshold = mResources.getDimensionPixelSize(
                 R.dimen.unlock_falsing_threshold);
+    }
+
+    protected float getTouchSlop(MotionEvent event) {
+        // Adjust the touch slop if another gesture may be being performed.
+        return event.getClassification() == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
+                ? mTouchSlop * mSlopMultiplier
+                : mTouchSlop;
     }
 
     private void addMovement(MotionEvent event) {
@@ -1111,7 +1120,8 @@ public abstract class PanelViewController {
                     addMovement(event);
                     if (scrolledToBottom || mTouchStartedInEmptyArea || mAnimatingOnDown) {
                         float hAbs = Math.abs(h);
-                        if ((h < -mTouchSlop || (mAnimatingOnDown && hAbs > mTouchSlop))
+                        float touchSlop = getTouchSlop(event);
+                        if ((h < -touchSlop || (mAnimatingOnDown && hAbs > touchSlop))
                                 && hAbs > Math.abs(x - mInitialTouchX)) {
                             cancelHeightAnimator();
                             startExpandMotion(x, y, true /* startTracking */, mExpandedHeight);
@@ -1228,7 +1238,8 @@ public abstract class PanelViewController {
 
                     // If the panel was collapsed when touching, we only need to check for the
                     // y-component of the gesture, as we have no conflicting horizontal gesture.
-                    if (Math.abs(h) > mTouchSlop && (Math.abs(h) > Math.abs(x - mInitialTouchX)
+                    if (Math.abs(h) > getTouchSlop(event)
+                            && (Math.abs(h) > Math.abs(x - mInitialTouchX)
                             || mIgnoreXTouchSlop)) {
                         mTouchSlopExceeded = true;
                         if (mGestureWaitForTouchSlop && !mTracking && !mCollapsedAndHeadsUpOnDown) {

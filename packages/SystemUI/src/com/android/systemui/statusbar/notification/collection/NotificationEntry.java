@@ -108,6 +108,12 @@ public final class NotificationEntry extends ListEntry {
     /** If this notification was filtered out, then the filter that did the filtering. */
     @Nullable NotifFilter mExcludingFilter;
 
+    /**
+     * The NotifFilter, if any, that was active on this notification during the previous run of
+     * the list builder.
+     */
+    @Nullable NotifFilter mPreviousExcludingFilter;
+
     /** If this was a group child that was promoted to the top level, then who did the promoting. */
     @Nullable NotifPromoter mNotifPromoter;
 

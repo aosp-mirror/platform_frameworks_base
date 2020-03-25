@@ -255,6 +255,7 @@ applications that come with the platform
     </privapp-permissions>
 
     <privapp-permissions package="com.android.networkstack.tethering">
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
         <permission name="android.permission.MANAGE_USB"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
@@ -398,6 +399,10 @@ applications that come with the platform
         <permission name="android.permission.REGISTER_STATS_PULL_ATOM"/>
         <!-- Permission required for testing system audio effect APIs. -->
         <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
+        <!-- Permissions required for CTS test - TunerTest -->
+        <permission name="android.permission.ACCESS_TV_DESCRAMBLER" />
+        <permission name="android.permission.ACCESS_TV_TUNER" />
+        <permission name="android.permission.TUNER_RESOURCE_ACCESS" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

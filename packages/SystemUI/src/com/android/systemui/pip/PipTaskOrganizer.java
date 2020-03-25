@@ -217,7 +217,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     @Override
-    public void taskAppeared(ActivityManager.RunningTaskInfo info) {
+    public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
                 getAspectRatioOrDefault(info.pictureInPictureParams),
@@ -250,7 +250,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     @Override
-    public void taskVanished(ActivityManager.RunningTaskInfo info) {
+    public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
         IWindowContainer token = info.token;
         Objects.requireNonNull(token, "Requires valid IWindowContainer");
         if (token.asBinder() != mToken.asBinder()) {
@@ -346,6 +346,7 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper
                 .crop(tx, mLeash, destinationBounds)
+                .resetScale(tx, mLeash, destinationBounds)
                 .round(tx, mLeash, mInPip);
         scheduleFinishResizePip(tx, destinationBounds, TRANSITION_DIRECTION_NONE, null);
     }

@@ -16,8 +16,6 @@
 
 package android.util.apk;
 
-import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256;
-import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.compareSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getContentDigestAlgorithmJcaDigestAlgorithm;
@@ -26,6 +24,7 @@ import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContent
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
+import static android.util.apk.ApkSigningBlockUtils.pickBestDigestForV4;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.os.Build;
@@ -213,22 +212,9 @@ public class ApkSignatureSchemeV3Verifier {
                     verityDigest, apk.length(), signatureInfo);
         }
 
-        result.digest = pickBestV3DigestForV4(contentDigests);
+        result.digest = pickBestDigestForV4(contentDigests);
 
         return result;
-    }
-
-    // Keep in sync with pickBestV3DigestForV4 in apksigner.V3SchemeVerifier.
-    private static byte[] pickBestV3DigestForV4(Map<Integer, byte[]> contentDigests) {
-        final int[] orderedContentDigestTypes =
-                {CONTENT_DIGEST_CHUNKED_SHA512, CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
-                        CONTENT_DIGEST_CHUNKED_SHA256};
-        for (int contentDigestType : orderedContentDigestTypes) {
-            if (contentDigests.containsKey(contentDigestType)) {
-                return contentDigests.get(contentDigestType);
-            }
-        }
-        return null;
     }
 
     private static VerifiedSigner verifySigner(

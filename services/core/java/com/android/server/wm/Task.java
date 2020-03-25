@@ -20,6 +20,9 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
@@ -129,11 +132,11 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.window.ITaskOrganizer;
 import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.Surface;
 import android.view.SurfaceControl;
+import android.window.ITaskOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
@@ -509,22 +512,6 @@ class Task extends WindowContainer<WindowContainer> {
                 _voiceSession, _voiceInteractor, stack);
     }
 
-    class TaskToken extends RemoteToken {
-        TaskToken(WindowContainer container) {
-            super(container);
-        }
-
-        @Override
-        public SurfaceControl getLeash() {
-            // We need to copy the SurfaceControl instead of returning the original
-            // because the Parcel FLAGS PARCELABLE_WRITE_RETURN_VALUE cause SurfaceControls
-            // to release themselves.
-            SurfaceControl sc = new SurfaceControl();
-            sc.copyFrom(getSurfaceControl());
-            return sc;
-        }
-    }
-
     /** Don't use constructor directly. This is only used by XML parser. */
     Task(ActivityTaskManagerService atmService, int _taskId, Intent _intent, Intent _affinityIntent,
             String _affinity, String _rootAffinity, ComponentName _realActivity,
@@ -550,7 +537,7 @@ class Task extends WindowContainer<WindowContainer> {
         mTaskDescription = _lastTaskDescription;
         // Tasks have no set orientation value (including SCREEN_ORIENTATION_UNSPECIFIED).
         setOrientation(SCREEN_ORIENTATION_UNSET);
-        mRemoteToken = new TaskToken(this);
+        mRemoteToken = new RemoteToken(this);
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
@@ -594,6 +581,14 @@ class Task extends WindowContainer<WindowContainer> {
         voiceInteractor = _voiceInteractor;
         setIntent(activity, intent, info);
         setMinDimensions(info);
+        // Before we began to reuse a root task (old ActivityStack) as the leaf task, we used to
+        // create a leaf task in this case. Therefore now we won't send out the task created
+        // notification when we decide to reuse it here, so we send out the notification below.
+        // The reason why the created notification sent out when root task is created doesn't work
+        // is that realActivity isn't set until setIntent() method above is called for the first
+        // time. Eventually this notification will be removed when we can populate those information
+        // when root task is created.
+        mAtmService.getTaskChangeNotificationController().notifyTaskCreated(mTaskId, realActivity);
         return this;
     }
 
@@ -602,11 +597,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        // TODO(xutan): Removed type check after stack and task is merged.
-        // Before the real merge of stack and task, we need to avoid saving state of stacks. Once
-        // the merge is finished we can just pass DisplayContent because both windowing mode and
-        // bounds are set in the merged task.
-        if (oldParent instanceof ActivityStack) {
+        if (isLeafTask()) {
             // This task is going away, so save the last state if necessary.
             saveLaunchingStateIfNeeded(((WindowContainer) oldParent).getDisplayContent());
         }
@@ -3110,7 +3101,7 @@ class Task extends WindowContainer<WindowContainer> {
         /**
          * Animations are handled by the TaskOrganizer implementation.
          */
-        if (isControlledByTaskOrganizer()) {
+        if (isOrganized()) {
             return false;
         }
         // Don't animate while the task runs recents animation but only if we are in the mode
@@ -3212,6 +3203,20 @@ class Task extends WindowContainer<WindowContainer> {
 
     TaskDescription getTaskDescription() {
         return mTaskDescription;
+    }
+
+    @Override
+    int getOrientation(int candidate) {
+        return canSpecifyOrientation() ? super.getOrientation(candidate) : SCREEN_ORIENTATION_UNSET;
+    }
+
+    private boolean canSpecifyOrientation() {
+        final int windowingMode = getWindowingMode();
+        final int activityType = getActivityType();
+        return windowingMode == WINDOWING_MODE_FULLSCREEN
+                || activityType == ACTIVITY_TYPE_HOME
+                || activityType == ACTIVITY_TYPE_RECENTS
+                || activityType == ACTIVITY_TYPE_ASSISTANT;
     }
 
     @Override
@@ -4014,7 +4019,8 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    boolean isControlledByTaskOrganizer() {
+    @Override
+    boolean isOrganized() {
         final Task rootTask = getRootTask();
         // if the rootTask is a "child" of a tile, then don't consider it a root task.
         // TODO: remove this along with removing tile.
@@ -4030,7 +4036,7 @@ class Task extends WindowContainer<WindowContainer> {
          * Avoid yanking back control from the TaskOrganizer, which has presumably reparented the
          * Surface in to its own hierarchy.
          */
-        if (isControlledByTaskOrganizer()) {
+        if (isOrganized()) {
             return;
         }
         super.reparentSurfaceControl(t, newParent);
@@ -4115,27 +4121,6 @@ class Task extends WindowContainer<WindowContainer> {
         // If the TaskOrganizer was set before we created the SurfaceControl, we need to
         // emit the callbacks now.
         sendTaskAppeared();
-    }
-
-    @Override
-    public void updateSurfacePosition() {
-        // Avoid fighting with the TaskOrganizer over Surface position.
-        if (isControlledByTaskOrganizer()) {
-            return;
-        } else {
-            super.updateSurfacePosition();
-        }
-    }
-
-    @Override
-    void getRelativeDisplayedPosition(Point outPos) {
-        // In addition to updateSurfacePosition, we keep other code that sets
-        // position from fighting with the TaskOrganizer
-        if (isControlledByTaskOrganizer()) {
-            outPos.set(0, 0);
-            return;
-        }
-        super.getRelativeDisplayedPosition(outPos);
     }
 
     /**

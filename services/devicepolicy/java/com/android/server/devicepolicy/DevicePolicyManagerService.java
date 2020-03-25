@@ -136,7 +136,7 @@ import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyEventLogger;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
-import android.app.admin.DevicePolicyManager.PersonalAppSuspensionReason;
+import android.app.admin.DevicePolicyManager.PersonalAppsSuspensionReason;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.FactoryResetProtectionPolicy;
@@ -935,10 +935,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 }
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
                 handlePackagesChanged(null /* check all admins */, userHandle);
-            } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
-                    || (Intent.ACTION_PACKAGE_ADDED.equals(action)
-                    && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))) {
+            } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)) {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
+            } else if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+                if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
+                } else {
+                    handleNewPackageInstalled(intent.getData().getSchemeSpecificPart(), userHandle);
+                }
             } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
@@ -2028,6 +2032,26 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return false;
     }
 
+    private void handleNewPackageInstalled(String packageName, int userHandle) {
+        // If personal apps were suspended by the admin, suspend the newly installed one.
+        if (!getUserData(userHandle).mAppsSuspended) {
+            return;
+        }
+        final String[] packagesToSuspend = { packageName };
+        // Check if package is considered not suspendable?
+        if (mInjector.getPackageManager(userHandle)
+                .getUnsuspendablePackages(packagesToSuspend).length != 0) {
+            Slog.i(LOG_TAG, "Newly installed package is unsuspendable: " + packageName);
+            return;
+        }
+        try {
+            mIPackageManager.setPackagesSuspendedAsUser(packagesToSuspend, true /*suspend*/,
+                    null, null, null, PLATFORM_PACKAGE_NAME, userHandle);
+        } catch (RemoteException ignored) {
+            // shouldn't happen.
+        }
+    }
+
     /**
      * Unit test will subclass it to inject mocks.
      */
@@ -2108,6 +2132,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         PackageManager getPackageManager() {
             return mContext.getPackageManager();
+        }
+
+        PackageManager getPackageManager(int userId) {
+            return mContext
+                    .createContextAsUser(UserHandle.of(userId), 0 /* flags */).getPackageManager();
         }
 
         PowerManagerInternal getPowerManagerInternal() {
@@ -15650,7 +15679,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public @PersonalAppSuspensionReason int getPersonalAppsSuspendedReasons(ComponentName who) {
+    public @PersonalAppsSuspensionReason int getPersonalAppsSuspendedReasons(ComponentName who) {
         synchronized (getLockObject()) {
             final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_ORGANIZATION_OWNED_PROFILE_OWNER,
@@ -15669,7 +15698,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private @PersonalAppSuspensionReason int makeSuspensionReasons(
+    private @PersonalAppsSuspensionReason int makeSuspensionReasons(
             boolean explicit, boolean timeout) {
         int result = PERSONAL_APPS_NOT_SUSPENDED;
         if (explicit) {
@@ -15793,7 +15822,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void applyPersonalAppsSuspension(
-            int profileUserId, @PersonalAppSuspensionReason int suspensionState) {
+            int profileUserId, @PersonalAppsSuspensionReason int suspensionState) {
         final boolean suspended = getUserData(UserHandle.USER_SYSTEM).mAppsSuspended;
         final boolean shouldSuspend = suspensionState != PERSONAL_APPS_NOT_SUSPENDED;
         if (suspended != shouldSuspend) {
@@ -15813,8 +15842,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.binderWithCleanCallingIdentity(() -> {
             try {
                 final String[] appsToSuspend =
-                        new PersonalAppsSuspensionHelper(mContext, mInjector.getPackageManager())
-                                .getPersonalAppsForSuspension(userId);
+                        new PersonalAppsSuspensionHelper(
+                                mContext.createContextAsUser(UserHandle.of(userId), 0 /* flags */))
+                                .getPersonalAppsForSuspension();
                 final String[] failedPackages = mIPackageManager.setPackagesSuspendedAsUser(
                         appsToSuspend, suspended, null, null, null, PLATFORM_PACKAGE_NAME, userId);
                 if (!ArrayUtils.isEmpty(failedPackages)) {

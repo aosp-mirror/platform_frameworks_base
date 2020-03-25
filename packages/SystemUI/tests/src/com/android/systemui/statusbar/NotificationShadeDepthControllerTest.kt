@@ -22,7 +22,6 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
 import android.view.View
 import android.view.ViewRootImpl
-import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
@@ -35,10 +34,14 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.any
+import org.mockito.Mockito.anyFloat
+import org.mockito.Mockito.anyString
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 @RunWith(AndroidTestingRunner::class)
@@ -56,7 +59,8 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var root: View
     @Mock private lateinit var viewRootImpl: ViewRootImpl
-    @Mock private lateinit var shadeSpring: SpringAnimation
+    @Mock private lateinit var shadeSpring: NotificationShadeDepthController.DepthAnimation
+    @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     private lateinit var statusBarStateListener: StatusBarStateController.StateListener
@@ -76,6 +80,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 keyguardStateController, choreographer, wallpaperManager,
                 notificationShadeWindowController, dumpManager)
         notificationShadeDepthController.shadeSpring = shadeSpring
+        notificationShadeDepthController.globalActionsSpring = globalActionsSpring
         notificationShadeDepthController.root = root
 
         val captor = ArgumentCaptor.forClass(StatusBarStateController.StateListener::class.java)
@@ -92,7 +97,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     fun onPanelExpansionChanged_apliesBlur_ifShade() {
         notificationShadeDepthController.onPanelExpansionChanged(1f /* expansion */,
                 false /* tracking */)
-        verify(shadeSpring).animateToFinalPosition(eq(maxBlur.toFloat()))
+        verify(shadeSpring).animateTo(eq(maxBlur), any())
     }
 
     @Test
@@ -102,13 +107,13 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
 
         statusBarState = StatusBarState.KEYGUARD
         statusBarStateListener.onStateChanged(statusBarState)
-        verify(shadeSpring).animateToFinalPosition(eq(0f))
+        verify(shadeSpring).animateTo(eq(0), any())
     }
 
     @Test
-    fun updateGlobalDialogVisibility_schedulesUpdate() {
+    fun updateGlobalDialogVisibility_appliesBlur() {
         notificationShadeDepthController.updateGlobalDialogVisibility(0.5f, root)
-        verify(choreographer).postFrameCallback(any())
+        verify(globalActionsSpring).animateTo(eq(maxBlur / 2), safeEq(root))
     }
 
     private fun <T : Any> safeEq(value: T): T {

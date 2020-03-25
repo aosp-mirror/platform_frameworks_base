@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.InsetsState.ITYPE_IME;
+import static android.view.InsetsState.toInternalType;
 import static android.view.InsetsState.toPublicType;
 import static android.view.WindowInsets.Type.all;
 import static android.view.WindowInsets.Type.ime;
@@ -26,8 +27,6 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONT
 import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -38,11 +37,9 @@ import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.RemoteException;
-import android.renderscript.Sampler.Value;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Property;
 import android.util.SparseArray;
 import android.view.InsetsSourceConsumer.ShowResult;
 import android.view.InsetsState.InternalInsetsType;
@@ -363,9 +360,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private final Runnable mAnimCallback;
 
-    private final Rect mLastLegacyContentInsets = new Rect();
-    private final Rect mLastLegacyStableInsets = new Rect();
-
     /** Pending control request that is waiting on IME to be ready to be shown */
     private PendingControlRequest mPendingImeControlRequest;
 
@@ -435,8 +429,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
             WindowInsets insets = state.calculateInsets(mFrame, mState /* ignoringVisibilityState*/,
                     mLastInsets.isRound(), mLastInsets.shouldAlwaysConsumeSystemBars(),
-                    mLastDisplayCutout, mLastLegacyContentInsets, mLastLegacyStableInsets,
-                    mLastLegacySoftInputMode, mLastLegacySystemUiFlags, null /* typeSideMap */);
+                    mLastDisplayCutout, mLastLegacySoftInputMode, mLastLegacySystemUiFlags,
+                    null /* typeSideMap */);
             mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets,
                     mUnmodifiableTmpRunningAnims);
 
@@ -466,17 +460,34 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public boolean onStateChanged(InsetsState state) {
-        if (mState.equals(state) && mLastDispachedState.equals(state)) {
+        boolean localStateChanged = !mState.equals(state);
+        if (!localStateChanged && mLastDispachedState.equals(state)) {
             return false;
         }
-        mState.set(state);
+        updateState(state);
         mLastDispachedState.set(state, true /* copySources */);
         applyLocalVisibilityOverride();
-        mViewRoot.notifyInsetsChanged();
+        if (localStateChanged) {
+            mViewRoot.notifyInsetsChanged();
+        }
         if (!mState.equals(mLastDispachedState)) {
             sendStateToWindowManager();
         }
         return true;
+    }
+
+    private void updateState(InsetsState newState) {
+        mState.setDisplayFrame(newState.getDisplayFrame());
+        for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
+            InsetsSource source = newState.sourceAt(i);
+            getSourceConsumer(source.getType()).updateSource(source);
+        }
+        for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
+            InsetsSource source = mState.sourceAt(i);
+            if (newState.peekSource(source.getType()) == null) {
+                mState.removeSource(source.getType());
+            }
+        }
     }
 
     /**
@@ -484,26 +495,23 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      */
     @VisibleForTesting
     public WindowInsets calculateInsets(boolean isScreenRound,
-            boolean alwaysConsumeSystemBars, DisplayCutout cutout, Rect legacyContentInsets,
-            Rect legacyStableInsets, int legacySoftInputMode, int legacySystemUiFlags) {
-        mLastLegacyContentInsets.set(legacyContentInsets);
-        mLastLegacyStableInsets.set(legacyStableInsets);
+            boolean alwaysConsumeSystemBars, DisplayCutout cutout,
+            int legacySoftInputMode, int legacySystemUiFlags) {
         mLastLegacySoftInputMode = legacySoftInputMode;
         mLastLegacySystemUiFlags = legacySystemUiFlags;
         mLastDisplayCutout = cutout;
         mLastInsets = mState.calculateInsets(mFrame, null /* ignoringVisibilityState*/,
-                isScreenRound, alwaysConsumeSystemBars, cutout, legacyContentInsets,
-                legacyStableInsets, legacySoftInputMode, legacySystemUiFlags,
+                isScreenRound, alwaysConsumeSystemBars, cutout,
+                legacySoftInputMode, legacySystemUiFlags,
                 null /* typeSideMap */);
         return mLastInsets;
     }
 
     /**
-     * @see InsetsState#calculateVisibleInsets(Rect, Rect, int)
+     * @see InsetsState#calculateVisibleInsets(Rect, int)
      */
-    public Rect calculateVisibleInsets(Rect legacyVisibleInsets,
-            @SoftInputModeFlags int softInputMode) {
-        return mState.calculateVisibleInsets(mFrame, legacyVisibleInsets, softInputMode);
+    public Rect calculateVisibleInsets(@SoftInputModeFlags int softInputMode) {
+        return mState.calculateVisibleInsets(mFrame, softInputMode);
     }
 
     /**
@@ -861,8 +869,15 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             control.cancel();
         }
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
-            if (mRunningAnimations.get(i).runner == control) {
+            RunningAnimation runningAnimation = mRunningAnimations.get(i);
+            if (runningAnimation.runner == control) {
                 mRunningAnimations.remove(i);
+                ArraySet<Integer> types = toInternalType(control.getTypes());
+                for (int j = types.size() - 1; j >= 0; j--) {
+                    if (getSourceConsumer(types.valueAt(j)).notifyAnimationFinished()) {
+                        mViewRoot.notifyInsetsChanged();
+                    }
+                }
                 break;
             }
         }
@@ -954,7 +969,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             }
         }
 
-        // TODO: Put this on a dispatcher thread.
         try {
             mViewRoot.mWindowSession.insetsModified(mViewRoot.mWindow, tmpState);
         } catch (RemoteException e) {

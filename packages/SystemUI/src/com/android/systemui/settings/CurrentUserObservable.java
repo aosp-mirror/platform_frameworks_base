@@ -38,7 +38,7 @@ public class CurrentUserObservable {
         @Override
         protected void onInactive() {
             super.onInactive();
-            mTracker.startTracking();
+            mTracker.stopTracking();
         }
     };
 

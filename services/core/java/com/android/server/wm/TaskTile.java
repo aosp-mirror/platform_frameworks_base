@@ -218,7 +218,7 @@ public class TaskTile extends ActivityStack {
 
     static TaskTile forToken(IBinder token) {
         try {
-            return (TaskTile) ((TaskToken) token).getContainer();
+            return (TaskTile) ((RemoteToken) token).getContainer();
         } catch (ClassCastException e) {
             Slog.w(TAG, "Bad tile token: " + token, e);
             return null;

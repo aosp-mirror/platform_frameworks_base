@@ -233,6 +233,7 @@ public class BubbleData {
                 Bubble b = mOverflowBubbles.get(i);
                 if (b.getKey().equals(entry.getKey())) {
                     moveOverflowBubbleToPending(b);
+                    b.setEntry(entry);
                     return b;
                 }
             }
@@ -240,6 +241,7 @@ public class BubbleData {
             for (int i = 0; i < mPendingBubbles.size(); i++) {
                 Bubble b = mPendingBubbles.get(i);
                 if (b.getKey().equals(entry.getKey())) {
+                    b.setEntry(entry);
                     return b;
                 }
             }
@@ -403,6 +405,9 @@ public class BubbleData {
     }
 
     private void doRemove(String key, @DismissReason int reason) {
+        if (DEBUG_BUBBLE_DATA) {
+            Log.d(TAG, "doRemove: " + key);
+        }
         //  If it was pending remove it
         for (int i = 0; i < mPendingBubbles.size(); i++) {
             if (mPendingBubbles.get(i).getKey().equals(key)) {
@@ -445,15 +450,14 @@ public class BubbleData {
         if (reason == BubbleController.DISMISS_AGED
                 || reason == BubbleController.DISMISS_USER_GESTURE) {
             if (DEBUG_BUBBLE_DATA) {
-                Log.d(TAG, "overflowing bubble: " + bubble);
+                Log.d(TAG, "Overflowing: " + bubble);
             }
             mOverflowBubbles.add(0, bubble);
             bubble.stopInflation();
-
             if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
                 // Remove oldest bubble.
                 if (DEBUG_BUBBLE_DATA) {
-                    Log.d(TAG, "Overflow full. Remove bubble: " + mOverflowBubbles.get(
+                    Log.d(TAG, "Overflow full. Remove: " + mOverflowBubbles.get(
                             mOverflowBubbles.size() - 1));
                 }
                 mOverflowBubbles.remove(mOverflowBubbles.size() - 1);
