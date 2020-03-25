@@ -13070,26 +13070,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final boolean addingProfileRestricted = mUserManager.hasUserRestriction(
                     UserManager.DISALLOW_ADD_MANAGED_PROFILE, callingUserHandle);
 
-            UserInfo parentUser = mUserManager.getProfileParent(callingUserId);
-            final boolean addingProfileRestrictedOnParent = (parentUser != null)
-                    && mUserManager.hasUserRestriction(
-                            UserManager.DISALLOW_ADD_MANAGED_PROFILE,
-                            UserHandle.of(parentUser.id));
+            if (mUserManager.getUserInfo(callingUserId).isProfile()) {
+                Slog.i(LOG_TAG,
+                        String.format("Calling user %d is a profile, cannot add another.",
+                                callingUserId));
+                // The check is called from inside a managed profile. A managed profile cannot
+                // be provisioned from within another managed profile.
+                return CODE_CANNOT_ADD_MANAGED_PROFILE;
+            }
 
-            Slog.i(LOG_TAG, String.format(
-                    "When checking for managed profile provisioning: Has device owner? %b, adding"
-                            + " profile restricted? %b, adding profile restricted on parent? %b",
-                    hasDeviceOwner, addingProfileRestricted, addingProfileRestrictedOnParent));
-
-            // If there's a device owner, the restriction on adding a managed profile must be set
-            // somewhere.
-            if (hasDeviceOwner && !addingProfileRestricted && !addingProfileRestrictedOnParent) {
+            // If there's a device owner, the restriction on adding a managed profile must be set.
+            if (hasDeviceOwner && !addingProfileRestricted) {
                 Slog.wtf(LOG_TAG, "Has a device owner but no restriction on adding a profile.");
             }
 
-            // Do not allow adding a managed profile if there's a restriction, either on the current
-            // user or its parent user.
-            if (addingProfileRestricted || addingProfileRestrictedOnParent) {
+            // Do not allow adding a managed profile if there's a restriction.
+            if (addingProfileRestricted) {
+                Slog.i(LOG_TAG, String.format(
+                        "Adding a profile is restricted: User %s Has device owner? %b",
+                        callingUserHandle, hasDeviceOwner));
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }
             // If there's a restriction on removing the managed profile then we have to take it
@@ -13098,6 +13097,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     !mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
                     callingUserHandle);
             if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
+                Slog.i(LOG_TAG, String.format(
+                        "Cannot add more profiles: Can remove current? %b", canRemoveProfile));
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }
         } finally {
