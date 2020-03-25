@@ -16,14 +16,14 @@
 
 #pragma once
 
-#include "Collation.h"
+#include <stdio.h>
+#include <string.h>
 
 #include <map>
 #include <set>
 #include <vector>
 
-#include <stdio.h>
-#include <string.h>
+#include "Collation.h"
 
 namespace android {
 namespace stats_log_api_gen {
@@ -52,11 +52,12 @@ void write_closing_namespace(FILE* out, const string& cppNamespaces);
 void write_native_atom_constants(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl);
 
 void write_native_method_signature(FILE* out, const string& methodName,
-        const vector<java_type_t>& signature, const AtomDecl& attributionDecl,
-        const string& closer);
+                                   const vector<java_type_t>& signature,
+                                   const AtomDecl& attributionDecl, const string& closer);
 
 void write_native_method_call(FILE* out, const string& methodName,
-        const vector<java_type_t>& signature, const AtomDecl& attributionDecl, int argIndex = 1);
+                              const vector<java_type_t>& signature, const AtomDecl& attributionDecl,
+                              int argIndex = 1);
 
 // Common Java helpers.
 void write_java_atom_codes(FILE* out, const Atoms& atoms);
@@ -64,14 +65,13 @@ void write_java_atom_codes(FILE* out, const Atoms& atoms);
 void write_java_enum_values(FILE* out, const Atoms& atoms);
 
 void write_java_usage(FILE* out, const string& method_name, const string& atom_code_name,
-        const AtomDecl& atom);
+                      const AtomDecl& atom);
 
-int write_java_non_chained_methods(FILE* out, const map<vector<java_type_t>,
-        FieldNumberToAnnotations>& signatureInfoMap);
+int write_java_non_chained_methods(
+        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap);
 
 int write_java_work_source_methods(
-        FILE* out,
-        const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap);
+        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap);
 
 }  // namespace stats_log_api_gen
 }  // namespace android

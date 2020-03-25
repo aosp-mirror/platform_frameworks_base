@@ -15,45 +15,38 @@
  */
 
 #include "native_writer.h"
+
 #include "utils.h"
 
 namespace android {
 namespace stats_log_api_gen {
 
-static void write_annotations(
-        FILE* out, int argIndex,
-        const FieldNumberToAnnotations& fieldNumberToAnnotations,
-        const string& methodPrefix,
-        const string& methodSuffix) {
+static void write_annotations(FILE* out, int argIndex,
+                              const FieldNumberToAnnotations& fieldNumberToAnnotations,
+                              const string& methodPrefix, const string& methodSuffix) {
     auto fieldNumberToAnnotationsIt = fieldNumberToAnnotations.find(argIndex);
     if (fieldNumberToAnnotationsIt == fieldNumberToAnnotations.end()) {
         return;
     }
-    const set<shared_ptr<Annotation>>& annotations =
-            fieldNumberToAnnotationsIt->second;
+    const set<shared_ptr<Annotation>>& annotations = fieldNumberToAnnotationsIt->second;
     for (const shared_ptr<Annotation>& annotation : annotations) {
         // TODO(b/151744250): Group annotations for same atoms.
         // TODO(b/151786433): Write atom constant name instead of atom id literal.
         fprintf(out, "    if (code == %d) {\n", annotation->atomId);
-        switch(annotation->type) {
-            // TODO(b/151776731): Check for reset state annotation and only include reset state
-            // when field value == default state annotation value.
+        switch (annotation->type) {
+            // TODO(b/151776731): Check for reset state annotation and only include
+            // reset state when field value == default state annotation value.
             case ANNOTATION_TYPE_INT:
                 // TODO(b/151786433): Write annotation constant name instead of
                 // annotation id literal.
-                fprintf(out, "        %saddInt32Annotation(%s%d, %d);\n",
-                        methodPrefix.c_str(),
-                        methodSuffix.c_str(),
-                        annotation->annotationId,
-                        annotation->value.intValue);
+                fprintf(out, "        %saddInt32Annotation(%s%d, %d);\n", methodPrefix.c_str(),
+                        methodSuffix.c_str(), annotation->annotationId, annotation->value.intValue);
                 break;
             case ANNOTATION_TYPE_BOOL:
                 // TODO(b/151786433): Write annotation constant name instead of
                 // annotation id literal.
-                fprintf(out, "        %saddBoolAnnotation(%s%d, %s);\n",
-                        methodPrefix.c_str(),
-                        methodSuffix.c_str(),
-                        annotation->annotationId,
+                fprintf(out, "        %saddBoolAnnotation(%s%d, %s);\n", methodPrefix.c_str(),
+                        methodSuffix.c_str(), annotation->annotationId,
                         annotation->value.boolValue ? "true" : "false");
                 break;
             default:
@@ -61,29 +54,28 @@ static void write_annotations(
         }
         fprintf(out, "    }\n");
     }
-
 }
 
 static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
-        const AtomDecl& attributionDecl, const bool supportQ) {
+                                            const AtomDecl& attributionDecl, const bool supportQ) {
     fprintf(out, "\n");
     for (auto signatureInfoMapIt = atoms.signatureInfoMap.begin();
-            signatureInfoMapIt != atoms.signatureInfoMap.end(); signatureInfoMapIt++) {
+         signatureInfoMapIt != atoms.signatureInfoMap.end(); signatureInfoMapIt++) {
         vector<java_type_t> signature = signatureInfoMapIt->first;
         const FieldNumberToAnnotations& fieldNumberToAnnotations = signatureInfoMapIt->second;
         // Key value pairs not supported in native.
         if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
             continue;
         }
-        write_native_method_signature(out, "int stats_write", signature,
-                attributionDecl, " {");
+        write_native_method_signature(out, "int stats_write", signature, attributionDecl, " {");
 
         int argIndex = 1;
         if (supportQ) {
             fprintf(out, "    StatsEventCompat event;\n");
             fprintf(out, "    event.setAtomId(code);\n");
+            write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAnnotations, "event.", "");
             for (vector<java_type_t>::const_iterator arg = signature.begin();
-                    arg != signature.end(); arg++) {
+                 arg != signature.end(); arg++) {
                 switch (*arg) {
                     case JAVA_TYPE_ATTRIBUTION_CHAIN: {
                         const char* uidName = attributionDecl.fields.front().name.c_str();
@@ -99,7 +91,7 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                     case JAVA_TYPE_BOOLEAN:
                         fprintf(out, "    event.writeBool(arg%d);\n", argIndex);
                         break;
-                    case JAVA_TYPE_INT: // Fall through.
+                    case JAVA_TYPE_INT:  // Fall through.
                     case JAVA_TYPE_ENUM:
                         fprintf(out, "    event.writeInt32(arg%d);\n", argIndex);
                         break;
@@ -124,8 +116,10 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
         } else {
             fprintf(out, "    AStatsEvent* event = AStatsEvent_obtain();\n");
             fprintf(out, "    AStatsEvent_setAtomId(event, code);\n");
+            write_annotations(out, ATOM_ID_FIELD_NUMBER, fieldNumberToAnnotations, "AStatsEvent_",
+                              "event, ");
             for (vector<java_type_t>::const_iterator arg = signature.begin();
-                    arg != signature.end(); arg++) {
+                 arg != signature.end(); arg++) {
                 switch (*arg) {
                     case JAVA_TYPE_ATTRIBUTION_CHAIN: {
                         const char* uidName = attributionDecl.fields.front().name.c_str();
@@ -140,13 +134,14 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                     case JAVA_TYPE_BYTE_ARRAY:
                         fprintf(out,
                                 "    AStatsEvent_writeByteArray(event, "
-                                "reinterpret_cast<const uint8_t*>(arg%d.arg), arg%d.arg_length);\n",
+                                "reinterpret_cast<const uint8_t*>(arg%d.arg), "
+                                "arg%d.arg_length);\n",
                                 argIndex, argIndex);
                         break;
                     case JAVA_TYPE_BOOLEAN:
                         fprintf(out, "    AStatsEvent_writeBool(event, arg%d);\n", argIndex);
                         break;
-                    case JAVA_TYPE_INT: // Fall through.
+                    case JAVA_TYPE_INT:  // Fall through.
                     case JAVA_TYPE_ENUM:
                         fprintf(out, "    AStatsEvent_writeInt32(event, arg%d);\n", argIndex);
                         break;
@@ -165,7 +160,7 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
                         return 1;
                 }
                 write_annotations(out, argIndex, fieldNumberToAnnotations, "AStatsEvent_",
-                        "event, ");
+                                  "event, ");
                 argIndex++;
             }
             fprintf(out, "    const int ret = AStatsEvent_write(event);\n");
@@ -178,10 +173,10 @@ static int write_native_stats_write_methods(FILE* out, const Atoms& atoms,
 }
 
 static void write_native_stats_write_non_chained_methods(FILE* out, const Atoms& atoms,
-        const AtomDecl& attributionDecl) {
+                                                         const AtomDecl& attributionDecl) {
     fprintf(out, "\n");
     for (auto signature_it = atoms.nonChainedSignatureInfoMap.begin();
-            signature_it != atoms.nonChainedSignatureInfoMap.end(); signature_it++) {
+         signature_it != atoms.nonChainedSignatureInfoMap.end(); signature_it++) {
         vector<java_type_t> signature = signature_it->first;
         // Key value pairs not supported in native.
         if (find(signature.begin(), signature.end(), JAVA_TYPE_KEY_VALUE_PAIR) != signature.end()) {
@@ -189,7 +184,7 @@ static void write_native_stats_write_non_chained_methods(FILE* out, const Atoms&
         }
 
         write_native_method_signature(out, "int stats_write_non_chained", signature,
-                attributionDecl, " {");
+                                      attributionDecl, " {");
 
         vector<java_type_t> newSignature;
 
@@ -212,17 +207,14 @@ static void write_native_stats_write_non_chained_methods(FILE* out, const Atoms&
 
         fprintf(out, "}\n\n");
     }
-
 }
 
 static void write_native_method_header(
-        FILE* out,
-        const string& methodName,
+        FILE* out, const string& methodName,
         const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap,
-        const AtomDecl &attributionDecl) {
-
+        const AtomDecl& attributionDecl) {
     for (auto signatureInfoMapIt = signatureInfoMap.begin();
-            signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
+         signatureInfoMapIt != signatureInfoMap.end(); signatureInfoMapIt++) {
         vector<java_type_t> signature = signatureInfoMapIt->first;
 
         // Key value pairs not supported in native.
@@ -233,9 +225,9 @@ static void write_native_method_header(
     }
 }
 
-int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributionDecl,
-                        const string& cppNamespace,
-                        const string& importHeader, const bool supportQ) {
+int write_stats_log_cpp(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
+                        const string& cppNamespace, const string& importHeader,
+                        const bool supportQ) {
     // Print prelude
     fprintf(out, "// This file is autogenerated\n");
     fprintf(out, "\n");
@@ -260,8 +252,8 @@ int write_stats_log_cpp(FILE *out, const Atoms &atoms, const AtomDecl &attributi
     return 0;
 }
 
-int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl,
-        const string& cppNamespace) {
+int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl& attributionDecl,
+                           const string& cppNamespace) {
     // Print prelude
     fprintf(out, "// This file is autogenerated\n");
     fprintf(out, "\n");
@@ -286,21 +278,18 @@ int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attrib
     fprintf(out, "//\n");
     fprintf(out, "// Constants for enum values\n");
     fprintf(out, "//\n\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-        atom != atoms.decls.end(); atom++) {
-
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
+         atom++) {
         for (vector<AtomField>::const_iterator field = atom->fields.begin();
-            field != atom->fields.end(); field++) {
+             field != atom->fields.end(); field++) {
             if (field->javaType == JAVA_TYPE_ENUM) {
-                fprintf(out, "// Values for %s.%s\n", atom->message.c_str(),
-                    field->name.c_str());
+                fprintf(out, "// Values for %s.%s\n", atom->message.c_str(), field->name.c_str());
                 for (map<int, string>::const_iterator value = field->enumValues.begin();
-                    value != field->enumValues.end(); value++) {
+                     value != field->enumValues.end(); value++) {
                     fprintf(out, "const int32_t %s__%s__%s = %d;\n",
-                        make_constant_name(atom->message).c_str(),
-                        make_constant_name(field->name).c_str(),
-                        make_constant_name(value->second).c_str(),
-                        value->first);
+                            make_constant_name(atom->message).c_str(),
+                            make_constant_name(field->name).c_str(),
+                            make_constant_name(value->second).c_str(), value->first);
                 }
                 fprintf(out, "\n");
             }
@@ -325,8 +314,8 @@ int write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attrib
     fprintf(out, "//\n");
     fprintf(out, "// Write flattened methods\n");
     fprintf(out, "//\n");
-    write_native_method_header(out, "int stats_write_non_chained",
-            atoms.nonChainedSignatureInfoMap, attributionDecl);
+    write_native_method_header(out, "int stats_write_non_chained", atoms.nonChainedSignatureInfoMap,
+                               attributionDecl);
 
     fprintf(out, "\n");
     write_closing_namespace(out, cppNamespace);
