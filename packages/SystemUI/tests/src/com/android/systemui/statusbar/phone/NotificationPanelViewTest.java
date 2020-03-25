@@ -67,6 +67,7 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
+import com.android.systemui.statusbar.notification.UnreadConversationBadgeManager;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -169,6 +170,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private ZenModeController mZenModeController;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private UnreadConversationBadgeManager mUnreadConversationBadgeManager;
     private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
     private NotificationPanelViewController mNotificationPanelViewController;
@@ -223,7 +226,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mDozeParameters, mCommandQueue, mVibratorHelper,
                 mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
-                mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager);
+                mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
+                mUnreadConversationBadgeManager);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelf, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);

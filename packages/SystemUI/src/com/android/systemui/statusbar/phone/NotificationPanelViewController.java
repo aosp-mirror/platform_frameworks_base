@@ -90,6 +90,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
+import com.android.systemui.statusbar.notification.UnreadConversationBadgeManager;
 import com.android.systemui.statusbar.notification.ViewGroupFadeHelper;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -238,6 +239,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final KeyguardBypassController mKeyguardBypassController;
     private final KeyguardUpdateMonitor mUpdateMonitor;
+    private final UnreadConversationBadgeManager mUnreadConversationBadgeManager;
 
     private KeyguardAffordanceHelper mAffordanceHelper;
     private KeyguardUserSwitcher mKeyguardUserSwitcher;
@@ -451,7 +453,8 @@ public class NotificationPanelViewController extends PanelViewController {
             ActivityManager activityManager, ZenModeController zenModeController,
             ConfigurationController configurationController,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            UnreadConversationBadgeManager unreadConversationBadgeManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder, statusBarTouchableRegionManager);
@@ -509,6 +512,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mShadeController = shadeController;
         mLockscreenUserManager = notificationLockscreenUserManager;
         mEntryManager = notificationEntryManager;
+        mUnreadConversationBadgeManager = unreadConversationBadgeManager;
 
         mView.setBackgroundColor(Color.TRANSPARENT);
         OnAttachStateChangeListener onAttachStateChangeListener = new OnAttachStateChangeListener();
@@ -2143,6 +2147,7 @@ public class NotificationPanelViewController extends PanelViewController {
         super.onExpandingFinished();
         mNotificationStackScroller.onExpansionStopped();
         mHeadsUpManager.onExpandingFinished();
+        mUnreadConversationBadgeManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
         mIsExpanding = false;
         if (isFullyCollapsed()) {
             DejankUtils.postAfterTraversal(new Runnable() {
