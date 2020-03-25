@@ -34,6 +34,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.window.ITaskOrganizer;
 import android.window.ITaskOrganizerController;
 import android.window.IWindowContainer;
@@ -42,6 +43,7 @@ import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.WeakHashMap;
 
@@ -51,6 +53,7 @@ import java.util.WeakHashMap;
  */
 class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private static final String TAG = "TaskOrganizerController";
+    private static final LinkedList<TaskOrganizerState> EMPTY_LIST = new LinkedList<>();
 
     /**
      * Masks specifying which configurations are important to report back to an organizer when
@@ -73,32 +76,20 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                final TaskOrganizerState state =
-                    mTaskOrganizerStates.get(mTaskOrganizer.asBinder());
-                state.releaseTasks();
-                mTaskOrganizerStates.remove(mTaskOrganizer.asBinder());
-                if (mTaskOrganizersForWindowingMode.get(mWindowingMode) == mTaskOrganizer) {
-                    mTaskOrganizersForWindowingMode.remove(mWindowingMode);
-                }
+                final TaskOrganizerState state = mTaskOrganizerStates.remove(
+                        mTaskOrganizer.asBinder());
+                state.dispose();
             }
         }
     };
 
-    class TaskOrganizerState {
-        ITaskOrganizer mOrganizer;
-        DeathRecipient mDeathRecipient;
-        int mWindowingMode;
+    private class TaskOrganizerState {
+        private final ITaskOrganizer mOrganizer;
+        private final DeathRecipient mDeathRecipient;
+        private final int mWindowingMode;
+        private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
 
-        ArrayList<Task> mOrganizedTasks = new ArrayList<>();
-
-        // Save the TaskOrganizer which we replaced registration for
-        // so it can be re-registered if we unregister.
-        TaskOrganizerState mReplacementFor;
-        boolean mDisposed = false;
-
-
-        TaskOrganizerState(ITaskOrganizer organizer, int windowingMode,
-                @Nullable TaskOrganizerState replacing) {
+        TaskOrganizerState(ITaskOrganizer organizer, int windowingMode) {
             mOrganizer = organizer;
             mDeathRecipient = new DeathRecipient(organizer, windowingMode);
             try {
@@ -107,7 +98,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mWindowingMode = windowingMode;
-            mReplacementFor = replacing;
         }
 
         void addTask(Task t) {
@@ -129,35 +119,26 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void dispose() {
-            mDisposed = true;
             releaseTasks();
-            handleReplacement();
+            mTaskOrganizersForWindowingMode.get(mWindowingMode).remove(this);
         }
 
-        void releaseTasks() {
+        private void releaseTasks() {
             for (int i = mOrganizedTasks.size() - 1; i >= 0; i--) {
                 final Task t = mOrganizedTasks.get(i);
-                t.taskOrganizerDied();
                 removeTask(t);
-            }
-        }
-
-        void handleReplacement() {
-            if (mReplacementFor != null && !mReplacementFor.mDisposed) {
-                mTaskOrganizersForWindowingMode.put(mWindowingMode, mReplacementFor);
+                t.taskOrganizerUnregistered();
             }
         }
 
         void unlinkDeath() {
-            mDisposed = true;
             mOrganizer.asBinder().unlinkToDeath(mDeathRecipient, 0);
         }
-    };
+    }
 
-
-    final HashMap<Integer, TaskOrganizerState> mTaskOrganizersForWindowingMode = new HashMap();
-    final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap();
-
+    private final SparseArray<LinkedList<TaskOrganizerState>> mTaskOrganizersForWindowingMode =
+            new SparseArray<>();
+    private final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap<>();
     private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
     private final ArrayList<Task> mPendingTaskInfoChanges = new ArrayList<>();
 
@@ -196,11 +177,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     Slog.w(TAG, "Task organizer already exists for windowing mode: "
                             + windowingMode);
                 }
-                final TaskOrganizerState previousState =
-                        mTaskOrganizersForWindowingMode.get(windowingMode);
-                final TaskOrganizerState state = new TaskOrganizerState(organizer, windowingMode,
-                        previousState);
-                mTaskOrganizersForWindowingMode.put(windowingMode, state);
+
+                LinkedList<TaskOrganizerState> states;
+                if (mTaskOrganizersForWindowingMode.contains(windowingMode)) {
+                    states = mTaskOrganizersForWindowingMode.get(windowingMode);
+                } else {
+                    states = new LinkedList<>();
+                    mTaskOrganizersForWindowingMode.put(windowingMode, states);
+                }
+                final TaskOrganizerState previousState = states.peekLast();
+                final TaskOrganizerState state = new TaskOrganizerState(organizer, windowingMode);
+                states.add(state);
                 mTaskOrganizerStates.put(organizer.asBinder(), state);
 
                 if (previousState == null) {
@@ -221,16 +208,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public void unregisterTaskOrganizer(ITaskOrganizer organizer) {
-        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
+        final TaskOrganizerState state = mTaskOrganizerStates.remove(organizer.asBinder());
         state.unlinkDeath();
-        if (mTaskOrganizersForWindowingMode.get(state.mWindowingMode) == state) {
-            mTaskOrganizersForWindowingMode.remove(state.mWindowingMode);
-        }
         state.dispose();
     }
 
     ITaskOrganizer getTaskOrganizer(int windowingMode) {
-        final TaskOrganizerState state = mTaskOrganizersForWindowingMode.get(windowingMode);
+        final TaskOrganizerState state = mTaskOrganizersForWindowingMode.get(windowingMode,
+                EMPTY_LIST).peekLast();
         if (state == null) {
             return null;
         }
