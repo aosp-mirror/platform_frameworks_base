@@ -15,11 +15,10 @@
  */
 
 #include <gtest/gtest.h>
-
-#include "frameworks/base/tools/stats_log_api_gen/test.pb.h"
-#include "Collation.h"
-
 #include <stdio.h>
+
+#include "Collation.h"
+#include "frameworks/base/tools/stats_log_api_gen/test.pb.h"
 
 namespace android {
 namespace stats_log_api_gen {
@@ -31,14 +30,13 @@ using std::vector;
 /**
  * Return whether the map contains a vector of the elements provided.
  */
-static bool
-map_contains_vector(const map<vector<java_type_t>, FieldNumberToAnnotations>& s, int count, ...)
-{
+static bool map_contains_vector(const map<vector<java_type_t>, FieldNumberToAnnotations>& s,
+                                int count, ...) {
     va_list args;
     vector<java_type_t> v;
 
     va_start(args, count);
-    for (int i=0; i<count; i++) {
+    for (int i = 0; i < count; i++) {
         v.push_back((java_type_t)va_arg(args, int));
     }
     va_end(args);
@@ -49,34 +47,33 @@ map_contains_vector(const map<vector<java_type_t>, FieldNumberToAnnotations>& s,
 /**
  * Expect that the provided map contains the elements provided.
  */
-#define EXPECT_MAP_CONTAINS_SIGNATURE(s, ...) \
-    do { \
-        int count = sizeof((int[]){__VA_ARGS__})/sizeof(int); \
+#define EXPECT_MAP_CONTAINS_SIGNATURE(s, ...)                    \
+    do {                                                         \
+        int count = sizeof((int[]){__VA_ARGS__}) / sizeof(int);  \
         EXPECT_TRUE(map_contains_vector(s, count, __VA_ARGS__)); \
-    } while(0)
+    } while (0)
 
 /** Expects that the provided atom has no enum values for any field. */
-#define EXPECT_NO_ENUM_FIELD(atom) \
-    do { \
+#define EXPECT_NO_ENUM_FIELD(atom)                                           \
+    do {                                                                     \
         for (vector<AtomField>::const_iterator field = atom->fields.begin(); \
-             field != atom->fields.end(); field++) { \
-            EXPECT_TRUE(field->enumValues.empty()); \
-        } \
-    } while(0)
+             field != atom->fields.end(); field++) {                         \
+            EXPECT_TRUE(field->enumValues.empty());                          \
+        }                                                                    \
+    } while (0)
 
 /** Expects that exactly one specific field has expected enum values. */
-#define EXPECT_HAS_ENUM_FIELD(atom, field_name, values)        \
-    do { \
+#define EXPECT_HAS_ENUM_FIELD(atom, field_name, values)                      \
+    do {                                                                     \
         for (vector<AtomField>::const_iterator field = atom->fields.begin(); \
-             field != atom->fields.end(); field++) { \
-            if (field->name == field_name) { \
-                EXPECT_EQ(field->enumValues, values); \
-            } else { \
-                EXPECT_TRUE(field->enumValues.empty()); \
-            } \
-        } \
-    } while(0)
-
+             field != atom->fields.end(); field++) {                         \
+            if (field->name == field_name) {                                 \
+                EXPECT_EQ(field->enumValues, values);                        \
+            } else {                                                         \
+                EXPECT_TRUE(field->enumValues.empty());                      \
+            }                                                                \
+        }                                                                    \
+    } while (0)
 
 /**
  * Test a correct collation, with all the types.
@@ -95,23 +92,22 @@ TEST(CollationTest, CollateStats) {
     EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap, JAVA_TYPE_INT, JAVA_TYPE_INT);
 
     // AllTypesAtom
-    EXPECT_MAP_CONTAINS_SIGNATURE(
-        atoms.signatureInfoMap,
-        JAVA_TYPE_ATTRIBUTION_CHAIN, // AttributionChain
-        JAVA_TYPE_FLOAT,             // float
-        JAVA_TYPE_LONG,              // int64
-        JAVA_TYPE_LONG,              // uint64
-        JAVA_TYPE_INT,               // int32
-        JAVA_TYPE_LONG,              // fixed64
-        JAVA_TYPE_INT,               // fixed32
-        JAVA_TYPE_BOOLEAN,           // bool
-        JAVA_TYPE_STRING,            // string
-        JAVA_TYPE_INT,               // uint32
-        JAVA_TYPE_INT,               // AnEnum
-        JAVA_TYPE_INT,               // sfixed32
-        JAVA_TYPE_LONG,              // sfixed64
-        JAVA_TYPE_INT,               // sint32
-        JAVA_TYPE_LONG               // sint64
+    EXPECT_MAP_CONTAINS_SIGNATURE(atoms.signatureInfoMap,
+                                  JAVA_TYPE_ATTRIBUTION_CHAIN,  // AttributionChain
+                                  JAVA_TYPE_FLOAT,              // float
+                                  JAVA_TYPE_LONG,               // int64
+                                  JAVA_TYPE_LONG,               // uint64
+                                  JAVA_TYPE_INT,                // int32
+                                  JAVA_TYPE_LONG,               // fixed64
+                                  JAVA_TYPE_INT,                // fixed32
+                                  JAVA_TYPE_BOOLEAN,            // bool
+                                  JAVA_TYPE_STRING,             // string
+                                  JAVA_TYPE_INT,                // uint32
+                                  JAVA_TYPE_INT,                // AnEnum
+                                  JAVA_TYPE_INT,                // sfixed32
+                                  JAVA_TYPE_LONG,               // sfixed64
+                                  JAVA_TYPE_INT,                // sint32
+                                  JAVA_TYPE_LONG                // sint64
     );
 
     set<AtomDecl>::const_iterator atom = atoms.decls.begin();
@@ -156,7 +152,8 @@ TEST(CollationTest, NonMessageTypeFails) {
 }
 
 /**
- * Test that atoms that have non-primitive types or repeated fields are rejected.
+ * Test that atoms that have non-primitive types or repeated fields are
+ * rejected.
  */
 TEST(CollationTest, FailOnBadTypes) {
     Atoms atoms;
@@ -170,18 +167,20 @@ TEST(CollationTest, FailOnBadTypes) {
  */
 TEST(CollationTest, FailOnSkippedFieldsSingle) {
     Atoms atoms;
-    int errorCount = collate_atoms(BadSkippedFieldSingle::descriptor(), DEFAULT_MODULE_NAME, &atoms);
+    int errorCount =
+            collate_atoms(BadSkippedFieldSingle::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(1, errorCount);
 }
 
 /**
- * Test that atoms that skip field numbers (not in the first position, and multiple
- * times) are rejected.
+ * Test that atoms that skip field numbers (not in the first position, and
+ * multiple times) are rejected.
  */
 TEST(CollationTest, FailOnSkippedFieldsMultiple) {
     Atoms atoms;
-    int errorCount = collate_atoms(BadSkippedFieldMultiple::descriptor(), DEFAULT_MODULE_NAME, &atoms);
+    int errorCount =
+            collate_atoms(BadSkippedFieldMultiple::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
     EXPECT_EQ(2, errorCount);
 }
@@ -191,11 +190,11 @@ TEST(CollationTest, FailOnSkippedFieldsMultiple) {
  * rejected.
  */
 TEST(CollationTest, FailBadAttributionNodePosition) {
-  Atoms atoms;
-  int errorCount =
-      collate_atoms(BadAttributionNodePosition::descriptor(), DEFAULT_MODULE_NAME, &atoms);
+    Atoms atoms;
+    int errorCount =
+            collate_atoms(BadAttributionNodePosition::descriptor(), DEFAULT_MODULE_NAME, &atoms);
 
-  EXPECT_EQ(1, errorCount);
+    EXPECT_EQ(1, errorCount);
 }
 
 TEST(CollationTest, FailOnBadStateAtomOptions) {
@@ -270,8 +269,8 @@ TEST(CollationTest, RecognizeModuleAtom) {
             const set<shared_ptr<Annotation>>& annotations = fieldNumberToAnnotations.at(1);
             EXPECT_EQ(2u, annotations.size());
             for (const shared_ptr<Annotation> annotation : annotations) {
-                EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID
-                        || annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
+                EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID ||
+                            annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
                 if (ANNOTATION_ID_IS_UID == annotation->annotationId) {
                     EXPECT_EQ(1, annotation->atomId);
                     EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
@@ -303,12 +302,11 @@ TEST(CollationTest, RecognizeModule1Atom) {
         EXPECT_EQ(1u, fieldNumberToAnnotations.size());
         int fieldNumber = 1;
         EXPECT_NE(fieldNumberToAnnotations.end(), fieldNumberToAnnotations.find(fieldNumber));
-        const set<shared_ptr<Annotation>>& annotations =
-                fieldNumberToAnnotations.at(fieldNumber);
+        const set<shared_ptr<Annotation>>& annotations = fieldNumberToAnnotations.at(fieldNumber);
         EXPECT_EQ(2u, annotations.size());
         for (const shared_ptr<Annotation> annotation : annotations) {
-            EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID
-                    || annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
+            EXPECT_TRUE(annotation->annotationId == ANNOTATION_ID_IS_UID ||
+                        annotation->annotationId == ANNOTATION_ID_STATE_OPTION);
             if (ANNOTATION_ID_IS_UID == annotation->annotationId) {
                 EXPECT_EQ(1, annotation->atomId);
                 EXPECT_EQ(ANNOTATION_TYPE_BOOL, annotation->type);
