@@ -187,7 +187,6 @@ public class PhoneStateListener {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH)
-    @SystemApi
     public static final int LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH          = 0x00000200;
 
     /**
