@@ -4318,6 +4318,7 @@ public class AudioService extends IAudioService.Stub
     public void setWiredDeviceConnectionState(int type,
             @ConnectionState int state, String address, String name,
             String caller) {
+        enforceModifyAudioRoutingPermission();
         if (state != CONNECTION_STATE_CONNECTED
                 && state != CONNECTION_STATE_DISCONNECTED) {
             throw new IllegalArgumentException("Invalid state " + state);
