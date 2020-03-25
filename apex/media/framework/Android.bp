@@ -132,19 +132,19 @@ droidstubs {
 java_library {
     name: "framework-media-stubs-publicapi",
     srcs: [":framework-media-stubs-srcs-publicapi"],
-    sdk_version: "current",
+    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
 }
 
 java_library {
     name: "framework-media-stubs-systemapi",
     srcs: [":framework-media-stubs-srcs-systemapi"],
-    sdk_version: "system_current",
+    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
 }
 
 java_library {
     name: "framework-media-stubs-module_libs_api",
     srcs: [":framework-media-stubs-srcs-module_libs_api"],
-    sdk_version: "system_current",
+    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
 }
 
 java_library {
