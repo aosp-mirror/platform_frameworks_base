@@ -67,32 +67,9 @@ class NotificationShadeDepthController @Inject constructor(
     private var updateScheduled: Boolean = false
     private var shadeExpansion = 0f
     @VisibleForTesting
-    var shadeSpring = SpringAnimation(this, object :
-            FloatPropertyCompat<NotificationShadeDepthController>("shadeBlurRadius") {
-        override fun setValue(rect: NotificationShadeDepthController?, value: Float) {
-            shadeBlurRadius = value.toInt()
-        }
-
-        override fun getValue(rect: NotificationShadeDepthController?): Float {
-            return shadeBlurRadius.toFloat()
-        }
-    })
-    private val zoomInterpolator = Interpolators.ACCELERATE_DECELERATE
-
-    /**
-     * Radius that we're animating to.
-     */
-    private var pendingShadeBlurRadius = -1
-
-    /**
-     * Shade blur radius on the current frame.
-     */
-    private var shadeBlurRadius = 0
-        set(value) {
-            if (field == value) return
-            field = value
-            scheduleUpdate()
-        }
+    var shadeSpring = DepthAnimation()
+    @VisibleForTesting
+    var globalActionsSpring = DepthAnimation()
 
     /**
      * Blur radius of the wake-up animation on this frame.
@@ -103,7 +80,6 @@ class NotificationShadeDepthController @Inject constructor(
             field = value
             scheduleUpdate()
         }
-    private var globalDialogVisibility = 0f
 
     /**
      * Callback that updates the window blur value and is called only once per frame.
@@ -111,12 +87,9 @@ class NotificationShadeDepthController @Inject constructor(
     private val updateBlurCallback = Choreographer.FrameCallback {
         updateScheduled = false
 
-        val blur = max(shadeBlurRadius,
-                max(wakeAndUnlockBlurRadius, blurUtils.blurRadiusOfRatio(globalDialogVisibility)))
+        val blur = max(max(shadeSpring.radius, wakeAndUnlockBlurRadius), globalActionsSpring.radius)
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
-        val rawZoom = max(blurUtils.ratioOfBlurRadius(blur), globalDialogVisibility)
-        wallpaperManager.setWallpaperZoomOut(root.windowToken,
-                zoomInterpolator.getInterpolation(rawZoom))
+        wallpaperManager.setWallpaperZoomOut(root.windowToken, blurUtils.ratioOfBlurRadius(blur))
         notificationShadeWindowController.setBackgroundBlurRadius(blur)
     }
 
@@ -163,8 +136,9 @@ class NotificationShadeDepthController @Inject constructor(
         }
 
         override fun onDozingChanged(isDozing: Boolean) {
-            if (isDozing && shadeSpring.isRunning) {
-                shadeSpring.skipToEnd()
+            if (isDozing) {
+                shadeSpring.finishIfRunning()
+                globalActionsSpring.finishIfRunning()
             }
         }
     }
@@ -174,10 +148,6 @@ class NotificationShadeDepthController @Inject constructor(
         if (WAKE_UP_ANIMATION_ENABLED) {
             keyguardStateController.addCallback(keyguardStateCallback)
         }
-        shadeSpring.spring = SpringForce(0.0f)
-        shadeSpring.spring.dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
-        shadeSpring.spring.stiffness = SpringForce.STIFFNESS_LOW
-        shadeSpring.addEndListener { _, _, _, _ -> pendingShadeBlurRadius = -1 }
         statusBarStateController.addCallback(statusBarStateCallback)
     }
 
@@ -198,11 +168,7 @@ class NotificationShadeDepthController @Inject constructor(
             newBlur = blurUtils.blurRadiusOfRatio(shadeExpansion)
         }
 
-        if (pendingShadeBlurRadius == newBlur) {
-            return
-        }
-        pendingShadeBlurRadius = newBlur
-        shadeSpring.animateToFinalPosition(newBlur.toFloat())
+        shadeSpring.animateTo(newBlur)
     }
 
     private fun scheduleUpdate(viewToBlur: View? = null) {
@@ -215,19 +181,72 @@ class NotificationShadeDepthController @Inject constructor(
     }
 
     fun updateGlobalDialogVisibility(visibility: Float, dialogView: View) {
-        if (visibility == globalDialogVisibility) {
-            return
-        }
-        globalDialogVisibility = visibility
-        scheduleUpdate(dialogView)
+        globalActionsSpring.animateTo(blurUtils.blurRadiusOfRatio(visibility), dialogView)
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         IndentingPrintWriter(pw, "  ").let {
             it.println("StatusBarWindowBlurController:")
             it.increaseIndent()
-            it.println("shadeBlurRadius: $shadeBlurRadius")
+            it.println("shadeRadius: ${shadeSpring.radius}")
+            it.println("globalActionsRadius: ${globalActionsSpring.radius}")
             it.println("wakeAndUnlockBlur: $wakeAndUnlockBlurRadius")
+        }
+    }
+
+    /**
+     * Animation helper that smoothly animates the depth using a spring and deals with frame
+     * invalidation.
+     */
+    inner class DepthAnimation() {
+        /**
+         * Blur radius visible on the UI, in pixels.
+         */
+        var radius = 0
+            private set
+
+        /**
+         * Radius that we're animating to.
+         */
+        private var pendingRadius = -1
+
+        /**
+         * View on {@link Surface} that wants depth.
+         */
+        private var view: View? = null
+
+        private var springAnimation = SpringAnimation(this, object :
+            FloatPropertyCompat<DepthAnimation>("blurRadius") {
+            override fun setValue(rect: DepthAnimation?, value: Float) {
+                radius = value.toInt()
+                scheduleUpdate(view)
+            }
+
+            override fun getValue(rect: DepthAnimation?): Float {
+                return radius.toFloat()
+            }
+        })
+
+        init {
+            springAnimation.spring = SpringForce(0.0f)
+            springAnimation.spring.dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
+            springAnimation.spring.stiffness = SpringForce.STIFFNESS_MEDIUM
+            springAnimation.addEndListener { _, _, _, _ -> pendingRadius = -1 }
+        }
+
+        fun animateTo(newRadius: Int, viewToBlur: View? = null) {
+            if (pendingRadius == newRadius && view == viewToBlur) {
+                return
+            }
+            view = viewToBlur
+            pendingRadius = newRadius
+            springAnimation.animateToFinalPosition(newRadius.toFloat())
+        }
+
+        fun finishIfRunning() {
+            if (springAnimation.isRunning) {
+                springAnimation.skipToEnd()
+            }
         }
     }
 }
