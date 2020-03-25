@@ -20,7 +20,6 @@ import static com.android.server.wm.ActivityStack.TAG_ADD_REMOVE;
 import static com.android.server.wm.ActivityStack.TAG_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.wm.Task.REPARENT_LEAVE_STACK_IN_PLACE;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
@@ -233,29 +232,6 @@ class ResetTargetTaskHelper {
         }
 
         final ActivityTaskManagerService atmService = mTargetStack.mAtmService;
-        final ArrayList<Task> createdTasks = new ArrayList<>();
-        while (!mPendingReparentActivities.isEmpty()) {
-            final ActivityRecord r = mPendingReparentActivities.remove(0);
-            final ActivityRecord bottom = mTargetStack.getBottomMostActivity();
-            final Task targetTask;
-            if (bottom != null && r.taskAffinity.equals(bottom.getTask().affinity)) {
-                // If the activity currently at the bottom has the same task affinity as
-                // the one we are moving, then merge it into the same task.
-                targetTask = bottom.getTask();
-                if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
-                        + r + " out to bottom task " + targetTask);
-            } else {
-                targetTask = mTargetStack.reuseOrCreateTask(
-                        r.info, null /*intent*/, false /*toTop*/);
-                targetTask.affinityIntent = r.intent;
-                createdTasks.add(targetTask);
-                if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
-                        + r + " out to new task " + targetTask);
-            }
-            r.reparent(targetTask, 0 /* position */, "resetTargetTaskIfNeeded");
-            atmService.mStackSupervisor.mRecentTasks.add(targetTask);
-        }
-
         DisplayContent display = mTargetStack.getDisplay();
         final boolean singleTaskInstanceDisplay = display.isSingleTaskInstance();
         if (singleTaskInstanceDisplay) {
@@ -264,16 +240,33 @@ class ResetTargetTaskHelper {
 
         final int windowingMode = mTargetStack.getWindowingMode();
         final int activityType = mTargetStack.getActivityType();
-        if (!singleTaskInstanceDisplay && !display.alwaysCreateStack(windowingMode, activityType)) {
-            return;
-        }
 
-        while (!createdTasks.isEmpty()) {
-            final Task targetTask = createdTasks.remove(createdTasks.size() - 1);
-            final ActivityStack targetStack = display.getOrCreateStack(
-                    windowingMode, activityType, false /* onTop */);
-            targetTask.reparent(targetStack, false /* toTop */, REPARENT_LEAVE_STACK_IN_PLACE,
-                    false /* animate */, true /* deferResume */, "resetTargetTask");
+        while (!mPendingReparentActivities.isEmpty()) {
+            final ActivityRecord r = mPendingReparentActivities.remove(0);
+            final boolean alwaysCreateTask = DisplayContent.alwaysCreateStack(windowingMode,
+                    activityType);
+            final Task task = alwaysCreateTask
+                    ? display.getBottomMostTask() : mTargetStack.getBottomMostTask();
+            Task targetTask = null;
+            if (task != null && r.taskAffinity.equals(task.affinity)) {
+                // If the activity currently at the bottom has the same task affinity as
+                // the one we are moving, then merge it into the same task.
+                targetTask = task;
+                if (DEBUG_TASKS) Slog.v(TAG_TASKS, "Start pushing activity "
+                        + r + " out to bottom task " + targetTask);
+            }
+            if (targetTask == null) {
+                if (alwaysCreateTask) {
+                    targetTask = display.getOrCreateStack(windowingMode, activityType,
+                            false /* onTop */);
+                } else {
+                    targetTask = mTargetStack.reuseOrCreateTask(r.info, null /*intent*/,
+                            false /*toTop*/);
+                }
+                targetTask.affinityIntent = r.intent;
+            }
+            r.reparent(targetTask, 0 /* position */, "resetTargetTaskIfNeeded");
+            atmService.mStackSupervisor.mRecentTasks.add(targetTask);
         }
     }
 
