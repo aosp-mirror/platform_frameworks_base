@@ -9844,7 +9844,6 @@ package android.telephony.ims {
   }
 
   public class ImsManager {
-    method @NonNull public android.telephony.ims.ImsRcsManager getImsRcsManager(int);
     field public static final String ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION = "com.android.internal.intent.action.ACTION_FORBIDDEN_NO_SERVICE_AUTHORIZATION";
   }
 
@@ -9870,10 +9869,6 @@ package android.telephony.ims {
 
   @Deprecated public static class ImsMmTelManager.RegistrationCallback extends android.telephony.ims.RegistrationManager.RegistrationCallback {
     ctor @Deprecated public ImsMmTelManager.RegistrationCallback();
-  }
-
-  public class ImsRcsManager implements android.telephony.ims.RegistrationManager {
-    method @NonNull public android.telephony.ims.RcsUceAdapter getUceAdapter();
   }
 
   public final class ImsReasonInfo implements android.os.Parcelable {
@@ -10252,7 +10247,6 @@ package android.telephony.ims {
   }
 
   public class RcsUceAdapter {
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isUceSettingEnabled() throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
   }
 

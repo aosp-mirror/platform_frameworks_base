@@ -20,14 +20,16 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
-import android.annotation.TestApi;
+import android.annotation.SdkConstant;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsRcsController;
@@ -46,12 +48,32 @@ import java.util.function.Consumer;
  * (UCE) service, as well as managing user settings.
  *
  * Use {@link ImsManager#getImsRcsManager(int)} to create an instance of this manager.
- * @hide
  */
-@SystemApi
-@TestApi
 public class ImsRcsManager implements RegistrationManager {
     private static final String TAG = "ImsRcsManager";
+
+    /**
+     * Activity Action: Show the opt-in dialog for enabling or disabling RCS contact discovery
+     * using User Capability Exchange (UCE).
+     * <p>
+     * An application that depends on contact discovery being enabled may send this intent
+     * using {@link Context#startActivity(Intent)} to ask the user to opt-in for contacts upload for
+     * capability exchange if it is currently disabled. Whether or not this setting has been enabled
+     * can be queried using {@link RcsUceAdapter#isUceSettingEnabled()}.
+     * <p>
+     * This intent should only be sent if the carrier supports RCS capability exchange, which can be
+     * queried using the key {@link CarrierConfigManager#KEY_USE_RCS_PRESENCE_BOOL}. Otherwise, the
+     * setting will not be present.
+     * <p>
+     * Input: A mandatory {@link Settings#EXTRA_SUB_ID} extra containing the subscription that the
+     * setting will be be shown for.
+     * <p>
+     * Output: Nothing
+     * @see RcsUceAdapter
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN =
+            "android.telephony.ims.action.SHOW_CAPABILITY_DISCOVERY_OPT_IN";
 
     /**
      * Receives RCS availability status updates from the ImsService.
@@ -145,11 +167,10 @@ public class ImsRcsManager implements RegistrationManager {
      */
     @NonNull
     public RcsUceAdapter getUceAdapter() {
-        return new RcsUceAdapter(mSubId);
+        return new RcsUceAdapter(mContext, mSubId);
     }
 
     /**
-     * {@inheritDoc}
      * @hide
      */
     @Override
@@ -181,7 +202,6 @@ public class ImsRcsManager implements RegistrationManager {
     }
 
     /**
-     * {@inheritDoc
      * @hide
      */
     @Override
@@ -206,7 +226,6 @@ public class ImsRcsManager implements RegistrationManager {
     }
 
     /**
-     * {@inheritDoc}
      * @hide
      */
     @Override
@@ -239,7 +258,6 @@ public class ImsRcsManager implements RegistrationManager {
     }
 
     /**
-     * {@inheritDoc}
      * @hide
      */
     @Override
