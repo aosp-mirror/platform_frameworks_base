@@ -8446,7 +8446,9 @@ public class AppOpsManager {
 
     /**
      * Pulls current AppOps access report and picks package and op to watch for next access report
-     *
+     * Returns null if no reports were collected since last call. There is no guarantee of report
+     * collection, hence this method should be called periodically even if no report was collected
+     * to pick different package and op to watch.
      * @hide
      */
     @SystemApi
