@@ -40,6 +40,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_TEST;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.uidRulesToString;
@@ -50,6 +51,7 @@ import static android.system.OsConstants.IPPROTO_UDP;
 
 import static java.util.Map.Entry;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -2702,9 +2704,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             switch (msg.what) {
                 case NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED: {
-                    final NetworkCapabilities networkCapabilities = (NetworkCapabilities) msg.obj;
+                    NetworkCapabilities networkCapabilities = (NetworkCapabilities) msg.obj;
                     if (networkCapabilities.hasConnectivityManagedCapability()) {
                         Slog.wtf(TAG, "BUG: " + nai + " has CS-managed capability.");
+                    }
+                    if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
+                        // Make sure the original object is not mutated. NetworkAgent normally
+                        // makes a copy of the capabilities when sending the message through
+                        // the Messenger, but if this ever changes, not making a defensive copy
+                        // here will give attack vectors to clients using this code path.
+                        networkCapabilities = new NetworkCapabilities(networkCapabilities);
+                        networkCapabilities.restrictCapabilitesForTestNetwork();
                     }
                     updateCapabilities(nai.getCurrentScore(), nai, networkCapabilities);
                     break;
@@ -5778,7 +5788,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public Network registerNetworkAgent(Messenger messenger, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
-        enforceNetworkFactoryPermission();
+        if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
+            enforceAnyPermissionOf(Manifest.permission.MANAGE_TEST_NETWORKS);
+            // Strictly, sanitizing here is unnecessary as the capabilities will be sanitized in
+            // the call to mixInCapabilities below anyway, but sanitizing here means the NAI never
+            // sees capabilities that may be malicious, which might prevent mistakes in the future.
+            networkCapabilities = new NetworkCapabilities(networkCapabilities);
+            networkCapabilities.restrictCapabilitesForTestNetwork();
+        } else {
+            enforceNetworkFactoryPermission();
+        }
 
         LinkProperties lp = new LinkProperties(linkProperties);
         lp.ensureDirectlyConnectedRoutes();
