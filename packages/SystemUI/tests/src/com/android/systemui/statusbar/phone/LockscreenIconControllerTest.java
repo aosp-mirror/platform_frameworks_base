@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.res.Resources;
 import android.view.View;
 
 import androidx.test.filters.SmallTest;
@@ -35,6 +36,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -71,6 +73,12 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private DockManager mDockManager;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
+    @Mock
+    private Resources mResources;
+    @Mock
+    private HeadsUpManagerPhone mHeadsUpManagerPhone;
 
 
     @Before
@@ -81,7 +89,8 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
                 mLockscreenGestureLogger, mKeyguardUpdateMonitor, mLockPatternUtils,
                 mShadeController, mAccessibilityController, mKeyguardIndicationController,
                 mStatusBarStateController, mConfigurationController, mNotificationWakeUpCoordinator,
-                mKeyguardBypassController, mDockManager);
+                mKeyguardBypassController, mDockManager, mKeyguardStateController, mResources,
+                mHeadsUpManagerPhone);
 
         mLockIconController.attach(mLockIcon);
     }
