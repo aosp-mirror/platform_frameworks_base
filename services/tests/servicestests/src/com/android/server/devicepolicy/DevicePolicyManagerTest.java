@@ -3205,6 +3205,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
                 .thenReturn(true);
         setUserSetupCompleteForUser(false, UserHandle.USER_SYSTEM);
+        when(getServices().userManager.getProfileParent(UserHandle.USER_SYSTEM)).thenReturn(null);
 
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
     }
@@ -3246,6 +3247,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
                 .thenReturn(true);
         setUserSetupCompleteForUser(true, UserHandle.USER_SYSTEM);
+        when(getServices().userManager.getProfileParent(UserHandle.USER_SYSTEM)).thenReturn(null);
 
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
     }
@@ -3617,14 +3619,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         when(getServices().ipackageManager.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0))
                 .thenReturn(true);
-        when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(true);
+        when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(false);
         when(getServices().userManager.getProfileParent(DpmMockContext.CALLER_USER_HANDLE))
             .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
         when(getServices().userManager.canAddMoreManagedProfiles(DpmMockContext.CALLER_USER_HANDLE,
                 true)).thenReturn(true);
         setUserSetupCompleteForUser(false, DpmMockContext.CALLER_USER_HANDLE);
 
-        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
     }
 
     public void testIsProvisioningAllowed_provisionManagedProfileWithDeviceOwner_primaryUser()
