@@ -49,7 +49,8 @@ public final class InlinePresentation implements Parcelable {
     private final @NonNull InlinePresentationSpec mInlinePresentationSpec;
 
     /**
-     * Indicates whether the UI should be pinned, hence non-scrollable, in the host.
+     * Indicates whether the UI should be pinned, hence non-scrollable and non-filterable, in the
+     * host.
      */
     private final boolean mPinned;
 
