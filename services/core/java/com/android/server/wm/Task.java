@@ -20,6 +20,9 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_FORCED;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM_SCREEN_ROTATION;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
@@ -3200,6 +3203,20 @@ class Task extends WindowContainer<WindowContainer> {
 
     TaskDescription getTaskDescription() {
         return mTaskDescription;
+    }
+
+    @Override
+    int getOrientation(int candidate) {
+        return canSpecifyOrientation() ? super.getOrientation(candidate) : SCREEN_ORIENTATION_UNSET;
+    }
+
+    private boolean canSpecifyOrientation() {
+        final int windowingMode = getWindowingMode();
+        final int activityType = getActivityType();
+        return windowingMode == WINDOWING_MODE_FULLSCREEN
+                || activityType == ACTIVITY_TYPE_HOME
+                || activityType == ACTIVITY_TYPE_RECENTS
+                || activityType == ACTIVITY_TYPE_ASSISTANT;
     }
 
     @Override
