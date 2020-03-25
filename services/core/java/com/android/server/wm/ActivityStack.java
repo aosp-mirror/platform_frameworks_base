@@ -36,7 +36,6 @@ import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_FOR_ALL_USERS;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
@@ -3786,20 +3785,6 @@ class ActivityStack extends Task {
         }
 
         return super.checkCompleteDeferredRemoval();
-    }
-
-    @Override
-    int getOrientation() {
-        return (canSpecifyOrientation()) ? super.getOrientation() : SCREEN_ORIENTATION_UNSET;
-    }
-
-    private boolean canSpecifyOrientation() {
-        final int windowingMode = getWindowingMode();
-        final int activityType = getActivityType();
-        return windowingMode == WINDOWING_MODE_FULLSCREEN
-                || activityType == ACTIVITY_TYPE_HOME
-                || activityType == ACTIVITY_TYPE_RECENTS
-                || activityType == ACTIVITY_TYPE_ASSISTANT;
     }
 
     public DisplayInfo getDisplayInfo() {
