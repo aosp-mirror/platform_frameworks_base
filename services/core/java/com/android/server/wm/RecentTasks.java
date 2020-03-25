@@ -21,6 +21,7 @@ import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -1298,6 +1299,7 @@ class RecentTasks {
         switch (task.getActivityType()) {
             case ACTIVITY_TYPE_HOME:
             case ACTIVITY_TYPE_RECENTS:
+            case ACTIVITY_TYPE_DREAM:
                 // Ignore certain activity types completely
                 return false;
             case ACTIVITY_TYPE_ASSISTANT:
