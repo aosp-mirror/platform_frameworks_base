@@ -110,6 +110,7 @@ droidstubs {
     name: "services-stubs.sources",
     srcs: [":services-sources"],
     installable: false,
+    api_tag_name: "SYSTEM_SERVER",
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
