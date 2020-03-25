@@ -65,7 +65,7 @@ filegroup {
 }
 
 filegroup {
-    name: "framework-graphics-sources",
+    name: "framework-graphics-nonupdatable-sources",
     srcs: [
         "graphics/java/**/*.java",
         "graphics/java/**/*.aidl",
@@ -223,7 +223,7 @@ filegroup {
         ":framework-blobstore-sources",
         ":framework-core-sources",
         ":framework-drm-sources",
-        ":framework-graphics-sources",
+        ":framework-graphics-nonupdatable-sources",
         ":framework-jobscheduler-sources", // jobscheduler is not a module for R
         ":framework-keystore-sources",
         ":framework-identity-sources",
@@ -283,6 +283,7 @@ filegroup {
     name: "framework-updatable-sources",
     srcs: [
         ":framework-appsearch-sources",
+        ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
         ":framework-sdkextensions-sources",
@@ -297,6 +298,7 @@ java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
         "framework-appsearch-stubs", // TODO: Update to module_libs_api when there is one.
+        "framework-graphics-stubs-module_libs_api",
         "framework-media-stubs-module_libs_api",
         "framework-mediaprovider-stubs-module_libs_api",
         "framework-permission-stubs-module_libs_api",
