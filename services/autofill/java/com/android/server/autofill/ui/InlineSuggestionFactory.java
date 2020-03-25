@@ -165,7 +165,8 @@ public final class InlineSuggestionFactory {
                 Slog.w(TAG, "InlinePresentation not found in dataset");
                 continue;
             }
-            if (!includeDataset(dataset, fieldIndex, filterText)) {
+            if (!inlinePresentation.isPinned()  // don't filter pinned suggestions
+                    && !includeDataset(dataset, fieldIndex, filterText)) {
                 continue;
             }
             InlineSuggestion inlineSuggestion = createInlineSuggestion(isAugmented, dataset,
