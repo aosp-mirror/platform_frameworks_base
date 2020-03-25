@@ -324,7 +324,6 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
     method public void unregisterHomeVisibilityObserver(@NonNull android.app.HomeVisibilityObserver);
-    method @RequiresPermission(android.Manifest.permission.CHANGE_CONFIGURATION) public boolean updateMccMncConfiguration(@NonNull String, @NonNull String);
   }
 
   public static interface ActivityManager.OnUidImportanceListener {
@@ -8013,27 +8012,6 @@ package android.telephony {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallAttributes> CREATOR;
   }
 
-  public final class CallForwardingInfo implements android.os.Parcelable {
-    ctor public CallForwardingInfo(int, int, @Nullable String, int);
-    method public int describeContents();
-    method @Nullable public String getNumber();
-    method public int getReason();
-    method public int getStatus();
-    method public int getTimeoutSeconds();
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.CallForwardingInfo> CREATOR;
-    field public static final int REASON_ALL = 4; // 0x4
-    field public static final int REASON_ALL_CONDITIONAL = 5; // 0x5
-    field public static final int REASON_BUSY = 1; // 0x1
-    field public static final int REASON_NOT_REACHABLE = 3; // 0x3
-    field public static final int REASON_NO_REPLY = 2; // 0x2
-    field public static final int REASON_UNCONDITIONAL = 0; // 0x0
-    field public static final int STATUS_ACTIVE = 1; // 0x1
-    field public static final int STATUS_FDN_CHECK_FAILURE = 2; // 0x2
-    field public static final int STATUS_INACTIVE = 0; // 0x0
-    field public static final int STATUS_NOT_SUPPORTED = 4; // 0x4
-    field public static final int STATUS_UNKNOWN_ERROR = 3; // 0x3
-  }
-
   public final class CallQuality implements android.os.Parcelable {
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int);
     ctor public CallQuality(int, int, int, int, int, int, int, int, int, int, int, boolean, boolean, boolean);
@@ -8743,7 +8721,6 @@ package android.telephony {
     method public void onRadioPowerStateChanged(int);
     method public void onSrvccStateChanged(int);
     method public void onVoiceActivationStateChanged(int);
-    field @RequiresPermission(android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH) public static final int LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH = 512; // 0x200
     field @RequiresPermission("android.permission.READ_PRECISE_PHONE_STATE") public static final int LISTEN_CALL_ATTRIBUTES_CHANGED = 67108864; // 0x4000000
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_CALL = 268435456; // 0x10000000
     field @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public static final int LISTEN_OUTGOING_EMERGENCY_SMS = 536870912; // 0x20000000
@@ -8774,7 +8751,6 @@ package android.telephony {
   }
 
   public final class PreciseDataConnectionState implements android.os.Parcelable {
-    ctor public PreciseDataConnectionState(int, int, int, @NonNull String, @Nullable android.net.LinkProperties, int, @Nullable android.telephony.data.ApnSetting);
     method @Deprecated @NonNull public String getDataConnectionApn();
     method @Deprecated public int getDataConnectionApnTypeBitMask();
     method @Deprecated public int getDataConnectionFailCause();
@@ -9119,8 +9095,6 @@ package android.telephony {
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getAidForAppType(int);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public java.util.List<android.service.carrier.CarrierIdentifier> getAllowedCarriers(int);
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getAllowedNetworkTypes();
-    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.CallForwardingInfo getCallForwarding(int);
-    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCallWaitingStatus();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.ImsiEncryptionInfo getCarrierInfoForImsiEncryption(int);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntent(android.content.Intent);
     method public java.util.List<java.lang.String> getCarrierPackageNamesForIntentAndPhone(android.content.Intent, int);
@@ -9203,8 +9177,6 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAllowedNetworkTypes(long);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setAlwaysAllowMmsData(boolean);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallForwarding(@NonNull android.telephony.CallForwardingInfo);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setCallWaitingStatus(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setCarrierDataEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public int setCarrierRestrictionRules(@NonNull android.telephony.CarrierRestrictionRules);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataActivationState(int);
@@ -9245,10 +9217,6 @@ package android.telephony {
     field public static final String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
     field public static final String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
     field public static final String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
-    field public static final int CALL_WAITING_STATUS_ACTIVE = 1; // 0x1
-    field public static final int CALL_WAITING_STATUS_INACTIVE = 2; // 0x2
-    field public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4; // 0x4
-    field public static final int CALL_WAITING_STATUS_UNKNOWN_ERROR = 3; // 0x3
     field public static final int CARD_POWER_DOWN = 0; // 0x0
     field public static final int CARD_POWER_UP = 1; // 0x1
     field public static final int CARD_POWER_UP_PASS_THROUGH = 2; // 0x2
