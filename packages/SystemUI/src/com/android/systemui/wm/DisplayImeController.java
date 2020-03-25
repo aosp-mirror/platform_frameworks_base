@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -97,7 +98,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
         if (mSystemWindows.mDisplayController.getDisplayLayout(displayId).rotation()
                 != pd.mRotation && isImeShowing(displayId)) {
-            pd.startAnimation(true);
+            pd.startAnimation(true, false /* forceRestart */);
         }
     }
 
@@ -200,7 +201,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         continue;
                     }
                     if (activeControl.getType() == InsetsState.ITYPE_IME) {
-                        mImeSourceControl = activeControl;
+                        mHandler.post(() -> {
+                            final Point lastSurfacePosition = mImeSourceControl != null
+                                    ? mImeSourceControl.getSurfacePosition() : null;
+                            mImeSourceControl = activeControl;
+                            if (!activeControl.getSurfacePosition().equals(lastSurfacePosition)
+                                    && mAnimation != null) {
+                                startAnimation(mImeShowing, true /* forceRestart */);
+                            }
+                        });
                     }
                 }
             }
@@ -212,7 +221,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got showInsets for ime");
-            startAnimation(true /* show */);
+            startAnimation(true /* show */, false /* forceRestart */);
         }
 
         @Override
@@ -221,7 +230,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 return;
             }
             if (DEBUG) Slog.d(TAG, "Got hideInsets for ime");
-            startAnimation(false /* show */);
+            startAnimation(false /* show */, false /* forceRestart */);
         }
 
         /**
@@ -239,7 +248,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             return imeSource.getFrame().top + (int) surfaceOffset;
         }
 
-        private void startAnimation(final boolean show) {
+        private void startAnimation(final boolean show, final boolean forceRestart) {
             final InsetsSource imeSource = mInsetsState.getSource(InsetsState.ITYPE_IME);
             if (imeSource == null || mImeSourceControl == null) {
                 return;
@@ -250,7 +259,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                             + (mAnimationDirection == DIRECTION_SHOW ? "SHOW"
                             : (mAnimationDirection == DIRECTION_HIDE ? "HIDE" : "NONE")));
                 }
-                if ((mAnimationDirection == DIRECTION_SHOW && show)
+                if (!forceRestart && (mAnimationDirection == DIRECTION_SHOW && show)
                         || (mAnimationDirection == DIRECTION_HIDE && !show)) {
                     return;
                 }
@@ -270,11 +279,6 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 final float shownY = defaultY;
                 final float startY = show ? hiddenY : shownY;
                 final float endY = show ? shownY : hiddenY;
-                if (mImeShowing && show) {
-                    // IME is already showing, so set seek to end
-                    seekValue = shownY;
-                    seek = true;
-                }
                 mImeShowing = show;
                 mAnimation = ValueAnimator.ofFloat(startY, endY);
                 mAnimation.setDuration(
