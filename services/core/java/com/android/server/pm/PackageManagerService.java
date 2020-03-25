@@ -415,7 +415,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Keep track of all those APKs everywhere.
@@ -2655,6 +2654,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             + partition.folder);
             }
         }
+
+        @Override
+        public String toString() {
+            return folder.getAbsolutePath() + ":" + scanFlag;
+        }
     }
 
     public PackageManagerService(Injector injector, boolean onlyCore, boolean factoryTest) {
@@ -2757,15 +2761,19 @@ public class PackageManagerService extends IPackageManager.Stub
         mApexManager = ApexManager.getInstance();
         mAppsFilter = mInjector.getAppsFilter();
 
+        final List<ScanPartition> scanPartitions = new ArrayList<>();
+        final List<ApexManager.ActiveApexInfo> activeApexInfos = mApexManager.getActiveApexInfos();
+        for (int i = 0; i < activeApexInfos.size(); i++) {
+            final ScanPartition scanPartition = resolveApexToScanPartition(activeApexInfos.get(i));
+            if (scanPartition != null) {
+                scanPartitions.add(scanPartition);
+            }
+        }
+
         mDirsToScanAsSystem = new ArrayList<>();
         mDirsToScanAsSystem.addAll(SYSTEM_PARTITIONS);
-        mDirsToScanAsSystem.addAll(mApexManager.getActiveApexInfos().stream()
-                .map(PackageManagerService::resolveApexToScanPartition)
-                .filter(Objects::nonNull).collect(Collectors.toList()));
-        Slog.d(TAG,
-                "Directories scanned as system partitions: [" + mDirsToScanAsSystem.stream().map(
-                        d -> (d.folder.getAbsolutePath() + ":" + d.scanFlag))
-                        .collect(Collectors.joining(",")) + "]");
+        mDirsToScanAsSystem.addAll(scanPartitions);
+        Slog.d(TAG, "Directories scanned as system partitions: " + mDirsToScanAsSystem);
 
         // CHECKSTYLE:OFF IndentationCheck
         synchronized (mInstallLock) {
