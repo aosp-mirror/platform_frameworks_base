@@ -510,6 +510,7 @@ message Atom {
         VoiceCallRatUsage voice_call_rat_usage = 10077 [(module) = "telephony"];
         SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
+        SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -8998,4 +8999,38 @@ message RankingSelected {
     optional int32 instance_id = 3;
     // Which of the ranked targets got picked, default starting position 0.
     optional int32 position_picked = 4;
+}
+
+/**
+ * Logs settings provider values.
+ *
+ * Use DeviceConfig.getProperties to get a list Setting key, query the data from content provider,
+ * then write the value to proto.
+ *
+ */
+message SettingSnapshot {
+
+    // Setting key
+    optional string name = 1;
+
+    enum SettingsValueType {
+        NOTASSIGNED = 0;
+        ASSIGNED_BOOL_TYPE = 1;
+        ASSIGNED_INT_TYPE = 2;
+        ASSIGNED_FLOAT_TYPE = 3;
+        ASSIGNED_STRING_TYPE = 4;
+    };
+    // Setting value type
+    optional SettingsValueType type = 2;
+
+    optional bool bool_value = 3;
+
+    optional int32 int_value = 4;
+
+    optional float float_value = 5;
+
+    optional string str_value = 6;
+
+    // Android user index. 0 for primary user, 10, 11 for secondary or profile user
+    optional int32 user_id = 7;
 }
