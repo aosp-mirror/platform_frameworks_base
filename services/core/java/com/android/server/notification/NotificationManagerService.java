@@ -142,6 +142,7 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.ICompanionDeviceManager;
 import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentProvider;
@@ -390,10 +391,9 @@ public class NotificationManagerService extends SystemService {
      * still post toasts created with
      * {@link android.widget.Toast#makeText(Context, CharSequence, int)} and its variants while
      * in the background.
-     *
-     * TODO(b/144152069): Add @EnabledAfter(Q) to target R+ after assessing impact on dogfood
      */
     @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK = 128611929L;
 
     private IActivityManager mAm;
@@ -2754,24 +2754,18 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration,
                 int displayId, @Nullable ITransientNotificationCallback callback) {
-            enqueueToast(pkg, token, text, null, duration, displayId, callback, false);
+            enqueueToast(pkg, token, text, null, duration, displayId, callback);
         }
 
         @Override
         public void enqueueToast(String pkg, IBinder token, ITransientNotification callback,
                 int duration, int displayId) {
-            enqueueToast(pkg, token, null, callback, duration, displayId, null, true);
-        }
-
-        @Override
-        public void enqueueTextOrCustomToast(String pkg, IBinder token,
-                ITransientNotification callback, int duration, int displayId, boolean isCustom) {
-            enqueueToast(pkg, token, null, callback, duration, displayId, null, isCustom);
+            enqueueToast(pkg, token, null, callback, duration, displayId, null);
         }
 
         private void enqueueToast(String pkg, IBinder token, @Nullable CharSequence text,
                 @Nullable ITransientNotification callback, int duration, int displayId,
-                @Nullable ITransientNotificationCallback textCallback, boolean isCustom) {
+                @Nullable ITransientNotificationCallback textCallback) {
             if (DBG) {
                 Slog.i(TAG, "enqueueToast pkg=" + pkg + " token=" + token
                         + " duration=" + duration + " displayId=" + displayId);
@@ -2810,11 +2804,15 @@ public class NotificationManagerService extends SystemService {
             }
 
             boolean isAppRenderedToast = (callback != null);
-            if (isAppRenderedToast && isCustom && !isSystemToast
-                    && !isPackageInForegroundForToast(pkg, callingUid)) {
+            if (isAppRenderedToast && !isSystemToast && !isPackageInForegroundForToast(pkg,
+                    callingUid)) {
                 boolean block;
                 long id = Binder.clearCallingIdentity();
                 try {
+                    // CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK is gated on targetSdk, so block will be
+                    // false for apps with targetSdk < R. For apps with targetSdk R+, text toasts
+                    // are not app-rendered, so isAppRenderedToast == true means it's a custom
+                    // toast.
                     block = mPlatformCompat.isChangeEnabledByPackageName(
                             CHANGE_BACKGROUND_CUSTOM_TOAST_BLOCK, pkg,
                             callingUser.getIdentifier());
@@ -2827,11 +2825,6 @@ public class NotificationManagerService extends SystemService {
                     Binder.restoreCallingIdentity(id);
                 }
                 if (block) {
-                    // TODO(b/144152069): Remove informative toast
-                    mUiHandler.post(() -> Toast.makeText(getContext(),
-                            "Background custom toast blocked for package " + pkg + ".\n"
-                                    + "See g.co/dev/toast.",
-                            Toast.LENGTH_SHORT).show());
                     Slog.w(TAG, "Blocking custom toast from package " + pkg
                             + " due to package not in the foreground");
                     return;
