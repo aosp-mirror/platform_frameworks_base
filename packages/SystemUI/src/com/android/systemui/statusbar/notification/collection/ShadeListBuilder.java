@@ -316,6 +316,7 @@ public class ShadeListBuilder implements Dumpable {
 
         // Step 7: Lock in our group structure and log anything that's changed since the last run
         mPipelineState.incrementTo(STATE_FINALIZING);
+        logFilterChanges();
         logParentingChanges();
         freeEmptyGroups();
 
@@ -363,6 +364,9 @@ public class ShadeListBuilder implements Dumpable {
             entry.setPreviousParent(entry.getParent());
             entry.setParent(null);
 
+            entry.mPreviousExcludingFilter = entry.mExcludingFilter;
+            entry.mExcludingFilter = null;
+
             if (entry.mFirstAddedIteration == -1) {
                 entry.mFirstAddedIteration = mIterationCount;
             }
@@ -371,8 +375,10 @@ public class ShadeListBuilder implements Dumpable {
         mNotifList.clear();
     }
 
-    private void filterNotifs(Collection<? extends ListEntry> entries,
-            List<ListEntry> out, List<NotifFilter> filters) {
+    private void filterNotifs(
+            Collection<? extends ListEntry> entries,
+            List<ListEntry> out,
+            List<NotifFilter> filters) {
         final long now = mSystemClock.uptimeMillis();
         for (ListEntry entry : entries)  {
             if (entry instanceof GroupEntry) {
@@ -585,8 +591,9 @@ public class ShadeListBuilder implements Dumpable {
      * filtered out during any of the filtering steps.
      */
     private void annulAddition(ListEntry entry) {
-        entry.setSection(-1);
-        entry.mNotifSection = null;
+        // TODO: We should null out the entry's section and promoter here. However, if we do that,
+        //  future runs will think that the section changed. We need a mPreviousNotifSection,
+        //  similar to what we do for parents.
         entry.setParent(null);
         if (entry.mFirstAddedIteration == mIterationCount) {
             entry.mFirstAddedIteration = -1;
@@ -613,6 +620,17 @@ public class ShadeListBuilder implements Dumpable {
 
     private void freeEmptyGroups() {
         mGroups.values().removeIf(ge -> ge.getSummary() == null && ge.getChildren().isEmpty());
+    }
+
+    private void logFilterChanges() {
+        for (NotificationEntry entry : mAllEntries) {
+            if (entry.mExcludingFilter != entry.mPreviousExcludingFilter) {
+                mLogger.logFilterChanged(
+                        entry.getKey(),
+                        entry.mPreviousExcludingFilter,
+                        entry.mExcludingFilter);
+            }
+        }
     }
 
     private void logParentingChanges() {
@@ -680,21 +698,8 @@ public class ShadeListBuilder implements Dumpable {
     };
 
     private boolean applyFilters(NotificationEntry entry, long now, List<NotifFilter> filters) {
-        NotifFilter filter = findRejectingFilter(entry, now, filters);
-
-        if (filter != entry.mExcludingFilter) {
-            mLogger.logFilterChanged(
-                    entry.getKey(),
-                    entry.mExcludingFilter != null ? entry.mExcludingFilter.getName() : null,
-                    filter != null ? filter.getName() : null);
-
-            // Note that groups and summaries can also be filtered out later if they're part of a
-            // malformed group. We currently don't have a great way to track that beyond parenting
-            // change logs. Consider adding something similar to mExcludingFilter for them.
-            entry.mExcludingFilter = filter;
-        }
-
-        return filter != null;
+        entry.mExcludingFilter = findRejectingFilter(entry, now, filters);
+        return entry.mExcludingFilter != null;
     }
 
     @Nullable private static NotifFilter findRejectingFilter(NotificationEntry entry, long now,
