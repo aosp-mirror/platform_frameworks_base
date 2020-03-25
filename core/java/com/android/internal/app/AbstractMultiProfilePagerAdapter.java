@@ -374,9 +374,6 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
         resetViewVisibilities(emptyStateView);
         emptyStateView.setVisibility(View.VISIBLE);
 
-        ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
-        icon.setImageResource(iconRes);
-
         TextView title = emptyStateView.findViewById(R.id.resolver_empty_state_title);
         title.setText(titleRes);
 
@@ -388,9 +385,17 @@ public abstract class AbstractMultiProfilePagerAdapter extends PagerAdapter {
             subtitle.setVisibility(View.GONE);
         }
 
+        ImageView icon = emptyStateView.findViewById(R.id.resolver_empty_state_icon);
         Button button = emptyStateView.findViewById(R.id.resolver_empty_state_button);
-        button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
-        button.setOnClickListener(buttonOnClick);
+        if (!getContext().getResources().getBoolean(R.bool.resolver_landscape_phone)) {
+            icon.setVisibility(View.VISIBLE);
+            icon.setImageResource(iconRes);
+            button.setVisibility(buttonOnClick != null ? View.VISIBLE : View.GONE);
+            button.setOnClickListener(buttonOnClick);
+        } else {
+            icon.setVisibility(View.GONE);
+            button.setVisibility(View.GONE);
+        }
 
         activeListAdapter.markTabLoaded();
     }
