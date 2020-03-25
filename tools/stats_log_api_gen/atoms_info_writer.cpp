@@ -15,11 +15,12 @@
  */
 
 #include "atoms_info_writer.h"
-#include "utils.h"
 
 #include <map>
 #include <set>
 #include <vector>
+
+#include "utils.h"
 
 namespace android {
 namespace stats_log_api_gen {
@@ -42,32 +43,27 @@ static void write_atoms_info_header_body(FILE* out, const Atoms& atoms) {
             "  const static std::set<int> "
             "kTruncatingTimestampAtomBlackList;\n");
     fprintf(out, "  const static std::map<int, int> kAtomsWithUidField;\n");
-    fprintf(out,
-            "  const static std::set<int> kAtomsWithAttributionChain;\n");
+    fprintf(out, "  const static std::set<int> kAtomsWithAttributionChain;\n");
     fprintf(out,
             "  const static std::map<int, StateAtomFieldOptions> "
             "kStateAtomsFieldOptions;\n");
-    fprintf(out,
-            "  const static std::set<int> kWhitelistedAtoms;\n");
+    fprintf(out, "  const static std::set<int> kWhitelistedAtoms;\n");
     fprintf(out, "};\n");
     fprintf(out, "const static int kMaxPushedAtomId = %d;\n\n", atoms.maxPushedAtomId);
-
 }
 
 static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
-    std::set<string> kTruncatingAtomNames = {
-            "mobile_radio_power_state_changed",
-            "audio_state_changed",
-            "call_state_changed",
-            "phone_signal_strength_changed",
-            "mobile_bytes_transfer_by_fg_bg",
-            "mobile_bytes_transfer"
-    };
+    std::set<string> kTruncatingAtomNames = {"mobile_radio_power_state_changed",
+                                             "audio_state_changed",
+                                             "call_state_changed",
+                                             "phone_signal_strength_changed",
+                                             "mobile_bytes_transfer_by_fg_bg",
+                                             "mobile_bytes_transfer"};
     fprintf(out,
             "const std::set<int> "
             "AtomsInfo::kTruncatingTimestampAtomBlackList = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
+         atom++) {
         if (kTruncatingAtomNames.find(atom->name) != kTruncatingAtomNames.end()) {
             const string constant = make_constant_name(atom->name);
             fprintf(out, "    %d, // %s\n", atom->code, constant.c_str());
@@ -77,10 +73,9 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
-    fprintf(out,
-            "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
+    fprintf(out, "const std::set<int> AtomsInfo::kAtomsWithAttributionChain = {\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
+         atom++) {
         for (vector<AtomField>::const_iterator field = atom->fields.begin();
              field != atom->fields.end(); field++) {
             if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
@@ -94,10 +89,9 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
-    fprintf(out,
-            "const std::set<int> AtomsInfo::kWhitelistedAtoms = {\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
+    fprintf(out, "const std::set<int> AtomsInfo::kWhitelistedAtoms = {\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
+         atom++) {
         if (atom->whitelisted) {
             const string constant = make_constant_name(atom->name);
             fprintf(out, "    %d, // %s\n", atom->code, constant.c_str());
@@ -109,8 +103,8 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
 
     fprintf(out, "static std::map<int, int> getAtomUidField() {\n");
     fprintf(out, "    std::map<int, int> uidField;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
+         atom++) {
         if (atom->uidField == 0) {
             continue;
         }
@@ -118,8 +112,8 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
                 "\n    // Adding uid field for atom "
                 "(%d)%s\n",
                 atom->code, atom->name.c_str());
-        fprintf(out, "    uidField[%d /* %s */] = %d;\n",
-                atom->code, make_constant_name(atom->name).c_str(), atom->uidField);
+        fprintf(out, "    uidField[%d /* %s */] = %d;\n", atom->code,
+                make_constant_name(atom->name).c_str(), atom->uidField);
     }
 
     fprintf(out, "    return uidField;\n");
@@ -134,8 +128,8 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
             "getStateAtomFieldOptions() {\n");
     fprintf(out, "    std::map<int, StateAtomFieldOptions> options;\n");
     fprintf(out, "    StateAtomFieldOptions* opt;\n");
-    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
-         atom != atoms.decls.end(); atom++) {
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin(); atom != atoms.decls.end();
+         atom++) {
         if (atom->primaryFields.size() == 0 && atom->exclusiveField == 0) {
             continue;
         }
@@ -143,8 +137,8 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
                 "\n    // Adding primary and exclusive fields for atom "
                 "(%d)%s\n",
                 atom->code, atom->name.c_str());
-        fprintf(out, "    opt = &(options[%d /* %s */]);\n",
-                atom->code, make_constant_name(atom->name).c_str());
+        fprintf(out, "    opt = &(options[%d /* %s */]);\n", atom->code,
+                make_constant_name(atom->name).c_str());
         fprintf(out, "    opt->primaryFields.reserve(%lu);\n", atom->primaryFields.size());
         for (const auto& field : atom->primaryFields) {
             fprintf(out, "    opt->primaryFields.push_back(%d);\n", field);
@@ -174,7 +168,7 @@ static void write_atoms_info_cpp_body(FILE* out, const Atoms& atoms) {
             "getStateAtomFieldOptions();\n");
 }
 
-int write_atoms_info_header(FILE* out, const Atoms &atoms, const string& namespaceStr) {
+int write_atoms_info_header(FILE* out, const Atoms& atoms, const string& namespaceStr) {
     // Print prelude
     fprintf(out, "// This file is autogenerated\n");
     fprintf(out, "\n");
@@ -195,8 +189,8 @@ int write_atoms_info_header(FILE* out, const Atoms &atoms, const string& namespa
     return 0;
 }
 
-int write_atoms_info_cpp(FILE *out, const Atoms &atoms, const string& namespaceStr,
-        const string& importHeader) {
+int write_atoms_info_cpp(FILE* out, const Atoms& atoms, const string& namespaceStr,
+                         const string& importHeader) {
     // Print prelude
     fprintf(out, "// This file is autogenerated\n");
     fprintf(out, "\n");
