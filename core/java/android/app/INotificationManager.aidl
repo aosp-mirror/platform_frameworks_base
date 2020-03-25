@@ -123,10 +123,14 @@ interface INotificationManager
     // INotificationListener method.
     @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
+            String callingAttributionTag);
     @UnsupportedAppUsage
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
+    StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
+            String callingAttributionTag, int count, boolean includeSnoozed);
 
-    NotificationHistory getNotificationHistory(String callingPkg);
+    NotificationHistory getNotificationHistory(String callingPkg, String callingAttributionTag);
 
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);
     void unregisterListener(in INotificationListener listener, int userid);
