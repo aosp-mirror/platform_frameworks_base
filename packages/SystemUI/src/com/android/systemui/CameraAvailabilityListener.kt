@@ -37,20 +37,22 @@ class CameraAvailabilityListener(
     private val cameraManager: CameraManager,
     private val cutoutProtectionPath: Path,
     private val targetCameraId: String,
+    excludedPackages: String,
     private val executor: Executor
 ) {
     private var cutoutBounds = Rect()
+    private val excludedPackageIds: Set<String>
     private val listeners = mutableListOf<CameraTransitionCallback>()
     private val availabilityCallback: CameraManager.AvailabilityCallback =
             object : CameraManager.AvailabilityCallback() {
-                override fun onCameraAvailable(cameraId: String) {
+                override fun onCameraClosed(cameraId: String) {
                     if (targetCameraId == cameraId) {
                         notifyCameraInactive()
                     }
                 }
 
-                override fun onCameraUnavailable(cameraId: String) {
-                    if (targetCameraId == cameraId) {
+                override fun onCameraOpened(cameraId: String, packageId: String) {
+                    if (targetCameraId == cameraId && !isExcluded(packageId)) {
                         notifyCameraActive()
                     }
                 }
@@ -64,6 +66,7 @@ class CameraAvailabilityListener(
                 computed.top.roundToInt(),
                 computed.right.roundToInt(),
                 computed.bottom.roundToInt())
+        excludedPackageIds = excludedPackages.split(",").toSet()
     }
 
     /**
@@ -85,6 +88,10 @@ class CameraAvailabilityListener(
 
     fun removeTransitionCallback(callback: CameraTransitionCallback) {
         listeners.remove(callback)
+    }
+
+    private fun isExcluded(packageId: String): Boolean {
+        return excludedPackageIds.contains(packageId)
     }
 
     private fun registerCameraListener() {
@@ -118,9 +125,10 @@ class CameraAvailabilityListener(
             val res = context.resources
             val pathString = res.getString(R.string.config_frontBuiltInDisplayCutoutProtection)
             val cameraId = res.getString(R.string.config_protectedCameraId)
+            val excluded = res.getString(R.string.config_cameraProtectionExcludedPackages)
 
             return CameraAvailabilityListener(
-                    manager, pathFromString(pathString), cameraId, executor)
+                    manager, pathFromString(pathString), cameraId, excluded, executor)
         }
 
         private fun pathFromString(pathString: String): Path {
