@@ -45,7 +45,8 @@ public class RankingCoordinator implements Coordinator {
     public void attach(NotifPipeline pipeline) {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
 
-        pipeline.addPreGroupFilter(mNotifFilter);
+        pipeline.addPreGroupFilter(mSuspendedFilter);
+        pipeline.addPreGroupFilter(mDozingFilter);
     }
 
     /**
@@ -53,33 +54,30 @@ public class RankingCoordinator implements Coordinator {
      * NotifListBuilder invalidates the notification list each time the ranking is updated,
      * so we don't need to explicitly invalidate this filter on ranking update.
      */
-    private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
+    private final NotifFilter mSuspendedFilter = new NotifFilter("IsSuspendedFilter") {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            // App suspended from Ranking
-            if (entry.getRanking().isSuspended()) {
-                return true;
-            }
+            return entry.getRanking().isSuspended();
+        }
+    };
 
+    private final NotifFilter mDozingFilter = new NotifFilter("IsDozingFilter") {
+        @Override
+        public boolean shouldFilterOut(NotificationEntry entry, long now) {
             // Dozing + DND Settings from Ranking object
             if (mStatusBarStateController.isDozing() && entry.shouldSuppressAmbient()) {
                 return true;
             }
 
-            if (!mStatusBarStateController.isDozing() && entry.shouldSuppressNotificationList()) {
-                return true;
-            }
-
-            return false;
+            return !mStatusBarStateController.isDozing() && entry.shouldSuppressNotificationList();
         }
     };
-
 
     private final StatusBarStateController.StateListener mStatusBarStateCallback =
             new StatusBarStateController.StateListener() {
                 @Override
                 public void onDozingChanged(boolean isDozing) {
-                    mNotifFilter.invalidateList();
+                    mDozingFilter.invalidateList();
                 }
             };
 }
