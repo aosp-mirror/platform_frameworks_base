@@ -312,6 +312,9 @@ public class TelecomManager {
             "android.telecom.extra.IS_USER_INTENT_EMERGENCY_CALL";
 
     /**
+     * A mandatory extra containing a {@link Uri} to be passed in when calling
+     * {@link #addNewUnknownCall(PhoneAccountHandle, Bundle)}. The {@link Uri} value indicates
+     * the remote handle of the new call.
      * @hide
      */
     public static final String EXTRA_UNKNOWN_CALL_HANDLE =
@@ -373,8 +376,15 @@ public class TelecomManager {
             "android.telecom.extra.CONNECTION_SERVICE";
 
     /**
-     * Optional extra for communicating the call technology used by a
-     * {@link com.android.internal.telephony.Connection} to Telecom
+     * Optional extra for communicating the call technology used by a {@link ConnectionService}
+     * to Telecom. Valid values are:
+     * <ul>
+     *     <li>{@link TelephonyManager#PHONE_TYPE_CDMA}</li>
+     *     <li>{@link TelephonyManager#PHONE_TYPE_GSM}</li>
+     *     <li>{@link TelephonyManager#PHONE_TYPE_IMS}</li>
+     *     <li>{@link TelephonyManager#PHONE_TYPE_THIRD_PARTY}</li>
+     *     <li>{@link TelephonyManager#PHONE_TYPE_SIP}</li>
+     * </ul>
      * @hide
      */
     public static final String EXTRA_CALL_TECHNOLOGY_TYPE =
@@ -725,15 +735,16 @@ public class TelecomManager {
     /**
      * The lookup key for an int that indicates the current TTY mode.
      * Valid modes are:
-     * - {@link #TTY_MODE_OFF}
-     * - {@link #TTY_MODE_FULL}
-     * - {@link #TTY_MODE_HCO}
-     * - {@link #TTY_MODE_VCO}
-     *
+     * <ul>
+     *     <li>{@link #TTY_MODE_OFF}</li>
+     *     <li>{@link #TTY_MODE_FULL}</li>
+     *     <li>{@link #TTY_MODE_HCO}</li>
+     *     <li>{@link #TTY_MODE_VCO}</li>
+     * </ul>
      * @hide
      */
     public static final String EXTRA_CURRENT_TTY_MODE =
-            "android.telecom.intent.extra.CURRENT_TTY_MODE";
+            "android.telecom.extra.CURRENT_TTY_MODE";
 
     /**
      * Broadcast intent action indicating that the TTY preferred operating mode has changed. An
@@ -753,7 +764,7 @@ public class TelecomManager {
      * @hide
      */
     public static final String EXTRA_TTY_PREFERRED_MODE =
-            "android.telecom.intent.extra.TTY_PREFERRED";
+            "android.telecom.extra.TTY_PREFERRED_MODE";
 
     /**
      * Broadcast intent action for letting custom component know to show the missed call
@@ -822,14 +833,35 @@ public class TelecomManager {
     /**
      * Optional extra for {@link #placeCall(Uri, Bundle)} containing an integer that specifies
      * the source where user initiated this call. This data is used in metrics.
-     * Valid source are:
-     * {@link ParcelableCallAnalytics#CALL_SOURCE_UNSPECIFIED},
-     * {@link ParcelableCallAnalytics#CALL_SOURCE_EMERGENCY_DIALPAD},
-     * {@link ParcelableCallAnalytics#CALL_SOURCE_EMERGENCY_SHORTCUT}.
+     * Valid sources are:
+     * {@link TelecomManager#CALL_SOURCE_UNSPECIFIED},
+     * {@link TelecomManager#CALL_SOURCE_EMERGENCY_DIALPAD},
+     * {@link TelecomManager#CALL_SOURCE_EMERGENCY_SHORTCUT}.
      *
      * @hide
      */
     public static final String EXTRA_CALL_SOURCE = "android.telecom.extra.CALL_SOURCE";
+
+    /**
+     * Indicating the call is initiated via emergency dialer's shortcut button.
+     *
+     * @hide
+     */
+    public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2;
+
+    /**
+     * Indicating the call is initiated via emergency dialer's dialpad.
+     *
+     * @hide
+     */
+    public static final int CALL_SOURCE_EMERGENCY_DIALPAD = 1;
+
+    /**
+     * Indicating the call source is not specified.
+     *
+     * @hide
+     */
+    public static final int CALL_SOURCE_UNSPECIFIED = 0;
 
     /**
      * The following 4 constants define how properties such as phone numbers and names are
