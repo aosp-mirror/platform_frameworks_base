@@ -2572,6 +2572,13 @@ class ActivityStack extends Task {
         if (r == null || r.app != app) {
             return null;
         }
+        if (r.isActivityTypeHome() && mAtmService.mHomeProcess == app) {
+            // Home activities should not be force-finished as we have nothing else to go
+            // back to. AppErrors will get to it after two crashes in MIN_CRASH_INTERVAL.
+            Slog.w(TAG, "  Not force finishing home activity "
+                    + r.intent.getComponent().flattenToShortString());
+            return null;
+        }
         Slog.w(TAG, "  Force finishing activity "
                 + r.intent.getComponent().flattenToShortString());
         Task finishedTask = r.getTask();
