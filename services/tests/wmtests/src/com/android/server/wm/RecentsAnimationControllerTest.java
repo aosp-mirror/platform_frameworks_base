@@ -100,7 +100,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
+        doNothing().when(mWm.mRoot).performSurfacePlacement();
         when(mMockRunner.asBinder()).thenReturn(new Binder());
         mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
         mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,

@@ -796,10 +796,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return leakedSurface || killedApps;
     }
 
-    void performSurfacePlacement(boolean recoveringMemory) {
+    void performSurfacePlacement() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "performSurfacePlacement");
         try {
-            performSurfacePlacementNoTrace(recoveringMemory);
+            performSurfacePlacementNoTrace();
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
@@ -807,7 +807,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     // "Something has changed!  Let's make it correct now."
     // TODO: Super crazy long method that should be broken down...
-    void performSurfacePlacementNoTrace(boolean recoveringMemory) {
+    void performSurfacePlacementNoTrace() {
         if (DEBUG_WINDOW_TRACE) Slog.v(TAG, "performSurfacePlacementInner: entry. Called by "
                 + Debug.getCallers(3));
 
@@ -842,7 +842,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applySurfaceChanges");
         mWmService.openSurfaceTransaction();
         try {
-            applySurfaceChangesTransaction(recoveringMemory);
+            applySurfaceChangesTransaction();
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
@@ -1042,7 +1042,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    private void applySurfaceChangesTransaction(boolean recoveringMemory) {
+    private void applySurfaceChangesTransaction() {
         mHoldScreenWindow = null;
         mObscuringWindow = null;
 
@@ -1065,7 +1065,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int count = mChildren.size();
         for (int j = 0; j < count; ++j) {
             final DisplayContent dc = mChildren.get(j);
-            dc.applySurfaceChangesTransaction(recoveringMemory);
+            dc.applySurfaceChangesTransaction();
         }
 
         // Give the display manager a chance to adjust properties like display rotation if it needs
