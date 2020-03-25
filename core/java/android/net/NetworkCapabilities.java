@@ -415,6 +415,20 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_PARTIAL_CONNECTIVITY);
 
     /**
+     * Capabilities that are allowed for test networks. This list must be set so that it is safe
+     * for an unprivileged user to create a network with these capabilities via shell. As such,
+     * it must never contain capabilities that are generally useful to the system, such as
+     * INTERNET, IMS, SUPL, etc.
+     */
+    private static final long TEST_NETWORKS_ALLOWED_CAPABILITIES =
+            (1 << NET_CAPABILITY_NOT_METERED)
+            | (1 << NET_CAPABILITY_NOT_RESTRICTED)
+            | (1 << NET_CAPABILITY_NOT_VPN)
+            | (1 << NET_CAPABILITY_NOT_ROAMING)
+            | (1 << NET_CAPABILITY_NOT_CONGESTED)
+            | (1 << NET_CAPABILITY_NOT_SUSPENDED);
+
+    /**
      * Adds the given capability to this {@code NetworkCapability} instance.
      * Note that when searching for a network to satisfy a request, all capabilities
      * requested must be satisfied.
@@ -643,6 +657,21 @@ public final class NetworkCapabilities implements Parcelable {
         if (deduceRestrictedCapability()) {
             removeCapability(NET_CAPABILITY_NOT_RESTRICTED);
         }
+    }
+
+    /**
+     * Test networks have strong restrictions on what capabilities they can have. Enforce these
+     * restrictions.
+     * @hide
+     */
+    public void restrictCapabilitesForTestNetwork() {
+        final long originalCapabilities = mNetworkCapabilities;
+        final NetworkSpecifier originalSpecifier = mNetworkSpecifier;
+        clearAll();
+        // Reset the transports to only contain TRANSPORT_TEST.
+        mTransportTypes = (1 << TRANSPORT_TEST);
+        mNetworkCapabilities = originalCapabilities & TEST_NETWORKS_ALLOWED_CAPABILITIES;
+        mNetworkSpecifier = originalSpecifier;
     }
 
     /**
