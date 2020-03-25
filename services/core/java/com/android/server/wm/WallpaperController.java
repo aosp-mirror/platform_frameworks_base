@@ -142,11 +142,13 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        final boolean keyguardGoingAwayWithWallpaper = (w.mActivityRecord != null
-                && w.mActivityRecord.isAnimating(TRANSITION | PARENTS)
-                && AppTransition.isKeyguardGoingAwayTransit(w.mActivityRecord.getTransit())
-                && (w.mActivityRecord.getTransitFlags()
-                        & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
+        final WindowContainer animatingContainer = w.mActivityRecord != null
+                ? w.mActivityRecord.getAnimatingContainer() : null;
+        final boolean keyguardGoingAwayWithWallpaper = (animatingContainer != null
+                && animatingContainer.isAnimating(TRANSITION | PARENTS)
+                && AppTransition.isKeyguardGoingAwayTransit(animatingContainer.mTransit)
+                && (animatingContainer.mTransitFlags
+                & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0);
 
         boolean needsShowWhenLockedWallpaper = false;
         if ((w.mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0
@@ -166,8 +168,6 @@ class WallpaperController {
 
         final RecentsAnimationController recentsAnimationController =
                 mService.getRecentsAnimationController();
-        final WindowContainer animatingContainer =
-                w.mActivityRecord != null ? w.mActivityRecord.getAnimatingContainer() : null;
         final boolean animationWallpaper = animatingContainer != null
                 && animatingContainer.getAnimation() != null
                 && animatingContainer.getAnimation().getShowWallpaper();
