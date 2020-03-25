@@ -97,7 +97,8 @@ class InsetsPolicy {
 
     private void updateHideNavInputEventReceiver() {
         mPolicy.updateHideNavInputEventReceiver(!isHidden(ITYPE_NAVIGATION_BAR),
-                mFocusedWin.mAttrs.insetsFlags.behavior != BEHAVIOR_SHOW_BARS_BY_TOUCH);
+                mFocusedWin != null
+                        && mFocusedWin.mAttrs.insetsFlags.behavior != BEHAVIOR_SHOW_BARS_BY_TOUCH);
     }
 
     boolean isHidden(@InternalInsetsType int type) {
