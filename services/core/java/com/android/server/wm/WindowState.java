@@ -608,6 +608,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mSeamlesslyRotated = false;
 
     /**
+     * Indicates if this window is behind IME. Only windows behind IME can get insets from IME.
+     */
+    boolean mBehindIme = false;
+
+    /**
      * Surface insets from the previous call to relayout(), used to track
      * if we are changing the Surface insets.
      */
