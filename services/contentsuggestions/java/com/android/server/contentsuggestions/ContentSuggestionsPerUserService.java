@@ -19,17 +19,14 @@ package com.android.server.contentsuggestions;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.contentsuggestions.ClassificationsRequest;
-import android.app.contentsuggestions.ContentSuggestionsManager;
 import android.app.contentsuggestions.IClassificationsCallback;
 import android.app.contentsuggestions.ISelectionsCallback;
 import android.app.contentsuggestions.SelectionsRequest;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.graphics.ColorSpace;
 import android.graphics.GraphicBuffer;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -95,26 +92,17 @@ public final class ContentSuggestionsPerUserService extends
     }
 
     @GuardedBy("mLock")
-    void provideContextImageLocked(int taskId, @NonNull Bundle imageContextRequestExtras) {
+    void provideContextImageFromBitmapLocked(@NonNull Bundle bitmapContainingExtras) {
+        // No task or snapshot provided, the bitmap is contained in the extras
+        provideContextImageLocked(-1, null, 0, bitmapContainingExtras);
+    }
+
+    @GuardedBy("mLock")
+    void provideContextImageLocked(int taskId, @Nullable GraphicBuffer snapshot,
+            int colorSpaceIdForSnapshot, @NonNull Bundle imageContextRequestExtras) {
         RemoteContentSuggestionsService service = ensureRemoteServiceLocked();
         if (service != null) {
-            GraphicBuffer snapshotBuffer = null;
-            int colorSpaceId = 0;
-
-            // Skip taking TaskSnapshot when bitmap is provided.
-            if (!imageContextRequestExtras.containsKey(ContentSuggestionsManager.EXTRA_BITMAP)) {
-                ActivityManager.TaskSnapshot snapshot =
-                        mActivityTaskManagerInternal.getTaskSnapshotNoRestore(taskId, false);
-                if (snapshot != null) {
-                    snapshotBuffer = snapshot.getSnapshot();
-                    ColorSpace colorSpace = snapshot.getColorSpace();
-                    if (colorSpace != null) {
-                        colorSpaceId = colorSpace.getId();
-                    }
-                }
-            }
-
-            service.provideContextImage(taskId, snapshotBuffer, colorSpaceId,
+            service.provideContextImage(taskId, snapshot, colorSpaceIdForSnapshot,
                     imageContextRequestExtras);
         }
     }
