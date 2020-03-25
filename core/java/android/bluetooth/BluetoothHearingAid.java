@@ -386,6 +386,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     public boolean setConnectionPolicy(@NonNull BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
         if (DBG) log("setConnectionPolicy(" + device + ", " + connectionPolicy + ")");
+        verifyDeviceNotNull(device, "setConnectionPolicy");
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled()
@@ -435,6 +436,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public @ConnectionPolicy int getConnectionPolicy(@NonNull BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
+        verifyDeviceNotNull(device, "getConnectionPolicy");
         final IBluetoothHearingAid service = getService();
         try {
             if (service != null && isEnabled()
@@ -511,6 +513,7 @@ public final class BluetoothHearingAid implements BluetoothProfile {
         if (VDBG) {
             log("getHiSyncId(" + device + ")");
         }
+        verifyDeviceNotNull(device, "getConnectionPolicy");
         final IBluetoothHearingAid service = getService();
         try {
             if (service == null) {
@@ -582,6 +585,13 @@ public final class BluetoothHearingAid implements BluetoothProfile {
     private boolean isEnabled() {
         if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
         return false;
+    }
+
+    private void verifyDeviceNotNull(BluetoothDevice device, String methodName) {
+        if (device == null) {
+            Log.e(TAG, methodName + ": device param is null");
+            throw new IllegalArgumentException("Device cannot be null");
+        }
     }
 
     private boolean isValidDevice(BluetoothDevice device) {
