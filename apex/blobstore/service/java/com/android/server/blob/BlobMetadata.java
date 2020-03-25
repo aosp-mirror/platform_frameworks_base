@@ -116,7 +116,7 @@ class BlobMetadata {
         return mUserId;
     }
 
-    void addCommitter(@NonNull Committer committer) {
+    void addOrReplaceCommitter(@NonNull Committer committer) {
         synchronized (mMetadataLock) {
             // We need to override the committer data, so first remove any existing
             // committer before adding the new one.
@@ -139,6 +139,12 @@ class BlobMetadata {
         }
     }
 
+    void removeCommitter(@NonNull Committer committer) {
+        synchronized (mMetadataLock) {
+            mCommitters.remove(committer);
+        }
+    }
+
     void removeInvalidCommitters(SparseArray<String> packages) {
         synchronized (mMetadataLock) {
             mCommitters.removeIf(committer ->
@@ -154,7 +160,7 @@ class BlobMetadata {
         }
     }
 
-    void addLeasee(String callingPackage, int callingUid, int descriptionResId,
+    void addOrReplaceLeasee(String callingPackage, int callingUid, int descriptionResId,
             CharSequence description, long leaseExpiryTimeMillis) {
         synchronized (mMetadataLock) {
             // We need to override the leasee data, so first remove any existing
