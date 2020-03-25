@@ -233,6 +233,7 @@ public class BubbleData {
                 Bubble b = mOverflowBubbles.get(i);
                 if (b.getKey().equals(entry.getKey())) {
                     moveOverflowBubbleToPending(b);
+                    b.setEntry(entry);
                     return b;
                 }
             }
@@ -240,6 +241,7 @@ public class BubbleData {
             for (int i = 0; i < mPendingBubbles.size(); i++) {
                 Bubble b = mPendingBubbles.get(i);
                 if (b.getKey().equals(entry.getKey())) {
+                    b.setEntry(entry);
                     return b;
                 }
             }
