@@ -230,6 +230,22 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return null;
     }
 
+    public int getOriginalIconColor() {
+        return Notification.COLOR_INVALID;
+    }
+
+    /**
+     * @return get the transformation target of the shelf, which usually is the icon
+     */
+    public View getShelfTransformationTarget() {
+        return null;
+    }
+
+    /**
+     * Set the notification icon to be hidden.
+     */
+    public void setIconsHidden(boolean hidden) {}
+
     public int getHeaderTranslation(boolean forceNoHeader) {
         return 0;
     }

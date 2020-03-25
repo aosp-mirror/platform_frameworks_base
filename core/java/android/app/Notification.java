@@ -5817,7 +5817,7 @@ public class Notification implements Parcelable
                         PorterDuff.Mode.SRC_ATOP);
 
             }
-            contentView.setInt(R.id.notification_header, "setOriginalIconColor",
+            contentView.setInt(R.id.icon, "setOriginalIconColor",
                     colorable ? color : NotificationHeaderView.NO_COLOR);
         }
 

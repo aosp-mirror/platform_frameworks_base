@@ -46,6 +46,7 @@ public class CachingIconView extends ImageView {
     private boolean mForceHidden;
     private int mDesiredVisibility;
     private Consumer<Integer> mOnVisibilityChangedListener;
+    private int mIconColor;
 
     @UnsupportedAppUsage
     public CachingIconView(Context context, @Nullable AttributeSet attrs) {
@@ -208,5 +209,14 @@ public class CachingIconView extends ImageView {
 
     public void setOnVisibilityChangedListener(Consumer<Integer> listener) {
         mOnVisibilityChangedListener = listener;
+    }
+
+    @RemotableViewMethod
+    public void setOriginalIconColor(int color) {
+        mIconColor = color;
+    }
+
+    public int getOriginalIconColor() {
+        return mIconColor;
     }
 }

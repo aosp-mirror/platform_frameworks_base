@@ -913,7 +913,11 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private void updatePivot() {
-        setPivotX((1 - mIconScale) / 2.0f * getWidth());
+        if (isLayoutRtl()) {
+            setPivotX((1 + mIconScale) / 2.0f * getWidth());
+        } else {
+            setPivotX((1 - mIconScale) / 2.0f * getWidth());
+        }
         setPivotY((getHeight() - mIconScale * getWidth()) / 2.0f);
     }
 

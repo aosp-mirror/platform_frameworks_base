@@ -69,7 +69,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     }.setDuration(200);
 
     private static final AnimationProperties ICON_ANIMATION_PROPERTIES = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter().animateY().animateAlpha()
+        private AnimationFilter mAnimationFilter = new AnimationFilter()
+                .animateX()
+                .animateY()
+                .animateAlpha()
                 .animateScale();
 
         @Override
@@ -388,7 +391,12 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         for (int i = 0; i < childCount; i++) {
             View view = getChildAt(i);
             IconState iconState = mIconStates.get(view);
-            iconState.xTranslation = translationX;
+            if (iconState.iconAppearAmount == 1.0f) {
+                // We only modify the xTranslation if it's fully inside of the container
+                // since during the transition to the shelf, the translations are controlled
+                // from the outside
+                iconState.xTranslation = translationX;
+            }
             if (mFirstVisibleIconState == null) {
                 mFirstVisibleIconState = iconState;
             }
@@ -499,7 +507,10 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
         return mActualPaddingEnd;
     }
 
-    private float getActualPaddingStart() {
+    /**
+     * @return the actual startPadding of this view
+     */
+    public float getActualPaddingStart() {
         if (mActualPaddingStart == NO_VALUE) {
             return getPaddingStart();
         }

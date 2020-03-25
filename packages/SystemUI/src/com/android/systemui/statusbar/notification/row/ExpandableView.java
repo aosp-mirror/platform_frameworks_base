@@ -636,6 +636,56 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     }
 
     /**
+     * @return get the transformation target of the shelf, which usually is the icon
+     */
+    public View getShelfTransformationTarget() {
+        return null;
+    }
+
+    /**
+     * Get the relative top padding of a view relative to this view. This recursively walks up the
+     * hierarchy and does the corresponding measuring.
+     *
+     * @param view the view to get the padding for. The requested view has to be a child of this
+     *             notification.
+     * @return the toppadding
+     */
+    public int getRelativeTopPadding(View view) {
+        int topPadding = 0;
+        while (view.getParent() instanceof ViewGroup) {
+            topPadding += view.getTop();
+            view = (View) view.getParent();
+            if (view == this) {
+                return topPadding;
+            }
+        }
+        return topPadding;
+    }
+
+
+    /**
+     * Get the relative start padding of a view relative to this view. This recursively walks up the
+     * hierarchy and does the corresponding measuring.
+     *
+     * @param view the view to get the padding for. The requested view has to be a child of this
+     *             notification.
+     * @return the start padding
+     */
+    public int getRelativeStartPadding(View view) {
+        boolean isRtl = isLayoutRtl();
+        int startPadding = 0;
+        while (view.getParent() instanceof ViewGroup) {
+            View parent = (View) view.getParent();
+            startPadding += isRtl ? parent.getWidth() - view.getRight() : view.getLeft();
+            view = parent;
+            if (view == this) {
+                return startPadding;
+            }
+        }
+        return startPadding;
+    }
+
+    /**
      * Set how much this notification is transformed into the shelf.
      *
      * @param contentTransformationAmount A value from 0 to 1 indicating how much we are transformed

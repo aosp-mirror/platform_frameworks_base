@@ -31,6 +31,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -587,15 +588,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 ContrastColorUtil.getInstance(mContext));
         int color = StatusBarIconView.NO_COLOR;
         if (colorize) {
-            NotificationHeaderView header = getVisibleNotificationHeader();
-            if (header != null) {
-                color = header.getOriginalIconColor();
-            } else {
-                color = mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded(),
-                        getBackgroundColorWithoutTint());
-            }
+            color = getOriginalIconColor();
         }
         expandedIcon.setStaticDrawableColor(color);
+    }
+
+    public int getOriginalIconColor() {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
+            return mChildrenContainer.getVisibleHeader().getOriginalIconColor();
+        }
+        int color = getShowingLayout().getOriginalIconColor();
+        if (color != Notification.COLOR_INVALID) {
+            return color;
+        } else {
+            return mEntry.getContrastedColor(mContext, mIsLowPriority && !isExpanded(),
+                    getBackgroundColorWithoutTint());
+        }
     }
 
     public void setAboveShelfChangedListener(AboveShelfChangedListener aboveShelfChangedListener) {
@@ -1452,12 +1460,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mOnDismissRunnable = onDismissRunnable;
     }
 
-    public View getNotificationIcon() {
-        NotificationHeaderView notificationHeader = getVisibleNotificationHeader();
-        if (notificationHeader != null) {
-            return notificationHeader.getIcon();
+    @Override
+    public View getShelfTransformationTarget() {
+        if (mIsSummaryWithChildren && !shouldShowPublic()) {
+            return mChildrenContainer.getVisibleHeader().getIcon();
         }
-        return null;
+        return getShowingLayout().getShelfTransformationTarget();
     }
 
     /**
@@ -1467,26 +1475,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (areGutsExposed()) {
             return false;
         }
-        return getVisibleNotificationHeader() != null;
-    }
-
-    /**
-     * Set how much this notification is transformed into an icon.
-     *
-     * @param contentTransformationAmount A value from 0 to 1 indicating how much we are transformed
-     *                                 to the content away
-     * @param isLastChild is this the last child in the list. If true, then the transformation is
-     *                    different since it's content fades out.
-     */
-    public void setContentTransformationAmount(float contentTransformationAmount,
-            boolean isLastChild) {
-        boolean changeTransformation = isLastChild != mIsLastChild;
-        changeTransformation |= mContentTransformationAmount != contentTransformationAmount;
-        mIsLastChild = isLastChild;
-        mContentTransformationAmount = contentTransformationAmount;
-        if (changeTransformation) {
-            updateContentTransformation();
-        }
+        return getShelfTransformationTarget() != null;
     }
 
     /**
@@ -1538,26 +1527,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mChildrenContainer != null) {
             mChildrenContainer.setIconsVisible(visible);
         }
-    }
-
-    /**
-     * Get the relative top padding of a view relative to this view. This recursively walks up the
-     * hierarchy and does the corresponding measuring.
-     *
-     * @param view the view to the the padding for. The requested view has to be a child of this
-     *             notification.
-     * @return the toppadding
-     */
-    public int getRelativeTopPadding(View view) {
-        int topPadding = 0;
-        while (view.getParent() instanceof ViewGroup) {
-            topPadding += view.getTop();
-            view = (View) view.getParent();
-            if (view instanceof ExpandableNotificationRow) {
-                return topPadding;
-            }
-        }
-        return topPadding;
     }
 
     public float getContentTranslation() {
@@ -2134,7 +2103,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     @Override
-    public StatusBarIconView getShelfIcon() {
+    public @NonNull StatusBarIconView getShelfIcon() {
         return getEntry().getIcons().getShelfIcon();
     }
 

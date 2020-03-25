@@ -29,6 +29,7 @@ import android.view.animation.PathInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.widget.CachingIconView;
 import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
@@ -54,7 +55,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
     protected int mColor;
 
-    private ImageView mIcon;
+    private CachingIconView mIcon;
     private NotificationExpandButton mExpandButton;
     protected NotificationHeaderView mNotificationHeader;
     private TextView mHeaderText;
@@ -196,6 +197,22 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     @Override
     public NotificationHeaderView getNotificationHeader() {
         return mNotificationHeader;
+    }
+
+    @Override
+    public int getOriginalIconColor() {
+        return mIcon.getOriginalIconColor();
+    }
+
+    @Override
+    public View getShelfTransformationTarget() {
+        return mIcon;
+    }
+
+    @Override
+    public void setIconsHidden(boolean hidden) {
+        super.setIconsHidden(hidden);
+        mIcon.setForceHidden(hidden);
     }
 
     @Override
