@@ -92,6 +92,8 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.InjectionInflationController;
 
+import com.google.common.collect.ImmutableList;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -315,6 +317,23 @@ public class BubbleControllerTest extends SysuiTestCase {
         verify(mBubbleStateChangeListener).onHasBubblesChanged(false);
 
         assertFalse(mSysUiStateBubblesExpanded);
+    }
+
+    @Test
+    public void testPromoteBubble_autoExpand() {
+        mBubbleController.updateBubble(mRow2.getEntry());
+        mBubbleController.updateBubble(mRow.getEntry());
+        mBubbleController.removeBubble(
+                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+
+        Bubble b = mBubbleData.getOverflowBubbleWithKey(mRow.getEntry().getKey());
+        assertThat(mBubbleData.getOverflowBubbles()).isEqualTo(ImmutableList.of(b));
+
+        Bubble b2 = mBubbleData.getBubbleWithKey(mRow2.getEntry().getKey());
+        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(b2);
+
+        mBubbleController.promoteBubbleFromOverflow(b);
+        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(b);
     }
 
     @Test
