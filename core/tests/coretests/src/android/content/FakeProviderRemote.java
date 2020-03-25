@@ -37,6 +37,9 @@ public class FakeProviderRemote extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
+        if (uri.getPath() != null && uri.getPath().contains("error")) {
+            throw new IllegalArgumentException("Expected exception");
+        }
         return "fake/remote";
     }
 
