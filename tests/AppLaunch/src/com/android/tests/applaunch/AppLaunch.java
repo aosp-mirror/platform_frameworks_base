@@ -509,14 +509,66 @@ public class AppLaunch extends InstrumentationTestCase {
         for (int i = 0; i < IORAP_COMPILE_CMD_TIMEOUT; ++i) {
             IorapCompilationStatus status = waitForIorapCompiled(appPkgName);
             if (status == IorapCompilationStatus.COMPLETE) {
+                Log.v(TAG, "compileAppForIorap: success");
+                logDumpsysIorapd(appPkgName);
                 return true;
             } else if (status == IorapCompilationStatus.INSUFFICIENT_TRACES) {
+                Log.e(TAG, "compileAppForIorap: failed due to insufficient traces");
+                logDumpsysIorapd(appPkgName);
                 return false;
             } // else INCOMPLETE. keep asking iorapd if it's done yet.
             sleep(1000);
         }
 
+        Log.e(TAG, "compileAppForIorap: failed due to timeout");
+        logDumpsysIorapd(appPkgName);
         return false;
+    }
+
+    /** Save the contents of $(adb shell dumpsys iorapd) to the launch_logs directory. */
+    private void logDumpsysIorapd(String packageName) throws IOException {
+        InstrumentationTestRunner instrumentation =
+                (InstrumentationTestRunner)getInstrumentation();
+        Bundle args = instrumentation.getArguments();
+
+        String launchDirectory = args.getString(KEY_LAUNCH_DIRECTORY);
+
+        // Root directory for applaunch file to log the app launch output
+        // Will be useful in case of simpleperf command is used
+        File launchRootDir = null;
+        if (null != launchDirectory && !launchDirectory.isEmpty()) {
+            launchRootDir = new File(launchDirectory);
+            if (!launchRootDir.exists() && !launchRootDir.mkdirs()) {
+                throw new IOException("Unable to create the destination directory "
+                    + launchRootDir + ". Try disabling selinux.");
+            }
+        } else {
+            Log.w(TAG, "logDumpsysIorapd: Missing launch-directory arg");
+            return;
+        }
+
+        File launchSubDir = new File(launchRootDir, LAUNCH_SUB_DIRECTORY);
+
+        if (!launchSubDir.exists() && !launchSubDir.mkdirs()) {
+            throw new IOException("Unable to create the lauch file sub directory "
+                + launchSubDir + ". Try disabling selinux.");
+        }
+        String path = "iorapd_dumpsys_" + packageName + "_" + System.nanoTime() + ".txt";
+        File file = new File(launchSubDir, path);
+        try (FileOutputStream outputStream = new FileOutputStream(file);
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(outputStream));
+                ParcelFileDescriptor result = getInstrumentation().getUiAutomation().
+                        executeShellCommand(IORAP_DUMPSYS_CMD);
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+                        new FileInputStream(result.getFileDescriptor())))) {
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                writer.write(line + "\n");
+            }
+        }
+
+        Log.v(TAG, "logDumpsysIorapd: Saved to file: " + path);
     }
 
     enum IorapCompilationStatus {
