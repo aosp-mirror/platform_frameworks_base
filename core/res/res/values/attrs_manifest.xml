@@ -1827,19 +1827,11 @@
 
         <attr name="gwpAsanMode" />
 
-        <!-- If {@code true} allow requesting that its permissions don't get automatically
-             revoked when the app is unused for an extended amount of time.
-
-             The default value is {@code false}. -->
-        <attr name="requestAutoRevokePermissionsExemption" format="boolean" />
-
-        <!-- If {@code true} its permissions shouldn't get automatically
-             revoked when the app is unused for an extended amount of time.
-
-             This implies {@code requestDontAutoRevokePermissions=true}
-
-             The default value is {@code false}. -->
-        <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
+        <attr name="autoRevokePermissions">
+            <enum name="allowed" value="0" />
+            <enum name="discouraged" value="1" />
+            <enum name="disallowed" value="2" />
+        </attr>
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
