@@ -1971,8 +1971,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int focusStackId = topFocusedStack != null
                 ? topFocusedStack.getRootTaskId() : INVALID_TASK_ID;
         // We dismiss the docked stack whenever we switch users.
-        final ActivityStack dockedStack = getDefaultDisplay().getRootSplitScreenPrimaryTask();
-        if (dockedStack != null) {
+        if (getDefaultDisplay().isSplitScreenModeActivated()) {
             getDefaultDisplay().onSplitScreenModeDismissed();
         }
         // Also dismiss the pinned stack whenever we switch users. Removing the pinned stack will
@@ -2111,19 +2110,17 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final ActivityStack stack;
             if (singleActivity) {
                 stack = r.getRootTask();
+                stack.setWindowingMode(WINDOWING_MODE_PINNED);
             } else {
-                // In the case of multiple activities, we will create a new stack for it and then
-                // move the PIP activity into the stack.
-                // We will then perform a windowing mode change for both scenarios.
-                stack = display.createStack(
-                        r.getRootTask().getRequestedOverrideWindowingMode(),
-                        r.getActivityType(), ON_TOP, r.info, r.intent);
+                // In the case of multiple activities, we will create a new task for it and then
+                // move the PIP activity into the task.
+                stack = display.createStack(WINDOWING_MODE_PINNED, r.getActivityType(), ON_TOP,
+                        r.info, r.intent, false /* createdByOrganizer */);
+
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
                 r.reparent(stack, MAX_VALUE, "moveActivityToStack");
             }
-
-            stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the pinned stack
@@ -2800,16 +2797,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if (stack == null && r != null) {
             stack = r.getRootTask();
         }
+        int windowingMode = launchParams != null ? launchParams.mWindowingMode
+                : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         if (stack != null) {
             display = stack.getDisplay();
             if (display != null && canLaunchOnDisplay(r, display.mDisplayId)) {
-                int windowingMode = launchParams != null ? launchParams.mWindowingMode
-                        : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
                 if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
                     windowingMode = display.resolveWindowingMode(r, options, candidateTask,
                             activityType);
                 }
-                if (stack.isCompatible(windowingMode, activityType)) {
+                // Always allow organized tasks that created by organizer since the activity type
+                // of an organized task is decided by the activity type of its top child, which
+                // could be incompatible with the given windowing mode and activity type.
+                if (stack.isCompatible(windowingMode, activityType) || stack.mCreatedByOrganizer) {
                     return stack;
                 }
                 if (windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
@@ -2827,6 +2827,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (display == null || !canLaunchOnDisplay(r, display.mDisplayId)) {
             display = getDefaultDisplay();
+            if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
+                windowingMode = display.resolveWindowingMode(r, options, candidateTask,
+                        activityType);
+            }
         }
 
         return display.getOrCreateStack(r, options, candidateTask, activityType, onTop);
@@ -2918,10 +2922,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             case ACTIVITY_TYPE_ASSISTANT: return r.isActivityTypeAssistant();
             case ACTIVITY_TYPE_DREAM: return r.isActivityTypeDream();
         }
-        // TODO(task-hierarchy): Find another way to differentiate tile from normal stack once it is
-        //                       part of the hierarchy
-        if (stack instanceof TaskTile) {
-            // Don't launch directly into tiles.
+        if (stack.mCreatedByOrganizer) {
+            // Don't launch directly into task created by organizer...but why can't we?
             return false;
         }
         // There is a 1-to-1 relationship between stack and task when not in
