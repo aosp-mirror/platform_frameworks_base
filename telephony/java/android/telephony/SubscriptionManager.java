@@ -135,29 +135,28 @@ public class SubscriptionManager {
     public static final String CACHE_KEY_DEFAULT_SUB_ID_PROPERTY =
             "cache_key.telephony.get_default_sub_id";
 
-    private static final int DEFAULT_SUB_ID_CACHE_SIZE = 1;
+    /** @hide */
+    public static final String CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY =
+            "cache_key.telephony.get_default_data_sub_id";
+
+    private static final int MAX_CACHE_SIZE = 4;
 
     private static PropertyInvalidatedCache<Void, Integer> sDefaultSubIdCache =
             new PropertyInvalidatedCache<Void, Integer>(
-                    DEFAULT_SUB_ID_CACHE_SIZE,
-                    CACHE_KEY_DEFAULT_SUB_ID_PROPERTY) {
-                @Override
-                protected Integer recompute(Void query) {
-                    int subId = INVALID_SUBSCRIPTION_ID;
+                    MAX_CACHE_SIZE, CACHE_KEY_DEFAULT_SUB_ID_PROPERTY) {
+            @Override
+            protected Integer recompute(Void query) {
+                return getDefaultSubscriptionIdInternal();
+            }};
 
-                    try {
-                        ISub iSub = TelephonyManager.getSubscriptionService();
-                        if (iSub != null) {
-                            subId = iSub.getDefaultSubId();
-                        }
-                    } catch (RemoteException ex) {
-                        // ignore it
-                    }
+    private static PropertyInvalidatedCache<Void, Integer> sDefaultDataSubIdCache =
+            new PropertyInvalidatedCache<Void, Integer>(
+                    MAX_CACHE_SIZE, CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY) {
+            @Override
+            protected Integer recompute(Void query) {
+                return getDefaultDataSubscriptionIdInternal();
+            }};
 
-                    if (VDBG) logd("getDefaultSubId=" + subId);
-                    return subId;
-                }
-            };
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
      * on the given subscriptionId
@@ -1857,6 +1856,22 @@ public class SubscriptionManager {
         return sDefaultSubIdCache.query(null);
     }
 
+    private static int getDefaultSubscriptionIdInternal() {
+        int subId = INVALID_SUBSCRIPTION_ID;
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                subId = iSub.getDefaultSubId();
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        if (VDBG) logd("getDefaultSubId=" + subId);
+        return subId;
+    }
+
     /**
      * Returns the system's default voice subscription id.
      *
@@ -2007,6 +2022,10 @@ public class SubscriptionManager {
      * @return the default data subscription Id.
      */
     public static int getDefaultDataSubscriptionId() {
+        return sDefaultDataSubIdCache.query(null);
+    }
+
+    private static int getDefaultDataSubscriptionIdInternal() {
         int subId = INVALID_SUBSCRIPTION_ID;
 
         try {
@@ -3280,5 +3299,10 @@ public class SubscriptionManager {
     /** @hide */
     public static void invalidateDefaultSubIdCaches() {
         PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_SUB_ID_PROPERTY);
+    }
+
+    /** @hide */
+    public static void invalidateDefaultDataSubIdCaches() {
+        PropertyInvalidatedCache.invalidateCache(CACHE_KEY_DEFAULT_DATA_SUB_ID_PROPERTY);
     }
 }
