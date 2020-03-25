@@ -30,7 +30,6 @@ import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WaitResult.LAUNCH_STATE_COLD;
 import static android.app.WaitResult.LAUNCH_STATE_HOT;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
@@ -78,6 +77,7 @@ import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_DISPLAY;
 import static com.android.server.wm.Task.REPARENT_MOVE_STACK_TO_FRONT;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1566,7 +1566,7 @@ class ActivityStarter {
         }
 
         if (!mAvoidMoveToFront && mDoResume) {
-            mTargetStack.moveToFront("reuseOrNewTask");
+            mTargetStack.getStack().moveToFront("reuseOrNewTask", targetTask);
             if (mOptions != null) {
                 if (mPreferredWindowingMode != WINDOWING_MODE_UNDEFINED) {
                     mTargetStack.setWindowingMode(mPreferredWindowingMode);
@@ -2364,6 +2364,7 @@ class ActivityStarter {
     private void setTargetStackIfNeeded(ActivityRecord intentActivity) {
         mTargetStack = intentActivity.getRootTask();
         mTargetStack.mLastPausedActivity = null;
+        Task intentTask = intentActivity.getTask();
         // If the target task is not in the front, then we need to bring it to the front...
         // except...  well, with SINGLE_TASK_LAUNCH it's not entirely clear. We'd like to have
         // the same behavior as if a new instance was being started, which means not bringing it
@@ -2374,7 +2375,7 @@ class ActivityStarter {
             final ActivityRecord curTop = (focusStack == null)
                     ? null : focusStack.topRunningNonDelayedActivityLocked(mNotTop);
             final Task topTask = curTop != null ? curTop.getTask() : null;
-            differentTopTask = topTask != intentActivity.getTask()
+            differentTopTask = topTask != intentTask
                     || (focusStack != null && topTask != focusStack.getTopMostTask());
         } else {
             // The existing task should always be different from those in other displays.
@@ -2391,7 +2392,6 @@ class ActivityStarter {
                     intentActivity.setTaskToAffiliateWith(mSourceRecord.getTask());
                 }
 
-                final Task intentTask = intentActivity.getTask();
                 final ActivityStack launchStack =
                         getLaunchStack(mStartActivity, mLaunchFlags, intentTask, mOptions);
                 if (launchStack == null || launchStack == mTargetStack) {
@@ -2400,6 +2400,14 @@ class ActivityStarter {
                     // new intent has delivered.
                     final boolean isSplitScreenTopStack = mTargetStack.isTopSplitScreenStack();
 
+                    // TODO(b/151572268): Figure out a better way to move tasks in above 2-levels
+                    //  tasks hierarchies.
+                    if (mTargetStack != intentTask
+                            && mTargetStack != intentTask.getParent().asTask()) {
+                        intentTask.getParent().positionChildAt(POSITION_TOP, intentTask,
+                                false /* includingParents */);
+                        intentTask = intentTask.getParent().asTask();
+                    }
                     // We only want to move to the front, if we aren't going to launch on a
                     // different stack. If we launch on a different stack, we will put the
                     // task on top there.
@@ -2420,8 +2428,8 @@ class ActivityStarter {
         // Need to update mTargetStack because if task was moved out of it, the original stack may
         // be destroyed.
         mTargetStack = intentActivity.getRootTask();
-        mSupervisor.handleNonResizableTaskIfNeeded(intentActivity.getTask(),
-                WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY, mTargetStack);
+        mSupervisor.handleNonResizableTaskIfNeeded(intentTask, WINDOWING_MODE_UNDEFINED,
+                DEFAULT_DISPLAY, mTargetStack);
     }
 
     private void resumeTargetStackIfNeeded() {

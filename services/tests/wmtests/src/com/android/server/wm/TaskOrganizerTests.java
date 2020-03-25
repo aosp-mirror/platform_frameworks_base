@@ -37,6 +37,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -347,45 +348,62 @@ public class TaskOrganizerTests extends WindowTestsBase {
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info2.topActivityType);
 
         DisplayContent dc = mWm.mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
-        List<TaskTile> infos = getTaskTiles(dc);
+        List<Task> infos = getTasksCreatedByOrganizer(dc);
         assertEquals(2, infos.size());
 
         assertTrue(mWm.mAtmService.mTaskOrganizerController.deleteRootTask(info1.token));
-        infos = getTaskTiles(dc);
+        infos = getTasksCreatedByOrganizer(dc);
         assertEquals(1, infos.size());
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, infos.get(0).getWindowingMode());
     }
 
     @Test
     public void testTileAddRemoveChild() {
+        ITaskOrganizer listener = new ITaskOrganizer.Stub() {
+            @Override
+            public void onTaskAppeared(RunningTaskInfo taskInfo) { }
+
+            @Override
+            public void onTaskVanished(RunningTaskInfo container) { }
+
+            @Override
+            public void onTaskInfoChanged(RunningTaskInfo info) throws RemoteException {
+            }
+        };
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(listener,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
         final ActivityStack stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
         assertEquals(mDisplayContent.getWindowingMode(), stack.getWindowingMode());
-        TaskTile tile1 = TaskTile.forToken(info1.token.asBinder());
-        tile1.addChild(stack, 0 /* index */);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparent(stack.mRemoteToken, info1.token, true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         assertEquals(info1.configuration.windowConfiguration.getWindowingMode(),
                 stack.getWindowingMode());
 
         // Info should reflect new membership
-        List<TaskTile> tiles = getTaskTiles(mDisplayContent);
-        info1 = tiles.get(0).getTaskInfo();
+        List<Task> infos = getTasksCreatedByOrganizer(mDisplayContent);
+        info1 = infos.get(0).getTaskInfo();
         assertEquals(ACTIVITY_TYPE_STANDARD, info1.topActivityType);
 
         // Children inherit configuration
         Rect newSize = new Rect(10, 10, 300, 300);
-        Configuration c = new Configuration(tile1.getRequestedOverrideConfiguration());
+        Task task1 = WindowContainer.fromBinder(info1.token.asBinder()).asTask();
+        Configuration c = new Configuration(task1.getRequestedOverrideConfiguration());
         c.windowConfiguration.setBounds(newSize);
         doNothing().when(stack).adjustForMinimalTaskDimensions(any(), any());
-        tile1.onRequestedOverrideConfigurationChanged(c);
+        task1.onRequestedOverrideConfigurationChanged(c);
         assertEquals(newSize, stack.getBounds());
 
-        tile1.removeChild(stack);
+        wct = new WindowContainerTransaction();
+        wct.reparent(stack.mRemoteToken, null, true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         assertEquals(mDisplayContent.getWindowingMode(), stack.getWindowingMode());
-        tiles = getTaskTiles(mDisplayContent);
-        info1 = tiles.get(0).getTaskInfo();
+        infos = getTasksCreatedByOrganizer(mDisplayContent);
+        info1 = infos.get(0).getTaskInfo();
         assertEquals(ACTIVITY_TYPE_UNDEFINED, info1.topActivityType);
     }
 
@@ -415,8 +433,10 @@ public class TaskOrganizerTests extends WindowTestsBase {
 
         final ActivityStack stack = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, mDisplayContent);
-        TaskTile tile1 = TaskTile.forToken(info1.token.asBinder());
-        tile1.addChild(stack, 0 /* index */);
+        Task task1 = WindowContainer.fromBinder(info1.token.asBinder()).asTask();
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparent(stack.mRemoteToken, info1.token, true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         assertTrue(called[0]);
         assertEquals(ACTIVITY_TYPE_STANDARD, lastReportedTiles.get(0).topActivityType);
 
@@ -424,19 +444,24 @@ public class TaskOrganizerTests extends WindowTestsBase {
         called[0] = false;
         final ActivityStack stack2 = createTaskStackOnDisplay(
                 WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, mDisplayContent);
-        tile1.addChild(stack2, 0 /* index */);
+        wct = new WindowContainerTransaction();
+        wct.reparent(stack2.mRemoteToken, info1.token, true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         assertTrue(called[0]);
         assertEquals(ACTIVITY_TYPE_HOME, lastReportedTiles.get(0).topActivityType);
 
         lastReportedTiles.clear();
         called[0] = false;
-        mDisplayContent.positionStackAtTop(stack, false /* includingParents */);
+        task1.positionChildAt(POSITION_TOP, stack, false /* includingParents */);
         assertTrue(called[0]);
         assertEquals(ACTIVITY_TYPE_STANDARD, lastReportedTiles.get(0).topActivityType);
 
         lastReportedTiles.clear();
         called[0] = false;
-        tile1.removeAllChildren();
+        wct = new WindowContainerTransaction();
+        wct.reparent(stack.mRemoteToken, null, true /* onTop */);
+        wct.reparent(stack2.mRemoteToken, null, true /* onTop */);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
         assertTrue(called[0]);
         assertEquals(ACTIVITY_TYPE_UNDEFINED, lastReportedTiles.get(0).topActivityType);
     }
@@ -457,9 +482,11 @@ public class TaskOrganizerTests extends WindowTestsBase {
             }
         };
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(
+                listener, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(
                 listener, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         RunningTaskInfo info1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
-                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         RunningTaskInfo info2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
                 mDisplayContent.mDisplayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
 
@@ -522,13 +549,11 @@ public class TaskOrganizerTests extends WindowTestsBase {
                 lastReportedTiles.get(info1.token.asBinder()).topActivityType);
     }
 
-    private List<TaskTile> getTaskTiles(DisplayContent dc) {
-        ArrayList<TaskTile> out = new ArrayList<>();
+    private List<Task> getTasksCreatedByOrganizer(DisplayContent dc) {
+        ArrayList<Task> out = new ArrayList<>();
         for (int i = dc.getStackCount() - 1; i >= 0; --i) {
-            final TaskTile t = dc.getStackAt(i).asTile();
-            if (t != null) {
-                out.add(t);
-            }
+            final Task t = dc.getStackAt(i);
+            if (t.mCreatedByOrganizer) out.add(t);
         }
         return out;
     }

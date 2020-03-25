@@ -302,9 +302,6 @@ class ActivityStack extends Task {
 
     private static final int TRANSLUCENT_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 1;
 
-    // TODO(task-hierarchy): remove when tiles can be actual parents
-    TaskTile mTile = null;
-
     private final Handler mHandler;
 
     private class ActivityStackHandler extends Handler {
@@ -550,10 +547,10 @@ class ActivityStack extends Task {
     }
 
     ActivityStack(ActivityTaskManagerService atmService, int id, int activityType,
-            ActivityInfo info, Intent intent) {
+            ActivityInfo info, Intent intent, boolean createdByOrganizer) {
         this(atmService, id, info, intent, null /*voiceSession*/, null /*voiceInteractor*/,
                 null /*taskDescription*/, null /*stack*/);
-
+        mCreatedByOrganizer = createdByOrganizer;
         setActivityType(activityType);
     }
 
@@ -600,20 +597,11 @@ class ActivityStack extends Task {
     }
 
     @Override
-    public void resolveTileOverrideConfiguration(Configuration newParentConfig) {
-        super.resolveTileOverrideConfiguration(newParentConfig);
-        if (mTile != null) {
-            // If this is a virtual child of a tile, simulate the parent-child relationship
-            mTile.updateResolvedConfig(getResolvedOverrideConfiguration());
-        }
-    }
-
-    @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         // Calling Task#onConfigurationChanged() for leaf task since the ops in this method are
         // particularly for ActivityStack, like preventing bounds changes when inheriting certain
         // windowing mode.
-        if (!isRootTask() || this instanceof TaskTile) {
+        if (!isRootTask()) {
             super.onConfigurationChanged(newParentConfig);
             return;
         }
@@ -688,6 +676,9 @@ class ActivityStack extends Task {
 
     @Override
     public void setWindowingMode(int windowingMode) {
+        // Reset the cached result of toString()
+        stringName = null;
+
         // Calling Task#setWindowingMode() for leaf task since this is the a specialization of
         // {@link #setWindowingMode(int)} for ActivityStack.
         if (!isRootTask()) {
@@ -741,7 +732,6 @@ class ActivityStack extends Task {
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final DisplayContent display = getDisplay();
         final Task topTask = getTopMostTask();
-        final ActivityStack splitScreenStack = display.getRootSplitScreenPrimaryTask();
         int windowingMode = preferredWindowingMode;
         if (preferredWindowingMode == WINDOWING_MODE_UNDEFINED
                 && isTransientWindowingMode(currentMode)) {
@@ -755,14 +745,14 @@ class ActivityStack extends Task {
             windowingMode = display.validateWindowingMode(windowingMode,
                     null /* ActivityRecord */, topTask, getActivityType());
         }
-        if (splitScreenStack == this
+        if (display.getRootSplitScreenPrimaryTask() == this
                 && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
             // Resolution to split-screen secondary for the primary split-screen stack means
             // we want to leave split-screen mode.
             windowingMode = mRestoreOverrideWindowingMode;
         }
 
-        final boolean alreadyInSplitScreenMode = display.hasSplitScreenPrimaryTask();
+        final boolean alreadyInSplitScreenMode = display.isSplitScreenModeActivated();
 
         // Don't send non-resizeable notifications if the windowing mode changed was a side effect
         // of us entering split-screen mode.
@@ -830,7 +820,7 @@ class ActivityStack extends Task {
                 return;
             }
 
-            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && splitScreenStack != null) {
+            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && alreadyInSplitScreenMode) {
                 // We already have a split-screen stack in this display, so just move the tasks over.
                 // TODO: Figure-out how to do all the stuff in
                 // AMS.setTaskWindowingModeSplitScreenPrimary
@@ -1062,7 +1052,7 @@ class ActivityStack extends Task {
         final DisplayContent display = getDisplay();
 
         if (inSplitScreenSecondaryWindowingMode()) {
-            // If the stack is in split-screen seconardy mode, we need to make sure we move the
+            // If the stack is in split-screen secondary mode, we need to make sure we move the
             // primary split-screen stack forward in the case it is currently behind a fullscreen
             // stack so both halves of the split-screen appear on-top and the fullscreen stack isn't
             // cutting between them.
@@ -1084,12 +1074,13 @@ class ActivityStack extends Task {
             display.moveHomeStackToFront(reason + " returnToHome");
         }
 
-        final boolean movingTask = task != null;
-        display.positionStackAtTop(this, !movingTask /* includingParents */, reason);
-        if (movingTask) {
-            // This also moves the entire hierarchy branch to top, including parents
-            positionChildAtTop(task);
+        if (isRootTask()) {
+            display.positionStackAtTop(this, false /* includingParents */, reason);
         }
+        if (task == null) {
+            task = this;
+        }
+        task.getParent().positionChildAt(POSITION_TOP, task, true /* includingParents */);
     }
 
     /**
@@ -1113,12 +1104,6 @@ class ActivityStack extends Task {
         if (getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
         }
-    }
-
-    @Override
-    boolean isFocusable() {
-        // Special check for tile which isn't really in the hierarchy
-        return mTile != null ? mTile.isFocusable() : super.isFocusable();
     }
 
     boolean isTopActivityFocusable() {
@@ -3541,6 +3526,10 @@ class ActivityStack extends Task {
 
     @Override
     void onChildPositionChanged(WindowContainer child) {
+        if (isOrganized()) {
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, false /* force */);
+        }
+
         if (!mChildren.contains(child)) {
             return;
         }
@@ -3570,11 +3559,6 @@ class ActivityStack extends Task {
         // the prevous display.
         if (oldDisplay != null && oldDisplay.isRemoving()) {
             postReparent();
-        }
-        if (mTile != null && getSurfaceControl() != null) {
-            // by now, the TaskStack should already have been reparented, so we can reparent its
-            // surface here
-            reparentSurfaceControl(getPendingTransaction(), mTile.getSurfaceControl());
         }
     }
 
@@ -3613,16 +3597,7 @@ class ActivityStack extends Task {
 
     @Override
     void getRelativeDisplayedPosition(Point outPos) {
-        // check for tile which is "virtually" a parent.
-        if (mTile != null) {
-            final Rect dispBounds = getDisplayedBounds();
-            outPos.set(dispBounds.left, dispBounds.top);
-            final Rect parentBounds = mTile.getBounds();
-            outPos.offset(-parentBounds.left, -parentBounds.top);
-        } else {
-            super.getRelativeDisplayedPosition(outPos);
-        }
-
+        super.getRelativeDisplayedPosition(outPos);
         final int outset = getStackOutset();
         outPos.x -= outset;
         outPos.y -= outset;
@@ -3630,16 +3605,6 @@ class ActivityStack extends Task {
 
     private void updateSurfaceSize(SurfaceControl.Transaction transaction) {
         if (mSurfaceControl == null) {
-            return;
-        }
-        if (mTile != null) {
-            // Tile controls crop, so the app needs to be able to draw its background outside of
-            // the stack bounds for when the tile crop gets bigger than the stack.
-            if (mLastSurfaceSize.equals(0, 0)) {
-                return;
-            }
-            transaction.setWindowCrop(mSurfaceControl, null);
-            mLastSurfaceSize.set(0, 0);
             return;
         }
 
@@ -3665,9 +3630,6 @@ class ActivityStack extends Task {
 
     @Override
     void onDisplayChanged(DisplayContent dc) {
-        if (mTile != null && dc != mTile.getDisplay()) {
-            mTile.removeChild(this);
-        }
         super.onDisplayChanged(dc);
         if (isRootTask()) {
             updateSurfaceBounds();
@@ -3810,49 +3772,6 @@ class ActivityStack extends Task {
         return shouldSleepActivities() || mAtmService.mShuttingDown;
     }
 
-    TaskTile getTile() {
-        return mTile;
-    }
-
-    /**
-     * Don't call this directly. instead use {@link TaskTile#addChild} or
-     * {@link TaskTile#removeChild}.
-     */
-    void setTile(TaskTile tile) {
-        TaskTile origTile = mTile;
-        mTile = tile;
-        final ConfigurationContainer parent = getParent();
-        if (parent != null) {
-            onConfigurationChanged(parent.getConfiguration());
-        }
-
-        // Reparent to tile surface or back to original parent
-        if (getSurfaceControl() == null) {
-            return;
-        }
-        if (mTile != null) {
-            // don't use reparentSurfaceControl because we need to bypass taskorg check
-            mSurfaceAnimator.reparent(getPendingTransaction(), mTile.getSurfaceControl());
-        } else if (mTile == null && origTile != null) {
-            mSurfaceAnimator.reparent(getPendingTransaction(), getParentSurfaceControl());
-        }
-    }
-
-    @Override
-    public SurfaceControl getParentSurfaceControl() {
-        // Tile is a "virtual" parent, so we need to intercept the parent surface here
-        return mTile != null ? mTile.getSurfaceControl() : super.getParentSurfaceControl();
-    }
-
-    @Override
-    void removeImmediately() {
-        // TODO(task-hierarchy): remove this override when tiles are in hierarchy
-        if (mTile != null) {
-            mTile.removeChild(this);
-        }
-        super.removeImmediately();
-    }
-
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
@@ -3897,7 +3816,7 @@ class ActivityStack extends Task {
             proto.write(SURFACE_HEIGHT, mSurfaceControl.getHeight());
         }
 
-        proto.write(CREATED_BY_ORGANIZER, this instanceof TaskTile);
+        proto.write(CREATED_BY_ORGANIZER, mCreatedByOrganizer);
 
         proto.end(token);
     }
