@@ -114,7 +114,9 @@ public class KeyguardMediaPlayer {
             throw new IllegalStateException("cannot update controls, views not bound");
         }
         if (mediaMetadata == null) {
-            throw new IllegalArgumentException("media metadata was null");
+            mMediaNotifView.setVisibility(View.GONE);
+            Log.d(TAG, "media metadata was null");
+            return;
         }
         mMediaNotifView.setVisibility(View.VISIBLE);
 
