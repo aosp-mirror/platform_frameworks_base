@@ -55,6 +55,7 @@ import android.os.DeadObjectException;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
 import android.os.OperationCanceledException;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -735,6 +736,9 @@ public abstract class ContentResolver implements ContentInterface {
     /** @hide */
     public static final String REMOTE_CALLBACK_RESULT = "result";
 
+    /** @hide */
+    public static final String REMOTE_CALLBACK_ERROR = "error";
+
     /**
      * How long we wait for an attached process to publish its content providers
      * before we decide it must be hung.
@@ -874,6 +878,9 @@ public abstract class ContentResolver implements ContentInterface {
                 final StringResultListener resultListener = new StringResultListener();
                 provider.getTypeAsync(url, new RemoteCallback(resultListener));
                 resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
+                if (resultListener.exception != null) {
+                    throw resultListener.exception;
+                }
                 return resultListener.result;
             } catch (RemoteException e) {
                 // Arbitrary and not worth documenting, as Activity
@@ -898,6 +905,9 @@ public abstract class ContentResolver implements ContentInterface {
                     resolveUserId(url),
                     new RemoteCallback(resultListener));
             resultListener.waitForResult(REMOTE_CONTENT_PROVIDER_TIMEOUT_MILLIS);
+            if (resultListener.exception != null) {
+                throw resultListener.exception;
+            }
             return resultListener.result;
         } catch (RemoteException e) {
             // We just failed to send a oneway request to the System Server. Nothing to do.
@@ -915,13 +925,39 @@ public abstract class ContentResolver implements ContentInterface {
         @GuardedBy("this")
         public T result;
 
+        @GuardedBy("this")
+        public RuntimeException exception;
+
         @Override
         public void onResult(Bundle result) {
             synchronized (this) {
-                this.result = getResultFromBundle(result);
+                this.exception = getExceptionFromBundle(result);
+                if (this.exception == null) {
+                    this.result = getResultFromBundle(result);
+                }
                 done = true;
                 notifyAll();
             }
+        }
+
+        private RuntimeException getExceptionFromBundle(Bundle result) {
+            byte[] bytes = result.getByteArray(REMOTE_CALLBACK_ERROR);
+            if (bytes == null) {
+                return null;
+            }
+
+            Parcel parcel = Parcel.obtain();
+            try {
+                parcel.unmarshall(bytes, 0, bytes.length);
+                parcel.setDataPosition(0);
+                parcel.readException();
+            } catch (RuntimeException ex) {
+                return ex;
+            } finally {
+                parcel.recycle();
+            }
+
+            return null;
         }
 
         protected abstract T getResultFromBundle(Bundle result);
@@ -1250,6 +1286,9 @@ public abstract class ContentResolver implements ContentInterface {
             provider.canonicalizeAsync(mPackageName, mAttributionTag, url,
                     new RemoteCallback(resultListener));
             resultListener.waitForResult(CONTENT_PROVIDER_TIMEOUT_MILLIS);
+            if (resultListener.exception != null) {
+                throw resultListener.exception;
+            }
             return resultListener.result;
         } catch (RemoteException e) {
             // Arbitrary and not worth documenting, as Activity
