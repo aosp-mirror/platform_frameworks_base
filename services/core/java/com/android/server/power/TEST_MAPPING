@@ -3,6 +3,7 @@
     {
       "name": "CtsBatterySavingTestCases",
       "options": [
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.LargeTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
@@ -11,6 +12,7 @@
       "name": "FrameworksMockingServicesTests",
       "options": [
         {"include-filter": "com.android.server.power"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
     },
@@ -18,6 +20,7 @@
       "name": "FrameworksServicesTests",
       "options": [
         {"include-filter": "com.android.server.power"},
+        {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"},
         {
           "exclude-filter": "com.android.server.power.PowerManagerServiceTest#testWakefulnessAwake_ShouldWakeUpWhenPluggedIn"
