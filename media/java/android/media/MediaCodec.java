@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -3048,16 +3049,47 @@ final public class MediaCodec {
          * @param block The linear block object
          * @param offset The byte offset into the input buffer at which the data starts.
          * @param size The number of bytes of valid input data.
-         * @param cryptoInfo Metadata describing the structure of the encrypted input sample.
-         *                   may be null for non-encrypted content.
          * @return this object
          * @throws IllegalStateException if a buffer is already set
          */
         public @NonNull QueueRequest setLinearBlock(
                 @NonNull LinearBlock block,
                 int offset,
+                int size) {
+            if (!isAccessible()) {
+                throw new IllegalStateException("The request is stale");
+            }
+            if (mLinearBlock != null || mHardwareBuffer != null) {
+                throw new IllegalStateException("Cannot set block twice");
+            }
+            mLinearBlock = block;
+            mOffset = offset;
+            mSize = size;
+            mCryptoInfo = null;
+            return this;
+        }
+
+        /**
+         * Set an encrypted linear block to this queue request. Exactly one buffer must be
+         * set for a queue request before calling {@link #queue}. It is possible
+         * to use the same {@link LinearBlock} object for multiple queue
+         * requests. The behavior is undefined if the range of the buffer
+         * overlaps for multiple requests, or the application writes into the
+         * region being processed by the codec.
+         *
+         * @param block The linear block object
+         * @param offset The byte offset into the input buffer at which the data starts.
+         * @param size The number of bytes of valid input data.
+         * @param cryptoInfo Metadata describing the structure of the encrypted input sample.
+         * @return this object
+         * @throws IllegalStateException if a buffer is already set
+         */
+        public @NonNull QueueRequest setEncryptedLinearBlock(
+                @NonNull LinearBlock block,
+                int offset,
                 int size,
-                @Nullable MediaCodec.CryptoInfo cryptoInfo) {
+                @NonNull MediaCodec.CryptoInfo cryptoInfo) {
+            Objects.requireNonNull(cryptoInfo);
             if (!isAccessible()) {
                 throw new IllegalStateException("The request is stale");
             }
