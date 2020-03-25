@@ -60,6 +60,7 @@ java_library {
     hostdex: true, // for hiddenapi check
     visibility: ["//frameworks/base/packages/Tethering:__subpackages__"],
     apex_available: ["com.android.tethering"],
+    permitted_packages: ["android.net"],
 }
 
 stubs_defaults {
