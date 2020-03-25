@@ -230,6 +230,10 @@ private:
     // Maps deactivation triggering event to MetricProducers.
     std::unordered_map<int, std::vector<int>> mDeactivationAtomTrackerToMetricMap;
 
+    // Maps AlertIds to the index of the corresponding AnomalyTracker stored in mAllAnomalyTrackers.
+    // The map is used in LoadMetadata to more efficiently lookup AnomalyTrackers from an AlertId.
+    std::unordered_map<int64_t, int> mAlertTrackerMap;
+
     std::vector<int> mMetricIndexesWithActivation;
 
     void initLogSourceWhiteList();

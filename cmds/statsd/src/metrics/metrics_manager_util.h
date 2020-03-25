@@ -128,6 +128,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       std::unordered_map<int, std::vector<int>>& trackerToConditionMap,
                       unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
                       unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+                      std::unordered_map<int64_t, int>& alertTrackerMap,
                       vector<int>& metricsWithActivation,
                       std::set<int64_t>& noReportMetricIds);
 
