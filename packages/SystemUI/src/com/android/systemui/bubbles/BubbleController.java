@@ -957,9 +957,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             String key = orderedKeys[i];
             NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(key);
             rankingMap.getRanking(key, mTmpRanking);
-            if (mBubbleData.hasBubbleWithKey(key) && !mTmpRanking.canBubble()) {
+            boolean isActiveBubble = mBubbleData.hasBubbleWithKey(key);
+            if (isActiveBubble && !mTmpRanking.canBubble()) {
                 mBubbleData.notificationEntryRemoved(entry, BubbleController.DISMISS_BLOCKED);
-            } else if (entry != null && mTmpRanking.isBubble()) {
+            } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
                 entry.setFlagBubble(true);
                 onEntryUpdated(entry);
             }
