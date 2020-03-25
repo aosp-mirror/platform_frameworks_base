@@ -1537,25 +1537,7 @@ public class DisplayPolicy {
                 && (mNotificationShade.getAttrs().privateFlags
                 & PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION) != 0;
 
-        // When the navigation bar isn't visible, we put up a fake input window to catch all
-        // touch events. This way we can detect when the user presses anywhere to bring back the
-        // nav bar and ensure the application doesn't see the event.
-        if (navVisible || navAllowedHidden) {
-            if (mInputConsumer != null) {
-                mInputConsumer.dismiss();
-                mHandler.sendMessage(
-                        mHandler.obtainMessage(MSG_DISPOSE_INPUT_CONSUMER, mInputConsumer));
-                mInputConsumer = null;
-            }
-        } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
-            mInputConsumer = mDisplayContent.getInputMonitor().createInputConsumer(
-                    mHandler.getLooper(),
-                    INPUT_CONSUMER_NAVIGATION,
-                    HideNavInputEventReceiver::new);
-            // As long as mInputConsumer is active, hover events are not dispatched to the app
-            // and the pointer icon is likely to become stale. Hide it to avoid confusion.
-            InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NULL);
-        }
+        updateHideNavInputEventReceiver(navVisible, navAllowedHidden);
 
         // For purposes of positioning and showing the nav bar, if we have decided that it can't
         // be hidden (because of the screen aspect ratio), then take that into account.
@@ -1575,6 +1557,28 @@ public class DisplayPolicy {
         mLastNavTranslucent = navTranslucent;
         mLastNavAllowedHidden = navAllowedHidden;
         mLastNotificationShadeForcesShowingNavigation = notificationShadeForcesShowingNavigation;
+    }
+
+    void updateHideNavInputEventReceiver(boolean navVisible, boolean navAllowedHidden) {
+        // When the navigation bar isn't visible, we put up a fake input window to catch all
+        // touch events. This way we can detect when the user presses anywhere to bring back the
+        // nav bar and ensure the application doesn't see the event.
+        if (navVisible || navAllowedHidden) {
+            if (mInputConsumer != null) {
+                mInputConsumer.dismiss();
+                mHandler.sendMessage(
+                        mHandler.obtainMessage(MSG_DISPOSE_INPUT_CONSUMER, mInputConsumer));
+                mInputConsumer = null;
+            }
+        } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
+            mInputConsumer = mDisplayContent.getInputMonitor().createInputConsumer(
+                    mHandler.getLooper(),
+                    INPUT_CONSUMER_NAVIGATION,
+                    HideNavInputEventReceiver::new);
+            // As long as mInputConsumer is active, hover events are not dispatched to the app
+            // and the pointer icon is likely to become stale. Hide it to avoid confusion.
+            InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_NULL);
+        }
     }
 
     private static void updateInsetsStateForDisplayCutout(DisplayFrames displayFrames,
