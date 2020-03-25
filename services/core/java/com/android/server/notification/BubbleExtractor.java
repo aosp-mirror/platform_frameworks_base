@@ -15,9 +15,7 @@
 */
 package com.android.server.notification;
 
-import static android.app.Notification.CATEGORY_CALL;
 import static android.app.Notification.FLAG_BUBBLE;
-import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 
 import static com.android.internal.util.FrameworkStatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_MISSING;
 import static com.android.internal.util.FrameworkStatsLog.BUBBLE_DEVELOPER_ERROR_REPORTED__ERROR__ACTIVITY_INFO_NOT_RESIZABLE;
@@ -25,7 +23,6 @@ import static com.android.internal.util.FrameworkStatsLog.BUBBLE_DEVELOPER_ERROR
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -33,8 +30,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
-
-import java.util.ArrayList;
 
 /**
  * Determines whether a bubble can be shown for this notification
@@ -152,41 +147,13 @@ public class BubbleExtractor implements NotificationSignalExtractor {
                 return false;
             }
 
-            // At this point the bubble must fulfill communication policy
-
-            // Communication always needs a person
-            ArrayList<Person> peopleList = notification.extras != null
-                    ? notification.extras.getParcelableArrayList(Notification.EXTRA_PEOPLE_LIST)
-                    : null;
-            // Message style requires a person & it's not included in the list
             boolean isMessageStyle = Notification.MessagingStyle.class.equals(
                     notification.getNotificationStyle());
-            if (!isMessageStyle && (peopleList == null || peopleList.isEmpty())) {
-                logBubbleError(r.getKey(), "Must have a person and be "
-                        + "Notification.MessageStyle or Notification.CATEGORY_CALL");
+            if (!isMessageStyle) {
+                logBubbleError(r.getKey(), "must be Notification.MessageStyle");
                 return false;
             }
-
-            // Communication is a message or a call
-            boolean isCall = CATEGORY_CALL.equals(notification.category);
-            boolean hasForegroundService = (notification.flags & FLAG_FOREGROUND_SERVICE) != 0;
-            if (hasForegroundService && !isCall) {
-                logBubbleError(r.getKey(),
-                        "foreground services must be Notification.CATEGORY_CALL to bubble");
-                return false;
-            }
-            if (isMessageStyle) {
-                return true;
-            } else if (isCall) {
-                if (hasForegroundService) {
-                    return true;
-                }
-                logBubbleError(r.getKey(), "calls require foreground service");
-                return false;
-            }
-            logBubbleError(r.getKey(), "Must be "
-                    + "Notification.MessageStyle or Notification.CATEGORY_CALL");
-            return false;
+            return true;
         }
 
         /**
@@ -218,7 +185,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
 
             String shortcutId = metadata.getShortcutId();
             boolean shortcutValid = shortcutId != null
-                    && mShortcutHelper.hasValidShortcutInfo(shortcutId, pkg, r.getUser());
+                    && mShortcutHelper.getValidShortcutInfo(shortcutId, pkg, r.getUser()) != null;
             if (metadata.getIntent() == null && !shortcutValid) {
                 // Should have a shortcut if intent is null
                 logBubbleError(r.getKey(),

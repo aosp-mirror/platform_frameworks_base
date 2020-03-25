@@ -416,10 +416,10 @@
 
     <!-- Content title for a notification. This notification indicates that the device owner has
          changed the location settings. [CHAR LIMIT=NONE] -->
-    <string name="location_changed_notification_title">Location settings changed by your admin</string>
+    <string name="location_changed_notification_title">Apps can access your location</string>
     <!-- Content text for a notification. Tapping opens device location settings.
          [CHAR LIMIT=NONE] -->
-    <string name="location_changed_notification_text">Tap to see your location settings.</string>
+    <string name="location_changed_notification_text">Contact your IT admin to learn more</string>
 
     <!-- Feature Id for Country Detector. [CHAR LIMIT=NONE]-->
     <string name="country_detector">Country Detector</string>

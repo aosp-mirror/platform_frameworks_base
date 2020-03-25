@@ -47,7 +47,7 @@ import java.util.function.Consumer;
  * - Keeps track of all test artifacts and deletes ones which do not need to be reviewed.
  * - Fails tests if results are not available for any test due to jank.
  */
-public class FlickerTestBase {
+public abstract class FlickerTestBase {
     public static final String TAG = "FLICKER";
     static final String SCREENSHOT_LAYER = "RotationLayer";
     static final String NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar";
@@ -114,9 +114,15 @@ public class FlickerTestBase {
     /**
      * Runs a transition, returns a cached result if the transition has run before.
      */
-    void runTransition(TransitionRunner transition) {
-        run(transition);
+    @Before
+    public void runTransition() {
+        run(getTransitionToRun());
     }
+
+    /**
+     * Gets the transition that will be executed
+     */
+    abstract TransitionRunner getTransitionToRun();
 
     /**
      * Goes through a list of transition results and checks assertions on each result.

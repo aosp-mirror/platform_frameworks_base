@@ -663,18 +663,7 @@ public class FingerprintService extends BiometricServiceBase {
                 Slog.w(TAG, "authenticate(): no fingerprint HAL!");
                 return ERROR_ESRCH;
             }
-            android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprint daemon22 =
-                    android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprint.castFrom(
-                            daemon);
-            if (daemon22 != null) {
-                return daemon22.authenticate_2_2(operationId, groupId,
-                        convertSurfaceToNativeHandle(surface));
-            } else if (surface == null) {
-                return daemon.authenticate(operationId, groupId);
-            } else {
-                Slog.e(TAG, "authenticate(): surface is only supported in @2.2 HAL");
-                return ERROR_ESRCH;
-            }
+            return daemon.authenticate(operationId, groupId);
         }
 
         @Override
@@ -715,22 +704,7 @@ public class FingerprintService extends BiometricServiceBase {
                 Slog.w(TAG, "enroll(): no fingerprint HAL!");
                 return ERROR_ESRCH;
             }
-            android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprint daemon22 =
-                    android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprint.castFrom(
-                            daemon);
-            if (daemon22 != null) {
-                ArrayList<Byte> cryptoTokenAsList = new ArrayList<>(cryptoToken.length);
-                for (byte b : cryptoToken) {
-                    cryptoTokenAsList.add(b);
-                }
-                return daemon22.enroll_2_2(cryptoTokenAsList, groupId, timeout,
-                        convertSurfaceToNativeHandle(surface));
-            } else if (surface == null) {
-                return daemon.enroll(cryptoToken, groupId, timeout);
-            } else {
-                Slog.e(TAG, "enroll(): surface is only supported in @2.2 HAL");
-                return ERROR_ESRCH;
-            }
+            return daemon.enroll(cryptoToken, groupId, timeout);
         }
 
         @Override

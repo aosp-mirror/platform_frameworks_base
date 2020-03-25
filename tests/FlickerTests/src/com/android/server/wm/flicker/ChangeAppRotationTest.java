@@ -32,7 +32,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -79,11 +78,10 @@ public class ChangeAppRotationTest extends FlickerTestBase {
         return params;
     }
 
-    @Before
-    public void runTransition() {
-        super.runTransition(
-                changeAppRotation(mTestApp, mUiDevice, mBeginRotation, mEndRotation)
-                        .includeJankyRuns().build());
+    @Override
+    TransitionRunner getTransitionToRun() {
+        return changeAppRotation(mTestApp, mUiDevice, mBeginRotation, mEndRotation)
+                .includeJankyRuns().build();
     }
 
     @FlakyTest(bugId = 140855415)

@@ -33,7 +33,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -102,17 +101,16 @@ public class SeamlessAppRotationTest extends FlickerTestBase {
         return params;
     }
 
-    @Before
-    public void runTransition() {
+    @Override
+    TransitionRunner getTransitionToRun() {
         String intentId = "";
         if (mIntent.getExtras() != null &&
                 mIntent.getExtras().getBoolean(EXTRA_STARVE_UI_THREAD)) {
             intentId = "BUSY_UI_THREAD";
         }
 
-        super.runTransition(
-                changeAppRotation(mIntent, intentId, InstrumentationRegistry.getContext(),
-                        mUiDevice, mBeginRotation, mEndRotation).build());
+        return changeAppRotation(mIntent, intentId, InstrumentationRegistry.getContext(),
+                mUiDevice, mBeginRotation, mEndRotation).build();
     }
 
     @Test

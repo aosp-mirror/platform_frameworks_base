@@ -22,7 +22,6 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -48,11 +47,11 @@ public class OpenAppToSplitScreenTest extends NonRotationTestBase {
                 "com.android.server.wm.flicker.testapp", "SimpleApp");
     }
 
-    @Before
-    public void runTransition() {
-        super.runTransition(appToSplitScreen(mTestApp, mUiDevice, mBeginRotation)
+    @Override
+    TransitionRunner getTransitionToRun() {
+        return appToSplitScreen(mTestApp, mUiDevice, mBeginRotation)
                 .includeJankyRuns()
-                .build());
+                .build();
     }
 
     @Test

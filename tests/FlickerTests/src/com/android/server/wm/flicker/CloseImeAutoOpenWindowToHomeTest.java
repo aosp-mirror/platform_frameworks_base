@@ -24,7 +24,6 @@ import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper;
 
-import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -47,10 +46,10 @@ public class CloseImeAutoOpenWindowToHomeTest extends CloseImeWindowToHomeTest {
         mTestApp = new ImeAppAutoFocusHelper(InstrumentationRegistry.getInstrumentation());
     }
 
-    @Before
-    public void runTransition() {
-        run(editTextLoseFocusToHome((ImeAppAutoFocusHelper) mTestApp, mUiDevice, mBeginRotation)
-                .includeJankyRuns().build());
+    @Override
+    TransitionRunner getTransitionToRun() {
+        return editTextLoseFocusToHome((ImeAppAutoFocusHelper) mTestApp, mUiDevice, mBeginRotation)
+                .includeJankyRuns().build();
     }
 
     @FlakyTest(bugId = 141458352)

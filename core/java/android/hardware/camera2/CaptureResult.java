@@ -2410,27 +2410,66 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} can still be used to specify the horizontal or vertical
      * crop to achieve aspect ratios different than the native camera sensor.</p>
      * <p>By using this control, the application gains a simpler way to control zoom, which can
-     * be a combination of optical and digital zoom. More specifically, for a logical
-     * multi-camera with more than one focal length, using a floating point zoom ratio offers
-     * more zoom precision when a telephoto lens is used, as well as allowing zoom ratio of
-     * less than 1.0 to zoom out to a wide field of view.</p>
-     * <p>Note that the coordinate system of cropRegion, AE/AWB/AF regions, and faces now changes
-     * to the effective after-zoom field-of-view represented by rectangle of (0, 0,
-     * activeArrayWidth, activeArrayHeight).</p>
-     * <p>For example, if {@link CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE android.sensor.info.activeArraySize} is 4032*3024, and the preview stream
-     * is configured to the same 4:3 aspect ratio, the application can achieve 2.0x zoom in
-     * one of two ways:</p>
+     * be a combination of optical and digital zoom. For example, a multi-camera system may
+     * contain more than one lens with different focal lengths, and the user can use optical
+     * zoom by switching between lenses. Using zoomRatio has benefits in the scenarios below:
+     * <em> Zooming in from a wide-angle lens to a telephoto lens: A floating-point ratio provides
+     *   better precision compared to an integer value of {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}.
+     * </em> Zooming out from a wide lens to an ultrawide lens: zoomRatio supports zoom-out whereas
+     *   {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion} doesn't.</p>
+     * <p>To illustrate, here are several scenarios of different zoom ratios, crop regions,
+     * and output streams, for a hypothetical camera device with an active array of size
+     * <code>(2000,1500)</code>.</p>
      * <ul>
-     * <li>zoomRatio = 2.0, scaler.cropRegion = (0, 0, 4032, 3024)</li>
-     * <li>zoomRatio = 1.0 (default), scaler.cropRegion = (1008, 756, 3024, 2268)</li>
+     * <li>Camera Configuration:<ul>
+     * <li>Active array size: <code>2000x1500</code> (3 MP, 4:3 aspect ratio)</li>
+     * <li>Output stream #1: <code>640x480</code> (VGA, 4:3 aspect ratio)</li>
+     * <li>Output stream #2: <code>1280x720</code> (720p, 16:9 aspect ratio)</li>
      * </ul>
-     * <p>If the application intends to set aeRegions to be top-left quarter of the preview
-     * field-of-view, the {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions} should be set to (0, 0, 2016, 1512) with
+     * </li>
+     * <li>Case #1: 4:3 crop region with 2.0x zoom ratio<ul>
+     * <li>Zoomed field of view: 1/4 of original field of view</li>
+     * <li>Crop region: <code>Rect(0, 0, 2000, 1500) // (left, top, right, bottom)</code> (post zoom)</li>
+     * </ul>
+     * </li>
+     * <li><img alt="4:3 aspect ratio crop diagram" src="/reference/images/camera2/metadata/android.control.zoomRatio/zoom-ratio-2-crop-43.png" /><ul>
+     * <li><code>640x480</code> stream source area: <code>(0, 0, 2000, 1500)</code> (equal to crop region)</li>
+     * <li><code>1280x720</code> stream source area: <code>(0, 187, 2000, 1312)</code> (letterboxed)</li>
+     * </ul>
+     * </li>
+     * <li>Case #2: 16:9 crop region with 2.0x zoom.<ul>
+     * <li>Zoomed field of view: 1/4 of original field of view</li>
+     * <li>Crop region: <code>Rect(0, 187, 2000, 1312)</code></li>
+     * <li><img alt="16:9 aspect ratio crop diagram" src="/reference/images/camera2/metadata/android.control.zoomRatio/zoom-ratio-2-crop-169.png" /></li>
+     * <li><code>640x480</code> stream source area: <code>(250, 187, 1750, 1312)</code> (pillarboxed)</li>
+     * <li><code>1280x720</code> stream source area: <code>(0, 187, 2000, 1312)</code> (equal to crop region)</li>
+     * </ul>
+     * </li>
+     * <li>Case #3: 1:1 crop region with 0.5x zoom out to ultrawide lens.<ul>
+     * <li>Zoomed field of view: 4x of original field of view (switched from wide lens to ultrawide lens)</li>
+     * <li>Crop region: <code>Rect(250, 0, 1750, 1500)</code></li>
+     * <li><img alt="1:1 aspect ratio crop diagram" src="/reference/images/camera2/metadata/android.control.zoomRatio/zoom-ratio-0.5-crop-11.png" /></li>
+     * <li><code>640x480</code> stream source area: <code>(250, 187, 1750, 1312)</code> (letterboxed)</li>
+     * <li><code>1280x720</code> stream source area: <code>(250, 328, 1750, 1172)</code> (letterboxed)</li>
+     * </ul>
+     * </li>
+     * </ul>
+     * <p>As seen from the graphs above, the coordinate system of cropRegion now changes to the
+     * effective after-zoom field-of-view, and is represented by the rectangle of (0, 0,
+     * activeArrayWith, activeArrayHeight). The same applies to AE/AWB/AF regions, and faces.
+     * This coordinate system change isn't applicable to RAW capture and its related
+     * metadata such as intrinsicCalibration and lensShadingMap.</p>
+     * <p>Using the same hypothetical example above, and assuming output stream #1 (640x480) is
+     * the viewfinder stream, the application can achieve 2.0x zoom in one of two ways:</p>
+     * <ul>
+     * <li>zoomRatio = 2.0, scaler.cropRegion = (0, 0, 2000, 1500)</li>
+     * <li>zoomRatio = 1.0 (default), scaler.cropRegion = (500, 375, 1500, 1125)</li>
+     * </ul>
+     * <p>If the application intends to set aeRegions to be top-left quarter of the viewfinder
+     * field-of-view, the {@link CaptureRequest#CONTROL_AE_REGIONS android.control.aeRegions} should be set to (0, 0, 1000, 750) with
      * zoomRatio set to 2.0. Alternatively, the application can set aeRegions to the equivalent
-     * region of (1008, 756, 2016, 1512) for zoomRatio of 1.0. If the application doesn't
+     * region of (500, 375, 1000, 750) for zoomRatio of 1.0. If the application doesn't
      * explicitly set {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio}, its value defaults to 1.0.</p>
-     * <p>This coordinate system change isn't applicable to RAW capture and its related metadata
-     * such as intrinsicCalibration and lensShadingMap.</p>
      * <p>One limitation of controlling zoom using zoomRatio is that the {@link CaptureRequest#SCALER_CROP_REGION android.scaler.cropRegion}
      * must only be used for letterboxing or pillarboxing of the sensor active array, and no
      * FREEFORM cropping can be used with {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} other than 1.0.</p>
@@ -2446,7 +2485,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * @see CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE
      * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
      * @see CaptureRequest#SCALER_CROP_REGION
-     * @see CameraCharacteristics#SENSOR_INFO_ACTIVE_ARRAY_SIZE
      */
     @PublicKey
     @NonNull
@@ -2848,12 +2886,15 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * frames before the lens can change to the requested focal length.
      * While the focal length is still changing, {@link CaptureResult#LENS_STATE android.lens.state} will
      * be set to MOVING.</p>
-     * <p>Optical zoom will not be supported on most devices.</p>
+     * <p>Optical zoom via this control will not be supported on most devices. Starting from API
+     * level 30, the camera device may combine optical and digital zoom through the
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO android.control.zoomRatio} control.</p>
      * <p><b>Units</b>: Millimeters</p>
      * <p><b>Range of valid values:</b><br>
      * {@link CameraCharacteristics#LENS_INFO_AVAILABLE_FOCAL_LENGTHS android.lens.info.availableFocalLengths}</p>
      * <p>This key is available on all devices.</p>
      *
+     * @see CaptureRequest#CONTROL_ZOOM_RATIO
      * @see CaptureRequest#LENS_APERTURE
      * @see CaptureRequest#LENS_FOCUS_DISTANCE
      * @see CameraCharacteristics#LENS_INFO_AVAILABLE_FOCAL_LENGTHS

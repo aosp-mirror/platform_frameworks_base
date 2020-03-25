@@ -246,7 +246,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
@@ -3457,7 +3456,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(onlyImportant);
             for (ConversationChannelWrapper conversation : conversations) {
-                conversation.setShortcutInfo(mShortcutHelper.getShortcutInfo(
+                conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
                         conversation.getNotificationChannel().getConversationId(),
                         conversation.getPkg(),
                         UserHandle.of(UserHandle.getUserId(conversation.getUid()))));
@@ -3480,7 +3479,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(pkg, uid);
             for (ConversationChannelWrapper conversation : conversations) {
-                conversation.setShortcutInfo(mShortcutHelper.getShortcutInfo(
+                conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
                         conversation.getNotificationChannel().getConversationId(),
                         pkg,
                         UserHandle.of(UserHandle.getUserId(uid))));
@@ -5651,7 +5650,8 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        r.setShortcutInfo(mShortcutHelper.getShortcutInfo(notification.getShortcutId(), pkg, user));
+        r.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
+                notification.getShortcutId(), pkg, user));
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.getSbn().getOverrideGroupKey() != null)) {

@@ -449,10 +449,18 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the number of this subscription.
+     * @return the number of this subscription if the calling app has been granted the
+     * READ_PHONE_NUMBERS permission, or an empty string otherwise
      */
     public String getNumber() {
         return mNumber;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearNumber() {
+        mNumber = "";
     }
 
     /**
@@ -662,13 +670,28 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the card string of the SIM card which contains the subscription. The card string is
-     * the ICCID for UICCs or the EID for eUICCs.
+     * Returns the card string if the calling app has been granted the READ_PRIVILEGED_PHONE_STATE
+     * permission, has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}), or
+     * is a device owner or profile owner on an organization owned device that has been granted the
+     * READ_PHONE_STATE permission. The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>.
+     *
+     * @return the card string of the SIM card which contains the subscription or an empty string
+     * if these requirements are not met. The card string is the ICCID for UICCs or the EID for
+     * eUICCs.
      * @hide
      * //TODO rename usages in LPA: UiccSlotUtil.java, UiccSlotsManager.java, UiccSlotInfoTest.java
      */
     public String getCardString() {
         return this.mCardString;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearCardString() {
+        this.mCardString = "";
     }
 
     /**

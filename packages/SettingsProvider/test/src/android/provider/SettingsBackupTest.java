@@ -539,6 +539,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_FREQUENCY_BAND,
                     Settings.Global.WIFI_IDLE_MS,
                     Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
+                    Settings.Global.WIFI_MIGRATION_COMPLETED,
                     Settings.Global.WIFI_MOBILE_DATA_TRANSITION_WAKELOCK_TIMEOUT_MS,
                     Settings.Global.WIFI_NETWORK_SHOW_RSSI,
                     Settings.Global.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,

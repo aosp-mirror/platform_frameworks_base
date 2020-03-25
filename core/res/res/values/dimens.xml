@@ -696,10 +696,31 @@
     <dimen name="conversation_badge_side_margin">36dp</dimen>
     <!-- size of the notification badge when applied to the conversation icon -->
     <dimen name="conversation_icon_size_badged">20dp</dimen>
-    <!-- size of the notification badge when centered in a conversation -->
-    <dimen name="conversation_icon_size_centered">26dp</dimen>
-    <!-- margin on the top when the icon is centered for group conversations -->
-    <dimen name="conversation_icon_margin_top_centered">12dp</dimen>
+    <!-- size of the conversation avatar in an expanded group -->
+    <dimen name="conversation_avatar_size_group_expanded">@dimen/messaging_avatar_size</dimen>
+    <!-- size of the face pile icons -->
+    <dimen name="conversation_face_pile_avatar_size">@dimen/messaging_avatar_size</dimen>
+    <!-- size of the face pile icons when the group is expanded -->
+    <dimen name="conversation_face_pile_avatar_size_group_expanded">25dp</dimen>
+    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
+    <dimen name="conversation_badge_side_margin_group_expanded">22dp</dimen>
+    <!-- Side margins of the conversation badge in relation to the conversation icon when the group is expanded-->
+    <dimen name="conversation_badge_side_margin_group_expanded_face_pile">18dp</dimen>
+    <!-- The width of the protection of the face pile layout-->
+    <dimen name="conversation_face_pile_protection_width">2dp</dimen>
+    <!-- The width of the protection of the face pile layout when expanded-->
+    <dimen name="conversation_face_pile_protection_width_expanded">1dp</dimen>
+    <!-- The padding of the expanded message container when the app name is gone-->
+    <dimen name="expanded_group_conversation_message_padding_without_app_name">14dp</dimen>
+
+    <!-- The top padding of the conversation icon container in the regular state-->
+    <dimen name="conversation_icon_container_top_padding">12dp</dimen>
+
+    <!-- The top padding of the conversation icon container when there's no app name present in a group-->
+    <dimen name="conversation_icon_container_top_padding_no_app_name">9dp</dimen>
+
+    <!-- The top padding of the conversation icon container when the avatar is small-->
+    <dimen name="conversation_icon_container_top_padding_small_avatar">17.5dp</dimen>
 
     <!-- The padding of the conversation header when expanded. This is calculated from the expand button size + notification_content_margin_end -->
     <dimen name="conversation_header_expanded_padding_end">38dp</dimen>
