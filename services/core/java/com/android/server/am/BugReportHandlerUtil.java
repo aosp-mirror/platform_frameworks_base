@@ -16,20 +16,15 @@
 
 package com.android.server.am;
 
-import static android.app.AppOpsManager.OP_NONE;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
-import android.app.Activity;
 import android.app.BroadcastOptions;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.BugreportManager;
-import android.os.BugreportParams;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -115,17 +110,9 @@ public final class BugReportHandlerUtil {
         options.setBackgroundActivityStartsAllowed(true);
         final long identity = Binder.clearCallingIdentity();
         try {
-            // Handler app's BroadcastReceiver should call setResultCode(Activity.RESULT_OK) to
-            // let ResultBroadcastReceiver know the handler app is available.
-            context.sendOrderedBroadcastAsUser(intent,
-                    UserHandle.of(handlerUser),
+            context.sendBroadcastAsUser(intent, UserHandle.of(handlerUser),
                     android.Manifest.permission.DUMP,
-                    OP_NONE, options.toBundle(),
-                    new ResultBroadcastReceiver(),
-                    /* scheduler= */ null,
-                    Activity.RESULT_CANCELED,
-                    /* initialData= */ null,
-                    /* initialExtras= */ null);
+                    options.toBundle());
         } catch (RuntimeException e) {
             Slog.e(TAG, "Error while trying to launch bugreport handler app.", e);
             return false;
@@ -187,21 +174,6 @@ public final class BugReportHandlerUtil {
                     Settings.Global.CUSTOM_BUGREPORT_HANDLER_USER, UserHandle.USER_SYSTEM);
         } finally {
             Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    private static class ResultBroadcastReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (getResultCode() == Activity.RESULT_OK) {
-                return;
-            }
-
-            Slog.w(TAG, "Request bug report because handler app seems to be not available.");
-            BugreportManager bugreportManager = context.getSystemService(BugreportManager.class);
-            bugreportManager.requestBugreport(
-                    new BugreportParams(BugreportParams.BUGREPORT_MODE_INTERACTIVE),
-                    /* shareTitle= */null, /* shareDescription= */ null);
         }
     }
 }
