@@ -23,6 +23,9 @@ import android.util.Log;
 
 import com.android.server.wm.ActivityMetricsLaunchObserver;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 /**
  * A validator to check the correctness of event sequence during app startup.
  *
@@ -100,7 +103,8 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   @Override
   public void onIntentStarted(@NonNull Intent intent, long timestampNs) {
     if (state == State.UNKNOWN) {
-      Log.wtf(TAG, "IntentStarted during UNKNOWN." + intent);
+      logWarningWithStackTrace(
+          String.format("IntentStarted during UNKNOWN. " + intent));
       incAccIntentStartedEvents();
       return;
     }
@@ -110,7 +114,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
         state != State.ACTIVITY_CANCELLED &&
         state != State.ACTIVITY_FINISHED &&
         state != State.REPORT_FULLY_DRAWN) {
-      Log.wtf(TAG,
+      logWarningWithStackTrace(
           String.format("Cannot transition from %s to %s", state, State.INTENT_STARTED));
       incAccIntentStartedEvents();
       incAccIntentStartedEvents();
@@ -124,12 +128,12 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   @Override
   public void onIntentFailed() {
     if (state == State.UNKNOWN) {
-      Log.wtf(TAG, "IntentFailed during UNKNOWN.");
+      logWarningWithStackTrace(String.format("onIntentFailed during UNKNOWN."));
       decAccIntentStartedEvents();
       return;
     }
     if (state != State.INTENT_STARTED) {
-      Log.wtf(TAG,
+      logWarningWithStackTrace(
           String.format("Cannot transition from %s to %s", state, State.INTENT_FAILED));
       incAccIntentStartedEvents();
       return;
@@ -143,11 +147,12 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   public void onActivityLaunched(@NonNull @ActivityRecordProto byte[] activity,
       @Temperature int temperature) {
     if (state == State.UNKNOWN) {
-      Log.wtf(TAG, "onActivityLaunched during UNKNOWN.");
+      logWarningWithStackTrace(
+          String.format("onActivityLaunched during UNKNOWN."));
       return;
     }
     if (state != State.INTENT_STARTED) {
-      Log.wtf(TAG,
+      logWarningWithStackTrace(
           String.format("Cannot transition from %s to %s", state, State.ACTIVITY_LAUNCHED));
       incAccIntentStartedEvents();
       return;
@@ -160,12 +165,13 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   @Override
   public void onActivityLaunchCancelled(@Nullable @ActivityRecordProto byte[] activity) {
     if (state == State.UNKNOWN) {
-      Log.wtf(TAG, "onActivityLaunchCancelled during UNKNOWN.");
+      logWarningWithStackTrace(
+          String.format("onActivityLaunchCancelled during UNKNOWN."));
       decAccIntentStartedEvents();
       return;
     }
     if (state != State.ACTIVITY_LAUNCHED) {
-      Log.wtf(TAG,
+      logWarningWithStackTrace(
           String.format("Cannot transition from %s to %s", state, State.ACTIVITY_CANCELLED));
       incAccIntentStartedEvents();
       return;
@@ -179,13 +185,14 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] activity,
       long timestampNs) {
     if (state == State.UNKNOWN) {
-      Log.wtf(TAG, "onActivityLaunchFinished during UNKNOWN.");
+      logWarningWithStackTrace(
+          String.format("onActivityLaunchFinished during UNKNOWN."));
       decAccIntentStartedEvents();
       return;
     }
 
     if (state != State.ACTIVITY_LAUNCHED) {
-      Log.wtf(TAG,
+      logWarningWithStackTrace(
           String.format("Cannot transition from %s to %s", state, State.ACTIVITY_FINISHED));
       incAccIntentStartedEvents();
       return;
@@ -199,7 +206,8 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   public void onReportFullyDrawn(@NonNull @ActivityRecordProto byte[] activity,
       long timestampNs) {
     if (state == State.UNKNOWN) {
-      Log.wtf(TAG, "onReportFullyDrawn during UNKNOWN.");
+      logWarningWithStackTrace(
+          String.format("onReportFullyDrawn during UNKNOWN."));
       return;
     }
     if (state == State.INIT) {
@@ -207,7 +215,7 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
     }
 
     if (state != State.ACTIVITY_FINISHED) {
-      Log.wtf(TAG,
+      logWarningWithStackTrace(
           String.format("Cannot transition from %s to %s", state, State.REPORT_FULLY_DRAWN));
       return;
     }
@@ -251,5 +259,12 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
     --accIntentStartedEvents;
     Log.i(TAG,
         String.format("dec AccIntentStartedEvents to %d", accIntentStartedEvents));
+  }
+
+  private void logWarningWithStackTrace(String log) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    new Throwable("EventSequenceValidator#getStackTrace").printStackTrace(pw);
+    Log.w(TAG, String.format("%s\n%s", log, sw));
   }
 }
