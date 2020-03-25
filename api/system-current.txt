@@ -3576,23 +3576,23 @@ package android.hardware.soundtrigger {
 
   public static final class SoundTrigger.Keyphrase implements android.os.Parcelable {
     ctor public SoundTrigger.Keyphrase(int, int, @NonNull java.util.Locale, @NonNull String, @Nullable int[]);
+    method public int getId();
+    method @NonNull public java.util.Locale getLocale();
+    method public int getRecognitionModes();
+    method @NonNull public String getText();
+    method @NonNull public int[] getUsers();
     method @NonNull public static android.hardware.soundtrigger.SoundTrigger.Keyphrase readFromParcel(@NonNull android.os.Parcel);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.Keyphrase> CREATOR;
-    field public final int id;
-    field @NonNull public final java.util.Locale locale;
-    field public final int recognitionModes;
-    field @NonNull public final String text;
-    field @NonNull public final int[] users;
   }
 
   public static final class SoundTrigger.KeyphraseSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[], int);
     ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[]);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.Keyphrase[] getKeyphrases();
     method @NonNull public static android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel readFromParcel(@NonNull android.os.Parcel);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel> CREATOR;
-    field @NonNull public final android.hardware.soundtrigger.SoundTrigger.Keyphrase[] keyphrases;
   }
 
   public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
@@ -3604,26 +3604,26 @@ package android.hardware.soundtrigger {
 
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     method public int describeContents();
+    method public int getAudioCapabilities();
+    method @NonNull public String getDescription();
+    method public int getId();
+    method @NonNull public String getImplementor();
+    method public int getMaxBufferMillis();
+    method public int getMaxKeyphrases();
+    method public int getMaxSoundModels();
+    method public int getMaxUsers();
+    method public int getPowerConsumptionMw();
+    method public int getRecognitionModes();
+    method @NonNull public String getSupportedModelArch();
+    method @NonNull public java.util.UUID getUuid();
+    method public int getVersion();
+    method public boolean isCaptureTransitionSupported();
+    method public boolean isConcurrentCaptureSupported();
+    method public boolean isTriggerReturnedInEvent();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
     field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
-    field public final int audioCapabilities;
-    field @NonNull public final String description;
-    field public final int id;
-    field @NonNull public final String implementor;
-    field public final int maxBufferMs;
-    field public final int maxKeyphrases;
-    field public final int maxSoundModels;
-    field public final int maxUsers;
-    field public final int powerConsumptionMw;
-    field public final int recognitionModes;
-    field public final boolean returnsTriggerInEvent;
-    field @NonNull public final String supportedModelArch;
-    field public final boolean supportsCaptureTransition;
-    field public final boolean supportsConcurrentCapture;
-    field @NonNull public final java.util.UUID uuid;
-    field public final int version;
   }
 
   public static class SoundTrigger.RecognitionEvent {
@@ -3634,13 +3634,13 @@ package android.hardware.soundtrigger {
   }
 
   public static class SoundTrigger.SoundModel {
+    method @NonNull public byte[] getData();
+    method public int getType();
+    method @NonNull public java.util.UUID getUuid();
+    method @NonNull public java.util.UUID getVendorUuid();
+    method public int getVersion();
     field public static final int TYPE_GENERIC_SOUND = 1; // 0x1
     field public static final int TYPE_KEYPHRASE = 0; // 0x0
-    field @NonNull public final byte[] data;
-    field public final int type;
-    field @NonNull public final java.util.UUID uuid;
-    field @NonNull public final java.util.UUID vendorUuid;
-    field public final int version;
   }
 
 }

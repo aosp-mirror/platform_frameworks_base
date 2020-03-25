@@ -487,7 +487,7 @@ public class AlwaysOnHotwordDetector {
             ModuleProperties properties =
                     mModelManagementService.getDspModuleProperties();
             if (properties != null) {
-                return properties.audioCapabilities;
+                return properties.getAudioCapabilities();
             }
 
             return 0;
