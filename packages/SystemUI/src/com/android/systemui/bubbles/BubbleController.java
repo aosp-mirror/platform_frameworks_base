@@ -74,6 +74,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.dagger.BubbleModule;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder;
@@ -174,6 +175,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private IStatusBarService mBarService;
+    private SysUiState mSysUiState;
 
     // Used for determining view rect for touch interaction
     private Rect mTempRect = new Rect();
@@ -290,11 +292,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
             DumpManager dumpManager,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            SysUiState sysUiState) {
         this(context, notificationShadeWindowController, statusBarStateController, shadeController,
                 data, null /* synchronizer */, configurationController, interruptionStateProvider,
                 zenModeController, notifUserManager, groupManager, entryManager,
-                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator);
+                notifPipeline, featureFlags, dumpManager, floatingContentCoordinator, sysUiState);
     }
 
     /**
@@ -315,7 +318,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             NotifPipeline notifPipeline,
             FeatureFlags featureFlags,
             DumpManager dumpManager,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            SysUiState sysUiState) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
@@ -340,6 +344,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         });
 
         configurationController.addCallback(this /* configurationListener */);
+        mSysUiState = sysUiState;
 
         mBubbleData = data;
         mBubbleData.setListener(mBubbleDataListener);
@@ -593,7 +598,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private void ensureStackViewCreated() {
         if (mStackView == null) {
             mStackView = new BubbleStackView(
-                    mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator);
+                    mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
+                    mSysUiState);
             ViewGroup nsv = mNotificationShadeWindowController.getNotificationShadeView();
             int bubbleScrimIndex = nsv.indexOfChild(nsv.findViewById(R.id.scrim_for_bubble));
             int stackIndex = bubbleScrimIndex + 1;  // Show stack above bubble scrim.
