@@ -45,6 +45,20 @@
         <option name="run-command" value="sleep 1" />
     </target_preparer>
 
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="cleanup" value="true" />
+        <option name="abort-on-push-failure" value="true" />
+        <option name="push-file"
+          key="iorap_test_app_v1.apk"
+          value="/data/misc/iorapd/iorap_test_app_v1.apk" />
+        <option name="push-file"
+          key="iorap_test_app_v2.apk"
+          value="/data/misc/iorapd/iorap_test_app_v2.apk" />
+        <option name="push-file"
+          key="iorap_test_app_v3.apk"
+          value="/data/misc/iorapd/iorap_test_app_v3.apk" />
+    </target_preparer>
+
     <test class="com.android.tradefed.testtype.AndroidJUnitTest" >
         <option name="package" value="com.google.android.startop.iorap.tests" />
         <option name="runner" value="androidx.test.runner.AndroidJUnitRunner" />
