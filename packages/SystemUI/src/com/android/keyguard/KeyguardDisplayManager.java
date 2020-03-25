@@ -126,12 +126,14 @@ public class KeyguardDisplayManager {
         final int displayId = display.getDisplayId();
         Presentation presentation = mPresentations.get(displayId);
         if (presentation == null) {
-            presentation = new KeyguardPresentation(mContext, display, mInjectableInflater);
-            presentation.setOnDismissListener(dialog -> {
-                if (null != mPresentations.get(displayId)) {
+            final Presentation newPresentation =
+                    new KeyguardPresentation(mContext, display, mInjectableInflater);
+            newPresentation.setOnDismissListener(dialog -> {
+                if (newPresentation.equals(mPresentations.get(displayId))) {
                     mPresentations.remove(displayId);
                 }
             });
+            presentation = newPresentation;
             try {
                 presentation.show();
             } catch (WindowManager.InvalidDisplayException ex) {
