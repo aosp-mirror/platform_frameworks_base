@@ -94,55 +94,31 @@ FieldMatcher CreateAttributionUidDimensions(const int atomId,
 
 // Create log event for screen state changed.
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
-    const android::view::DisplayStateEnum state, uint64_t timestampNs);
-
-// Create log event for screen brightness state changed.
-std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
-   int level, uint64_t timestampNs);
+        uint64_t timestampNs, const android::view::DisplayStateEnum state);
 
 // Create log event when scheduled job starts.
-std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(
-    const std::vector<AttributionNodeInternal>& attributions,
-    const string& name, uint64_t timestampNs);
+std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(uint64_t timestampNs,
+                                                       const vector<int>& attributionUids,
+                                                       const vector<string>& attributionTags,
+                                                       const string& jobName);
 
 // Create log event when scheduled job finishes.
-std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(
-    const std::vector<AttributionNodeInternal>& attributions,
-    const string& name, uint64_t timestampNs);
-
-// Create log event for app moving to background.
-std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(const int uid, uint64_t timestampNs);
-
-// Create log event for app moving to foreground.
-std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(const int uid, uint64_t timestampNs);
+std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(uint64_t timestampNs,
+                                                        const vector<int>& attributionUids,
+                                                        const vector<string>& attributionTags,
+                                                        const string& jobName);
 
 // Create log event when the app sync starts.
-std::unique_ptr<LogEvent> CreateSyncStartEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-        uint64_t timestampNs);
+std::unique_ptr<LogEvent> CreateSyncStartEvent(uint64_t timestampNs,
+                                               const vector<int>& attributionUids,
+                                               const vector<string>& attributionTags,
+                                               const string& name);
 
 // Create log event when the app sync ends.
-std::unique_ptr<LogEvent> CreateSyncEndEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-        uint64_t timestampNs);
-
-// Create log event when the app sync ends.
-std::unique_ptr<LogEvent> CreateAppCrashEvent(
-    const int uid, uint64_t timestampNs);
-
-// Create log event for acquiring wakelock.
-std::unique_ptr<LogEvent> CreateAcquireWakelockEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-        uint64_t timestampNs);
-
-// Create log event for releasing wakelock.
-std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-        uint64_t timestampNs);
-
-// Create log event for releasing wakelock.
-std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
-    int isolatedUid, int hostUid, bool is_create, uint64_t timestampNs);
+std::unique_ptr<LogEvent> CreateSyncEndEvent(uint64_t timestampNs,
+                                             const vector<int>& attributionUids,
+                                             const vector<string>& attributionTags,
+                                             const string& name);
 
 // Helper function to create an AttributionNodeInternal proto.
 AttributionNodeInternal CreateAttribution(const int& uid, const string& tag);
