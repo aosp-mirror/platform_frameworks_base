@@ -611,48 +611,6 @@ public class Annotation {
     }
 
     /**
-     * Call forwarding function status
-     */
-    @IntDef(prefix = { "STATUS_" }, value = {
-        CallForwardingInfo.STATUS_ACTIVE,
-        CallForwardingInfo.STATUS_INACTIVE,
-        CallForwardingInfo.STATUS_UNKNOWN_ERROR,
-        CallForwardingInfo.STATUS_NOT_SUPPORTED,
-        CallForwardingInfo.STATUS_FDN_CHECK_FAILURE
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallForwardingStatus {
-    }
-
-    /**
-     * Call forwarding reason types
-     */
-    @IntDef(flag = true, prefix = { "REASON_" }, value = {
-        CallForwardingInfo.REASON_UNCONDITIONAL,
-        CallForwardingInfo.REASON_BUSY,
-        CallForwardingInfo.REASON_NO_REPLY,
-        CallForwardingInfo.REASON_NOT_REACHABLE,
-        CallForwardingInfo.REASON_ALL,
-        CallForwardingInfo.REASON_ALL_CONDITIONAL
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallForwardingReason {
-    }
-
-    /**
-     * Call waiting function status
-     */
-    @IntDef(prefix = { "CALL_WAITING_STATUS_" }, value = {
-        TelephonyManager.CALL_WAITING_STATUS_ACTIVE,
-        TelephonyManager.CALL_WAITING_STATUS_INACTIVE,
-        TelephonyManager.CALL_WAITING_STATUS_NOT_SUPPORTED,
-        TelephonyManager.CALL_WAITING_STATUS_UNKNOWN_ERROR
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallWaitingStatus {
-    }
-
-    /**
      * UICC SIM Application Types
      */
     @IntDef(prefix = { "APPTYPE_" }, value = {
