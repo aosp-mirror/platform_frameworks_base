@@ -739,11 +739,13 @@ public class TetheringManager {
      * @param type The tethering type, on of the {@code TetheringManager#TETHERING_*} constants.
      * @param executor {@link Executor} to specify the thread upon which the callback of
      *         TetheringRequest will be invoked.
+     * @hide
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.TETHER_PRIVILEGED,
             android.Manifest.permission.WRITE_SETTINGS
     })
+    @SystemApi(client = MODULE_LIBRARIES)
     public void startTethering(int type, @NonNull final Executor executor,
             @NonNull final StartTetheringCallback callback) {
         startTethering(new TetheringRequest.Builder(type).build(), executor, callback);
