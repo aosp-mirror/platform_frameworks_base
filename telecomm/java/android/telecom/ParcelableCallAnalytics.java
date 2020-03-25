@@ -258,27 +258,6 @@ public class ParcelableCallAnalytics implements Parcelable {
     public static final int SIP_PHONE = 0x8;
     public static final int THIRD_PARTY_PHONE = 0x10;
 
-    /**
-     * Indicating the call source is not specified.
-     *
-     * @hide
-     */
-    public static final int CALL_SOURCE_UNSPECIFIED = 0;
-
-    /**
-     * Indicating the call is initiated via emergency dialer's dialpad.
-     *
-     * @hide
-     */
-    public static final int CALL_SOURCE_EMERGENCY_DIALPAD = 1;
-
-    /**
-     * Indicating the call is initiated via emergency dialer's shortcut button.
-     *
-     * @hide
-     */
-    public static final int CALL_SOURCE_EMERGENCY_SHORTCUT = 2;
-
     public static final long MILLIS_IN_5_MINUTES = 1000 * 60 * 5;
     public static final long MILLIS_IN_1_SECOND = 1000;
 
@@ -343,7 +322,7 @@ public class ParcelableCallAnalytics implements Parcelable {
     private List<VideoEvent> videoEvents;
 
     // The source where user initiated this call. ONE OF the CALL_SOURCE_* constants.
-    private int callSource = CALL_SOURCE_UNSPECIFIED;
+    private int callSource = TelecomManager.CALL_SOURCE_UNSPECIFIED;
 
     public ParcelableCallAnalytics(long startTimeMillis, long callDurationMillis, int callType,
             boolean isAdditionalCall, boolean isInterrupted, int callTechnologies,
