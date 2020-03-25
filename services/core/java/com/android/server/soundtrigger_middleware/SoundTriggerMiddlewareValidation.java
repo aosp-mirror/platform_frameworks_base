@@ -34,6 +34,7 @@ import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
@@ -139,6 +140,14 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             throw new ServiceSpecificException(((RecoverableException) e).errorCode,
                     e.getMessage());
         }
+
+        /* Throwing an exception is not enough in this case. When the HAL behaves unexpectedly, the
+           system service and the HAL must be reset and the client must be notified. Without a full
+           reset in this catastrophic case, the state of the HAL and the system service cannot be
+           guaranteed to the client.
+         */
+        Log.wtf(TAG, "Crashing system server due to unrecoverable exception", e);
+        Process.killProcess(Process.myPid());
         throw new InternalServerError(e);
     }
 
