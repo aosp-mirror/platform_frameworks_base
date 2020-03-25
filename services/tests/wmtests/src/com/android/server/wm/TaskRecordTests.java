@@ -27,6 +27,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ActivityInfo.FLAG_RELINQUISH_TASK_IDENTITY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.IWindowManager.FIXED_TO_USER_ROTATION_ENABLED;
@@ -937,6 +938,20 @@ public class TaskRecordTests extends ActivityTestsBase {
         task.onConfigurationChanged(task.getParent().getConfiguration());
 
         verify(persister, never()).saveTask(same(task), any());
+    }
+
+    @Test
+    public void testNotSpecifyOrientationByFloatingTask() {
+        final Task task = getTestTask();
+        final ActivityRecord activity = task.getTopMostActivity();
+        final WindowContainer<?> taskContainer = task.getParent();
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, taskContainer.getOrientation());
+
+        task.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        assertEquals(SCREEN_ORIENTATION_UNSET, taskContainer.getOrientation());
     }
 
     private Task getTestTask() {
