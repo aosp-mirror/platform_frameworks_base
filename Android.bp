@@ -524,23 +524,9 @@ java_library {
     ],
 }
 
-java_library {
-    name: "framework-annotation-proc",
-    defaults: ["framework-defaults"],
-    srcs: [":framework-all-sources"],
-    libs: [
-        "app-compat-annotations",
-        "unsupportedappusage",
-    ],
-    installable: false,
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
-}
-
 platform_compat_config {
-    name: "framework-platform-compat-config",
-    src: ":framework-annotation-proc",
+   name: "framework-platform-compat-config",
+   src: ":framework-minus-apex",
 }
 
 // A library including just UnsupportedAppUsage.java classes.
