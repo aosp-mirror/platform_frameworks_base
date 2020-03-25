@@ -421,6 +421,10 @@ final class ApkSigningBlockUtils {
     static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
     static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
 
+    private static final int[] V4_CONTENT_DIGEST_ALGORITHMS =
+            {CONTENT_DIGEST_CHUNKED_SHA512, CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
+                    CONTENT_DIGEST_CHUNKED_SHA256};
+
     static int compareSignatureAlgorithm(int sigAlgorithm1, int sigAlgorithm2) {
         int digestAlgorithm1 = getSignatureAlgorithmContentDigestAlgorithm(sigAlgorithm1);
         int digestAlgorithm2 = getSignatureAlgorithmContentDigestAlgorithm(sigAlgorithm2);
@@ -569,6 +573,21 @@ final class ApkSigningBlockUtils {
                         "Unknown signature algorithm: 0x"
                                 + Long.toHexString(sigAlgorithm & 0xffffffff));
         }
+    }
+
+    /**
+     * Returns the best digest from the map of available digests.
+     * similarly to compareContentDigestAlgorithm.
+     *
+     * Keep in sync with pickBestDigestForV4 in apksigner's ApkSigningBlockUtils.
+     */
+    static byte[] pickBestDigestForV4(Map<Integer, byte[]> contentDigests) {
+        for (int algo : V4_CONTENT_DIGEST_ALGORITHMS) {
+            if (contentDigests.containsKey(algo)) {
+                return contentDigests.get(algo);
+            }
+        }
+        return null;
     }
 
     /**

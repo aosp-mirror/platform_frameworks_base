@@ -24,6 +24,7 @@ import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmContent
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaKeyAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.getSignatureAlgorithmJcaSignatureAlgorithm;
 import static android.util.apk.ApkSigningBlockUtils.isSupportedSignatureAlgorithm;
+import static android.util.apk.ApkSigningBlockUtils.pickBestDigestForV4;
 import static android.util.apk.ApkSigningBlockUtils.readLengthPrefixedByteArray;
 
 import android.util.ArrayMap;
@@ -117,7 +118,10 @@ public class ApkSignatureSchemeV2Verifier {
         return vSigner.certs;
     }
 
-    private static VerifiedSigner verify(String apkFile, boolean verifyIntegrity)
+    /**
+     * Same as above returns the full signer object, containing additional info e.g. digest.
+     */
+    public static VerifiedSigner verify(String apkFile, boolean verifyIntegrity)
             throws SignatureNotFoundException, SecurityException, IOException {
         try (RandomAccessFile apk = new RandomAccessFile(apkFile, "r")) {
             return verify(apk, verifyIntegrity);
@@ -209,9 +213,11 @@ public class ApkSignatureSchemeV2Verifier {
                     verityDigest, apk.length(), signatureInfo);
         }
 
+        byte[] digest = pickBestDigestForV4(contentDigests);
+
         return new VerifiedSigner(
                 signerCerts.toArray(new X509Certificate[signerCerts.size()][]),
-                verityRootHash);
+                verityRootHash, digest);
     }
 
     private static X509Certificate[] verifySigner(
@@ -426,11 +432,14 @@ public class ApkSignatureSchemeV2Verifier {
      */
     public static class VerifiedSigner {
         public final X509Certificate[][] certs;
-        public final byte[] verityRootHash;
 
-        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash) {
+        public final byte[] verityRootHash;
+        public final byte[] digest;
+
+        public VerifiedSigner(X509Certificate[][] certs, byte[] verityRootHash, byte[] digest) {
             this.certs = certs;
             this.verityRootHash = verityRootHash;
+            this.digest = digest;
         }
 
     }
