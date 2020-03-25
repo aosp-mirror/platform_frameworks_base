@@ -217,4 +217,20 @@ public class DozeScreenStateTest extends SysuiTestCase {
         assertEquals(Display.STATE_OFF, mServiceFake.screenState);
     }
 
+    @Test
+    public void test_animatesOff() {
+        ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+        doAnswer(invocation -> null).when(mDozeHost).prepareForGentleSleep(captor.capture());
+        mHandlerFake.setMode(QUEUEING);
+
+        mScreen.transitionTo(UNINITIALIZED, INITIALIZED);
+        mScreen.transitionTo(INITIALIZED, DOZE_AOD);
+        mScreen.transitionTo(DOZE_AOD, DOZE);
+
+        mHandlerFake.dispatchQueuedMessages();
+        verify(mDozeHost).prepareForGentleSleep(eq(captor.getValue()));
+        captor.getValue().run();
+        assertEquals(Display.STATE_OFF, mServiceFake.screenState);
+    }
+
 }

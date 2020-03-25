@@ -1133,16 +1133,6 @@ aidl_mapping {
     output: "framework-aidl-mappings.txt",
 }
 
-genrule {
-    name: "framework-annotation-proc-index",
-    srcs: [":framework-annotation-proc"],
-    cmd: "unzip -qp $(in) unsupportedappusage/unsupportedappusage_index.csv > $(out)",
-    out: ["unsupportedappusage_index.csv"],
-    dist: {
-        targets: ["droidcore"],
-    },
-}
-
 // Avoid including Parcelable classes as we don't want to have two copies of
 // Parcelable cross the libraries. This is used by telephony-common (frameworks/opt/telephony)
 // and TeleService app (packages/services/Telephony).

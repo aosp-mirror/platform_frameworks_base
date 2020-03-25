@@ -17,9 +17,67 @@
 
 #include <gtest/gtest.h>
 
-namespace android {
-namespace os {
-namespace statsd {
+#include <vector>
+#include <string>
+
+using namespace std;
+using namespace android::os;
+
+class IncidentReportRequest {
+public:
+    inline IncidentReportRequest() {
+        mImpl = AIncidentReportArgs_init();
+    }
+
+    inline IncidentReportRequest(const IncidentReportRequest& that) {
+        mImpl = AIncidentReportArgs_clone(that.mImpl);
+    }
+
+    inline ~IncidentReportRequest() {
+        AIncidentReportArgs_delete(mImpl);
+    }
+
+    inline AIncidentReportArgs* getImpl() {
+        return mImpl;
+    }
+
+    inline void setAll(bool all) {
+        AIncidentReportArgs_setAll(mImpl, all);
+    }
+
+    inline void setPrivacyPolicy(int privacyPolicy) {
+        AIncidentReportArgs_setPrivacyPolicy(mImpl, privacyPolicy);
+    }
+
+    inline void addSection(int section) {
+        AIncidentReportArgs_addSection(mImpl, section);
+    }
+
+    inline void setReceiverPackage(const string& pkg) {
+        AIncidentReportArgs_setReceiverPackage(mImpl, pkg.c_str());
+    };
+
+    inline void setReceiverClass(const string& cls) {
+        AIncidentReportArgs_setReceiverClass(mImpl, cls.c_str());
+    };
+
+    inline void addHeader(const vector<uint8_t>& headerProto) {
+        AIncidentReportArgs_addHeader(mImpl, headerProto.data(), headerProto.size());
+    };
+
+    inline void addHeader(const uint8_t* buf, size_t size) {
+        AIncidentReportArgs_addHeader(mImpl, buf, size);
+    };
+
+    // returns a status_t
+    inline int takeReport() {
+        return AIncidentReportArgs_takeReport(mImpl);
+    }
+
+private:
+    AIncidentReportArgs* mImpl;
+};
+
 
 TEST(IncidentReportRequestTest, testWrite) {
     IncidentReportRequest request;
@@ -60,6 +118,3 @@ TEST(IncidentReportRequestTest, testWrite) {
     EXPECT_EQ(headers, args->headers());
 }
 
-}  // namespace statsd
-}  // namespace os
-}  // namespace android

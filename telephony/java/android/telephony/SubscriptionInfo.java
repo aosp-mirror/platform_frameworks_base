@@ -449,10 +449,18 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the number of this subscription.
+     * @return the number of this subscription if the calling app has been granted the
+     * READ_PHONE_NUMBERS permission, or an empty string otherwise
      */
     public String getNumber() {
         return mNumber;
+    }
+
+    /**
+     * @hide
+     */
+    public void clearNumber() {
+        mNumber = "";
     }
 
     /**

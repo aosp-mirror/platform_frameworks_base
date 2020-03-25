@@ -248,7 +248,7 @@ public class TransformState {
     }
 
     protected boolean transformScale(TransformState otherState) {
-        return false;
+        return sameAs(otherState);
     }
 
     /**

@@ -121,7 +121,10 @@ class ShortcutHelper {
         mLauncherAppsService = launcherApps;
     }
 
-    ShortcutInfo getShortcutInfo(String shortcutId, String packageName, UserHandle user) {
+    /**
+     * Only returns shortcut info if it's found and if it's {@link ShortcutInfo#isLongLived()}.
+     */
+    ShortcutInfo getValidShortcutInfo(String shortcutId, String packageName, UserHandle user) {
         if (mLauncherAppsService == null) {
             return null;
         }
@@ -135,18 +138,13 @@ class ShortcutHelper {
             query.setShortcutIds(Arrays.asList(shortcutId));
             query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_PINNED | FLAG_MATCH_CACHED);
             List<ShortcutInfo> shortcuts = mLauncherAppsService.getShortcuts(query, user);
-            return shortcuts != null && shortcuts.size() > 0
+            ShortcutInfo info = shortcuts != null && shortcuts.size() > 0
                     ? shortcuts.get(0)
                     : null;
+            return info != null && info.isLongLived() ? info : null;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    boolean hasValidShortcutInfo(String shortcutId, String packageName,
-            UserHandle user) {
-        ShortcutInfo shortcutInfo = getShortcutInfo(shortcutId, packageName, user);
-        return shortcutInfo != null && shortcutInfo.isLongLived();
     }
 
     /**

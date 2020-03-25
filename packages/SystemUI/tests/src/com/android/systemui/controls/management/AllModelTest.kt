@@ -25,6 +25,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.controls.ControlStatus
 import com.android.systemui.controls.controller.ControlInfo
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -156,12 +157,26 @@ class AllModelTest : SysuiTestCase() {
     }
 
     @Test
+    fun testAddFavorite_changesModelFlag() {
+        val indexToAdd = 6
+        val id = "$idPrefix$indexToAdd"
+        model.changeFavoriteStatus(id, true)
+        assertTrue(
+                (model.elements.first {
+                    it is ControlWrapper && it.controlStatus.control.controlId == id
+                } as ControlWrapper)
+                        .controlStatus.favorite
+        )
+    }
+
+    @Test
     fun testAddFavorite_alreadyThere() {
         val indexToAdd = 7
         model.changeFavoriteStatus("$idPrefix$indexToAdd", true)
 
         val expectedFavorites = favoritesIndices.map(controls::get).map(ControlStatus::control)
 
+        assertEquals(expectedFavorites.size, model.favorites.size)
         model.favorites.zip(expectedFavorites).forEach {
             assertTrue(sameControl(it.first, it.second))
         }
@@ -179,6 +194,19 @@ class AllModelTest : SysuiTestCase() {
         model.favorites.zip(expectedFavorites).forEach {
             assertTrue(sameControl(it.first, it.second))
         }
+    }
+
+    @Test
+    fun testRemoveFavorite_changesModelFlag() {
+        val indexToRemove = 3
+        val id = "$idPrefix$indexToRemove"
+        model.changeFavoriteStatus(id, false)
+        assertFalse(
+                (model.elements.first {
+                    it is ControlWrapper && it.controlStatus.control.controlId == id
+                } as ControlWrapper)
+                        .controlStatus.favorite
+        )
     }
 
     @Test

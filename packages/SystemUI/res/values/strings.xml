@@ -2636,14 +2636,17 @@
 
     <!-- Quick Controls strings -->
     <!-- Quick Controls empty state, title [CHAR LIMIT=30] -->
-    <string name="quick_controls_title">Quick Controls</string>
+    <string name="quick_controls_title">Quick controls</string>
     <!-- Quick Controls empty state, subtitle [CHAR LIMIT=100] -->
     <string name="quick_controls_subtitle">Add controls for your connected devices</string>
 
-    <!-- Controls management providers screen title [CHAR LIMIT=30]-->
-    <string name="controls_providers_title">Add Controls</string>
-    <!-- Controls management providers screen subtitle [CHAR LIMIT=NONE] -->
-    <string name="controls_providers_subtitle">Choose app to add controls</string>
+    <!-- Quick Controls setup, title [CHAR LIMIT=50] -->
+    <string name="quick_controls_setup_title">Set up quick controls</string>
+    <!-- Quick Controls setup, subtitle [CHAR LIMIT=100] -->
+    <string name="quick_controls_setup_subtitle">Hold the Power button to access your controls</string>
+
+    <!-- Controls management providers screen title [CHAR LIMIT=60]-->
+    <string name="controls_providers_title">Choose app to add controls</string>
     <!-- Number of favorites for controls management screen [CHAR LIMIT=NONE]-->
     <plurals name="controls_number_of_favorites">
         <item quantity="one"><xliff:g id="number" example="1">%s</xliff:g> control added.</item>
@@ -2679,12 +2682,8 @@
     <string name="controls_pin_verifying">Verifying\u2026</string>
     <!-- Controls PIN entry dialog, text hint [CHAR LIMIT=30] -->
     <string name="controls_pin_instructions">Enter PIN</string>
-    <!-- Controls passphrase entry dialog, text hint [CHAR LIMIT=30] -->
-    <string name="controls_passphrase_instructions">Enter passphrase</string>
     <!-- Controls PIN entry dialog, text hint, retry [CHAR LIMIT=30] -->
     <string name="controls_pin_instructions_retry">Try another PIN</string>
-    <!-- Controls passphrase entry dialog, text hint, retry [CHAR LIMIT=50] -->
-    <string name="controls_passphrase_instructions_retry">Try another passphrase</string>
     <!-- Controls confirmation dialog, waiting to confirm [CHAR LIMIT=30] -->
     <string name="controls_confirmation_confirming">Confirming\u2026</string>
     <!-- Controls confirmation dialog, user prompt [CHAR LIMIT=NONE] -->
@@ -2694,7 +2693,7 @@
     <string name="controls_structure_tooltip">Swipe to see more</string>
 
     <!-- Message to tell the user to wait while systemui attempts to load a set of
-         recommended controls [CHAR_LIMIT=30] -->
+         recommended controls [CHAR_LIMIT=60] -->
     <string name="controls_seeding_in_progress">Loading recommendations</string>
 
     <!-- Close the controls associated with a specific media session [CHAR_LIMIT=NONE] -->

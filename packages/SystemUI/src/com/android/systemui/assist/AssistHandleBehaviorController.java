@@ -23,6 +23,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.accessibility.AccessibilityManager;
 
 import androidx.annotation.Nullable;
 
@@ -44,6 +45,8 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+
+import dagger.Lazy;
 
 /**
  * A class for managing Assistant handle logic.
@@ -73,6 +76,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     private final Provider<AssistHandleViewController> mAssistHandleViewController;
     private final DeviceConfigHelper mDeviceConfigHelper;
     private final Map<AssistHandleBehavior, BehaviorController> mBehaviorMap;
+    private final Lazy<AccessibilityManager> mA11yManager;
 
     private boolean mHandlesShowing = false;
     private long mHandlesLastHiddenAt;
@@ -93,6 +97,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
             DeviceConfigHelper deviceConfigHelper,
             Map<AssistHandleBehavior, BehaviorController> behaviorMap,
             NavigationModeController navigationModeController,
+            Lazy<AccessibilityManager> a11yManager,
             DumpManager dumpManager) {
         mContext = context;
         mAssistUtils = assistUtils;
@@ -100,6 +105,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         mAssistHandleViewController = assistHandleViewController;
         mDeviceConfigHelper = deviceConfigHelper;
         mBehaviorMap = behaviorMap;
+        mA11yManager = a11yManager;
 
         mInGesturalMode = QuickStepContract.isGesturalMode(
                 navigationModeController.addListener(this::handleNavigationModeChange));
@@ -211,9 +217,11 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
     }
 
     private long getShowAndGoDuration() {
-        return mDeviceConfigHelper.getLong(
+        long configuredTime = mDeviceConfigHelper.getLong(
                 SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS,
                 DEFAULT_SHOW_AND_GO_DURATION_MS);
+        return mA11yManager.get().getRecommendedTimeoutMillis(
+                (int) configuredTime, AccessibilityManager.FLAG_CONTENT_ICONS);
     }
 
     private String getBehaviorMode() {
@@ -291,7 +299,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
 
         pw.println("   Phenotype Flags:");
         pw.println("      "
-                + SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS
+                + SystemUiDeviceConfigFlags.ASSIST_HANDLES_SHOW_AND_GO_DURATION_MS + "(a11y modded)"
                 + "="
                 + getShowAndGoDuration());
         pw.println("      "

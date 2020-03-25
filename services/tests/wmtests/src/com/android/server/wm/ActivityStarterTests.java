@@ -1020,13 +1020,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
             mSecondary = TaskTile.forToken(secondary.asBinder());
         }
         @Override
-        public void taskAppeared(ActivityManager.RunningTaskInfo info) {
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
         }
         @Override
-        public void taskVanished(ActivityManager.RunningTaskInfo info) {
-        }
-        @Override
-        public void transactionReady(int id, SurfaceControl.Transaction t) {
+        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
         }
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {

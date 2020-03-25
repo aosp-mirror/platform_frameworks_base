@@ -86,7 +86,8 @@ public class ExpandHelper implements Gefingerpoken {
     private float mInitialTouchSpan;
     private float mLastFocusY;
     private float mLastSpanY;
-    private int mTouchSlop;
+    private final int mTouchSlop;
+    private final float mSlopMultiplier;
     private float mLastMotionY;
     private float mPullGestureMinXSpan;
     private Callback mCallback;
@@ -177,6 +178,7 @@ public class ExpandHelper implements Gefingerpoken {
 
         final ViewConfiguration configuration = ViewConfiguration.get(mContext);
         mTouchSlop = configuration.getScaledTouchSlop();
+        mSlopMultiplier = configuration.getAmbiguousGestureMultiplier();
 
         mSGD = new ScaleGestureDetector(context, mScaleGestureListener);
         mFlingAnimationUtils = new FlingAnimationUtils(mContext.getResources().getDisplayMetrics(),
@@ -258,6 +260,13 @@ public class ExpandHelper implements Gefingerpoken {
         mScrollAdapter = adapter;
     }
 
+    private float getTouchSlop(MotionEvent event) {
+        // Adjust the touch slop if another gesture may be being performed.
+        return event.getClassification() == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE
+                ? mTouchSlop * mSlopMultiplier
+                : mTouchSlop;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (!isEnabled()) {
@@ -303,7 +312,7 @@ public class ExpandHelper implements Gefingerpoken {
                 if (mWatchingForPull) {
                     final float yDiff = ev.getRawY() - mInitialTouchY;
                     final float xDiff = ev.getRawX() - mInitialTouchX;
-                    if (yDiff > mTouchSlop && yDiff > Math.abs(xDiff)) {
+                    if (yDiff > getTouchSlop(ev) && yDiff > Math.abs(xDiff)) {
                         if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
                         mWatchingForPull = false;
                         if (mResizedView != null && !isFullyExpanded(mResizedView)) {
@@ -431,7 +440,7 @@ public class ExpandHelper implements Gefingerpoken {
                 if (mWatchingForPull) {
                     final float yDiff = ev.getRawY() - mInitialTouchY;
                     final float xDiff = ev.getRawX() - mInitialTouchX;
-                    if (yDiff > mTouchSlop && yDiff > Math.abs(xDiff)) {
+                    if (yDiff > getTouchSlop(ev) && yDiff > Math.abs(xDiff)) {
                         if (DEBUG) Log.v(TAG, "got venetian gesture (dy=" + yDiff + "px)");
                         mWatchingForPull = false;
                         if (mResizedView != null && !isFullyExpanded(mResizedView)) {

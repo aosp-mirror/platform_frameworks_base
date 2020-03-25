@@ -2448,11 +2448,11 @@ static DemuxFilterSettings getFilterConfiguration(
     return filterSettings;
 }
 
-static int copyData(JNIEnv *env, sp<Filter> filter, jbyteArray buffer, jint offset, int size) {
-    ALOGD("copyData, size=%d, offset=%d", size, offset);
+static jint copyData(JNIEnv *env, sp<Filter> filter, jbyteArray buffer, jlong offset, jlong size) {
+    ALOGD("copyData, size=%ld, offset=%ld", (long) size, (long) offset);
 
-    int available = filter->mFilterMQ->availableToRead();
-    ALOGD("copyData, available=%d", available);
+    jlong available = filter->mFilterMQ->availableToRead();
+    ALOGD("copyData, available=%ld", (long) available);
     size = std::min(size, available);
 
     jboolean isCopy;
@@ -2474,7 +2474,7 @@ static int copyData(JNIEnv *env, sp<Filter> filter, jbyteArray buffer, jint offs
     return size;
 }
 
-static int android_media_tv_Tuner_configure_filter(
+static jint android_media_tv_Tuner_configure_filter(
         JNIEnv *env, jobject filter, int type, int subtype, jobject settings) {
     ALOGD("configure filter type=%d, subtype=%d", type, subtype);
     sp<Filter> filterSp = getFilter(env, filter);
@@ -2485,9 +2485,14 @@ static int android_media_tv_Tuner_configure_filter(
     }
     DemuxFilterSettings filterSettings = getFilterConfiguration(env, type, subtype, settings);
     Result res = iFilterSp->configure(filterSettings);
+
+    if (res != Result::SUCCESS) {
+        return (jint) res;
+    }
+
     MQDescriptorSync<uint8_t> filterMQDesc;
-    if (res == Result::SUCCESS && filterSp->mFilterMQ == NULL) {
-        Result getQueueDescResult = Result::UNKNOWN_ERROR;
+    Result getQueueDescResult = Result::UNKNOWN_ERROR;
+    if (filterSp->mFilterMQ == NULL) {
         iFilterSp->getQueueDesc(
                 [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
                     filterMQDesc = desc;
@@ -2500,59 +2505,97 @@ static int android_media_tv_Tuner_configure_filter(
                     filterSp->mFilterMQ->getEventFlagWord(), &(filterSp->mFilterMQEventFlag));
         }
     }
-    return (int)res;
+    return (jint) getQueueDescResult;
 }
 
-static int android_media_tv_Tuner_get_filter_id(JNIEnv*, jobject) {
-    return 0;
+static jint android_media_tv_Tuner_get_filter_id(JNIEnv* env, jobject filter) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
+        ALOGD("Failed to get filter ID: filter not found");
+        return (int) Result::INVALID_STATE;
+    }
+    Result res;
+    uint32_t id;
+    iFilterSp->getId(
+            [&](Result r, uint32_t filterId) {
+                res = r;
+                id = filterId;
+            });
+    if (res != Result::SUCCESS) {
+        return (jint) Constant::INVALID_FILTER_ID;
+    }
+    return (jint) id;
 }
 
-static int android_media_tv_Tuner_set_filter_data_source(JNIEnv*, jobject, jobject) {
-    return 0;
+static jint android_media_tv_Tuner_set_filter_data_source(
+        JNIEnv* env, jobject filter, jobject srcFilter) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
+        ALOGD("Failed to set filter data source: filter not found");
+        return (jint) Result::INVALID_STATE;
+    }
+    Result r;
+    if (srcFilter == NULL) {
+        r = iFilterSp->setDataSource(NULL);
+    } else {
+        sp<IFilter> srcSp = getFilter(env, srcFilter)->getIFilter();
+        if (iFilterSp == NULL) {
+            ALOGD("Failed to set filter data source: src filter not found");
+            return (jint) Result::INVALID_STATE;
+        }
+        r = iFilterSp->setDataSource(srcSp);
+    }
+    return (jint) r;
 }
 
-static int android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    if (filterSp == NULL) {
+static jint android_media_tv_Tuner_start_filter(JNIEnv *env, jobject filter) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
         ALOGD("Failed to start filter: filter not found");
-        return false;
+        return (jint) Result::INVALID_STATE;
     }
-    Result r = filterSp->start();
-    return (int) r;
+    Result r = iFilterSp->start();
+    return (jint) r;
 }
 
-static int android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    if (filterSp == NULL) {
+static jint android_media_tv_Tuner_stop_filter(JNIEnv *env, jobject filter) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
         ALOGD("Failed to stop filter: filter not found");
-        return false;
+        return (jint) Result::INVALID_STATE;
     }
-    Result r = filterSp->stop();
-    return (int) r;
+    Result r = iFilterSp->stop();
+    return (jint) r;
 }
 
-static int android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    if (filterSp == NULL) {
+static jint android_media_tv_Tuner_flush_filter(JNIEnv *env, jobject filter) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
         ALOGD("Failed to flush filter: filter not found");
-        return false;
+        return (jint) Result::INVALID_STATE;
     }
-    Result r = filterSp->flush();
-    return (int) r;
+    Result r = iFilterSp->flush();
+    return (jint) r;
 }
 
-static int android_media_tv_Tuner_read_filter_fmq(
+static jint android_media_tv_Tuner_read_filter_fmq(
         JNIEnv *env, jobject filter, jbyteArray buffer, jlong offset, jlong size) {
     sp<Filter> filterSp = getFilter(env, filter);
     if (filterSp == NULL) {
         ALOGD("Failed to read filter FMQ: filter not found");
-        return 0;
+        return (jint) Result::INVALID_STATE;
     }
     return copyData(env, filterSp, buffer, offset, size);
 }
 
-static int android_media_tv_Tuner_close_filter(JNIEnv*, jobject) {
-    return 0;
+static jint android_media_tv_Tuner_close_filter(JNIEnv *env, jobject filter) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (iFilterSp == NULL) {
+        ALOGD("Failed to close filter: filter not found");
+        return (jint) Result::INVALID_STATE;
+    }
+    Result r = iFilterSp->close();
+    return (jint) r;
 }
 
 static sp<TimeFilter> getTimeFilter(JNIEnv *env, jobject filter) {
@@ -2660,8 +2703,8 @@ static int android_media_tv_Tuner_add_pid(
     if (descramblerSp == NULL) {
         return false;
     }
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    Result result = descramblerSp->addPid(getDemuxPid((int)pidType, (int)pid), filterSp);
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    Result result = descramblerSp->addPid(getDemuxPid((int)pidType, (int)pid), iFilterSp);
     return (int)result;
 }
 
@@ -2671,8 +2714,8 @@ static int android_media_tv_Tuner_remove_pid(
     if (descramblerSp == NULL) {
         return false;
     }
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    Result result = descramblerSp->removePid(getDemuxPid((int)pidType, (int)pid), filterSp);
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    Result result = descramblerSp->removePid(getDemuxPid((int)pidType, (int)pid), iFilterSp);
     return (int)result;
 }
 
@@ -2702,21 +2745,21 @@ static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv*, jobject) {
 
 static int android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    if (dvrSp == NULL || filterSp == NULL) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (dvrSp == NULL || iFilterSp == NULL) {
         return false;
     }
-    Result result = dvrSp->attachFilter(filterSp);
+    Result result = dvrSp->attachFilter(iFilterSp);
     return (int) result;
 }
 
 static int android_media_tv_Tuner_detach_filter(JNIEnv *env, jobject dvr, jobject filter) {
     sp<IDvr> dvrSp = getDvr(env, dvr)->getIDvr();
-    sp<IFilter> filterSp = getFilter(env, filter)->getIFilter();
-    if (dvrSp == NULL || filterSp == NULL) {
+    sp<IFilter> iFilterSp = getFilter(env, filter)->getIFilter();
+    if (dvrSp == NULL || iFilterSp == NULL) {
         return false;
     }
-    Result result = dvrSp->detachFilter(filterSp);
+    Result result = dvrSp->detachFilter(iFilterSp);
     return (int) result;
 }
 

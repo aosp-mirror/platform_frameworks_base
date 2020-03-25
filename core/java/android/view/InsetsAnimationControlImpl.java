@@ -196,11 +196,10 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         if (mCancelled || mFinished) {
             return;
         }
+        mShownOnFinish = shown;
         setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */);
         mFinished = true;
         mListener.onFinished(this);
-
-        mShownOnFinish = shown;
     }
 
     @Override
@@ -259,7 +258,6 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         return state.calculateInsets(frame, null /* ignoringVisibilityState */,
                 false /* isScreenRound */,
                 false /* alwaysConsumeSystemBars */, null /* displayCutout */,
-                null /* legacyContentInsets */, null /* legacyStableInsets */,
                 LayoutParams.SOFT_INPUT_ADJUST_RESIZE /* legacySoftInputMode*/,
                 0 /* legacySystemUiFlags */, typeSideMap)
                .getInsets(mTypes);
@@ -301,7 +299,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
                         .withAlpha(side == ISIDE_FLOATING ? 1 : alpha)
                         .withMatrix(mTmpMatrix)
                         .withVisibility(side == ISIDE_FLOATING
-                                ? state.getSource(source.getType()).isVisible()
+                                ? mShownOnFinish
                                 : inset != 0 /* visible */)
                         .build();
                 surfaceParams.add(params);

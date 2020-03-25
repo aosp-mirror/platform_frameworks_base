@@ -22,9 +22,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.window.ITaskOrganizerController;
 import android.app.WindowConfiguration;
 import android.os.RemoteException;
 import android.util.Log;
@@ -49,13 +49,12 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
         mDivider = divider;
     }
 
-    void init(ITaskOrganizerController organizerController, SurfaceSession session)
-            throws RemoteException {
-        organizerController.registerTaskOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        organizerController.registerTaskOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
-        mPrimary = organizerController.createRootTask(Display.DEFAULT_DISPLAY,
+    void init(SurfaceSession session) throws RemoteException {
+        TaskOrganizer.registerOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        TaskOrganizer.registerOrganizer(this, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+        mPrimary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
                 WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        mSecondary = organizerController.createRootTask(Display.DEFAULT_DISPLAY,
+        mSecondary = TaskOrganizer.createRootTask(Display.DEFAULT_DISPLAY,
                 WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
         mPrimarySurface = mPrimary.token.getLeash();
         mSecondarySurface = mSecondary.token.getLeash();
@@ -83,15 +82,11 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     }
 
     @Override
-    public void taskAppeared(RunningTaskInfo taskInfo) {
+    public void onTaskAppeared(RunningTaskInfo taskInfo) {
     }
 
     @Override
-    public void taskVanished(RunningTaskInfo taskInfo) {
-    }
-
-    @Override
-    public void transactionReady(int id, SurfaceControl.Transaction t) {
+    public void onTaskVanished(RunningTaskInfo taskInfo) {
     }
 
     @Override

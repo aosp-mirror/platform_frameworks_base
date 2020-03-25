@@ -7088,7 +7088,7 @@ public abstract class PackageManager {
      * Returns any packages in a given set of packages that cannot be suspended via a call to {@link
      * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
      * SuspendDialogInfo) setPackagesSuspended}. The platform prevents suspending certain critical
-     * packages to keep the device in a functioning state, e.g. the default dialer.
+     * packages to keep the device in a functioning state, e.g. the default dialer and launcher.
      * Apps need to hold {@link Manifest.permission#SUSPEND_APPS SUSPEND_APPS} to call this API.
      *
      * <p>
@@ -7106,7 +7106,7 @@ public abstract class PackageManager {
     @RequiresPermission(Manifest.permission.SUSPEND_APPS)
     @NonNull
     public String[] getUnsuspendablePackages(@NonNull String[] packageNames) {
-        throw new UnsupportedOperationException("canSuspendPackages not implemented");
+        throw new UnsupportedOperationException("getUnsuspendablePackages not implemented");
     }
 
     /**

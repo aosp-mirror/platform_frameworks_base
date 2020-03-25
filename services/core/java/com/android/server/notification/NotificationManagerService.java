@@ -243,7 +243,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
@@ -3454,7 +3453,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(onlyImportant);
             for (ConversationChannelWrapper conversation : conversations) {
-                conversation.setShortcutInfo(mShortcutHelper.getShortcutInfo(
+                conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
                         conversation.getNotificationChannel().getConversationId(),
                         conversation.getPkg(),
                         UserHandle.of(UserHandle.getUserId(conversation.getUid()))));
@@ -3477,7 +3476,7 @@ public class NotificationManagerService extends SystemService {
             ArrayList<ConversationChannelWrapper> conversations =
                     mPreferencesHelper.getConversations(pkg, uid);
             for (ConversationChannelWrapper conversation : conversations) {
-                conversation.setShortcutInfo(mShortcutHelper.getShortcutInfo(
+                conversation.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
                         conversation.getNotificationChannel().getConversationId(),
                         pkg,
                         UserHandle.of(UserHandle.getUserId(uid))));
@@ -3639,13 +3638,23 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
+         * @deprecated Use {@link #getActiveNotificationsWithAttribution(String, String)} instead.
+         */
+        @Deprecated
+        @Override
+        public StatusBarNotification[] getActiveNotifications(String callingPkg) {
+            return getActiveNotificationsWithAttribution(callingPkg, null);
+        }
+
+        /**
          * System-only API for getting a list of current (i.e. not cleared) notifications.
          *
          * Requires ACCESS_NOTIFICATIONS which is signature|system.
          * @returns A list of all the notifications, in natural order.
          */
         @Override
-        public StatusBarNotification[] getActiveNotifications(String callingPkg) {
+        public StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
+                String callingAttributionTag) {
             // enforce() will ensure the calling uid has the correct permission
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_NOTIFICATIONS,
@@ -3655,7 +3664,8 @@ public class NotificationManagerService extends SystemService {
             int uid = Binder.getCallingUid();
 
             // noteOp will check to make sure the callingPkg matches the uid
-            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
+            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
+                    callingAttributionTag, null)
                     == AppOpsManager.MODE_ALLOWED) {
                 synchronized (mNotificationLock) {
                     tmp = new StatusBarNotification[mNotificationList.size()];
@@ -3737,12 +3747,24 @@ public class NotificationManagerService extends SystemService {
         }
 
         /**
-         * System-only API for getting a list of recent (cleared, no longer shown) notifications.
+         * @deprecated Use {@link #getHistoricalNotificationsWithAttribution} instead.
          */
+        @Deprecated
         @Override
         @RequiresPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
         public StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count,
                 boolean includeSnoozed) {
+            return getHistoricalNotificationsWithAttribution(callingPkg, null, count,
+                    includeSnoozed);
+        }
+
+        /**
+         * System-only API for getting a list of recent (cleared, no longer shown) notifications.
+         */
+        @Override
+        @RequiresPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
+        public StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
+                String callingAttributionTag, int count, boolean includeSnoozed) {
             // enforce() will ensure the calling uid has the correct permission
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_NOTIFICATIONS,
@@ -3752,7 +3774,8 @@ public class NotificationManagerService extends SystemService {
             int uid = Binder.getCallingUid();
 
             // noteOp will check to make sure the callingPkg matches the uid
-            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
+            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
+                    callingAttributionTag, null)
                     == AppOpsManager.MODE_ALLOWED) {
                 synchronized (mArchive) {
                     tmp = mArchive.getArray(count, includeSnoozed);
@@ -3768,7 +3791,8 @@ public class NotificationManagerService extends SystemService {
         @Override
         @WorkerThread
         @RequiresPermission(android.Manifest.permission.ACCESS_NOTIFICATIONS)
-        public NotificationHistory getNotificationHistory(String callingPkg) {
+        public NotificationHistory getNotificationHistory(String callingPkg,
+                String callingAttributionTag) {
             // enforce() will ensure the calling uid has the correct permission
             getContext().enforceCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_NOTIFICATIONS,
@@ -3776,7 +3800,8 @@ public class NotificationManagerService extends SystemService {
             int uid = Binder.getCallingUid();
 
             // noteOp will check to make sure the callingPkg matches the uid
-            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg)
+            if (mAppOps.noteOpNoThrow(AppOpsManager.OP_ACCESS_NOTIFICATIONS, uid, callingPkg,
+                    callingAttributionTag, null)
                     == AppOpsManager.MODE_ALLOWED) {
                 IntArray currentUserIds = mUserProfiles.getCurrentProfileIds();
                 Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "notifHistoryReadHistory");
@@ -5648,7 +5673,8 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        r.setShortcutInfo(mShortcutHelper.getShortcutInfo(notification.getShortcutId(), pkg, user));
+        r.setShortcutInfo(mShortcutHelper.getValidShortcutInfo(
+                notification.getShortcutId(), pkg, user));
 
         if (!checkDisqualifyingFeatures(userId, notificationUid, id, tag, r,
                 r.getSbn().getOverrideGroupKey() != null)) {
