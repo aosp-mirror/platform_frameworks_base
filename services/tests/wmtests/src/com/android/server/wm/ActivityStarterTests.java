@@ -82,9 +82,8 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.service.voice.IVoiceInteractionSession;
 import android.view.Gravity;
-import android.window.IWindowContainer;
-import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
+import android.window.IWindowContainer;
 
 import androidx.test.filters.SmallTest;
 
@@ -975,7 +974,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Move activity to split-screen-primary stack and make sure it has the focus.
         TestSplitOrganizer splitOrg = new TestSplitOrganizer(mService, top.getDisplayId());
-        splitOrg.mPrimary.addChild(top.getRootTask(), 0 /* index */);
+        top.getRootTask().reparent(splitOrg.mPrimary, POSITION_BOTTOM);
         top.getRootTask().moveToFront("testWindowingModeOptionsLaunchAdjacent");
 
         // Activity must landed on split-screen-secondary when launch adjacent.
@@ -1001,8 +1000,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
     static class TestSplitOrganizer extends ITaskOrganizer.Stub {
         final ActivityTaskManagerService mService;
-        TaskTile mPrimary;
-        TaskTile mSecondary;
+        Task mPrimary;
+        Task mSecondary;
         boolean mInSplit = false;
         int mDisplayId;
         TestSplitOrganizer(ActivityTaskManagerService service, int displayId) {
@@ -1014,10 +1013,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
                     WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
             IWindowContainer primary = mService.mTaskOrganizerController.createRootTask(
                     displayId, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY).token;
-            mPrimary = TaskTile.forToken(primary.asBinder());
+            mPrimary = WindowContainer.fromBinder(primary.asBinder()).asTask();
             IWindowContainer secondary = mService.mTaskOrganizerController.createRootTask(
                     displayId, WINDOWING_MODE_SPLIT_SCREEN_SECONDARY).token;
-            mSecondary = TaskTile.forToken(secondary.asBinder());
+            mSecondary = WindowContainer.fromBinder(secondary.asBinder()).asTask();
         }
         @Override
         public void onTaskAppeared(ActivityManager.RunningTaskInfo info) {
@@ -1042,7 +1041,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                     for (int i = dc.getStackCount() - 1; i >= 0; --i) {
                         if (!WindowConfiguration.isSplitScreenWindowingMode(
                                 dc.getStackAt(i).getWindowingMode())) {
-                            mSecondary.addChild(dc.getStackAt(i), 0);
+                            dc.getStackAt(i).reparent(mSecondary, POSITION_BOTTOM);
                         }
                     }
                 }

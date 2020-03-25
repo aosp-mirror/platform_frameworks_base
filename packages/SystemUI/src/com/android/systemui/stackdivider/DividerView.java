@@ -25,6 +25,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
+import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -129,6 +130,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private int mDividerInsets;
     private final Display mDefaultDisplay;
+    private boolean mSupportSplitScreenMultiWindow;
 
     private int mDividerSize;
     private int mTouchElevation;
@@ -282,6 +284,8 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         final DisplayManager displayManager =
                 (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
         mDefaultDisplay = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        mSupportSplitScreenMultiWindow =
+                ActivityTaskManager.supportsSplitScreenMultiWindow(mContext);
     }
 
     @Override
@@ -354,6 +358,11 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (!mSupportSplitScreenMultiWindow) {
+            super.onLayout(changed, left, top, right, bottom);
+            return;
+        }
+
         if (mFirstLayout) {
             // Wait for first layout so that the ViewRootImpl surface has been created.
             initializeSurfaceState();
@@ -1085,6 +1094,13 @@ public class DividerView extends FrameLayout implements OnTouchListener,
         crop.offsetTo(-(otherTaskRect.left - otherRect.left),
                 -(otherTaskRect.top - otherRect.top));
         t.setWindowCrop(mTiles.mSecondarySurface, crop);
+        // Reposition home and recents surfaces or they would be positioned relatively to its
+        // parent (split-screen secondary task) position.
+        for (int i = mTiles.mHomeAndRecentsSurfaces.size() - 1; i >= 0; --i) {
+            t.setPosition(mTiles.mHomeAndRecentsSurfaces.get(i),
+                    mTiles.mHomeBounds.left - otherTaskRect.left,
+                    mTiles.mHomeBounds.top - otherTaskRect.top);
+        }
         final SurfaceControl dividerCtrl = getWindowSurfaceControl();
         if (dividerCtrl != null) {
             if (isHorizontalDivision()) {
