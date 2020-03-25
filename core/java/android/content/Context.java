@@ -5792,7 +5792,7 @@ public abstract class Context {
      * {@link android.view.LayoutInflater inflating} views, such that they can be inflated with
      * proper {@link Resources}.
      *
-     * Below is a sample code to <b>add an application overlay window on the primary display:<b/>
+     * Below is a sample code to <b>add an application overlay window on the primary display:</b>
      * <pre class="prettyprint">
      * ...
      * final DisplayManager dm = anyContext.getSystemService(DisplayManager.class);
