@@ -25,7 +25,7 @@ import android.net.ConnectivityManager.TETHERING_USB
 import android.net.ConnectivityManager.TETHERING_WIFI
 import android.os.UserHandle
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
-import androidx.test.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.internal.util.test.BroadcastInterceptingContext
@@ -114,7 +114,7 @@ class TetheringNotificationUpdaterTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        val context = TestContext(InstrumentationRegistry.getContext())
+        val context = TestContext(InstrumentationRegistry.getInstrumentation().context)
         doReturn(notificationManager).`when`(mockContext)
                 .getSystemService(Context.NOTIFICATION_SERVICE)
         notificationUpdater = WrappedNotificationUpdater(context)
@@ -128,7 +128,8 @@ class TetheringNotificationUpdaterTest {
         verify(notificationManager, never()).cancel(any(), anyInt())
 
         val notificationCaptor = ArgumentCaptor.forClass(Notification::class.java)
-        verify(notificationManager, times(1)).notify(any(), anyInt(), notificationCaptor.capture())
+        verify(notificationManager, times(1))
+                .notify(any(), anyInt(), notificationCaptor.capture())
 
         val notification = notificationCaptor.getValue()
         assertEquals(iconId, notification.smallIcon.resId)
@@ -223,5 +224,39 @@ class TetheringNotificationUpdaterTest {
         assertEquals(BT_MASK, notificationUpdater.getDownstreamTypesMask(" WIFI: | BT"))
         assertEquals(WIFI_MASK or USB_MASK,
                 notificationUpdater.getDownstreamTypesMask("1|2|USB|WIFI|BLUETOOTH||"))
+    }
+
+    @Test
+    fun testSetupRestrictedNotification() {
+        val title = InstrumentationRegistry.getInstrumentation().context.resources
+                .getString(R.string.disable_tether_notification_title)
+        val message = InstrumentationRegistry.getInstrumentation().context.resources
+                .getString(R.string.disable_tether_notification_message)
+        val disallowTitle = "Tether function is disallowed"
+        val disallowMessage = "Please contact your admin"
+        doReturn(title).`when`(defaultResources)
+                .getString(R.string.disable_tether_notification_title)
+        doReturn(message).`when`(defaultResources)
+                .getString(R.string.disable_tether_notification_message)
+        doReturn(disallowTitle).`when`(testResources)
+                .getString(R.string.disable_tether_notification_title)
+        doReturn(disallowMessage).`when`(testResources)
+                .getString(R.string.disable_tether_notification_message)
+
+        // User restrictions on. Show restricted notification.
+        notificationUpdater.notifyTetheringDisabledByRestriction()
+        verifyNotification(R.drawable.stat_sys_tether_general, title, message)
+
+        // User restrictions off. Clear notification.
+        notificationUpdater.tetheringRestrictionLifted()
+        verifyNoNotification()
+
+        // Set test sub id. No notification.
+        notificationUpdater.onActiveDataSubscriptionIdChanged(TEST_SUBID)
+        verifyNoNotification()
+
+        // User restrictions on again. Show restricted notification with test resource.
+        notificationUpdater.notifyTetheringDisabledByRestriction()
+        verifyNotification(R.drawable.stat_sys_tether_general, disallowTitle, disallowMessage)
     }
 }
