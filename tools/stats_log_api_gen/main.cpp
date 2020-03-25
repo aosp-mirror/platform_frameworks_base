@@ -1,21 +1,20 @@
 
-#include "Collation.h"
-#include "atoms_info_writer.h"
-#include "java_writer.h"
-#include "java_writer_q.h"
-#include "native_writer.h"
-#include "utils.h"
-
-#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
+#include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <map>
 #include <set>
 #include <vector>
 
-#include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "Collation.h"
+#include "atoms_info_writer.h"
+#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
+#include "java_writer.h"
+#include "java_writer_q.h"
+#include "native_writer.h"
+#include "utils.h"
 
 using namespace google::protobuf;
 using namespace std;
@@ -25,25 +24,34 @@ namespace stats_log_api_gen {
 
 using android::os::statsd::Atom;
 
-static void
-print_usage()
-{
+static void print_usage() {
     fprintf(stderr, "usage: stats-log-api-gen OPTIONS\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "OPTIONS\n");
     fprintf(stderr, "  --cpp FILENAME       the header file to output for write helpers\n");
     fprintf(stderr, "  --header FILENAME    the cpp file to output for write helpers\n");
     fprintf(stderr,
-            "  --atomsInfoCpp FILENAME       the header file to output for statsd metadata\n");
-    fprintf(stderr, "  --atomsInfoHeader FILENAME    the cpp file to output for statsd metadata\n");
+            "  --atomsInfoCpp FILENAME       the header file to output for "
+            "statsd metadata\n");
+    fprintf(stderr,
+            "  --atomsInfoHeader FILENAME    the cpp file to output for statsd "
+            "metadata\n");
     fprintf(stderr, "  --help               this message\n");
     fprintf(stderr, "  --java FILENAME      the java file to output\n");
     fprintf(stderr, "  --module NAME        optional, module name to generate outputs for\n");
-    fprintf(stderr, "  --namespace COMMA,SEP,NAMESPACE   required for cpp/header with module\n");
-    fprintf(stderr, "                                    comma separated namespace of the files\n");
-    fprintf(stderr,"  --importHeader NAME  required for cpp/jni to say which header to import "
+    fprintf(stderr,
+            "  --namespace COMMA,SEP,NAMESPACE   required for cpp/header with "
+            "module\n");
+    fprintf(stderr,
+            "                                    comma separated namespace of "
+            "the files\n");
+    fprintf(stderr,
+            "  --importHeader NAME  required for cpp/jni to say which header to "
+            "import "
             "for write helpers\n");
-    fprintf(stderr,"  --atomsInfoImportHeader NAME  required for cpp to say which header to import "
+    fprintf(stderr,
+            "  --atomsInfoImportHeader NAME  required for cpp to say which "
+            "header to import "
             "for statsd metadata\n");
     fprintf(stderr, "  --javaPackage PACKAGE             the package for the java file.\n");
     fprintf(stderr, "                                    required for java with module\n");
@@ -51,17 +59,18 @@ print_usage()
     fprintf(stderr, "                       Optional for Java with module.\n");
     fprintf(stderr, "                       Default is \"StatsLogInternal\"\n");
     fprintf(stderr, "  --supportQ           Include runtime support for Android Q.\n");
-    fprintf(stderr, "  --worksource         Include support for logging WorkSource objects.\n");
-    fprintf(stderr, "  --compileQ           Include compile-time support for Android Q "
+    fprintf(stderr,
+            "  --worksource         Include support for logging WorkSource "
+            "objects.\n");
+    fprintf(stderr,
+            "  --compileQ           Include compile-time support for Android Q "
             "(Java only).\n");
 }
 
 /**
  * Do the argument parsing and execute the tasks.
  */
-static int
-run(int argc, char const*const* argv)
-{
+static int run(int argc, char const* const* argv) {
     string cppFilename;
     string headerFilename;
     string javaFilename;
@@ -171,11 +180,8 @@ run(int argc, char const*const* argv)
         index++;
     }
 
-    if (cppFilename.size() == 0
-            && headerFilename.size() == 0
-            && javaFilename.size() == 0
-            && atomsInfoHeaderFilename.size() == 0
-            && atomsInfoCppFilename.size() == 0) {
+    if (cppFilename.size() == 0 && headerFilename.size() == 0 && javaFilename.size() == 0 &&
+        atomsInfoHeaderFilename.size() == 0 && atomsInfoCppFilename.size() == 0) {
         print_usage();
         return 1;
     }
@@ -201,8 +207,8 @@ run(int argc, char const*const* argv)
 
     AtomDecl attributionDecl;
     vector<java_type_t> attributionSignature;
-    collate_atom(android::os::statsd::AttributionNode::descriptor(),
-                 &attributionDecl, &attributionSignature);
+    collate_atom(android::os::statsd::AttributionNode::descriptor(), &attributionDecl,
+                 &attributionSignature);
 
     // Write the atoms info .cpp file
     if (atomsInfoCppFilename.size() != 0) {
@@ -211,8 +217,8 @@ run(int argc, char const*const* argv)
             fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoCppFilename.c_str());
             return 1;
         }
-        errorCount = android::stats_log_api_gen::write_atoms_info_cpp(
-            out, atoms, cppNamespace, atomsInfoCppHeaderImport);
+        errorCount = android::stats_log_api_gen::write_atoms_info_cpp(out, atoms, cppNamespace,
+                                                                      atomsInfoCppHeaderImport);
         fclose(out);
     }
 
@@ -227,7 +233,6 @@ run(int argc, char const*const* argv)
         fclose(out);
     }
 
-
     // Write the .cpp file
     if (cppFilename.size() != 0) {
         FILE* out = fopen(cppFilename.c_str(), "w");
@@ -240,13 +245,14 @@ run(int argc, char const*const* argv)
             fprintf(stderr, "Must supply --namespace if supplying a specific module\n");
             return 1;
         }
-        // If this is for a specific module, the header file to import must also be provided.
+        // If this is for a specific module, the header file to import must also be
+        // provided.
         if (moduleName != DEFAULT_MODULE_NAME && cppHeaderImport == DEFAULT_CPP_HEADER_IMPORT) {
             fprintf(stderr, "Must supply --headerImport if supplying a specific module\n");
             return 1;
         }
         errorCount = android::stats_log_api_gen::write_stats_log_cpp(
-            out, atoms, attributionDecl, cppNamespace, cppHeaderImport, supportQ);
+                out, atoms, attributionDecl, cppNamespace, cppHeaderImport, supportQ);
         fclose(out);
     }
 
@@ -261,8 +267,8 @@ run(int argc, char const*const* argv)
         if (moduleName != DEFAULT_MODULE_NAME && cppNamespace == DEFAULT_CPP_NAMESPACE) {
             fprintf(stderr, "Must supply --namespace if supplying a specific module\n");
         }
-        errorCount = android::stats_log_api_gen::write_stats_log_header(
-            out, atoms, attributionDecl, cppNamespace);
+        errorCount = android::stats_log_api_gen::write_stats_log_header(out, atoms, attributionDecl,
+                                                                        cppNamespace);
         fclose(out);
     }
 
@@ -291,8 +297,7 @@ run(int argc, char const*const* argv)
 
         if (compileQ) {
             errorCount = android::stats_log_api_gen::write_stats_log_java_q_for_module(
-                    out, atoms, attributionDecl, javaClass, javaPackage,
-                    supportWorkSource);
+                    out, atoms, attributionDecl, javaClass, javaPackage, supportWorkSource);
         } else {
             errorCount = android::stats_log_api_gen::write_stats_log_java(
                     out, atoms, attributionDecl, javaClass, javaPackage, supportQ,
@@ -311,9 +316,7 @@ run(int argc, char const*const* argv)
 /**
  * Main.
  */
-int
-main(int argc, char const*const* argv)
-{
+int main(int argc, char const* const* argv) {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
     return android::stats_log_api_gen::run(argc, argv);
