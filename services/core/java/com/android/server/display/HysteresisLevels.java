@@ -64,8 +64,8 @@ public class HysteresisLevels {
      * Return the brightening hysteresis threshold for the given value level.
      */
     public float getBrighteningThreshold(float value) {
-        float brightConstant = getReferenceLevel(value, mBrighteningThresholds);
-        float brightThreshold = value * (1.0f + brightConstant);
+        final float brightConstant = getReferenceLevel(value, mBrighteningThresholds);
+        final float brightThreshold = value * (1.0f + brightConstant);
         if (DEBUG) {
             Slog.d(TAG, "bright hysteresis constant=" + brightConstant + ", threshold="
                     + brightThreshold + ", value=" + value);
@@ -77,8 +77,8 @@ public class HysteresisLevels {
      * Return the darkening hysteresis threshold for the given value level.
      */
     public float getDarkeningThreshold(float value) {
-        float darkConstant = getReferenceLevel(value, mDarkeningThresholds);
-        float darkThreshold = value * (1.0f - darkConstant);
+        final float darkConstant = getReferenceLevel(value, mDarkeningThresholds);
+        final float darkThreshold = value * (1.0f - darkConstant);
         if (DEBUG) {
             Slog.d(TAG, "dark hysteresis constant=: " + darkConstant + ", threshold="
                     + darkThreshold + ", value=" + value);

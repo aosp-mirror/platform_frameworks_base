@@ -942,8 +942,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         if (Float.isNaN(brightnessState)) {
             float newAutoBrightnessAdjustment = autoBrightnessAdjustment;
             if (autoBrightnessEnabled) {
-                brightnessState = BrightnessSynchronizer.brightnessIntToFloat(
-                mContext, mAutomaticBrightnessController.getAutomaticScreenBrightness());
+                brightnessState = mAutomaticBrightnessController.getAutomaticScreenBrightness();
                 newAutoBrightnessAdjustment =
                         mAutomaticBrightnessController.getAutomaticScreenBrightnessAdjustment();
             }
