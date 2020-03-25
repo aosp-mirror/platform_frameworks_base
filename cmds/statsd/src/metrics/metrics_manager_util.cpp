@@ -830,10 +830,10 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
 
 bool initAlerts(const StatsdConfig& config,
                 const unordered_map<int64_t, int>& metricProducerMap,
+                unordered_map<int64_t, int>& alertTrackerMap,
                 const sp<AlarmMonitor>& anomalyAlarmMonitor,
                 vector<sp<MetricProducer>>& allMetricProducers,
                 vector<sp<AnomalyTracker>>& allAnomalyTrackers) {
-    unordered_map<int64_t, int> anomalyTrackerMap;
     for (int i = 0; i < config.alert_size(); i++) {
         const Alert& alert = config.alert(i);
         const auto& itr = metricProducerMap.find(alert.metric_id());
@@ -858,7 +858,7 @@ bool initAlerts(const StatsdConfig& config,
             // The ALOGW for this invalid alert was already displayed in addAnomalyTracker().
             return false;
         }
-        anomalyTrackerMap.insert(std::make_pair(alert.id(), allAnomalyTrackers.size()));
+        alertTrackerMap.insert(std::make_pair(alert.id(), allAnomalyTrackers.size()));
         allAnomalyTrackers.push_back(anomalyTracker);
     }
     for (int i = 0; i < config.subscription_size(); ++i) {
@@ -872,8 +872,8 @@ bool initAlerts(const StatsdConfig& config,
                 (long long)subscription.id());
             return false;
         }
-        const auto& itr = anomalyTrackerMap.find(subscription.rule_id());
-        if (itr == anomalyTrackerMap.end()) {
+        const auto& itr = alertTrackerMap.find(subscription.rule_id());
+        if (itr == alertTrackerMap.end()) {
             ALOGW("subscription \"%lld\" has unknown rule id: \"%lld\"",
                 (long long)subscription.id(), (long long)subscription.rule_id());
             return false;
@@ -944,6 +944,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       unordered_map<int, std::vector<int>>& trackerToConditionMap,
                       unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
                       unordered_map<int, std::vector<int>>& deactivationAtomTrackerToMetricMap,
+                      unordered_map<int64_t, int>& alertTrackerMap,
                       vector<int>& metricsWithActivation,
                       std::set<int64_t>& noReportMetricIds) {
     unordered_map<int64_t, int> logTrackerMap;
@@ -976,8 +977,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
         ALOGE("initMetricProducers failed");
         return false;
     }
-    if (!initAlerts(config, metricProducerMap, anomalyAlarmMonitor, allMetricProducers,
-                    allAnomalyTrackers)) {
+    if (!initAlerts(config, metricProducerMap, alertTrackerMap, anomalyAlarmMonitor,
+                    allMetricProducers, allAnomalyTrackers)) {
         ALOGE("initAlerts failed");
         return false;
     }
