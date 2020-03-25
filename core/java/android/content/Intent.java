@@ -11215,6 +11215,17 @@ public class Intent implements Parcelable, Cloneable {
                 && hasWebURI();
     }
 
+    private boolean isImageCaptureIntent() {
+        return (MediaStore.ACTION_IMAGE_CAPTURE.equals(mAction)
+                || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(mAction)
+                || MediaStore.ACTION_VIDEO_CAPTURE.equals(mAction));
+    }
+
+    /** @hide */
+    public boolean isImplicitImageCaptureIntent() {
+        return mPackage == null && mComponent == null && isImageCaptureIntent();
+    }
+
     /**
      * @hide
      */
@@ -11241,9 +11252,7 @@ public class Intent implements Parcelable, Cloneable {
                 }
                 putParcelableArrayListExtra(EXTRA_STREAM, newStreams);
             }
-        } else if (MediaStore.ACTION_IMAGE_CAPTURE.equals(action)
-                || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action)
-                || MediaStore.ACTION_VIDEO_CAPTURE.equals(action)) {
+        } else if (isImageCaptureIntent()) {
             final Uri output = getParcelableExtra(MediaStore.EXTRA_OUTPUT);
             if (output != null) {
                 putExtra(MediaStore.EXTRA_OUTPUT, maybeAddUserId(output, contentUserHint));
@@ -11349,9 +11358,7 @@ public class Intent implements Parcelable, Cloneable {
                 }
             } catch (ClassCastException e) {
             }
-        } else if (MediaStore.ACTION_IMAGE_CAPTURE.equals(action)
-                || MediaStore.ACTION_IMAGE_CAPTURE_SECURE.equals(action)
-                || MediaStore.ACTION_VIDEO_CAPTURE.equals(action)) {
+        } else if (isImageCaptureIntent()) {
             final Uri output;
             try {
                 output = getParcelableExtra(MediaStore.EXTRA_OUTPUT);
