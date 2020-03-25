@@ -50,6 +50,9 @@ import java.util.List;
  */
 public class IncidentCompanionService extends SystemService {
     static final String TAG = "IncidentCompanionService";
+    // TODO(b/152289743): Expose below intent.
+    private static final String INTENT_CHECK_USER_CONSENT =
+            "com.android.internal.intent.action.CHECK_USER_CONSENT";
 
     /**
      * Dump argument for proxying restricted image dumps to the services
@@ -89,6 +92,12 @@ public class IncidentCompanionService extends SystemService {
 
             final long ident = Binder.clearCallingIdentity();
             try {
+                Intent intent = new Intent(INTENT_CHECK_USER_CONSENT);
+                intent.setPackage(callingPackage);
+                intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+                getContext().sendBroadcast(intent, android.Manifest.permission.DUMP);
+
                 mPendingReports.authorizeReport(callingUid, callingPackage,
                         receiverClass, reportId, flags, listener);
             } finally {
