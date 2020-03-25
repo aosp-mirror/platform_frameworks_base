@@ -651,7 +651,7 @@ public class NotificationEntryManager implements
      */
     public void updateNotifications(String reason) {
         reapplyFilterAndSort(reason);
-        if (mPresenter != null) {
+        if (mPresenter != null && !mFeatureFlags.isNewNotifPipelineRenderingEnabled()) {
             mPresenter.updateNotificationViews();
         }
     }
