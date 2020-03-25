@@ -698,7 +698,7 @@ DONE:
             listener->onReportFailed();
         });
     }
-
+    clear_buffer_pool();
     ALOGI("Done taking incident report err=%s", strerror(-err));
 }
 

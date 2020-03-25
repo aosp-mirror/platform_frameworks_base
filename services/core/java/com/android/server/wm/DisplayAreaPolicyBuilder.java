@@ -73,16 +73,36 @@ class DisplayAreaPolicyBuilder {
      */
     static class Feature {
         private final String mName;
+        private final int mId;
         private final boolean[] mWindowLayers;
 
-        private Feature(String name, boolean[] windowLayers) {
+        private Feature(String name, int id, boolean[] windowLayers) {
             mName = name;
+            mId = id;
             mWindowLayers = windowLayers;
+        }
+
+        /**
+         * Returns the id of the feature.
+         *
+         * Must be unique among the features added to a {@link DisplayAreaPolicyBuilder}.
+         *
+         * @see android.window.WindowOrganizer.DisplayAreaOrganizer#FEATURE_SYSTEM_FIRST
+         * @see android.window.WindowOrganizer.DisplayAreaOrganizer#FEATURE_VENDOR_FIRST
+         */
+        public int getId() {
+            return mId;
+        }
+
+        @Override
+        public String toString() {
+            return "Feature(\"" + mName + "\", " + mId + '}';
         }
 
         static class Builder {
             private final WindowManagerPolicy mPolicy;
             private final String mName;
+            private final int mId;
             private final boolean[] mLayers;
 
             /**
@@ -96,10 +116,12 @@ class DisplayAreaPolicyBuilder {
              * The builder starts out with the feature not applying to any types.
              *
              * @param name the name of the feature.
+             * @param id of the feature. {@see Feature#getId}
              */
-            Builder(WindowManagerPolicy policy, String name) {
+            Builder(WindowManagerPolicy policy, String name, int id) {
                 mPolicy = policy;
                 mName = name;
+                mId = id;
                 mLayers = new boolean[mPolicy.getMaxWindowLayer()];
             }
 
@@ -147,7 +169,7 @@ class DisplayAreaPolicyBuilder {
             }
 
             Feature build() {
-                return new Feature(mName, mLayers.clone());
+                return new Feature(mName, mId, mLayers.clone());
             }
 
             private void set(int type, boolean value) {
@@ -364,7 +386,7 @@ class DisplayAreaPolicyBuilder {
                 return leaf;
             } else {
                 return new DisplayArea(parent.mWmService, type, mFeature.mName + ":"
-                        + mMinLayer + ":" + mMaxLayer);
+                        + mMinLayer + ":" + mMaxLayer, mFeature.mId);
             }
         }
     }

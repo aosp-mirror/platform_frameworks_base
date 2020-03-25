@@ -84,8 +84,6 @@ class ControlsProviderSelectorActivity @Inject constructor(
 
         requireViewById<TextView>(R.id.title).text =
                 resources.getText(R.string.controls_providers_title)
-        requireViewById<TextView>(R.id.subtitle).text =
-                resources.getText(R.string.controls_providers_subtitle)
 
         requireViewById<Button>(R.id.done).setOnClickListener {
             this@ControlsProviderSelectorActivity.finishAffinity()

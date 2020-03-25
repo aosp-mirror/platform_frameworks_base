@@ -80,6 +80,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -9581,18 +9582,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // First check if context has client, so it saves a service lookup when it doesn't
         if (mContext.getContentCaptureOptions() == null) return;
 
-        // Then check if it's enabled in the context...
-        final ContentCaptureManager ccm = ai != null ? ai.getContentCaptureManager(mContext)
-                : mContext.getSystemService(ContentCaptureManager.class);
-        if (ccm == null || !ccm.isContentCaptureEnabled()) return;
-
-        // ... and finally at the view level
-        // NOTE: isImportantForContentCapture() is more expensive than cm.isContentCaptureEnabled()
-        if (!isImportantForContentCapture()) return;
-
-        ContentCaptureSession session = getContentCaptureSession();
-        if (session == null) return;
-
         if (appeared) {
             if (!isLaidOut() || getVisibility() != VISIBLE
                     || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0) {
@@ -9601,12 +9590,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                             + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
                             + ", visible=" + (getVisibility() == VISIBLE)
                             + ": alreadyNotifiedAppeared=" + ((mPrivateFlags4
-                                    & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
+                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
                             + ", alreadyNotifiedDisappeared=" + ((mPrivateFlags4
-                                    & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
+                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
                 }
                 return;
             }
+        } else {
+            if ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) == 0
+                    || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0) {
+                if (DEBUG_CONTENT_CAPTURE) {
+                    Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'disappeared' on " + this + ": laid="
+                            + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
+                            + ", visible=" + (getVisibility() == VISIBLE)
+                            + ": alreadyNotifiedAppeared=" + ((mPrivateFlags4
+                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
+                            + ", alreadyNotifiedDisappeared=" + ((mPrivateFlags4
+                            & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
+                }
+                return;
+            }
+        }
+
+        ContentCaptureSession session = getContentCaptureSession();
+        if (session == null) return;
+
+        // ... and finally at the view level
+        // NOTE: isImportantForContentCapture() is more expensive than cm.isContentCaptureEnabled()
+        if (!isImportantForContentCapture()) return;
+
+        if (appeared) {
             setNotifiedContentCaptureAppeared();
 
             if (ai != null) {
@@ -9617,19 +9630,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         } else {
-            if ((mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) == 0
-                    || (mPrivateFlags4 & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0) {
-                if (DEBUG_CONTENT_CAPTURE) {
-                    Log.v(CONTENT_CAPTURE_LOG_TAG, "Ignoring 'disappeared' on " + this + ": laid="
-                            + isLaidOut() + ", visibleToUser=" + isVisibleToUser()
-                            + ", visible=" + (getVisibility() == VISIBLE)
-                            + ": alreadyNotifiedAppeared=" + ((mPrivateFlags4
-                                    & PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED) != 0)
-                            + ", alreadyNotifiedDisappeared=" + ((mPrivateFlags4
-                                    & PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED) != 0));
-                }
-                return;
-            }
             mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
             mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
 
@@ -28746,7 +28746,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * content of the window.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
         final Rect mContentInsets = new Rect();
 
         /**
@@ -28754,7 +28755,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * actual visible parts of the window.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
         final Rect mVisibleInsets = new Rect();
 
         /**
@@ -28762,7 +28764,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * of the screen decorations, these are the current insets for the
          * stable system windows.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = VERSION_CODES.Q,
+                publicAlternatives = "Use {@link WindowInsets#getInsets(int)}")
         final Rect mStableInsets = new Rect();
 
         final DisplayCutout.ParcelableWrapper mDisplayCutout =

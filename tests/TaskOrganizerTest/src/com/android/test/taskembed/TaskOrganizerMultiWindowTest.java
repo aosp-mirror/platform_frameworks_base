@@ -17,9 +17,9 @@
 package com.android.test.taskembed;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Context;
@@ -27,6 +27,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -34,8 +36,10 @@ import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.window.ITaskOrganizer;
+import android.window.IWindowContainerTransactionCallback;
 import android.window.WindowContainerTransaction;
 import android.widget.LinearLayout;
+import android.window.WindowOrganizer;
 
 public class TaskOrganizerMultiWindowTest extends Activity {
     class SplitLayout extends LinearLayout implements View.OnTouchListener {
@@ -112,8 +116,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
             wct.setBounds(mWc, new Rect(0, 0, width, height));
             try {
-                ActivityTaskManager.getTaskOrganizerController().applyContainerTransaction(wct,
-                        mOrganizer);
+                WindowOrganizer.applySyncTransaction(wct, mOrganizer.mTransactionCallback);
             } catch (Exception e) {
                 // Oh well
             }
@@ -127,8 +130,27 @@ public class TaskOrganizerMultiWindowTest extends Activity {
     class Organizer extends ITaskOrganizer.Stub {
         private int receivedTransactions = 0;
         SurfaceControl.Transaction mergedTransaction = new SurfaceControl.Transaction();
+        IWindowContainerTransactionCallback mTransactionCallback =
+                new IWindowContainerTransactionCallback() {
+            @Override
+            public void transactionReady(int id, SurfaceControl.Transaction t)
+                    throws RemoteException {
+                mergedTransaction.merge(t);
+                receivedTransactions++;
+                if (receivedTransactions == 2) {
+                    mergedTransaction.apply();
+                    receivedTransactions = 0;
+                }
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return null;
+            }
+        };
+
         @Override
-        public void taskAppeared(ActivityManager.RunningTaskInfo ti) {
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo ti) {
             if (!gotFirstTask) {
                 mTaskView1.reparentTask(ti.token);
                 gotFirstTask = true;
@@ -136,15 +158,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
                 mTaskView2.reparentTask(ti.token);
             }
         }
-        public void taskVanished(ActivityManager.RunningTaskInfo ti) {
-        }
-        public void transactionReady(int id, SurfaceControl.Transaction t) {
-            mergedTransaction.merge(t);
-            receivedTransactions++;
-            if (receivedTransactions == 2) {
-                mergedTransaction.apply();
-                receivedTransactions = 0;
-            }
+        public void onTaskVanished(ActivityManager.RunningTaskInfo ti) {
         }
         @Override
         public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
@@ -158,9 +172,7 @@ public class TaskOrganizerMultiWindowTest extends Activity {
         super.onCreate(savedInstanceState);
 
         try {
-            ActivityTaskManager.getTaskOrganizerController().registerTaskOrganizer(mOrganizer,
-                    WINDOWING_MODE_MULTI_WINDOW);
-
+            TaskOrganizer.registerOrganizer(mOrganizer, WINDOWING_MODE_MULTI_WINDOW);
         } catch (Exception e) {
         }
 

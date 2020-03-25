@@ -172,7 +172,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
         val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
-        subtitle.setVisibility(View.VISIBLE)
+        subtitle.setText(context.resources.getString(R.string.controls_seeding_in_progress))
     }
 
     private fun showInitialSetupView(items: List<SelectionItem>) {
@@ -183,6 +183,9 @@ class ControlsUiControllerImpl @Inject constructor (
 
         val viewGroup = parent.requireViewById(R.id.controls_no_favorites_group) as ViewGroup
         viewGroup.setOnClickListener(launchSelectorActivityListener(context))
+
+        val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
+        subtitle.setText(context.resources.getString(R.string.quick_controls_subtitle))
 
         val iconRowGroup = parent.requireViewById(R.id.controls_icon_row) as ViewGroup
         items.forEach {

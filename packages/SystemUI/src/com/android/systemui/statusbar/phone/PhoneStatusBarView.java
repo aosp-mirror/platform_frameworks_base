@@ -66,7 +66,7 @@ public class PhoneStatusBarView extends PanelBar {
         }
     };
     private DarkReceiver mBattery;
-    private int mRotationOrientation;
+    private int mRotationOrientation = -1;
     @Nullable
     private View mCenterIconSpace;
     @Nullable

@@ -178,6 +178,13 @@ public class WallpaperManager {
     public static final String COMMAND_DROP = "android.home.drop";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported when the wallpaper that was already
+     * set is re-applied by the user.
+     * @hide
+     */
+    public static final String COMMAND_REAPPLY = "android.wallpaper.reapply";
+
+    /**
      * Extra passed back from setWallpaper() giving the new wallpaper's assigned ID.
      * @hide
      */
