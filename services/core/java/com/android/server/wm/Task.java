@@ -4111,8 +4111,7 @@ class Task extends WindowContainer<WindowContainer> {
         return true;
     }
 
-    // Called on Binder death.
-    void taskOrganizerDied() {
+    void taskOrganizerUnregistered() {
         mTaskOrganizer = null;
         mLastTaskOrganizerWindowingMode = -1;
         onTaskOrganizerChanged();
