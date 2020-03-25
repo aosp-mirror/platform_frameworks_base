@@ -31,6 +31,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -1274,9 +1275,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         a.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         a.flags |= ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
 
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        options.setLaunchActivityType(ACTIVITY_TYPE_DREAM);
+
         try {
             getActivityStartController().obtainStarter(intent, "dream")
                     .setActivityInfo(a)
+                    .setActivityOptions(options.toBundle())
                     .setIsDream(true)
                     .execute();
             return true;
