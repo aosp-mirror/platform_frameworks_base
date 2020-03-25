@@ -166,9 +166,14 @@ class InlineSuggestionSession {
             }
             return;
         }
-
+        // The IME doesn't have information about the virtual view id for the child views in the
+        // web view, so we are only comparing the parent view id here. This means that for cases
+        // where there are two input fields in the web view, they will have the same view id
+        // (although different virtual child id), and we will not be able to distinguish them.
+        final AutofillId imeClientFieldId = mClientAutofillIdSupplier.get();
         if (!mComponentName.getPackageName().equals(mClientPackageNameSupplier.get())
-                || !fieldId.equalsIgnoreSession(mClientAutofillIdSupplier.get())) {
+                || imeClientFieldId == null
+                || fieldId.getViewId() != imeClientFieldId.getViewId()) {
             if (DEBUG) {
                 Log.d(TAG,
                         "handleOnInlineSuggestionsResponse() called on the wrong package/field "
