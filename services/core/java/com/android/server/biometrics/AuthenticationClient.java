@@ -68,6 +68,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     public abstract boolean wasUserDetected();
 
+    public abstract boolean isStrongBiometric();
+
     public AuthenticationClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, long halDeviceId, IBinder token,
             BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
@@ -171,9 +173,15 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
                 if (isBiometricPrompt() && listener != null) {
                     // BiometricService will add the token to keystore
-                    listener.onAuthenticationSucceededInternal(mRequireConfirmation, byteToken);
+                    listener.onAuthenticationSucceededInternal(mRequireConfirmation, byteToken,
+                            isStrongBiometric());
                 } else if (!isBiometricPrompt() && listener != null) {
-                    KeyStore.getInstance().addAuthToken(byteToken);
+                    if (isStrongBiometric()) {
+                        KeyStore.getInstance().addAuthToken(byteToken);
+                    } else {
+                        Slog.d(getLogTag(), "Skipping addAuthToken");
+                    }
+
                     try {
                         // Explicitly have if/else here to make it super obvious in case the code is
                         // touched in the future.
