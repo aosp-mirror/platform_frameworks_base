@@ -95,7 +95,6 @@ public final class PreciseDataConnectionState implements Parcelable {
      *        if there is no valid APN setting for the specific type, then this will be null
      * @hide
      */
-    @SystemApi
     public PreciseDataConnectionState(@DataState int state,
                                       @NetworkType int networkType,
                                       @ApnType int apnTypes, @NonNull String apn,
