@@ -1019,8 +1019,11 @@ public class BugreportProgressService extends Service {
      * Wraps up bugreport generation and triggers a notification to share the bugreport.
      */
     private void onBugreportFinished(BugreportInfo info) {
+        if (!TextUtils.isEmpty(info.shareTitle)) {
+            info.setTitle(info.shareTitle);
+        }
         Log.d(TAG, "Bugreport finished with title: " + info.getTitle()
-                + " and shareDescription:  " + info.shareDescription);
+                + " and shareDescription: " + info.shareDescription);
         info.finished = new AtomicBoolean(true);
 
         synchronized (mLock) {
@@ -1795,7 +1798,9 @@ public class BugreportProgressService extends Service {
 
         /**
          * User-provided, detailed description of the bugreport; when set, will be added to the body
-         * of the {@link Intent#ACTION_SEND_MULTIPLE} intent.
+         * of the {@link Intent#ACTION_SEND_MULTIPLE} intent. This is shown in the app where the
+         * bugreport is being shared as an attachment. This is not related/dependant on
+         * {@code shareDescription}.
          */
         private String description;
 
@@ -2130,7 +2135,6 @@ public class BugreportProgressService extends Service {
                 return new BugreportInfo[size];
             }
         };
-
     }
 
     @GuardedBy("mLock")
