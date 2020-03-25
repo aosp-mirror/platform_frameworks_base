@@ -152,7 +152,7 @@ public class TaskRecordTests extends ActivityTestsBase {
             assertFalse(factory.mCreated);
 
             Task.create(mService, 0 /*taskId*/, 0 /*activityType*/,
-                    new ActivityInfo(), new Intent());
+                    new ActivityInfo(), new Intent(), false /* createdByOrganizer */);
 
             assertTrue(factory.mCreated);
         } finally {
@@ -1015,7 +1015,7 @@ public class TaskRecordTests extends ActivityTestsBase {
 
         @Override
         Task create(ActivityTaskManagerService service, int taskId, int activityType,
-                ActivityInfo info, Intent intent) {
+                ActivityInfo info, Intent intent, boolean createdByOrganizer) {
             mCreated = true;
             return null;
         }
