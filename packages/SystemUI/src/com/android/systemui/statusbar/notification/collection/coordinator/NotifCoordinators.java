@@ -49,15 +49,17 @@ public class NotifCoordinators implements Dumpable {
     public NotifCoordinators(
             DumpManager dumpManager,
             FeatureFlags featureFlags,
-            HeadsUpCoordinator headsUpCoordinator,
+            HideNotifsForOtherUsersCoordinator hideNotifsForOtherUsersCoordinator,
             KeyguardCoordinator keyguardCoordinator,
             RankingCoordinator rankingCoordinator,
             ForegroundCoordinator foregroundCoordinator,
             DeviceProvisionedCoordinator deviceProvisionedCoordinator,
             BubbleCoordinator bubbleCoordinator,
+            HeadsUpCoordinator headsUpCoordinator,
             PreparationCoordinator preparationCoordinator) {
         dumpManager.registerDumpable(TAG, this);
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
+        mCoordinators.add(hideNotifsForOtherUsersCoordinator);
         mCoordinators.add(keyguardCoordinator);
         mCoordinators.add(rankingCoordinator);
         mCoordinators.add(foregroundCoordinator);
