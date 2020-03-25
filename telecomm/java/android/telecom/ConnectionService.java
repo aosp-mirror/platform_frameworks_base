@@ -2633,6 +2633,7 @@ public abstract class ConnectionService extends Service {
      * @param request Details about the incoming call.
      * @return The {@code Connection} object to satisfy this call, or {@code null} to
      *         not handle the call.
+     * @hide
      */
     public @Nullable Conference onCreateIncomingConference(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
@@ -2717,6 +2718,7 @@ public abstract class ConnectionService extends Service {
      * @param connectionManagerPhoneAccount See description at
      *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
      * @param request The incoming connection request.
+     * @hide
      */
     public void onCreateIncomingConferenceFailed(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
@@ -2737,6 +2739,7 @@ public abstract class ConnectionService extends Service {
      * @param connectionManagerPhoneAccount See description at
      *         {@link #onCreateOutgoingConnection(PhoneAccountHandle, ConnectionRequest)}.
      * @param request The outgoing connection request.
+     * @hide
      */
     public void onCreateOutgoingConferenceFailed(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
@@ -2805,6 +2808,7 @@ public abstract class ConnectionService extends Service {
      * @param request Details about the outgoing call.
      * @return The {@code Conference} object to satisfy this call, or the result of an invocation
      *         of {@link Connection#createFailedConnection(DisconnectCause)} to not handle the call.
+     * @hide
      */
     public @Nullable Conference onCreateOutgoingConference(
             @Nullable PhoneAccountHandle connectionManagerPhoneAccount,
