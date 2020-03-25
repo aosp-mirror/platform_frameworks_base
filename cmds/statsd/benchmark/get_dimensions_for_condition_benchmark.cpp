@@ -19,6 +19,7 @@
 #include "HashableDimensionKey.h"
 #include "logd/LogEvent.h"
 #include "stats_log_util.h"
+#include "stats_event.h"
 
 namespace android {
 namespace os {
@@ -27,16 +28,30 @@ namespace statsd {
 using std::vector;
 
 static void createLogEventAndLink(LogEvent* event, Metric2Condition *link) {
-    AttributionNodeInternal node;
-    node.set_uid(100);
-    node.set_tag("LOCATION");
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, 1);
+    AStatsEvent_overwriteTimestamp(statsEvent, 100000);
 
-    std::vector<AttributionNodeInternal> nodes = {node, node};
-    event->write(nodes);
-    event->write(3.2f);
-    event->write("LOCATION");
-    event->write((int64_t)990);
-    event->init();
+    std::vector<int> attributionUids = {100, 100};
+    std::vector<string> attributionTags = {"LOCATION", "LOCATION"};
+
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+    AStatsEvent_writeFloat(statsEvent, 3.2f);
+    AStatsEvent_writeString(statsEvent, "LOCATION");
+    AStatsEvent_writeInt64(statsEvent, 990);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+    event->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
 
     link->conditionId = 1;
 
@@ -54,7 +69,7 @@ static void createLogEventAndLink(LogEvent* event, Metric2Condition *link) {
 
 static void BM_GetDimensionInCondition(benchmark::State& state) {
     Metric2Condition link;
-    LogEvent event(1, 100000);
+    LogEvent event(/*uid=*/0, /*pid=*/0);
     createLogEventAndLink(&event, &link);
 
     while (state.KeepRunning()) {
