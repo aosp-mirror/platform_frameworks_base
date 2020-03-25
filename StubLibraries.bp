@@ -187,6 +187,7 @@ droidstubs {
 droidstubs {
     name: "module-lib-api",
     defaults: ["metalava-full-api-stubs-default"],
+    api_tag_name: "MODULE_LIB",
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + module_libs,
     check_api: {
