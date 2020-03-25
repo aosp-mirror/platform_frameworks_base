@@ -174,7 +174,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
 
     @Override
     public boolean isEnabled(BluetoothDevice device) {
-        if (mService == null) {
+        if (mService == null || device == null) {
             return false;
         }
         return mService.getConnectionPolicy(device) > CONNECTION_POLICY_FORBIDDEN;
@@ -182,7 +182,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
 
     @Override
     public int getConnectionPolicy(BluetoothDevice device) {
-        if (mService == null) {
+        if (mService == null || device == null) {
             return CONNECTION_POLICY_FORBIDDEN;
         }
         return mService.getConnectionPolicy(device);
@@ -191,7 +191,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     @Override
     public boolean setEnabled(BluetoothDevice device, boolean enabled) {
         boolean isEnabled = false;
-        if (mService == null) {
+        if (mService == null || device == null) {
             return false;
         }
         if (enabled) {
@@ -213,7 +213,7 @@ public class HearingAidProfile implements LocalBluetoothProfile {
     }
 
     public long getHiSyncId(BluetoothDevice device) {
-        if (mService == null) {
+        if (mService == null || device == null) {
             return BluetoothHearingAid.HI_SYNC_ID_INVALID;
         }
         return mService.getHiSyncId(device);
