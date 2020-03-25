@@ -405,6 +405,13 @@ public class Editor {
     // The actual zoom value may changes based on this initial zoom value.
     private float mInitialZoom = 1f;
 
+    // For calculating the line change slops while moving cursor/selection.
+    // The slop max/min value include line height and the slop on the upper/lower line.
+    private static final int LINE_CHANGE_SLOP_MAX_DP = 45;
+    private static final int LINE_CHANGE_SLOP_MIN_DP = 12;
+    private int mLineChangeSlopMax;
+    private int mLineChangeSlopMin;
+
     Editor(TextView textView) {
         mTextView = textView;
         // Synchronize the filter list, which places the undo input filter at the end.
@@ -430,6 +437,14 @@ public class Editor {
             logCursor("Editor", "New magnifier is %s.",
                     mNewMagnifierEnabled ? "enabled" : "disabled");
         }
+
+        mLineChangeSlopMax = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, LINE_CHANGE_SLOP_MAX_DP,
+                mTextView.getContext().getResources().getDisplayMetrics());
+        mLineChangeSlopMin = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, LINE_CHANGE_SLOP_MIN_DP,
+                mTextView.getContext().getResources().getDisplayMetrics());
+
     }
 
     @VisibleForTesting
@@ -6018,7 +6033,14 @@ public class Editor {
         }
     }
 
-    private int getCurrentLineAdjustedForSlop(Layout layout, int prevLine, float y) {
+    @VisibleForTesting
+    public void setLineChangeSlopMinMaxForTesting(final int min, final int max) {
+        mLineChangeSlopMin = min;
+        mLineChangeSlopMax = max;
+    }
+
+    @VisibleForTesting
+    public int getCurrentLineAdjustedForSlop(Layout layout, int prevLine, float y) {
         final int trueLine = mTextView.getLineAtCoordinate(y);
         if (layout == null || prevLine > layout.getLineCount()
                 || layout.getLineCount() <= 0 || prevLine < 0) {
@@ -6031,28 +6053,21 @@ public class Editor {
             return trueLine;
         }
 
+        final int lineHeight = layout.getLineBottom(prevLine) - layout.getLineTop(prevLine);
+        int slop = (int)(LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS
+                * (layout.getLineBottom(trueLine) - layout.getLineTop(trueLine)));
+        slop = Math.max(mLineChangeSlopMin,
+                Math.min(mLineChangeSlopMax, lineHeight + slop)) - lineHeight;
+        slop = Math.max(0, slop);
+
         final float verticalOffset = mTextView.viewportToContentVerticalOffset();
-        final int lineCount = layout.getLineCount();
-        final float slop = mTextView.getLineHeight() * LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS;
-
-        final float firstLineTop = layout.getLineTop(0) + verticalOffset;
-        final float prevLineTop = layout.getLineTop(prevLine) + verticalOffset;
-        final float yTopBound = Math.max(prevLineTop - slop, firstLineTop + slop);
-
-        final float lastLineBottom = layout.getLineBottom(lineCount - 1) + verticalOffset;
-        final float prevLineBottom = layout.getLineBottom(prevLine) + verticalOffset;
-        final float yBottomBound = Math.min(prevLineBottom + slop, lastLineBottom - slop);
-
-        // Determine if we've moved lines based on y position and previous line.
-        int currLine;
-        if (y <= yTopBound) {
-            currLine = Math.max(prevLine - 1, 0);
-        } else if (y >= yBottomBound) {
-            currLine = Math.min(prevLine + 1, lineCount - 1);
-        } else {
-            currLine = prevLine;
+        if (trueLine > prevLine && y >= layout.getLineBottom(prevLine) + slop + verticalOffset) {
+            return trueLine;
         }
-        return currLine;
+        if (trueLine < prevLine && y <= layout.getLineTop(prevLine) - slop + verticalOffset) {
+            return trueLine;
+        }
+        return prevLine;
     }
 
     /**
