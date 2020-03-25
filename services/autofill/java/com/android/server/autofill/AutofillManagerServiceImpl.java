@@ -67,7 +67,6 @@ import android.util.LocalLog;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.SmartSuggestionMode;
@@ -80,6 +79,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
+import com.android.server.autofill.AutofillManagerService.DisabledInfoCache;
 import com.android.server.autofill.RemoteAugmentedAutofillService.RemoteAugmentedAutofillServiceCallbacks;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.contentcapture.ContentCaptureManagerInternal;
@@ -90,7 +90,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
  * app's {@link IAutoFillService} implementation.
@@ -123,19 +122,6 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     @Nullable
     private RemoteInlineSuggestionRenderService mRemoteInlineSuggestionRenderService;
-
-    /**
-     * Apps disabled by the service; key is package name, value is when they will be enabled again.
-     */
-    @GuardedBy("mLock")
-    private ArrayMap<String, Long> mDisabledApps;
-
-    /**
-     * Activities disabled by the service; key is component name, value is when they will be enabled
-     * again.
-     */
-    @GuardedBy("mLock")
-    private ArrayMap<ComponentName, Long> mDisabledActivities;
 
     /**
      * Data used for field classification.
@@ -186,10 +172,12 @@ final class AutofillManagerServiceImpl
 
     private final ContentCaptureManagerInternal mContentCaptureManagerInternal;
 
+    private final DisabledInfoCache mDisabledInfoCache;
+
     AutofillManagerServiceImpl(AutofillManagerService master, Object lock,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState,
-            boolean disabled) {
+            boolean disabled, DisabledInfoCache disableCache) {
         super(master, lock, userId);
 
         mUiLatencyHistory = uiLatencyHistory;
@@ -200,7 +188,7 @@ final class AutofillManagerServiceImpl
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
         mContentCaptureManagerInternal = LocalServices.getService(
                 ContentCaptureManagerInternal.class);
-
+        mDisabledInfoCache = disableCache;
         updateLocked(disabled);
     }
 
@@ -1045,45 +1033,7 @@ final class AutofillManagerServiceImpl
         pw.println(isInlineSuggestionsEnabled());
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
-        pw.print(prefix); pw.print("Disabled apps: ");
-
-        if (mDisabledApps == null) {
-            pw.println("N/A");
-        } else {
-            final int size = mDisabledApps.size();
-            pw.println(size);
-            final StringBuilder builder = new StringBuilder();
-            final long now = SystemClock.elapsedRealtime();
-            for (int i = 0; i < size; i++) {
-                final String packageName = mDisabledApps.keyAt(i);
-                final long expiration = mDisabledApps.valueAt(i);
-                builder.append(prefix).append(prefix)
-                        .append(i).append(". ").append(packageName).append(": ");
-                TimeUtils.formatDuration((expiration - now), builder);
-                builder.append('\n');
-            }
-            pw.println(builder);
-        }
-
-        pw.print(prefix); pw.print("Disabled activities: ");
-
-        if (mDisabledActivities == null) {
-            pw.println("N/A");
-        } else {
-            final int size = mDisabledActivities.size();
-            pw.println(size);
-            final StringBuilder builder = new StringBuilder();
-            final long now = SystemClock.elapsedRealtime();
-            for (int i = 0; i < size; i++) {
-                final ComponentName component = mDisabledActivities.keyAt(i);
-                final long expiration = mDisabledActivities.valueAt(i);
-                builder.append(prefix).append(prefix)
-                        .append(i).append(". ").append(component).append(": ");
-                TimeUtils.formatDuration((expiration - now), builder);
-                builder.append('\n');
-            }
-            pw.println(builder);
-        }
+        mDisabledInfoCache.dump(mUserId, prefix, pw);
 
         final int size = mSessions.size();
         if (size == 0) {
@@ -1480,15 +1430,13 @@ final class AutofillManagerServiceImpl
     void disableAutofillForApp(@NonNull String packageName, long duration, int sessionId,
             boolean compatMode) {
         synchronized (mLock) {
-            if (mDisabledApps == null) {
-                mDisabledApps = new ArrayMap<>(1);
-            }
             long expiration = SystemClock.elapsedRealtime() + duration;
             // Protect it against overflow
             if (expiration < 0) {
                 expiration = Long.MAX_VALUE;
             }
-            mDisabledApps.put(packageName, expiration);
+            mDisabledInfoCache.addDisabledAppLocked(mUserId, packageName, expiration);
+
             int intDuration = duration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) duration;
             mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_APP,
                     packageName, getServicePackageName(), sessionId, compatMode)
@@ -1502,15 +1450,12 @@ final class AutofillManagerServiceImpl
     void disableAutofillForActivity(@NonNull ComponentName componentName, long duration,
             int sessionId, boolean compatMode) {
         synchronized (mLock) {
-            if (mDisabledActivities == null) {
-                mDisabledActivities = new ArrayMap<>(1);
-            }
             long expiration = SystemClock.elapsedRealtime() + duration;
             // Protect it against overflow
             if (expiration < 0) {
                 expiration = Long.MAX_VALUE;
             }
-            mDisabledActivities.put(componentName, expiration);
+            mDisabledInfoCache.addDisabledActivityLocked(mUserId, componentName, expiration);
             final int intDuration = duration > Integer.MAX_VALUE
                     ? Integer.MAX_VALUE
                     : (int) duration;
@@ -1528,74 +1473,12 @@ final class AutofillManagerServiceImpl
         }
     }
 
-    // Called by AutofillManagerService
-    long getAppDisabledExpirationLocked(@NonNull String packageName) {
-        if (mDisabledApps == null) {
-            return 0;
-        }
-        final Long expiration = mDisabledApps.get(packageName);
-        return expiration != null ? expiration : 0;
-    }
-
-    // Called by AutofillManagerService
-    @Nullable
-    ArrayMap<String, Long> getAppDisabledActivitiesLocked(@NonNull String packageName) {
-        if (mDisabledActivities != null) {
-            final int size = mDisabledActivities.size();
-            ArrayMap<String, Long> disabledList = null;
-            for (int i = 0; i < size; i++) {
-                final ComponentName component = mDisabledActivities.keyAt(i);
-                if (packageName.equals(component.getPackageName())) {
-                    if (disabledList == null) {
-                        disabledList = new ArrayMap<>();
-                    }
-                    final long expiration = mDisabledActivities.valueAt(i);
-                    disabledList.put(component.flattenToShortString(), expiration);
-                }
-            }
-            return disabledList;
-        }
-        return null;
-    }
-
     /**
      * Checks if autofill is disabled by service to the given activity.
      */
     @GuardedBy("mLock")
     private boolean isAutofillDisabledLocked(@NonNull ComponentName componentName) {
-        // Check activities first.
-        long elapsedTime = 0;
-        if (mDisabledActivities != null) {
-            elapsedTime = SystemClock.elapsedRealtime();
-            final Long expiration = mDisabledActivities.get(componentName);
-            if (expiration != null) {
-                if (expiration >= elapsedTime) return true;
-                // Restriction expired - clean it up.
-                if (sVerbose) {
-                    Slog.v(TAG, "Removing " + componentName.toShortString()
-                        + " from disabled list");
-                }
-                mDisabledActivities.remove(componentName);
-            }
-        }
-
-        // Then check apps.
-        final String packageName = componentName.getPackageName();
-        if (mDisabledApps == null) return false;
-
-        final Long expiration = mDisabledApps.get(packageName);
-        if (expiration == null) return false;
-
-        if (elapsedTime == 0) {
-            elapsedTime = SystemClock.elapsedRealtime();
-        }
-
-        if (expiration >= elapsedTime) return true;
-
-        // Restriction expired - clean it up.
-        if (sVerbose)  Slog.v(TAG, "Removing " + packageName + " from disabled list");
-        mDisabledApps.remove(packageName);
-        return false;
+        return mDisabledInfoCache.isAutofillDisabledLocked(mUserId, componentName);
     }
 
     // Called by AutofillManager, checks UID.
