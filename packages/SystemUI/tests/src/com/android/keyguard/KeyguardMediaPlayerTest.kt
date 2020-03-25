@@ -22,6 +22,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import android.widget.TextView
+import androidx.arch.core.executor.ArchTaskExecutor
+import androidx.arch.core.executor.TaskExecutor
 import androidx.test.filters.SmallTest
 
 import com.android.systemui.R
@@ -50,18 +52,38 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
     private lateinit var mediaMetadata: MediaMetadata.Builder
     private lateinit var entry: NotificationEntryBuilder
     @Mock private lateinit var mockView: View
-    private lateinit var textView: TextView
+    private lateinit var songView: TextView
+    private lateinit var artistView: TextView
     @Mock private lateinit var mockIcon: Icon
+
+    private val taskExecutor: TaskExecutor = object : TaskExecutor() {
+        public override fun executeOnDiskIO(runnable: Runnable) {
+            runnable.run()
+        }
+        public override fun postToMainThread(runnable: Runnable) {
+            runnable.run()
+        }
+        public override fun isMainThread(): Boolean {
+            return true
+        }
+    }
 
     @Before
     public fun setup() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
         keyguardMediaPlayer = KeyguardMediaPlayer(context, fakeExecutor)
-        mockView = mock(View::class.java)
-        textView = TextView(context)
         mockIcon = mock(Icon::class.java)
+
+        mockView = mock(View::class.java)
+        songView = TextView(context)
+        artistView = TextView(context)
+        whenever<TextView>(mockView.findViewById(R.id.header_title)).thenReturn(songView)
+        whenever<TextView>(mockView.findViewById(R.id.header_artist)).thenReturn(artistView)
+
         mediaMetadata = MediaMetadata.Builder()
         entry = NotificationEntryBuilder()
+
+        ArchTaskExecutor.getInstance().setDelegate(taskExecutor)
 
         keyguardMediaPlayer.bindView(mockView)
     }
@@ -69,6 +91,7 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
     @After
     public fun tearDown() {
         keyguardMediaPlayer.unbindView()
+        ArchTaskExecutor.getInstance().setDelegate(null)
     }
 
     @Test
@@ -87,34 +110,36 @@ public class KeyguardMediaPlayerTest : SysuiTestCase() {
     @Test
     public fun testUpdateControls() {
         keyguardMediaPlayer.updateControls(entry.build(), mockIcon, mediaMetadata.build())
+        FakeExecutor.exhaustExecutors(fakeExecutor)
         verify(mockView).setVisibility(View.VISIBLE)
     }
 
     @Test
     public fun testClearControls() {
         keyguardMediaPlayer.clearControls()
+        FakeExecutor.exhaustExecutors(fakeExecutor)
         verify(mockView).setVisibility(View.GONE)
     }
 
     @Test
     public fun testSongName() {
-        whenever<TextView>(mockView.findViewById(R.id.header_title)).thenReturn(textView)
         val song: String = "Song"
         mediaMetadata.putText(MediaMetadata.METADATA_KEY_TITLE, song)
 
         keyguardMediaPlayer.updateControls(entry.build(), mockIcon, mediaMetadata.build())
 
-        assertThat(textView.getText()).isEqualTo(song)
+        assertThat(fakeExecutor.runAllReady()).isEqualTo(1)
+        assertThat(songView.getText()).isEqualTo(song)
     }
 
     @Test
     public fun testArtistName() {
-        whenever<TextView>(mockView.findViewById(R.id.header_artist)).thenReturn(textView)
         val artist: String = "Artist"
         mediaMetadata.putText(MediaMetadata.METADATA_KEY_ARTIST, artist)
 
         keyguardMediaPlayer.updateControls(entry.build(), mockIcon, mediaMetadata.build())
 
-        assertThat(textView.getText()).isEqualTo(artist)
+        assertThat(fakeExecutor.runAllReady()).isEqualTo(1)
+        assertThat(artistView.getText()).isEqualTo(artist)
     }
 }
