@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-package android.view.inline;
+package android.widget.inline;
 
-/**
- * @hide
- * @removed
- */
 parcelable InlinePresentationSpec;

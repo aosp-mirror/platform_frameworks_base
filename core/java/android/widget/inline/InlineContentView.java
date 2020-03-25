@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.inline;
+package android.widget.inline;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,9 +45,6 @@ import android.view.ViewGroup;
  * under the hosting window which could be useful in some cases, e.g. animating transitions.
  * At this point the inlined content will not be interactive and the touch events would
  * be delivered to your app.
- *
- * @hide
- * @removed
  */
 public class InlineContentView extends ViewGroup {
 
@@ -127,7 +124,7 @@ public class InlineContentView extends ViewGroup {
      *
      * @return The surface control.
      *
-     * @see #setSurfaceControlCallback(SurfaceControlCallback) 
+     * @see #setSurfaceControlCallback(SurfaceControlCallback)
      */
     public @Nullable SurfaceControl getSurfaceControl() {
         return mSurfaceView.getSurfaceControl();

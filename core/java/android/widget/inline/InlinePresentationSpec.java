@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.inline;
+package android.widget.inline;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,9 +29,6 @@ import com.android.internal.util.DataClass;
  * should abide when constructing its UI. Since suggestions are inlined in a
  * host application while provided by another source, they need to be consistent
  * with the host's look at feel to allow building smooth and integrated UIs.
- *
- * @hide
- * @removed
  */
 @DataClass(genEqualsHashCode = true, genToString = true, genBuilder = true)
 public final class InlinePresentationSpec implements Parcelable {
@@ -67,7 +64,7 @@ public final class InlinePresentationSpec implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/view/inline/InlinePresentationSpec.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/widget/inline/InlinePresentationSpec.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -282,9 +279,9 @@ public final class InlinePresentationSpec implements Parcelable {
     }
 
     @DataClass.Generated(
-            time = 1585177087499L,
+            time = 1585174247896L,
             codegenVersion = "1.0.15",
-            sourceFile = "frameworks/base/core/java/android/view/inline/InlinePresentationSpec.java",
+            sourceFile = "frameworks/base/core/java/android/widget/inline/InlinePresentationSpec.java",
             inputSignatures = "private final @android.annotation.NonNull android.util.Size mMinSize\nprivate final @android.annotation.NonNull android.util.Size mMaxSize\nprivate final @android.annotation.Nullable android.os.Bundle mStyle\nprivate static  android.os.Bundle defaultStyle()\nclass InlinePresentationSpec extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true, genBuilder=true)\nclass BaseBuilder extends java.lang.Object implements []")
     @Deprecated
     private void __metadata() {}
