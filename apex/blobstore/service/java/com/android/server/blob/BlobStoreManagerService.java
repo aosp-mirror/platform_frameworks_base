@@ -401,7 +401,7 @@ public class BlobStoreManagerService extends SystemService {
                 throw new LimitExceededException("Total amount of data with an active lease"
                         + " is exceeding the max limit");
             }
-            blobMetadata.addLeasee(callingPackage, callingUid,
+            blobMetadata.addOrReplaceLeasee(callingPackage, callingUid,
                     descriptionResId, description, leaseExpiryTimeMillis);
             if (LOGV) {
                 Slog.v(TAG, "Acquired lease on " + blobHandle
@@ -573,12 +573,16 @@ public class BlobStoreManagerService extends SystemService {
                     final Committer newCommitter = new Committer(session.getOwnerPackageName(),
                             session.getOwnerUid(), session.getBlobAccessMode());
                     final Committer existingCommitter = blob.getExistingCommitter(newCommitter);
-                    blob.addCommitter(newCommitter);
+                    blob.addOrReplaceCommitter(newCommitter);
                     try {
                         writeBlobsInfoLocked();
                         session.sendCommitCallbackResult(COMMIT_RESULT_SUCCESS);
                     } catch (Exception e) {
-                        blob.addCommitter(existingCommitter);
+                        if (existingCommitter == null) {
+                            blob.removeCommitter(newCommitter);
+                        } else {
+                            blob.addOrReplaceCommitter(existingCommitter);
+                        }
                         session.sendCommitCallbackResult(COMMIT_RESULT_ERROR);
                     }
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
