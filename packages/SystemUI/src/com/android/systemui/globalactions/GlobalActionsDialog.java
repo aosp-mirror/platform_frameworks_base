@@ -1849,7 +1849,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     .alpha(1)
                     .translationX(0)
                     .translationY(0)
-                    .setDuration(300)
+                    .setDuration(450)
                     .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
                     .setUpdateListener(animation -> {
                         float animatedValue = animation.getAnimatedFraction();
@@ -1878,7 +1878,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     .alpha(0)
                     .translationX(mGlobalActionsLayout.getAnimationOffsetX())
                     .translationY(mGlobalActionsLayout.getAnimationOffsetY())
-                    .setDuration(300)
+                    .setDuration(550)
                     .withEndAction(this::completeDismiss)
                     .setInterpolator(new LogAccelerateInterpolator())
                     .setUpdateListener(animation -> {
