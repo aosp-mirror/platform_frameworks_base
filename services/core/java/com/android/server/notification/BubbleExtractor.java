@@ -157,8 +157,8 @@ public class BubbleExtractor implements NotificationSignalExtractor {
         }
 
         /**
-         * @return whether the user has enabled the provided notification to bubble, does not
-         * account for policy.
+         * @return whether the user has enabled the provided notification to bubble, and if the
+         * developer has provided valid information for the notification to bubble.
          */
         @VisibleForTesting
         boolean canBubble(NotificationRecord r, String pkg, int userId) {
@@ -184,8 +184,17 @@ public class BubbleExtractor implements NotificationSignalExtractor {
             }
 
             String shortcutId = metadata.getShortcutId();
-            boolean shortcutValid = shortcutId != null
-                    && mShortcutHelper.getValidShortcutInfo(shortcutId, pkg, r.getUser()) != null;
+            String notificationShortcutId = r.getShortcutInfo() != null
+                    ? r.getShortcutInfo().getId()
+                    : null;
+            boolean shortcutValid = false;
+            if (notificationShortcutId != null && shortcutId != null) {
+                // NoMan already checks validity of shortcut, just check if they match.
+                shortcutValid = shortcutId.equals(notificationShortcutId);
+            } else if (shortcutId != null) {
+                shortcutValid =
+                        mShortcutHelper.getValidShortcutInfo(shortcutId, pkg, r.getUser()) != null;
+            }
             if (metadata.getIntent() == null && !shortcutValid) {
                 // Should have a shortcut if intent is null
                 logBubbleError(r.getKey(),
