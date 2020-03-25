@@ -48,8 +48,6 @@ interface INotificationManager
     void clearData(String pkg, int uid, boolean fromApp);
     void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, int displayId, @nullable ITransientNotificationCallback callback);
     void enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, int displayId);
-    // TODO(b/144152069): Remove this after assessing impact on dogfood.
-    void enqueueTextOrCustomToast(String pkg, IBinder token, ITransientNotification callback, int duration, int displayId, boolean isCustom);
     void cancelToast(String pkg, IBinder token);
     void finishToken(String pkg, IBinder token);
 
