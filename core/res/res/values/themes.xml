@@ -702,7 +702,7 @@ please see themes_device_defaults.xml.
     </style>
 
     <style name="Theme.Dream">
-        <item name="windowBackground">@null</item>
+        <item name="windowBackground">@color/black</item>
         <item name="windowDisablePreview">true</item>
     </style>
 
