@@ -159,17 +159,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                                 false /* preserveWindow */);
                         try {
                             for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
-                                final WindowContainer wc = haveConfigChanges.valueAt(i);
-                                final Task task = wc.asTask();
-                                final TaskTile tile = task != null ? task.asTile() : null;
-                                if (tile != null) {
-                                    // Special case for tile. Can't override normal forAllActivities
-                                    // because it generates duplicate calls and messes up existing
-                                    // code-paths.
-                                    tile.forAllTileActivities(f);
-                                } else {
-                                    wc.forAllActivities(f);
-                                }
+                                haveConfigChanges.valueAt(i).forAllActivities(f);
                             }
                         } finally {
                             f.recycle();
@@ -223,51 +213,65 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     private int sanitizeAndApplyHierarchyOp(WindowContainer container,
             WindowContainerTransaction.HierarchyOp hop) {
-        if (!(container instanceof Task)) {
+        final Task task = container.asTask();
+        if (task == null) {
             throw new IllegalArgumentException("Invalid container in hierarchy op");
         }
-        if (container.getDisplayContent() == null) {
-            Slog.w(TAG, "Container is no longer attached: " + container);
+        final DisplayContent dc = task.getDisplayContent();
+        if (dc == null) {
+            Slog.w(TAG, "Container is no longer attached: " + task);
             return 0;
         }
+        final ActivityStack as = (ActivityStack) task;
+
         if (hop.isReparent()) {
-            // special case for tiles since they are "virtual" parents
-            if (container instanceof ActivityStack && ((ActivityStack) container).isRootTask()) {
-                ActivityStack as = (ActivityStack) container;
-                TaskTile newParent = hop.getNewParent() == null ? null
-                        : (TaskTile) WindowContainer.fromBinder(hop.getNewParent());
-                if (as.getTile() != newParent) {
-                    if (as.getTile() != null) {
-                        as.getTile().removeChild(as);
+            final boolean isNonOrganizedRootableTask =
+                    (task.isRootTask() && !task.mCreatedByOrganizer)
+                            || task.getParent().asTask().mCreatedByOrganizer;
+            if (isNonOrganizedRootableTask) {
+                Task newParent = hop.getNewParent() == null ? null
+                        : WindowContainer.fromBinder(hop.getNewParent()).asTask();
+                if (task.getParent() != newParent) {
+                    if (newParent == null) {
+                        // Re-parent task to display as a root task.
+                        dc.moveStackToDisplay(as, hop.getToTop());
+                    } else if (newParent.inMultiWindowMode() && !task.isResizeable()
+                            && task.isLeafTask()) {
+                        Slog.w(TAG, "Can't support task that doesn't support multi-window mode in"
+                                + " multi-window mode... newParent=" + newParent + " task=" + task);
+                        return 0;
+                    } else {
+                        // Clear the window crop on root task since it may not be updated after
+                        // reparent (no longer be a root task)
+                        task.getSurfaceControl().setWindowCrop(null);
+                        task.reparent((ActivityStack) newParent,
+                                hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
+                                false /*moveParents*/, "sanitizeAndApplyHierarchyOp");
                     }
-                    if (newParent != null) {
-                        if (!as.affectedBySplitScreenResize()) {
-                            return 0;
-                        }
-                        newParent.addChild(as, POSITION_TOP);
-                    }
-                }
-                if (hop.getToTop()) {
-                    as.getDisplay().positionStackAtTop(as, false /* includingParents */);
                 } else {
-                    as.getDisplay().positionStackAtBottom(as);
+                    final ActivityStack rootTask =
+                            (ActivityStack) (newParent != null ? newParent : task.getRootTask());
+                    if (hop.getToTop()) {
+                        as.getDisplay().positionStackAtTop(rootTask, false /* includingParents */);
+                    } else {
+                        as.getDisplay().positionStackAtBottom(rootTask);
+                    }
                 }
-            } else if (container instanceof Task) {
+            } else {
                 throw new RuntimeException("Reparenting leaf Tasks is not supported now.");
             }
         } else {
             // Ugh, of course ActivityStack has its own special reorder logic...
-            if (container instanceof ActivityStack && ((ActivityStack) container).isRootTask()) {
-                ActivityStack as = (ActivityStack) container;
+            if (task.isRootTask()) {
                 if (hop.getToTop()) {
-                    as.getDisplay().positionStackAtTop(as, false /* includingParents */);
+                    dc.positionStackAtTop(as, false /* includingParents */);
                 } else {
-                    as.getDisplay().positionStackAtBottom(as);
+                    dc.positionStackAtBottom(as);
                 }
             } else {
-                container.getParent().positionChildAt(
+                task.getParent().positionChildAt(
                         hop.getToTop() ? POSITION_TOP : POSITION_BOTTOM,
-                        container, false /* includingParents */);
+                        task, false /* includingParents */);
             }
         }
         return TRANSACT_EFFECTS_LIFECYCLE;

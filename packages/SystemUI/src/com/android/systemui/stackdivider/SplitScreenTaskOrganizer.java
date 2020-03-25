@@ -26,12 +26,15 @@ import static android.window.WindowOrganizer.TaskOrganizer;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration;
+import android.graphics.Rect;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
-import android.window.ITaskOrganizer;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
+import android.window.ITaskOrganizer;
+
+import java.util.ArrayList;
 
 class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     private static final String TAG = "SplitScreenTaskOrganizer";
@@ -43,6 +46,8 @@ class SplitScreenTaskOrganizer extends ITaskOrganizer.Stub {
     SurfaceControl mSecondarySurface;
     SurfaceControl mPrimaryDim;
     SurfaceControl mSecondaryDim;
+    ArrayList<SurfaceControl> mHomeAndRecentsSurfaces = new ArrayList<>();
+    Rect mHomeBounds = new Rect();
     final Divider mDivider;
 
     SplitScreenTaskOrganizer(Divider divider) {
