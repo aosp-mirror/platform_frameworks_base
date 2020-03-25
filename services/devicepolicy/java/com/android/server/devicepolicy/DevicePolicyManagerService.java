@@ -4434,6 +4434,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     clearDeviceOwnerLocked(getDeviceOwnerAdminLocked(), userHandle);
                 }
                 if (isProfileOwner(adminReceiver, userHandle)) {
+                    if (isProfileOwnerOfOrganizationOwnedDevice(userHandle)) {
+                        mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                                false,
+                                UserHandle.of(getProfileParentId(userHandle)));
+                    }
                     final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver,
                             userHandle, /* parent */ false);
                     clearProfileOwnerLocked(admin, userHandle);
