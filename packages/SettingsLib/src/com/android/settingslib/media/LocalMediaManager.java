@@ -68,9 +68,9 @@ public class LocalMediaManager implements BluetoothCallback {
     private String mPackageName;
 
     @VisibleForTesting
-    List<MediaDevice> mMediaDevices = new ArrayList<>();
+    List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
     @VisibleForTesting
-    List<MediaDevice> mDisconnectedMediaDevices = new ArrayList<>();
+    List<MediaDevice> mDisconnectedMediaDevices = new CopyOnWriteArrayList<>();
     @VisibleForTesting
     MediaDevice mPhoneDevice;
     @VisibleForTesting
@@ -206,6 +206,7 @@ public class LocalMediaManager implements BluetoothCallback {
     public void stopScan() {
         mInfoMediaManager.unregisterCallback(mMediaDeviceCallback);
         mInfoMediaManager.stopScan();
+        unRegisterDeviceAttributeChangeCallback();
     }
 
     /**
@@ -392,30 +393,32 @@ public class LocalMediaManager implements BluetoothCallback {
         }
 
         private List<MediaDevice> buildDisconnectedBluetoothDevice() {
-            for (MediaDevice device : mDisconnectedMediaDevices) {
-                ((BluetoothMediaDevice) device).getCachedDevice()
-                        .unregisterCallback(mDeviceAttributeChangeCallback);
-            }
-            mDisconnectedMediaDevices.clear();
             final List<BluetoothDevice> bluetoothDevices =
                     mBluetoothAdapter.getMostRecentlyConnectedDevices();
             final CachedBluetoothDeviceManager cachedDeviceManager =
                     mLocalBluetoothManager.getCachedDeviceManager();
 
+            final List<CachedBluetoothDevice> cachedBluetoothDeviceList = new ArrayList<>();
             for (BluetoothDevice device : bluetoothDevices) {
                 final CachedBluetoothDevice cachedDevice =
                         cachedDeviceManager.findDevice(device);
                 if (cachedDevice != null) {
                     if (cachedDevice.getBondState() == BluetoothDevice.BOND_BONDED
                             && !cachedDevice.isConnected()) {
-                        final MediaDevice mediaDevice = new BluetoothMediaDevice(mContext,
-                                cachedDevice,
-                                null, null, mPackageName);
-                        if (!mMediaDevices.contains(mediaDevice)) {
-                            cachedDevice.registerCallback(mDeviceAttributeChangeCallback);
-                            mDisconnectedMediaDevices.add(mediaDevice);
-                        }
+                        cachedBluetoothDeviceList.add(cachedDevice);
                     }
+                }
+            }
+
+            unRegisterDeviceAttributeChangeCallback();
+            mDisconnectedMediaDevices.clear();
+            for (CachedBluetoothDevice cachedDevice : cachedBluetoothDeviceList) {
+                final MediaDevice mediaDevice = new BluetoothMediaDevice(mContext,
+                        cachedDevice,
+                        null, null, mPackageName);
+                if (!mMediaDevices.contains(mediaDevice)) {
+                    cachedDevice.registerCallback(mDeviceAttributeChangeCallback);
+                    mDisconnectedMediaDevices.add(mediaDevice);
                 }
             }
             return new ArrayList<>(mDisconnectedMediaDevices);
@@ -468,6 +471,12 @@ public class LocalMediaManager implements BluetoothCallback {
         }
     }
 
+    private void unRegisterDeviceAttributeChangeCallback() {
+        for (MediaDevice device : mDisconnectedMediaDevices) {
+            ((BluetoothMediaDevice) device).getCachedDevice()
+                    .unregisterCallback(mDeviceAttributeChangeCallback);
+        }
+    }
 
     /**
      * Callback for notifying device information updating
