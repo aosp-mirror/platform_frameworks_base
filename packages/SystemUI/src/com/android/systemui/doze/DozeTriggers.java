@@ -490,6 +490,9 @@ public class DozeTriggers implements DozeMachine.Part {
         public void onPowerSaveChanged(boolean active) {
             if (mDozeHost.isPowerSaveActive()) {
                 mMachine.requestState(DozeMachine.State.DOZE);
+            } else if (mMachine.getState() == DozeMachine.State.DOZE
+                    && mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT)) {
+                mMachine.requestState(DozeMachine.State.DOZE_AOD);
             }
         }
 
