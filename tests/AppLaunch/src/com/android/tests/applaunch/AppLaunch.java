@@ -767,7 +767,7 @@ public class AppLaunch extends InstrumentationTestCase {
                 .executeShellCommand(String.format("setprop iorapd.readahead.enable %b", enable));
         getInstrumentation().getUiAutomation()
                 .executeShellCommand("start iorapd");
-        sleep(2000);  // give enough time for iorapd to start back up.
+        sleep(3000);  // give enough time for iorapd to start back up.
 
         if (enable) {
             mIorapStatus = IorapStatus.ENABLED;
