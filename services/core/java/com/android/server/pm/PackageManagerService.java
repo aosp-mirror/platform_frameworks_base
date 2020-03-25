@@ -24484,7 +24484,8 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             synchronized (mLock) {
                 boolean manifestWhitelisted =
-                        mPackages.get(packageName).isAllowDontAutoRevokePermmissions();
+                        mPackages.get(packageName).getAutoRevokePermissions()
+                                == ApplicationInfo.AUTO_REVOKE_DISALLOWED;
                 return manifestWhitelisted;
             }
         }
