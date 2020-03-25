@@ -548,33 +548,9 @@ java_library {
     ],
 }
 
-java_library {
-    name: "framework-annotation-proc",
-    srcs: [
-        ":framework-all-sources",
-        "core/java/**/*.logtags",
-    ],
-    sdk_version: "core_platform",
-    libs: [
-        "app-compat-annotations",
-        "ext",
-        "unsupportedappusage",
-    ],
-
-    installable: false,
-    plugins: [
-        "compat-changeid-annotation-processor",
-    ],
-    static_libs: [
-        "framework-internal-utils",
-        "exoplayer2-extractor",
-        "android.hardware.wifi-V1.0-java-constants",
-    ]
-}
-
 platform_compat_config {
     name: "framework-platform-compat-config",
-    src: ":framework-annotation-proc",
+    src: ":framework-minus-apex",
 }
 
 // A library including just UnsupportedAppUsage.java classes.
