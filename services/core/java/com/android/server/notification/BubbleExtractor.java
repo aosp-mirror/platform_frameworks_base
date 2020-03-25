@@ -76,7 +76,8 @@ public class BubbleExtractor implements NotificationSignalExtractor {
                 record.setAllowBubble(appCanShowBubble);
             }
         }
-        final boolean applyFlag = mBubbleChecker.isNotificationAppropriateToBubble(record);
+        final boolean applyFlag = mBubbleChecker.isNotificationAppropriateToBubble(record)
+                && !record.isFlagBubbleRemoved();
         if (applyFlag) {
             record.getNotification().flags |= FLAG_BUBBLE;
         } else {
