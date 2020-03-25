@@ -1151,8 +1151,8 @@
     <dimen name="bubble_overflow_height">380dp</dimen>
     <!-- Bubble overflow padding when there are no bubbles  -->
     <dimen name="bubble_overflow_empty_state_padding">16dp</dimen>
-    <!-- Margin of overflow bubbles -->
-    <dimen name="bubble_overflow_margin">16dp</dimen>
+    <!-- Padding of container for overflow bubbles -->
+    <dimen name="bubble_overflow_padding">5dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
     <dimen name="bubble_pointer_height">4dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
