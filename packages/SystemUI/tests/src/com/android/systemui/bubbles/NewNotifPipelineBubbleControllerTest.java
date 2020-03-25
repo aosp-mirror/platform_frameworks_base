@@ -58,6 +58,7 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -132,6 +133,9 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private KeyguardBypassController mKeyguardBypassController;
     @Mock
     private FloatingContentCoordinator mFloatingContentCoordinator;
+
+    private SysUiState mSysUiState = new SysUiState();
+
     @Captor
     private ArgumentCaptor<NotifCollectionListener> mNotifListenerCaptor;
     private TestableBubbleController mBubbleController;
@@ -242,7 +246,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mNotifPipeline,
                 mFeatureFlagsNewPipeline,
                 mDumpManager,
-                mFloatingContentCoordinator);
+                mFloatingContentCoordinator,
+                mSysUiState);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setBubbleStateChangeListener(mBubbleStateChangeListener);
         mBubbleController.setExpandListener(mBubbleExpandListener);
