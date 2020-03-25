@@ -861,13 +861,13 @@ public class ZenModeHelper {
             final boolean policyChanged = !Objects.equals(getNotificationPolicy(mConfig),
                     getNotificationPolicy(config));
             if (!config.equals(mConfig)) {
+                mConfig = config;
                 dispatchOnConfigChanged();
                 updateConsolidatedPolicy(reason);
             }
             if (policyChanged) {
                 dispatchOnPolicyChanged();
             }
-            mConfig = config;
             mHandler.postApplyConfig(config, reason, triggeringComponent, setRingerMode);
             return true;
         } catch (SecurityException e) {
