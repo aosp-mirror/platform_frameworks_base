@@ -1522,6 +1522,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         void onOomAdjMessage(String msg);
     }
 
+    final AnrHelper mAnrHelper = new AnrHelper();
+
     /**
      * Runtime CPU use collection thread.  This object's lock is used to
      * perform synchronization with the thread (notifying it to run).
@@ -7797,13 +7799,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                host.appNotResponding(
-                        null, null, null, null, false, "ContentProvider not responding");
-            }
-        });
+        mAnrHelper.appNotResponding(host, "ContentProvider not responding");
     }
 
     @Override
@@ -7816,13 +7812,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new SecurityException("Unknown process: " + callingPid);
             }
 
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    app.appNotResponding(
-                            null, app.info, null, null, false, "App requested: " + reason);
-                }
-            });
+            mAnrHelper.appNotResponding(app, null, app.info, null, null, false,
+                    "App requested: " + reason);
         }
     }
 
@@ -19267,10 +19258,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason) {
-            synchronized (ActivityManagerService.this) {
-                return ActivityManagerService.this.inputDispatchingTimedOut(
-                        pid, aboveSystem, reason);
-            }
+            return ActivityManagerService.this.inputDispatchingTimedOut(pid, aboveSystem, reason);
         }
 
         @Override
@@ -19561,7 +19549,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     return true;
                 }
             }
-            proc.appNotResponding(activityShortComponentName, aInfo,
+            mAnrHelper.appNotResponding(proc, activityShortComponentName, aInfo,
                     parentShortComponentName, parentProcess, aboveSystem, annotation);
         }
 

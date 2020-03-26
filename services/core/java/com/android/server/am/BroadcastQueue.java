@@ -198,21 +198,6 @@ public final class BroadcastQueue {
         }
     }
 
-    private final class AppNotResponding implements Runnable {
-        private final ProcessRecord mApp;
-        private final String mAnnotation;
-
-        public AppNotResponding(ProcessRecord app, String annotation) {
-            mApp = app;
-            mAnnotation = annotation;
-        }
-
-        @Override
-        public void run() {
-            mApp.appNotResponding(null, null, null, null, false, mAnnotation);
-        }
-    }
-
     BroadcastQueue(ActivityManagerService service, Handler handler,
             String name, BroadcastConstants constants, boolean allowDelayBehindServices) {
         mService = service;
@@ -1808,9 +1793,7 @@ public final class BroadcastQueue {
         scheduleBroadcastsLocked();
 
         if (!debugging && anrMessage != null) {
-            // Post the ANR to the handler since we do not want to process ANRs while
-            // potentially holding our lock.
-            mHandler.post(new AppNotResponding(app, anrMessage));
+            mService.mAnrHelper.appNotResponding(app, anrMessage);
         }
     }
 

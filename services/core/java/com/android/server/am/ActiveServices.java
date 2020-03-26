@@ -4213,7 +4213,7 @@ public final class ActiveServices {
         }
 
         if (anrMessage != null) {
-            proc.appNotResponding(null, null, null, null, false, anrMessage);
+            mAm.mAnrHelper.appNotResponding(proc, anrMessage);
         }
     }
 
@@ -4238,7 +4238,7 @@ public final class ActiveServices {
         }
 
         if (app != null) {
-            app.appNotResponding(null, null, null, null, false,
+            mAm.mAnrHelper.appNotResponding(app,
                     "Context.startForegroundService() did not then call Service.startForeground(): "
                         + r);
         }
