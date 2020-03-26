@@ -22,25 +22,31 @@ import android.os.ResultReceiver;
 
 /** @hide */
 oneway interface ITetheringConnector {
-    void tether(String iface, String callerPkg, IIntResultListener receiver);
-
-    void untether(String iface, String callerPkg, IIntResultListener receiver);
-
-    void setUsbTethering(boolean enable, String callerPkg, IIntResultListener receiver);
-
-    void startTethering(in TetheringRequestParcel request, String callerPkg,
+    void tether(String iface, String callerPkg, String callingAttributionTag,
             IIntResultListener receiver);
 
-    void stopTethering(int type, String callerPkg, IIntResultListener receiver);
+    void untether(String iface, String callerPkg, String callingAttributionTag,
+            IIntResultListener receiver);
+
+    void setUsbTethering(boolean enable, String callerPkg,
+            String callingAttributionTag, IIntResultListener receiver);
+
+    void startTethering(in TetheringRequestParcel request, String callerPkg,
+            String callingAttributionTag, IIntResultListener receiver);
+
+    void stopTethering(int type, String callerPkg, String callingAttributionTag,
+            IIntResultListener receiver);
 
     void requestLatestTetheringEntitlementResult(int type, in ResultReceiver receiver,
-            boolean showEntitlementUi, String callerPkg);
+            boolean showEntitlementUi, String callerPkg, String callingAttributionTag);
 
     void registerTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
 
     void unregisterTetheringEventCallback(ITetheringEventCallback callback, String callerPkg);
 
-    void isTetheringSupported(String callerPkg, IIntResultListener receiver);
+    void isTetheringSupported(String callerPkg, String callingAttributionTag,
+            IIntResultListener receiver);
 
-    void stopAllTethering(String callerPkg, IIntResultListener receiver);
+    void stopAllTethering(String callerPkg, String callingAttributionTag,
+            IIntResultListener receiver);
 }
