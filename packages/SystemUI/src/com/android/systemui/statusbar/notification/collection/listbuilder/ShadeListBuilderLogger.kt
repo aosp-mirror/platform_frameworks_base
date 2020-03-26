@@ -23,6 +23,7 @@ import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.NotificationLog
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
+import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter
 import javax.inject.Inject
 
 class ShadeListBuilderLogger @Inject constructor(
@@ -126,13 +127,13 @@ class ShadeListBuilderLogger @Inject constructor(
 
     fun logFilterChanged(
         key: String,
-        prevFilter: String?,
-        newFilter: String?
+        prevFilter: NotifFilter?,
+        newFilter: NotifFilter?
     ) {
         buffer.log(TAG, INFO, {
             str1 = key
-            str2 = prevFilter
-            str3 = newFilter
+            str2 = prevFilter?.name
+            str3 = newFilter?.name
         }, {
             "Filter changed for $str1: $str2 -> $str3"
         })

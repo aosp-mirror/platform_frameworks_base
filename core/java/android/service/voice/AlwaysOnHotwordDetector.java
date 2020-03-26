@@ -780,15 +780,16 @@ public class AlwaysOnHotwordDetector {
             audioCapabilities |= AUDIO_CAPABILITY_NOISE_SUPPRESSION;
         }
 
-        int code = STATUS_ERROR;
+        int code;
         try {
             code = mModelManagementService.startRecognition(
                     mKeyphraseMetadata.id, mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
                             recognitionExtra, null /* additional data */, audioCapabilities));
         } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in startRecognition!", e);
+            throw e.rethrowFromSystemServer();
         }
+
         if (code != STATUS_OK) {
             Slog.w(TAG, "startRecognition() failed with error code " + code);
         }
@@ -796,12 +797,12 @@ public class AlwaysOnHotwordDetector {
     }
 
     private int stopRecognitionLocked() {
-        int code = STATUS_ERROR;
+        int code;
         try {
             code = mModelManagementService.stopRecognition(mKeyphraseMetadata.id,
                     mInternalCallback);
         } catch (RemoteException e) {
-            Slog.w(TAG, "RemoteException in stopRecognition!", e);
+            throw e.rethrowFromSystemServer();
         }
 
         if (code != STATUS_OK) {
@@ -968,12 +969,12 @@ public class AlwaysOnHotwordDetector {
                 }
             }
 
-            ModuleProperties dspModuleProperties = null;
+            ModuleProperties dspModuleProperties;
             try {
                 dspModuleProperties =
                         mModelManagementService.getDspModuleProperties();
             } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException in getDspProperties!", e);
+                throw e.rethrowFromSystemServer();
             }
 
             // No DSP available
@@ -989,7 +990,7 @@ public class AlwaysOnHotwordDetector {
                 mKeyphraseMetadata = mModelManagementService.getEnrolledKeyphraseMetadata(
                         mText, mLocale.toLanguageTag());
             } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException in internalUpdateEnrolledKeyphraseMetadata", e);
+                throw e.rethrowFromSystemServer();
             }
         }
     }

@@ -413,8 +413,8 @@ public abstract class BiometricServiceBase extends SystemService
             throw new UnsupportedOperationException("Stub!");
         }
 
-        default void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] token)
-                throws RemoteException {
+        default void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] token,
+                boolean isStrongBiometric) throws RemoteException {
             throw new UnsupportedOperationException("Stub!");
         }
 
@@ -451,10 +451,11 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         @Override
-        public void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] token)
-                throws RemoteException {
+        public void onAuthenticationSucceededInternal(boolean requireConfirmation, byte[] token,
+                boolean isStrongBiometric) throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationSucceeded(requireConfirmation, token);
+                getWrapperReceiver().onAuthenticationSucceeded(requireConfirmation, token,
+                        isStrongBiometric);
             }
         }
 

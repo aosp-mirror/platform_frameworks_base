@@ -142,9 +142,11 @@ class NotifViewManager @Inject constructor(
         // To attach rows we can use _this one weird trick_: if the intended view to add does not
         // have a parent, then simply add it (and its children).
         entries.forEach { entry ->
-            val listItem = rowRegistry.requireView(entry)
+            // TODO: We should eventually map GroupEntry's themselves to views so that we don't
+            // depend on representativeEntry here which may actually be null in the future
+            val listItem = rowRegistry.requireView(entry.representativeEntry!!)
 
-            if (listItem.view.parent != null) {
+            if (listItem.view.parent == null) {
                 listContainer.addListItem(listItem)
                 stabilityManager.notifyViewAddition(listItem.view)
             }
@@ -153,7 +155,8 @@ class NotifViewManager @Inject constructor(
                 for ((idx, childEntry) in entry.children.withIndex()) {
                     val childListItem = rowRegistry.requireView(childEntry)
                     // Child hasn't been added yet. add it!
-                    if (!listItem.notificationChildren.contains(childListItem)) {
+                    if (listItem.notificationChildren == null ||
+                            !listItem.notificationChildren.contains(childListItem)) {
                         // TODO: old code here just Log.wtf()'d here. This might wreak havoc
                         if (childListItem.view.parent != null) {
                             throw IllegalStateException("trying to add a notification child that " +

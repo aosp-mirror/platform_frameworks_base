@@ -35,6 +35,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceActionCheckCallback;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -63,6 +65,8 @@ import java.util.Set;
  * separate process from this one.
  */
 public class VoiceInteractionService extends Service {
+    static final String TAG = VoiceInteractionService.class.getSimpleName();
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      * To be supported, the service must also require the
@@ -240,8 +244,21 @@ public class VoiceInteractionService extends Service {
     public void onReady() {
         mSystemService = IVoiceInteractionManagerService.Stub.asInterface(
                 ServiceManager.getService(Context.VOICE_INTERACTION_MANAGER_SERVICE));
+        Objects.requireNonNull(mSystemService);
+        try {
+            mSystemService.asBinder().linkToDeath(mDeathRecipient, 0);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "unable to link to death with system service");
+        }
         mKeyphraseEnrollmentInfo = new KeyphraseEnrollmentInfo(getPackageManager());
     }
+
+    private IBinder.DeathRecipient mDeathRecipient = () -> {
+        Log.e(TAG, "system service binder died shutting down");
+        Handler.getMain().executeOrSendMessage(PooledLambda.obtainMessage(
+                VoiceInteractionService::onShutdownInternal, VoiceInteractionService.this));
+    };
+
 
     private void onShutdownInternal() {
         onShutdown();
@@ -349,16 +366,24 @@ public class VoiceInteractionService extends Service {
     }
 
     private void safelyShutdownHotwordDetector() {
-        try {
-            synchronized (mLock) {
-                if (mHotwordDetector != null) {
-                    mHotwordDetector.stopRecognition();
-                    mHotwordDetector.invalidate();
-                    mHotwordDetector = null;
-                }
+        synchronized (mLock) {
+            if (mHotwordDetector == null) {
+                return;
             }
-        } catch (Exception ex) {
-            // Ignore.
+
+            try {
+                mHotwordDetector.stopRecognition();
+            } catch (Exception ex) {
+                // Ignore.
+            }
+
+            try {
+                mHotwordDetector.invalidate();
+            } catch (Exception ex) {
+                // Ignore.
+            }
+
+            mHotwordDetector = null;
         }
     }
 

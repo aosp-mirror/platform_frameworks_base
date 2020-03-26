@@ -423,6 +423,10 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
 
             final ActivityStack toStack = mToDisplay.getOrCreateStack(
                     null, mTmpOptions, task, task.getActivityType(), mOnTop);
+            if (task == toStack) {
+                // The task was reused as the root task.
+                return;
+            }
 
             if (mOnTop) {
                 final boolean isTopTask = task == mTopTask;
@@ -1704,7 +1708,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 mRootWindowContainer.getLaunchStack(null, aOptions, task, onTop);
         final WindowContainer parent = task.getParent();
 
-        if (parent == stack) {
+        if (parent == stack || task == stack) {
             // Nothing else to do since it is already restored in the right stack.
             return true;
         }
@@ -2237,7 +2241,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final boolean isSecondaryDisplayPreferred =
                 (preferredDisplayId != DEFAULT_DISPLAY && preferredDisplayId != INVALID_DISPLAY);
         final boolean inSplitScreenMode = actualStack != null
-                && actualStack.getDisplay().hasSplitScreenPrimaryTask();
+                && actualStack.getDisplay().isSplitScreenModeActivated();
         if (((!inSplitScreenMode && preferredWindowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY)
                 && !isSecondaryDisplayPreferred) || !task.isActivityTypeStandardOrUndefined()) {
             return;
@@ -2284,16 +2288,14 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         if (!task.supportsSplitScreenWindowingMode() || forceNonResizable) {
             // Dismiss docked stack. If task appeared to be in docked stack but is not resizable -
             // we need to move it to top of fullscreen stack, otherwise it will be covered.
-
-            final ActivityStack dockedStack =
-                    task.getStack().getDisplay().getRootSplitScreenPrimaryTask();
-            if (dockedStack != null) {
+            final DisplayContent display = task.getStack().getDisplay();
+            if (display.isSplitScreenModeActivated()) {
                 // Display a warning toast that we tried to put an app that doesn't support
                 // split-screen in split-screen.
                 mService.getTaskChangeNotificationController()
                         .notifyActivityDismissingDockedStack();
-                dockedStack.getDisplay().onSplitScreenModeDismissed();
-                dockedStack.getDisplay().ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
+                display.onSplitScreenModeDismissed();
+                display.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                         true /* notifyClients */);
             }
             return;
@@ -2602,7 +2604,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                         "startActivityFromRecents: Task " + taskId + " not found.");
             } else if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && task.getWindowingMode() != windowingMode) {
-                mService.moveTaskToSplitScreenPrimaryTile(task, true /* toTop */);
+                mService.moveTaskToSplitScreenPrimaryTask(task, true /* toTop */);
             }
 
             if (windowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
