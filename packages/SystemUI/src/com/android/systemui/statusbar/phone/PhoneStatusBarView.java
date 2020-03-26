@@ -385,7 +385,6 @@ public class PhoneStatusBarView extends PanelBar {
      * Returns a Pair of integers where
      *  - Pair.first is the left margin inset
      *  - Pair.second is the right margin inset
-     *  This method always assumes the cutout is on the top when the device is in portrait mode.
      */
     public static Pair<Integer, Integer> cornerCutoutMargins(DisplayCutout cutout,
             Display display) {
@@ -400,21 +399,12 @@ public class PhoneStatusBarView extends PanelBar {
         Point size = new Point();
         display.getRealSize(size);
 
-        Rect bounds = new Rect();
-        switch (rotationOrientation) {
-            case RotationUtils.ROTATION_LANDSCAPE:
-                boundsFromDirection(cutout, Gravity.LEFT, bounds);
-                break;
-            case RotationUtils.ROTATION_SEASCAPE:
-                boundsFromDirection(cutout, Gravity.RIGHT, bounds);
-                break;
-            case RotationUtils.ROTATION_NONE:
-                boundsFromDirection(cutout, Gravity.TOP, bounds);
-                break;
-            case RotationUtils.ROTATION_UPSIDE_DOWN:
-                // we assume the cutout is always on top in portrait mode
-                return null;
+        if (rotationOrientation != RotationUtils.ROTATION_NONE) {
+            return new Pair<>(cutout.getSafeInsetLeft(), cutout.getSafeInsetRight());
         }
+
+        Rect bounds = new Rect();
+        boundsFromDirection(cutout, Gravity.TOP, bounds);
 
         if (statusBarHeight >= 0 && bounds.top > statusBarHeight) {
             return null;
