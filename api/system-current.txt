@@ -229,9 +229,6 @@ package android {
 
   public static final class R.array {
     field public static final int config_keySystemUuidMapping = 17235973; // 0x1070005
-    field public static final int config_restrictedPreinstalledCarrierApps = 17235975; // 0x1070007
-    field public static final int config_sms_enabled_locking_shift_tables = 17235977; // 0x1070009
-    field public static final int config_sms_enabled_single_shift_tables = 17235976; // 0x1070008
     field public static final int simColors = 17235974; // 0x1070006
   }
 
@@ -279,7 +276,6 @@ package android {
     field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
     field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
     field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
-    field public static final int low_memory = 17039397; // 0x1040025
   }
 
   public static final class R.style {
