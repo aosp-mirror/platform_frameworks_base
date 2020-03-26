@@ -2324,6 +2324,13 @@ public class AudioService extends IAudioService.Stub
 
         // For legacy reason, propagate to all streams associated to this volume group
         for (final int groupedStream : vgs.getLegacyStreamTypes()) {
+            try {
+                ensureValidStreamType(groupedStream);
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, "volume group " + volumeGroup + " has internal streams (" + groupedStream
+                        + "), do not change associated stream volume");
+                continue;
+            }
             setStreamVolume(groupedStream, index, flags, callingPackage, callingPackage,
                             Binder.getCallingUid());
         }
