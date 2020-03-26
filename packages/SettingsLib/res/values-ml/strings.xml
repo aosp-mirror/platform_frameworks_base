@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"പ്രോട്ടാനോമലി (ചുവപ്പ്-പച്ച)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ട്രിട്ടാനോമലി (നീല-മഞ്ഞ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"വർണ്ണം ക്രമീകരിക്കൽ"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"നിങ്ങളുടെ ഉപകരണത്തിൽ നിറങ്ങൾ പ്രദർശിപ്പിക്കാൻ നിറം തിരുത്തൽ അനുവദിക്കുന്നു"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ഉപയോഗിച്ച് അസാധുവാക്കി"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"ഏതാണ്ട് <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ശേഷിക്കുന്നു"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"ഉപയോക്താക്കൾക്ക് സ്വന്തമായ അപ്ലിക്കേഷനുകളും ഉള്ളടക്കവും ഉണ്ടായിരിക്കും"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"നിങ്ങളുടെ അക്കൗണ്ടിൽ നിന്നും അപ്ലിക്കേഷനുകളിലേക്കും ഉള്ളടക്കത്തിലേക്കുമുള്ള ആക്‌സസ്സ് നിയന്ത്രിക്കാനാകും"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"ഉപയോക്താവ്"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"നിയന്ത്രിത പ്രൊഫൈൽ"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"പുതിയ ഉപയോക്താവിനെ ചേർക്കണോ?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"കൂടുതൽ ഉപയോക്താക്കളെ സൃഷ്‌ടിച്ചുകൊണ്ട് ഈ ഉപകരണം മറ്റുള്ളവരുമായി നിങ്ങൾക്ക് പങ്കിടാം. ആപ്പുകളും വാൾപേപ്പറുകളും മറ്റും ഉപയോഗിച്ച് ഇഷ്‌ടാനുസൃതമാക്കാൻ ഓരോ ഉപയോക്താവിനും സാധിക്കും. വൈഫൈ പോലെ എല്ലാവരെയും ബാധിക്കുന്ന ഉപകരണ ക്രമീകരണവും ഉപയോക്താക്കൾക്ക് ക്രമീകരിക്കാം.\n\nനിങ്ങളൊരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിക്ക് സ്വന്തമായ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\n എല്ലാ ഉപയോക്താക്കൾക്കുമായി ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാൻ ഏതൊരു ഉപയോക്താവിനുമാവും. ഉപയോഗസഹായി ക്രമീകരണവും സേവനങ്ങളും പുതിയ ഉപയോക്താവിന് കൈമാറിയേക്കില്ല."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"നിങ്ങൾ ഒരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തിയ്‌ക്ക് അവരുടെ ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്.\n\nമറ്റ് എല്ലാ ഉപയോക്താക്കൾക്കുമായി ഏതൊരു ഉപയോക്താവിനും അപ്ലിക്കേഷനുകൾ അപ്‌ഡേറ്റുചെയ്യാനാവും."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ഉപയോക്താവിനെ ഇപ്പോൾ സജ്ജീകരിക്കണോ?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"ഉപകരണം എടുത്ത് ഇടം സജ്ജീകരിക്കുന്നതിന് വ്യക്തി ലഭ്യമാണെന്ന് ഉറപ്പാക്കുക"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ഇപ്പോൾ പ്രൊഫൈൽ സജ്ജീകരിക്കണോ?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ഇപ്പോൾ സജ്ജീകരിക്കുക"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ഇപ്പോൾ വേണ്ട"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"ചേര്‍ക്കുക"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"പുതിയ ഉപയോക്താവ്"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"പുതിയ പ്രൊഫൈൽ"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ഉപയോക്തൃവിവരം"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"പ്രൊഫൈൽ വിവരം"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"ഒരു നിയന്ത്രിത പ്രൊഫൈൽ സൃഷ്‌ടിക്കുന്നതിനുമുമ്പ്, നിങ്ങളുടെ അപ്ലിക്കേഷനുകളും വ്യക്തിഗത ഡാറ്റയും പരിരക്ഷിക്കുന്നതിന് ഒരു സ്‌ക്രീൻ ലോക്ക് സജ്ജീകരിക്കേണ്ടതുണ്ട്."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"ലോക്ക് സജ്ജീകരിക്കുക"</string>
 </resources>

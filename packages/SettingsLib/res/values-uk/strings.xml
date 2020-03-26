@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-адреса та порт"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Сканувати QR-код"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Підключати пристрій через Wi‑Fi за допомогою QR-коду"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Підключіть пристрій до мережі Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, налагодження, розробка"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Ярлик звіту про помилки"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Показувати в меню живлення кнопку створення звіту про помилки"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Протаномалія (червоний – зелений)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Тританомалія (синій – жовтий)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Корекція кольору"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Корекція кольорів дає змогу керувати відображенням кольорів на пристрої"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Замінено на <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Залишилося приблизно <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Вистачить приблизно до <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Вистачить приблизно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Акумулятор може розрядитися до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Залишилося менше ніж <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Залишилося менше ніж <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Залишилося понад <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -514,26 +511,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Динамік телефона"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Не вдається підключитися. Перезавантажте пристрій."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Дротовий аудіопристрій"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"Довідка й відгуки"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Пам\'ять"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Спільні дані"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Переглянути та змінити спільні дані"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Ідентифікатор спільних даних: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Термін дії завершується <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Додатки зі спільним доступом до даних"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Немає опису, наданого додатком."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Період оренди закінчується <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Видалити спільні дані"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Видалити ці спільні дані?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Користувачі мають власні програми та вміст"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Ви можете обмежити доступ до програм і вмісту з вашого облікового запису"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Користувач"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Профіль з обмеженням"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Додати нового користувача?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Цим пристроєм можуть користуватися кілька людей. Для цього потрібно створити додаткові профілі. Власник профілю може налаштувати його на свій смак: вибрати фоновий малюнок, установити потрібні додатки тощо. Користувачі також можуть налаштовувати певні параметри пристрою (як-от Wi-Fi), які застосовуватимуться до решти профілів.\n\nПісля створення новий профіль потрібно налаштувати.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів. Налаштування спеціальних можливостей і сервісів можуть не передаватися новому користувачеві."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Створити користувача зараз?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Переконайтеся, що користувач може взяти пристрій і налаштувати профіль"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Налаштувати профіль зараз?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Створити зараз"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Не зараз"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Додавання"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Новий користувач"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Новий профіль"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Дані користувача"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Інформація профілю"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Перш ніж створювати обмежений профіль, потрібно налаштувати блокування екрана, щоб захистити свої програми та особисті дані."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Налаштувати блокування"</string>
 </resources>

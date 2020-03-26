@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Mù màu đỏ không hoàn toàn (đỏ-xanh lục)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Mù màu (xanh lam-vàng)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Sửa màu"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Với chế độ hiệu chỉnh màu sắc, bạn có thể điều chỉnh cách các màu hiển thị trên thiết bị"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Bị ghi đè bởi <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Còn khoảng <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Người dùng có ứng dụng và nội dung riêng của mình"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Bạn có thể hạn chế quyền truy cập vào ứng dụng và nội dung từ tài khoản của bạn"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Người dùng"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Tiểu sử bị hạn chế"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Thêm người dùng mới?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Bạn có thể chia sẻ thiết bị này với người khác bằng cách tạo thêm người dùng. Mỗi người dùng sẽ có không gian riêng của mình. Họ có thể tùy chỉnh không gian riêng đó bằng các ứng dụng, hình nền, v.v. Người dùng cũng có thể điều chỉnh các tùy chọn cài đặt thiết bị có ảnh hưởng đến tất cả mọi người, chẳng hạn như Wi‑Fi.\n\nKhi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác. Các dịch vụ và các tùy chọn cài đặt hỗ trợ tiếp cận có thể không chuyển sang người dùng mới."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Khi bạn thêm người dùng mới, họ cần thiết lập không gian của mình.\n\nMọi người dùng đều có thể cập nhật ứng dụng cho tất cả người dùng khác."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Thiết lập người dùng ngay bây giờ?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Đảm bảo người dùng có mặt để tự thiết lập không gian của mình trên thiết bị"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Thiết lập tiểu sử ngay bây giờ?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Thiết lập ngay"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Không phải bây giờ"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Thêm"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Người dùng mới"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Tiểu sử mới"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Thông tin người dùng"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Thông tin hồ sơ"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Trước khi bạn có thể tạo tiểu sử bị hạn chế, bạn sẽ cần thiết lập một màn hình khóa để bảo vệ các ứng dụng và dữ liệu cá nhân của bạn."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Thiết lập khóa"</string>
 </resources>

@@ -533,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Los usuarios tienen sus propias aplicaciones y contenidos."</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Desde tu cuenta, puedes restringir el acceso a las aplicaciones y al contenido."</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Usuario"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restringido"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"¿Agregar usuario nuevo?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Para compartir este dispositivo, crea más usuarios. Cada uno tendrá su propio espacio y podrá personalizarlo con apps, un fondo de pantalla y mucho más. Los usuarios también podrán ajustar algunas opciones del dispositivo, como la conexión Wi‑Fi, que afectan a todos los usuarios.\n\nCuando agregues un nuevo usuario, esa persona deberá configurar su espacio.\n\nCualquier usuario podrá actualizar las apps de otras personas. Es posible que no se transfieran los servicios ni las opciones de accesibilidad al nuevo usuario."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Cuando agregas un nuevo usuario, esa persona debe configurar su espacio.\n\nCualquier usuario puede actualizar las aplicaciones del resto de los usuarios."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"¿Configurar el usuario ahora?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Asegúrate de que la persona pueda acceder al dispositivo y configurar su espacio."</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"¿Quieres configurar tu perfil ahora?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Configurar ahora"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ahora no"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Agregar"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Usuario nuevo"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Perfil nuevo"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Datos de usuario"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Datos del perfil"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Para poder crear un perfil restringido, debes configurar un bloqueo de pantalla que proteja tus aplicaciones y datos personales."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Configurar bloqueo"</string>
 </resources>

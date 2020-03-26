@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"लाल रंग पहचान न पाना (लाल-हरा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"नीला रंग पहचान न पाना (नीला-पीला)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधार"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"रंग में सुधार करने की सुविधा, आपके डिवाइस पर दिखने वाले रंगों में बदलाव करने में मदद करती है"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> के द्वारा ओवरराइड किया गया"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"बैटरी करीब <xliff:g id="TIME_REMAINING">%1$s</xliff:g> में खत्म हो जाएगी"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"उपयोगकर्ताओं के उनके स्वयं के ऐप्लिकेशन  और सामग्री होती है"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"आप अपने खाते से ऐप और सामग्री की पहुंच को रोक सकते हैं"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"उपयोगकर्ता"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"प्रतिबंधित प्रोफ़ाइल"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"नया उपयोगकर्ता जोड़ें?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"आप और ज़्यादा उपयोगकर्ता बनाकर इस डिवाइस को दूसरे लोगों के साथ शेयर कर सकते हैं. हर उपयोगकर्ता के पास अपनी जगह होती है, जिसमें वह मनपसंद तरीके से ऐप्लिकेशन, वॉलपेपर और दूसरी चीज़ों में बदलाव कर सकते हैं. उपयोगकर्ता वाई-फ़ाई जैसी डिवाइस सेटिंग में भी बदलाव कर सकते हैं, जिसका असर हर किसी पर पड़ेगा.\n\nजब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उन्हें अपनी जगह सेट करनी होगी.\n\nकोई भी उपयोगकर्ता दूसरे सभी उपयोगकर्ताओं के लिए ऐप्लिकेशन अपडेट कर सकते हैं. हो सकता है कि सुलभता सेटिंग और सेवाएं नए उपयोगकर्ता को ट्रांसफ़र न हो पाएं."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"जब आप कोई नया उपयोगकर्ता जोड़ते हैं तो उसे अपनी जगह सेट करनी होती है.\n\nकोई भी उपयोगकर्ता बाकी सभी उपयोगकर्ताओं के लिए ऐप अपडेट कर सकता है."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"उपयोगकर्ता को अभी सेट करें?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"पक्का करें कि व्यक्ति डिवाइस का इस्तेमाल करने और अपनी जगह सेट करने के लिए मौजूद है"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"प्रोफ़ाइल अभी सेट करें?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"अभी सेट करें"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"रद्द करें"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"जोड़ें"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"नया उपयोगकर्ता"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"नई प्रोफ़ाइल"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"उपयोगकर्ता की जानकारी"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"प्रोफ़ाइल की जानकारी"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"इससे पहले कि आप कोई प्रतिबंधित प्रोफ़ाइल बनाएं, आपको अपने ऐप्लिकेशन  और व्यक्तिगत डेटा की सुरक्षा करने के लिए एक स्क्रीन लॉक सेट करना होगा."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"लॉक सेट करें"</string>
 </resources>
