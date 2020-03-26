@@ -32,6 +32,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.window.ITaskOrganizer;
@@ -40,10 +41,12 @@ import android.window.IWindowContainer;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
@@ -84,8 +87,9 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         private final ITaskOrganizer mOrganizer;
         private final DeathRecipient mDeathRecipient;
         private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
+        private final int mUid;
 
-        TaskOrganizerState(ITaskOrganizer organizer) {
+        TaskOrganizerState(ITaskOrganizer organizer, int uid) {
             mOrganizer = organizer;
             mDeathRecipient = new DeathRecipient(organizer);
             try {
@@ -93,6 +97,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             } catch (RemoteException e) {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
+            mUid = uid;
         }
 
         void addTask(Task t) {
@@ -179,6 +184,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     + " windowing modes are supported for registerTaskOrganizer");
         }
         enforceStackPermission("registerTaskOrganizer()");
+        final int uid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
@@ -195,7 +201,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 orgs.add(organizer.asBinder());
                 if (!mTaskOrganizerStates.containsKey(organizer.asBinder())) {
                     mTaskOrganizerStates.put(organizer.asBinder(),
-                            new TaskOrganizerState(organizer));
+                            new TaskOrganizerState(organizer, uid));
                 }
 
                 if (orgs.size() == 1) {
@@ -465,5 +471,28 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        final String innerPrefix = prefix + "  ";
+        pw.print(prefix); pw.println("TaskOrganizerController:");
+        pw.print(innerPrefix); pw.println("Per windowing mode:");
+        for (int i = 0; i < mTaskOrganizersForWindowingMode.size(); i++) {
+            final int windowingMode = mTaskOrganizersForWindowingMode.keyAt(i);
+            final List<IBinder> taskOrgs = mTaskOrganizersForWindowingMode.valueAt(i);
+            pw.println(innerPrefix + "  "
+                    + WindowConfiguration.windowingModeToString(windowingMode) + ":");
+            for (int j = 0; j < taskOrgs.size(); j++) {
+                final TaskOrganizerState state =  mTaskOrganizerStates.get(taskOrgs.get(j));
+                final ArrayList<Task> tasks = state.mOrganizedTasks;
+                pw.print(innerPrefix + "    ");
+                pw.println(state.mOrganizer + " uid=" + state.mUid + ":");
+                for (int k = 0; k < tasks.size(); k++) {
+                    pw.println(innerPrefix + "      " + tasks.get(k));
+                }
+            }
+
+        }
+        pw.println();
     }
 }

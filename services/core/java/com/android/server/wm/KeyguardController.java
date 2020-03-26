@@ -565,6 +565,7 @@ class KeyguardController {
         dumpDisplayStates(pw, prefix);
         pw.println(prefix + "  mDismissalRequested=" + mDismissalRequested);
         pw.println(prefix + "  mVisibilityTransactionDepth=" + mVisibilityTransactionDepth);
+        pw.println();
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {
