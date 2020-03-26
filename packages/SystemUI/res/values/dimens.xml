@@ -1225,6 +1225,7 @@
     <dimen name="controls_top_margin">44dp</dimen>
     <dimen name="control_header_text_size">22sp</dimen>
     <dimen name="control_text_size">14sp</dimen>
+    <dimen name="control_icon_size">24dp</dimen>
     <dimen name="control_spacing">4dp</dimen>
     <dimen name="control_list_divider">1dp</dimen>
     <dimen name="control_corner_radius">12dp</dimen>

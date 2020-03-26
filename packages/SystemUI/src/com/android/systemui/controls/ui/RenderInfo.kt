@@ -64,7 +64,7 @@ data class RenderInfo(
 
             val iconState = deviceIconMap.getValue(iconKey)
             val resourceId = iconState[enabled]
-            var icon: Drawable? = null
+            var icon: Drawable?
             if (resourceId == APP_ICON_ID) {
                 icon = appIconMap.get(componentName)
                 if (icon == null) {
