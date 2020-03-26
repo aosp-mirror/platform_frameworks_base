@@ -228,16 +228,18 @@ droidstubs {
 java_defaults {
     name: "framework-stubs-default",
     libs: [ "stub-annotations" ],
-    static_libs: [ "private-stub-annotations-jar" ],
+    static_libs: [
+        "private-stub-annotations-jar",
+
+        // License notices from art module
+        "art-notices-for-framework-stubs-jar",
+    ],
     sdk_version: "core_current",
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
         ],
     },
-    java_resources: [
-        ":notices-for-framework-stubs",
-    ],
     system_modules: "none",
     java_version: "1.8",
     compile_dex: true,
