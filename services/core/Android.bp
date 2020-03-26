@@ -154,6 +154,10 @@ java_library {
     static_libs: ["services.core.priorityboosted"],
 }
 
+java_library_host {
+    name: "core_cts_test_resources",
+    srcs: ["java/com/android/server/notification/SmallHash.java"]
+}
 
 prebuilt_etc {
     name: "gps_debug.conf",
