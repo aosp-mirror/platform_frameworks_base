@@ -129,6 +129,7 @@ public class PhoneStatusBarView extends PanelBar {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        updateResources();
 
         // May trigger cutout space layout-ing
         if (updateOrientationAndCutout(newConfig.orientation)) {
@@ -292,9 +293,28 @@ public class PhoneStatusBarView extends PanelBar {
         mCutoutSideNudge = getResources().getDimensionPixelSize(
                 R.dimen.display_cutout_margin_consumption);
 
+        boolean isRtl = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+
+        int statusBarPaddingTop = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_padding_top);
+        int statusBarPaddingStart = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_padding_start);
+        int statusBarPaddingEnd = getResources().getDimensionPixelSize(
+                R.dimen.status_bar_padding_end);
+
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         mStatusBarHeight = getResources().getDimensionPixelSize(R.dimen.status_bar_height);
         layoutParams.height = mStatusBarHeight;
+
+        View sbContents = findViewById(R.id.status_bar_contents);
+        sbContents.setPadding(
+                isRtl ? statusBarPaddingEnd : statusBarPaddingStart,
+                statusBarPaddingTop,
+                isRtl ? statusBarPaddingStart : statusBarPaddingEnd,
+                0);
+
+        findViewById(R.id.notification_lights_out).setPadding(0, statusBarPaddingStart, 0, 0);
+
         setLayoutParams(layoutParams);
     }
 
@@ -360,7 +380,6 @@ public class PhoneStatusBarView extends PanelBar {
      * Returns a Pair of integers where
      *  - Pair.first is the left margin inset
      *  - Pair.second is the right margin inset
-     *  This method always assumes the cutout is on the top when the device is in portrait mode.
      */
     public static Pair<Integer, Integer> cornerCutoutMargins(DisplayCutout cutout,
             Display display) {
@@ -375,21 +394,12 @@ public class PhoneStatusBarView extends PanelBar {
         Point size = new Point();
         display.getRealSize(size);
 
-        Rect bounds = new Rect();
-        switch (rotationOrientation) {
-            case RotationUtils.ROTATION_LANDSCAPE:
-                boundsFromDirection(cutout, Gravity.LEFT, bounds);
-                break;
-            case RotationUtils.ROTATION_SEASCAPE:
-                boundsFromDirection(cutout, Gravity.RIGHT, bounds);
-                break;
-            case RotationUtils.ROTATION_NONE:
-                boundsFromDirection(cutout, Gravity.TOP, bounds);
-                break;
-            case RotationUtils.ROTATION_UPSIDE_DOWN:
-                // we assume the cutout is always on top in portrait mode
-                return null;
+        if (rotationOrientation != RotationUtils.ROTATION_NONE) {
+            return new Pair<>(cutout.getSafeInsetLeft(), cutout.getSafeInsetRight());
         }
+
+        Rect bounds = new Rect();
+        boundsFromDirection(cutout, Gravity.TOP, bounds);
 
         if (statusBarHeight >= 0 && bounds.top > statusBarHeight) {
             return null;
