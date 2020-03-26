@@ -1213,15 +1213,6 @@
                 android:description="@string/permdesc_acceptHandovers"
                 android:protectionLevel="dangerous" />
 
-    <!-- Allows an application assigned to the Dialer role to be granted access to the telephony
-         call audio streams, both TX and RX.
-         <p>Protection level: signature|appop
-    -->
-    <permission android:name="android.permission.ACCESS_CALL_AUDIO"
-                android.label="@string/permlab_accessCallAudio"
-                android:description="@string/permdesc_accessCallAudio"
-                android:protectionLevel="signature|appop" />
-
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device microphone                        -->
     <!-- ====================================================================== -->
