@@ -210,23 +210,44 @@ public final class UiAutomation {
     }
 
     /**
-     * Connects this UiAutomation to the accessibility introspection APIs with default flags.
+     * Connects this UiAutomation to the accessibility introspection APIs with default flags
+     * and default timeout.
      *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void connect() {
-        connect(0);
+        try {
+            connectWithTimeout(0, CONNECT_TIMEOUT_MILLIS);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Connects this UiAutomation to the accessibility introspection APIs with default timeout.
+     *
+     * @hide
+     */
+    public void connect(int flags) {
+        try {
+            connectWithTimeout(flags, CONNECT_TIMEOUT_MILLIS);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Connects this UiAutomation to the accessibility introspection APIs.
      *
      * @param flags Any flags to apply to the automation as it gets connected
+     * @param timeoutMillis The wait timeout in milliseconds
+     *
+     * @throws TimeoutException If not connected within the timeout
      *
      * @hide
      */
-    public void connect(int flags) {
+    public void connectWithTimeout(int flags, long timeoutMillis) throws TimeoutException {
         synchronized (mLock) {
             throwIfConnectedLocked();
             if (mIsConnecting) {
@@ -254,9 +275,9 @@ public final class UiAutomation {
                         break;
                     }
                     final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                    final long remainingTimeMillis = CONNECT_TIMEOUT_MILLIS - elapsedTimeMillis;
+                    final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
                     if (remainingTimeMillis <= 0) {
-                        throw new RuntimeException("Error while connecting " + this);
+                        throw new TimeoutException("Timeout while connecting " + this);
                     }
                     try {
                         mLock.wait(remainingTimeMillis);
