@@ -67,11 +67,9 @@ void write_java_enum_values(FILE* out, const Atoms& atoms);
 void write_java_usage(FILE* out, const string& method_name, const string& atom_code_name,
                       const AtomDecl& atom);
 
-int write_java_non_chained_methods(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap);
+int write_java_non_chained_methods(FILE* out, const SignatureInfoMap& signatureInfoMap);
 
-int write_java_work_source_methods(
-        FILE* out, const map<vector<java_type_t>, FieldNumberToAnnotations>& signatureInfoMap);
+int write_java_work_source_methods(FILE* out, const SignatureInfoMap& signatureInfoMap);
 
 }  // namespace stats_log_api_gen
 }  // namespace android
