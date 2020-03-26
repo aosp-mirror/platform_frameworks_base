@@ -26,6 +26,7 @@ import android.content.pm.UserInfo;
 import android.hardware.rebootescrow.IRebootEscrow;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Slog;
@@ -33,12 +34,15 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.widget.RebootEscrowListener;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 class RebootEscrowManager {
@@ -63,6 +67,11 @@ class RebootEscrowManager {
      * getting to the escrow restore code.
      */
     private static final int BOOT_COUNT_TOLERANCE = 5;
+
+    /**
+     * Logs events for later debugging in bugreports.
+     */
+    private final RebootEscrowEventLog mEventLog;
 
     /**
      * Used to track when the reboot escrow is wanted. Should stay true once escrow is requested
@@ -137,6 +146,10 @@ class RebootEscrowManager {
         public void reportMetric(boolean success) {
             FrameworkStatsLog.write(FrameworkStatsLog.REBOOT_ESCROW_RECOVERY_REPORTED, success);
         }
+
+        public RebootEscrowEventLog getEventLog() {
+            return new RebootEscrowEventLog();
+        }
     }
 
     RebootEscrowManager(Context context, Callbacks callbacks, LockSettingsStorage storage) {
@@ -150,6 +163,7 @@ class RebootEscrowManager {
         mCallbacks = callbacks;
         mStorage = storage;
         mUserManager = injector.getUserManager();
+        mEventLog = injector.getEventLog();
     }
 
     void loadRebootEscrowDataIfAvailable() {
@@ -174,6 +188,8 @@ class RebootEscrowManager {
             onEscrowRestoreComplete(false);
             return;
         }
+
+        mEventLog.addEntry(RebootEscrowEvent.FOUND_ESCROW_DATA);
 
         boolean allUsersUnlocked = true;
         for (UserInfo user : rebootEscrowUsers) {
@@ -223,6 +239,7 @@ class RebootEscrowManager {
             // Overwrite the existing key with the null key
             rebootEscrow.storeKey(new byte[32]);
 
+            mEventLog.addEntry(RebootEscrowEvent.RETRIEVED_STORED_KEK);
             return RebootEscrowKey.fromKeyBytes(escrowKeyBytes);
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not retrieve escrow data");
@@ -244,6 +261,7 @@ class RebootEscrowManager {
             mCallbacks.onRebootEscrowRestored(escrowData.getSpVersion(),
                     escrowData.getSyntheticPassword(), userId);
             Slog.i(TAG, "Restored reboot escrow data for user " + userId);
+            mEventLog.addEntry(RebootEscrowEvent.RETRIEVED_LSKF_FOR_USER, userId);
             return true;
         } catch (IOException e) {
             Slog.w(TAG, "Could not load reboot escrow data for user " + userId, e);
@@ -280,6 +298,7 @@ class RebootEscrowManager {
         }
 
         mStorage.writeRebootEscrow(userId, escrowData.getBlob());
+        mEventLog.addEntry(RebootEscrowEvent.STORED_LSKF_FOR_USER, userId);
 
         setRebootEscrowReady(true);
     }
@@ -324,6 +343,8 @@ class RebootEscrowManager {
         for (UserInfo user : users) {
             mStorage.removeRebootEscrow(user.id);
         }
+
+        mEventLog.addEntry(RebootEscrowEvent.CLEARED_LSKF_REQUEST);
     }
 
     boolean armRebootEscrowIfNeeded() {
@@ -358,6 +379,7 @@ class RebootEscrowManager {
 
         if (armedRebootEscrow) {
             mStorage.setInt(REBOOT_ESCROW_ARMED_KEY, mInjector.getBootCount(), USER_SYSTEM);
+            mEventLog.addEntry(RebootEscrowEvent.SET_ARMED_STATUS);
         }
 
         return armedRebootEscrow;
@@ -377,6 +399,7 @@ class RebootEscrowManager {
 
         clearRebootEscrowIfNeeded();
         mRebootEscrowWanted = true;
+        mEventLog.addEntry(RebootEscrowEvent.REQUESTED_LSKF);
         return true;
     }
 
@@ -393,7 +416,100 @@ class RebootEscrowManager {
         mRebootEscrowListener = listener;
     }
 
-    void dump(@NonNull PrintWriter pw) {
+    @VisibleForTesting
+    public static class RebootEscrowEvent {
+        static final int FOUND_ESCROW_DATA = 1;
+        static final int SET_ARMED_STATUS = 2;
+        static final int CLEARED_LSKF_REQUEST = 3;
+        static final int RETRIEVED_STORED_KEK = 4;
+        static final int REQUESTED_LSKF = 5;
+        static final int STORED_LSKF_FOR_USER = 6;
+        static final int RETRIEVED_LSKF_FOR_USER = 7;
+
+        final int mEventId;
+        final Integer mUserId;
+        final long mWallTime;
+        final long mTimestamp;
+
+        RebootEscrowEvent(int eventId) {
+            this(eventId, null);
+        }
+
+        RebootEscrowEvent(int eventId, Integer userId) {
+            mEventId = eventId;
+            mUserId = userId;
+            mTimestamp = SystemClock.uptimeMillis();
+            mWallTime = System.currentTimeMillis();
+        }
+
+        String getEventDescription() {
+            switch (mEventId) {
+                case FOUND_ESCROW_DATA:
+                    return "Found escrow data";
+                case SET_ARMED_STATUS:
+                    return "Set armed status";
+                case CLEARED_LSKF_REQUEST:
+                    return "Cleared request for LSKF";
+                case RETRIEVED_STORED_KEK:
+                    return "Retrieved stored KEK";
+                case REQUESTED_LSKF:
+                    return "Requested LSKF";
+                case STORED_LSKF_FOR_USER:
+                    return "Stored LSKF for user";
+                case RETRIEVED_LSKF_FOR_USER:
+                    return "Retrieved LSKF for user";
+                default:
+                    return "Unknown event ID " + mEventId;
+            }
+        }
+    }
+
+    @VisibleForTesting
+    public static class RebootEscrowEventLog {
+        private RebootEscrowEvent[] mEntries = new RebootEscrowEvent[16];
+        private int mNextIndex = 0;
+
+        void addEntry(int eventId) {
+            addEntryInternal(new RebootEscrowEvent(eventId));
+        }
+
+        void addEntry(int eventId, int userId) {
+            addEntryInternal(new RebootEscrowEvent(eventId, userId));
+        }
+
+        private void addEntryInternal(RebootEscrowEvent event) {
+            final int index = mNextIndex;
+            mEntries[index] = event;
+            mNextIndex = (mNextIndex + 1) % mEntries.length;
+        }
+
+        void dump(@NonNull IndentingPrintWriter pw) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+
+            for (int i = 0; i < mEntries.length; ++i) {
+                RebootEscrowEvent event = mEntries[(i + mNextIndex) % mEntries.length];
+                if (event == null) {
+                    continue;
+                }
+
+                pw.print("Event #");
+                pw.println(i);
+
+                pw.println(" time=" + sdf.format(new Date(event.mWallTime))
+                        + " (timestamp=" + event.mTimestamp + ")");
+
+                pw.print(" event=");
+                pw.println(event.getEventDescription());
+
+                if (event.mUserId != null) {
+                    pw.print(" user=");
+                    pw.println(event.mUserId);
+                }
+            }
+        }
+    }
+
+    void dump(@NonNull IndentingPrintWriter pw) {
         pw.print("mRebootEscrowWanted=");
         pw.println(mRebootEscrowWanted);
 
@@ -410,5 +526,12 @@ class RebootEscrowManager {
 
         pw.print("mPendingRebootEscrowKey is ");
         pw.println(keySet ? "set" : "not set");
+
+        pw.println();
+        pw.println("Event log:");
+        pw.increaseIndent();
+        mEventLog.dump(pw);
+        pw.println();
+        pw.decreaseIndent();
     }
 }
