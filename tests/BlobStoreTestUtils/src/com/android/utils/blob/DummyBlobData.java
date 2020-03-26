@@ -167,7 +167,7 @@ public class DummyBlobData {
 
         final byte[] actualBytes = new byte[lengthBytes];
         try (FileInputStream in = new ParcelFileDescriptor.AutoCloseInputStream(
-                session.openWrite(0L, 0L))) {
+                session.openRead())) {
             read(in, actualBytes, offsetBytes, lengthBytes);
         }
 
@@ -190,7 +190,7 @@ public class DummyBlobData {
             long offsetBytes, long lengthBytes) throws Exception {
         final byte[] actualDigest;
         try (FileInputStream in = new ParcelFileDescriptor.AutoCloseInputStream(
-                session.openWrite(0L, 0L))) {
+                session.openRead())) {
             actualDigest = createSha256Digest(in, offsetBytes, lengthBytes);
         }
 
