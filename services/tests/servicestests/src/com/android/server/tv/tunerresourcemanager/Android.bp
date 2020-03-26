@@ -1,0 +1,37 @@
+android_test {
+    name: "TunerResourceManagerTests",
+
+    // Include all test java files.
+    srcs: [
+        "*.java",
+    ],
+
+    static_libs: [
+        "frameworks-base-testutils",
+        "services.core",
+        "services.devicepolicy",
+        "guava",
+        "androidx.test.core",
+        "androidx.test.ext.truth",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "mockito-target-minus-junit4",
+        "platform-test-annotations",
+        "truth-prebuilt",
+        "testables",
+        "testng",
+        "servicestests-utils",
+        "service-permission",
+
+    ],
+
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+
+    platform_apis: true,
+    test_suites: ["general-tests", "device-tests"],
+    compile_multilib: "both",
+}
