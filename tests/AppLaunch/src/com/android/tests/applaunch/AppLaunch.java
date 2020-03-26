@@ -46,6 +46,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -72,6 +73,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String KEY_REQUIRED_ACCOUNTS = "required_accounts";
     private static final String KEY_APPS = "apps";
     private static final String KEY_IORAP_TRIAL_LAUNCH = "iorap_trial_launch";
+    private static final String KEY_IORAP_COMPILER_FILTERS = "iorap_compiler_filters";
     private static final String KEY_TRIAL_LAUNCH = "trial_launch";
     private static final String KEY_LAUNCH_ITERATIONS = "launch_iterations";
     private static final String KEY_LAUNCH_ORDER = "launch_order";
@@ -153,6 +155,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private BufferedWriter mBufferedWriter = null;
     private boolean mSimplePerfAppOnly = false;
     private String[] mCompilerFilters = null;
+    private List<String> mIorapCompilerFilters = null;
     private String mLastAppName = "";
     private boolean mCycleCleanUp = false;
     private boolean mTraceAll = false;
@@ -618,6 +621,24 @@ public class AppLaunch extends InstrumentationTestCase {
         return reason;
     }
 
+    private boolean shouldIncludeIorap(String compilerFilter) {
+        if (!mIorapTrialLaunch) {
+            return false;
+        }
+
+        // No iorap compiler filters specified: treat all compiler filters as ok.
+        if (mIorapCompilerFilters == null) {
+            return true;
+        }
+
+        // iorap compiler filters specified: the compilerFilter must be in the whitelist.
+        if (mIorapCompilerFilters.indexOf(compilerFilter) != -1) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * If launch order is "cyclic" then apps will be launched one after the
      * other for each iteration count.
@@ -632,7 +653,7 @@ public class AppLaunch extends InstrumentationTestCase {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH, /*iorapEnabled*/false));
                     }
                 }
-                if (mIorapTrialLaunch) {
+                if (shouldIncludeIorap(compilerFilter)) {
                     for (int launchCount = 0; launchCount < IORAP_TRIAL_LAUNCH_ITERATIONS; ++launchCount) {
                         for (String app : mNameToResultKey.keySet()) {
                             String reason = makeReasonForIorapTrialLaunch(launchCount);
@@ -646,14 +667,16 @@ public class AppLaunch extends InstrumentationTestCase {
                 for (int launchCount = 0; launchCount < mLaunchIterations; launchCount++) {
                     for (String app : mNameToResultKey.keySet()) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                  String.format(LAUNCH_ITERATION, launchCount), mIorapTrialLaunch));
+                                  String.format(LAUNCH_ITERATION, launchCount),
+                                        shouldIncludeIorap(compilerFilter)));
                     }
                 }
                 if (mTraceDirectoryStr != null && !mTraceDirectoryStr.isEmpty()) {
                     for (int traceCount = 0; traceCount < mTraceLaunchCount; traceCount++) {
                         for (String app : mNameToResultKey.keySet()) {
                             mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                      String.format(TRACE_ITERATION, traceCount), mIorapTrialLaunch));
+                                      String.format(TRACE_ITERATION, traceCount),
+                                            shouldIncludeIorap(compilerFilter)));
                         }
                     }
                 }
@@ -664,7 +687,7 @@ public class AppLaunch extends InstrumentationTestCase {
                     if (mTrialLaunch) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter, TRIAL_LAUNCH, /*iorapEnabled*/false));
                     }
-                    if (mIorapTrialLaunch) {
+                    if (shouldIncludeIorap(compilerFilter)) {
                         for (int launchCount = 0; launchCount < IORAP_TRIAL_LAUNCH_ITERATIONS; ++launchCount) {
                             String reason = makeReasonForIorapTrialLaunch(launchCount);
                             mLaunchOrderList.add(
@@ -675,12 +698,14 @@ public class AppLaunch extends InstrumentationTestCase {
                     }
                     for (int launchCount = 0; launchCount < mLaunchIterations; launchCount++) {
                         mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                String.format(LAUNCH_ITERATION, launchCount), mIorapTrialLaunch));
+                                String.format(LAUNCH_ITERATION, launchCount),
+                                        shouldIncludeIorap(compilerFilter)));
                     }
                     if (mTraceDirectoryStr != null && !mTraceDirectoryStr.isEmpty()) {
                         for (int traceCount = 0; traceCount < mTraceLaunchCount; traceCount++) {
                             mLaunchOrderList.add(new LaunchOrder(app, compilerFilter,
-                                    String.format(TRACE_ITERATION, traceCount), mIorapTrialLaunch));
+                                    String.format(TRACE_ITERATION, traceCount),
+                                            shouldIncludeIorap(compilerFilter)));
                         }
                     }
                 }
@@ -820,6 +845,13 @@ public class AppLaunch extends InstrumentationTestCase {
         } else {
             // Just pass a null compiler filter to use the current state of the app.
             mCompilerFilters = new String[1];
+        }
+
+        String iorapCompilerFilterList = args.getString(KEY_IORAP_COMPILER_FILTERS);
+        if (iorapCompilerFilterList != null) {
+            // Passing in iorap compiler filters implies an iorap trial launch.
+            mIorapTrialLaunch = true;
+            mIorapCompilerFilters = Arrays.asList(iorapCompilerFilterList.split("\\|"));
         }
 
         // Pre-populate the results map to avoid null checks.
