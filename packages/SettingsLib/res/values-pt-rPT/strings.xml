@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomalia (vermelho-verde)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (azul-amarelo)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Correção da cor"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"A correção da cor permite-lhe ajustar a forma como as cores são apresentadas no seu dispositivo."</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Substituído por <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Resta(m) cerca de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Os utilizadores têm as suas próprias aplicações e conteúdos"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Pode restringir o acesso às aplicações e conteúdos da sua conta"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Utilizador"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Perfil restrito"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Adicionar novo utilizador?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Pode partilhar este dispositivo com outras pessoas ao criar utilizadores adicionais. Cada utilizador possui o seu próprio espaço, que pode ser personalizado com aplicações, imagens de fundo, etc. Os utilizadores também podem ajustar as definições do dispositivo, como o Wi‑Fi, que afetam os restantes utilizadores.\n\nAo adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores. Os serviços e as definições de acessibilidade podem não ser transferidos para o novo utilizador."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Ao adicionar um novo utilizador, essa pessoa tem de configurar o respetivo espaço.\n\nQualquer utilizador pode atualizar aplicações para todos os outros utilizadores."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Configurar o utilizador agora?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Certifique-se de que a pessoa está disponível para levar o dispositivo e configurar o seu espaço"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Configurar perfil agora?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Configurar agora"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Agora não"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Adicionar"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Novo utilizador"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Novo perfil"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Info. utilizador"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Informação do perfil"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Antes de poder criar um perfil restrito, tem de configurar um bloqueio de ecrã para proteger as suas aplicações e dados pessoais."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Definir bloqueio"</string>
 </resources>
