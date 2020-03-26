@@ -409,12 +409,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private void clipTransientViews() {
         for (int i = 0; i < mHostLayout.getTransientViewCount(); i++) {
             View transientView = mHostLayout.getTransientView(i);
-            if (transientView instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow transientRow = (ExpandableNotificationRow) transientView;
-                updateNotificationClipHeight(transientRow, getTranslationY(), -1);
-            } else {
-                Log.e(TAG, "NotificationShelf.clipTransientViews(): "
-                        + "Trying to clip non-row transient view");
+            if (transientView instanceof ExpandableView) {
+                ExpandableView transientExpandableView = (ExpandableView) transientView;
+                updateNotificationClipHeight(transientExpandableView, getTranslationY(), -1);
             }
         }
     }
