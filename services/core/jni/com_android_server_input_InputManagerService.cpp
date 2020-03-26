@@ -206,7 +206,7 @@ public:
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
     status_t pilferPointers(const sp<IBinder>& token);
 
-    void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
+    void displayRemoved(JNIEnv* env, int32_t displayId);
     void setFocusedApplication(JNIEnv* env, int32_t displayId, jobject applicationHandleObj);
     void setFocusedDisplay(JNIEnv* env, int32_t displayId);
     void setInputDispatchMode(bool enabled, bool frozen);
@@ -771,55 +771,10 @@ void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration
     }
 }
 
-void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray,
-         int32_t displayId) {
-    std::vector<sp<InputWindowHandle> > windowHandles;
-
-    if (windowHandleObjArray) {
-        jsize length = env->GetArrayLength(windowHandleObjArray);
-        for (jsize i = 0; i < length; i++) {
-            jobject windowHandleObj = env->GetObjectArrayElement(windowHandleObjArray, i);
-            if (! windowHandleObj) {
-                break; // found null element indicating end of used portion of the array
-            }
-
-            sp<InputWindowHandle> windowHandle =
-                    android_view_InputWindowHandle_getHandle(env, windowHandleObj);
-            if (windowHandle != nullptr) {
-                windowHandles.push_back(windowHandle);
-            }
-            env->DeleteLocalRef(windowHandleObj);
-        }
-    }
-
-    mInputManager->getDispatcher()->setInputWindows(windowHandles, displayId);
-
-    // Do this after the dispatcher has updated the window handle state.
-    bool newPointerGesturesEnabled = true;
-    size_t numWindows = windowHandles.size();
-    for (size_t i = 0; i < numWindows; i++) {
-        const sp<InputWindowHandle>& windowHandle = windowHandles[i];
-        const InputWindowInfo* windowInfo = windowHandle->getInfo();
-        if (windowInfo && windowInfo->hasFocus && (windowInfo->inputFeatures
-                & InputWindowInfo::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES)) {
-            newPointerGesturesEnabled = false;
-        }
-    }
-
-    bool pointerGesturesEnabledChanged = false;
-    { // acquire lock
-        AutoMutex _l(mLock);
-
-        if (mLocked.pointerGesturesEnabled != newPointerGesturesEnabled) {
-            mLocked.pointerGesturesEnabled = newPointerGesturesEnabled;
-            pointerGesturesEnabledChanged = true;
-        }
-    } // release lock
-
-    if (pointerGesturesEnabledChanged) {
-        mInputManager->getReader()->requestRefreshConfiguration(
-                InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT);
-    }
+void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
+    // Set an empty list to remove all handles from the specific display.
+    std::vector<sp<InputWindowHandle>> windowHandles;
+    mInputManager->getDispatcher()->setInputWindows({{displayId, windowHandles}});
 }
 
 void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
@@ -1567,11 +1522,10 @@ static void nativeToggleCapsLock(JNIEnv* env, jclass /* clazz */,
     im->getInputManager()->getReader()->toggleCapsLockState(deviceId);
 }
 
-static void nativeSetInputWindows(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobjectArray windowHandleObjArray, jint displayId) {
+static void nativeDisplayRemoved(JNIEnv* env, jclass /* clazz */, jlong ptr, jint displayId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->setInputWindows(env, windowHandleObjArray, displayId);
+    im->displayRemoved(env, displayId);
 }
 
 static void nativeSetFocusedApplication(JNIEnv* env, jclass /* clazz */,
@@ -1815,8 +1769,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeVerifyInputEvent", "(JLandroid/view/InputEvent;)Landroid/view/VerifiedInputEvent;",
          (void*)nativeVerifyInputEvent},
         {"nativeToggleCapsLock", "(JI)V", (void*)nativeToggleCapsLock},
-        {"nativeSetInputWindows", "(J[Landroid/view/InputWindowHandle;I)V",
-         (void*)nativeSetInputWindows},
+        {"nativeDisplayRemoved", "(JI)V", (void*)nativeDisplayRemoved},
         {"nativeSetFocusedApplication", "(JILandroid/view/InputApplicationHandle;)V",
          (void*)nativeSetFocusedApplication},
         {"nativeSetFocusedDisplay", "(JI)V", (void*)nativeSetFocusedDisplay},
