@@ -57,7 +57,8 @@ public class ThumbnailData {
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
-        thumbnail = Bitmap.wrapHardwareBuffer(snapshot.getSnapshot(), snapshot.getColorSpace());
+        thumbnail = Bitmap.wrapHardwareBuffer(snapshot.getHardwareBuffer(),
+                snapshot.getColorSpace());
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
         rotation = snapshot.getRotation();

@@ -17,7 +17,7 @@ package com.android.server.wm;
 
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 
-import android.graphics.GraphicBuffer;
+import android.hardware.HardwareBuffer;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -40,9 +40,9 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
     private int mHeight;
 
     TaskScreenshotAnimatable(Function<SurfaceSession, SurfaceControl.Builder> surfaceControlFactory,
-            Task task, SurfaceControl.ScreenshotGraphicBuffer screenshotBuffer) {
-        GraphicBuffer buffer = screenshotBuffer == null
-                ? null : screenshotBuffer.getGraphicBuffer();
+            Task task, SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer) {
+        HardwareBuffer buffer = screenshotBuffer == null
+                ? null : screenshotBuffer.getHardwareBuffer();
         mTask = task;
         mWidth = (buffer != null) ? buffer.getWidth() : 1;
         mHeight = (buffer != null) ? buffer.getHeight() : 1;

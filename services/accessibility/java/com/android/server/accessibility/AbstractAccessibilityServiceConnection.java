@@ -41,7 +41,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
-import android.graphics.GraphicBuffer;
 import android.graphics.ParcelableColorSpace;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -67,7 +66,7 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
-import android.view.SurfaceControl.ScreenshotGraphicBuffer;
+import android.view.SurfaceControl.ScreenshotHardwareBuffer;
 import android.view.View;
 import android.view.WindowInfo;
 import android.view.accessibility.AccessibilityCache;
@@ -1021,7 +1020,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         sendScreenshotSuccess(display, callback);
     }
 
-    private ScreenshotGraphicBuffer takeScreenshotBuffer(Display display) {
+    private ScreenshotHardwareBuffer takeScreenshotBuffer(Display display) {
         final Point displaySize = new Point();
         // TODO (b/145893483): calling new API with the display as a parameter
         // when surface control supported.
@@ -1038,26 +1037,22 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final long identity = Binder.clearCallingIdentity();
         try {
             mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
-                final ScreenshotGraphicBuffer screenshotBuffer = takeScreenshotBuffer(display);
-                final GraphicBuffer graphicBuffer = screenshotBuffer.getGraphicBuffer();
-                try (HardwareBuffer hardwareBuffer =
-                             HardwareBuffer.createFromGraphicBuffer(graphicBuffer)) {
-                    final ParcelableColorSpace colorSpace =
-                            new ParcelableColorSpace(screenshotBuffer.getColorSpace());
+                final ScreenshotHardwareBuffer screenshotBuffer = takeScreenshotBuffer(display);
+                final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+                final ParcelableColorSpace colorSpace =
+                        new ParcelableColorSpace(screenshotBuffer.getColorSpace());
 
-                    final Bundle payload = new Bundle();
-                    payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
-                            AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
-                    payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
-                            hardwareBuffer);
-                    payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
-                    payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
-                            SystemClock.uptimeMillis());
+                final Bundle payload = new Bundle();
+                payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
+                        AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
+                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
+                        hardwareBuffer);
+                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
+                payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
+                        SystemClock.uptimeMillis());
 
-                    // Send back the result.
-                    callback.sendResult(payload);
-                    hardwareBuffer.close();
-                }
+                // Send back the result.
+                callback.sendResult(payload);
             }, null).recycleOnUse());
         } finally {
             Binder.restoreCallingIdentity(identity);

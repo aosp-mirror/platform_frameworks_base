@@ -35,10 +35,10 @@ import android.app.WindowConfiguration;
 import android.content.ComponentName;
 import android.content.res.Configuration;
 import android.graphics.ColorSpace;
-import android.graphics.GraphicBuffer;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 import android.view.View;
@@ -130,7 +130,7 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test
     public void testSnapshotBuilder() {
-        final GraphicBuffer buffer = Mockito.mock(GraphicBuffer.class);
+        final HardwareBuffer buffer = Mockito.mock(HardwareBuffer.class);
         final ColorSpace sRGB = ColorSpace.get(ColorSpace.Named.SRGB);
         final long id = 1234L;
         final ComponentName activityComponent = new ComponentName("package", ".Class");
@@ -173,12 +173,12 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
             assertEquals(orientation, snapshot.getOrientation());
             assertEquals(contentInsets, snapshot.getContentInsets());
             assertTrue(snapshot.isTranslucent());
-            assertSame(buffer, snapshot.getSnapshot());
+            assertSame(buffer, snapshot.getHardwareBuffer());
             assertTrue(snapshot.isRealSnapshot());
             assertEquals(taskSize, snapshot.getTaskSize());
         } finally {
             if (buffer != null) {
-                buffer.destroy();
+                buffer.close();
             }
         }
     }

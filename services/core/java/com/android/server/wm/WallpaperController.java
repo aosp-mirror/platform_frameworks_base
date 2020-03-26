@@ -777,7 +777,7 @@ class WallpaperController {
         final Rect bounds = wallpaperWindowState.getBounds();
         bounds.offsetTo(0, 0);
 
-        SurfaceControl.ScreenshotGraphicBuffer wallpaperBuffer = SurfaceControl.captureLayers(
+        SurfaceControl.ScreenshotHardwareBuffer wallpaperBuffer = SurfaceControl.captureLayers(
                 wallpaperWindowState.getSurfaceControl(), bounds, 1 /* frameScale */);
 
         if (wallpaperBuffer == null) {
@@ -785,7 +785,7 @@ class WallpaperController {
             return null;
         }
         return Bitmap.wrapHardwareBuffer(
-                wallpaperBuffer.getGraphicBuffer(), wallpaperBuffer.getColorSpace());
+                wallpaperBuffer.getHardwareBuffer(), wallpaperBuffer.getColorSpace());
     }
 
     private WindowState getTopVisibleWallpaper() {

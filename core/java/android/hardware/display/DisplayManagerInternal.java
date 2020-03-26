@@ -70,7 +70,7 @@ public abstract class DisplayManagerInternal {
      * @param displayId The display id to take the screenshot of.
      * @return The buffer or null if we have failed.
      */
-    public abstract SurfaceControl.ScreenshotGraphicBuffer screenshot(int displayId);
+    public abstract SurfaceControl.ScreenshotHardwareBuffer screenshot(int displayId);
 
     /**
      * Returns information about the specified logical display.
