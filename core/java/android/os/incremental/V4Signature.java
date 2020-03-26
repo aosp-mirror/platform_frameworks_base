@@ -72,16 +72,16 @@ public class V4Signature {
      * V4 signature data.
      */
     public static class SigningInfo {
-        public final byte[] v3Digest;  // used to match with the corresponding APK
+        public final byte[] apkDigest;  // used to match with the corresponding APK
         public final byte[] certificate; // ASN.1 DER form
         public final byte[] additionalData; // a free-form binary data blob
         public final byte[] publicKey; // ASN.1 DER, must match the certificate
         public final int signatureAlgorithmId; // see the APK v2 doc for the list
         public final byte[] signature;
 
-        SigningInfo(byte[] v3Digest, byte[] certificate, byte[] additionalData,
+        SigningInfo(byte[] apkDigest, byte[] certificate, byte[] additionalData,
                 byte[] publicKey, int signatureAlgorithmId, byte[] signature) {
-            this.v3Digest = v3Digest;
+            this.apkDigest = apkDigest;
             this.certificate = certificate;
             this.additionalData = additionalData;
             this.publicKey = publicKey;
@@ -94,13 +94,13 @@ public class V4Signature {
          */
         public static SigningInfo fromByteArray(byte[] bytes) throws IOException {
             ByteBuffer buffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
-            byte[] v3Digest = readBytes(buffer);
+            byte[] apkDigest = readBytes(buffer);
             byte[] certificate = readBytes(buffer);
             byte[] additionalData = readBytes(buffer);
             byte[] publicKey = readBytes(buffer);
             int signatureAlgorithmId = buffer.getInt();
             byte[] signature = readBytes(buffer);
-            return new SigningInfo(v3Digest, certificate, additionalData, publicKey,
+            return new SigningInfo(apkDigest, certificate, additionalData, publicKey,
                     signatureAlgorithmId, signature);
         }
     }
@@ -150,7 +150,7 @@ public class V4Signature {
         final int size =
                 4/*size*/ + 8/*fileSize*/ + 4/*hash_algorithm*/ + 1/*log2_blocksize*/ + bytesSize(
                         hashingInfo.salt) + bytesSize(hashingInfo.rawRootHash) + bytesSize(
-                        signingInfo.v3Digest) + bytesSize(signingInfo.certificate) + bytesSize(
+                        signingInfo.apkDigest) + bytesSize(signingInfo.certificate) + bytesSize(
                         signingInfo.additionalData);
         ByteBuffer buffer = ByteBuffer.allocate(size).order(ByteOrder.LITTLE_ENDIAN);
         buffer.putInt(size);
@@ -159,7 +159,7 @@ public class V4Signature {
         buffer.put(hashingInfo.log2BlockSize);
         writeBytes(buffer, hashingInfo.salt);
         writeBytes(buffer, hashingInfo.rawRootHash);
-        writeBytes(buffer, signingInfo.v3Digest);
+        writeBytes(buffer, signingInfo.apkDigest);
         writeBytes(buffer, signingInfo.certificate);
         writeBytes(buffer, signingInfo.additionalData);
         return buffer.array();

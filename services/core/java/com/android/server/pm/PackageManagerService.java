@@ -5070,15 +5070,16 @@ public class PackageManagerService extends IPackageManager.Stub
      * action and a {@code android.intent.category.BROWSABLE} category</li>
      * </ul>
      */
-    int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps) {
+    int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps,
+            boolean matchSystemOnly) {
         return updateFlagsForResolve(flags, userId, callingUid,
-                wantInstantApps, false /*onlyExposedExplicitly*/);
+                wantInstantApps, matchSystemOnly, false /*onlyExposedExplicitly*/);
     }
 
     int updateFlagsForResolve(int flags, int userId, int callingUid,
-            boolean wantInstantApps, boolean onlyExposedExplicitly) {
+            boolean wantInstantApps, boolean onlyExposedExplicitly, boolean matchSystemOnly) {
         // Safe mode means we shouldn't match any third-party components
-        if (mSafeMode) {
+        if (mSafeMode || matchSystemOnly) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
         }
         if (getInstantAppPackageName(callingUid) != null) {
@@ -6170,7 +6171,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
             if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
-            flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart);
+            flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
+                    intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
             mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                     false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
 
@@ -6202,7 +6204,8 @@ public class PackageManagerService extends IPackageManager.Stub
         intent = updateIntentForResolve(intent);
         final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
         final int flags = updateFlagsForResolve(
-                0, userId, callingUid, false /*includeInstantApps*/);
+                0, userId, callingUid, false /*includeInstantApps*/,
+                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         synchronized (mLock) {
@@ -6523,7 +6526,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 android.provider.Settings.Global.getInt(mContext.getContentResolver(),
                         android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
         flags = updateFlagsForResolve(
-                flags, userId, callingUid, false /*includeInstantApps*/);
+                flags, userId, callingUid, false /*includeInstantApps*/,
+                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
         intent = updateIntentForResolve(intent);
         // writer
         synchronized (mLock) {
@@ -6735,7 +6739,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             synchronized (mLock) {
                 int flags = updateFlagsForResolve(0, parent.id, callingUid,
-                        false /*includeInstantApps*/);
+                        false /*includeInstantApps*/,
+                        intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
@@ -6821,7 +6826,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
-                comp != null || pkgName != null /*onlyExposedExplicitly*/);
+                comp != null || pkgName != null /*onlyExposedExplicitly*/,
+                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<>(1);
             final ActivityInfo ai = getActivityInfo(comp, flags, userId);
@@ -7606,7 +7612,8 @@ public class PackageManagerService extends IPackageManager.Stub
             String resolvedType, int flags, int userId) {
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
+                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent activity options");
@@ -7792,7 +7799,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
+                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -7882,7 +7890,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private ResolveInfo resolveServiceInternal(Intent intent, String resolvedType, int flags,
             int userId, int callingUid) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
+                false /* matchSystemOnly */);
         List<ResolveInfo> query = queryIntentServicesInternal(
                 intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
         if (query != null) {
@@ -7913,7 +7922,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 false /*checkShell*/,
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps);
+        flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps,
+                false /* matchSystemOnly */);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -8050,7 +8060,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
-        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/);
+        flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
+                false /* matchSystemOnly */);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -24476,7 +24487,8 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             synchronized (mLock) {
                 boolean manifestWhitelisted =
-                        mPackages.get(packageName).isAllowDontAutoRevokePermmissions();
+                        mPackages.get(packageName).getAutoRevokePermissions()
+                                == ApplicationInfo.AUTO_REVOKE_DISALLOWED;
                 return manifestWhitelisted;
             }
         }

@@ -40,6 +40,7 @@ using android::os::statsd::Predicate;
 #ifdef __ANDROID__
 
 const ConfigKey kConfigKey(0, 12345);
+const long kAlertId = 3;
 
 const long timeBaseSec = 1000;
 
@@ -85,7 +86,7 @@ StatsdConfig buildGoodConfig() {
     config.add_no_report_metric(3);
 
     auto alert = config.add_alert();
-    alert->set_id(3);
+    alert->set_id(kAlertId);
     alert->set_metric_id(3);
     alert->set_num_buckets(10);
     alert->set_refractory_period_secs(100);
@@ -218,7 +219,7 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     metric->mutable_dimensions_in_what()->add_child()->set_field(1);
 
     auto alert = config.add_alert();
-    alert->set_id(103);
+    alert->set_id(kAlertId);
     alert->set_metric_id(3);
     alert->set_num_buckets(10);
     alert->set_refractory_period_secs(100);
@@ -284,6 +285,7 @@ TEST(MetricsManagerTest, TestGoodConfig) {
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
     vector<int> metricsWithActivation;
     std::set<int64_t> noReportMetricIds;
 
@@ -293,10 +295,14 @@ TEST(MetricsManagerTest, TestGoodConfig) {
                                  allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
                                  trackerToMetricMap, trackerToConditionMap,
                                  activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                                 metricsWithActivation, noReportMetricIds));
+                                 alertTrackerMap, metricsWithActivation,
+                                 noReportMetricIds));
     EXPECT_EQ(1u, allMetricProducers.size());
     EXPECT_EQ(1u, allAnomalyTrackers.size());
     EXPECT_EQ(1u, noReportMetricIds.size());
+    EXPECT_EQ(1u, alertTrackerMap.size());
+    EXPECT_NE(alertTrackerMap.find(kAlertId), alertTrackerMap.end());
+    EXPECT_EQ(alertTrackerMap.find(kAlertId)->second, 0);
 }
 
 TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
@@ -316,6 +322,7 @@ TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
     vector<int> metricsWithActivation;
     std::set<int64_t> noReportMetricIds;
 
@@ -325,7 +332,8 @@ TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
                                   trackerToMetricMap, trackerToConditionMap,
                                   activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                                  metricsWithActivation, noReportMetricIds));
+                                  alertTrackerMap, metricsWithActivation,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
@@ -345,6 +353,7 @@ TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
     vector<int> metricsWithActivation;
     std::set<int64_t> noReportMetricIds;
 
@@ -354,7 +363,8 @@ TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
                                   trackerToMetricMap, trackerToConditionMap,
                                   activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                                  metricsWithActivation, noReportMetricIds));
+                                  alertTrackerMap, metricsWithActivation,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestMissingMatchers) {
@@ -374,6 +384,7 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
     vector<int> metricsWithActivation;
     std::set<int64_t> noReportMetricIds;
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
@@ -382,7 +393,8 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
                                   trackerToMetricMap, trackerToConditionMap,
                                   activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                                  metricsWithActivation, noReportMetricIds));
+                                  alertTrackerMap, metricsWithActivation,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestMissingPredicate) {
@@ -402,6 +414,7 @@ TEST(MetricsManagerTest, TestMissingPredicate) {
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
     vector<int> metricsWithActivation;
     std::set<int64_t> noReportMetricIds;
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
@@ -410,7 +423,7 @@ TEST(MetricsManagerTest, TestMissingPredicate) {
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
                                   trackerToMetricMap, trackerToConditionMap,
                                   activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                                  metricsWithActivation, noReportMetricIds));
+                                  alertTrackerMap, metricsWithActivation, noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestCirclePredicateDependency) {
@@ -430,6 +443,7 @@ TEST(MetricsManagerTest, TestCirclePredicateDependency) {
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
     vector<int> metricsWithActivation;
     std::set<int64_t> noReportMetricIds;
 
@@ -439,7 +453,8 @@ TEST(MetricsManagerTest, TestCirclePredicateDependency) {
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
                                   trackerToMetricMap, trackerToConditionMap,
                                   activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                                  metricsWithActivation, noReportMetricIds));
+                                  alertTrackerMap, metricsWithActivation,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
@@ -459,6 +474,7 @@ TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
     unordered_map<int, std::vector<int>> trackerToConditionMap;
     unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
     unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
     vector<int> metricsWithActivation;
     std::set<int64_t> noReportMetricIds;
 
@@ -468,7 +484,8 @@ TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
                                   trackerToMetricMap, trackerToConditionMap,
                                   activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
-                                  metricsWithActivation, noReportMetricIds));
+                                  alertTrackerMap, metricsWithActivation,
+                                  noReportMetricIds));
 }
 
 #else

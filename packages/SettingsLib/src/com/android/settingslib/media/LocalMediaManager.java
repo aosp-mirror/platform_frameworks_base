@@ -66,6 +66,7 @@ public class LocalMediaManager implements BluetoothCallback {
     private LocalBluetoothManager mLocalBluetoothManager;
     private InfoMediaManager mInfoMediaManager;
     private String mPackageName;
+    private MediaDevice mOnTransferBluetoothDevice;
 
     @VisibleForTesting
     List<MediaDevice> mMediaDevices = new ArrayList<>();
@@ -143,7 +144,7 @@ public class LocalMediaManager implements BluetoothCallback {
             final CachedBluetoothDevice cachedDevice =
                     ((BluetoothMediaDevice) device).getCachedDevice();
             if (!cachedDevice.isConnected() && !cachedDevice.isBusy()) {
-                device.setState(MediaDeviceState.STATE_CONNECTING);
+                mOnTransferBluetoothDevice = connectDevice;
                 cachedDevice.connect();
                 return;
             }
@@ -389,6 +390,10 @@ public class LocalMediaManager implements BluetoothCallback {
             mCurrentConnectedDevice = infoMediaDevice != null
                     ? infoMediaDevice : updateCurrentConnectedDevice();
             dispatchDeviceListUpdate();
+            if (mOnTransferBluetoothDevice != null && mOnTransferBluetoothDevice.isConnected()) {
+                connectDevice(mOnTransferBluetoothDevice);
+                mOnTransferBluetoothDevice = null;
+            }
         }
 
         private List<MediaDevice> buildDisconnectedBluetoothDevice() {

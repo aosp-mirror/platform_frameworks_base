@@ -1582,9 +1582,9 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures) {
             ValueMetricProducerTestHelper::createValueProducerNoConditions(pullerManager, metric);
 
     EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
-    auto it = valueProducer->mCurrentSlicedBucket.begin();
-    auto& interval1 = it->second[0];
-    auto& baseInfo1 =
+    const auto& it = valueProducer->mCurrentSlicedBucket.begin();
+    ValueMetricProducer::Interval& interval1 = it->second[0];
+    ValueMetricProducer::BaseInfo& baseInfo1 =
             valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat())->second[0];
     EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     EXPECT_EQ(true, baseInfo1.hasBase);
@@ -1611,16 +1611,9 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures) {
             break;
         }
     }
-    // auto itBase = valueProducer->mCurrentBaseInfo.begin();
-    // for (; itBase != valueProducer->mCurrentBaseInfo.end(); it++) {
-    //     if (itBase != iterBase) {
-    //         break;
-    //     }
-    // }
     EXPECT_TRUE(it2 != it);
-    // EXPECT_TRUE(itBase != iterBase);
-    auto& interval2 = it2->second[0];
-    auto& baseInfo2 =
+    ValueMetricProducer::Interval& interval2 = it2->second[0];
+    ValueMetricProducer::BaseInfo& baseInfo2 =
             valueProducer->mCurrentBaseInfo.find(it2->first.getDimensionKeyInWhat())->second[0];
     EXPECT_EQ(2, it2->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     EXPECT_EQ(true, baseInfo2.hasBase);
@@ -1647,23 +1640,28 @@ TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures) {
     valueProducer->onDataPulled(allData, /** succeed */ true, bucket5StartTimeNs);
 
     EXPECT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
-    it = valueProducer->mCurrentSlicedBucket.begin();
-    it2 = std::next(valueProducer->mCurrentSlicedBucket.begin());
-    interval1 = it->second[0];
-    interval2 = it2->second[0];
-    baseInfo1 = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat())->second[0];
-    baseInfo2 = valueProducer->mCurrentBaseInfo.find(it2->first.getDimensionKeyInWhat())->second[0];
+    // Get new references now that entries have been deleted from the map
+    const auto& it3 = valueProducer->mCurrentSlicedBucket.begin();
+    const auto& it4 = std::next(valueProducer->mCurrentSlicedBucket.begin());
+    EXPECT_EQ(it3->second.size(), 1);
+    EXPECT_EQ(it4->second.size(), 1);
+    ValueMetricProducer::Interval& interval3 = it3->second[0];
+    ValueMetricProducer::Interval& interval4 = it4->second[0];
+    ValueMetricProducer::BaseInfo& baseInfo3 =
+            valueProducer->mCurrentBaseInfo.find(it3->first.getDimensionKeyInWhat())->second[0];
+    ValueMetricProducer::BaseInfo& baseInfo4 =
+            valueProducer->mCurrentBaseInfo.find(it4->first.getDimensionKeyInWhat())->second[0];
 
-    EXPECT_EQ(true, baseInfo1.hasBase);
-    EXPECT_EQ(5, baseInfo1.base.long_value);
-    EXPECT_EQ(false, interval1.hasValue);
-    EXPECT_EQ(5, interval1.value.long_value);
+    EXPECT_EQ(true, baseInfo3.hasBase);
+    EXPECT_EQ(5, baseInfo3.base.long_value);
+    EXPECT_EQ(false, interval3.hasValue);
+    EXPECT_EQ(5, interval3.value.long_value);
     EXPECT_EQ(true, valueProducer->mHasGlobalBase);
 
-    EXPECT_EQ(true, baseInfo2.hasBase);
-    EXPECT_EQ(13, baseInfo2.base.long_value);
-    EXPECT_EQ(false, interval2.hasValue);
-    EXPECT_EQ(8, interval2.value.long_value);
+    EXPECT_EQ(true, baseInfo4.hasBase);
+    EXPECT_EQ(13, baseInfo4.base.long_value);
+    EXPECT_EQ(false, interval4.hasValue);
+    EXPECT_EQ(8, interval4.value.long_value);
 
     EXPECT_EQ(2UL, valueProducer->mPastBuckets.size());
 }

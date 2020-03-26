@@ -73,14 +73,19 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED = 1 << 9;
     // The search feature is disabled (either by SUW/SysUI/device policy)
     public static final int SYSUI_STATE_SEARCH_DISABLED = 1 << 10;
-    // The notification panel is expanded and interactive (either locked or unlocked), and the
-    // quick settings is not expanded
+    // The notification panel is expanded and interactive (either locked or unlocked), and quick
+    // settings is expanded.
     public static final int SYSUI_STATE_QUICK_SETTINGS_EXPANDED = 1 << 11;
     // Winscope tracing is enabled
     public static final int SYSUI_STATE_TRACING_ENABLED = 1 << 12;
     // The Assistant gesture should be constrained. It is up to the launcher implementation to
     // decide how to constrain it
     public static final int SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED = 1 << 13;
+    // The bubble stack is expanded. This means that the home gesture should be ignored, since a
+    // swipe up is an attempt to close the bubble stack, but that the back gesture should remain
+    // enabled (since it's used to navigate back within the bubbled app, or to collapse the bubble
+    // stack.
+    public static final int SYSUI_STATE_BUBBLES_EXPANDED = 1 << 14;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SYSUI_STATE_SCREEN_PINNING,
@@ -96,7 +101,8 @@ public class QuickStepContract {
             SYSUI_STATE_HOME_DISABLED,
             SYSUI_STATE_SEARCH_DISABLED,
             SYSUI_STATE_TRACING_ENABLED,
-            SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED
+            SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED,
+            SYSUI_STATE_BUBBLES_EXPANDED
     })
     public @interface SystemUiStateFlags {}
 
@@ -118,6 +124,7 @@ public class QuickStepContract {
         str.add((flags & SYSUI_STATE_TRACING_ENABLED) != 0 ? "tracing" : "");
         str.add((flags & SYSUI_STATE_ASSIST_GESTURE_CONSTRAINED) != 0
                 ? "asst_gesture_constrain" : "");
+        str.add((flags & SYSUI_STATE_BUBBLES_EXPANDED) != 0 ? "bubbles_expanded" : "");
         return str.toString();
     }
 

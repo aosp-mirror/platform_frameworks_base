@@ -14,6 +14,8 @@
 
 #include "metric_util.h"
 
+#include "stats_event.h"
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -246,117 +248,112 @@ FieldMatcher CreateDimensions(const int atomId, const std::vector<int>& fields) 
 }
 
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
-    const android::view::DisplayStateEnum state, uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(android::util::SCREEN_STATE_CHANGED, timestampNs);
-    event->write(state);
-    event->init();
-    return event;
-}
+        uint64_t timestampNs, const android::view::DisplayStateEnum state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, util::SCREEN_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
 
-std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
-    int level, uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(android::util::SCREEN_BRIGHTNESS_CHANGED, timestampNs);
-    (event->write(level));
-    event->init();
-    return event;
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
 
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
 }
 
 std::unique_ptr<LogEvent> CreateScheduledJobStateChangedEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& jobName,
-        const ScheduledJobStateChanged::State state, uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(android::util::SCHEDULED_JOB_STATE_CHANGED, timestampNs);
-    event->write(attributions);
-    event->write(jobName);
-    event->write(state);
-    event->init();
-    return event;
+        const vector<int>& attributionUids, const vector<string>& attributionTags,
+        const string& jobName, const ScheduledJobStateChanged::State state, uint64_t timestampNs) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, util::SCHEDULED_JOB_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+    AStatsEvent_writeString(statsEvent, jobName.c_str());
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
 }
 
-std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(
-    const std::vector<AttributionNodeInternal>& attributions,
-    const string& name, uint64_t timestampNs) {
-    return CreateScheduledJobStateChangedEvent(
-            attributions, name, ScheduledJobStateChanged::STARTED, timestampNs);
+std::unique_ptr<LogEvent> CreateStartScheduledJobEvent(uint64_t timestampNs,
+                                                       const vector<int>& attributionUids,
+                                                       const vector<string>& attributionTags,
+                                                       const string& jobName) {
+    return CreateScheduledJobStateChangedEvent(attributionUids, attributionTags, jobName,
+                                               ScheduledJobStateChanged::STARTED, timestampNs);
 }
 
 // Create log event when scheduled job finishes.
-std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(
-    const std::vector<AttributionNodeInternal>& attributions,
-    const string& name, uint64_t timestampNs) {
-    return CreateScheduledJobStateChangedEvent(
-            attributions, name, ScheduledJobStateChanged::FINISHED, timestampNs);
+std::unique_ptr<LogEvent> CreateFinishScheduledJobEvent(uint64_t timestampNs,
+                                                        const vector<int>& attributionUids,
+                                                        const vector<string>& attributionTags,
+                                                        const string& jobName) {
+    return CreateScheduledJobStateChangedEvent(attributionUids, attributionTags, jobName,
+                                               ScheduledJobStateChanged::FINISHED, timestampNs);
 }
 
-std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-        const WakelockStateChanged::State state, uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(android::util::WAKELOCK_STATE_CHANGED, timestampNs);
-    event->write(attributions);
-    event->write(android::os::WakeLockLevelEnum::PARTIAL_WAKE_LOCK);
-    event->write(wakelockName);
-    event->write(state);
-    event->init();
-    return event;
+std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(uint64_t timestampNs,
+                                                      const vector<int>& attributionUids,
+                                                      const vector<string>& attributionTags,
+                                                      const string& name,
+                                                      const SyncStateChanged::State state) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, util::SYNC_STATE_CHANGED);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    vector<const char*> cTags(attributionTags.size());
+    for (int i = 0; i < cTags.size(); i++) {
+        cTags[i] = attributionTags[i].c_str();
+    }
+
+    AStatsEvent_writeAttributionChain(statsEvent,
+                                      reinterpret_cast<const uint32_t*>(attributionUids.data()),
+                                      cTags.data(), attributionUids.size());
+    AStatsEvent_writeString(statsEvent, name.c_str());
+    AStatsEvent_writeInt32(statsEvent, state);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+
+    std::unique_ptr<LogEvent> logEvent = std::make_unique<LogEvent>(/*uid=*/0, /*pid=*/0);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+    return logEvent;
 }
 
-std::unique_ptr<LogEvent> CreateAcquireWakelockEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-        uint64_t timestampNs) {
-    return CreateWakelockStateChangedEvent(
-        attributions, wakelockName, WakelockStateChanged::ACQUIRE, timestampNs);
+std::unique_ptr<LogEvent> CreateSyncStartEvent(uint64_t timestampNs,
+                                               const vector<int>& attributionUids,
+                                               const vector<string>& attributionTags,
+                                               const string& name) {
+    return CreateSyncStateChangedEvent(timestampNs, attributionUids, attributionTags, name,
+                                       SyncStateChanged::ON);
 }
 
-std::unique_ptr<LogEvent> CreateReleaseWakelockEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& wakelockName,
-        uint64_t timestampNs) {
-    return CreateWakelockStateChangedEvent(
-        attributions, wakelockName, WakelockStateChanged::RELEASE, timestampNs);
-}
-
-std::unique_ptr<LogEvent> CreateActivityForegroundStateChangedEvent(
-    const int uid, const ActivityForegroundStateChanged::State state, uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(
-        android::util::ACTIVITY_FOREGROUND_STATE_CHANGED, timestampNs);
-    event->write(uid);
-    event->write("pkg_name");
-    event->write("class_name");
-    event->write(state);
-    event->init();
-    return event;
-}
-
-std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(const int uid, uint64_t timestampNs) {
-    return CreateActivityForegroundStateChangedEvent(
-        uid, ActivityForegroundStateChanged::BACKGROUND, timestampNs);
-}
-
-std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(const int uid, uint64_t timestampNs) {
-    return CreateActivityForegroundStateChangedEvent(
-        uid, ActivityForegroundStateChanged::FOREGROUND, timestampNs);
-}
-
-std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-        const SyncStateChanged::State state, uint64_t timestampNs) {
-    auto event = std::make_unique<LogEvent>(android::util::SYNC_STATE_CHANGED, timestampNs);
-    event->write(attributions);
-    event->write(name);
-    event->write(state);
-    event->init();
-    return event;
-}
-
-std::unique_ptr<LogEvent> CreateSyncStartEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-        uint64_t timestampNs) {
-    return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::ON, timestampNs);
-}
-
-std::unique_ptr<LogEvent> CreateSyncEndEvent(
-        const std::vector<AttributionNodeInternal>& attributions, const string& name,
-        uint64_t timestampNs) {
-    return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::OFF, timestampNs);
+std::unique_ptr<LogEvent> CreateSyncEndEvent(uint64_t timestampNs,
+                                             const vector<int>& attributionUids,
+                                             const vector<string>& attributionTags,
+                                             const string& name) {
+    return CreateSyncStateChangedEvent(timestampNs, attributionUids, attributionTags, name,
+                                       SyncStateChanged::OFF);
 }
 
 sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const StatsdConfig& config,

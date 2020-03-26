@@ -184,27 +184,45 @@ public class ApkSignatureVerifier {
             Signature[] signerSigs = convertToSignatures(signerCerts);
 
             if (verifyFull) {
-                // v4 is an add-on and requires v3 signature to validate against its certificates
-                ApkSignatureSchemeV3Verifier.VerifiedSigner nonstreaming =
-                        ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
-                Certificate[][] nonstreamingCerts = new Certificate[][]{nonstreaming.certs};
-                Signature[] nonstreamingSigs = convertToSignatures(nonstreamingCerts);
+                byte[] nonstreamingDigest = null;
+                Certificate[][] nonstreamingCerts = null;
 
+                try {
+                    // v4 is an add-on and requires v2 or v3 signature to validate against its
+                    // certificate and digest
+                    ApkSignatureSchemeV3Verifier.VerifiedSigner v3Signer =
+                            ApkSignatureSchemeV3Verifier.unsafeGetCertsWithoutVerification(apkPath);
+                    nonstreamingDigest = v3Signer.digest;
+                    nonstreamingCerts = new Certificate[][]{v3Signer.certs};
+                } catch (SignatureNotFoundException e) {
+                    try {
+                        ApkSignatureSchemeV2Verifier.VerifiedSigner v2Signer =
+                                ApkSignatureSchemeV2Verifier.verify(apkPath, false);
+                        nonstreamingDigest = v2Signer.digest;
+                        nonstreamingCerts = v2Signer.certs;
+                    } catch (SignatureNotFoundException ee) {
+                        throw new SecurityException(
+                                "V4 verification failed to collect V2/V3 certificates from : "
+                                        + apkPath, ee);
+                    }
+                }
+
+                Signature[] nonstreamingSigs = convertToSignatures(nonstreamingCerts);
                 if (nonstreamingSigs.length != signerSigs.length) {
                     throw new SecurityException(
-                            "Invalid number of certificates: " + nonstreaming.certs.length);
+                            "Invalid number of certificates: " + nonstreamingSigs.length);
                 }
 
                 for (int i = 0, size = signerSigs.length; i < size; ++i) {
                     if (!nonstreamingSigs[i].equals(signerSigs[i])) {
-                        throw new SecurityException("V4 signature certificate does not match V3");
+                        throw new SecurityException(
+                                "V4 signature certificate does not match V2/V3");
                     }
                 }
 
-                // TODO(b/151240006): add support for v2 digest and make it mandatory.
-                if (!ArrayUtils.isEmpty(vSigner.v3Digest) && !ArrayUtils.equals(vSigner.v3Digest,
-                        nonstreaming.digest, vSigner.v3Digest.length)) {
-                    throw new SecurityException("V3 digest in V4 signature does not match V3");
+                if (!ArrayUtils.equals(vSigner.apkDigest, nonstreamingDigest,
+                        vSigner.apkDigest.length)) {
+                    throw new SecurityException("APK digest in V4 signature does not match V2/V3");
                 }
             }
 

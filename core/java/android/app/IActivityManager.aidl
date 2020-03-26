@@ -99,6 +99,7 @@ interface IActivityManager {
     void unregisterUidObserver(in IUidObserver observer);
     boolean isUidActive(int uid, String callingPackage);
     int getUidProcessState(int uid, in String callingPackage);
+    boolean isUidActiveOrForeground(int uid, String callingPackage);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.

@@ -43,6 +43,7 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIE
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
 import static android.os.storage.StorageManager.PROP_FUSE;
+import static android.os.storage.StorageManager.PROP_LEGACY_OP_STICKY;
 import static android.os.storage.StorageManager.PROP_SETTINGS_FUSE;
 
 import static com.android.internal.util.XmlUtils.readIntAttribute;
@@ -155,6 +156,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.pm.Installer;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.storage.AppFuseBridge;
 import com.android.server.storage.StorageSessionController;
 import com.android.server.storage.StorageSessionController.ExternalStorageServiceException;
@@ -902,6 +904,7 @@ class StorageManagerService extends IStorageManager.Stub
                     refreshIsolatedStorageSettings();
                 }
             });
+        updateLegacyStorageOpSticky();
         // For now, simply clone property when it changes
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                 mContext.getMainExecutor(), (properties) -> {
@@ -1776,6 +1779,13 @@ class StorageManagerService extends IStorageManager.Stub
             // Then perform hard reboot to kick policy into place
             mContext.getSystemService(PowerManager.class).reboot("fuse_prop");
         }
+    }
+
+    private void updateLegacyStorageOpSticky() {
+        final boolean propertyValue = DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                "legacy_storage_op_sticky", true);
+        SystemProperties.set(PROP_LEGACY_OP_STICKY, propertyValue ? "true" : "false");
     }
 
     private void start() {
@@ -3265,6 +3275,25 @@ class StorageManagerService extends IStorageManager.Stub
             mVold.destroyUserStorage(volumeUuid, userId, flags);
         } catch (Exception e) {
             Slog.wtf(TAG, e);
+        }
+    }
+
+    @Override
+    public void fixupAppDir(String path) {
+        final Matcher matcher = KNOWN_APP_DIR_PATHS.matcher(path);
+        if (matcher.matches()) {
+            AndroidPackage pkg = mPmInternal.getPackage(matcher.group(3));
+            if (pkg != null) {
+                try {
+                    mVold.fixupAppDir(path + "/", pkg.getUid());
+                } catch (RemoteException | ServiceSpecificException e) {
+                    Log.e(TAG, "Failed to fixup app dir for " + pkg.getPackageName(), e);
+                }
+            } else {
+                Log.e(TAG, "Can't find package belonging to " + path);
+            }
+        } else {
+            Log.e(TAG, "Path " + path + " is not a valid application-specific directory");
         }
     }
 

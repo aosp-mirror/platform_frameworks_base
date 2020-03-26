@@ -801,6 +801,11 @@ public final class LoadedApk {
         makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
         String libraryPermittedPath = mDataDir;
+        if (mActivityThread == null) {
+            // In a zygote context where mActivityThread is null we can't access the app data dir
+            // and including this in libraryPermittedPath would cause SELinux denials.
+            libraryPermittedPath = "";
+        }
 
         if (isBundledApp) {
             // For bundled apps, add the base directory of the app (e.g.,
