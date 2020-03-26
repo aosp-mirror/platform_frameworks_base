@@ -1582,7 +1582,9 @@ public class NotificationManagerService extends SystemService {
                 }
             } else if (action.equals(Intent.ACTION_USER_PRESENT)) {
                 // turn off LED when user passes through lock screen
-                mNotificationLight.turnOff();
+                if (mNotificationLight != null) {
+                    mNotificationLight.turnOff();
+                }
             } else if (action.equals(Intent.ACTION_USER_SWITCHED)) {
                 final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, USER_NULL);
                 mUserProfiles.updateCache(context);
@@ -4196,7 +4198,7 @@ public class NotificationManagerService extends SystemService {
         @Override
         public int getInterruptionFilterFromListener(INotificationListener token)
                 throws RemoteException {
-            synchronized (mNotificationLight) {
+            synchronized (mNotificationLock) {
                 return mInterruptionFilter;
             }
         }
@@ -6776,7 +6778,7 @@ public class NotificationManagerService extends SystemService {
         if (canShowLightsLocked(record, aboveThreshold)) {
             mLights.add(key);
             updateLightsLocked();
-            if (mUseAttentionLight) {
+            if (mUseAttentionLight && mAttentionLight != null) {
                 mAttentionLight.pulse();
             }
             blink = true;
@@ -7977,6 +7979,10 @@ public class NotificationManagerService extends SystemService {
     @GuardedBy("mNotificationLock")
     void updateLightsLocked()
     {
+        if (mNotificationLight == null) {
+            return;
+        }
+
         // handle notification lights
         NotificationRecord ledNotification = null;
         while (ledNotification == null && !mLights.isEmpty()) {
