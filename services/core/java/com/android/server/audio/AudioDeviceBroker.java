@@ -30,6 +30,7 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
 import android.media.IStrategyPreferredDeviceDispatcher;
+import android.media.MediaMetrics;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -668,6 +669,13 @@ import java.io.PrintWriter;
         }
         AudioService.sForceUseLogger.log(
                 new AudioServiceEvents.ForceUseEvent(useCase, config, eventSource));
+        new MediaMetrics.Item(MediaMetrics.Name.AUDIO_FORCE_USE + MediaMetrics.SEPARATOR
+                + AudioSystem.forceUseUsageToString(useCase))
+                .set(MediaMetrics.Property.EVENT, "onSetForceUse")
+                .set(MediaMetrics.Property.FORCE_USE_DUE_TO, eventSource)
+                .set(MediaMetrics.Property.FORCE_USE_MODE,
+                        AudioSystem.forceUseConfigToString(config))
+                .record();
         AudioSystem.setForceUse(useCase, config);
     }
 
