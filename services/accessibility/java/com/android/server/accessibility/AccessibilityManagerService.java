@@ -2001,17 +2001,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
                 userState.mUserId, currentTargets, str -> str);
         scheduleNotifyClientsOfServicesStateChangeLocked(userState);
-
-        // Disable accessibility shortcut key if there's no shortcut installed.
-        if (currentTargets.isEmpty()) {
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                        Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 0, userState.mUserId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
     }
 
     private boolean canRequestAndRequestsTouchExplorationLocked(
