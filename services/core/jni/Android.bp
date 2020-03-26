@@ -41,6 +41,7 @@ cc_library_static {
         "com_android_server_security_VerityUtils.cpp",
         "com_android_server_SerialService.cpp",
         "com_android_server_soundtrigger_middleware_AudioSessionProviderImpl.cpp",
+        "com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker.cpp",
         "com_android_server_stats_pull_StatsPullAtomService.cpp",
         "com_android_server_storage_AppFuseBridge.cpp",
         "com_android_server_SystemServer.cpp",
