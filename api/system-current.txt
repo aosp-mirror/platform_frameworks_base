@@ -2030,10 +2030,10 @@ package android.content.pm {
   }
 
   public static class PackageInstaller.Session implements java.io.Closeable {
-    method public void addFile(int, @NonNull String, long, @NonNull byte[], @Nullable byte[]);
+    method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void addFile(int, @NonNull String, long, @NonNull byte[], @Nullable byte[]);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void commitTransferred(@NonNull android.content.IntentSender);
-    method @Nullable public android.content.pm.DataLoaderParams getDataLoaderParams();
-    method public void removeFile(int, @NonNull String);
+    method @Nullable @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public android.content.pm.DataLoaderParams getDataLoaderParams();
+    method @RequiresPermission("com.android.permission.USE_INSTALLER_V2") public void removeFile(int, @NonNull String);
   }
 
   public static class PackageInstaller.SessionInfo implements android.os.Parcelable {
@@ -2054,7 +2054,7 @@ package android.content.pm {
   public static class PackageInstaller.SessionParams implements android.os.Parcelable {
     method @RequiresPermission(android.Manifest.permission.ALLOCATE_AGGRESSIVE) public void setAllocateAggressive(boolean);
     method @Deprecated public void setAllowDowngrade(boolean);
-    method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
+    method @RequiresPermission(allOf={android.Manifest.permission.INSTALL_PACKAGES, "com.android.permission.USE_INSTALLER_V2"}) public void setDataLoaderParams(@NonNull android.content.pm.DataLoaderParams);
     method public void setDontKillApp(boolean);
     method public void setEnableRollback(boolean);
     method public void setEnableRollback(boolean, int);
