@@ -307,6 +307,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
             assertEquals(1, controls.size)
             val controlStatus = controls[0]
             assertEquals(TEST_CONTROL_ID, controlStatus.control.controlId)
+            assertEquals(TEST_STRUCTURE_INFO.structure, controlStatus.control.structure)
             assertTrue(controlStatus.favorite)
             assertTrue(controlStatus.removed)
 
@@ -337,6 +338,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
             assertEquals(1, controls.size)
             val controlStatus = controls[0]
             assertEquals(TEST_CONTROL_ID, controlStatus.control.controlId)
+            assertEquals(TEST_STRUCTURE_INFO.structure, controlStatus.control.structure)
             assertTrue(controlStatus.favorite)
             assertFalse(controlStatus.removed)
 
