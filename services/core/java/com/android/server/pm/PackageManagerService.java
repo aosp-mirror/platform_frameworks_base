@@ -9679,6 +9679,20 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public void notifyDexLoad(String loadingPackageName, Map<String, String> classLoaderContextMap,
             String loaderIsa) {
+        if (PLATFORM_PACKAGE_NAME.equals(loadingPackageName)
+                && Binder.getCallingUid() != Process.SYSTEM_UID) {
+            Slog.w(TAG, "Non System Server process reporting dex loads as system server. uid="
+                    + Binder.getCallingUid());
+            // Do not record dex loads from processes pretending to be system server.
+            // Only the system server should be assigned the package "android", so reject calls
+            // that don't satisfy the constraint.
+            //
+            // notifyDexLoad is a PM API callable from the app process. So in theory, apps could
+            // craft calls to this API and pretend to be system server. Doing so poses no particular
+            // danger for dex load reporting or later dexopt, however it is a sensible check to do
+            // in order to verify the expectations.
+            return;
+        }
         int userId = UserHandle.getCallingUserId();
         ApplicationInfo ai = getApplicationInfo(loadingPackageName, /*flags*/ 0, userId);
         if (ai == null) {
@@ -11305,7 +11319,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.i(TAG, "Using ABIS and native lib paths from settings : " +
                             parsedPackage.getPackageName() + " " +
                             AndroidPackageUtils.getRawPrimaryCpuAbi(parsedPackage)
-                            + ", " 
+                            + ", "
                             + AndroidPackageUtils.getRawSecondaryCpuAbi(parsedPackage));
                 }
             }
