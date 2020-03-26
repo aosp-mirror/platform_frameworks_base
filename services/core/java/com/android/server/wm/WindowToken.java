@@ -480,26 +480,42 @@ class WindowToken extends WindowContainer<WindowState> {
     }
 
     /**
-     * Clears the transformation and continue updating the orientation change of display. Only the
-     * state owner can clear the transform state.
+     * Finishes the transform and continue updating the orientation change of display. Only the
+     * state owner can finish the transform state.
      */
-    void clearFixedRotationTransform() {
-        final FixedRotationTransformState state = mFixedRotationTransformState;
-        if (state == null || state.mOwner != this) {
+    void finishFixedRotationTransform() {
+        if (mFixedRotationTransformState == null || mFixedRotationTransformState.mOwner != this) {
             return;
         }
-        state.resetTransform();
-        // Clear the flag so if the display will be updated to the same orientation, the transform
-        // won't take effect. The state is cleared at the end, because it is used to indicate that
-        // other windows can use seamless rotation when applying rotation to display.
-        state.mIsTransforming = false;
         final boolean changed =
                 mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp(this);
-        // If it is not the launching app or the display is not rotated, make sure the merged
-        // override configuration is restored from parent.
+        // If it is not the launching app or the display is not rotated, make sure the transform is
+        // cleared and the configuration is restored from parent.
         if (!changed) {
-            onMergedOverrideConfigurationChanged();
+            clearFixedRotationTransform(null /* applyDisplayRotation */);
+            onConfigurationChanged(getParent().getConfiguration());
         }
+    }
+
+    /**
+     * Clears the transform and apply display rotation if the action is given. The caller needs to
+     * refresh the configuration of this container after this method call.
+     */
+    void clearFixedRotationTransform(Runnable applyDisplayRotation) {
+        final FixedRotationTransformState state = mFixedRotationTransformState;
+        if (state == null) {
+            return;
+        }
+
+        state.resetTransform();
+        // Clear the flag so if the display will be updated to the same orientation, the transform
+        // won't take effect.
+        state.mIsTransforming = false;
+        if (applyDisplayRotation != null) {
+            applyDisplayRotation.run();
+        }
+        // The state is cleared at the end, because it is used to indicate that other windows can
+        // use seamless rotation when applying rotation to display.
         for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
             state.mAssociatedTokens.get(i).mFixedRotationTransformState = null;
         }
