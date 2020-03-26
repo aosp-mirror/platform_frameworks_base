@@ -64,6 +64,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     private static final String TAG = "CrossProfileAppsService";
@@ -447,7 +448,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         final int uid = mInjector.getPackageManager()
                 .getPackageUidAsUser(packageName, /* flags= */ 0, userId);
         if (currentModeEquals(newMode, packageName, uid)) {
-            Slog.w(TAG, "Attempt to set mode to existing value of " + newMode + " for "
+            Slog.i(TAG, "Attempt to set mode to existing value of " + newMode + " for "
                     + packageName + " on user ID " + userId);
             return;
         }
@@ -575,6 +576,24 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         final String op =
                 AppOpsManager.permissionToOp(Manifest.permission.INTERACT_ACROSS_PROFILES);
         setInteractAcrossProfilesAppOp(packageName, AppOpsManager.opToDefaultMode(op));
+    }
+
+    @Override
+    public void clearInteractAcrossProfilesAppOps() {
+        final int defaultMode =
+                AppOpsManager.opToDefaultMode(
+                        AppOpsManager.permissionToOp(Manifest.permission.INTERACT_ACROSS_PROFILES));
+        findAllPackageNames()
+                .forEach(packageName -> setInteractAcrossProfilesAppOp(packageName, defaultMode));
+    }
+
+    private List<String> findAllPackageNames() {
+        return mInjector.getPackageManagerInternal()
+                .getInstalledApplications(
+                        /* flags= */ 0, mInjector.getCallingUserId(), mInjector.getCallingUid())
+                .stream()
+                .map(applicationInfo -> applicationInfo.packageName)
+                .collect(Collectors.toList());
     }
 
     CrossProfileAppsInternal getLocalService() {
