@@ -788,6 +788,22 @@ public class RootActivityContainerTests extends ActivityTestsBase {
     }
 
     @Test
+    public void testGetValidLaunchStackOnDisplayWithCandidateRootTask() {
+        // Create a root task with an activity on secondary display.
+        final TestDisplayContent secondaryDisplay = new TestDisplayContent.Builder(mService, 300,
+                600).build();
+        final Task task = new ActivityTestsBase.StackBuilder(mRootWindowContainer).setDisplay(
+                secondaryDisplay).build();
+        final ActivityRecord activity = new ActivityTestsBase.ActivityBuilder(mService)
+                .setTask(task).build();
+
+        // Make sure the root task is valid and can be reused on default display.
+        final ActivityStack stack = mRootWindowContainer.getValidLaunchStackOnDisplay(
+                DEFAULT_DISPLAY, activity, task, null, null);
+        assertEquals(task, stack);
+    }
+
+    @Test
     public void testSwitchUser_missingHomeRootTask() {
         doReturn(mFullscreenStack).when(mRootWindowContainer).getTopDisplayFocusedStack();
 
