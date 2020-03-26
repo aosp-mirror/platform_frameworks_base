@@ -4432,6 +4432,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             position = findPositionForStack(position, stack, true /* adding */);
 
             super.addChild(stack, position);
+            mAtmService.updateSleepIfNeededLocked();
 
             // The reparenting case is handled in WindowContainer.
             if (!stack.mReparenting) {
@@ -4443,6 +4444,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         protected void removeChild(ActivityStack stack) {
             super.removeChild(stack);
             mDisplayContent.onStackRemoved(stack);
+            mAtmService.updateSleepIfNeededLocked();
             removeStackReferenceIfNeeded(stack);
         }
 
@@ -5648,7 +5650,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void addStack(ActivityStack stack, int position) {
         setStackOnDisplay(stack, position);
         positionStackAt(stack, position);
-        mAtmService.updateSleepIfNeededLocked();
     }
 
     void addStackReferenceIfNeeded(ActivityStack stack) {
@@ -5667,7 +5668,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPreferredTopFocusableStack = null;
         }
         releaseSelfIfNeeded();
-        mAtmService.updateSleepIfNeededLocked();
         onStackOrderChanged(stack);
     }
 
