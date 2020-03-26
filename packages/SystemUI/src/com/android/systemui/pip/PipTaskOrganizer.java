@@ -26,9 +26,8 @@ import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTI
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
-import android.window.ITaskOrganizerController;
 import android.app.PictureInPictureParams;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
@@ -38,9 +37,9 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Size;
+import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
 import android.window.IWindowContainer;
-import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
@@ -93,7 +92,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionStarted();
+                    callback.onPipTransitionStarted(mTaskInfo.baseActivity,
+                            animator.getTransitionDirection());
                 }
             });
         }
@@ -104,7 +104,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionFinished();
+                    callback.onPipTransitionFinished(mTaskInfo.baseActivity,
+                            animator.getTransitionDirection());
                 }
             });
             finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection());
@@ -115,7 +116,8 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
             mMainHandler.post(() -> {
                 for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
                     final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionCanceled();
+                    callback.onPipTransitionCanceled(mTaskInfo.baseActivity,
+                            animator.getTransitionDirection());
                 }
             });
         }
@@ -198,6 +200,10 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
 
     public Handler getUpdateHandler() {
         return mUpdateHandler;
+    }
+
+    public Rect getLastReportedBounds() {
+        return new Rect(mLastReportedBounds);
     }
 
     /**
@@ -492,16 +498,16 @@ public class PipTaskOrganizer extends ITaskOrganizer.Stub {
         /**
          * Callback when the pip transition is started.
          */
-        void onPipTransitionStarted();
+        void onPipTransitionStarted(ComponentName activity, int direction);
 
         /**
          * Callback when the pip transition is finished.
          */
-        void onPipTransitionFinished();
+        void onPipTransitionFinished(ComponentName activity, int direction);
 
         /**
          * Callback when the pip transition is cancelled.
          */
-        void onPipTransitionCanceled();
+        void onPipTransitionCanceled(ComponentName activity, int direction);
     }
 }

@@ -3160,7 +3160,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
 
         // Reset the last saved PiP snap fraction on removal.
-        mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
+        mDisplayContent.mPinnedStackControllerLocked.onActivityHidden(mActivityComponent);
         mWmService.mEmbeddedWindowController.onActivityRemoved(this);
         mRemovingFromDisplay = false;
     }
@@ -4426,7 +4426,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "notifyAppStopped: %s", this);
         mAppStopped = true;
         // Reset the last saved PiP snap fraction on app stop.
-        mDisplayContent.mPinnedStackControllerLocked.resetReentryBounds(mActivityComponent);
+        mDisplayContent.mPinnedStackControllerLocked.onActivityHidden(mActivityComponent);
         destroySurfaces();
         // Remove any starting window that was added for this app if they are still around.
         removeStartingWindow();
@@ -6646,17 +6646,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 restartProcessIfVisible();
             }
         }
-    }
-
-    void savePinnedStackBounds() {
-        // Leaving PiP to fullscreen, save the snap fraction based on the pre-animation bounds
-        // for the next re-entry into PiP (assuming the activity is not hidden or destroyed)
-        final ActivityStack pinnedStack = mDisplayContent.getRootPinnedTask();
-        if (pinnedStack == null) return;
-        final Rect stackBounds = mTmpRect;
-        pinnedStack.getBounds(stackBounds);
-        mDisplayContent.mPinnedStackControllerLocked.saveReentryBounds(
-                mActivityComponent, stackBounds);
     }
 
     /** Returns true if the configuration is compatible with this activity. */

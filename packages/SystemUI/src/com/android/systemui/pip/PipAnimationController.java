@@ -49,10 +49,10 @@ public class PipAnimationController {
     @Retention(RetentionPolicy.SOURCE)
     public @interface AnimationType {}
 
-    static final int TRANSITION_DIRECTION_NONE = 0;
-    static final int TRANSITION_DIRECTION_SAME = 1;
-    static final int TRANSITION_DIRECTION_TO_PIP = 2;
-    static final int TRANSITION_DIRECTION_TO_FULLSCREEN = 3;
+    public static final int TRANSITION_DIRECTION_NONE = 0;
+    public static final int TRANSITION_DIRECTION_SAME = 1;
+    public static final int TRANSITION_DIRECTION_TO_PIP = 2;
+    public static final int TRANSITION_DIRECTION_TO_FULLSCREEN = 3;
 
     @IntDef(prefix = { "TRANSITION_DIRECTION_" }, value = {
             TRANSITION_DIRECTION_NONE,
@@ -61,7 +61,7 @@ public class PipAnimationController {
             TRANSITION_DIRECTION_TO_FULLSCREEN
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface TransitionDirection {}
+    public @interface TransitionDirection {}
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;

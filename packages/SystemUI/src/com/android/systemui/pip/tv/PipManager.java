@@ -45,7 +45,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.view.DisplayInfo;
-import android.window.WindowOrganizer;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -700,15 +699,15 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     };
 
     @Override
-    public void onPipTransitionStarted() { }
+    public void onPipTransitionStarted(ComponentName activity, int direction) { }
 
     @Override
-    public void onPipTransitionFinished() {
+    public void onPipTransitionFinished(ComponentName activity, int direction) {
         onPipTransitionFinishedOrCanceled();
     }
 
     @Override
-    public void onPipTransitionCanceled() {
+    public void onPipTransitionCanceled(ComponentName activity, int direction) {
         onPipTransitionFinishedOrCanceled();
     }
 
