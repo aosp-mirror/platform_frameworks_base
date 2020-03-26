@@ -8780,6 +8780,27 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isUidActiveOrForeground(int uid, String callingPackage) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "isUidActiveOrForeground");
+        }
+        synchronized (this) {
+            final boolean isActive = isUidActiveLocked(uid);
+            if (isActive) {
+                return true;
+            }
+        }
+        final boolean isForeground = mAtmInternal.isUidForeground(uid);
+        if (isForeground) {
+            Slog.wtf(TAG, "isUidActiveOrForeground: isUidActive false but "
+                    + " isUidForeground true, uid:" + uid
+                    + " callingPackage:" + callingPackage);
+        }
+        return isForeground;
+    }
+
+    @Override
     public void setPersistentVrThread(int tid) {
         mActivityTaskManager.setPersistentVrThread(tid);
     }
