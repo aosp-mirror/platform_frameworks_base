@@ -1434,58 +1434,25 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    // Helper class to carry data to handler for reportSvStatus
-    private static class SvStatusInfo {
-        private int mSvCount;
-        private int[] mSvidWithFlags;
-        private float[] mCn0s;
-        private float[] mSvElevations;
-        private float[] mSvAzimuths;
-        private float[] mSvCarrierFreqs;
-        private float[] mBasebandCn0s;
-    }
-
     @NativeEntryPoint
-    private void reportSvStatus(int svCount, int[] svidWithFlags, float[] cn0s,
-            float[] svElevations, float[] svAzimuths, float[] svCarrierFreqs,
-            float[] basebandCn0s) {
-        SvStatusInfo svStatusInfo = new SvStatusInfo();
-        svStatusInfo.mSvCount = svCount;
-        svStatusInfo.mSvidWithFlags = svidWithFlags;
-        svStatusInfo.mCn0s = cn0s;
-        svStatusInfo.mSvElevations = svElevations;
-        svStatusInfo.mSvAzimuths = svAzimuths;
-        svStatusInfo.mSvCarrierFreqs = svCarrierFreqs;
-        svStatusInfo.mBasebandCn0s = basebandCn0s;
-
-        sendMessage(REPORT_SV_STATUS, 0, svStatusInfo);
+    private void reportSvStatus(int svCount, int[] svidWithFlags, float[] cn0DbHzs,
+            float[] elevations, float[] azimuths, float[] carrierFrequencies,
+            float[] basebandCn0DbHzs) {
+        sendMessage(REPORT_SV_STATUS, 0,
+                GnssStatus.wrap(svCount, svidWithFlags, cn0DbHzs, elevations, azimuths,
+                        carrierFrequencies, basebandCn0DbHzs));
     }
 
-    private void handleReportSvStatus(SvStatusInfo info) {
-        mGnssStatusListenerHelper.onSvStatusChanged(
-                info.mSvCount,
-                info.mSvidWithFlags,
-                info.mCn0s,
-                info.mSvElevations,
-                info.mSvAzimuths,
-                info.mSvCarrierFreqs,
-                info.mBasebandCn0s);
+    private void handleReportSvStatus(GnssStatus gnssStatus) {
+        mGnssStatusListenerHelper.onSvStatusChanged(gnssStatus);
 
         // Log CN0 as part of GNSS metrics
-        mGnssMetrics.logCn0(info.mCn0s, info.mSvCount, info.mSvCarrierFreqs);
+        mGnssMetrics.logCn0(gnssStatus);
 
         if (VERBOSE) {
-            Log.v(TAG, "SV count: " + info.mSvCount);
+            Log.v(TAG, "SV count: " + gnssStatus.getSatelliteCount());
         }
-        // Calculate number of satellites used in fix.
-        GnssStatus gnssStatus = GnssStatus.wrap(
-                info.mSvCount,
-                info.mSvidWithFlags,
-                info.mCn0s,
-                info.mSvElevations,
-                info.mSvAzimuths,
-                info.mSvCarrierFreqs,
-                info.mBasebandCn0s);
+
         int usedInFixCount = 0;
         int maxCn0 = 0;
         int meanCn0 = 0;
@@ -2032,7 +1999,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     handleReportLocation(msg.arg1 == 1, (Location) msg.obj);
                     break;
                 case REPORT_SV_STATUS:
-                    handleReportSvStatus((SvStatusInfo) msg.obj);
+                    handleReportSvStatus((GnssStatus) msg.obj);
                     break;
                 case UPDATE_LOW_POWER_MODE:
                     updateLowPowerMode();

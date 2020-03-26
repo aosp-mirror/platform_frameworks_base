@@ -19,6 +19,7 @@ package com.android.internal.location.gnssmetrics;
 import android.app.StatsManager;
 import android.content.Context;
 import android.location.GnssStatus;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.connectivity.GpsBatteryStats;
@@ -47,86 +48,57 @@ import java.util.List;
  */
 public class GnssMetrics {
 
-    private static final String TAG = GnssMetrics.class.getSimpleName();
+    private static final String TAG = "GnssMetrics";
 
-    /* Constant which indicates GPS signal quality is as yet unknown */
     private static final int GPS_SIGNAL_QUALITY_UNKNOWN =
             ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_UNKNOWN; // -1
 
-    /* Constant which indicates GPS signal quality is poor */
     private static final int GPS_SIGNAL_QUALITY_POOR =
             ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_POOR; // 0
 
-    /* Constant which indicates GPS signal quality is good */
     private static final int GPS_SIGNAL_QUALITY_GOOD =
             ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_GOOD; // 1
 
-    /* Number of GPS signal quality levels */
     public static final int NUM_GPS_SIGNAL_QUALITY_LEVELS = GPS_SIGNAL_QUALITY_GOOD + 1;
 
     /** Default time between location fixes (in millisecs) */
     private static final int DEFAULT_TIME_BETWEEN_FIXES_MILLISECS = 1000;
 
-    /* The time since boot when logging started */
-    private String mLogStartInElapsedRealTime;
-
-    /** The number of hertz in one MHz */
-    private static final double HZ_PER_MHZ = 1e6;
-
-    /* GNSS power metrics */
-    private GnssPowerMetrics mGnssPowerMetrics;
-
     /** Frequency range of GPS L5, Galileo E5a, QZSS J5 frequency band */
-    private static final double L5_CARRIER_FREQ_RANGE_LOW_HZ = 1164 * HZ_PER_MHZ;
-    private static final double L5_CARRIER_FREQ_RANGE_HIGH_HZ = 1189 * HZ_PER_MHZ;
+    private static final double L5_CARRIER_FREQ_RANGE_LOW_HZ = 1164 * 1e6;
+    private static final double L5_CARRIER_FREQ_RANGE_HIGH_HZ = 1189 * 1e6;
 
-    /* A boolean array indicating whether the constellation types have been used in fix. */
+    private long mLogStartInElapsedRealtimeMs;
+
+    GnssPowerMetrics mGnssPowerMetrics;
+
+    // A boolean array indicating whether the constellation types have been used in fix.
     private boolean[] mConstellationTypes;
-    /** Location failure statistics */
     private Statistics mLocationFailureStatistics;
-    /** Time to first fix statistics */
     private Statistics mTimeToFirstFixSecStatistics;
-    /** Position accuracy statistics */
     private Statistics mPositionAccuracyMeterStatistics;
-    /** Top 4 average CN0 statistics */
     private Statistics mTopFourAverageCn0Statistics;
-    /** Top 4 average CN0 statistics L5 */
     private Statistics mTopFourAverageCn0StatisticsL5;
-    /** Total number of sv status messages processed */
+    // Total number of sv status messages processed
     private int mNumSvStatus;
-    /** Total number of L5 sv status messages processed */
+    // Total number of L5 sv status messages processed
     private int mNumL5SvStatus;
-    /** Total number of sv status messages processed, where sv is used in fix */
+    // Total number of sv status messages processed, where sv is used in fix
     private int mNumSvStatusUsedInFix;
-    /** Total number of L5 sv status messages processed, where sv is used in fix */
+    // Total number of L5 sv status messages processed, where sv is used in fix
     private int mNumL5SvStatusUsedInFix;
 
-    /* Statsd Logging Variables Section Start */
-    /** Location failure reports since boot used for statsd logging */
-    private Statistics mLocationFailureReportsStatistics;
-    /** Time to first fix milli-seconds since boot used for statsd logging */
-    private Statistics mTimeToFirstFixMilliSReportsStatistics;
-    /** Position accuracy meters since boot used for statsd logging  */
-    private Statistics mPositionAccuracyMetersReportsStatistics;
-    /** Top 4 average CN0 (db-mHz) since boot used for statsd logging  */
-    private Statistics mTopFourAverageCn0DbmHzReportsStatistics;
-    /** Top 4 average CN0 (db-mHz) L5 since boot used for statsd logging  */
-    private Statistics mL5TopFourAverageCn0DbmHzReportsStatistics;
-    /** Total number of sv status reports processed since boot used for statsd logging  */
-    private long mSvStatusReports;
-    /** Total number of L5 sv status reports processed since boot used for statsd logging  */
-    private long mL5SvStatusReports;
-    /** Total number of sv status reports processed, where sv is used in fix since boot used for
-     * statsd logging  */
-    private long mSvStatusReportsUsedInFix;
-    /** Total number of L5 sv status reports processed, where sv is used in fix since boot used for
-     * statsd logging  */
-    private long mL5SvStatusReportsUsedInFix;
-    /** Stats manager service for reporting atoms */
+    Statistics mLocationFailureReportsStatistics;
+    Statistics mTimeToFirstFixMilliSReportsStatistics;
+    Statistics mPositionAccuracyMetersReportsStatistics;
+    Statistics mTopFourAverageCn0DbmHzReportsStatistics;
+    Statistics mL5TopFourAverageCn0DbmHzReportsStatistics;
+    long mSvStatusReports;
+    long mL5SvStatusReports;
+    long mSvStatusReportsUsedInFix;
+    long mL5SvStatusReportsUsedInFix;
+
     private StatsManager mStatsManager;
-    /** Pull atom callback, this is called when atom pull request occurs */
-    private StatsPullAtomCallbackImpl mPullAtomCallback;
-    /* Statds Logging Variables Section End */
 
     public GnssMetrics(Context context, IBatteryStats stats) {
         mGnssPowerMetrics = new GnssPowerMetrics(stats);
@@ -177,7 +149,7 @@ public class GnssMetrics {
      * Logs time to first fix
      */
     public void logTimeToFirstFixMilliSecs(int timeToFirstFixMilliSeconds) {
-        mTimeToFirstFixSecStatistics.addItem((double) (timeToFirstFixMilliSeconds / 1000));
+        mTimeToFirstFixSecStatistics.addItem(((double) timeToFirstFixMilliSeconds) / 1000);
         mTimeToFirstFixMilliSReportsStatistics.addItem(timeToFirstFixMilliSeconds);
     }
 
@@ -185,36 +157,35 @@ public class GnssMetrics {
      * Logs position accuracy
      */
     public void logPositionAccuracyMeters(float positionAccuracyMeters) {
-        mPositionAccuracyMeterStatistics.addItem((double) positionAccuracyMeters);
+        mPositionAccuracyMeterStatistics.addItem(positionAccuracyMeters);
         mPositionAccuracyMetersReportsStatistics.addItem(positionAccuracyMeters);
     }
 
     /**
      * Logs CN0 when at least 4 SVs are available
-     *
-     * @param cn0s
-     * @param numSv
-     * @param svCarrierFreqs
      */
-    public void logCn0(float[] cn0s, int numSv, float[] svCarrierFreqs) {
-        // Calculate L5 Cn0
-        logCn0L5(numSv, cn0s, svCarrierFreqs);
-        if (numSv == 0 || cn0s == null || cn0s.length == 0 || cn0s.length < numSv) {
-            if (numSv == 0) {
-                mGnssPowerMetrics.reportSignalQuality(null, 0);
-            }
+    public void logCn0(GnssStatus gnssStatus) {
+        logCn0L5(gnssStatus);
+
+        if (gnssStatus.getSatelliteCount() == 0) {
+            mGnssPowerMetrics.reportSignalQuality(null);
             return;
         }
-        float[] cn0Array = Arrays.copyOf(cn0s, numSv);
-        Arrays.sort(cn0Array);
-        mGnssPowerMetrics.reportSignalQuality(cn0Array, numSv);
-        if (numSv < 4) {
+
+        float[] cn0DbHzs = new float[gnssStatus.getSatelliteCount()];
+        for (int i = 0; i < gnssStatus.getSatelliteCount(); i++) {
+            cn0DbHzs[i] = gnssStatus.getCn0DbHz(i);
+        }
+
+        Arrays.sort(cn0DbHzs);
+        mGnssPowerMetrics.reportSignalQuality(cn0DbHzs);
+        if (cn0DbHzs.length < 4) {
             return;
         }
-        if (cn0Array[numSv - 4] > 0.0) {
+        if (cn0DbHzs[cn0DbHzs.length - 4] > 0.0) {
             double top4AvgCn0 = 0.0;
-            for (int i = numSv - 4; i < numSv; i++) {
-                top4AvgCn0 += (double) cn0Array[i];
+            for (int i = cn0DbHzs.length - 4; i < cn0DbHzs.length; i++) {
+                top4AvgCn0 += cn0DbHzs[i];
             }
             top4AvgCn0 /= 4;
             mTopFourAverageCn0Statistics.addItem(top4AvgCn0);
@@ -222,7 +193,7 @@ public class GnssMetrics {
             mTopFourAverageCn0DbmHzReportsStatistics.addItem(top4AvgCn0 * 1000);
         }
     }
-    /* Helper function to check if a SV is L5 */
+
     private static boolean isL5Sv(float carrierFreq) {
         return (carrierFreq >= L5_CARRIER_FREQ_RANGE_LOW_HZ
                 && carrierFreq <= L5_CARRIER_FREQ_RANGE_HIGH_HZ);
@@ -232,7 +203,7 @@ public class GnssMetrics {
     * Logs sv status data
     */
     public void logSvStatus(GnssStatus status) {
-        boolean isL5 = false;
+        boolean isL5;
         // Calculate SvStatus Information
         for (int i = 0; i < status.getSatelliteCount(); i++) {
             if (status.hasCarrierFrequencyHz(i)) {
@@ -258,35 +229,32 @@ public class GnssMetrics {
     /**
     * Logs CN0 when at least 4 SVs are available L5 Only
     */
-    private void logCn0L5(int svCount, float[] cn0s, float[] svCarrierFreqs) {
-        if (svCount == 0 || cn0s == null || cn0s.length == 0 || cn0s.length < svCount
-                || svCarrierFreqs == null || svCarrierFreqs.length == 0
-                || svCarrierFreqs.length < svCount) {
+    private void logCn0L5(GnssStatus gnssStatus) {
+        if (gnssStatus.getSatelliteCount() == 0) {
             return;
         }
         // Create array list of all L5 satellites in report.
-        ArrayList<Float> CnoL5Array = new ArrayList();
-        for (int i = 0; i < svCount; i++) {
-            if (isL5Sv(svCarrierFreqs[i])) {
-                CnoL5Array.add(cn0s[i]);
+        ArrayList<Float> l5Cn0DbHzs = new ArrayList<>(gnssStatus.getSatelliteCount());
+        for (int i = 0; i < gnssStatus.getSatelliteCount(); i++) {
+            if (isL5Sv(gnssStatus.getCarrierFrequencyHz(i))) {
+                l5Cn0DbHzs.add(gnssStatus.getCn0DbHz(i));
             }
         }
-        if (CnoL5Array.size() == 0 || CnoL5Array.size() < 4) {
+        if (l5Cn0DbHzs.size() < 4) {
             return;
         }
-        int numSvL5 = CnoL5Array.size();
-        Collections.sort(CnoL5Array);
-        if (CnoL5Array.get(numSvL5 - 4) > 0.0) {
+
+        Collections.sort(l5Cn0DbHzs);
+        if (l5Cn0DbHzs.get(l5Cn0DbHzs.size() - 4) > 0.0) {
             double top4AvgCn0 = 0.0;
-            for (int i = numSvL5 - 4; i < numSvL5; i++) {
-                top4AvgCn0 += (double) CnoL5Array.get(i);
+            for (int i = l5Cn0DbHzs.size() - 4; i < l5Cn0DbHzs.size(); i++) {
+                top4AvgCn0 += l5Cn0DbHzs.get(i);
             }
             top4AvgCn0 /= 4;
             mTopFourAverageCn0StatisticsL5.addItem(top4AvgCn0);
             // Convert to mHz for accuracy
             mL5TopFourAverageCn0DbmHzReportsStatistics.addItem(top4AvgCn0 * 1000);
         }
-        return;
     }
 
     /**
@@ -360,9 +328,11 @@ public class GnssMetrics {
     public String dumpGnssMetricsAsText() {
         StringBuilder s = new StringBuilder();
         s.append("GNSS_KPI_START").append('\n');
-        s.append("  KPI logging start time: ").append(mLogStartInElapsedRealTime).append("\n");
+        s.append("  KPI logging start time: ");
+        TimeUtils.formatDuration(mLogStartInElapsedRealtimeMs, s);
+        s.append("\n");
         s.append("  KPI logging end time: ");
-        TimeUtils.formatDuration(SystemClock.elapsedRealtimeNanos() / 1000000L, s);
+        TimeUtils.formatDuration(SystemClock.elapsedRealtime(), s);
         s.append("\n");
         s.append("  Number of location reports: ").append(
                 mLocationFailureStatistics.getCount()).append("\n");
@@ -447,9 +417,7 @@ public class GnssMetrics {
     }
 
     private void reset() {
-        StringBuilder s = new StringBuilder();
-        TimeUtils.formatDuration(SystemClock.elapsedRealtimeNanos() / 1000000L, s);
-        mLogStartInElapsedRealTime = s.toString();
+        mLogStartInElapsedRealtimeMs = SystemClock.elapsedRealtime();
         mLocationFailureStatistics.reset();
         mTimeToFirstFixSecStatistics.reset();
         mPositionAccuracyMeterStatistics.reset();
@@ -468,12 +436,14 @@ public class GnssMetrics {
     }
 
     /** Class for storing statistics */
-    private class Statistics {
+    private static class Statistics {
 
         private int mCount;
         private double mSum;
         private double mSumSquare;
         private long mLongSum;
+
+        Statistics() {}
 
         /** Resets statistics */
         public void reset() {
@@ -536,7 +506,7 @@ public class GnssMetrics {
         /* Last reported signal quality bin (based on Top Four Average CN0) */
         private int mLastSignalLevel;
 
-        private GnssPowerMetrics(IBatteryStats stats) {
+        GnssPowerMetrics(IBatteryStats stats) {
             mBatteryStats = stats;
             // Used to initialize the variable to a very small value (unachievable in practice)
           // so that
@@ -559,9 +529,7 @@ public class GnssMetrics {
                         stats.getEnergyConsumedMaMs() / ((double) DateUtils.HOUR_IN_MILLIS);
                 long[] t = stats.getTimeInGpsSignalQualityLevel();
                 p.timeInSignalQualityLevelMs = new long[t.length];
-                for (int i = 0; i < t.length; i++) {
-                    p.timeInSignalQualityLevelMs[i] = t[i];
-                }
+                System.arraycopy(t, 0, p.timeInSignalQualityLevelMs, 0, t.length);
             }
             return p;
         }
@@ -574,26 +542,26 @@ public class GnssMetrics {
         public GpsBatteryStats getGpsBatteryStats() {
             try {
                 return mBatteryStats.getGpsBatteryStats();
-            } catch (Exception e) {
-                Log.w(TAG, "Exception", e);
+            } catch (RemoteException e) {
+                Log.w(TAG, e);
                 return null;
             }
         }
 
         /**
          * Reports signal quality to BatteryStats. Signal quality is based on Top four average CN0.
-         * If
-         * the number of SVs seen is less than 4, then signal quality is the average CN0.
+         * If the number of SVs seen is less than 4, then signal quality is the average CN0.
          * Changes are reported only if the average CN0 changes by more than
          * REPORTING_THRESHOLD_DB_HZ.
          */
-        public void reportSignalQuality(float[] ascendingCN0Array, int numSv) {
+        public void reportSignalQuality(float[] sortedCn0DbHzs) {
             double avgCn0 = 0.0;
-            if (numSv > 0) {
-                for (int i = Math.max(0, numSv - 4); i < numSv; i++) {
-                    avgCn0 += (double) ascendingCN0Array[i];
+            if (sortedCn0DbHzs != null && sortedCn0DbHzs.length > 0) {
+                for (int i = Math.max(0, sortedCn0DbHzs.length - 4); i < sortedCn0DbHzs.length;
+                        i++) {
+                    avgCn0 += sortedCn0DbHzs[i];
                 }
-                avgCn0 /= Math.min(numSv, 4);
+                avgCn0 /= Math.min(sortedCn0DbHzs.length, 4);
             }
             if (Math.abs(avgCn0 - mLastAverageCn0) < REPORTING_THRESHOLD_DB_HZ) {
                 return;
@@ -606,8 +574,8 @@ public class GnssMetrics {
             try {
                 mBatteryStats.noteGpsSignalQuality(signalLevel);
                 mLastAverageCn0 = avgCn0;
-            } catch (Exception e) {
-                Log.w(TAG, "Exception", e);
+            } catch (RemoteException e) {
+                Log.w(TAG, e);
             }
         }
 
@@ -623,11 +591,11 @@ public class GnssMetrics {
     }
 
     private void registerGnssStats() {
-        mPullAtomCallback = new StatsPullAtomCallbackImpl();
+        StatsPullAtomCallbackImpl pullAtomCallback = new StatsPullAtomCallbackImpl();
         mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.GNSS_STATS,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), mPullAtomCallback);
+                BackgroundThread.getExecutor(), pullAtomCallback);
     }
 
     /**
@@ -635,6 +603,9 @@ public class GnssMetrics {
      * Calls the pull method to fill out gnss stats
      */
     private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
+
+        StatsPullAtomCallbackImpl() {}
+
         @Override
         public int onPullAtom(int atomTag, List<StatsEvent> data) {
             if (atomTag != FrameworkStatsLog.GNSS_STATS) {
