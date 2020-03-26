@@ -499,9 +499,11 @@ public final class ApplicationExitInfo implements Parcelable {
 
     /**
      * Return the defining kernel user identifier, maybe different from {@link #getRealUid} and
-     * {@link #getPackageUid}, if an external service was bound with the flag
-     * {@link android.content.Context#BIND_EXTERNAL_SERVICE} - in this case, this field here
-     * will be the kernel user identifier of the external service provider.
+     * {@link #getPackageUid}, if an external service has the
+     * {@link android.R.styleable#AndroidManifestService_useAppZygote android:useAppZygote} set
+     * to <code>true<code> and was bound with the flag
+     * {@link android.content.Context#BIND_EXTERNAL_SERVICE} - in this case, this field here will
+     * be the kernel user identifier of the external service provider.
      */
     public int getDefiningUid() {
         return mDefiningUid;
