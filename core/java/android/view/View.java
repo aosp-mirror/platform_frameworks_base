@@ -3475,7 +3475,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Flag indicating the field should not have yellow highlight when autofilled.
      */
-    private static final int PFLAG4_AUTOFILL_HIDE_HIGHLIGHT = 0x100;
+    private static final int PFLAG4_AUTOFILL_HIDE_HIGHLIGHT = 0x200;
 
     /* End of masks for mPrivateFlags4 */
 
