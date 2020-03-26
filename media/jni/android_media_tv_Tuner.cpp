@@ -40,6 +40,7 @@ using ::android::hardware::tv::tuner::V1_0::DataFormat;
 using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxAlpLengthType;
+using ::android::hardware::tv::tuner::V1_0::DemuxCapabilities;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterAvSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterDownloadEvent;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterDownloadSettings;
@@ -1380,6 +1381,42 @@ jobject JTuner::openDvr(DvrType type, jlong bufferSize) {
     callback->setDvr(dvrObj);
 
     return dvrObj;
+}
+
+jobject JTuner::getDemuxCaps() {
+    DemuxCapabilities caps;
+    Result res;
+    mTuner->getDemuxCaps([&](Result r, const DemuxCapabilities& demuxCaps) {
+        caps = demuxCaps;
+        res = r;
+    });
+    if (res != Result::SUCCESS) {
+        return NULL;
+    }
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    jclass clazz = env->FindClass("android/media/tv/tuner/DemuxCapabilities");
+    jmethodID capsInit = env->GetMethodID(clazz, "<init>", "(IIIIIIIIIJI[IZ)V");
+
+    jint numDemux = caps.numDemux;
+    jint numRecord = caps.numRecord;
+    jint numPlayback = caps.numPlayback;
+    jint numTsFilter = caps.numTsFilter;
+    jint numSectionFilter = caps.numSectionFilter;
+    jint numAudioFilter = caps.numAudioFilter;
+    jint numVideoFilter = caps.numVideoFilter;
+    jint numPesFilter = caps.numPesFilter;
+    jint numPcrFilter = caps.numPcrFilter;
+    jlong numBytesInSectionFilter = caps.numBytesInSectionFilter;
+    jint filterCaps = static_cast<jint>(caps.filterCaps);
+    jboolean bTimeFilter = caps.bTimeFilter;
+
+    jintArray linkCaps = env->NewIntArray(caps.linkCaps.size());
+    env->SetIntArrayRegion(
+            linkCaps, 0, caps.linkCaps.size(), reinterpret_cast<jint*>(&caps.linkCaps[0]));
+
+    return env->NewObject(clazz, capsInit, numDemux, numRecord, numPlayback, numTsFilter,
+            numSectionFilter, numAudioFilter, numVideoFilter, numPesFilter, numPcrFilter,
+            numBytesInSectionFilter, filterCaps, linkCaps, bTimeFilter);
 }
 
 }  // namespace android
@@ -2739,8 +2776,9 @@ static jobject android_media_tv_Tuner_open_dvr_playback(
     return tuner->openDvr(DvrType::PLAYBACK, bufferSize);
 }
 
-static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv*, jobject) {
-    return NULL;
+static jobject android_media_tv_Tuner_get_demux_caps(JNIEnv* env, jobject thiz) {
+    sp<JTuner> tuner = getTuner(env, thiz);
+    return tuner->getDemuxCaps();
 }
 
 static int android_media_tv_Tuner_attach_filter(JNIEnv *env, jobject dvr, jobject filter) {
