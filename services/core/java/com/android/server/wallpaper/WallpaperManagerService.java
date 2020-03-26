@@ -2441,9 +2441,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
              * the caller here writes new bitmap data.
              */
             if (which == FLAG_SYSTEM && mLockWallpaperMap.get(userId) == null) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Migrating system->lock to preserve");
-                }
+                Slog.i(TAG, "Migrating current wallpaper to be lock-only before"
+                        + "updating system wallpaper");
                 migrateSystemToLockWallpaperLocked(userId);
             }
 
@@ -2511,6 +2510,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             ParcelFileDescriptor fd = ParcelFileDescriptor.open(wallpaper.wallpaperFile,
                     MODE_CREATE|MODE_READ_WRITE|MODE_TRUNCATE);
             if (!SELinux.restorecon(wallpaper.wallpaperFile)) {
+                Slog.w(TAG, "restorecon failed for wallpaper file: " +
+                        wallpaper.wallpaperFile.getPath());
                 return null;
             }
             wallpaper.name = name;
@@ -2520,10 +2521,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
             // Nullify field to require new computation
             wallpaper.primaryColors = null;
-            if (DEBUG) {
-                Slog.v(TAG, "updateWallpaperBitmapLocked() : id=" + wallpaper.wallpaperId
-                        + " name=" + name + " file=" + wallpaper.wallpaperFile.getName());
-            }
+            Slog.v(TAG, "updateWallpaperBitmapLocked() : id=" + wallpaper.wallpaperId
+                    + " name=" + name + " file=" + wallpaper.wallpaperFile.getName());
             return fd;
         } catch (FileNotFoundException e) {
             Slog.w(TAG, "Error setting wallpaper", e);
@@ -2556,7 +2555,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         WallpaperData wallpaper;
 
         synchronized (mLock) {
-            if (DEBUG) Slog.v(TAG, "setWallpaperComponent name=" + name);
+            Slog.v(TAG, "setWallpaperComponent name=" + name);
             wallpaper = mWallpaperMap.get(userId);
             if (wallpaper == null) {
                 throw new IllegalStateException("Wallpaper not yet initialized for user " + userId);
@@ -2571,6 +2570,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 if (mLockWallpaperMap.get(userId) == null) {
                     // We're using the static imagery and there is no lock-specific image in place,
                     // therefore it's a shared system+lock image that we need to migrate.
+                    Slog.i(TAG, "Migrating current wallpaper to be lock-only before"
+                            + "updating system wallpaper");
                     migrateSystemToLockWallpaperLocked(userId);
                 }
             }
