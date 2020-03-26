@@ -7171,7 +7171,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         ActiveAdmin admin;
         synchronized (getLockObject()) {
             if (who == null) {
-                if ((frpManagementAgentUid != mInjector.binderGetCallingUid())) {
+                if ((frpManagementAgentUid != mInjector.binderGetCallingUid())
+                        && (mContext.checkCallingPermission(permission.MASTER_CLEAR)
+                        != PackageManager.PERMISSION_GRANTED)) {
                     throw new SecurityException(
                             "Must be called by the FRP management agent on device");
                 }
