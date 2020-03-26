@@ -81,7 +81,6 @@ java_library {
     libs: [
         "framework-annotations-lib",
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
-        "unsupportedappusage-annotation", // for dalvik.annotation.compat.UnsupportedAppUsage
         "framework-telephony-stubs",
     ],
     srcs: [
