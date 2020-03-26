@@ -91,10 +91,11 @@ public final class SubscriptionPlan implements Parcelable {
     private long dataUsageBytes = BYTES_UNKNOWN;
     private long dataUsageTime = TIME_UNKNOWN;
     private @NetworkType int[] networkTypes;
-    private long networkTypesBitMask;
 
     private SubscriptionPlan(RecurrenceRule cycleRule) {
         this.cycleRule = Preconditions.checkNotNull(cycleRule);
+        this.networkTypes = Arrays.copyOf(TelephonyManager.getAllNetworkTypes(),
+                TelephonyManager.getAllNetworkTypes().length);
     }
 
     private SubscriptionPlan(Parcel source) {
@@ -221,10 +222,10 @@ public final class SubscriptionPlan implements Parcelable {
 
     /**
      * Return an array containing all {@link NetworkType}s this SubscriptionPlan applies to.
-     * A null value means this SubscriptionPlan applies to all network types.
+     * @see TelephonyManager for network types values
      */
-    public @Nullable @NetworkType int[] getNetworkTypes() {
-        return networkTypes;
+    public @NonNull @NetworkType int[] getNetworkTypes() {
+        return Arrays.copyOf(networkTypes, networkTypes.length);
     }
 
     /**
@@ -361,14 +362,14 @@ public final class SubscriptionPlan implements Parcelable {
         }
 
         /**
-         * Set the network types this SubscriptionPlan applies to.
+         * Set the network types this SubscriptionPlan applies to. By default the plan will apply
+         * to all network types. An empty array means this plan applies to no network types.
          *
-         * @param networkTypes a set of all {@link NetworkType}s that apply to this plan.
-         *            A null value means the plan applies to all network types,
-         *            and an empty array means the plan applies to no network types.
+         * @param networkTypes an array of all {@link NetworkType}s that apply to this plan.
+         * @see TelephonyManager for network type values
          */
-        public @NonNull Builder setNetworkTypes(@Nullable @NetworkType int[] networkTypes) {
-            plan.networkTypes = networkTypes;
+        public @NonNull Builder setNetworkTypes(@NonNull @NetworkType int[] networkTypes) {
+            plan.networkTypes = Arrays.copyOf(networkTypes, networkTypes.length);
             return this;
         }
     }
