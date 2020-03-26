@@ -21,6 +21,7 @@ import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.service.controls.Control
+import android.service.controls.DeviceTypes
 import android.service.controls.actions.ControlAction
 import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.StatelessTemplate
@@ -156,7 +157,11 @@ class ControlViewHolder(
         statusExtra.setTextColor(fg)
 
         icon.setImageDrawable(ri.icon)
-        icon.setImageTintList(fg)
+
+        // do not color app icons
+        if (deviceType != DeviceTypes.TYPE_ROUTINE) {
+            icon.setImageTintList(fg)
+        }
 
         (clipLayer.getDrawable() as GradientDrawable).apply {
             setColor(context.getResources().getColor(bg, context.getTheme()))
