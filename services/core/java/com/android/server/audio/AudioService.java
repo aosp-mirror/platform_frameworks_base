@@ -4888,10 +4888,6 @@ public class AudioService extends IAudioService.Stub
 
         public void applyAllVolumes() {
             synchronized (VolumeGroupState.class) {
-                if (mLegacyStreamType != AudioSystem.STREAM_DEFAULT) {
-                    // No-op to avoid regression with stream based volume management
-                    return;
-                }
                 // apply device specific volumes first
                 int index;
                 for (int i = 0; i < mIndexMap.size(); i++) {
