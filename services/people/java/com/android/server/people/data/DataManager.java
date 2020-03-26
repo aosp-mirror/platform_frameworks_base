@@ -26,6 +26,7 @@ import android.app.NotificationManager;
 import android.app.Person;
 import android.app.prediction.AppTarget;
 import android.app.prediction.AppTargetEvent;
+import android.app.usage.UsageEvents;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -70,6 +71,7 @@ import com.android.server.notification.NotificationManagerInternal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -237,6 +239,27 @@ public class DataManager {
         eventHistory.addEvent(new Event(System.currentTimeMillis(), eventType));
     }
 
+    /**
+     * Queries events for moving app to foreground between {@code startTime} and {@code endTime}.
+     */
+    @NonNull
+    public List<UsageEvents.Event> queryAppMovingToForegroundEvents(@UserIdInt int callingUserId,
+            long startTime, long endTime) {
+        return UsageStatsQueryHelper.queryAppMovingToForegroundEvents(callingUserId, startTime,
+                endTime);
+    }
+
+    /**
+     * Queries launch counts of apps within {@code packageNameFilter} between {@code startTime}
+     * and {@code endTime}.
+     */
+    @NonNull
+    public Map<String, Integer> queryAppLaunchCount(@UserIdInt int callingUserId, long startTime,
+            long endTime, Set<String> packageNameFilter) {
+        return UsageStatsQueryHelper.queryAppLaunchCount(callingUserId, startTime, endTime,
+                packageNameFilter);
+    }
+
     /** Prunes the data for the specified user. */
     public void pruneDataForUser(@UserIdInt int userId, @NonNull CancellationSignal signal) {
         UserData userData = getUnlockedUserData(userId);
@@ -382,7 +405,13 @@ public class DataManager {
         }
     }
 
-    private int mimeTypeToShareEventType(String mimeType) {
+    /**
+     * Converts {@code mimeType} to {@link Event.EventType}.
+     */
+    public int mimeTypeToShareEventType(String mimeType) {
+        if (mimeType == null) {
+            return Event.TYPE_SHARE_OTHER;
+        }
         if (mimeType.startsWith("text/")) {
             return Event.TYPE_SHARE_TEXT;
         } else if (mimeType.startsWith("image/")) {
