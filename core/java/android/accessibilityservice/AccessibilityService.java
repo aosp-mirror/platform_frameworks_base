@@ -33,6 +33,7 @@ import android.graphics.ColorSpace;
 import android.graphics.ParcelableColorSpace;
 import android.graphics.Region;
 import android.hardware.HardwareBuffer;
+import android.hardware.display.DisplayManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1014,8 +1015,9 @@ public abstract class AccessibilityService extends Service {
         if (connection == null) {
             return false;
         }
+        int sampleTimeMs = calculateGestureSampleTimeMs(gesture.getDisplayId());
         List<GestureDescription.GestureStep> steps =
-                MotionEventGenerator.getGestureStepsFromGestureDescription(gesture, 16);
+                MotionEventGenerator.getGestureStepsFromGestureDescription(gesture, sampleTimeMs);
         try {
             synchronized (mLock) {
                 mGestureStatusCallbackSequence++;
@@ -1034,6 +1036,30 @@ public abstract class AccessibilityService extends Service {
             throw new RuntimeException(re);
         }
         return true;
+    }
+
+    /**
+     * Returns the sample time in millis of gesture steps for the current display.
+     *
+     * <p>For gestures to be smooth they should line up with the refresh rate of the display.
+     * On versions of Android before R, the sample time was fixed to 100ms.
+     */
+    private int calculateGestureSampleTimeMs(int displayId) {
+        if (getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.Q) {
+            return 100;
+        }
+        Display display = getSystemService(DisplayManager.class).getDisplay(
+                displayId);
+        if (display == null) {
+            return 100;
+        }
+        int msPerSecond = 1000;
+        int sampleTimeMs = (int) (msPerSecond / display.getRefreshRate());
+        if (sampleTimeMs < 1) {
+            // Should be impossible, but do not return 0.
+            return 100;
+        }
+        return sampleTimeMs;
     }
 
     void onPerformGestureResult(int sequence, final boolean completedSuccessfully) {
