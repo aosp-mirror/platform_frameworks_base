@@ -16,5 +16,5 @@
   -->
 
 <resources>
-    <bool name="sharesheet_show_content_preview">true</bool>
+    <bool name="resolver_landscape_phone">false</bool>
 </resources>
