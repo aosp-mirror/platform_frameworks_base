@@ -2085,7 +2085,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     /** Returns true if this activity is opaque and fills the entire space of this task. */
     boolean occludesParent() {
-        return mOccludesParent;
+        return !finishing && mOccludesParent;
     }
 
     boolean setOccludesParent(boolean occludesParent) {

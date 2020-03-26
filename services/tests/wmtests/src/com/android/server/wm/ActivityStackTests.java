@@ -27,6 +27,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.FLAG_RESUME_WHILE_PAUSING;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
@@ -56,7 +57,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
@@ -1154,6 +1154,34 @@ public class ActivityStackTests extends ActivityTestsBase {
         final ActivityRecord newR = new ActivityBuilder(mService).build();
         final ActivityRecord result = mStack.resetTaskIfNeeded(taskTop, newR);
         assertThat(result).isEqualTo(taskTop);
+    }
+
+    @Test
+    public void testCheckBehindFullscreenActivity() {
+        final ActivityRecord bottomActivity =
+                new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
+        final ActivityRecord topActivity =
+                new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
+        doReturn(true).when(mStack).shouldBeVisible(any());
+        assertTrue(mStack.checkBehindFullscreenActivity(bottomActivity,
+                null /* handleBehindFullscreenActivity */));
+        assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
+                null /* handleBehindFullscreenActivity */));
+
+        doReturn(false).when(topActivity).occludesParent();
+        assertFalse(mStack.checkBehindFullscreenActivity(bottomActivity,
+                null /* handleBehindFullscreenActivity */));
+        assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
+                null /* handleBehindFullscreenActivity */));
+
+        final ActivityRecord finishingActivity =
+                new ActivityBuilder(mService).setStack(mStack).setTask(mTask).build();
+        finishingActivity.finishing = true;
+        doCallRealMethod().when(finishingActivity).occludesParent();
+        assertFalse(mStack.checkBehindFullscreenActivity(bottomActivity,
+                null /* handleBehindFullscreenActivity */));
+        assertFalse(mStack.checkBehindFullscreenActivity(topActivity,
+                null /* handleBehindFullscreenActivity */));
     }
 
     @Test
