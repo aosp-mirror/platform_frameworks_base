@@ -1317,8 +1317,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mDisplayRotation.isWaitingForRemoteRotation()) {
             return;
         }
-        // Clear the record because the display will sync to current rotation.
-        mFixedRotationLaunchingApp = null;
 
         final boolean configUpdated = updateDisplayOverrideConfigurationLocked();
         if (configUpdated) {
@@ -1509,7 +1507,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         startFixedRotationTransform(r, rotation);
         mAppTransition.registerListenerLocked(new WindowManagerInternal.AppTransitionListener() {
             void done() {
-                r.clearFixedRotationTransform();
+                r.finishFixedRotationTransform();
                 mAppTransition.unregisterListener(this);
             }
 
@@ -1538,7 +1536,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (token != mFixedRotationLaunchingApp) {
             return false;
         }
-        if (updateOrientation()) {
+        // Update directly because the app which will change the orientation of display is ready.
+        if (mDisplayRotation.updateOrientation(getOrientation(), false /* forceUpdate */)) {
             sendNewConfiguration();
             return true;
         }
@@ -1584,7 +1583,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param oldRotation the rotation we are coming from.
      * @param rotation the rotation to apply.
      */
-    void applyRotationLocked(final int oldRotation, final int rotation) {
+    private void applyRotation(final int oldRotation, final int rotation) {
         mDisplayRotation.applyCurrentRotation(rotation);
         final boolean rotateSeamlessly = mDisplayRotation.isRotatingSeamlessly();
         final Transaction transaction = getPendingTransaction();
@@ -6493,15 +6492,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
-        final int currRotation =
-                getRequestedOverrideConfiguration().windowConfiguration.getRotation();
-        if (currRotation != ROTATION_UNDEFINED
-                && currRotation != overrideConfiguration.windowConfiguration.getRotation()) {
-            applyRotationLocked(currRotation,
-                    overrideConfiguration.windowConfiguration.getRotation());
+        final Configuration currOverrideConfig = getRequestedOverrideConfiguration();
+        final int currRotation = currOverrideConfig.windowConfiguration.getRotation();
+        final int overrideRotation = overrideConfiguration.windowConfiguration.getRotation();
+        if (currRotation != ROTATION_UNDEFINED && currRotation != overrideRotation) {
+            if (mFixedRotationLaunchingApp != null) {
+                mFixedRotationLaunchingApp.clearFixedRotationTransform(
+                        () -> applyRotation(currRotation, overrideRotation));
+                // Clear the record because the display will sync to current rotation.
+                mFixedRotationLaunchingApp = null;
+            } else {
+                applyRotation(currRotation, overrideRotation);
+            }
         }
-        mCurrentOverrideConfigurationChanges =
-            getRequestedOverrideConfiguration().diff(overrideConfiguration);
+        mCurrentOverrideConfigurationChanges = currOverrideConfig.diff(overrideConfiguration);
         super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
         mCurrentOverrideConfigurationChanges = 0;
         mWmService.setNewDisplayOverrideConfiguration(overrideConfiguration, this);
