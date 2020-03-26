@@ -25,7 +25,6 @@ import static android.location.LocationProvider.AVAILABLE;
 import static android.os.PowerManager.locationPowerSaveModeToString;
 import static android.provider.Settings.Global.LOCATION_DISABLE_STATUS_CALLBACKS;
 
-import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.internal.util.Preconditions.checkState;
 
 import android.Manifest;
@@ -133,6 +132,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -986,7 +986,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @GuardedBy("mLock")
         public void attachLocked(AbstractLocationProvider provider) {
-            checkNotNull(provider);
+            Objects.requireNonNull(provider);
             checkState(mProvider == null);
 
             if (D) {
