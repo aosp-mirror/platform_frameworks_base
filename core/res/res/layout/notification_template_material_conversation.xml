@@ -42,7 +42,7 @@
         >
 
             <!-- Big icon: 52x52, 12dp padding left + top, 16dp padding right -->
-            <ImageView
+            <com.android.internal.widget.CachingIconView
                 android:id="@+id/conversation_icon"
                 android:layout_width="@dimen/conversation_avatar_size"
                 android:layout_height="@dimen/conversation_avatar_size"

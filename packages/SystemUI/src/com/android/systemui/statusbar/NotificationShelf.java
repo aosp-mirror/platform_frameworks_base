@@ -680,7 +680,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
         boolean forceInShelf =
                 iconState.isLastExpandIcon && !iconState.hasCustomTransformHeight();
-        float clampedAmount = iconTransitionAmount > 0.5f ? 1.0f : 0.0f;
+        boolean clampInShelf = iconTransitionAmount > 0.5f || isTargetClipped(view);
+        float clampedAmount = clampInShelf ? 1.0f : 0.0f;
         if (iconTransitionAmount == clampedAmount) {
             iconState.noAnimations = (scrollingFast || expandingAnimated) && !forceInShelf;
             iconState.useFullTransitionAmount = iconState.noAnimations
@@ -723,6 +724,20 @@ public class NotificationShelf extends ActivatableNotificationView implements
         iconState.clampedAppearAmount = clampedAmount;
         setIconTransformationAmount(view, transitionAmount, iconTransformDistance,
                 clampedAmount != transitionAmount, isLastChild);
+    }
+
+    private boolean isTargetClipped(ExpandableView view) {
+        View target = view.getShelfTransformationTarget();
+        if (target == null) {
+            return false;
+        }
+        // We should never clip the target, let's instead put it into the shelf!
+        float endOfTarget = view.getTranslationY()
+                + view.getContentTranslation()
+                + view.getRelativeTopPadding(target)
+                + target.getHeight();
+
+        return endOfTarget >= getTranslationY() - mPaddingBetweenElements;
     }
 
     private void setIconTransformationAmount(ExpandableView view,

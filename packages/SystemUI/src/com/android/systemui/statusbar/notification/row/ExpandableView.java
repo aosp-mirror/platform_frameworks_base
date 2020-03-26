@@ -66,6 +66,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
     protected boolean mIsLastChild;
     protected int mContentShift;
     private final ExpandableViewState mViewState;
+    private float mContentTranslation;
 
     public ExpandableView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -715,6 +716,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
         if (mIsLastChild) {
             translationY *= 0.4f;
         }
+        mContentTranslation = translationY;
         applyContentTransformation(contentAlpha, translationY);
     }
 
@@ -756,6 +758,13 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    }
+
+    /**
+     * return the amount that the content is translated
+     */
+    public float getContentTranslation() {
+        return mContentTranslation;
     }
 
     /**

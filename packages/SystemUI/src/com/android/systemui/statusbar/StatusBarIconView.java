@@ -159,7 +159,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private boolean mDismissed;
     private Runnable mOnDismissListener;
     private boolean mIncreasedSize;
-    private boolean mTintIcons = true;
+    private boolean mShowsConversation;
 
     public StatusBarIconView(Context context, String slot, StatusBarNotification sbn) {
         this(context, slot, sbn, false);
@@ -613,7 +613,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     private void updateIconColor() {
-        if (!mTintIcons) {
+        if (mShowsConversation) {
             setColorFilter(null);
             return;
         }
@@ -964,16 +964,24 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     }
 
     /**
-     * Sets whether the icon should be tinted. If the state differs from the supplied setting, this
+     * Sets whether this icon shows a person and should be tinted.
+     * If the state differs from the supplied setting, this
      * will update the icon colors.
      *
-     * @param shouldTint Whether the icon should be tinted.
+     * @param showsConversation Whether the icon shows a person
      */
-    public void setTintIcons(boolean shouldTint) {
-        if (mTintIcons != shouldTint) {
-            mTintIcons = shouldTint;
+    public void setShowsConversation(boolean showsConversation) {
+        if (mShowsConversation != showsConversation) {
+            mShowsConversation = showsConversation;
             updateIconColor();
         }
+    }
+
+    /**
+     * @return if this icon shows a conversation
+     */
+    public boolean showsConversation() {
+        return mShowsConversation;
     }
 
     public interface OnVisibilityChangedListener {

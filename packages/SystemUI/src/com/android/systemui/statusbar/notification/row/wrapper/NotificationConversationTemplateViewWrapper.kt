@@ -18,7 +18,9 @@ package com.android.systemui.statusbar.notification.row.wrapper
 
 import android.content.Context
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
+import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingLinearLayout
 import com.android.systemui.R
@@ -44,7 +46,7 @@ class NotificationConversationTemplateViewWrapper constructor(
     )
     private val conversationLayout: ConversationLayout = view as ConversationLayout
 
-    private lateinit var conversationIcon: View
+    private lateinit var conversationIcon: CachingIconView
     private lateinit var conversationBadgeBg: View
     private lateinit var expandButton: View
     private lateinit var expandButtonContainer: View
@@ -130,6 +132,27 @@ class NotificationConversationTemplateViewWrapper constructor(
                 facePileBottom,
                 facePileBottomBg
         )
+    }
+
+    override fun setShelfIconVisible(visible: Boolean) {
+        if (conversationLayout.isImportantConversation) {
+            conversationIcon.setForceHidden(visible);
+        }
+        super.setShelfIconVisible(visible)
+    }
+
+    override fun getShelfTransformationTarget(): View? {
+        if (conversationLayout.isImportantConversation) {
+            if (conversationIcon.visibility != GONE) {
+                return conversationIcon
+            } else {
+                // A notification with a fallback icon was set to important. Currently
+                // the transformation doesn't work for these and needs to be fixed. In the meantime
+                // those are using the icon.
+                return super.getShelfTransformationTarget();
+            }
+        }
+        return super.getShelfTransformationTarget()
     }
 
     override fun setRemoteInputVisible(visible: Boolean) =

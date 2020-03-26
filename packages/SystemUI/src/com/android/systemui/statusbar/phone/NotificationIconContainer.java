@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.Interpolator;
 
 import androidx.collection.ArrayMap;
 
@@ -80,8 +81,7 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return mAnimationFilter;
         }
 
-    }.setDuration(CANNED_ANIMATION_DURATION)
-            .setCustomInterpolator(View.TRANSLATION_Y, Interpolators.ICON_OVERSHOT);
+    }.setDuration(CANNED_ANIMATION_DURATION);
 
     /**
      * Temporary AnimationProperties to avoid unnecessary allocations.
@@ -740,6 +740,13 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                                 ICON_ANIMATION_PROPERTIES.getAnimationFilter());
                         sTempProperties.resetCustomInterpolators();
                         sTempProperties.combineCustomInterpolators(ICON_ANIMATION_PROPERTIES);
+                        Interpolator interpolator;
+                        if (icon.showsConversation()) {
+                            interpolator = Interpolators.ICON_OVERSHOT_LESS;
+                        } else {
+                            interpolator = Interpolators.ICON_OVERSHOT;
+                        }
+                        sTempProperties.setCustomInterpolator(View.TRANSLATION_Y, interpolator);
                         if (animationProperties != null) {
                             animationFilter.combineFilter(animationProperties.getAnimationFilter());
                             sTempProperties.combineCustomInterpolators(animationProperties);

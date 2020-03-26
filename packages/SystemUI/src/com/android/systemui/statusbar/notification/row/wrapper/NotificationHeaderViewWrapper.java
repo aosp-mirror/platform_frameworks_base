@@ -210,9 +210,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public void setIconsHidden(boolean hidden) {
-        super.setIconsHidden(hidden);
-        mIcon.setForceHidden(hidden);
+    public void setShelfIconVisible(boolean visible) {
+        super.setShelfIconVisible(visible);
+        mIcon.setForceHidden(visible);
     }
 
     @Override

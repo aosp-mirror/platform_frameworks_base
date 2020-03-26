@@ -145,6 +145,7 @@ public class ConversationLayout extends FrameLayout
     private int mFacePileAvatarSizeExpandedGroup;
     private int mFacePileProtectionWidth;
     private int mFacePileProtectionWidthExpanded;
+    private boolean mImportantConversation;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -255,7 +256,12 @@ public class ConversationLayout extends FrameLayout
      */
     @RemotableViewMethod
     public void setIsImportantConversation(boolean isImportantConversation) {
+        mImportantConversation = isImportantConversation;
         mImportanceRingView.setVisibility(isImportantConversation ? VISIBLE : GONE);
+    }
+
+    public boolean isImportantConversation() {
+        return mImportantConversation;
     }
 
     /**

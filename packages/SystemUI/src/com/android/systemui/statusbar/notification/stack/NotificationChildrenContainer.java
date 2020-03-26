@@ -1187,18 +1187,18 @@ public class NotificationChildrenContainer extends ViewGroup {
         return 0;
     }
 
-    public void setIconsVisible(boolean iconsVisible) {
+    public void setShelfIconVisible(boolean iconVisible) {
         if (mNotificationHeaderWrapper != null) {
             NotificationHeaderView header = mNotificationHeaderWrapper.getNotificationHeader();
             if (header != null) {
-                header.getIcon().setForceHidden(!iconsVisible);
+                header.getIcon().setForceHidden(iconVisible);
             }
         }
         if (mNotificationHeaderWrapperLowPriority != null) {
             NotificationHeaderView header
                     = mNotificationHeaderWrapperLowPriority.getNotificationHeader();
             if (header != null) {
-                header.getIcon().setForceHidden(!iconsVisible);
+                header.getIcon().setForceHidden(iconVisible);
             }
         }
     }

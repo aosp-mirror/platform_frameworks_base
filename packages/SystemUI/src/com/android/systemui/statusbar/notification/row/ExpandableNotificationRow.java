@@ -312,7 +312,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mHeadsupDisappearRunning;
     private View mChildAfterViewWhenDismissed;
     private View mGroupParentWhenDismissed;
-    private boolean mIconsVisible = true;
+    private boolean mShelfIconVisible;
     private boolean mAboveShelf;
     private Runnable mOnDismissRunnable;
     private boolean mIsLowPriority;
@@ -1481,9 +1481,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * Set the icons to be visible of this notification.
      */
-    public void setIconsVisible(boolean iconsVisible) {
-        if (iconsVisible != mIconsVisible) {
-            mIconsVisible = iconsVisible;
+    public void setShelfIconVisible(boolean iconVisible) {
+        if (iconVisible != mShelfIconVisible) {
+            mShelfIconVisible = iconVisible;
             updateIconVisibilities();
         }
     }
@@ -1520,17 +1520,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateIconVisibilities() {
-        boolean visible = isChildInGroup() || mIconsVisible;
+        // The shelficon is never hidden for children in groups
+        boolean visible = !isChildInGroup() && mShelfIconVisible;
         for (NotificationContentView l : mLayouts) {
-            l.setIconsVisible(visible);
+            l.setShelfIconVisible(visible);
         }
         if (mChildrenContainer != null) {
-            mChildrenContainer.setIconsVisible(visible);
+            mChildrenContainer.setShelfIconVisible(visible);
         }
-    }
-
-    public float getContentTranslation() {
-        return mPrivateLayout.getTranslationY();
     }
 
     public void setIsLowPriority(boolean isLowPriority) {

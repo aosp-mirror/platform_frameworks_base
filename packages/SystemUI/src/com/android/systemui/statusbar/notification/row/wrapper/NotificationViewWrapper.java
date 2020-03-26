@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row.wrapper;
 
 import android.annotation.ColorInt;
+import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -237,14 +238,14 @@ public abstract class NotificationViewWrapper implements TransformableView {
     /**
      * @return get the transformation target of the shelf, which usually is the icon
      */
-    public View getShelfTransformationTarget() {
+    public @Nullable View getShelfTransformationTarget() {
         return null;
     }
 
     /**
-     * Set the notification icon to be hidden.
+     * Set the shelf icon to be visible and hide our own icons.
      */
-    public void setIconsHidden(boolean hidden) {}
+    public void setShelfIconVisible(boolean shelfIconVisible) {}
 
     public int getHeaderTranslation(boolean forceNoHeader) {
         return 0;
