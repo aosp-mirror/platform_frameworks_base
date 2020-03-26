@@ -189,19 +189,6 @@ public class AccessibilityUtils {
         return context.getString(R.string.config_defaultAccessibilityService);
     }
 
-    /**
-     * Check if the accessibility shortcut is enabled for a user
-     *
-     * @param context A valid context
-     * @param userId  The user of interest
-     * @return {@code true} if the shortcut is enabled for the user. {@code false} otherwise.
-     * Note that the shortcut may be enabled, but no action associated with it.
-     */
-    public static boolean isShortcutEnabled(Context context, int userId) {
-        return Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.ACCESSIBILITY_SHORTCUT_ENABLED, 1, userId) == 1;
-    }
-
     private static Set<ComponentName> getInstalledServices(Context context) {
         final Set<ComponentName> installedServices = new HashSet<>();
         installedServices.clear();
