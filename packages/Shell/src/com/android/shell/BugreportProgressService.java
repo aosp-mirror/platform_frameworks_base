@@ -1803,13 +1803,13 @@ public class BugreportProgressService extends Service {
          * Current value of progress (in percentage) of the bugreport generation as
          * displayed by the UI.
          */
-        AtomicInteger progress;
+        AtomicInteger progress = new AtomicInteger(0);
 
         /**
          * Last value of progress (in percentage) of the bugreport generation for which
          * system notification was updated.
          */
-        AtomicInteger lastProgress;
+        AtomicInteger lastProgress = new AtomicInteger(0);
 
         /**
          * Time of the last progress update.
