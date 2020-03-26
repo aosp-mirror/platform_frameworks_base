@@ -37,6 +37,7 @@ import static org.junit.Assert.assertTrue;
 import android.app.Activity;
 import android.app.Instrumentation;
 import android.graphics.Rect;
+import android.platform.test.annotations.Presubmit;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -48,7 +49,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.filters.SmallTest;
+import androidx.test.filters.MediumTest;
 import androidx.test.filters.Suppress;
 import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
@@ -67,7 +68,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RunWith(AndroidJUnit4.class)
-@SmallTest
+@MediumTest
+@Presubmit
 public class EditorCursorDragTest {
     private static final String LOG_TAG = EditorCursorDragTest.class.getSimpleName();
 
