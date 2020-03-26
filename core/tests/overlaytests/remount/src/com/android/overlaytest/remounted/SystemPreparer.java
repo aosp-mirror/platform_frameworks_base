@@ -69,7 +69,7 @@ class SystemPreparer extends ExternalResource {
         return this;
     }
 
-    /** Sets the enable state of an overlay pacakage. */
+    /** Sets the enable state of an overlay package. */
     SystemPreparer setOverlayEnabled(String packageName, boolean enabled)
             throws DeviceNotAvailableException {
         final ITestDevice device = mDeviceProvider.getDevice();

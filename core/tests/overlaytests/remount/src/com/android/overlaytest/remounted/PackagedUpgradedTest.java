@@ -23,6 +23,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class PackagedUpgradedTest extends OverlayRemountedTestBase {
+    private static final String TARGET_UPGRADE_APK = "OverlayRemountedTest_TargetUpgrade.apk";
 
     @Test
     public void testTargetUpgrade() throws Exception {
