@@ -767,7 +767,7 @@ public class ThermalManagerService extends SystemService {
         protected boolean connectToHal() {
             synchronized (mHalLock) {
                 try {
-                    mThermalHal10 = android.hardware.thermal.V1_0.IThermal.getService();
+                    mThermalHal10 = android.hardware.thermal.V1_0.IThermal.getService(true);
                     mThermalHal10.linkToDeath(new DeathRecipient(),
                             THERMAL_HAL_DEATH_COOKIE);
                     Slog.i(TAG,
@@ -902,7 +902,7 @@ public class ThermalManagerService extends SystemService {
         protected boolean connectToHal() {
             synchronized (mHalLock) {
                 try {
-                    mThermalHal11 = android.hardware.thermal.V1_1.IThermal.getService();
+                    mThermalHal11 = android.hardware.thermal.V1_1.IThermal.getService(true);
                     mThermalHal11.linkToDeath(new DeathRecipient(),
                             THERMAL_HAL_DEATH_COOKIE);
                     mThermalHal11.registerThermalCallback(mThermalCallback11);
@@ -1046,7 +1046,7 @@ public class ThermalManagerService extends SystemService {
         protected boolean connectToHal() {
             synchronized (mHalLock) {
                 try {
-                    mThermalHal20 = android.hardware.thermal.V2_0.IThermal.getService();
+                    mThermalHal20 = android.hardware.thermal.V2_0.IThermal.getService(true);
                     mThermalHal20.linkToDeath(new DeathRecipient(), THERMAL_HAL_DEATH_COOKIE);
                     mThermalHal20.registerThermalChangedCallback(mThermalCallback20, false,
                             0 /* not used */);
