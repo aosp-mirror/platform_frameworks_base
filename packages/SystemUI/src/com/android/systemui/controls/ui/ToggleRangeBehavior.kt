@@ -64,12 +64,13 @@ class ToggleRangeBehavior : Behavior {
 
         val gestureListener = ToggleRangeGestureListener(cvh.layout)
         val gestureDetector = GestureDetector(context, gestureListener)
-        cvh.layout.setOnTouchListener { _: View, e: MotionEvent ->
+        cvh.layout.setOnTouchListener { v: View, e: MotionEvent ->
             if (gestureDetector.onTouchEvent(e)) {
                 return@setOnTouchListener true
             }
 
             if (e.getAction() == MotionEvent.ACTION_UP && gestureListener.isDragging) {
+                v.getParent().requestDisallowInterceptTouchEvent(false)
                 gestureListener.isDragging = false
                 endUpdateRange()
                 return@setOnTouchListener true
@@ -254,6 +255,7 @@ class ToggleRangeBehavior : Behavior {
             yDiff: Float
         ): Boolean {
             if (!isDragging) {
+                v.getParent().requestDisallowInterceptTouchEvent(true)
                 this@ToggleRangeBehavior.beginUpdateRange()
                 isDragging = true
             }
