@@ -5484,11 +5484,6 @@
     <!-- Error message. This text lets the user know that their current personal apps can't open this specific content. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_personal_apps_available_resolve">No personal apps can open this content</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permlab_accessCallAudio">Record or play audio in telephony calls</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_accessCallAudio">Allows this app, when assigned as default dialer application, to record or play audio in telephony calls.</string>
-
     <!-- Icc depersonalization related strings -->
     <!-- Label text for PIN entry widget on SIM Network Depersonalization panel [CHAR LIMIT=none] -->
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY">SIM network unlock PIN</string>
