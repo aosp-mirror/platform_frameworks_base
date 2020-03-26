@@ -637,7 +637,10 @@ public class Tethering {
                 Context.ETHERNET_SERVICE);
         synchronized (mPublicSync) {
             if (enable) {
-                if (mEthernetCallback != null) return TETHER_ERROR_NO_ERROR;
+                if (mEthernetCallback != null) {
+                    Log.d(TAG, "Ethernet tethering already started");
+                    return TETHER_ERROR_NO_ERROR;
+                }
 
                 mEthernetCallback = new EthernetCallback();
                 mEthernetIfaceRequest = em.requestTetheredInterface(mExecutor, mEthernetCallback);
