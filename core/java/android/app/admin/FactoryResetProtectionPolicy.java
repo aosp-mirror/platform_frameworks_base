@@ -43,6 +43,12 @@ import java.util.List;
  * reset protection policy for the device by calling the {@code DevicePolicyManager} method
  * {@link DevicePolicyManager#setFactoryResetProtectionPolicy(ComponentName,
  * FactoryResetProtectionPolicy)}}.
+ * <p>
+ * Normally factory reset protection does not kick in if the device is factory reset via Settings.
+ * This is also the case when a device owner sets factory reset protection policy. However,
+ * when a profile owner of an organization-owned device sets factory reset protection policy that
+ * locks the device to specific accounts, the policy will take effect even if factory reset is
+ * performed from Settings.
  *
  * @see DevicePolicyManager#setFactoryResetProtectionPolicy
  * @see DevicePolicyManager#getFactoryResetProtectionPolicy
@@ -234,6 +240,18 @@ public final class FactoryResetProtectionPolicy implements Parcelable {
             out.attribute(null, ATTR_VALUE, account);
             out.endTag(null, KEY_FACTORY_RESET_PROTECTION_ACCOUNT);
         }
+    }
+
+    /**
+     * Returns if the policy will result in factory reset protection being locked to
+     * admin-specified accounts.
+     * <p>
+     * When a device has a non-empty factory reset protection policy, trusted factory reset
+     * via Settings will no longer remove factory reset protection from the device.
+     * @hide
+     */
+    public boolean isNotEmpty() {
+        return !mFactoryResetProtectionAccounts.isEmpty() && mFactoryResetProtectionEnabled;
     }
 
 }
