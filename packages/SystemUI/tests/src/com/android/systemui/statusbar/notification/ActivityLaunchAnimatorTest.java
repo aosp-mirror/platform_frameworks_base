@@ -19,14 +19,18 @@ package com.android.systemui.statusbar.notification;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.os.RemoteException;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.IRemoteAnimationFinishedCallback;
 import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationTarget;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
@@ -36,6 +40,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,9 +74,11 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
     private NotificationPanelViewController mNotificationPanelViewController;
     @Rule
     public MockitoRule rule = MockitoJUnit.rule();
+    private FakeExecutor mExecutor;
 
     @Before
     public void setUp() throws Exception {
+        mExecutor = new FakeExecutor(new FakeSystemClock());
         when(mNotificationShadeWindowViewController.getView())
                 .thenReturn(mNotificationShadeWindowView);
         when(mNotificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
@@ -80,8 +88,8 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
                 mCallback,
                 mNotificationPanelViewController,
                 mNotificationShadeDepthController,
-                mNotificationContainer);
-
+                mNotificationContainer,
+                mExecutor);
     }
 
     @Test
@@ -111,6 +119,29 @@ public class ActivityLaunchAnimatorTest extends SysuiTestCase {
         mLaunchAnimator.setLaunchResult(ActivityManager.START_SUCCESS,
                 true /* wasIntentActivity */);
         verify(mCallback).onExpandAnimationTimedOut();
+    }
+
+    @Test
+    public void testRowLinkBrokenOnAnimationStartFail() throws RemoteException {
+        ActivityLaunchAnimator.AnimationRunner runner = mLaunchAnimator.new AnimationRunner(mRow,
+                mExecutor);
+        // WHEN onAnimationStart with no valid remote target
+        runner.onAnimationStart(new RemoteAnimationTarget[0], new RemoteAnimationTarget[0],
+                mock(IRemoteAnimationFinishedCallback.class));
+        mExecutor.runAllReady();
+        // THEN the row is nulled out so that it won't be retained
+        Assert.assertTrue("The row should be null", runner.getRow() == null);
+    }
+
+    @Test
+    public void testRowLinkBrokenOnAnimationCancelled() throws RemoteException {
+        ActivityLaunchAnimator.AnimationRunner runner = mLaunchAnimator.new AnimationRunner(mRow,
+                mExecutor);
+        // WHEN onAnimationCancelled
+        runner.onAnimationCancelled();
+        mExecutor.runAllReady();
+        // THEN the row is nulled out so that it won't be retained
+        Assert.assertTrue("The row should be null", runner.getRow() == null);
     }
 
     private void executePostsImmediately(View view) {
