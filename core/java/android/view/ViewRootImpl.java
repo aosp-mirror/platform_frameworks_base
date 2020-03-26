@@ -448,7 +448,7 @@ public final class ViewRootImpl implements ViewParent,
     InputQueue mInputQueue;
     @UnsupportedAppUsage
     FallbackEventHandler mFallbackEventHandler;
-    Choreographer mChoreographer;
+    final Choreographer mChoreographer;
 
     // used in relayout to get SurfaceControl size
     // for BLAST adapter surface setup
@@ -691,11 +691,18 @@ public final class ViewRootImpl implements ViewParent,
     private SurfaceControl.Transaction mRtBLASTSyncTransaction = new SurfaceControl.Transaction();
 
     private String mTag = TAG;
+
     public ViewRootImpl(Context context, Display display) {
-        this(context, display, WindowManagerGlobal.getWindowSession());
+        this(context, display, WindowManagerGlobal.getWindowSession(),
+                false /* useSfChoreographer */);
     }
 
     public ViewRootImpl(Context context, Display display, IWindowSession session) {
+        this(context, display, session, false /* useSfChoreographer */);
+    }
+
+    public ViewRootImpl(Context context, Display display, IWindowSession session,
+            boolean useSfChoreographer) {
         mContext = context;
         mWindowSession = session;
         mDisplay = display;
@@ -731,7 +738,8 @@ public final class ViewRootImpl implements ViewParent,
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
-        mChoreographer = Choreographer.getInstance();
+        mChoreographer = useSfChoreographer
+                ? Choreographer.getSfInstance() : Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mInsetsController = new InsetsController(this);
 
