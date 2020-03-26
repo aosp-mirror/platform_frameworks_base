@@ -68,6 +68,8 @@ class ControlAdapter(
                             width = ViewGroup.LayoutParams.MATCH_PARENT
                         }
                         elevation = this@ControlAdapter.elevation
+                        background = parent.context.getDrawable(
+                                R.drawable.control_background_ripple)
                     }
                 ) { id, favorite ->
                     model?.changeFavoriteStatus(id, favorite)
@@ -137,10 +139,7 @@ private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChang
     private val title: TextView = itemView.requireViewById(R.id.title)
     private val subtitle: TextView = itemView.requireViewById(R.id.subtitle)
     private val removed: TextView = itemView.requireViewById(R.id.status)
-    private val favorite: CheckBox = itemView.requireViewById<CheckBox>(R.id.favorite)
-    private val favoriteFrame: ViewGroup = itemView
-            .requireViewById<ViewGroup>(R.id.favorite_container)
-            .apply {
+    private val favorite: CheckBox = itemView.requireViewById<CheckBox>(R.id.favorite).apply {
         visibility = View.VISIBLE
     }
 
@@ -155,7 +154,7 @@ private class ControlHolder(view: View, val favoriteCallback: ModelFavoriteChang
         favorite.setOnClickListener {
             favoriteCallback(data.control.controlId, favorite.isChecked)
         }
-        favoriteFrame.setOnClickListener { favorite.performClick() }
+        itemView.setOnClickListener { favorite.performClick() }
         applyRenderInfo(renderInfo)
     }
 
