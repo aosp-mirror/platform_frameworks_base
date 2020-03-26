@@ -2753,21 +2753,32 @@ message PhoneStateChanged {
 
 message BackGesture {
     enum BackType {
-          DEFAULT_BACK_TYPE = 0;
-          COMPLETED = 1;
-          COMPLETED_REJECTED = 2; // successful because coming from rejected area
-          INCOMPLETE_EXCLUDED = 3; // would have been successful but in the exclusion area
-          INCOMPLETE = 4;
+        DEFAULT_BACK_TYPE = 0;
+        COMPLETED = 1;
+        COMPLETED_REJECTED = 2; // successful because coming from rejected area
+        INCOMPLETE_EXCLUDED = 3; // would have been successful but in the exclusion area
+        INCOMPLETE = 4;  // Unsuccessful, for reasons other than below.
+        INCOMPLETE_FAR_FROM_EDGE = 5;  // Unsuccessful, far from the edge.
+        INCOMPLETE_MULTI_TOUCH = 6;  // Unsuccessful, multi touch.
+        INCOMPLETE_LONG_PRESS = 7;  // Unsuccessful, long press.
+        INCOMPLETE_VERTICAL_MOVE = 8;  // Unsuccessful, move vertically.
     }
     optional BackType type = 1;
 
-    optional int32 y_coordinate = 2; // y coordinate for ACTION_DOWN event
+    optional int32 y_coordinate = 2 [deprecated = true]; // y coordinate for ACTION_DOWN event
+    optional int32 start_x = 4;  // X coordinate for ACTION_DOWN event.
+    optional int32 start_y = 5;  // Y coordinate for ACTION_DOWN event.
+    optional int32 end_x = 6;   // X coordinate for ACTION_MOVE event.
+    optional int32 end_y = 7;  // Y coordinate for ACTION_MOVE event.
+    optional int32 left_boundary = 8;  // left edge width + left inset
+    optional int32 right_boundary = 9;  // screen width - (right edge width + right inset)
+
     enum WindowHorizontalLocation {
         DEFAULT_LOCATION = 0;
         LEFT = 1;
         RIGHT = 2;
     }
-    optional WindowHorizontalLocation x_location = 3;
+    optional WindowHorizontalLocation x_location = 3 [deprecated = true];
 }
 
 message ExclusionRectStateChanged {
