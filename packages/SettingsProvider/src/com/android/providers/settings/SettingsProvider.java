@@ -3436,7 +3436,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 188;
+            private static final int SETTINGS_VERSION = 189;
 
             private final int mUserId;
 
@@ -4757,6 +4757,23 @@ public class SettingsProvider extends ContentProvider {
                                 false /* makeDefault */, SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 188;
+                }
+
+                if (currentVersion == 188) {
+                    // Deprecate ACCESSIBILITY_SHORTCUT_ENABLED, and migrate it
+                    // to ACCESSIBILITY_SHORTCUT_TARGET_SERVICE.
+                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
+                    final Setting shortcutEnabled = secureSettings.getSettingLocked(
+                            "accessibility_shortcut_enabled");
+                    if ("0".equals(shortcutEnabled.getValue())) {
+                        // Clear shortcut key targets list setting.
+                        secureSettings.insertSettingLocked(
+                                Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
+                                "", null /* tag */, false /* makeDefault */,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    secureSettings.deleteSettingLocked("accessibility_shortcut_enabled");
+                    currentVersion = 189;
                 }
 
                 // vXXX: Add new settings above this point.
