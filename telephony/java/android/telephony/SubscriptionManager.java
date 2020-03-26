@@ -944,6 +944,18 @@ public class SubscriptionManager {
             if (DBG) log("onSubscriptionsChanged: NOT OVERRIDDEN");
         }
 
+        /**
+         * Callback invoked when {@link SubscriptionManager#addOnSubscriptionsChangedListener(
+         * Executor, OnSubscriptionsChangedListener)} or
+         * {@link SubscriptionManager#addOnSubscriptionsChangedListener(
+         * OnSubscriptionsChangedListener)} fails to complete due to the
+         * {@link Context#TELEPHONY_REGISTRY_SERVICE} being unavailable.
+         * @hide
+         */
+        public void onAddListenerFailed() {
+            Rlog.w(LOG_TAG, "onAddListenerFailed not overridden");
+        }
+
         private void log(String s) {
             Rlog.d(LOG_TAG, s);
         }
@@ -1016,6 +1028,12 @@ public class SubscriptionManager {
         if (telephonyRegistryManager != null) {
             telephonyRegistryManager.addOnSubscriptionsChangedListener(listener,
                     executor);
+        } else {
+            // If the telephony registry isn't available, we will inform the caller on their
+            // listener that it failed so they can try to re-register.
+            loge("addOnSubscriptionsChangedListener: pkgname=" + pkgName + " failed to be added "
+                    + " due to TELEPHONY_REGISTRY_SERVICE being unavailable.");
+            executor.execute(() -> listener.onAddListenerFailed());
         }
     }
 
