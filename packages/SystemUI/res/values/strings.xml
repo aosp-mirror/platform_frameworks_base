@@ -374,8 +374,30 @@
     <string name="biometric_dialog_wrong_password">Wrong password</string>
     <!-- Error string shown when the user enters too many incorrect attempts [CHAR LIMIT=120]-->
     <string name="biometric_dialog_credential_too_many_attempts">Too many incorrect attempts.\nTry again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+
     <!-- Error string shown when the user enters an incorrect PIN/pattern/password and it counts towards the max attempts before the data on the device is wiped. [CHAR LIMIT=NONE]-->
     <string name="biometric_dialog_credential_attempts_before_wipe">Try again. Attempt <xliff:g id="attempts" example="1">%1$d</xliff:g> of <xliff:g id="max_attempts" example="3">%2$d</xliff:g>.</string>
+
+    <!-- Title of a dialog shown when the user only has one attempt left to provide the correct PIN/pattern/password before the device, one of its users, or a work profile is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_attempt_before_wipe_dialog_title">Your data will be deleted</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct lock pattern before the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_device">If you enter an incorrect pattern on the next attempt, this device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct PIN before the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_device">If you enter an incorrect PIN on the next attempt, this device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the device is wiped. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_password_attempt_before_wipe_device">If you enter an incorrect password on the next attempt, this device\u2019s data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct lock pattern before the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_user">If you enter an incorrect pattern on the next attempt, this user will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct PIN before the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_user">If you enter an incorrect PIN on the next attempt, this user will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the user is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_password_attempt_before_wipe_user">If you enter an incorrect password on the next attempt, this user will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct pattern before the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile">If you enter an incorrect pattern on the next attempt, your work profile and its data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct PIN before the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_pin_attempt_before_wipe_profile">If you enter an incorrect PIN on the next attempt, your work profile and its data will be deleted.</string>
+    <!-- Content of a dialog shown when the user only has one attempt left to provide the correct password before the work profile is removed. [CHAR LIMIT=NONE] -->
+    <string name="biometric_dialog_last_password_attempt_before_wipe_profile">If you enter an incorrect password on the next attempt, your work profile and its data will be deleted.</string>
 
     <!-- Content of a dialog shown when the user has failed to provide the device lock too many times and the device is wiped. [CHAR LIMIT=NONE] -->
     <string name="biometric_dialog_failed_attempts_now_wiping_device">Too many incorrect attempts. This device\u2019s data will be deleted.</string>
