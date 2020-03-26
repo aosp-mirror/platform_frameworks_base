@@ -187,6 +187,8 @@ void CreateRepeatedValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTi
 
 std::shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs);
 
+void CreateNoValuesLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs);
+
 // Create log event for screen state changed.
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
         uint64_t timestampNs, const android::view::DisplayStateEnum state);

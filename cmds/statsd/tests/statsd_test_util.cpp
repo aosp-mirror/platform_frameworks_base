@@ -428,7 +428,7 @@ shared_ptr<LogEvent> CreateTwoValueLogEvent(int atomId, int64_t eventTimeNs, int
 
     return logEvent;
 }
-//
+
 void CreateTwoValueLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs, int32_t value1,
                             int32_t value2) {
     AStatsEvent* statsEvent = AStatsEvent_obtain();
@@ -529,6 +529,18 @@ shared_ptr<LogEvent> CreateNoValuesLogEvent(int atomId, int64_t eventTimeNs) {
     AStatsEvent_release(statsEvent);
 
     return logEvent;
+}
+
+void CreateNoValuesLogEvent(LogEvent* logEvent, int atomId, int64_t eventTimeNs) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, atomId);
+    AStatsEvent_overwriteTimestamp(statsEvent, eventTimeNs);
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
 }
 
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(

@@ -13,13 +13,16 @@
 // limitations under the License.
 
 #include "src/metrics/EventMetricProducer.h"
-#include "metrics_test_helper.h"
-#include "tests/statsd_test_util.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <stdio.h>
+
 #include <vector>
+
+#include "metrics_test_helper.h"
+#include "stats_event.h"
+#include "tests/statsd_test_util.h"
 
 using namespace testing;
 using android::sp;
@@ -35,6 +38,22 @@ namespace statsd {
 
 const ConfigKey kConfigKey(0, 12345);
 
+namespace {
+void makeLogEvent(LogEvent* logEvent, int32_t atomId, int64_t timestampNs, string str) {
+    AStatsEvent* statsEvent = AStatsEvent_obtain();
+    AStatsEvent_setAtomId(statsEvent, atomId);
+    AStatsEvent_overwriteTimestamp(statsEvent, timestampNs);
+
+    AStatsEvent_writeString(statsEvent, str.c_str());
+    AStatsEvent_build(statsEvent);
+
+    size_t size;
+    uint8_t* buf = AStatsEvent_getBuffer(statsEvent, &size);
+    logEvent->parseBuffer(buf, size);
+    AStatsEvent_release(statsEvent);
+}
+}  // anonymous namespace
+
 TEST(EventMetricProducerTest, TestNoCondition) {
     int64_t bucketStartTimeNs = 10000000000;
     int64_t eventStartTimeNs = bucketStartTimeNs + 1;
@@ -43,8 +62,11 @@ TEST(EventMetricProducerTest, TestNoCondition) {
     EventMetric metric;
     metric.set_id(1);
 
-    LogEvent event1(1 /*tag id*/, bucketStartTimeNs + 1);
-    LogEvent event2(1 /*tag id*/, bucketStartTimeNs + 2);
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    CreateNoValuesLogEvent(&event1, 1 /*tagId*/, bucketStartTimeNs + 1);
+
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    CreateNoValuesLogEvent(&event2, 1 /*tagId*/, bucketStartTimeNs + 2);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -54,8 +76,17 @@ TEST(EventMetricProducerTest, TestNoCondition) {
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
 
-    // TODO(b/110561136): get the report and check the content after the ProtoOutputStream change
-    // is done eventProducer.onDumpReport();
+    // Check dump report content.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    eventProducer.onDumpReport(bucketStartTimeNs + 20, true /*include current partial bucket*/,
+                               true /*erase data*/, FAST, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_event_metrics());
+    EXPECT_EQ(2, report.event_metrics().data_size());
+    EXPECT_EQ(bucketStartTimeNs + 1, report.event_metrics().data(0).elapsed_timestamp_nanos());
+    EXPECT_EQ(bucketStartTimeNs + 2, report.event_metrics().data(1).elapsed_timestamp_nanos());
 }
 
 TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
@@ -67,8 +98,11 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
     metric.set_id(1);
     metric.set_condition(StringToId("SCREEN_ON"));
 
-    LogEvent event1(1, bucketStartTimeNs + 1);
-    LogEvent event2(1, bucketStartTimeNs + 10);
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    CreateNoValuesLogEvent(&event1, 1 /*tagId*/, bucketStartTimeNs + 1);
+
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    CreateNoValuesLogEvent(&event2, 1 /*tagId*/, bucketStartTimeNs + 10);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
@@ -81,51 +115,67 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
 
-    // TODO: get the report and check the content after the ProtoOutputStream change is done.
-    // eventProducer.onDumpReport();
+    // Check dump report content.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    eventProducer.onDumpReport(bucketStartTimeNs + 20, true /*include current partial bucket*/,
+                               true /*erase data*/, FAST, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_event_metrics());
+    EXPECT_EQ(1, report.event_metrics().data_size());
+    EXPECT_EQ(bucketStartTimeNs + 1, report.event_metrics().data(0).elapsed_timestamp_nanos());
 }
 
-// TODO(b/149590301): Update this test to use new socket schema.
-//TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
-//    int64_t bucketStartTimeNs = 10000000000;
-//    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
-//
-//    int tagId = 1;
-//    int conditionTagId = 2;
-//
-//    EventMetric metric;
-//    metric.set_id(1);
-//    metric.set_condition(StringToId("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON"));
-//    MetricConditionLink* link = metric.add_links();
-//    link->set_condition(StringToId("APP_IN_BACKGROUND_PER_UID"));
-//    buildSimpleAtomFieldMatcher(tagId, 1, link->mutable_fields_in_what());
-//    buildSimpleAtomFieldMatcher(conditionTagId, 2, link->mutable_fields_in_condition());
-//
-//    LogEvent event1(tagId, bucketStartTimeNs + 1);
-//    EXPECT_TRUE(event1.write("111"));
-//    event1.init();
-//    ConditionKey key1;
-//    key1[StringToId("APP_IN_BACKGROUND_PER_UID")] = {getMockedDimensionKey(conditionTagId, 2, "111")};
-//
-//    LogEvent event2(tagId, bucketStartTimeNs + 10);
-//    EXPECT_TRUE(event2.write("222"));
-//    event2.init();
-//    ConditionKey key2;
-//    key2[StringToId("APP_IN_BACKGROUND_PER_UID")] = {getMockedDimensionKey(conditionTagId, 2, "222")};
-//
-//    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
-//    EXPECT_CALL(*wizard, query(_, key1, _)).WillOnce(Return(ConditionState::kFalse));
-//
-//    EXPECT_CALL(*wizard, query(_, key2, _)).WillOnce(Return(ConditionState::kTrue));
-//
-//    EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
-//
-//    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
-//    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
-//
-//    // TODO: get the report and check the content after the ProtoOutputStream change is done.
-//    // eventProducer.onDumpReport();
-//}
+TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
+    int64_t bucketStartTimeNs = 10000000000;
+    int64_t bucketSizeNs = 30 * 1000 * 1000 * 1000LL;
+
+    int tagId = 1;
+    int conditionTagId = 2;
+
+    EventMetric metric;
+    metric.set_id(1);
+    metric.set_condition(StringToId("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON"));
+    MetricConditionLink* link = metric.add_links();
+    link->set_condition(StringToId("APP_IN_BACKGROUND_PER_UID"));
+    buildSimpleAtomFieldMatcher(tagId, 1, link->mutable_fields_in_what());
+    buildSimpleAtomFieldMatcher(conditionTagId, 2, link->mutable_fields_in_condition());
+
+    LogEvent event1(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event1, 1 /*tagId*/, bucketStartTimeNs + 1, "111");
+    ConditionKey key1;
+    key1[StringToId("APP_IN_BACKGROUND_PER_UID")] = {
+            getMockedDimensionKey(conditionTagId, 2, "111")};
+
+    LogEvent event2(/*uid=*/0, /*pid=*/0);
+    makeLogEvent(&event2, 1 /*tagId*/, bucketStartTimeNs + 10, "222");
+    ConditionKey key2;
+    key2[StringToId("APP_IN_BACKGROUND_PER_UID")] = {
+            getMockedDimensionKey(conditionTagId, 2, "222")};
+
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    // Condition is false for first event.
+    EXPECT_CALL(*wizard, query(_, key1, _)).WillOnce(Return(ConditionState::kFalse));
+    // Condition is true for second event.
+    EXPECT_CALL(*wizard, query(_, key2, _)).WillOnce(Return(ConditionState::kTrue));
+
+    EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
+
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
+    eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
+
+    // Check dump report content.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    eventProducer.onDumpReport(bucketStartTimeNs + 20, true /*include current partial bucket*/,
+                               true /*erase data*/, FAST, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_event_metrics());
+    EXPECT_EQ(1, report.event_metrics().data_size());
+    EXPECT_EQ(bucketStartTimeNs + 10, report.event_metrics().data(0).elapsed_timestamp_nanos());
+}
 
 }  // namespace statsd
 }  // namespace os
