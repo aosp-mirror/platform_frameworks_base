@@ -273,7 +273,7 @@ public abstract class RemoteListenerHelper<TRequest, TListener extends IInterfac
         }
 
         @Nullable
-        protected TRequest getRequest() {
+        public TRequest getRequest() {
             return mRequest;
         }
     }
