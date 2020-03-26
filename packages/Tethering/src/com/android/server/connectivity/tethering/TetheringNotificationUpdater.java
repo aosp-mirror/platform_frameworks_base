@@ -134,8 +134,9 @@ public class TetheringNotificationUpdater {
      *
      * @return downstream types mask value.
      */
+    @VisibleForTesting
     @IntRange(from = 0, to = 7)
-    private int getDownstreamTypesMask(@NonNull final String types) {
+    int getDownstreamTypesMask(@NonNull final String types) {
         int downstreamTypesMask = DOWNSTREAM_NONE;
         final String[] downstreams = types.split("\\|");
         for (String downstream : downstreams) {
@@ -158,8 +159,8 @@ public class TetheringNotificationUpdater {
      *
      * @return {@link android.util.SparseArray} with downstream types and icon id info.
      */
-    @NonNull
-    private SparseArray<Integer> getIcons(@ArrayRes int id, @NonNull Resources res) {
+    @VisibleForTesting
+    SparseArray<Integer> getIcons(@ArrayRes int id, @NonNull Resources res) {
         final String[] array = res.getStringArray(id);
         final SparseArray<Integer> icons = new SparseArray<>();
         for (String config : array) {
