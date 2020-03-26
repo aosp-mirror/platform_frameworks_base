@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ପ୍ରୋଟାନୋମାଲି (ଲାଲ୍‌-ସବୁଜ)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (ନୀଳ-ହଳଦିଆ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ରଙ୍ଗ ସଠିକତା"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ଆପଣଙ୍କ ଡିଭାଇସରେ ରଙ୍ଗଗୁଡ଼ିକ କିପରି ଡିସପ୍ଲେ ହୁଏ ତାହା ଆଡଜଷ୍ଟ କରିବାକୁ ’କଲର୍ କରେକ୍ସନ୍’ ଆପଣଙ୍କୁ ଅନୁମତି ଦିଏ"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ଦ୍ୱାରା ଓଭର୍‌ରାଇଡ୍‌ କରାଯାଇଛି"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"ପାଖାପାଖି <xliff:g id="TIME_REMAINING">%1$s</xliff:g> ବଳକା ଅଛି"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"ଉପଯୋଗକର୍ତ୍ତାମାନଙ୍କ ପାଖରେ ନିଜର ଆପ୍‌ ଓ କଣ୍ଟେଣ୍ଟ ଅଛି"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ନିଜ ଆକାଉଣ୍ଟରୁ ଆପ୍‌ ତଥା କଣ୍ଟେଣ୍ଟକୁ ଆପଣ ଆକ୍ସେସ୍ ରୋକିପାରିବେ"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"ଉପଯୋଗକର୍ତ୍ତା"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"ସୀମିତ ସୁବିଧା ଥିବା ପ୍ରୋଫାଇଲ୍‌"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"ନୂତନ ୟୁଜର୍ ଯୋଡ଼ିବେ?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"ଅତିରିକ୍ତ ୟୁଜର୍ ତିଆରିକରି ଆପଣ ଏହି ଡିଭାଇସ୍‌କୁ ଅନ୍ୟ ଲୋକମାନଙ୍କ ସହିତ ସେୟାର୍ କରିପାରିବେ। ପ୍ରତ୍ୟେକ ୟୁଜର୍‌ଙ୍କର ନିଜର ସ୍ପେସ୍ ଅଛି ଯାହାକୁ ସେମାନେ ଆପ୍, ୱାଲପେପର୍ ଓ ଏପରି ଅନେକ ସହିତ କଷ୍ଟମାଇଜ୍ କରିପାରିବେ। ୟୁଜର୍ ୱାଇ-ଫାଇ ଭଳି ଡିଭାଇସ୍ ସେଟିଙ୍ଗକୁ ମଧ୍ୟ ଆଡଜଷ୍ଟ କରିପାରିବେ ଯାହା ସମସ୍ତଙ୍କୁ ପ୍ରଭାବିତ କରିଥାଏ। \n\nଯେତେବେଳେ ଆପଣ ଗୋଟିଏ ନୂଆ ୟୁଜର୍‌ଙ୍କୁ ଯୋଡ଼ିବେ ସେତେବେଳେ ସେହି ବ୍ୟକ୍ତି ଜଣଙ୍କୁ ନିଜର ସ୍ପେସ୍‌କୁ ସେଟ‌ଅପ୍ କରିବାକୁ ପଡ଼ିବ। \n\nଅନ୍ୟ ୟୁଜରଙ୍କ ପାଇଁ ଯେକୌଣସି ୟୁଜର୍ ଆପ୍‌କୁ ଅପଡେଟ୍ କରିପାରିବେ। ଆକ୍ସେସ୍ କରିବା ପାଇଁ ସେଟିଙ୍ଗ ଏବଂ ସେବା ନୂଆ ୟୁଜର୍‌ଙ୍କୁ ଟ୍ରନ୍ସଫର୍ ନହୋ‌ଇପାରେ।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଡ଼ିବାବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ସ୍ଥାନ ସେଟ୍‍ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେକୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପ୍‌ଗୁଡ଼ିକୁ ଅପ୍‌ଡେଟ୍‌ କରିପାରିବେ।"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ଏବେ ୟୁଜର୍‌ଙ୍କୁ ସେଟ୍ କରିବେ?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"ସୁନିଶ୍ଚିତ କରନ୍ତୁ ଯେ, ବ୍ୟକ୍ତି ଜଣକ ଡିଭାଇସ୍‌ ଓ ନିଜର ସ୍ଥାନ ସେଟ୍‌ କରିବା ପାଇଁ ଉପଲବ୍ଧ ଅଛନ୍ତି।"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ପ୍ରୋଫାଇଲ୍‌କୁ ଏବେ ସେଟ୍‌ କରିବେ?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ଏବେ ସେଟ୍‌ କରନ୍ତୁ"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ଏବେ ନୁହେଁଁ"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"ଯୋଡନ୍ତୁ"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"ନୂଆ ୟୁଜର୍"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"ନୂଆ ପ୍ରୋଫାଇଲ୍‌"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ଉପଯୋଗକର୍ତ୍ତା ସୂଚନା"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"ପ୍ରୋଫାଇଲ୍ ସୂଚନା"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"ପ୍ରତିବନ୍ଧିତ ପ୍ରୋଫାଇଲ୍‌ ତିଆରି କରିବାବେଳେ, ନିଜ ଆପ୍‌ ଓ ବ୍ୟକ୍ତିଗତ ତଥ୍ୟର ସୁରକ୍ଷା ପାଇଁ ଏକ ସ୍କ୍ରୀନ୍‌ ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ।"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ"</string>
 </resources>

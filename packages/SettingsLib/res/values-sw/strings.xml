@@ -232,8 +232,7 @@
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Anwani ya IP na Mlango"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Changanua msimbo wa QR"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="8578868049289910131">"Oanisha kifaa kupitia Wi-Fi kwa kuchanganua Msimbo wa QR"</string>
-    <!-- no translation found for adb_wireless_no_network_msg (2365795244718494658) -->
-    <skip />
+    <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Tafadhali unganisha kwenye mtandao wa Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, tatua, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Njia ya mkato ya kuripoti hitilafu"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Onyesha kitufe cha kuripoti hitilafu katika menyu ya kuzima/kuwasha kifaa"</string>
@@ -418,8 +417,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (nyekundu-kijani)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (samawati-manjano)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Usahihishaji wa rangi"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Urekebishaji rangi hukuruhusu ubadilishe jinsi rangi zinavyoonyeshwa kwenye kifaa chako"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Imetanguliwa na <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Zimesalia takribani <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -433,8 +431,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Inapaswa kudumu kwa takribani <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Inapaswa kudumu hadi <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hadi <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_suggestion_battery_run_out (6332089307827787087) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Huenda chaji ikaisha kufikia <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5802195288324091585">"Zimesalia chini ya <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="1812668275239801236">"Zimesalia chini ya <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="7919119719242734848">"Zimesalia zaidi ya <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -512,26 +509,34 @@
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Spika ya simu"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kuna tatizo la kuunganisha kwenye Intaneti. Zima kisha uwashe kifaa"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kifaa cha sauti kinachotumia waya"</string>
-    <!-- no translation found for help_label (3528360748637781274) -->
-    <skip />
-    <!-- no translation found for storage_category (2287342585424631813) -->
-    <skip />
-    <!-- no translation found for shared_data_title (1017034836800864953) -->
-    <skip />
-    <!-- no translation found for shared_data_summary (5516326713822885652) -->
-    <skip />
-    <!-- no translation found for blob_id_text (8680078988996308061) -->
-    <skip />
-    <!-- no translation found for blob_expires_text (7882727111491739331) -->
-    <skip />
-    <!-- no translation found for accessor_info_title (8289823651512477787) -->
-    <skip />
-    <!-- no translation found for accessor_no_description_text (7510967452505591456) -->
-    <skip />
-    <!-- no translation found for accessor_expires_text (4625619273236786252) -->
-    <skip />
-    <!-- no translation found for delete_blob_text (2819192607255625697) -->
-    <skip />
-    <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
-    <skip />
+    <string name="help_label" msgid="3528360748637781274">"Usaidizi na maoni"</string>
+    <string name="storage_category" msgid="2287342585424631813">"Hifadhi"</string>
+    <string name="shared_data_title" msgid="1017034836800864953">"Data iliyoshirikiwa"</string>
+    <string name="shared_data_summary" msgid="5516326713822885652">"Angalia na ubadilishe data iliyoshirikiwa"</string>
+    <string name="blob_id_text" msgid="8680078988996308061">"Kitambulisho cha data iliyoshirikiwa: <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
+    <string name="blob_expires_text" msgid="7882727111491739331">"Muda wake utaisha<xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="accessor_info_title" msgid="8289823651512477787">"Programu zinazoshiriki data"</string>
+    <string name="accessor_no_description_text" msgid="7510967452505591456">"Hakuna maelezo yaliyotolewa na programu."</string>
+    <string name="accessor_expires_text" msgid="4625619273236786252">"Muda wa kukodisha utaisha <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="delete_blob_text" msgid="2819192607255625697">"Futa data iliyoshirikiwa"</string>
+    <string name="delete_blob_confirmation_text" msgid="7807446938920827280">"Una uhakika unataka kufuta data hii iliyoshirikiwa?"</string>
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"Watumiaji wana programu na maudhui yao binafsi"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Unaweza kudhibiti ufikiaji kwa programu na maudhui kutoka kwenye akaunti yako"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"Mtumiaji"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"Wasifu uliozuiwa"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Ungependa kuongeza mtumiaji?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Unaweza kutumia kifaa hiki pamoja na watu wengine kwa kuongeza watumiaji wa ziada. Kila mtumiaji ana nafasi yake mwenyewe, ambayo anaweza kuweka programu, mandhari na vipengee vingine anavyopenda. Watumiaji pia wanaweza kurekebisha mipangilio ya kifaa inayoathiri kila mtu kama vile Wi-Fi.\n\nUnapomwongeza mtumiaji mpya, mtu huyo anahitaji kujitayarishia nafasi yake.\n\nMtumiaji yeyote anaweza kuwasasishia watumiaji wengine wote programu. Huenda mipangilio na huduma za walio na matatizo ya kuona na kusikia zisihamishiwe mtumiaji mgeni."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Mtumiaji mpya utakayemwongeza atahitaji kuongeza akaunti yake.\n\nMtumiaji yoyote anaweza kusasisha programu kwa niaba ya wengine wote."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Mtumiaji aongezwe sasa?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Hakikisha kuwa mtu huyu anaweza kuchukua kifaa na kuweka mapendeleo yake"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Ungependa kuweka wasifu sasa?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Mwongeze sasa"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Si sasa"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"Ongeza"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"Mtumiaji mpya"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"Wasifu mpya"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Maelezo ya mtumiaji"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"Maelezo ya wasifu"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"Kabla uunde wasifu uliowekekwa vikwazo, utahitajika kuweka skrini iliyofungwa ili kulinda programu zako na data binafsi."</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"Weka ufunguo"</string>
 </resources>

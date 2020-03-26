@@ -418,8 +418,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"প্ৰ’টানোমালি (ৰঙা-সেউজীয়া)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ট্ৰাইটান\'মেলী (নীলা-হালধীয়া)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"ৰং শুধৰণী"</string>
-    <!-- no translation found for accessibility_display_daltonizer_preference_subtitle (1284746051652993443) -->
-    <skip />
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"ৰং শুধৰণি সুবিধাটোৰে আপোনাক আপোনাৰ ডিভাইচত ৰংবোৰ কেনেকৈ প্ৰদর্শন কৰা হয় সেয়া মিলাবলৈ দিয়ে"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g>ৰ দ্বাৰা অগ্ৰাহ্য কৰা হৈছে"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"প্রায় <xliff:g id="TIME_REMAINING">%1$s</xliff:g> বাকী আছে"</string>
@@ -534,4 +533,23 @@
     <skip />
     <!-- no translation found for delete_blob_confirmation_text (7807446938920827280) -->
     <skip />
+    <string name="user_add_user_item_summary" msgid="5748424612724703400">"ব্যৱহাৰকাৰীসকলৰ নিজৰ এপ্ আৰু সমল থাকে"</string>
+    <string name="user_add_profile_item_summary" msgid="5418602404308968028">"আপুনি নিজৰ একাউণ্টৰ পৰা এপ্ আৰু সমল চোৱা সুবিধাটো সীমাবদ্ধ কৰিব পাৰে"</string>
+    <string name="user_add_user_item_title" msgid="2394272381086965029">"ব্যৱহাৰকাৰী"</string>
+    <string name="user_add_profile_item_title" msgid="3111051717414643029">"সীমিত প্ৰ\'ফাইল"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"নতুন ব্যৱহাৰকাৰী যোগ কৰিবনে?"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"আপুনি অতিৰিক্ত ব্য়ৱহাৰকাৰীক যোগ কৰি এই ডিভাইচটো অন্য় ব্য়ক্তিৰ সৈতে শ্বেয়াৰ কৰিব পাৰে। প্ৰতিজন ব্য়ৱহাৰকাৰীৰ বাবে নিজাকৈ ঠাই আছে যাক তেওঁলোকে এপ্, ৱালপেপাৰ আৰু অন্য়ান্য় বস্তুৰ বাবে নিজৰ উপযোগিতা অনুযায়ী ব্য়ৱহাৰ কৰিব পাৰে। ব্য়ৱহাৰকাৰীসকলে সকলোকে প্ৰভাৱান্বিত কৰা ৱাই-ফাইৰ নিচিনা ডিভাইচৰ ছেটিংসমূহ সাল-সলনি কৰিবও পাৰে।\n\nআপুনি যেতিয়া কোনো নতুন ব্য়ৱহাৰকাৰীক যোগ কৰে সেই ব্য়ক্তিজনে নিজেই নিজৰ বাবে ঠাই ছেট আপ কৰিব লাগিব।\n\nসকলো ব্য়ৱহাৰকাৰীএ অন্য় ব্য়ৱহাৰকাৰীৰ বাবে এপসমূহ আপডে’ট কৰিব পাৰে। সাধ্য় সুবিধাসমূহৰ ছেটিং আৰু সেৱাসমূহ নতুন ব্য়ৱহাৰকাৰীলৈ স্থানান্তৰ নহ\'বও পাৰে।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"আপুনি যেতিয়া এজন নতুন ব্যৱহাৰকাৰী যোগ কৰে, তেওঁ নিজৰ ঠাই ছেট আপ কৰা প্ৰয়োজন।\n\nযিকোনো ব্যৱহাৰকাৰীয়ে সকলো ব্যৱহাৰকাৰীৰ বাবে এপ্ আপডেইট কৰিব পাৰে।"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"ব্যৱহাৰকাৰী এতিয়া ছেট আপ কৰিবনে?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"ডিভাইচটো লৈ নিজৰ ঠাই ছেটআপ কৰিবলৈ নতুন ব্যৱহাৰকাৰী উপলব্ধ থকাটো নিশ্চিত কৰক"</string>
+    <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"এতিয়া প্ৰ\'ফাইল ছেট আপ কৰিবনে?"</string>
+    <string name="user_setup_button_setup_now" msgid="1708269547187760639">"এতিয়াই ছেট আপ কৰক"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"এতিয়া নহয়"</string>
+    <string name="user_add_user_type_title" msgid="551279664052914497">"যোগ কৰক"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"নতুন ব্যৱহাৰকাৰী"</string>
+    <string name="user_new_profile_name" msgid="2405500423304678841">"নতুন প্ৰ\'ফাইল"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ব্যৱহাৰকাৰীৰ তথ্য"</string>
+    <string name="profile_info_settings_title" msgid="105699672534365099">"প্ৰ\'ফাইলৰ তথ্য"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"আপুনি সীমিত প্ৰ\'ফাইল এটা সৃষ্টি কৰাৰ আগেয়ে, আপোনাৰ ব্যক্তিগত ডেটা আৰু এপবিলাকক সুৰক্ষিত কৰিবলৈ স্ক্ৰীণ লক এটা নিৰ্ধাৰণ কৰিব লাগিব।"</string>
+    <string name="user_set_lock_button" msgid="1427128184982594856">"লক ছেট কৰক"</string>
 </resources>
