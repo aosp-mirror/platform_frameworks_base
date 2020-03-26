@@ -84,6 +84,7 @@ import java.util.Set;
 import static android.app.UiModeManager.MODE_NIGHT_AUTO;
 import static android.app.UiModeManager.MODE_NIGHT_CUSTOM;
 import static android.app.UiModeManager.MODE_NIGHT_YES;
+import static android.os.UserHandle.USER_SYSTEM;
 import static android.util.TimeUtils.isTimeBetween;
 
 final class UiModeManagerService extends SystemService {
@@ -151,6 +152,7 @@ final class UiModeManagerService extends SystemService {
     // Example: Activate dark mode in the day time until sunrise the next day
     private boolean mOverrideNightModeOn;
     private boolean mOverrideNightModeOff;
+    private int mOverrideNightModeUser = USER_SYSTEM;
 
     private PowerManager.WakeLock mWakeLock;
 
@@ -668,10 +670,7 @@ final class UiModeManagerService extends SystemService {
 
                         mNightMode = mode;
                         resetNightModeOverrideLocked();
-                        // Only persist setting if not in car mode
-                        if (!mCarModeEnabled) {
-                            persistNightMode(user);
-                        }
+                        persistNightMode(user);
                         // on screen off will update configuration instead
                         if ((mNightMode != MODE_NIGHT_AUTO && mNightMode != MODE_NIGHT_CUSTOM)
                                 || shouldApplyAutomaticChangesImmediately()) {
@@ -730,6 +729,8 @@ final class UiModeManagerService extends SystemService {
                         unregisterScreenOffEventLocked();
                         mOverrideNightModeOff = !active;
                         mOverrideNightModeOn = active;
+                        mOverrideNightModeUser = user;
+                        persistNightModeOverrides(user);
                     } else if (mNightMode == UiModeManager.MODE_NIGHT_NO
                             && active) {
                         mNightMode = UiModeManager.MODE_NIGHT_YES;
@@ -1008,18 +1009,25 @@ final class UiModeManagerService extends SystemService {
     }
 
     private void persistNightMode(int user) {
+        // Only persist setting if not in car mode
+        if (mCarModeEnabled) return;
         Secure.putIntForUser(getContext().getContentResolver(),
                 Secure.UI_NIGHT_MODE, mNightMode, user);
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.UI_NIGHT_MODE_OVERRIDE_ON, mOverrideNightModeOn ? 1 : 0, user);
-        Secure.putIntForUser(getContext().getContentResolver(),
-                Secure.UI_NIGHT_MODE_OVERRIDE_OFF, mOverrideNightModeOff ? 1 : 0, user);
         Secure.putLongForUser(getContext().getContentResolver(),
                 Secure.DARK_THEME_CUSTOM_START_TIME,
                 mCustomAutoNightModeStartMilliseconds.toNanoOfDay() / 1000, user);
         Secure.putLongForUser(getContext().getContentResolver(),
                 Secure.DARK_THEME_CUSTOM_END_TIME,
                 mCustomAutoNightModeEndMilliseconds.toNanoOfDay() / 1000, user);
+    }
+
+    private void persistNightModeOverrides(int user) {
+        // Only persist setting if not in car mode
+        if (mCarModeEnabled) return;
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.UI_NIGHT_MODE_OVERRIDE_ON, mOverrideNightModeOn ? 1 : 0, user);
+        Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.UI_NIGHT_MODE_OVERRIDE_OFF, mOverrideNightModeOff ? 1 : 0, user);
     }
 
     private void updateConfigurationLocked() {
@@ -1392,12 +1400,15 @@ final class UiModeManagerService extends SystemService {
         }
     }
 
-    private void resetNightModeOverrideLocked() {
+    private boolean resetNightModeOverrideLocked() {
         if (mOverrideNightModeOff || mOverrideNightModeOn) {
             mOverrideNightModeOff = false;
             mOverrideNightModeOn = false;
-            persistNightMode(UserHandle.getCallingUserId());
+            persistNightModeOverrides(mOverrideNightModeUser);
+            mOverrideNightModeUser = USER_SYSTEM;
+            return true;
         }
+        return false;
     }
 
     private void registerVrStateListener() {
@@ -1538,7 +1549,7 @@ final class UiModeManagerService extends SystemService {
         public void onReceive(Context context, Intent intent) {
             synchronized (mLock) {
                 final int currentId = intent.getIntExtra(
-                        Intent.EXTRA_USER_HANDLE, UserHandle.USER_SYSTEM);
+                        Intent.EXTRA_USER_HANDLE, USER_SYSTEM);
                 // only update if the value is actually changed
                 if (updateNightModeFromSettingsLocked(context, context.getResources(), currentId)) {
                     updateLocked(0, 0);
