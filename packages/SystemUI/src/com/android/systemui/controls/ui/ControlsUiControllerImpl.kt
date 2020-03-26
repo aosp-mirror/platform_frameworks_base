@@ -442,7 +442,15 @@ class ControlsUiControllerImpl @Inject constructor (
             controlViewsById.get(key)?.let { cvh ->
                 when (response) {
                     ControlAction.RESPONSE_CHALLENGE_PIN -> {
-                        activeDialog = ChallengeDialogs.createPinDialog(cvh)
+                        activeDialog = ChallengeDialogs.createPinDialog(cvh, false)
+                        activeDialog?.show()
+                    }
+                    ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
+                        activeDialog = ChallengeDialogs.createPinDialog(cvh, true)
+                        activeDialog?.show()
+                    }
+                    ControlAction.RESPONSE_CHALLENGE_ACK -> {
+                        activeDialog = ChallengeDialogs.createConfirmationDialog(cvh)
                         activeDialog?.show()
                     }
                     else -> cvh.actionResponse(response)
