@@ -29,5 +29,5 @@
          <p>The main purpose is for OEMs to customize the rendering of the
          lockscreen, setting this to true should come with customized drawables. -->
     <bool name="use_lock_pattern_drawable">false</bool>
-    <bool name="sharesheet_show_content_preview">false</bool>
+    <bool name="resolver_landscape_phone">true</bool>
 </resources>
