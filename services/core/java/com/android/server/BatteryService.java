@@ -1104,6 +1104,9 @@ public final class BatteryService extends SystemService {
          * Synchronize on BatteryService.
          */
         public void updateLightsLocked() {
+            if (mBatteryLight == null) {
+                return;
+            }
             final int level = mHealthInfo.batteryLevel;
             final int status = mHealthInfo.batteryStatus;
             if (level < mLowBatteryWarningLevel) {
