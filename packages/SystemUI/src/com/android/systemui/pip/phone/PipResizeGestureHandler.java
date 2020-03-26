@@ -99,14 +99,14 @@ public class PipResizeGestureHandler {
         mEnablePipResize = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_USER_RESIZE,
-                /* defaultValue = */ false);
+                /* defaultValue = */ true);
         deviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mMainExecutor,
                 new DeviceConfig.OnPropertiesChangedListener() {
                     @Override
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
                         if (properties.getKeyset().contains(PIP_USER_RESIZE)) {
                             mEnablePipResize = properties.getBoolean(
-                                    PIP_USER_RESIZE, /* defaultValue = */ false);
+                                    PIP_USER_RESIZE, /* defaultValue = */ true);
                         }
                     }
                 });

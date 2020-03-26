@@ -29,12 +29,22 @@ import android.os.PowerManager;
 import android.provider.Telephony.Carriers;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
+import android.telephony.PreciseCallState;
+import android.telephony.PhoneStateListener;
 import android.util.Log;
+
+import com.android.internal.location.GpsNetInitiatedHandler;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Iterator;
 
 /**
  * Handles network connection requests and network state change updates for AGPS data download.
@@ -86,6 +96,9 @@ class GnssNetworkConnectivityHandler {
     private HashMap<Network, NetworkAttributes> mAvailableNetworkAttributes =
             new HashMap<>(HASH_MAP_INITIAL_CAPACITY_TO_TRACK_CONNECTED_NETWORKS);
 
+    // Phone State Listeners to track all the active sub IDs
+    private HashMap<Integer, SubIdPhoneStateListener> mPhoneStateListeners;
+
     private final ConnectivityManager mConnMgr;
 
     private final Handler mHandler;
@@ -94,6 +107,9 @@ class GnssNetworkConnectivityHandler {
     private int mAGpsDataConnectionState;
     private InetAddress mAGpsDataConnectionIpAddr;
     private int mAGpsType;
+    private int mActiveSubId = -1;
+    private final GpsNetInitiatedHandler mNiHandler;
+
 
     private final Context mContext;
 
@@ -166,17 +182,108 @@ class GnssNetworkConnectivityHandler {
 
     GnssNetworkConnectivityHandler(Context context,
             GnssNetworkListener gnssNetworkListener,
-            Looper looper) {
+            Looper looper,
+            GpsNetInitiatedHandler niHandler) {
         mContext = context;
         mGnssNetworkListener = gnssNetworkListener;
+
+    SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
+        if (subManager != null) {
+            subManager.addOnSubscriptionsChangedListener(mOnSubscriptionsChangeListener);
+        }
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
 
         mHandler = new Handler(looper);
+        mNiHandler = niHandler;
         mConnMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         mSuplConnectivityCallback = createSuplConnectivityCallback();
     }
+
+    /**
+     * SubId Phone State Listener is used cache the last active Sub ID when a call is made,
+     * which will be used during an emergency call to set the Network Specifier to the particular
+     * sub when an emergency supl connection is requested
+     */
+    private final class SubIdPhoneStateListener extends PhoneStateListener {
+        private Integer mSubId;
+        SubIdPhoneStateListener(Integer subId) {
+            mSubId = subId;
+        }
+        @Override
+        public void onPreciseCallStateChanged(PreciseCallState state) {
+            if (state.PRECISE_CALL_STATE_ACTIVE == state.getForegroundCallState()) {
+                mActiveSubId = mSubId;
+                if (DEBUG) Log.d(TAG, "mActiveSubId: " + mActiveSubId);
+            }
+        }
+    };
+
+    /**
+     * Subscription Changed Listener is used to get all active subscriptions and create a
+     * Phone State Listener for each Sub ID that we find in the active subscription list
+     */
+    private final SubscriptionManager.OnSubscriptionsChangedListener mOnSubscriptionsChangeListener
+            = new SubscriptionManager.OnSubscriptionsChangedListener() {
+        @Override
+        public void onSubscriptionsChanged() {
+            if (mPhoneStateListeners == null) {
+                // Capacity=2 Load-Factor=1.0, as typically no more than 2 SIMs
+                mPhoneStateListeners = new HashMap<Integer, SubIdPhoneStateListener>(2,1);
+            }
+            SubscriptionManager subManager = mContext.getSystemService(SubscriptionManager.class);
+            TelephonyManager telManager = mContext.getSystemService(TelephonyManager.class);
+            if (subManager != null && telManager != null) {
+                List<SubscriptionInfo> subscriptionInfoList =
+                        subManager.getActiveSubscriptionInfoList();
+                HashSet<Integer> activeSubIds = new HashSet<Integer>();
+                if (subscriptionInfoList != null) {
+                    if (DEBUG) Log.d(TAG, "Active Sub List size: " + subscriptionInfoList.size());
+                    // populate phone state listeners with all new active subs
+                    for (SubscriptionInfo subInfo : subscriptionInfoList) {
+                        activeSubIds.add(subInfo.getSubscriptionId());
+                        if (!mPhoneStateListeners.containsKey(subInfo.getSubscriptionId())) {
+                            TelephonyManager subIdTelManager =
+                                    telManager.createForSubscriptionId(subInfo.getSubscriptionId());
+                            if (subIdTelManager != null) {
+                                if (DEBUG) Log.d(TAG, "Listener sub" + subInfo.getSubscriptionId());
+                                SubIdPhoneStateListener subIdPhoneStateListener =
+                                        new SubIdPhoneStateListener(subInfo.getSubscriptionId());
+                                mPhoneStateListeners.put(subInfo.getSubscriptionId(),
+                                        subIdPhoneStateListener);
+                                subIdTelManager.listen(subIdPhoneStateListener,
+                                        PhoneStateListener.LISTEN_PRECISE_CALL_STATE);
+                            }
+                        }
+                    }
+                }
+                // clean up phone state listeners than no longer have active subs
+                Iterator<Map.Entry<Integer, SubIdPhoneStateListener> > iterator =
+                        mPhoneStateListeners.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Map.Entry<Integer, SubIdPhoneStateListener> element = iterator.next();
+                    if (!activeSubIds.contains(element.getKey())) {
+                        TelephonyManager subIdTelManager =
+                                telManager.createForSubscriptionId(element.getKey());
+                        if (subIdTelManager != null) {
+                            if (DEBUG) Log.d(TAG, "unregister listener sub " + element.getKey());
+                            subIdTelManager.listen(element.getValue(),
+                                                   PhoneStateListener.LISTEN_NONE);
+                            // removes the element from mPhoneStateListeners
+                            iterator.remove();
+                        } else {
+                            Log.e(TAG, "Telephony Manager for Sub " + element.getKey() + " null");
+                        }
+                    }
+                }
+                // clean up cached active phone call sub if it is no longer an active sub
+                if (!activeSubIds.contains(mActiveSubId)) {
+                    mActiveSubId = -1;
+                }
+            }
+        }
+    };
 
     void registerNetworkCallbacks() {
         // register for connectivity change events.
@@ -467,6 +574,12 @@ class GnssNetworkConnectivityHandler {
         NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
         networkRequestBuilder.addCapability(getNetworkCapability(mAGpsType));
         networkRequestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
+        // During an emergency call, and when we have cached the Active Sub Id, we set the
+        // Network Specifier so that the network request goes to the correct Sub Id
+        if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
+            if (DEBUG) Log.d(TAG, "Adding Network Specifier: " + Integer.toString(mActiveSubId));
+            networkRequestBuilder.setNetworkSpecifier(Integer.toString(mActiveSubId));
+        }
         NetworkRequest networkRequest = networkRequestBuilder.build();
         mConnMgr.requestNetwork(
                 networkRequest,
@@ -598,6 +711,15 @@ class GnssNetworkConnectivityHandler {
         }
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        // During an emergency call with an active sub id, get the Telephony Manager specific
+        // to the active sub to get the correct value from getServiceState and getNetworkType
+        if (mNiHandler.getInEmergency() && mActiveSubId >= 0) {
+            TelephonyManager subIdTelManager =
+                    phone.createForSubscriptionId(mActiveSubId);
+            if (subIdTelManager != null) {
+                phone = subIdTelManager;
+            }
+        }
         ServiceState serviceState = phone.getServiceState();
         String projection = null;
         String selection = null;

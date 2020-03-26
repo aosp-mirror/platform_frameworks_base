@@ -19,6 +19,7 @@
     android:id="@+id/bubble_overflow_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingTop="@dimen/bubble_overflow_padding"
     android:orientation="vertical"
     android:layout_gravity="center_horizontal">
 

@@ -1249,6 +1249,7 @@ public class InputMethodService extends AbstractInputMethodService {
                 WindowManager.LayoutParams.TYPE_INPUT_METHOD, Gravity.BOTTOM, false);
         mWindow.getWindow().getAttributes().setFitInsetsTypes(statusBars() | navigationBars());
         mWindow.getWindow().getAttributes().setFitInsetsSides(Side.all() & ~Side.BOTTOM);
+        mWindow.getWindow().getAttributes().setFitInsetsIgnoringVisibility(true);
 
         // IME layout should always be inset by navigation bar, no matter its current visibility,
         // unless automotive requests it, since automotive may hide the navigation bar.

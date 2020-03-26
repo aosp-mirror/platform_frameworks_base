@@ -48,8 +48,6 @@ interface INotificationManager
     void clearData(String pkg, int uid, boolean fromApp);
     void enqueueTextToast(String pkg, IBinder token, CharSequence text, int duration, int displayId, @nullable ITransientNotificationCallback callback);
     void enqueueToast(String pkg, IBinder token, ITransientNotification callback, int duration, int displayId);
-    // TODO(b/144152069): Remove this after assessing impact on dogfood.
-    void enqueueTextOrCustomToast(String pkg, IBinder token, ITransientNotification callback, int duration, int displayId, boolean isCustom);
     void cancelToast(String pkg, IBinder token);
     void finishToken(String pkg, IBinder token);
 
@@ -123,10 +121,14 @@ interface INotificationManager
     // INotificationListener method.
     @UnsupportedAppUsage
     StatusBarNotification[] getActiveNotifications(String callingPkg);
+    StatusBarNotification[] getActiveNotificationsWithAttribution(String callingPkg,
+            String callingAttributionTag);
     @UnsupportedAppUsage
     StatusBarNotification[] getHistoricalNotifications(String callingPkg, int count, boolean includeSnoozed);
+    StatusBarNotification[] getHistoricalNotificationsWithAttribution(String callingPkg,
+            String callingAttributionTag, int count, boolean includeSnoozed);
 
-    NotificationHistory getNotificationHistory(String callingPkg);
+    NotificationHistory getNotificationHistory(String callingPkg, String callingAttributionTag);
 
     void registerListener(in INotificationListener listener, in ComponentName component, int userid);
     void unregisterListener(in INotificationListener listener, int userid);

@@ -2665,4 +2665,8 @@ enum PageId {
     // Open: Settings > Sound > Do Not Disturb > People > Messages
     // OS: R
     DND_MESSAGES = 1839;
+
+    // Open: Settings > Sound > Do Not Disturb > Apps > <Choose App>
+    // OS: R
+    DND_APPS_BYPASSING = 1840;
 }

@@ -25,6 +25,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.utils.TimingsTraceAndSlog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,6 +94,8 @@ public class SystemServerInitThreadPool {
             mPendingTasks.add(description);
         }
         return mService.submit(() -> {
+            TimingsTraceAndSlog traceLog = TimingsTraceAndSlog.newAsyncLog();
+            traceLog.traceBegin("InitThreadPoolExec:" + description);
             if (IS_DEBUGGABLE) {
                 Slog.d(TAG, "Started executing " + description);
             }
@@ -100,6 +103,7 @@ public class SystemServerInitThreadPool {
                 runnable.run();
             } catch (RuntimeException e) {
                 Slog.e(TAG, "Failure in " + description + ": " + e, e);
+                traceLog.traceEnd();
                 throw e;
             }
             synchronized (mPendingTasks) {
@@ -108,6 +112,7 @@ public class SystemServerInitThreadPool {
             if (IS_DEBUGGABLE) {
                 Slog.d(TAG, "Finished executing " + description);
             }
+            traceLog.traceEnd();
         });
     }
 
@@ -132,7 +137,10 @@ public class SystemServerInitThreadPool {
      */
     static void shutdown() {
         synchronized (LOCK) {
+            TimingsTraceAndSlog t = new TimingsTraceAndSlog();
+            t.traceBegin("WaitInitThreadPoolShutdown");
             if (sInstance == null) {
+                t.traceEnd();
                 Slog.wtf(TAG, "Already shutdown", new Exception());
                 return;
             }
@@ -147,6 +155,7 @@ public class SystemServerInitThreadPool {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 dumpStackTraces();
+                t.traceEnd();
                 throw new IllegalStateException(TAG + " init interrupted");
             }
             if (!terminated) {
@@ -160,11 +169,13 @@ public class SystemServerInitThreadPool {
                 synchronized (sInstance.mPendingTasks) {
                     copy.addAll(sInstance.mPendingTasks);
                 }
+                t.traceEnd();
                 throw new IllegalStateException("Cannot shutdown. Unstarted tasks "
                         + unstartedRunnables + " Unfinished tasks " + copy);
             }
             sInstance = null; // Make eligible for GC
             Slog.d(TAG, "Shutdown successful");
+            t.traceEnd();
         }
     }
 

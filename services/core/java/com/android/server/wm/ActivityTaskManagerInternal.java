@@ -548,8 +548,11 @@ public abstract class ActivityTaskManagerInternal {
 
     /**
      * Gets bitmap snapshot of the provided task id.
+     *
+     * <p>Warning! this may restore the snapshot from disk so can block, don't call in a latency
+     * sensitive environment.
      */
-    public abstract ActivityManager.TaskSnapshot getTaskSnapshotNoRestore(int taskId,
+    public abstract ActivityManager.TaskSnapshot getTaskSnapshotBlocking(int taskId,
             boolean isLowResolution);
 
     /** Returns true if uid is considered foreground for activity start purposes. */

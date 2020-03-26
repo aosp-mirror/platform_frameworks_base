@@ -64,9 +64,12 @@ import com.android.internal.statusbar.IStatusBarService;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Random;
 
 @SmallTest
 public class BiometricServiceTest {
@@ -347,9 +350,19 @@ public class BiometricServiceTest {
     }
 
     @Test
-    public void testAuthenticate_happyPathWithoutConfirmation() throws Exception {
+    public void testAuthenticate_happyPathWithoutConfirmation_strongBiometric() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_STRONG);
+        testAuthenticate_happyPathWithoutConfirmation(true /* isStrongBiometric */);
+    }
 
+    @Test
+    public void testAuthenticate_happyPathWithoutConfirmation_weakBiometric() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FINGERPRINT, Authenticators.BIOMETRIC_WEAK);
+        testAuthenticate_happyPathWithoutConfirmation(false /* isStrongBiometric */);
+    }
+
+    private void testAuthenticate_happyPathWithoutConfirmation(boolean isStrongBiometric)
+            throws Exception {
         // Start testing the happy path
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
                 null /* authenticators */);
@@ -397,9 +410,11 @@ public class BiometricServiceTest {
                 anyLong() /* sessionId */);
 
         // Hardware authenticated
+        final byte[] HAT = generateRandomHAT();
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
                 false /* requireConfirmation */,
-                new byte[69] /* HAT */);
+                HAT,
+                isStrongBiometric /* isStrongBiometric */);
         waitForIdle();
         // Waiting for SystemUI to send dismissed callback
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
@@ -413,7 +428,11 @@ public class BiometricServiceTest {
                 null /* credentialAttestation */);
         waitForIdle();
         // HAT sent to keystore
-        verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
+        if (isStrongBiometric) {
+            verify(mBiometricService.mKeyStore).addAuthToken(AdditionalMatchers.aryEq(HAT));
+        } else {
+            verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
+        }
         // Send onAuthenticated to client
         verify(mReceiver1).onAuthenticationSucceeded(
                 BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
@@ -447,16 +466,29 @@ public class BiometricServiceTest {
     }
 
     @Test
-    public void testAuthenticate_happyPathWithConfirmation() throws Exception {
+    public void testAuthenticate_happyPathWithConfirmation_strongBiometric() throws Exception {
         setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+        testAuthenticate_happyPathWithConfirmation(true /* isStrongBiometric */);
+    }
+
+    @Test
+    public void testAuthenticate_happyPathWithConfirmation_weakBiometric() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_WEAK);
+        testAuthenticate_happyPathWithConfirmation(false /* isStrongBiometric */);
+    }
+
+    private void testAuthenticate_happyPathWithConfirmation(boolean isStrongBiometric)
+            throws Exception {
         invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
                 true /* requireConfirmation */, null /* authenticators */);
 
         // Test authentication succeeded goes to PENDING_CONFIRMATION and that the HAT is not
         // sent to KeyStore yet
+        final byte[] HAT = generateRandomHAT();
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
                 true /* requireConfirmation */,
-                new byte[69] /* HAT */);
+                HAT,
+                isStrongBiometric /* isStrongBiometric */);
         waitForIdle();
         // Waiting for SystemUI to send confirmation callback
         assertEquals(mBiometricService.mCurrentAuthSession.mState,
@@ -468,7 +500,11 @@ public class BiometricServiceTest {
                 BiometricPrompt.DISMISSED_REASON_BIOMETRIC_CONFIRMED,
                 null /* credentialAttestation */);
         waitForIdle();
-        verify(mBiometricService.mKeyStore).addAuthToken(any(byte[].class));
+        if (isStrongBiometric) {
+            verify(mBiometricService.mKeyStore).addAuthToken(AdditionalMatchers.aryEq(HAT));
+        } else {
+            verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
+        }
         verify(mReceiver1).onAuthenticationSucceeded(
                 BiometricPrompt.AUTHENTICATION_RESULT_TYPE_BIOMETRIC);
     }
@@ -909,7 +945,8 @@ public class BiometricServiceTest {
 
         mBiometricService.mInternalReceiver.onAuthenticationSucceeded(
                 true /* requireConfirmation */,
-                new byte[69] /* HAT */);
+                new byte[69] /* HAT */,
+                true /* isStrongBiometric */);
         mBiometricService.mInternalReceiver.onDialogDismissed(
                 BiometricPrompt.DISMISSED_REASON_USER_CANCEL, null /* credentialAttestation */);
         waitForIdle();
@@ -927,6 +964,7 @@ public class BiometricServiceTest {
                 eq(BiometricAuthenticator.TYPE_FACE),
                 eq(BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED),
                 eq(0 /* vendorCode */));
+        verify(mBiometricService.mKeyStore, never()).addAuthToken(any(byte[].class));
         assertNull(mBiometricService.mCurrentAuthSession);
     }
 
@@ -1238,20 +1276,6 @@ public class BiometricServiceTest {
                 mFingerprintAuthenticator);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void testRegistrationWithUnsupportedStrength_throwsIllegalStateException()
-            throws Exception {
-        mBiometricService = new BiometricService(mContext, mInjector);
-        mBiometricService.onStart();
-
-        // Only STRONG and WEAK are supported. Let's enforce that CONVENIENCE cannot be
-        // registered. If there is a compelling reason, we can remove this constraint.
-        mBiometricService.mImpl.registerAuthenticator(
-                0 /* id */, 2 /* modality */,
-                Authenticators.BIOMETRIC_CONVENIENCE /* strength */,
-                mFingerprintAuthenticator);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testRegistrationWithNullAuthenticator_throwsIllegalArgumentException()
             throws Exception {
@@ -1508,4 +1532,13 @@ public class BiometricServiceTest {
     private static void waitForIdle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
+
+    private byte[] generateRandomHAT() {
+        byte[] HAT = new byte[69];
+        Random random = new Random();
+        random.nextBytes(HAT);
+        return HAT;
+    }
+
+
 }

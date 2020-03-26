@@ -141,6 +141,8 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     public static final int ACTIVITY_TYPE_RECENTS = 3;
     /** Assistant activity type. */
     public static final int ACTIVITY_TYPE_ASSISTANT = 4;
+    /** Dream activity type. */
+    public static final int ACTIVITY_TYPE_DREAM = 5;
 
     /** @hide */
     @IntDef(prefix = { "ACTIVITY_TYPE_" }, value = {
@@ -149,6 +151,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             ACTIVITY_TYPE_HOME,
             ACTIVITY_TYPE_RECENTS,
             ACTIVITY_TYPE_ASSISTANT,
+            ACTIVITY_TYPE_DREAM,
     })
     public @interface ActivityType {}
 
@@ -746,9 +749,11 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
      * @hide
      */
     public boolean isAlwaysOnTop() {
-        return mWindowingMode == WINDOWING_MODE_PINNED || (mAlwaysOnTop == ALWAYS_ON_TOP_ON
-                && (mWindowingMode == WINDOWING_MODE_FREEFORM
-                    || mWindowingMode == WINDOWING_MODE_MULTI_WINDOW));
+        if (mWindowingMode == WINDOWING_MODE_PINNED) return true;
+        if (mActivityType == ACTIVITY_TYPE_DREAM) return true;
+        if (mAlwaysOnTop != ALWAYS_ON_TOP_ON) return false;
+        return mWindowingMode == WINDOWING_MODE_FREEFORM
+                    || mWindowingMode == WINDOWING_MODE_MULTI_WINDOW;
     }
 
     /**
@@ -798,7 +803,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
 
     /** @hide */
     public static boolean supportSplitScreenWindowingMode(int activityType) {
-        return activityType != ACTIVITY_TYPE_ASSISTANT;
+        return activityType != ACTIVITY_TYPE_ASSISTANT && activityType != ACTIVITY_TYPE_DREAM;
     }
 
     /** @hide */
@@ -823,6 +828,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             case ACTIVITY_TYPE_HOME: return "home";
             case ACTIVITY_TYPE_RECENTS: return "recents";
             case ACTIVITY_TYPE_ASSISTANT: return "assistant";
+            case ACTIVITY_TYPE_DREAM: return "dream";
         }
         return String.valueOf(applicationType);
     }

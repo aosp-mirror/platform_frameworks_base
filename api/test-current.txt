@@ -535,6 +535,7 @@ package android.app {
     method public void setWindowingMode(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int ACTIVITY_TYPE_ASSISTANT = 4; // 0x4
+    field public static final int ACTIVITY_TYPE_DREAM = 5; // 0x5
     field public static final int ACTIVITY_TYPE_HOME = 2; // 0x2
     field public static final int ACTIVITY_TYPE_RECENTS = 3; // 0x3
     field public static final int ACTIVITY_TYPE_STANDARD = 1; // 0x1
@@ -1833,7 +1834,7 @@ package android.net {
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
-  public static class NetworkCapabilities.Builder {
+  public static final class NetworkCapabilities.Builder {
     ctor public NetworkCapabilities.Builder();
     ctor public NetworkCapabilities.Builder(@NonNull android.net.NetworkCapabilities);
     method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);

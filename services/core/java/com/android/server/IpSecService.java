@@ -46,6 +46,7 @@ import android.net.TrafficStats;
 import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -113,6 +114,9 @@ public class IpSecService extends IIpSecService.Stub {
 
     /* Binder context for this service */
     private final Context mContext;
+
+    /* NetworkManager instance */
+    private final INetworkManagementService mNetworkManager;
 
     /**
      * The next non-repeating global ID for tracking resources between users, this service, and
@@ -359,10 +363,14 @@ public class IpSecService extends IIpSecService.Stub {
     @VisibleForTesting
     static final class UserRecord {
         /* Maximum number of each type of resource that a single UID may possess */
-        public static final int MAX_NUM_TUNNEL_INTERFACES = 2;
-        public static final int MAX_NUM_ENCAP_SOCKETS = 2;
-        public static final int MAX_NUM_TRANSFORMS = 4;
-        public static final int MAX_NUM_SPIS = 8;
+
+        // Up to 4 active VPNs/IWLAN with potential soft handover.
+        public static final int MAX_NUM_TUNNEL_INTERFACES = 8;
+        public static final int MAX_NUM_ENCAP_SOCKETS = 16;
+
+        // SPIs and Transforms are both cheap, and are 1:1 correlated.
+        public static final int MAX_NUM_TRANSFORMS = 64;
+        public static final int MAX_NUM_SPIS = 64;
 
         /**
          * Store each of the OwnedResource types in an (thinly wrapped) sparse array for indexing
@@ -988,12 +996,13 @@ public class IpSecService extends IIpSecService.Stub {
      *
      * @param context Binder context for this service
      */
-    private IpSecService(Context context) {
-        this(context, IpSecServiceConfiguration.GETSRVINSTANCE);
+    private IpSecService(Context context, INetworkManagementService networkManager) {
+        this(context, networkManager, IpSecServiceConfiguration.GETSRVINSTANCE);
     }
 
-    static IpSecService create(Context context) throws InterruptedException {
-        final IpSecService service = new IpSecService(context);
+    static IpSecService create(Context context, INetworkManagementService networkManager)
+            throws InterruptedException {
+        final IpSecService service = new IpSecService(context, networkManager);
         service.connectNativeNetdService();
         return service;
     }
@@ -1007,9 +1016,11 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(Context context, IpSecServiceConfiguration config) {
+    public IpSecService(Context context, INetworkManagementService networkManager,
+            IpSecServiceConfiguration config) {
         this(
                 context,
+                networkManager,
                 config,
                 (fd, uid) -> {
                     try {
@@ -1023,9 +1034,10 @@ public class IpSecService extends IIpSecService.Stub {
 
     /** @hide */
     @VisibleForTesting
-    public IpSecService(
-            Context context, IpSecServiceConfiguration config, UidFdTagger uidFdTagger) {
+    public IpSecService(Context context, INetworkManagementService networkManager,
+            IpSecServiceConfiguration config, UidFdTagger uidFdTagger) {
         mContext = context;
+        mNetworkManager = Objects.requireNonNull(networkManager);
         mSrvConfig = config;
         mUidFdTagger = uidFdTagger;
     }
@@ -1303,6 +1315,10 @@ public class IpSecService extends IIpSecService.Stub {
             //              (use reqid = 0)
             final INetd netd = mSrvConfig.getNetdInstance();
             netd.ipSecAddTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey, resourceId);
+
+            Binder.withCleanCallingIdentity(() -> {
+                mNetworkManager.setInterfaceUp(intfName);
+            });
 
             for (int selAddrFamily : ADDRESS_FAMILIES) {
                 // Always send down correct local/remote addresses for template.

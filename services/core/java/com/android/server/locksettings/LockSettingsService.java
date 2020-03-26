@@ -3193,6 +3193,12 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStrongAuth.dump(pw);
         pw.println();
         pw.decreaseIndent();
+
+        pw.println("RebootEscrow:");
+        pw.increaseIndent();
+        mRebootEscrowManager.dump(pw);
+        pw.println();
+        pw.decreaseIndent();
     }
 
     /**

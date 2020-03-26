@@ -19,10 +19,12 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
+import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -144,6 +146,61 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_STATUS_BAR));
         assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_NAVIGATION_BAR));
+    }
+
+    @Test
+    public void testStripForDispatch_belowIme() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+
+        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
+
+        assertNotNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+    }
+
+    @Test
+    public void testStripForDispatch_aboveIme() {
+        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+
+        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
+
+        assertNull(getController().getInsetsForDispatch(app).peekSource(ITYPE_IME));
+    }
+
+    @Test
+    public void testStripForDispatch_childWindow_altFocusable() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+
+        final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
+        child.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
+
+        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+
+        // IME cannot be the IME target.
+        ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+
+        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
+
+        assertNull(getController().getInsetsForDispatch(child).peekSource(ITYPE_IME));
+    }
+
+    @Test
+    public void testStripForDispatch_childWindow_splitScreen() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+
+        final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
+        child.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        child.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+
+        final WindowState ime = createWindow(null, TYPE_APPLICATION, "ime");
+
+        // IME cannot be the IME target.
+        ime.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+
+        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
+
+        assertNull(getController().getInsetsForDispatch(child).peekSource(ITYPE_IME));
     }
 
     @Test

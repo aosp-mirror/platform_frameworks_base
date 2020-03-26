@@ -15,11 +15,12 @@
  */
 package android.view.contentcapture;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertThrows;
 
+import android.content.ContentCaptureOptions;
 import android.content.Context;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -37,16 +38,20 @@ public class ContentCaptureManagerTest {
     @Mock
     private Context mMockContext;
 
-    private ContentCaptureManager mManager;
-
-    @Before
-    public void before() {
-        mManager = new ContentCaptureManager(mMockContext, /* service= */ null,
-                /* options= */ null);
+    @Test
+    public void testConstructor_invalidParametersThrowsException() {
+        assertThrows(NullPointerException.class,
+                () -> new ContentCaptureManager(mMockContext, /* service= */ null, /* options= */
+                        null));
     }
 
     @Test
-    public void testRemoveData_invalid() {
-        assertThrows(NullPointerException.class, () -> mManager.removeData(null));
+    public void testRemoveData_invalidParametersThrowsException() {
+        final IContentCaptureManager mockService = mock(IContentCaptureManager.class);
+        final ContentCaptureOptions options = new ContentCaptureOptions(null);
+        final ContentCaptureManager manager =
+                new ContentCaptureManager(mMockContext, mockService, options);
+
+        assertThrows(NullPointerException.class, () -> manager.removeData(null));
     }
 }

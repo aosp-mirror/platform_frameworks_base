@@ -16,10 +16,10 @@
 
 #pragma once
 
-#include "Collation.h"
-
 #include <stdio.h>
 #include <string.h>
+
+#include "Collation.h"
 
 namespace android {
 namespace stats_log_api_gen {
@@ -27,7 +27,7 @@ namespace stats_log_api_gen {
 using namespace std;
 
 int write_atoms_info_cpp(FILE* out, const Atoms& atoms, const string& namespaceStr,
-        const string& importHeader);
+                         const string& importHeader);
 
 int write_atoms_info_header(FILE* out, const Atoms& atoms, const string& namespaceStr);
 

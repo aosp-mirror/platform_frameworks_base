@@ -19,9 +19,8 @@ package com.android.systemui.statusbar.notification.collection.coordinator;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST;
 
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
-
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -42,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -51,20 +51,23 @@ public class RankingCoordinatorTest extends SysuiTestCase {
 
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private NotifPipeline mNotifPipeline;
+
+    @Captor private ArgumentCaptor<NotifFilter> mNotifFilterCaptor;
+
     private NotificationEntry mEntry;
-    private RankingCoordinator mRankingCoordinator;
-    private NotifFilter mRankingFilter;
+    private NotifFilter mCapturedSuspendedFilter;
+    private NotifFilter mCapturedDozingFilter;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mRankingCoordinator = new RankingCoordinator(mStatusBarStateController);
+        RankingCoordinator rankingCoordinator = new RankingCoordinator(mStatusBarStateController);
         mEntry = new NotificationEntryBuilder().build();
 
-        ArgumentCaptor<NotifFilter> filterCaptor = ArgumentCaptor.forClass(NotifFilter.class);
-        mRankingCoordinator.attach(mNotifPipeline);
-        verify(mNotifPipeline, times(1)).addPreGroupFilter(filterCaptor.capture());
-        mRankingFilter = filterCaptor.getValue();
+        rankingCoordinator.attach(mNotifPipeline);
+        verify(mNotifPipeline, times(2)).addPreGroupFilter(mNotifFilterCaptor.capture());
+        mCapturedSuspendedFilter = mNotifFilterCaptor.getAllValues().get(0);
+        mCapturedDozingFilter = mNotifFilterCaptor.getAllValues().get(1);
     }
 
     @Test
@@ -73,7 +76,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         mEntry.setRanking(getRankingForUnfilteredNotif().build());
 
         // THEN don't filter out the notification
-        assertFalse(mRankingFilter.shouldFilterOut(mEntry, 0));
+        assertFalse(mCapturedSuspendedFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -84,7 +87,7 @@ public class RankingCoordinatorTest extends SysuiTestCase {
                 .build());
 
         // THEN filter out the notification
-        assertTrue(mRankingFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mCapturedSuspendedFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -98,13 +101,13 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         when(mStatusBarStateController.isDozing()).thenReturn(true);
 
         // THEN filter out the notification
-        assertTrue(mRankingFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
 
         // WHEN it's not dozing (showing the notification list)
         when(mStatusBarStateController.isDozing()).thenReturn(false);
 
         // THEN don't filter out the notification
-        assertFalse(mRankingFilter.shouldFilterOut(mEntry, 0));
+        assertFalse(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
     }
 
     @Test
@@ -118,13 +121,13 @@ public class RankingCoordinatorTest extends SysuiTestCase {
         when(mStatusBarStateController.isDozing()).thenReturn(true);
 
         // THEN don't filter out the notification
-        assertFalse(mRankingFilter.shouldFilterOut(mEntry, 0));
+        assertFalse(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
 
         // WHEN it's not dozing (showing the notification list)
         when(mStatusBarStateController.isDozing()).thenReturn(false);
 
         // THEN filter out the notification
-        assertTrue(mRankingFilter.shouldFilterOut(mEntry, 0));
+        assertTrue(mCapturedDozingFilter.shouldFilterOut(mEntry, 0));
     }
 
     private RankingBuilder getRankingForUnfilteredNotif() {

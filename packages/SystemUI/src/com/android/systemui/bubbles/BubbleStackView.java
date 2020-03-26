@@ -80,6 +80,8 @@ import com.android.systemui.R;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
 import com.android.systemui.bubbles.animation.PhysicsAnimationLayout;
 import com.android.systemui.bubbles.animation.StackAnimationController;
+import com.android.systemui.model.SysUiState;
+import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -241,6 +243,7 @@ public class BubbleStackView extends FrameLayout {
 
     private BubbleTouchHandler mTouchHandler;
     private BubbleController.BubbleExpandListener mExpandListener;
+    private SysUiState mSysUiState;
 
     private boolean mViewUpdatedRequested = false;
     private boolean mIsExpansionAnimating = false;
@@ -437,13 +440,16 @@ public class BubbleStackView extends FrameLayout {
 
     public BubbleStackView(Context context, BubbleData data,
             @Nullable SurfaceSynchronizer synchronizer,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            SysUiState sysUiState) {
         super(context);
 
         mBubbleData = data;
         mInflater = LayoutInflater.from(context);
         mTouchHandler = new BubbleTouchHandler(this, data, context);
         setOnTouchListener(mTouchHandler);
+
+        mSysUiState = sysUiState;
 
         Resources res = getResources();
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
@@ -1055,6 +1061,11 @@ public class BubbleStackView extends FrameLayout {
         if (shouldExpand == mIsExpanded) {
             return;
         }
+
+        mSysUiState
+                .setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
+                .commitUpdate(mContext.getDisplayId());
+
         if (mIsExpanded) {
             animateCollapse();
             logBubbleEvent(mExpandedBubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);

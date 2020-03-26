@@ -6070,7 +6070,7 @@ package android.net {
     method public void release();
   }
 
-  public class InvalidPacketException extends java.lang.Exception {
+  public final class InvalidPacketException extends java.lang.Exception {
     ctor public InvalidPacketException(int);
     method public int getError();
     field public static final int ERROR_INVALID_IP_ADDRESS = -21; // 0xffffffeb
@@ -6264,7 +6264,7 @@ package android.net {
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
   }
 
-  public static class NetworkCapabilities.Builder {
+  public static final class NetworkCapabilities.Builder {
     ctor public NetworkCapabilities.Builder();
     ctor public NetworkCapabilities.Builder(@NonNull android.net.NetworkCapabilities);
     method @NonNull public android.net.NetworkCapabilities.Builder addCapability(int);

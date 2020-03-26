@@ -21,6 +21,8 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISALLOWED;
+import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISCOURAGED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
@@ -3238,31 +3240,25 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public List<String> getAutoRevokeExemptionRequestedPackages(int userId) {
-        mContext.enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
-                "Must hold " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
-
-        List<String> result = new ArrayList<>();
-        mPackageManagerInt.forEachInstalledPackage(pkg -> {
-            if (pkg.isDontAutoRevokePermmissions()) {
-                result.add(pkg.getPackageName());
-            }
-        }, userId);
-
-        return result;
+        return getPackagesWithAutoRevokePolicy(AUTO_REVOKE_DISCOURAGED, userId);
     }
 
     @Override
     public List<String> getAutoRevokeExemptionGrantedPackages(int userId) {
+        return getPackagesWithAutoRevokePolicy(AUTO_REVOKE_DISALLOWED, userId);
+    }
+
+    @NonNull
+    private List<String> getPackagesWithAutoRevokePolicy(int autoRevokePolicy, int userId) {
         mContext.enforceCallingPermission(Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY,
                 "Must hold " + Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY);
 
         List<String> result = new ArrayList<>();
         mPackageManagerInt.forEachInstalledPackage(pkg -> {
-            if (pkg.isAllowDontAutoRevokePermmissions()) {
+            if (pkg.getAutoRevokePermissions() == autoRevokePolicy) {
                 result.add(pkg.getPackageName());
             }
         }, userId);
-
         return result;
     }
 
