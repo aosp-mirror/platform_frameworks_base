@@ -123,6 +123,10 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     private final RootWindowContainer.FindTaskResult
             mTmpFindTaskResult = new RootWindowContainer.FindTaskResult();
 
+    // Indicates whether the Assistant should show on top of the Dream (respectively, above
+    // everything else on screen). Otherwise, it will be put under always-on-top stacks.
+    private final boolean mAssistantOnTopOfDream;
+
     /**
      * If this is the same as {@link #getFocusedStack} then the activity on the top of the focused
      * stack has been resumed. If stacks are changing position this will hold the old stack until
@@ -148,6 +152,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         mDisplayContent = displayContent;
         mRootWindowContainer = service.mRoot;
         mAtmService = service.mAtmService;
+
+        mAssistantOnTopOfDream = mWmService.mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_assistantOnTopOfDream);
     }
 
     /**
@@ -329,55 +336,80 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     }
 
     /**
+     * Assigns a priority number to stack types. This priority defines an order between the types
+     * of stacks that are added to the task display area.
+     *
+     * Higher priority number indicates that the stack should have a higher z-order.
+     *
+     * @return the priority of the stack
+     */
+    private int getPriority(ActivityStack stack) {
+        if (mAssistantOnTopOfDream && stack.isActivityTypeAssistant()) return 4;
+        if (stack.isActivityTypeDream()) return 3;
+        if (stack.inPinnedWindowingMode()) return 2;
+        if (stack.isAlwaysOnTop()) return 1;
+        return 0;
+    }
+
+    private int findMinPositionForStack(ActivityStack stack) {
+        int minPosition = POSITION_BOTTOM;
+        for (int i = 0; i < mChildren.size(); ++i) {
+            if (getPriority(getStackAt(i)) < getPriority(stack)) {
+                minPosition = i;
+            } else {
+                break;
+            }
+        }
+
+        if (stack.isAlwaysOnTop()) {
+            // Since a stack could be repositioned while still being one of the children, we check
+            // if this always-on-top stack already exists and if so, set the minPosition to its
+            // previous position.
+            final int currentIndex = getIndexOf(stack);
+            if (currentIndex > minPosition) {
+                minPosition = currentIndex;
+            }
+        }
+        return minPosition;
+    }
+
+    private int findMaxPositionForStack(ActivityStack stack) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final ActivityStack curr = getStackAt(i);
+            // Since a stack could be repositioned while still being one of the children, we check
+            // if 'curr' is the same stack and skip it if so
+            final boolean sameStack = curr == stack;
+            if (getPriority(curr) <= getPriority(stack) && !sameStack) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    /**
      * When stack is added or repositioned, find a proper position for it.
-     * This will make sure that pinned stack always stays on top.
+     *
+     * The order is defined as:
+     *  - Dream is on top of everything
+     *  - PiP is directly below the Dream
+     *  - always-on-top stacks are directly below PiP; new always-on-top stacks are added above
+     *    existing ones
+     *  - other non-always-on-top stacks come directly below always-on-top stacks; new
+     *    non-always-on-top stacks are added directly below always-on-top stacks and above existing
+     *    non-always-on-top stacks
+     *  - if {@link #mAssistantOnTopOfDream} is enabled, then Assistant is on top of everything
+     *    (including the Dream); otherwise, it is a normal non-always-on-top stack
+     *
      * @param requestedPosition Position requested by caller.
      * @param stack Stack to be added or positioned.
      * @param adding Flag indicates whether we're adding a new stack or positioning an existing.
      * @return The proper position for the stack.
      */
-    private int findPositionForStack(int requestedPosition, ActivityStack stack,
-            boolean adding) {
-        if (stack.isActivityTypeDream()) {
-            return POSITION_TOP;
-        }
-
-        if (stack.inPinnedWindowingMode()) {
-            return POSITION_TOP;
-        }
-
-        final int topChildPosition = mChildren.size() - 1;
-        int belowAlwaysOnTopPosition = POSITION_BOTTOM;
-        for (int i = topChildPosition; i >= 0; --i) {
-            // Since a stack could be repositioned while being one of the child, return
-            // current index if that's the same stack we are positioning and it is always on
-            // top.
-            final boolean sameStack = mChildren.get(i) == stack;
-            if ((sameStack && stack.isAlwaysOnTop())
-                    || (!sameStack && !mChildren.get(i).isAlwaysOnTop())) {
-                belowAlwaysOnTopPosition = i;
-                break;
-            }
-        }
-
+    private int findPositionForStack(int requestedPosition, ActivityStack stack, boolean adding) {
         // The max possible position we can insert the stack at.
-        int maxPosition = POSITION_TOP;
+        int maxPosition = findMaxPositionForStack(stack);
         // The min possible position we can insert the stack at.
-        int minPosition = POSITION_BOTTOM;
-
-        if (stack.isAlwaysOnTop()) {
-            if (hasPinnedTask()) {
-                // Always-on-top stacks go below the pinned stack.
-                maxPosition = mChildren.indexOf(mRootPinnedTask) - 1;
-            }
-            // Always-on-top stacks need to be above all other stacks.
-            minPosition = belowAlwaysOnTopPosition
-                    != POSITION_BOTTOM ? belowAlwaysOnTopPosition : topChildPosition;
-        } else {
-            // Other stacks need to be below the always-on-top stacks.
-            maxPosition = belowAlwaysOnTopPosition
-                    != POSITION_BOTTOM ? belowAlwaysOnTopPosition : 0;
-        }
+        int minPosition = findMinPositionForStack(stack);
 
         // Cap the requested position to something reasonable for the previous position check
         // below.
