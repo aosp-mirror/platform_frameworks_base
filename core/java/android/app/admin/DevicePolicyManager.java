@@ -4424,11 +4424,13 @@ public class DevicePolicyManager {
      * the current factory reset protection (FRP) policy set previously by
      * {@link #setFactoryResetProtectionPolicy}.
      * <p>
-     * This method can also be called by the FRP management agent on device, in which case,
-     * it can pass {@code null} as the ComponentName.
+     * This method can also be called by the FRP management agent on device or with the permission
+     * {@link android.Manifest.permission#MASTER_CLEAR}, in which case, it can pass {@code null}
+     * as the ComponentName.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with or
-     *              {@code null} if called by the FRP management agent on device.
+     *              {@code null} if called by the FRP management agent on device or with the
+     *              permission {@link android.Manifest.permission#MASTER_CLEAR}.
      * @return The current FRP policy object or {@code null} if no policy is set.
      * @throws SecurityException if {@code admin} is not a device owner, a profile owner of
      *                           an organization-owned device or the FRP management agent.
