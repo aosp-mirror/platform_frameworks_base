@@ -27,13 +27,11 @@ import android.app.prediction.AppTargetId;
 import android.content.IntentFilter;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager.ShareShortcutInfo;
-import android.util.Range;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ChooserActivity;
 import com.android.server.people.data.ConversationInfo;
 import com.android.server.people.data.DataManager;
-import com.android.server.people.data.Event;
 import com.android.server.people.data.EventHistory;
 import com.android.server.people.data.PackageData;
 
@@ -42,6 +40,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Predictor that predicts the {@link AppTarget} the user is most likely to open on share sheet.
+ */
 class ShareTargetPredictor extends AppTargetPredictor {
 
     private final IntentFilter mIntentFilter;
@@ -66,7 +67,9 @@ class ShareTargetPredictor extends AppTargetPredictor {
     @Override
     void predictTargets() {
         List<ShareTarget> shareTargets = getDirectShareTargets();
-        rankTargets(shareTargets);
+        SharesheetModelScorer.computeScore(shareTargets, getShareEventType(mIntentFilter),
+                System.currentTimeMillis());
+        Collections.sort(shareTargets, (t1, t2) -> -Float.compare(t1.getScore(), t2.getScore()));
         List<AppTarget> res = new ArrayList<>();
         for (int i = 0; i < Math.min(getPredictionContext().getPredictedTargetCount(),
                 shareTargets.size()); i++) {
@@ -80,34 +83,14 @@ class ShareTargetPredictor extends AppTargetPredictor {
     @Override
     void sortTargets(List<AppTarget> targets, Consumer<List<AppTarget>> callback) {
         List<ShareTarget> shareTargets = getAppShareTargets(targets);
-        rankTargets(shareTargets);
+        SharesheetModelScorer.computeScoreForAppShare(shareTargets,
+                getShareEventType(mIntentFilter), getPredictionContext().getPredictedTargetCount(),
+                System.currentTimeMillis(), getDataManager(),
+                mCallingUserId);
+        Collections.sort(shareTargets, (t1, t2) -> -Float.compare(t1.getScore(), t2.getScore()));
         List<AppTarget> appTargetList = new ArrayList<>();
         shareTargets.forEach(t -> appTargetList.add(t.getAppTarget()));
         callback.accept(appTargetList);
-    }
-
-    private void rankTargets(List<ShareTarget> shareTargets) {
-        // Rank targets based on recency of sharing history only for the moment.
-        // TODO: Take more factors into ranking, e.g. frequency, mime type, foreground app.
-        Collections.sort(shareTargets, (t1, t2) -> {
-            if (t1.getEventHistory() == null) {
-                return 1;
-            }
-            if (t2.getEventHistory() == null) {
-                return -1;
-            }
-            Range<Long> timeSlot1 = t1.getEventHistory().getEventIndex(
-                    Event.SHARE_EVENT_TYPES).getMostRecentActiveTimeSlot();
-            Range<Long> timeSlot2 = t2.getEventHistory().getEventIndex(
-                    Event.SHARE_EVENT_TYPES).getMostRecentActiveTimeSlot();
-            if (timeSlot1 == null) {
-                return 1;
-            } else if (timeSlot2 == null) {
-                return -1;
-            } else {
-                return -Long.compare(timeSlot1.getUpper(), timeSlot2.getUpper());
-            }
-        });
     }
 
     private List<ShareTarget> getDirectShareTargets() {
@@ -153,6 +136,11 @@ class ShareTargetPredictor extends AppTargetPredictor {
         return shareTargets;
     }
 
+    private int getShareEventType(IntentFilter intentFilter) {
+        String mimeType = intentFilter != null ? intentFilter.getDataType(0) : null;
+        return getDataManager().mimeTypeToShareEventType(mimeType);
+    }
+
     @VisibleForTesting
     static class ShareTarget {
 
@@ -162,13 +150,16 @@ class ShareTargetPredictor extends AppTargetPredictor {
         private final EventHistory mEventHistory;
         @Nullable
         private final ConversationInfo mConversationInfo;
+        private float mScore;
 
-        private ShareTarget(@NonNull AppTarget appTarget,
+        @VisibleForTesting
+        ShareTarget(@NonNull AppTarget appTarget,
                 @Nullable EventHistory eventHistory,
                 @Nullable ConversationInfo conversationInfo) {
             mAppTarget = appTarget;
             mEventHistory = eventHistory;
             mConversationInfo = conversationInfo;
+            mScore = 0f;
         }
 
         @NonNull
@@ -187,6 +178,16 @@ class ShareTargetPredictor extends AppTargetPredictor {
         @VisibleForTesting
         ConversationInfo getConversationInfo() {
             return mConversationInfo;
+        }
+
+        @VisibleForTesting
+        float getScore() {
+            return mScore;
+        }
+
+        @VisibleForTesting
+        void setScore(float score) {
+            mScore = score;
         }
     }
 }
