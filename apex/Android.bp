@@ -66,6 +66,24 @@ stubs_defaults {
     },
 }
 
+java_defaults {
+    name: "framework-module-stubs-lib-defaults-publicapi",
+    installable: false,
+    sdk_version: "module_current",
+}
+
+java_defaults {
+    name: "framework-module-stubs-lib-defaults-systemapi",
+    installable: false,
+    sdk_version: "module_current",
+}
+
+java_defaults {
+    name: "framework-module-stubs-lib-defaults-module_libs_api",
+    installable: false,
+    sdk_version: "module_current",
+}
+
 // The defaults for module_libs comes in two parts - defaults for API checks
 // and defaults for stub generation. This is because we want the API txt
 // files to *only* include the module_libs_api, but the stubs to include
