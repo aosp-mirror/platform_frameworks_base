@@ -2479,12 +2479,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public DataLoaderParamsParcel getDataLoaderParams() {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2, null);
         return params.dataLoaderParams != null ? params.dataLoaderParams.getData() : null;
     }
 
     @Override
     public void addFile(int location, String name, long lengthBytes, byte[] metadata,
             byte[] signature) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2, null);
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");
@@ -2517,6 +2519,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @Override
     public void removeFile(int location, String name) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.USE_INSTALLER_V2, null);
         if (!isDataLoaderInstallation()) {
             throw new IllegalStateException(
                     "Cannot add files to non-data loader installation session.");
