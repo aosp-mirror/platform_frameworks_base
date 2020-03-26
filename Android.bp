@@ -970,7 +970,6 @@ filegroup {
         "core/java/android/content/pm/InstallationFileLocation.aidl",
         "core/java/android/content/pm/IDataLoaderStatusListener.aidl",
         "core/java/android/content/pm/IPackageInstallerSessionFileSystemConnector.aidl",
-        "core/java/android/content/pm/NamedParcelFileDescriptor.aidl",
     ],
     path: "core/java",
 }

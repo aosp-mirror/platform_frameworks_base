@@ -3242,8 +3242,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     new ComponentName(
                             readStringAttribute(in, ATTR_DATALOADER_PACKAGE_NAME),
                             readStringAttribute(in, ATTR_DATALOADER_CLASS_NAME)),
-                    readStringAttribute(in, ATTR_DATALOADER_ARGUMENTS),
-                    null);
+                    readStringAttribute(in, ATTR_DATALOADER_ARGUMENTS));
         }
 
         final File appIconFile = buildAppIconFile(sessionId, sessionsDir);
