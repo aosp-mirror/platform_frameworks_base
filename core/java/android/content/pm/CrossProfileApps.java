@@ -487,6 +487,34 @@ public class CrossProfileApps {
         }
     }
 
+    /**
+     * Clears the app-op for {@link android.Manifest.permission#INTERACT_ACROSS_PROFILES} back to
+     * its default value for every package on the device.
+     *
+     * <p>This method can be used to ensure that app-op state is not left around on existing users
+     * for previously-configured profiles.
+     *
+     * <p>If the caller does not have the {@link android.Manifest.permission
+     * #CONFIGURE_INTERACT_ACROSS_PROFILES} permission, then they must have the permissions that
+     * would have been required to call {@link android.app.AppOpsManager#setMode(int, int, String,
+     * int)}, which includes {@link android.Manifest.permission#MANAGE_APP_OPS_MODES}.
+     *
+     * <p>Also requires either {@link android.Manifest.permission#INTERACT_ACROSS_USERS} or {@link
+     * android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     *
+     * @hide
+     */
+    @RequiresPermission(
+            allOf={android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES,
+                    android.Manifest.permission.INTERACT_ACROSS_USERS})
+    public void clearInteractAcrossProfilesAppOps() {
+        try {
+            mService.clearInteractAcrossProfilesAppOps();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private void verifyCanAccessUser(UserHandle userHandle) {
         if (!getTargetUserProfiles().contains(userHandle)) {
             throw new SecurityException("Not allowed to access " + userHandle);
