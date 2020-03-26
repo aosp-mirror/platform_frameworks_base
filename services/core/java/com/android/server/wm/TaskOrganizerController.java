@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
@@ -27,19 +28,22 @@ import static com.android.server.wm.WindowOrganizerController.CONTROLLABLE_WINDO
 
 import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.window.ITaskOrganizerController;
+import android.util.SparseArray;
 import android.window.ITaskOrganizer;
+import android.window.ITaskOrganizerController;
 import android.window.IWindowContainer;
 
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.WeakHashMap;
 
@@ -49,6 +53,7 @@ import java.util.WeakHashMap;
  */
 class TaskOrganizerController extends ITaskOrganizerController.Stub {
     private static final String TAG = "TaskOrganizerController";
+    private static final LinkedList<TaskOrganizerState> EMPTY_LIST = new LinkedList<>();
 
     /**
      * Masks specifying which configurations are important to report back to an organizer when
@@ -71,32 +76,20 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         @Override
         public void binderDied() {
             synchronized (mGlobalLock) {
-                final TaskOrganizerState state =
-                    mTaskOrganizerStates.get(mTaskOrganizer.asBinder());
-                state.releaseTasks();
-                mTaskOrganizerStates.remove(mTaskOrganizer.asBinder());
-                if (mTaskOrganizersForWindowingMode.get(mWindowingMode) == mTaskOrganizer) {
-                    mTaskOrganizersForWindowingMode.remove(mWindowingMode);
-                }
+                final TaskOrganizerState state = mTaskOrganizerStates.remove(
+                        mTaskOrganizer.asBinder());
+                state.dispose();
             }
         }
     };
 
-    class TaskOrganizerState {
-        ITaskOrganizer mOrganizer;
-        DeathRecipient mDeathRecipient;
-        int mWindowingMode;
+    private class TaskOrganizerState {
+        private final ITaskOrganizer mOrganizer;
+        private final DeathRecipient mDeathRecipient;
+        private final int mWindowingMode;
+        private final ArrayList<Task> mOrganizedTasks = new ArrayList<>();
 
-        ArrayList<Task> mOrganizedTasks = new ArrayList<>();
-
-        // Save the TaskOrganizer which we replaced registration for
-        // so it can be re-registered if we unregister.
-        TaskOrganizerState mReplacementFor;
-        boolean mDisposed = false;
-
-
-        TaskOrganizerState(ITaskOrganizer organizer, int windowingMode,
-                @Nullable TaskOrganizerState replacing) {
+        TaskOrganizerState(ITaskOrganizer organizer, int windowingMode) {
             mOrganizer = organizer;
             mDeathRecipient = new DeathRecipient(organizer, windowingMode);
             try {
@@ -105,7 +98,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 Slog.e(TAG, "TaskOrganizer failed to register death recipient");
             }
             mWindowingMode = windowingMode;
-            mReplacementFor = replacing;
         }
 
         void addTask(Task t) {
@@ -127,35 +119,26 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void dispose() {
-            mDisposed = true;
             releaseTasks();
-            handleReplacement();
+            mTaskOrganizersForWindowingMode.get(mWindowingMode).remove(this);
         }
 
-        void releaseTasks() {
+        private void releaseTasks() {
             for (int i = mOrganizedTasks.size() - 1; i >= 0; i--) {
                 final Task t = mOrganizedTasks.get(i);
-                t.taskOrganizerDied();
                 removeTask(t);
-            }
-        }
-
-        void handleReplacement() {
-            if (mReplacementFor != null && !mReplacementFor.mDisposed) {
-                mTaskOrganizersForWindowingMode.put(mWindowingMode, mReplacementFor);
+                t.taskOrganizerUnregistered();
             }
         }
 
         void unlinkDeath() {
-            mDisposed = true;
             mOrganizer.asBinder().unlinkToDeath(mDeathRecipient, 0);
         }
-    };
+    }
 
-
-    final HashMap<Integer, TaskOrganizerState> mTaskOrganizersForWindowingMode = new HashMap();
-    final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap();
-
+    private final SparseArray<LinkedList<TaskOrganizerState>> mTaskOrganizersForWindowingMode =
+            new SparseArray<>();
+    private final HashMap<IBinder, TaskOrganizerState> mTaskOrganizerStates = new HashMap<>();
     private final WeakHashMap<Task, RunningTaskInfo> mLastSentTaskInfos = new WeakHashMap<>();
     private final ArrayList<Task> mPendingTaskInfoChanges = new ArrayList<>();
 
@@ -194,11 +177,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     Slog.w(TAG, "Task organizer already exists for windowing mode: "
                             + windowingMode);
                 }
-                final TaskOrganizerState previousState =
-                        mTaskOrganizersForWindowingMode.get(windowingMode);
-                final TaskOrganizerState state = new TaskOrganizerState(organizer, windowingMode,
-                        previousState);
-                mTaskOrganizersForWindowingMode.put(windowingMode, state);
+
+                LinkedList<TaskOrganizerState> states;
+                if (mTaskOrganizersForWindowingMode.contains(windowingMode)) {
+                    states = mTaskOrganizersForWindowingMode.get(windowingMode);
+                } else {
+                    states = new LinkedList<>();
+                    mTaskOrganizersForWindowingMode.put(windowingMode, states);
+                }
+                final TaskOrganizerState previousState = states.peekLast();
+                final TaskOrganizerState state = new TaskOrganizerState(organizer, windowingMode);
+                states.add(state);
                 mTaskOrganizerStates.put(organizer.asBinder(), state);
 
                 if (previousState == null) {
@@ -219,16 +208,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
 
     @Override
     public void unregisterTaskOrganizer(ITaskOrganizer organizer) {
-        final TaskOrganizerState state = mTaskOrganizerStates.get(organizer.asBinder());
+        final TaskOrganizerState state = mTaskOrganizerStates.remove(organizer.asBinder());
         state.unlinkDeath();
-        if (mTaskOrganizersForWindowingMode.get(state.mWindowingMode) == state) {
-            mTaskOrganizersForWindowingMode.remove(state.mWindowingMode);
-        }
         state.dispose();
     }
 
     ITaskOrganizer getTaskOrganizer(int windowingMode) {
-        final TaskOrganizerState state = mTaskOrganizersForWindowingMode.get(windowingMode);
+        final TaskOrganizerState state = mTaskOrganizersForWindowingMode.get(windowingMode,
+                EMPTY_LIST).peekLast();
         if (state == null) {
             return null;
         }
@@ -255,11 +242,12 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (display == null) {
                     return null;
                 }
-                final int nextId = display.getNextStackId();
-                TaskTile tile = new TaskTile(mService, nextId, windowingMode);
-                display.addTile(tile);
-                RunningTaskInfo out = tile.getTaskInfo();
-                mLastSentTaskInfos.put(tile, out);
+
+                final Task task = display.getOrCreateStack(windowingMode, ACTIVITY_TYPE_UNDEFINED,
+                        false /* onTop */, new Intent(), null /* candidateTask */,
+                        true /* createdByOrganizer */);
+                RunningTaskInfo out = task.getTaskInfo();
+                mLastSentTaskInfos.put(task, out);
                 return out;
             }
         } finally {
@@ -273,11 +261,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                TaskTile tile = TaskTile.forToken(token.asBinder());
-                if (tile == null) {
-                    return false;
+                final Task task = WindowContainer.fromBinder(token.asBinder()).asTask();
+                if (task == null) return false;
+                if (!task.mCreatedByOrganizer) {
+                    throw new IllegalArgumentException(
+                            "Attempt to delete task not created by organizer task=" + task);
                 }
-                tile.removeImmediately();
+                task.removeImmediately();
                 return true;
             }
         } finally {
@@ -358,12 +348,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (task == null) {
                     return null;
                 }
-                ActivityStack rootTask = (ActivityStack) task.getRootTask();
-                final TaskTile tile = rootTask.getTile();
-                if (tile != null) {
-                    rootTask = tile;
-                }
-                return rootTask.mRemoteToken;
+                return task.getRootTask().mRemoteToken;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -371,7 +356,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
     }
 
     @Override
-    public void setLaunchRoot(int displayId, @Nullable IWindowContainer tile) {
+    public void setLaunchRoot(int displayId, @Nullable IWindowContainer token) {
         enforceStackPermission("setLaunchRoot()");
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -380,16 +365,21 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 if (display == null) {
                     return;
                 }
-                TaskTile taskTile = tile == null ? null : TaskTile.forToken(tile.asBinder());
-                if (taskTile == null) {
-                    display.mLaunchTile = null;
+                Task task = token == null
+                        ? null : WindowContainer.fromBinder(token.asBinder()).asTask();
+                if (task == null) {
+                    display.mLaunchRootTask = null;
                     return;
                 }
-                if (taskTile.getDisplay() != display) {
-                    throw new RuntimeException("Can't set launch root for display " + displayId
-                            + " to task on display " + taskTile.getDisplay().getDisplayId());
+                if (!task.mCreatedByOrganizer) {
+                    throw new IllegalArgumentException("Attempt to set task not created by "
+                            + "organizer as launch root task=" + task);
                 }
-                display.mLaunchTile = taskTile;
+                if (task.getDisplayContent() != display) {
+                    throw new RuntimeException("Can't set launch root for display " + displayId
+                            + " to task on display " + task.getDisplayContent().getDisplayId());
+                }
+                display.mLaunchRootTask = task;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -411,25 +401,25 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                     Slog.e(TAG, "Can't get children of " + parent + " because it is not valid.");
                     return null;
                 }
-                // For now, only support returning children of persistent root tasks (of which the
-                // only current implementation is TaskTile).
-                if (!(container instanceof TaskTile)) {
+                final Task task = container.asTask();
+                if (task == null) {
+                    Slog.e(TAG, container + " is not a task...");
+                    return null;
+                }
+                // For now, only support returning children of tasks created by the organizer.
+                if (!task.mCreatedByOrganizer) {
                     Slog.w(TAG, "Can only get children of root tasks created via createRootTask");
                     return null;
                 }
                 ArrayList<RunningTaskInfo> out = new ArrayList<>();
-                // Tiles aren't real parents, so we need to go through stacks on the display to
-                // ensure correct ordering.
-                final DisplayContent dc = container.getDisplayContent();
-                for (int i = dc.getStackCount() - 1; i >= 0; --i) {
-                    final ActivityStack as = dc.getStackAt(i);
-                    if (as.getTile() == container) {
-                        if (activityTypes != null
-                                && !ArrayUtils.contains(activityTypes, as.getActivityType())) {
-                            continue;
-                        }
-                        out.add(as.getTaskInfo());
+                for (int i = task.getChildCount() - 1; i >= 0; --i) {
+                    final Task child = task.getChildAt(i).asTask();
+                    if (child == null) continue;
+                    if (activityTypes != null
+                            && !ArrayUtils.contains(activityTypes, child.getActivityType())) {
+                        continue;
                     }
+                    out.add(child.getTaskInfo());
                 }
                 return out;
             }
@@ -451,12 +441,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
                 }
                 ArrayList<RunningTaskInfo> out = new ArrayList<>();
                 for (int i = dc.getStackCount() - 1; i >= 0; --i) {
-                    final ActivityStack task = dc.getStackAt(i);
-                    if (task.getTile() != null) {
-                        // a tile is supposed to look like a parent, so don't include their
-                        // "children" here. They can be accessed via getChildTasks()
-                        continue;
-                    }
+                    final Task task = dc.getStackAt(i);
                     if (activityTypes != null
                             && !ArrayUtils.contains(activityTypes, task.getActivityType())) {
                         continue;

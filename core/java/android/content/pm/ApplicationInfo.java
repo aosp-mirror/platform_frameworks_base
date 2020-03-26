@@ -752,6 +752,30 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public @interface ApplicationInfoPrivateFlags {}
 
     /**
+     * Constant corresponding to <code>allowed</code> in the
+     * {@link android.R.attr#autoRevokePermissions} attribute.
+     *
+     * @hide
+     */
+    public static final int AUTO_REVOKE_ALLOWED = 0;
+
+    /**
+     * Constant corresponding to <code>discouraged</code> in the
+     * {@link android.R.attr#autoRevokePermissions} attribute.
+     *
+     * @hide
+     */
+    public static final int AUTO_REVOKE_DISCOURAGED = 1;
+
+    /**
+     * Constant corresponding to <code>disallowed</code> in the
+     * {@link android.R.attr#autoRevokePermissions} attribute.
+     *
+     * @hide
+     */
+    public static final int AUTO_REVOKE_DISALLOWED = 2;
+
+    /**
      * Private/hidden flags. See {@code PRIVATE_FLAG_...} constants.
      * @hide
      */

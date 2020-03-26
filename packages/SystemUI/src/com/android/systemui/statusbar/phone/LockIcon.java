@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
-
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -30,241 +28,98 @@ import android.os.Trace;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.view.ViewTreeObserver;
-import android.view.accessibility.AccessibilityNodeInfo;
+import android.util.SparseArray;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 
 import com.android.internal.graphics.ColorUtils;
-import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
-import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
-import com.android.systemui.statusbar.phone.ScrimController.ScrimVisibility;
-import com.android.systemui.statusbar.policy.AccessibilityController;
-import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-
 /**
  * Manages the different states and animations of the unlock icon.
  */
-public class LockIcon extends KeyguardAffordanceView implements
-        ViewTreeObserver.OnPreDrawListener {
+public class LockIcon extends KeyguardAffordanceView {
 
-    private static final int STATE_LOCKED = 0;
-    private static final int STATE_LOCK_OPEN = 1;
-    private static final int STATE_SCANNING_FACE = 2;
-    private static final int STATE_BIOMETRICS_ERROR = 3;
-    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final AccessibilityController mAccessibilityController;
-    private final KeyguardStateController mKeyguardStateController;
-    private final KeyguardBypassController mBypassController;
-    private final NotificationWakeUpCoordinator mWakeUpCoordinator;
-    private final HeadsUpManagerPhone mHeadsUpManager;
-
-    private int mLastState = 0;
-    private boolean mForceUpdate;
-    private boolean mTransientBiometricsError;
-    private boolean mIsFaceUnlockState;
-    private boolean mSimLocked;
-    private int mDensity;
+    static final int STATE_LOCKED = 0;
+    static final int STATE_LOCK_OPEN = 1;
+    static final int STATE_SCANNING_FACE = 2;
+    static final int STATE_BIOMETRICS_ERROR = 3;
+    private float mDozeAmount;
+    private int mIconColor;
+    private StateProvider mStateProvider;
+    private int mOldState;
     private boolean mPulsing;
     private boolean mDozing;
-    private boolean mDocked;
-    private boolean mBlockUpdates;
-    private int mIconColor;
-    private float mDozeAmount;
-    private boolean mBouncerShowingScrimmed;
-    private boolean mWakeAndUnlockRunning;
-    private boolean mKeyguardShowing;
-    private boolean mShowingLaunchAffordance;
     private boolean mKeyguardJustShown;
-    private boolean mUpdatePending;
-    private boolean mBouncerPreHideAnimation;
-    private int mStatusBarState = StatusBarState.SHADE;
+    private final SparseArray<Drawable> mDrawableCache = new SparseArray<>();
 
-    private final KeyguardStateController.Callback mKeyguardMonitorCallback =
-            new KeyguardStateController.Callback() {
-                @Override
-                public void onKeyguardShowingChanged() {
-                    boolean force = false;
-                    boolean wasShowing = mKeyguardShowing;
-                    mKeyguardShowing = mKeyguardStateController.isShowing();
-                    if (!wasShowing && mKeyguardShowing && mBlockUpdates) {
-                        mBlockUpdates = false;
-                        force = true;
-                    }
-                    if (!wasShowing && mKeyguardShowing) {
-                        mKeyguardJustShown = true;
-                    }
-                    update(force);
-                }
+    private final OnPreDrawListener mOnPreDrawListener = new OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            getViewTreeObserver().removeOnPreDrawListener(this);
 
-                @Override
-                public void onKeyguardFadingAwayChanged() {
-                    if (!mKeyguardStateController.isKeyguardFadingAway()) {
-                        mBouncerPreHideAnimation = false;
-                        if (mBlockUpdates) {
-                            mBlockUpdates = false;
-                            update(true /* force */);
-                        }
-                    }
-                }
+            int newState = mStateProvider.getState();
+            Drawable icon = getIcon(newState);
+            setImageDrawable(icon, false);
 
-                @Override
-                public void onUnlockedChanged() {
-                    update();
-                }
-            };
+            if (newState == STATE_SCANNING_FACE) {
+                announceForAccessibility(getResources().getString(
+                        R.string.accessibility_scanning_face));
+            }
 
-    @Inject
-    public LockIcon(@Named(VIEW_CONTEXT) Context context, AttributeSet attrs,
-            AccessibilityController accessibilityController,
-            KeyguardBypassController bypassController,
-            NotificationWakeUpCoordinator wakeUpCoordinator,
-            KeyguardStateController keyguardStateController,
-            HeadsUpManagerPhone headsUpManager) {
+            if (icon instanceof AnimatedVectorDrawable) {
+                final AnimatedVectorDrawable animation = (AnimatedVectorDrawable) icon;
+                animation.forceAnimationOnUI();
+                animation.clearAnimationCallbacks();
+                animation.registerAnimationCallback(
+                        new Animatable2.AnimationCallback() {
+                            @Override
+                            public void onAnimationEnd(Drawable drawable) {
+                                if (getDrawable() == animation
+                                        && newState == mStateProvider.getState()
+                                        && newState == STATE_SCANNING_FACE) {
+                                    animation.start();
+                                } else {
+                                    Trace.endAsyncSection("LockIcon#Animation", newState);
+                                }
+                            }
+                        });
+                Trace.beginAsyncSection("LockIcon#Animation", newState);
+                animation.start();
+            }
+
+            return true;
+        }
+    };
+
+    public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mContext = context;
-        mKeyguardUpdateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-        mAccessibilityController = accessibilityController;
-        mBypassController = bypassController;
-        mWakeUpCoordinator = wakeUpCoordinator;
-        mKeyguardStateController = keyguardStateController;
-        mHeadsUpManager = headsUpManager;
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        mKeyguardStateController.addCallback(mKeyguardMonitorCallback);
-        mSimLocked = mKeyguardUpdateMonitor.isSimPinSecure();
-        update();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mKeyguardStateController.removeCallback(mKeyguardMonitorCallback);
-    }
-
-    /**
-     * If we're currently presenting an authentication error message.
-     */
-    public void setTransientBiometricsError(boolean transientBiometricsError) {
-        mTransientBiometricsError = transientBiometricsError;
-        update();
+    void setStateProvider(StateProvider stateProvider) {
+        mStateProvider = stateProvider;
     }
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        final int density = newConfig.densityDpi;
-        if (density != mDensity) {
-            mDensity = density;
-            update();
-        }
-    }
-
-    public void update() {
-        update(false /* force */);
-    }
-
-    public void update(boolean force) {
-        if (force) {
-            mForceUpdate = true;
-        }
-        if (!mUpdatePending) {
-            mUpdatePending = true;
-            getViewTreeObserver().addOnPreDrawListener(this);
-        }
-    }
-
-    @Override
-    public boolean onPreDraw() {
-        mUpdatePending = false;
-        getViewTreeObserver().removeOnPreDrawListener(this);
-
-        int state = getState();
-        int lastState = mLastState;
-        boolean keyguardJustShown = mKeyguardJustShown;
-        mIsFaceUnlockState = state == STATE_SCANNING_FACE;
-        mLastState = state;
-        mKeyguardJustShown = false;
-
-        boolean shouldUpdate = lastState != state || mForceUpdate;
-        if (mBlockUpdates && canBlockUpdates()) {
-            shouldUpdate = false;
-        }
-        if (shouldUpdate) {
-            mForceUpdate = false;
-            @LockAnimIndex final int lockAnimIndex = getAnimationIndexForTransition(lastState,
-                    state, mPulsing, mDozing, keyguardJustShown);
-            boolean isAnim = lockAnimIndex != -1;
-            int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex) : getIconForState(state);
-
-            Drawable icon = mContext.getDrawable(iconRes);
-            final AnimatedVectorDrawable animation = icon instanceof AnimatedVectorDrawable
-                    ? (AnimatedVectorDrawable) icon
-                    : null;
-            setImageDrawable(icon, false);
-            if (mIsFaceUnlockState) {
-                announceForAccessibility(getContext().getString(
-                        R.string.accessibility_scanning_face));
-            }
-
-            if (animation != null && isAnim) {
-                animation.forceAnimationOnUI();
-                animation.clearAnimationCallbacks();
-                animation.registerAnimationCallback(new Animatable2.AnimationCallback() {
-                    @Override
-                    public void onAnimationEnd(Drawable drawable) {
-                        if (getDrawable() == animation && state == getState()
-                                && doesAnimationLoop(lockAnimIndex)) {
-                            animation.start();
-                        } else {
-                            Trace.endAsyncSection("LockIcon#Animation", state);
-                        }
-                    }
-                });
-                Trace.beginAsyncSection("LockIcon#Animation", state);
-                animation.start();
-            }
-        }
-        updateDarkTint();
-
-        updateIconVisibility();
-        updateClickability();
-
-        return true;
+        mDrawableCache.clear();
     }
 
     /**
      * Update the icon visibility
      * @return true if the visibility changed
      */
-    boolean updateIconVisibility() {
-        boolean onAodNotPulsingOrDocked = mDozing && (!mPulsing || mDocked);
-        boolean invisible = onAodNotPulsingOrDocked || mWakeAndUnlockRunning
-                || mShowingLaunchAffordance;
-        if (mBypassController.getBypassEnabled() && !mBouncerShowingScrimmed) {
-            if ((mHeadsUpManager.isHeadsUpGoingAway() || mHeadsUpManager.hasPinnedHeadsUp()
-                    || mStatusBarState == StatusBarState.KEYGUARD)
-                    && !mWakeUpCoordinator.getNotificationsFullyHidden()) {
-                invisible = true;
-            }
-        }
-        boolean wasInvisible = getVisibility() == INVISIBLE;
-        if (invisible != wasInvisible) {
-            setVisibility(invisible ? INVISIBLE : VISIBLE);
+    boolean updateIconVisibility(boolean visible) {
+        boolean wasVisible = getVisibility() == VISIBLE;
+        if (visible != wasVisible) {
+            setVisibility(visible ? VISIBLE : INVISIBLE);
             animate().cancel();
-            if (!invisible) {
+            if (visible) {
                 setScaleX(0);
                 setScaleY(0);
                 animate()
@@ -280,49 +135,47 @@ public class LockIcon extends KeyguardAffordanceView implements
         return false;
     }
 
-    private boolean canBlockUpdates() {
-        return mKeyguardShowing || mKeyguardStateController.isKeyguardFadingAway();
+    void update(int oldState, boolean pulsing, boolean dozing, boolean keyguardJustShown) {
+        mOldState = oldState;
+        mPulsing = pulsing;
+        mDozing = dozing;
+        mKeyguardJustShown = keyguardJustShown;
+
+        getViewTreeObserver().addOnPreDrawListener(mOnPreDrawListener);
     }
 
-    private void updateClickability() {
-        if (mAccessibilityController == null) {
-            return;
+    void setDozeAmount(float dozeAmount) {
+        mDozeAmount = dozeAmount;
+        updateDarkTint();
+    }
+
+    void onThemeChange(int iconColor) {
+        mDrawableCache.clear();
+        mIconColor = iconColor;
+        updateDarkTint();
+    }
+
+    private void updateDarkTint() {
+        int color = ColorUtils.blendARGB(mIconColor, Color.WHITE, mDozeAmount);
+        setImageTintList(ColorStateList.valueOf(color));
+    }
+
+    private Drawable getIcon(int newState) {
+        @LockAnimIndex final int lockAnimIndex =
+                getAnimationIndexForTransition(mOldState, newState, mPulsing, mDozing,
+                        mKeyguardJustShown);
+
+        boolean isAnim = lockAnimIndex != -1;
+        int iconRes = isAnim ? getThemedAnimationResId(lockAnimIndex) : getIconForState(newState);
+
+        if (!mDrawableCache.contains(iconRes)) {
+            mDrawableCache.put(iconRes, getResources().getDrawable(iconRes));
         }
-        boolean canLock = mKeyguardStateController.isMethodSecure()
-                && mKeyguardStateController.canDismissLockScreen();
-        boolean clickToUnlock = mAccessibilityController.isAccessibilityEnabled();
-        setClickable(clickToUnlock);
-        setLongClickable(canLock && !clickToUnlock);
-        setFocusable(mAccessibilityController.isAccessibilityEnabled());
+
+        return mDrawableCache.get(iconRes);
     }
 
-    @Override
-    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
-        super.onInitializeAccessibilityNodeInfo(info);
-        boolean fingerprintRunning = mKeyguardUpdateMonitor.isFingerprintDetectionRunning();
-        // Only checking if unlocking with Biometric is allowed (no matter strong or non-strong
-        // as long as primary auth, i.e. PIN/pattern/password, is not required), so it's ok to
-        // pass true for isStrongBiometric to isUnlockingWithBiometricAllowed() to bypass the
-        // check of whether non-strong biometric is allowed
-        boolean unlockingAllowed = mKeyguardUpdateMonitor
-                        .isUnlockingWithBiometricAllowed(true /* isStrongBiometric */);
-        if (fingerprintRunning && unlockingAllowed) {
-            AccessibilityNodeInfo.AccessibilityAction unlock
-                    = new AccessibilityNodeInfo.AccessibilityAction(
-                    AccessibilityNodeInfo.ACTION_CLICK,
-                    getContext().getString(R.string.accessibility_unlock_without_fingerprint));
-            info.addAction(unlock);
-            info.setHintText(getContext().getString(
-                    R.string.accessibility_waiting_for_fingerprint));
-        } else if (mIsFaceUnlockState) {
-            //Avoid 'button' to be spoken for scanning face
-            info.setClassName(LockIcon.class.getName());
-            info.setContentDescription(getContext().getString(
-                R.string.accessibility_scanning_face));
-        }
-    }
-
-    private int getIconForState(int state) {
+    static int getIconForState(int state) {
         int iconRes;
         switch (state) {
             case STATE_LOCKED:
@@ -343,11 +196,7 @@ public class LockIcon extends KeyguardAffordanceView implements
         return iconRes;
     }
 
-    private boolean doesAnimationLoop(@LockAnimIndex int lockAnimIndex) {
-        return lockAnimIndex == SCANNING;
-    }
-
-    private static int getAnimationIndexForTransition(int oldState, int newState, boolean pulsing,
+    static int getAnimationIndexForTransition(int oldState, int newState, boolean pulsing,
             boolean dozing, boolean keyguardJustShown) {
 
         // Never animate when screen is off
@@ -367,42 +216,10 @@ public class LockIcon extends KeyguardAffordanceView implements
         return -1;
     }
 
-    public void setBouncerShowingScrimmed(boolean bouncerShowing) {
-        mBouncerShowingScrimmed = bouncerShowing;
-        if (mBypassController.getBypassEnabled()) {
-            update();
-        }
-    }
-
-    /**
-     * Animate padlock opening when bouncer challenge is solved.
-     */
-    public void onBouncerPreHideAnimation() {
-        mBouncerPreHideAnimation = true;
-        update();
-    }
-
-    void setIconColor(int iconColor) {
-        mIconColor = iconColor;
-        updateDarkTint();
-    }
-
-    void setSimLocked(boolean simLocked) {
-        mSimLocked = simLocked;
-    }
-
-    /** Set if the device is docked. */
-    public void setDocked(boolean docked) {
-        if (mDocked != docked) {
-            mDocked = docked;
-            update();
-        }
-    }
-
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({ERROR, UNLOCK, LOCK, SCANNING})
     @interface LockAnimIndex {}
-    private static final int ERROR = 0, UNLOCK = 1, LOCK = 2, SCANNING = 3;
+    static final int ERROR = 0, UNLOCK = 1, LOCK = 2, SCANNING = 3;
     private static final int[][] LOCK_ANIM_RES_IDS = new int[][] {
             {
                     R.anim.lock_to_error,
@@ -433,7 +250,7 @@ public class LockIcon extends KeyguardAffordanceView implements
     private int getThemedAnimationResId(@LockAnimIndex int lockAnimIndex) {
         final String setting = TextUtils.emptyIfNull(
                 Settings.Secure.getString(getContext().getContentResolver(),
-                Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES));
+                        Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES));
         if (setting.contains("com.android.theme.icon_pack.circular.android")) {
             return LOCK_ANIM_RES_IDS[1][lockAnimIndex];
         } else if (setting.contains("com.android.theme.icon_pack.filled.android")) {
@@ -444,83 +261,8 @@ public class LockIcon extends KeyguardAffordanceView implements
         return LOCK_ANIM_RES_IDS[0][lockAnimIndex];
     }
 
-    private int getState() {
-        KeyguardUpdateMonitor updateMonitor = Dependency.get(KeyguardUpdateMonitor.class);
-        if ((mKeyguardStateController.canDismissLockScreen() || !mKeyguardShowing
-                || mKeyguardStateController.isKeyguardGoingAway()) && !mSimLocked) {
-            return STATE_LOCK_OPEN;
-        } else if (mTransientBiometricsError) {
-            return STATE_BIOMETRICS_ERROR;
-        } else if (updateMonitor.isFaceDetectionRunning() && !mPulsing) {
-            return STATE_SCANNING_FACE;
-        } else {
-            return STATE_LOCKED;
-        }
+    interface StateProvider {
+        int getState();
     }
 
-    /**
-     * When keyguard is in pulsing (AOD2) state.
-     * @param pulsing {@code true} when pulsing.
-     */
-    public void setPulsing(boolean pulsing) {
-        mPulsing = pulsing;
-        update();
-    }
-
-    private void updateDarkTint() {
-        int color = ColorUtils.blendARGB(mIconColor, Color.WHITE, mDozeAmount);
-        setImageTintList(ColorStateList.valueOf(color));
-    }
-
-    /**
-     * We need to hide the lock whenever there's a fingerprint unlock, otherwise you'll see the
-     * icon on top of the black front scrim.
-     * @param wakeAndUnlock are we wake and unlocking
-     * @param isUnlock are we currently unlocking
-     */
-    public void onBiometricAuthModeChanged(boolean wakeAndUnlock, boolean isUnlock) {
-        if (wakeAndUnlock) {
-            mWakeAndUnlockRunning = true;
-        }
-        if (isUnlock && mBypassController.getBypassEnabled() && canBlockUpdates()) {
-            // We don't want the icon to change while we are unlocking
-            mBlockUpdates = true;
-        }
-        update();
-    }
-
-    /**
-     * When we're launching an affordance, like double pressing power to open camera.
-     */
-    public void onShowingLaunchAffordanceChanged(boolean showing) {
-        mShowingLaunchAffordance = showing;
-        update();
-    }
-
-    /**
-     * Called whenever the scrims become opaque, transparent or semi-transparent.
-     */
-    public void onScrimVisibilityChanged(@ScrimVisibility int scrimsVisible) {
-        if (mWakeAndUnlockRunning
-                && scrimsVisible == ScrimController.TRANSPARENT) {
-            mWakeAndUnlockRunning = false;
-            update();
-        }
-    }
-
-    void setDozing(boolean dozing) {
-        mDozing = dozing;
-        update();
-    }
-
-    void setDozeAmount(float dozeAmount) {
-        mDozeAmount = dozeAmount;
-        updateDarkTint();
-    }
-
-    /** Set the StatusBarState. */
-    public void setStatusBarState(int statusBarState) {
-        mStatusBarState = statusBarState;
-        updateIconVisibility();
-    }
 }

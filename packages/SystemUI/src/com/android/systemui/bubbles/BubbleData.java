@@ -208,7 +208,7 @@ public class BubbleData {
                 b -> {
                     notificationEntryUpdated(bubble, /* suppressFlyout */
                             false, /* showInShade */ true);
-                    setSelectedBubbleInternal(bubble);
+                    setSelectedBubble(bubble);
                 },
                 mContext, stack, factory);
         dispatchPendingChanges();
@@ -753,6 +753,17 @@ public class BubbleData {
     Bubble getBubbleWithKey(String key) {
         for (int i = 0; i < mBubbles.size(); i++) {
             Bubble bubble = mBubbles.get(i);
+            if (bubble.getKey().equals(key)) {
+                return bubble;
+            }
+        }
+        return null;
+    }
+
+    @VisibleForTesting(visibility = PRIVATE)
+    Bubble getOverflowBubbleWithKey(String key) {
+        for (int i = 0; i < mOverflowBubbles.size(); i++) {
+            Bubble bubble = mOverflowBubbles.get(i);
             if (bubble.getKey().equals(key)) {
                 return bubble;
             }

@@ -266,7 +266,8 @@ public class BiometricService extends SystemService {
                     SomeArgs args = (SomeArgs) msg.obj;
                     handleAuthenticationSucceeded(
                             (boolean) args.arg1 /* requireConfirmation */,
-                            (byte[]) args.arg2 /* token */);
+                            (byte[]) args.arg2 /* token */,
+                            (boolean) args.arg3 /* isStrongBiometric */);
                     args.recycle();
                     break;
                 }
@@ -568,10 +569,12 @@ public class BiometricService extends SystemService {
     final IBiometricServiceReceiverInternal mInternalReceiver =
             new IBiometricServiceReceiverInternal.Stub() {
         @Override
-        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token) {
+        public void onAuthenticationSucceeded(boolean requireConfirmation, byte[] token,
+                boolean isStrongBiometric) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = requireConfirmation;
             args.arg2 = token;
+            args.arg3 = isStrongBiometric;
             mHandler.obtainMessage(MSG_ON_AUTHENTICATION_SUCCEEDED, args).sendToTarget();
         }
 
@@ -761,8 +764,13 @@ public class BiometricService extends SystemService {
                         + " config_biometric_sensors?");
             }
 
+            // Note that we allow BIOMETRIC_CONVENIENCE to register because BiometricService
+            // also does / will do other things such as keep track of lock screen timeout, etc.
+            // Just because a biometric is registered does not mean it can participate in
+            // the android.hardware.biometrics APIs.
             if (strength != Authenticators.BIOMETRIC_STRONG
-                    && strength != Authenticators.BIOMETRIC_WEAK) {
+                    && strength != Authenticators.BIOMETRIC_WEAK
+                    && strength != Authenticators.BIOMETRIC_CONVENIENCE) {
                 throw new IllegalStateException("Unsupported strength");
             }
 
@@ -1189,8 +1197,10 @@ public class BiometricService extends SystemService {
                         BiometricConstants.BIOMETRIC_ERROR_NO_DEVICE_CREDENTIAL);
             }
         } else {
+            // This should not be possible via the public API surface and is here mainly for
+            // "correctness". An exception should have been thrown before getting here.
             Slog.e(TAG, "No authenticators requested");
-            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+            return new Pair<>(TYPE_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
         }
     }
 
@@ -1286,7 +1296,8 @@ public class BiometricService extends SystemService {
         return modality;
     }
 
-    private void handleAuthenticationSucceeded(boolean requireConfirmation, byte[] token) {
+    private void handleAuthenticationSucceeded(boolean requireConfirmation, byte[] token,
+            boolean isStrongBiometric) {
         try {
             // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
             // after user dismissed/canceled dialog).
@@ -1295,9 +1306,16 @@ public class BiometricService extends SystemService {
                 return;
             }
 
-            // Store the auth token and submit it to keystore after the dialog is confirmed /
-            // animating away.
-            mCurrentAuthSession.mTokenEscrow = token;
+            if (isStrongBiometric) {
+                // Store the auth token and submit it to keystore after the dialog is confirmed /
+                // animating away.
+                mCurrentAuthSession.mTokenEscrow = token;
+            } else {
+                if (token != null) {
+                    Slog.w(TAG, "Dropping authToken for non-strong biometric");
+                }
+            }
+
             if (!requireConfirmation) {
                 mCurrentAuthSession.mState = STATE_AUTHENTICATED_PENDING_SYSUI;
             } else {

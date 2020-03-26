@@ -199,7 +199,10 @@ final class InlineSuggestionSession {
             return false;
         }
 
-        if (!mImeInputViewStarted || !autofillId.equalsIgnoreSession(mImeFieldId)) {
+        // TODO(b/151846600): IME doesn't have access to the virtual id of the webview, so we
+        //  only compare the view id for now.
+        if (!mImeInputViewStarted || mImeFieldId == null
+                || autofillId.getViewId() != mImeFieldId.getViewId()) {
             if (sDebug) {
                 Log.d(TAG,
                         "onInlineSuggestionsResponseLocked not sent because input view is not "

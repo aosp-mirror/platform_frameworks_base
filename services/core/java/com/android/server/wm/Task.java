@@ -117,7 +117,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
@@ -490,6 +489,17 @@ class Task extends WindowContainer<WindowContainer> {
      * enters Picture-in-Picture or when setPictureInPictureParams is called.
      */
     PictureInPictureParams mPictureInPictureParams = new PictureInPictureParams.Builder().build();
+
+    /**
+     * This task was created by the task organizer which has the following implementations.
+     * <ul>
+     *     <lis>The task won't be removed when it is empty. Removal has to be an explicit request
+     *     from the task organizer.</li>
+     *     <li>Unlike other non-root tasks, it's direct children are visible to the task
+     *     organizer for ordering purposes.</li>
+     * </ul>
+     */
+    boolean mCreatedByOrganizer;
 
     /**
      * Don't use constructor directly. Use {@link #create(ActivityTaskManagerService, int,
@@ -1356,7 +1366,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (applicationType != ACTIVITY_TYPE_UNDEFINED || !hasChild()) {
             return applicationType;
         }
-        return getChildAt(0).getActivityType();
+        return getTopChild().getActivityType();
     }
 
     @Override
@@ -1368,6 +1378,12 @@ class Task extends WindowContainer<WindowContainer> {
         super.addChild(child, index);
 
         ProtoLog.v(WM_DEBUG_ADD_REMOVE, "addChild: %s at top.", this);
+
+        // A rootable task that is now being added to be the child of an organized task. Making
+        // sure the stack references is keep updated.
+        if (mTaskOrganizer != null && mCreatedByOrganizer && child.asTask() != null) {
+            mDisplayContent.addStackReferenceIfNeeded((ActivityStack) child);
+        }
 
         // Make sure the list of display UID whitelists is updated
         // now that this record is in a new task.
@@ -1409,6 +1425,11 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void removeChild(WindowContainer child) {
+        // A rootable child task that is now being removed from an organized task. Making sure
+        // the stack references is keep updated.
+        if (mTaskOrganizer != null && mCreatedByOrganizer && child.asTask() != null) {
+            mDisplayContent.removeStackReferenceIfNeeded((ActivityStack) child);
+        }
         removeChild(child, "removeChild");
     }
 
@@ -1456,8 +1477,9 @@ class Task extends WindowContainer<WindowContainer> {
                 mStackSupervisor.removeTask(this, false /* killProcess */,
                         !REMOVE_FROM_RECENTS, reason);
             }
-        } else if (!mReuseTask) {
+        } else if (!mReuseTask && !mCreatedByOrganizer) {
             // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
+            // or created by task organizer.
             if (!isRootTask) {
                 getStack().removeChild(this, reason);
             }
@@ -1869,7 +1891,12 @@ class Task extends WindowContainer<WindowContainer> {
         final Task parentTask = getParent().asTask();
         if (parentTask != null) {
             parentTask.onActivityStateChanged(record, state, reason);
-            return;
+            // We still want to update the resumed activity if the parent task is created by
+            // organizer in order to keep the information synced once got reparented out from the
+            // organized task.
+            if (!parentTask.mCreatedByOrganizer) {
+                return;
+            }
         }
 
         if (record == mResumedActivity && state != RESUMED) {
@@ -2303,18 +2330,30 @@ class Task extends WindowContainer<WindowContainer> {
         return Configuration.reduceScreenLayout(sourceScreenLayout, longSize, shortSize);
     }
 
-    void resolveTileOverrideConfiguration(Configuration newParentConfig) {
+    private void resolveOrganizedOverrideConfiguration(Configuration newParentConfig) {
         super.resolveOverrideConfiguration(newParentConfig);
+        if (!isOrganized()) {
+            return;
+        }
+
+        final Task root = getRootTask();
+        if (root == this) {
+            return;
+        }
+
+        // Ensure to have the same windowing mode for the child tasks that controlled by task org.
+        getResolvedOverrideConfiguration().windowConfiguration
+                .setWindowingMode(root.getWindowingMode());
     }
 
     @Override
     void resolveOverrideConfiguration(Configuration newParentConfig) {
-        if (!isLeafTask()) {
-            resolveTileOverrideConfiguration(newParentConfig);
+        if (!isLeafTask() || mCreatedByOrganizer) {
+            resolveOrganizedOverrideConfiguration(newParentConfig);
             return;
         }
         mTmpBounds.set(getResolvedOverrideConfiguration().windowConfiguration.getBounds());
-        resolveTileOverrideConfiguration(newParentConfig);
+        resolveOrganizedOverrideConfiguration(newParentConfig);
         int windowingMode =
                 getResolvedOverrideConfiguration().windowConfiguration.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_UNDEFINED) {
@@ -2403,7 +2442,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     Rect updateOverrideConfigurationFromLaunchBounds() {
-        final Rect bounds = getLaunchBounds();
+        // If the task is controlled by another organized task, do not set override
+        // configurations and let its parent (organized task) to control it;
+        final Rect bounds = isOrganized() && !isRootTask() ? null : getLaunchBounds();
         setBounds(bounds);
         if (bounds != null && !bounds.isEmpty()) {
             // TODO: Review if we actually want to do this - we are setting the launch bounds
@@ -2587,7 +2628,7 @@ class Task extends WindowContainer<WindowContainer> {
         // preserve POSITION_BOTTOM/POSITION_TOP positions if they are still valid.
         if (suggestedPosition == POSITION_BOTTOM && minPosition == 0) {
             return POSITION_BOTTOM;
-        } else if (suggestedPosition == POSITION_TOP && maxPosition == (size - 1)) {
+        } else if (suggestedPosition == POSITION_TOP && maxPosition >= (size - 1)) {
             return POSITION_TOP;
         }
         // Reset position based on minimum/maximum possible positions.
@@ -3385,14 +3426,12 @@ class Task extends WindowContainer<WindowContainer> {
         info.supportsSplitScreenMultiWindow = supportsSplitScreenWindowingMode();
         info.configuration.setTo(getConfiguration());
         info.token = mRemoteToken;
-        // Get's the first non-undefined activity type among this and children. Can't use
-        // configuration.windowConfiguration because that would only be this level.
-        info.topActivityType = getActivityType();
 
         //TODO (AM refactor): Just use local once updateEffectiveIntent is run during all child
         //                    order changes.
         final Task top = getTopMostTask();
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
+        info.topActivityType = top.getActivityType();
 
         if (mPictureInPictureParams.empty()) {
             info.pictureInPictureParams = null;
@@ -3421,10 +3460,6 @@ class Task extends WindowContainer<WindowContainer> {
     Task asTask() {
         // I'm a task!
         return this;
-    }
-
-    TaskTile asTile() {
-        return null;
     }
 
     // TODO(task-merge): Figure-out how this should work with hierarchy tasks.
@@ -3722,8 +3757,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     static Task create(ActivityTaskManagerService service, int taskId, int activityType,
-            ActivityInfo info, Intent intent) {
-        return getTaskFactory().create(service, taskId, activityType, info, intent);
+            ActivityInfo info, Intent intent, boolean createdByOrganizer) {
+        return getTaskFactory().create(service, taskId, activityType, info, intent,
+                createdByOrganizer);
     }
 
     static Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
@@ -3745,8 +3781,9 @@ class Task extends WindowContainer<WindowContainer> {
      */
     static class TaskFactory {
         Task create(ActivityTaskManagerService service, int taskId, int activityType,
-                ActivityInfo info, Intent intent) {
-            return new ActivityStack(service, taskId, activityType, info, intent);
+                ActivityInfo info, Intent intent, boolean createdByOrganizer) {
+            return new ActivityStack(service, taskId, activityType, info, intent,
+                    createdByOrganizer);
         }
 
         Task create(ActivityTaskManagerService service, int taskId, ActivityInfo info,
@@ -4022,21 +4059,29 @@ class Task extends WindowContainer<WindowContainer> {
     @Override
     boolean isOrganized() {
         final Task rootTask = getRootTask();
-        // if the rootTask is a "child" of a tile, then don't consider it a root task.
-        // TODO: remove this along with removing tile.
-        if (((ActivityStack) rootTask).getTile() != null) {
+        if (rootTask.mTaskOrganizer == null) {
+            // You are obviously not organized...
             return false;
         }
-        return rootTask == this && rootTask.mTaskOrganizer != null;
+        if (rootTask == this) {
+            // Root tasks can be organized.
+            return true;
+        }
+        if (rootTask.mCreatedByOrganizer && getParent() == rootTask) {
+            // Direct children of tasks added by the organizer can the organized.
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     protected void reparentSurfaceControl(SurfaceControl.Transaction t, SurfaceControl newParent) {
         /**
-         * Avoid yanking back control from the TaskOrganizer, which has presumably reparented the
-         * Surface in to its own hierarchy.
+         * Avoid reparenting SurfaceControl of the organized tasks that are always on top, since
+         * the surfaces should be controlled by the organizer itself, like bubbles.
          */
-        if (isOrganized()) {
+        if (isOrganized() && isAlwaysOnTop()) {
             return;
         }
         super.reparentSurfaceControl(t, newParent);
@@ -4066,11 +4111,13 @@ class Task extends WindowContainer<WindowContainer> {
         return true;
     }
 
-    // Called on Binder death.
-    void taskOrganizerDied() {
+    void taskOrganizerUnregistered() {
         mTaskOrganizer = null;
         mLastTaskOrganizerWindowingMode = -1;
         onTaskOrganizerChanged();
+        if (mCreatedByOrganizer) {
+            removeImmediately();
+        }
     }
 
     /**

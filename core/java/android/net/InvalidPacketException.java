@@ -27,7 +27,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class InvalidPacketException extends Exception {
+public final class InvalidPacketException extends Exception {
     private final int mError;
 
     // Must match SocketKeepalive#ERROR_INVALID_IP_ADDRESS.

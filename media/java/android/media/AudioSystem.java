@@ -708,6 +708,8 @@ public class AudioSystem
         DEVICE_IN_ALL_USB_SET.add(DEVICE_IN_USB_HEADSET);
     }
 
+    public static final String LEGACY_REMOTE_SUBMIX_ADDRESS = "0";
+
     // device states, must match AudioSystem::device_connection_state
     @UnsupportedAppUsage
     public static final int DEVICE_STATE_UNAVAILABLE = 0;

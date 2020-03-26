@@ -695,26 +695,26 @@ public class ResourcesManager {
     }
 
     /**
-     * Creates base resources for an Activity. Calls to
+     * Creates base resources for a binder token. Calls to
      * {@link #getResources(IBinder, String, String[], String[], String[], int, Configuration,
-     * CompatibilityInfo, ClassLoader, List)} with the same activityToken will have their override
+     * CompatibilityInfo, ClassLoader, List)} with the same binder token will have their override
      * configurations merged with the one specified here.
      *
-     * @param activityToken Represents an Activity.
+     * @param token Represents an {@link Activity} or {@link WindowContext}.
      * @param resDir The base resource path. Can be null (only framework resources will be loaded).
      * @param splitResDirs An array of split resource paths. Can be null.
      * @param overlayDirs An array of overlay paths. Can be null.
      * @param libDirs An array of resource library paths. Can be null.
      * @param displayId The ID of the display for which to create the resources.
      * @param overrideConfig The configuration to apply on top of the base configuration. Can be
-     *                       null. This provides the base override for this Activity.
+     *                       {@code null}. This provides the base override for this token.
      * @param compatInfo The compatibility settings to use. Cannot be null. A default to use is
      *                   {@link CompatibilityInfo#DEFAULT_COMPATIBILITY_INFO}.
      * @param classLoader The class loader to use when inflating Resources. If null, the
      *                    {@link ClassLoader#getSystemClassLoader()} is used.
      * @return a Resources object from which to access resources.
      */
-    public @Nullable Resources createBaseActivityResources(@NonNull IBinder activityToken,
+    public @Nullable Resources createBaseTokenResources(@NonNull IBinder token,
             @Nullable String resDir,
             @Nullable String[] splitResDirs,
             @Nullable String[] overlayDirs,
@@ -739,24 +739,24 @@ public class ResourcesManager {
             classLoader = classLoader != null ? classLoader : ClassLoader.getSystemClassLoader();
 
             if (DEBUG) {
-                Slog.d(TAG, "createBaseActivityResources activity=" + activityToken
+                Slog.d(TAG, "createBaseActivityResources activity=" + token
                         + " with key=" + key);
             }
 
             synchronized (this) {
                 // Force the creation of an ActivityResourcesStruct.
-                getOrCreateActivityResourcesStructLocked(activityToken);
+                getOrCreateActivityResourcesStructLocked(token);
             }
 
             // Update any existing Activity Resources references.
-            updateResourcesForActivity(activityToken, overrideConfig, displayId,
+            updateResourcesForActivity(token, overrideConfig, displayId,
                     false /* movedToDifferentDisplay */);
 
-            cleanupReferences(activityToken);
-            rebaseKeyForActivity(activityToken, key);
+            cleanupReferences(token);
+            rebaseKeyForActivity(token, key);
 
             synchronized (this) {
-                Resources resources = findResourcesForActivityLocked(activityToken, key,
+                Resources resources = findResourcesForActivityLocked(token, key,
                         classLoader);
                 if (resources != null) {
                     return resources;
@@ -764,7 +764,7 @@ public class ResourcesManager {
             }
 
             // Now request an actual Resources object.
-            return createResources(activityToken, key, classLoader);
+            return createResources(token, key, classLoader);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
