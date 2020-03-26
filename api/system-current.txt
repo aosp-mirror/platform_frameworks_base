@@ -8499,7 +8499,6 @@ package android.telephony {
   public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
-    method public boolean isUsingCarrierAggregation();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
   }
@@ -8863,7 +8862,6 @@ package android.telephony {
     method @Nullable public android.telephony.NetworkRegistrationInfo getNetworkRegistrationInfo(int, int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForDomain(int);
     method @NonNull public java.util.List<android.telephony.NetworkRegistrationInfo> getNetworkRegistrationInfoListForTransportType(int);
-    method public int getNrFrequencyRange();
     method @Nullable public String getOperatorAlphaLongRaw();
     method @Nullable public String getOperatorAlphaShortRaw();
     method @NonNull public static android.telephony.ServiceState newFromBundle(@NonNull android.os.Bundle);
