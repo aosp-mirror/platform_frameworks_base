@@ -307,19 +307,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             try {
                 result.putString(ContentResolver.REMOTE_CALLBACK_RESULT, getType(uri));
             } catch (Exception e) {
-                Parcel parcel = Parcel.obtain();
-                try {
-                    try {
-                        parcel.writeException(e);
-                    } catch (Exception ex) {
-                        // getType threw an unparcelable exception. Wrap the message into
-                        // a parcelable exception type
-                        parcel.writeException(new IllegalStateException(e.getMessage()));
-                    }
-                    result.putByteArray(ContentResolver.REMOTE_CALLBACK_ERROR, parcel.marshall());
-                } finally {
-                    parcel.recycle();
-                }
+                putExceptionInBundle(result, ContentResolver.REMOTE_CALLBACK_ERROR, e);
             }
             callback.sendResult(result);
         }
@@ -602,8 +590,12 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         public void canonicalizeAsync(String callingPkg, @Nullable String attributionTag, Uri uri,
                 RemoteCallback callback) {
             final Bundle result = new Bundle();
-            result.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
-                    canonicalize(callingPkg, attributionTag, uri));
+            try {
+                result.putParcelable(ContentResolver.REMOTE_CALLBACK_RESULT,
+                        canonicalize(callingPkg, attributionTag, uri));
+            } catch (Exception e) {
+                putExceptionInBundle(result, ContentResolver.REMOTE_CALLBACK_ERROR, e);
+            }
             callback.sendResult(result);
         }
 
@@ -716,6 +708,22 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             }
 
             return AppOpsManager.MODE_ALLOWED;
+        }
+
+        private void putExceptionInBundle(Bundle bundle, String key, Exception e) {
+            Parcel parcel = Parcel.obtain();
+            try {
+                try {
+                    parcel.writeException(e);
+                } catch (Exception ex) {
+                    // getType threw an unparcelable exception. Wrap the message into
+                    // a parcelable exception type
+                    parcel.writeException(new IllegalStateException(e.getMessage()));
+                }
+                bundle.putByteArray(key, parcel.marshall());
+            } finally {
+                parcel.recycle();
+            }
         }
     }
 
